@@ -47,8 +47,8 @@
   in
   {
     # Build darwin flake using:
-    # $ darwin-rebuild build --flake .#saturn
-    darwinConfigurations."saturn" = nix-darwin.lib.darwinSystem {
+    # $ darwin-rebuild build --flake .#Lewiss-MacBook-Pro
+    darwinConfigurations."Lewiss-MacBook-Pro" = nix-darwin.lib.darwinSystem {
       modules = [ 
         configuration 
         home-manager.darwinModules.home-manager
