@@ -2,9 +2,6 @@
   # Add Docker to system packages
   environment.systemPackages = with pkgs; [ docker docker-compose ];
 
-  # Add Docker socket to the user's group
-  users.users.lewisflude.extraGroups = [ "docker" ];
-
   # Configure Docker daemon settings
   launchd.daemons.docker = {
     serviceConfig = {
@@ -23,4 +20,7 @@
     "max-file" = 100;
     experimental = true;
   };
+
+  # Add user to docker group
+  users.users.lewisflude.group = "docker";
 }
