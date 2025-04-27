@@ -2,7 +2,7 @@
   users.users.lewisflude = {
     name = "lewisflude";
     home = "/Users/lewisflude";
-    groups = [ "docker" ];
+    extraGroups = [ "docker" ];
   };
 
   # Create docker group
