@@ -6,8 +6,7 @@
   launchd.daemons.docker = {
     serviceConfig = {
       Label = "com.docker.docker";
-      ProgramArguments =
-        [ "${pkgs.docker}/bin/dockerd" "--config" "/etc/docker/daemon.json" ];
+      ProgramArguments = [ "${pkgs.docker}/bin/dockerd" ];
       RunAtLoad = true;
       KeepAlive = true;
       StandardErrorPath = "/var/log/docker.err.log";
@@ -15,15 +14,32 @@
       # Ensure Docker has the necessary permissions
       UserName = "lewisflude";
       GroupName = "staff";
+      # Set working directory
+      WorkingDirectory = "/Users/lewisflude";
     };
   };
 
-  # Create Docker daemon configuration
-  environment.etc."docker/daemon.json".text = lib.generators.toJSON { } {
-    "max-file" = 100;
-    experimental = true;
-    # Add macOS-specific settings
-    "debug" = true;
-    "hosts" = [ "unix:///var/run/docker.sock" "tcp://localhost:2375" ];
-  };
+  # Create Docker daemon configuration directory and set up socket
+  system.activationScripts.docker = ''
+    # Create Docker configuration directory
+    mkdir -p /Users/lewisflude/.docker
+    cat > /Users/lewisflude/.docker/daemon.json << EOF
+    {
+      "debug": true,
+      "experimental": true,
+      "max-file": 100,
+      "hosts": [
+        "unix:///var/run/docker.sock",
+        "tcp://localhost:2375"
+      ]
+    }
+    EOF
+    chown -R lewisflude:staff /Users/lewisflude/.docker
+
+    # Create Docker socket directory
+    mkdir -p /var/run
+    touch /var/run/docker.sock
+    chmod 666 /var/run/docker.sock
+    chown lewisflude:staff /var/run/docker.sock
+  '';
 }
