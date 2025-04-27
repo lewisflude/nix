@@ -20,7 +20,4 @@
     "max-file" = 100;
     experimental = true;
   };
-
-  # Add user to docker group
-  users.users.lewisflude.group = "docker";
 }
