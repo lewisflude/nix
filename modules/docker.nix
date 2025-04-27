@@ -12,6 +12,9 @@
       KeepAlive = true;
       StandardErrorPath = "/var/log/docker.err.log";
       StandardOutPath = "/var/log/docker.out.log";
+      # Ensure Docker has the necessary permissions
+      UserName = "lewisflude";
+      GroupName = "staff";
     };
   };
 
@@ -19,5 +22,8 @@
   environment.etc."docker/daemon.json".text = lib.generators.toJSON { } {
     "max-file" = 100;
     experimental = true;
+    # Add macOS-specific settings
+    "debug" = true;
+    "hosts" = [ "unix:///var/run/docker.sock" "tcp://localhost:2375" ];
   };
 }
