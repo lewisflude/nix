@@ -6,6 +6,7 @@
       enable-ssh-support
       default-cache-ttl 60
       max-cache-ttl 120
+      require-presence
       pinentry-program ${pkgs.pinentry_mac}/Applications/pinentry-mac.app/Contents/MacOS/pinentry-mac
     '';
     onChange = ''

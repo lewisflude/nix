@@ -1,5 +1,17 @@
 { pkgs, hostname, ... }: {
 
+  # System Libraries
+  environment.systemPackages = with pkgs; [
+    libiconv
+    pkg-config
+    ext4fuse
+    openssl
+    docker
+    docker-compose
+    docker-credential-helpers
+    postgresql_16
+  ];
+
   # Fonts
   fonts = { packages = with pkgs; [ nerd-fonts.jetbrains-mono ]; };
 
@@ -101,4 +113,7 @@
       allowsignedenabled = 1;
     };
   };
+  nix.extraOptions = ''
+    extra-sandbox-paths = /System/Library/Frameworks /Library/Frameworks
+  '';
 }

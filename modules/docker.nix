@@ -19,7 +19,7 @@
     };
   };
 
-  # Create Docker daemon configuration directory and set up socket
+  # Create Docker daemon configuration directory
   system.activationScripts.docker = ''
     # Create Docker configuration directory
     mkdir -p /Users/lewisflude/.docker
@@ -27,19 +27,9 @@
     {
       "debug": true,
       "experimental": true,
-      "max-file": 100,
-      "hosts": [
-        "unix:///var/run/docker.sock",
-        "tcp://localhost:2375"
-      ]
+      "max-file": 100
     }
     EOF
     chown -R lewisflude:staff /Users/lewisflude/.docker
-
-    # Create Docker socket directory
-    mkdir -p /var/run
-    touch /var/run/docker.sock
-    chmod 666 /var/run/docker.sock
-    chown lewisflude:staff /var/run/docker.sock
   '';
 }

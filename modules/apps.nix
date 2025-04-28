@@ -1,22 +1,33 @@
-{ config, pkgs, ... }: {
-  # Add user packages
-  environment.systemPackages = with pkgs; [ ext4fuse ];
+{ config, pkgs, username, homebrew-cask, homebrew-core, homebrew-bundle, ...
+}: {
 
   # Configure Homebrew
   homebrew = {
     enable = true;
     onActivation = {
-      autoUpdate = true;
       cleanup = "zap";
+      autoUpdate = false;
       upgrade = true;
     };
 
-    taps = [ "homebrew/cask" "homebrew/core" "homebrew/bundle" ];
-
     brews = [ ];
 
-    casks = [ "1password" "chatgpt" "ghostty" ];
+    # GUI applications
+    casks = [
+      "1password"
+      "chatgpt"
+      "docker" # Docker Desktop
+      "figma"
+      "notion"
+      "slack"
+      "rectangle"
+      "raycast"
+      "postman"
+      "tableplus"
+      "warp"
+    ];
 
+    # Mac App Store applications
     masApps = {
       "1Password for Safari" = 1569813296;
       "Kagi Search" = 1622835804;

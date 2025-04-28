@@ -5,27 +5,17 @@
   # Configure environment variables for GPG
   environment.variables = { GPG_TTY = "$(tty)"; };
 
-  # Enable YubiKey PAM module
-  security.pam.services = {
-    sudo = {
-      enable = true;
-      text = ''
-        auth       required       pam_yubico.so mode=challenge-response
-        auth       required       pam_unix.so
-      '';
-    };
-    login = {
-      enable = true;
-      text = ''
-        auth       required       pam_yubico.so mode=challenge-response
-        auth       required       pam_unix.so
-      '';
-    };
+  # Enable Touch ID for sudo
+  security.pam.services.sudo_local = {
+    enable = true;
+    touchIdAuth = true;
+    watchIdAuth = true;
   };
 
-  # Add YubiKey PAM package
+  # Add YubiKey tools
   environment.systemPackages = with pkgs; [
     yubikey-personalization
     yubico-pam
+    yubikey-manager
   ];
 }

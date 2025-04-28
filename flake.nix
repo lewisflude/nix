@@ -44,14 +44,29 @@
           ./modules/users.nix
           ./modules/users.nix
           ./modules/apps.nix
+          ./modules/shell.nix
+          ./modules/dev.nix
+          ./modules/docker.nix
           ./modules/system.nix
           ./modules/security.nix
+          ./modules/environment.nix
           home-manager.darwinModules.home-manager
           mac-app-util.darwinModules.default
           nix-homebrew.darwinModules.nix-homebrew
-          ({ config, ... }: {
-            homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
-          })
+          {
+            nix-homebrew = {
+              enable = true;
+              enableRosetta = true;
+              user = username;
+              taps = {
+                "homebrew/homebrew-cask" = homebrew-cask;
+                "homebrew/homebrew-core" = homebrew-core;
+                "homebrew/homebrew-bundle" = homebrew-bundle;
+              };
+              mutableTaps = false;
+            };
+          }
+
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
