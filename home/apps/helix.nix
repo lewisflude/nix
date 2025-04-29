@@ -3,7 +3,6 @@
     enable = true;
 
     settings = {
-      theme = "catppuccin_mocha";
 
       programs.helix = {
         enable = true;

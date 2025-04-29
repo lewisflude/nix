@@ -13,7 +13,9 @@
   ];
 
   # Fonts
-  fonts = { packages = with pkgs; [ nerd-fonts.jetbrains-mono ]; };
+  fonts = {
+    packages = with pkgs; [ nerd-fonts.jetbrains-mono nerd-fonts.iosevka ];
+  };
 
   # Networking
   networking = {
@@ -80,6 +82,23 @@
     controlcenter = {
       NowPlaying = true;
       Sound = true;
+    };
+
+    CustomUserPreferences = {
+      "com.apple.screensaver" = {
+        askForPassword = 1;
+        askForPasswordDelay = 0;
+      };
+      "com.apple.screencapture" = {
+        location = "~/Desktop";
+        type = "png";
+      };
+      "com.apple.finder" = {
+        AppleShowAllExtensions = true;
+        AppleShowAllFiles = true;
+        WebKitDeveloperExtras = true;
+      };
+
     };
 
     # Global Domain Settings

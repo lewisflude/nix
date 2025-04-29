@@ -1,26 +1,25 @@
-{ config, lib, pkgs, ... }: {
+{ pkgs, ... }: {
   home.packages = [ pkgs.gnupg pkgs.pinentry_mac ];
 
-  home.file.".gnupg/gpg-agent.conf" = {
-    text = ''
-      enable-ssh-support
-      default-cache-ttl 60
-      max-cache-ttl 120
-      require-presence
+  services.gpg-agent = {
+    enable = true;
+    enableSshSupport = true;
+    defaultCacheTtl = 3600;
+    maxCacheTtl = 7200;
+    extraConfig = ''
       pinentry-program ${pkgs.pinentry_mac}/Applications/pinentry-mac.app/Contents/MacOS/pinentry-mac
-    '';
-    onChange = ''
-      gpgconf --kill gpg-agent
-      gpgconf --launch gpg-agent
+      allow-preset-passphrase
+      enable-ssh-support
+      max-cache-ttl 7200
+      default-cache-ttl 3600
     '';
   };
 
-  home.file.".gnupg/common.conf" = { text = "use-keyboxd"; };
-
-  home.activation.gpgSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    $DRY_RUN_CMD mkdir -p ~/.gnupg
-    $DRY_RUN_CMD chmod 700 ~/.gnupg
-  '';
-
-  home.sessionVariables = { GPG_TTY = "$(tty)"; };
+  programs.gpg = {
+    enable = true;
+    settings = {
+      default-key = "01E0A6442301AD277C5A0EB3066E74CC9ACF910C";
+      use-agent = true;
+    };
+  };
 }

@@ -53,5 +53,6 @@
     ./apps/zoxide.nix
     ./apps/vscode.nix
     ./apps/helix.nix
+    ./apps/yazi.nix
   ];
 }

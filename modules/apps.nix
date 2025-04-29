@@ -6,7 +6,7 @@
     enable = true;
     onActivation = {
       cleanup = "zap";
-      autoUpdate = false;
+      autoUpdate = true;
       upgrade = true;
     };
 
@@ -16,15 +16,21 @@
     casks = [
       "1password"
       "chatgpt"
-      "docker" # Docker Desktop
+      "docker"
       "figma"
       "notion"
       "slack"
-      "rectangle"
       "raycast"
-      "postman"
+      "insomnia"
       "tableplus"
-      "warp"
+      "ghostty"
+      "logi-options+"
+      "firefox@developer-edition"
+      "google-chrome"
+      "responsively"
+      "imageoptim"
+      "figma"
+      "linear-linear"
     ];
 
     # Mac App Store applications
