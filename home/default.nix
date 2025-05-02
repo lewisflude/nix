@@ -1,6 +1,4 @@
 {
-  pkgs,
-  lib,
   catppuccin,
   ...
 }: {
@@ -20,8 +18,15 @@
   ];
   programs = {home-manager.enable = true;};
 
+  # User-specific environment variables
   home.sessionVariables = {
-    EDITOR = "code";
-    VISUAL = "code";
+    # Terminal and Pager
+    PAGER = "less";
+    MANPAGER = "less -R";
+
+    # XDG Base Directory
+    XDG_CONFIG_HOME = "$HOME/.config";
+    XDG_DATA_HOME = "$HOME/.local/share";
+    XDG_CACHE_HOME = "$HOME/.cache";
   };
 }

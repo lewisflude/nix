@@ -1,9 +1,10 @@
-{ pkgs, lib, ... }: {
+{ pkgs, ... }: {
   home.packages = with pkgs; [
     # Development Tools & IDEs
     code-cursor # AI-assisted code editor based on VS Code
     vscode
     helix
+    awscli2
 
     # Programming Languages & Runtimes
     nodejs_20
@@ -11,10 +12,19 @@
     nodePackages.typescript
 
     # Language Servers & Linters
+    nil # Nix language server
     nodePackages.typescript-language-server
     nodePackages.prettier
     nodePackages.eslint
     nodePackages.stylelint
+    yaml-language-server
+    marksman # Markdown language server
+    rust-analyzer
+    pyright
+    nodePackages.vscode-langservers-extracted # JSON language server
+    black # Python formatter
+    rustfmt
+    nixpkgs-fmt
 
     # Development Environment Tools
     direnv
@@ -51,7 +61,7 @@
     ./apps/fzf.nix
     ./apps/ripgrep.nix
     ./apps/zoxide.nix
-    ./apps/vscode.nix
+    ./apps/cursor.nix
     ./apps/helix.nix
     ./apps/yazi.nix
   ];

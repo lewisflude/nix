@@ -1,9 +1,9 @@
-{ config, lib, pkgs, ... }: {
+{ ... }: {
   # System-wide environment variables
   environment.variables = {
     # Development
-    EDITOR = "code";
-    VISUAL = "code";
+    EDITOR = "code-cursor";
+    VISUAL = "code-cursor";
 
     # GPG
     GPG_TTY = "$(tty)";

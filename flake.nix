@@ -21,10 +21,6 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
-    homebrew-bundle = {
-      url = "github:homebrew/homebrew-bundle";
-      flake = false;
-    };
   };
 
   outputs = inputs @ {
@@ -36,7 +32,6 @@
     nix-homebrew,
     homebrew-core,
     homebrew-cask,
-    homebrew-bundle,
     catppuccin,
   }: let
     username = "lewisflude";
@@ -74,7 +69,6 @@
             taps = {
               "homebrew/homebrew-cask" = homebrew-cask;
               "homebrew/homebrew-core" = homebrew-core;
-              "homebrew/homebrew-bundle" = homebrew-bundle;
             };
             mutableTaps = false;
           };

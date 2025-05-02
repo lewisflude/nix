@@ -1,6 +1,5 @@
-{ config, pkgs, username, homebrew-cask, homebrew-core, homebrew-bundle, ...
+{  ...
 }: {
-
   # Configure Homebrew
   homebrew = {
     enable = true;
@@ -8,6 +7,9 @@
       cleanup = "zap";
       autoUpdate = true;
       upgrade = true;
+    };
+    caskArgs = {
+      no_quarantine = true;
     };
 
     brews = [ ];
@@ -25,6 +27,7 @@
       "tableplus"
       "ghostty"
       "logi-options+"
+      "logitune"
       "firefox@developer-edition"
       "google-chrome"
       "responsively"

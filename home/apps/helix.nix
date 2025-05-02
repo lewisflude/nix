@@ -1,36 +1,119 @@
 {
   programs.helix = {
     enable = true;
+    languages = {
+      language = [
+        {
+          name = "nix";
+          scope = "source.nix";
+          injection-regex = "nix";
+          file-types = [ "nix" ];
+          comment-token = "#";
+          language-servers = [ "nil" ];
+          indent = {
+            tab-width = 2;
+            unit = "  ";
+          };
+          formatter = { command = "nixpkgs-fmt"; };
+          auto-format = true;
+        }
+        {
+          name = "typescript";
+          scope = "source.ts";
+          injection-regex = "ts";
+          file-types = [ "ts" "tsx" ];
+          comment-token = "//";
+          language-servers = [ "typescript-language-server" ];
+          indent = {
+            tab-width = 2;
+            unit = "  ";
+          };
+          formatter = { command = "prettier"; args = [ "--parser" "typescript" ]; };
+          auto-format = true;
+        }
+        {
+          name = "javascript";
+          scope = "source.js";
+          injection-regex = "js";
+          file-types = [ "js" "jsx" ];
+          comment-token = "//";
+          language-servers = [ "typescript-language-server" ];
+          indent = {
+            tab-width = 2;
+            unit = "  ";
+          };
+          formatter = { command = "prettier"; args = [ "--parser" "babel" ]; };
+          auto-format = true;
+        }
+        {
+          name = "json";
+          scope = "source.json";
+          injection-regex = "json";
+          file-types = [ "json" ];
+          language-servers = [ "vscode-langservers-extracted" ];
+          indent = {
+            tab-width = 2;
+            unit = "  ";
+          };
+          formatter = { command = "prettier"; args = [ "--parser" "json" ]; };
+          auto-format = true;
+        }
+        {
+          name = "yaml";
+          scope = "source.yaml";
+          injection-regex = "yaml";
+          file-types = [ "yaml" "yml" ];
+          language-servers = [ "yaml-language-server" ];
+          indent = {
+            tab-width = 2;
+            unit = "  ";
+          };
+          formatter = { command = "prettier"; args = [ "--parser" "yaml" ]; };
+          auto-format = true;
+        }
+        {
+          name = "markdown";
+          scope = "source.md";
+          injection-regex = "markdown";
+          file-types = [ "md" "markdown" ];
+          language-servers = [ "marksman" ];
+          indent = {
+            tab-width = 2;
+            unit = "  ";
+          };
+          formatter = { command = "prettier"; args = [ "--parser" "markdown" ]; };
+          auto-format = true;
+        }
+        {
+          name = "rust";
+          scope = "source.rust";
+          injection-regex = "rust";
+          file-types = [ "rs" ];
+          language-servers = [ "rust-analyzer" ];
+          indent = {
+            tab-width = 4;
+            unit = "    ";
+          };
+          formatter = { command = "rustfmt"; };
+          auto-format = true;
+        }
+        {
+          name = "python";
+          scope = "source.python";
+          injection-regex = "python";
+          file-types = [ "py" ];
+          language-servers = [ "pyright" ];
+          indent = {
+            tab-width = 4;
+            unit = "    ";
+          };
+          formatter = { command = "black"; };
+          auto-format = true;
+        }
+      ];
+    };
 
     settings = {
-
-      programs.helix = {
-        enable = true;
-        defaultEditor = true;
-        settings = {
-          editor = {
-            line-number = "relative";
-            lsp.display-messages = true;
-          };
-        };
-        languages = {
-          language = [{
-            name = "nix";
-            scope = "source.nix";
-            injection-regex = "nix";
-            file-types = [ "nix" ];
-            comment-token = "#";
-            language-servers = [ "nil" ];
-            indent = {
-              tab-width = 2;
-              unit = "  ";
-            };
-            formatter = { command = "nixpkgs-fmt"; };
-            auto-format = true;
-          }];
-        };
-      };
-
       keys.normal = {
         space.space = "file_picker";
         space.w = ":w";
