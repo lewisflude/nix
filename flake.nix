@@ -23,68 +23,60 @@
     };
   };
 
-  outputs = inputs @ {
-    self,
-    nix-darwin,
-    nixpkgs,
-    home-manager,
-    mac-app-util,
-    nix-homebrew,
-    homebrew-core,
-    homebrew-cask,
-    catppuccin,
-  }: let
-    username = "lewisflude";
-    useremail = "lewis@lewisflude.com";
-    system = "aarch64-darwin";
-    hostname = "Lewiss-MacBook-Pro";
+  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager, mac-app-util
+    , nix-homebrew, homebrew-core, homebrew-cask, catppuccin, }:
+    let
+      username = "lewisflude";
+      useremail = "lewis@lewisflude.com";
+      system = "aarch64-darwin";
+      hostname = "Lewiss-MacBook-Pro";
 
-    specialArgs = inputs // {inherit username useremail hostname;};
-  in {
-    # Build darwin flake using:
-    # $ darwin-rebuild build --flake .#Lewiss-MacBook-Pro
-    darwinConfigurations."${hostname}" = nix-darwin.lib.darwinSystem {
-      inherit system specialArgs;
+      specialArgs = inputs // { inherit username useremail hostname; };
+    in {
+      # Build darwin flake using:
+      # $ darwin-rebuild build --flake .#Lewiss-MacBook-Pro
+      darwinConfigurations."${hostname}" = nix-darwin.lib.darwinSystem {
+        inherit system specialArgs;
 
-      modules = [
-        ./modules/core.nix
-        ./modules/users.nix
-        ./modules/users.nix
-        ./modules/apps.nix
-        ./modules/shell.nix
-        ./modules/dev.nix
-        ./modules/docker.nix
-        ./modules/system.nix
-        ./modules/security.nix
-        ./modules/environment.nix
-        home-manager.darwinModules.home-manager
-        mac-app-util.darwinModules.default
-        nix-homebrew.darwinModules.nix-homebrew
+        modules = [
+          ./modules/core.nix
+          ./modules/users.nix
+          ./modules/apps.nix
+          ./modules/shell.nix
+          ./modules/dev.nix
+          ./modules/docker.nix
+          ./modules/system.nix
+          ./modules/security.nix
+          ./modules/environment.nix
+          home-manager.darwinModules.home-manager
+          mac-app-util.darwinModules.default
+          nix-homebrew.darwinModules.nix-homebrew
 
-        {
-          nix-homebrew = {
-            enable = true;
-            enableRosetta = true;
-            user = username;
-            taps = {
-              "homebrew/homebrew-cask" = homebrew-cask;
-              "homebrew/homebrew-core" = homebrew-core;
+          {
+            nix-homebrew = {
+              enable = true;
+              enableRosetta = true;
+              user = username;
+              taps = {
+                "homebrew/homebrew-cask" = homebrew-cask;
+                "homebrew/homebrew-core" = homebrew-core;
+              };
+              mutableTaps = false;
             };
-            mutableTaps = false;
-          };
-        }
+          }
 
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.verbose = true;
-          home-manager.backupFileExtension = "backup";
-          home-manager.sharedModules = [mac-app-util.homeManagerModules.default];
-          home-manager.extraSpecialArgs = specialArgs;
-          home-manager.users.${username} = import ./home;
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.verbose = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.sharedModules =
+              [ mac-app-util.homeManagerModules.default ];
+            home-manager.extraSpecialArgs = specialArgs;
+            home-manager.users.${username} = import ./home;
 
-        }
-      ];
+          }
+        ];
+      };
     };
-  };
 }

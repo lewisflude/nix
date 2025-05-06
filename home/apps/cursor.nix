@@ -1,154 +1,142 @@
-{pkgs, ...}: {
+# Cursor/VSCode Home-Manager Configuration
+#
+# - Maintained for reproducible, high-performance, and secure development
+# - To update: edit this file and run `darwin-rebuild switch` or `home-manager switch`
+# - To add extensions: add to the extension groups below
+# - To add settings: add to the userSettings block, grouped and alphabetized
+# - Review every few months for new features and to prune unused settings/extensions
+#
+# For project-specific rules, use .cursorrules in your repo.
+
+{pkgs, ...}: let
+  # Extension groups
+  coreLangs = with pkgs.vscode-extensions; [
+    jnoortheen.nix-ide
+    rust-lang.rust-analyzer
+  ];
+  tools = with pkgs.vscode-extensions; [
+    mkhl.direnv
+    bradlc.vscode-tailwindcss
+    dbaeumer.vscode-eslint
+    esbenp.prettier-vscode
+  ];
+  gitTools = with pkgs.vscode-extensions; [
+    eamodio.gitlens
+    github.vscode-pull-request-github
+  ];
+  # DRY ignore patterns
+  commonIgnores = {
+    "**/.DS_Store" = true;
+    "**/.direnv" = true;
+    "**/.git" = true;
+    "**/node_modules" = true;
+  };
+  watcherIgnores = commonIgnores // {
+    "**/.git/objects/**" = true;
+    "**/.git/subtree-cache/**" = true;
+    "**/.hg/store/**" = true;
+    "**/nix/store/**" = true;
+  };
+  # Extra config for bulky/complex JSON
+  extraConfig = {
+    "editor.rulers" = [80 120];
+    "editor.quickSuggestions" = {
+      "other" = true;
+      "comments" = true;
+      "strings" = true;
+    };
+    "editor.codeActionsOnSave" = {
+      "source.organizeImports" = "always";
+      "source.fixAll" = "always";
+    };
+    "files.readonlyInclude" = {
+      "/nix/store/**" = true;
+    };
+    "files.watcherExclude" = watcherIgnores;
+    "search.exclude" = {
+      "**/bower_components" = true;
+      "**/node_modules" = true;
+      "**/*.code-search" = true;
+    };
+  };
+in {
   programs.vscode = {
     enable = true;
     package = pkgs.code-cursor;
     profiles.default = {
-      extensions = with pkgs.vscode-extensions; [
-        # Core language support
-        jnoortheen.nix-ide
-        rust-lang.rust-analyzer
-
-        # Essential tools
-        mkhl.direnv
-        bradlc.vscode-tailwindcss
-        github.vscode-pull-request-github
-
-        # Git integration
-        eamodio.gitlens
-      ];
+      extensions = coreLangs ++ tools ++ gitTools;
       userSettings = {
-        # Theme settings
-        "workbench.colorTheme" = "Catppuccin Mocha";
-        "catppuccin.accentColor" = "mauve";
-        "catppuccin.boldKeywords" = true;
-        "catppuccin.italicComments" = true;
-        "catppuccin.italicKeywords" = true;
-        "catppuccin.workbenchMode" = "default";
-        "catppuccin.bracketMode" = "rainbow";
+        # Accessibility
+        "editor.accessibilitySupport" = "on";
 
-        # Nix settings
-        "nix.enableLanguageServer" = true;
-        "nix.serverPath" = "nil";
-        "nix.formatterPath" = "nixpkgs-fmt";
+        # Cursor AI/Features (grouped, alphabetized)
+        "agent.dotFilesProtection" = true;
+        "agent.outsideWorkspaceProtection" = true;
+        "chat.autoAcceptDiffs" = true;
+        "chat.autoApplyToFilesOutsideContextInManualMode" = true;
+        "chat.autoRefresh" = true;
+        "chat.autoScrollToBottom" = true;
+        "chat.iterateOnLints" = true;
+        "chat.webSearchTool" = true;
+        "cursor.beta.notepads" = true;
+        "cursor.beta.updateFrequency" = "standard";
+        "cursor.models.default" = "gpt-4o";
+        "cursor.models.enabled" = [
+          "gpt-4o"
+          "claude-3.5-sonnet"
+          "claude-3.7-sonnet"
+          "claude-3.7-sonnet-max"
+          "gemini-2.5-pro-exp-03-25"
+          "gemini-2.5-pro-max"
+          "o3"
+          "o4-mini"
+        ];
+        "cursor.rules.user" = [
+          "Prefer concise, well-documented, idiomatic code in all languages."
+        ];
+        "cursorTab.autoImport" = true;
+        "cursorTab.suggestionsInComments" = true;
+
+        # Editor UX
+        "editor.inlineSuggest.enabled" = true;
+        "editor.suggest.preview" = true;
+
+        # File handling
+        "editor.formatOnSave" = true;
+        "files.autoSave" = "onFocusChange";
+        "files.eol" = "\n";
+        "files.exclude" = commonIgnores;
+        "files.insertFinalNewline" = true;
+        "files.readonlyFromPermissions" = true;
+        "files.trimFinalNewlines" = true;
+        "files.trimTrailingWhitespace" = true;
+
+        # Nix-specific override
         "[nix]" = {
           "editor.defaultFormatter" = "jnoortheen.nix-ide";
-          "editor.formatOnSave" = false;
         };
 
-        # File handling settings
-        "files.autoSave" = "onFocusChange";
-        "files.trimTrailingWhitespace" = true;
-        "files.insertFinalNewline" = true;
-        "files.trimFinalNewlines" = true;
-        "files.eol" = "\n";
-
-        # Read-only file handling
-        "files.readonlyInclude" = {
-          "/nix/store/**" = true;
-        };
-        "files.readonlyFromPermissions" = true;
-
-        # File exclusions
-        "files.exclude" = {
-          "**/.git" = true;
-          "**/.DS_Store" = true;
-          "**/node_modules" = true;
-          "**/.direnv" = true;
-        };
-
-        # Files to not format
-        "files.watcherExclude" = {
-          "**/.git/objects/**" = true;
-          "**/.git/subtree-cache/**" = true;
-          "**/node_modules/**" = true;
-          "**/.hg/store/**" = true;
-          "**/nix/store/**" = true;
-        };
-
-        # TypeScript/JavaScript settings
-        "[typescript]" = {
-          "editor.formatOnSave" = true;
-        };
-        "[javascript]" = {
-          "editor.formatOnSave" = true;
-        };
-        "[typescriptreact]" = {
-          "editor.formatOnSave" = true;
-        };
-        "[javascriptreact]" = {
-          "editor.formatOnSave" = true;
-        };
-
-        # Rust settings
+        # TypeScript/JavaScript
+        "[typescript]" = { "editor.formatOnSave" = true; };
+        "[javascript]" = { "editor.formatOnSave" = true; };
+        "[typescriptreact]" = { "editor.formatOnSave" = true; };
+        "[javascriptreact]" = { "editor.formatOnSave" = true; };
+        # Rust
         "[rust]" = {
           "editor.defaultFormatter" = "rust-lang.rust-analyzer";
           "editor.formatOnSave" = true;
         };
         "rust-analyzer.checkOnSave.command" = "clippy";
 
-        # General formatting settings
-        "editor.formatOnSave" = true;
-        "editor.codeActionsOnSave" = {
-          "source.organizeImports" = "always";
-          "source.fixAll" = "always";
-        };
+        # Performance
+        "files.maxMemoryForLargeFilesMB" = 4096;
 
-        # Enhanced editor settings
-        "editor.bracketPairColorization.enabled" = true;
-        "editor.guides.bracketPairs" = true;
-        "editor.linkedEditing" = true;
-        "editor.suggestSelection" = "first";
-        "editor.renderWhitespace" = "boundary";
-        "editor.rulers" = [80 120];
-        "editor.fontLigatures" = true;
-        "editor.fontSize" = 16;
-        "editor.lineHeight" = 1.5;
-        "editor.cursorSmoothCaretAnimation" = "on";
-        "editor.smoothScrolling" = true;
-        "editor.minimap.enabled" = true;
-        "editor.minimap.renderCharacters" = false;
-        "editor.wordWrap" = "on";
-        "editor.wordWrapColumn" = 120;
-        "editor.multiCursorModifier" = "alt";
-        "editor.acceptSuggestionOnEnter" = "on";
-        "editor.quickSuggestions" = {
-          "other" = true;
-          "comments" = true;
-          "strings" = true;
-        };
+        # Security
+        "security.workspace.trust.enabled" = true;
 
-        # Terminal settings
-        "terminal.integrated.defaultProfile.linux" = "bash";
-        "terminal.integrated.fontSize" = 14;
-        "terminal.integrated.fontFamily" = "JetBrainsMono Nerd Font";
-        "terminal.integrated.cursorBlinking" = true;
-        "terminal.integrated.cursorStyle" = "line";
-
-        # Workbench settings
-        "workbench.editor.enablePreview" = false;
-        "workbench.startupEditor" = "newUntitledFile";
-        "workbench.iconTheme" = "material-icon-theme";
-        "workbench.editor.highlightModifiedTabs" = true;
-        "workbench.editor.limit.enabled" = true;
-        "workbench.editor.limit.value" = 10;
-
-        # Git settings
-        "git.autofetch" = true;
-        "git.confirmSync" = false;
-        "git.enableSmartCommit" = true;
-        "gitlens.codeLens.enabled" = true;
-        "gitlens.currentLine.enabled" = true;
-        "gitlens.hovers.currentLine.over" = "line";
-
-        # Search settings
-        "search.exclude" = {
-          "**/node_modules" = true;
-          "**/bower_components" = true;
-          "**/*.code-search" = true;
-        };
-        "search.followSymlinks" = false;
-        "search.useIgnoreFiles" = true;
-      };
+        # Telemetry
+        "telemetry.telemetryLevel" = "off";
+      } // extraConfig;
     };
   };
 }
