@@ -21,10 +21,30 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
+    homebrew-nx = {
+      url = "github:nrwl/homebrew-nx";
+      flake = false;
+    };
+    homebrew-j178 = {
+      url = "github:j178/homebrew-tap";
+      flake = false;
+    };
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager, mac-app-util
-    , nix-homebrew, homebrew-core, homebrew-cask, catppuccin, }:
+  outputs =
+    inputs@{ self
+    , nix-darwin
+    , nixpkgs
+    , home-manager
+    , mac-app-util
+    , nix-homebrew
+    , homebrew-core
+    , homebrew-cask
+    , homebrew-nx
+    , homebrew-j178
+    , catppuccin
+    ,
+    }:
     let
       username = "lewisflude";
       useremail = "lewis@lewisflude.com";
@@ -32,7 +52,8 @@
       hostname = "Lewiss-MacBook-Pro";
 
       specialArgs = inputs // { inherit username useremail hostname; };
-    in {
+    in
+    {
       # Build darwin flake using:
       # $ darwin-rebuild build --flake .#Lewiss-MacBook-Pro
       darwinConfigurations."${hostname}" = nix-darwin.lib.darwinSystem {
@@ -60,6 +81,8 @@
               taps = {
                 "homebrew/homebrew-cask" = homebrew-cask;
                 "homebrew/homebrew-core" = homebrew-core;
+                "nrwl/homebrew-nx" = homebrew-nx;
+                "j178/homebrew-tap" = homebrew-j178;
               };
               mutableTaps = false;
             };

@@ -4,7 +4,7 @@
     enableCompletion = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
-    shellAliases = { switch = "darwin-rebuild switch --flake ~/.config/nix"; };
+    shellAliases = { switch = "sudo darwin-rebuild switch --flake ~/.config/nix"; };
 
     initContent = ''
       source ~/.p10k.zsh

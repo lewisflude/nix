@@ -12,6 +12,14 @@
     postgresql_16
   ];
 
+  # Power Management Settings
+  power = {
+    sleep = {
+      display = 30;
+      computer = 60;
+    };
+  };
+
   # Fonts
   fonts = {
     packages = with pkgs; [ nerd-fonts.jetbrains-mono nerd-fonts.iosevka ];
@@ -32,6 +40,8 @@
       PasswordAuthentication no
       PubkeyAuthentication yes
   '';
+
+  system.primaryUser = "lewisflude";
 
   # macOS System Settings
   system.defaults = {
@@ -86,19 +96,30 @@
 
     CustomUserPreferences = {
       "com.apple.screensaver" = {
-        askForPassword = 1;
+        askForPassword = 0;
         askForPasswordDelay = 0;
       };
       "com.apple.screencapture" = {
         location = "~/Desktop";
         type = "png";
+        disable-shadow = true;
       };
       "com.apple.finder" = {
         AppleShowAllExtensions = true;
         AppleShowAllFiles = true;
         WebKitDeveloperExtras = true;
+        ShowPathbar = true;
+        ShowStatusBar = true;
+        FXPreferredViewStyle = "Nlsv"; # List view
+        ShowTabView = true;
+        ShowSidebar = true;
       };
-
+      "com.apple.Safari" = {
+        "com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled" =
+          true;
+      };
+      "com.apple.TimeMachine" = { DoNotOfferNewDisksForBackup = true; };
+      "com.apple.menuextra.battery" = { ShowPercent = true; };
     };
 
     # Global Domain Settings
@@ -116,14 +137,24 @@
       # Trackpad
       "com.apple.trackpad.scaling" = 0.5;
       "com.apple.trackpad.trackpadCornerClickBehavior" = 1;
+
+      # Mouse and Trackpad
+      "com.apple.swipescrolldirection" = false; # Natural scrolling
+      "com.apple.mouse.tapBehavior" = 1; # Tap to click
+
+      # Sound
+      "com.apple.sound.beep.feedback" = 0; # Disable system sound effects
+      "com.apple.sound.beep.volume" = 0.0; # Mute system sound
+
+      # Function Keys
+      "com.apple.keyboard.fnState" =
+        true; # Use F1-F12 keys as standard function keys
     };
 
     # Trackpad Settings
     trackpad = {
       Clicking = true;
       TrackpadRightClick = true;
-      # TrackpadScroll is not a valid option
-      # TrackpadSpeed is not a valid option
     };
 
     # Firewall Settings

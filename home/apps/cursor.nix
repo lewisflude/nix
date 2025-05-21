@@ -8,7 +8,8 @@
 #
 # For project-specific rules, use .cursorrules in your repo.
 
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   # Extension groups
   coreLangs = with pkgs.vscode-extensions; [
     jnoortheen.nix-ide
@@ -19,6 +20,7 @@
     bradlc.vscode-tailwindcss
     dbaeumer.vscode-eslint
     esbenp.prettier-vscode
+    biomejs.biome
   ];
   gitTools = with pkgs.vscode-extensions; [
     eamodio.gitlens
@@ -39,7 +41,7 @@
   };
   # Extra config for bulky/complex JSON
   extraConfig = {
-    "editor.rulers" = [80 120];
+    "editor.rulers" = [ 80 120 ];
     "editor.quickSuggestions" = {
       "other" = true;
       "comments" = true;
@@ -49,9 +51,7 @@
       "source.organizeImports" = "always";
       "source.fixAll" = "always";
     };
-    "files.readonlyInclude" = {
-      "/nix/store/**" = true;
-    };
+    "files.readonlyInclude" = { "/nix/store/**" = true; };
     "files.watcherExclude" = watcherIgnores;
     "search.exclude" = {
       "**/bower_components" = true;
@@ -112,15 +112,33 @@ in {
         "files.trimTrailingWhitespace" = true;
 
         # Nix-specific override
-        "[nix]" = {
-          "editor.defaultFormatter" = "jnoortheen.nix-ide";
-        };
+        "[nix]" = { "editor.defaultFormatter" = "jnoortheen.nix-ide"; };
 
         # TypeScript/JavaScript
-        "[typescript]" = { "editor.formatOnSave" = true; };
-        "[javascript]" = { "editor.formatOnSave" = true; };
-        "[typescriptreact]" = { "editor.formatOnSave" = true; };
-        "[javascriptreact]" = { "editor.formatOnSave" = true; };
+        "[typescript]" = {
+          "editor.defaultFormatter" = "biomejs.biome";
+          "editor.formatOnSave" = true;
+        };
+        "[javascript]" = {
+          "editor.defaultFormatter" = "biomejs.biome";
+          "editor.formatOnSave" = true;
+        };
+        "[typescriptreact]" = {
+          "editor.defaultFormatter" = "biomejs.biome";
+          "editor.formatOnSave" = true;
+        };
+        "[javascriptreact]" = {
+          "editor.defaultFormatter" = "biomejs.biome";
+          "editor.formatOnSave" = true;
+        };
+        "[json]" = {
+          "editor.defaultFormatter" = "biomejs.biome";
+          "editor.formatOnSave" = true;
+        };
+        "[jsonc]" = {
+          "editor.defaultFormatter" = "biomejs.biome";
+          "editor.formatOnSave" = true;
+        };
         # Rust
         "[rust]" = {
           "editor.defaultFormatter" = "rust-lang.rust-analyzer";

@@ -7,22 +7,20 @@
     awscli2
 
     # Programming Languages & Runtimes
-    nodejs_20
+    nodejs_22
     nodePackages.pnpm
     nodePackages.typescript
 
     # Language Servers & Linters
-    nil # Nix language server
+    nil
     nodePackages.typescript-language-server
-    nodePackages.prettier
-    nodePackages.eslint
-    nodePackages.stylelint
+    biome
     yaml-language-server
-    marksman # Markdown language server
+    marksman
     rust-analyzer
     pyright
     nodePackages.vscode-langservers-extracted # JSON language server
-    black # Python formatter
+    black
     rustfmt
     nixpkgs-fmt
 
@@ -33,9 +31,9 @@
 
     # Version Control & Git Tools
     git
-    gh # GitHub CLI
+    gh
     lazygit
-    delta # Better git diff
+    delta
 
     # CLI Utilities & System Tools
     ripgrep
@@ -64,5 +62,6 @@
     ./apps/cursor.nix
     ./apps/helix.nix
     ./apps/yazi.nix
+    ./apps/firefox.nix
   ];
 }

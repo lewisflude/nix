@@ -8,10 +8,16 @@
       push.autoSetupRemote = true;
       pull.rebase = true;
     };
-     delta = {
+    signing = {
+      key = "DBAEF83F";
+      format = "openpgp";
+      signByDefault = true;
+    };
+
+    delta = {
       enable = true;
     };
-     aliases = {
+    aliases = {
       br = "branch";
       co = "checkout";
       st = "status";
