@@ -1,5 +1,4 @@
-{  ...
-}: {
+{ ... }: {
   # Configure Homebrew
   homebrew = {
     enable = true;
@@ -8,32 +7,32 @@
       autoUpdate = true;
       upgrade = true;
     };
-    caskArgs = {
-      no_quarantine = true;
-    };
-
-    brews = [ ];
-
+    caskArgs = { no_quarantine = true; };
+    taps = [ "nrwl/nx" "j178/tap" ];
+    brews = [ "prefligit" ];
     # GUI applications
     casks = [
       "1password"
       "chatgpt"
+      "gpg-suite"
       "docker"
       "figma"
+      "adobe-creative-cloud"
       "notion"
       "slack"
       "raycast"
       "insomnia"
       "tableplus"
+      "logitech-options"
+      "logitech-g-hub"
       "ghostty"
-      "logi-options+"
-      "logitune"
       "firefox@developer-edition"
       "google-chrome"
       "responsively"
       "imageoptim"
       "figma"
       "linear-linear"
+      "logi-options+"
     ];
 
     # Mac App Store applications
