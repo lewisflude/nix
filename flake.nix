@@ -1,10 +1,27 @@
 {
   description = "Example nix-darwin system flake";
 
+  # Settings that are picked up automatically by every `nix` invocation that
+  # touches this flake (requires `nix --accept-flake-config` the first time).
+  nixConfig = {
+    experimental-features = [ "nix-command" "flakes" ];
+
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+      # Determinate Nix cache (enabled automatically by the installer but we
+      # declare it here in case the host is using stock Nix)
+      "https://cache.determinate.systems"
+    ];
+
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nix-darwin.url = "github:nix-darwin/nix-darwin/master";
-    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    darwin.url = "github:nix-darwin/nix-darwin/master";
+    darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     mac-app-util.url = "github:hraban/mac-app-util";
@@ -31,20 +48,9 @@
     };
   };
 
-  outputs =
-    inputs@{ self
-    , nix-darwin
-    , nixpkgs
-    , home-manager
-    , mac-app-util
-    , nix-homebrew
-    , homebrew-core
-    , homebrew-cask
-    , homebrew-nx
-    , homebrew-j178
-    , catppuccin
-    ,
-    }:
+  outputs = inputs@{ self, darwin, nixpkgs, home-manager, mac-app-util
+    , nix-homebrew, homebrew-core, homebrew-cask, homebrew-nx, homebrew-j178
+    , catppuccin, }:
     let
       username = "lewisflude";
       useremail = "lewis@lewisflude.com";
@@ -52,11 +58,26 @@
       hostname = "Lewiss-MacBook-Pro";
 
       specialArgs = inputs // { inherit username useremail hostname; };
-    in
-    {
+    in {
+      # Provide a formatter so `nix fmt` works
+      formatter.${system} = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
+
+      # Developer shell with common tools
+      devShells.${system}.default = nixpkgs.legacyPackages.${system}.mkShell {
+        packages = with nixpkgs.legacyPackages.${system}; [
+          nixpkgs-fmt
+          jq
+          yq
+          git
+          gh
+          direnv
+          nix-direnv
+        ];
+      };
+
       # Build darwin flake using:
       # $ darwin-rebuild build --flake .#Lewiss-MacBook-Pro
-      darwinConfigurations."${hostname}" = nix-darwin.lib.darwinSystem {
+      darwinConfigurations."${hostname}" = darwin.lib.darwinSystem {
         inherit system specialArgs;
 
         modules = [
