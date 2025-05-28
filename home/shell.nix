@@ -4,12 +4,8 @@
     enableCompletion = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
-    shellAliases = { switch = "sudo darwin-rebuild switch --flake ~/.config/nix"; };
-
-    initContent = ''
-      source ~/.p10k.zsh
-    '';
     shellAliases = {
+      switch = "sudo darwin-rebuild switch --flake ~/.config/nix";
       ls = "lsd";
       l = "ls -l";
       la = "ls -a";
@@ -42,6 +38,9 @@
         file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
       }
     ];
+    initContent = ''
+      source ~/.p10k.zsh
+    '';
   };
 
   # Environment variables managed by home-manager
