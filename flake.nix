@@ -5,17 +5,6 @@
   # touches this flake (requires `nix --accept-flake-config` the first time).
   nixConfig = {
     experimental-features = [ "nix-command" "flakes" ];
-
-    extra-substituters = [
-      "https://nix-community.cachix.org"
-      # Determinate Nix cache (enabled automatically by the installer but we
-      # declare it here in case the host is using stock Nix)
-      "https://cache.determinate.systems"
-    ];
-
-    extra-trusted-public-keys = [
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-    ];
   };
 
   inputs = {
@@ -48,9 +37,20 @@
     };
   };
 
-  outputs = inputs@{ self, darwin, nixpkgs, home-manager, mac-app-util
-    , nix-homebrew, homebrew-core, homebrew-cask, homebrew-nx, homebrew-j178
-    , catppuccin, }:
+  outputs =
+    inputs@{ self
+    , darwin
+    , nixpkgs
+    , home-manager
+    , mac-app-util
+    , nix-homebrew
+    , homebrew-core
+    , homebrew-cask
+    , homebrew-nx
+    , homebrew-j178
+    , catppuccin
+    ,
+    }:
     let
       username = "lewisflude";
       useremail = "lewis@lewisflude.com";
@@ -58,7 +58,8 @@
       hostname = "Lewiss-MacBook-Pro";
 
       specialArgs = inputs // { inherit username useremail hostname; };
-    in {
+    in
+    {
       # Provide a formatter so `nix fmt` works
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
 
