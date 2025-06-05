@@ -154,6 +154,7 @@ in {
 
         # Telemetry
         "telemetry.telemetryLevel" = "off";
+        "circleci.hostUrl" = "https://circleci.com";
       } // extraConfig;
     };
   };

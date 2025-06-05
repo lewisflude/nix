@@ -9,7 +9,7 @@
     };
     caskArgs = { no_quarantine = true; };
     taps = [ "nrwl/nx" "j178/tap" ];
-    brews = [ "prefligit" ];
+    brews = [ "circleci" "prefligit" "nx" ];
     # GUI applications
     casks = [
       "1password"
