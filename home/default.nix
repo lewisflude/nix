@@ -1,6 +1,5 @@
-{
-  catppuccin,
-  ...
+{ catppuccin
+, ...
 }: {
   home.stateVersion = "25.05";
   home.username = "lewisflude";
@@ -14,9 +13,10 @@
     ./gpg.nix
     ./theme.nix
     ./terminal.nix
+    ./direnv.nix
     catppuccin.homeModules.catppuccin
   ];
-  programs = {home-manager.enable = true;};
+  programs = { home-manager.enable = true; };
 
   # User-specific environment variables
   home.sessionVariables = {
