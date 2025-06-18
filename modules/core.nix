@@ -12,25 +12,12 @@
     package = pkgs.nix;
 
     settings = {
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-      auto-optimise-store = true;
+      # Basic settings - detailed optimization handled in nix-optimization.nix
       warn-dirty = false;
       trusted-users = [
         "root"
         username
       ];
-      trusted-substituters = [
-        "https://nix-community.cachix.org"
-        "https://cache.determinate.systems"
-      ];
-      trusted-public-keys = [
-        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-        "cache.determinate.systems-1:cd9bVm9wnyQHfHpLRhHGDMWWgPEXFEoKhiMuQ1jmNj8="
-      ];
-
     };
   };
 

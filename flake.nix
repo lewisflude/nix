@@ -97,6 +97,7 @@
           ./modules/security.nix
           ./modules/environment.nix
           ./modules/backup.nix
+          ./modules/nix-optimization.nix
           home-manager.darwinModules.home-manager
           mac-app-util.darwinModules.default
           nix-homebrew.darwinModules.nix-homebrew
