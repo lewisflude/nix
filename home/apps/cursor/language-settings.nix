@@ -14,14 +14,14 @@
       "source.fixAll.eslint" = "always";
       "source.fixAll.biome" = "always";
     };
-    
+
     # TypeScript/JavaScript
     "typescript.preferences.quoteStyle" = "double";
     "typescript.suggest.autoImports" = true;
     "javascript.preferences.quoteStyle" = "double";
     "typescript.updateImportsOnFileMove.enabled" = "always";
     "javascript.updateImportsOnFileMove.enabled" = "always";
-    
+
     # Python
     "python.defaultInterpreterPath" = "python3";
     "python.analysis.typeCheckingMode" = "basic";
@@ -32,7 +32,7 @@
         "source.organizeImports" = "always";
       };
     };
-    
+
     # Go
     "go.formatTool" = "goimports";
     "go.lintTool" = "golangci-lint";
@@ -41,7 +41,7 @@
       "editor.defaultFormatter" = "golang.go";
       "editor.formatOnSave" = true;
     };
-    
+
     # Rust
     "rust-analyzer.checkOnSave.command" = "clippy";
     "rust-analyzer.cargo.features" = "all";
@@ -49,21 +49,13 @@
       "editor.defaultFormatter" = "rust-lang.rust-analyzer";
       "editor.formatOnSave" = true;
     };
-    
+
     # Biome Configuration (JavaScript/TypeScript)
     "biomejs.enable" = true;
     "biomejs.lspBin" = "biome";
     "biomejs.rename" = true;
     "biomejs.requireConfigFile" = false;
-    
-    # Prettier Configuration
-    "prettier.requireConfig" = false;
-    "prettier.useEditorConfig" = true;
-    "prettier.semi" = true;
-    "prettier.singleQuote" = false;
-    "prettier.tabWidth" = 2;
-    "prettier.trailingComma" = "es5";
-    
+
     # ESLint Configuration
     "eslint.validate" = [
       "javascript"
@@ -75,7 +67,7 @@
     ];
     "eslint.format.enable" = true;
     "eslint.codeActionsOnSave.mode" = "all";
-    
+
     # File Type Formatters
     "[javascript]" = {
       "editor.defaultFormatter" = "biomejs.biome";
@@ -94,31 +86,31 @@
       "editor.formatOnSave" = true;
     };
     "[json]" = {
-      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+      "editor.defaultFormatter" = "biomejs.biome";
       "editor.formatOnSave" = true;
     };
     "[jsonc]" = {
-      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+      "editor.defaultFormatter" = "biomejs.biome";
       "editor.formatOnSave" = true;
     };
     "[markdown]" = {
-      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+      "editor.defaultFormatter" = "biomejs.biome";
       "editor.formatOnSave" = true;
     };
     "[yaml]" = {
-      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+      "editor.defaultFormatter" = "biomejs.biome";
       "editor.formatOnSave" = true;
     };
     "[css]" = {
-      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+      "editor.defaultFormatter" = "biomejs.biome";
       "editor.formatOnSave" = true;
     };
     "[scss]" = {
-      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+      "editor.defaultFormatter" = "biomejs.biome";
       "editor.formatOnSave" = true;
     };
     "[html]" = {
-      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+      "editor.defaultFormatter" = "biomejs.biome";
       "editor.formatOnSave" = true;
     };
     "[nix]" = {

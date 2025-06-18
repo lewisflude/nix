@@ -8,8 +8,8 @@
   services.gpg-agent = {
     enable = true;
     enableSshSupport = false;
-    defaultCacheTtl = 3600;
-    maxCacheTtl = 7200;
+    defaultCacheTtl = 28800;
+    maxCacheTtl = 86400;
     pinentry.package = pkgs.pinentry_mac;
     extraConfig = ''
       allow-preset-passphrase
