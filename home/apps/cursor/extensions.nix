@@ -6,29 +6,28 @@
   extensions = with pkgs.vscode-extensions; [
     # Themes & UI
     catppuccin.catppuccin-vsc # Catppuccin theme
-    
+
     # Core Languages
     jnoortheen.nix-ide
     rust-lang.rust-analyzer
-    
+
     # Development Tools
     mkhl.direnv
     bradlc.vscode-tailwindcss
     dbaeumer.vscode-eslint
-    esbenp.prettier-vscode
     biomejs.biome
-    
+
     # Git Integration
     eamodio.gitlens
     github.vscode-pull-request-github
-    
+
     # Developer Experience
     usernamehw.errorlens # Inline error/warning display
     yoavbls.pretty-ts-errors # Human-readable TypeScript errors
     redhat.vscode-yaml # YAML validation & IntelliSense
     christian-kohler.path-intellisense # File path autocomplete
     formulahendry.auto-rename-tag # Auto rename HTML/JSX tags
-    
+
     # Additional Languages
     ms-python.python # Python language support
     ms-python.pylint # Python linting

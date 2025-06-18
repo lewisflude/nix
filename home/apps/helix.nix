@@ -34,11 +34,7 @@
             unit = "  ";
           };
           formatter = {
-            command = "prettier";
-            args = [
-              "--parser"
-              "typescript"
-            ];
+            command = "biome";
           };
           auto-format = true;
         }
@@ -57,11 +53,7 @@
             unit = "  ";
           };
           formatter = {
-            command = "prettier";
-            args = [
-              "--parser"
-              "babel"
-            ];
+            command = "biome";
           };
           auto-format = true;
         }
@@ -76,11 +68,7 @@
             unit = "  ";
           };
           formatter = {
-            command = "prettier";
-            args = [
-              "--parser"
-              "json"
-            ];
+            command = "biome";
           };
           auto-format = true;
         }
@@ -98,11 +86,7 @@
             unit = "  ";
           };
           formatter = {
-            command = "prettier";
-            args = [
-              "--parser"
-              "yaml"
-            ];
+            command = "biome";
           };
           auto-format = true;
         }
@@ -120,11 +104,7 @@
             unit = "  ";
           };
           formatter = {
-            command = "prettier";
-            args = [
-              "--parser"
-              "markdown"
-            ];
+            command = "biome";
           };
           auto-format = true;
         }
