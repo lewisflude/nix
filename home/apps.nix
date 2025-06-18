@@ -56,8 +56,11 @@
     ./apps/direnv.nix
     ./apps/fzf.nix
     ./apps/zoxide.nix
-    ./apps/cursor-new.nix  # Using modular cursor config
+    ../modules/apps/cursor
     ./apps/helix.nix
     ./apps/yazi.nix
   ];
+
+  # Enable Cursor editor via the new module
+  programs.cursor.enable = true;
 }
