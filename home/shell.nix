@@ -17,6 +17,12 @@
       update = "system-update";
       backup = "~/.config/nix/backup.sh";
       backup-restore = "ls -la ~/Backups/nix-config";
+      
+      # Nix store management
+      nix-optimize = "sudo /etc/nix-optimization/optimize-store.sh";
+      nix-clean = "sudo /etc/nix-optimization/quick-clean.sh";
+      nix-analyze = "sudo /etc/nix-optimization/analyze-store.sh";
+      nix-size = "du -sh /nix/store";
     };
     history = {
       save = 10000;

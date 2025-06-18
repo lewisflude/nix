@@ -10,7 +10,7 @@
       pull.rebase = true;
     };
     signing = {
-      key = "DBAEF83F";
+      key = "D4DD67DDDBAEF83F";
       format = "openpgp";
       signByDefault = true;
     };

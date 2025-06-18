@@ -14,7 +14,7 @@
     "cursor.general.enableWindows11SnapAssistGUI" = false;
     "cursor.general.enableWindowsTerminalShell" = false;
     "cursor.general.modelTemperature" = 0.2;
-    "cursor.general.requestDelayTime" = 500;
+    "cursor.general.requestDelayTime" = 200; # Faster AI responses
     "cursor.general.requestTimeoutLength" = 30000;
     "cursor.privateTelemetryEnabled" = false;
     
@@ -25,6 +25,10 @@
     "cursor.chat.autoScrollToBottom" = true;
     "cursor.chat.iterateOnLints" = true;
     "cursor.chat.webSearchTool" = true;
+    
+    # Enhanced AI Features
+    "cursor.chat.suggestFollowUpQuestions" = true;
+    "cursor.chat.enableSmartSelection" = true;
     
     # Cursor Beta Features
     "cursor.beta.notepads" = true;
