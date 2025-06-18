@@ -1,0 +1,11 @@
+# Secrets directory - never commit
+secrets/
+
+# Build results
+result
+result-*
+
+# Temporary files
+*.tmp
+*.bak
+.DS_Store

@@ -14,35 +14,55 @@
             tab-width = 2;
             unit = "  ";
           };
-          formatter = { command = "nixpkgs-fmt"; };
+          formatter = {
+            command = "nixpkgs-fmt";
+          };
           auto-format = true;
         }
         {
           name = "typescript";
           scope = "source.ts";
           injection-regex = "ts";
-          file-types = [ "ts" "tsx" ];
+          file-types = [
+            "ts"
+            "tsx"
+          ];
           comment-token = "//";
           language-servers = [ "typescript-language-server" ];
           indent = {
             tab-width = 2;
             unit = "  ";
           };
-          formatter = { command = "prettier"; args = [ "--parser" "typescript" ]; };
+          formatter = {
+            command = "prettier";
+            args = [
+              "--parser"
+              "typescript"
+            ];
+          };
           auto-format = true;
         }
         {
           name = "javascript";
           scope = "source.js";
           injection-regex = "js";
-          file-types = [ "js" "jsx" ];
+          file-types = [
+            "js"
+            "jsx"
+          ];
           comment-token = "//";
           language-servers = [ "typescript-language-server" ];
           indent = {
             tab-width = 2;
             unit = "  ";
           };
-          formatter = { command = "prettier"; args = [ "--parser" "babel" ]; };
+          formatter = {
+            command = "prettier";
+            args = [
+              "--parser"
+              "babel"
+            ];
+          };
           auto-format = true;
         }
         {
@@ -55,33 +75,57 @@
             tab-width = 2;
             unit = "  ";
           };
-          formatter = { command = "prettier"; args = [ "--parser" "json" ]; };
+          formatter = {
+            command = "prettier";
+            args = [
+              "--parser"
+              "json"
+            ];
+          };
           auto-format = true;
         }
         {
           name = "yaml";
           scope = "source.yaml";
           injection-regex = "yaml";
-          file-types = [ "yaml" "yml" ];
+          file-types = [
+            "yaml"
+            "yml"
+          ];
           language-servers = [ "yaml-language-server" ];
           indent = {
             tab-width = 2;
             unit = "  ";
           };
-          formatter = { command = "prettier"; args = [ "--parser" "yaml" ]; };
+          formatter = {
+            command = "prettier";
+            args = [
+              "--parser"
+              "yaml"
+            ];
+          };
           auto-format = true;
         }
         {
           name = "markdown";
           scope = "source.md";
           injection-regex = "markdown";
-          file-types = [ "md" "markdown" ];
+          file-types = [
+            "md"
+            "markdown"
+          ];
           language-servers = [ "marksman" ];
           indent = {
             tab-width = 2;
             unit = "  ";
           };
-          formatter = { command = "prettier"; args = [ "--parser" "markdown" ]; };
+          formatter = {
+            command = "prettier";
+            args = [
+              "--parser"
+              "markdown"
+            ];
+          };
           auto-format = true;
         }
         {
@@ -94,7 +138,9 @@
             tab-width = 4;
             unit = "    ";
           };
-          formatter = { command = "rustfmt"; };
+          formatter = {
+            command = "rustfmt";
+          };
           auto-format = true;
         }
         {
@@ -107,7 +153,9 @@
             tab-width = 4;
             unit = "    ";
           };
-          formatter = { command = "black"; };
+          formatter = {
+            command = "black";
+          };
           auto-format = true;
         }
       ];
@@ -118,7 +166,10 @@
         space.space = "file_picker";
         space.w = ":w";
         space.q = ":q";
-        esc = [ "collapse_selection" "keep_primary_selection" ];
+        esc = [
+          "collapse_selection"
+          "keep_primary_selection"
+        ];
       };
 
       editor.lsp = {
@@ -128,9 +179,19 @@
       };
 
       editor.statusline = {
-        left = [ "mode" "spinner" "file-name" "file-modification-indicator" ];
+        left = [
+          "mode"
+          "spinner"
+          "file-name"
+          "file-modification-indicator"
+        ];
         center = [ ];
-        right = [ "diagnostics" "selections" "position" "file-encoding" ];
+        right = [
+          "diagnostics"
+          "selections"
+          "position"
+          "file-encoding"
+        ];
         mode.normal = "NORMAL";
         mode.insert = "INSERT";
         mode.select = "SELECT";

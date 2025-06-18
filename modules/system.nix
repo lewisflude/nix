@@ -1,4 +1,11 @@
-{ pkgs, hostname, ... }: {
+{
+  pkgs,
+  hostname,
+  username,
+  config,
+  ...
+}:
+{
 
   # System Libraries
   environment.systemPackages = with pkgs; [
@@ -6,9 +13,6 @@
     pkg-config
     ext4fuse
     openssl
-    docker
-    docker-compose
-    docker-credential-helpers
     postgresql_16
   ];
 
@@ -22,7 +26,10 @@
 
   # Fonts
   fonts = {
-    packages = with pkgs; [ nerd-fonts.jetbrains-mono nerd-fonts.iosevka ];
+    packages = with pkgs; [
+      nerd-fonts.jetbrains-mono
+      nerd-fonts.iosevka
+    ];
   };
 
   # Networking
@@ -33,7 +40,9 @@
   };
 
   # SSH Configuration
-  services.openssh = { enable = true; };
+  services.openssh = {
+    enable = true;
+  };
   environment.etc."ssh/ssh_config.d/secure.conf".text = ''
     # Secure SSH configuration
     Host *
@@ -41,51 +50,36 @@
       PubkeyAuthentication yes
   '';
 
-  system.primaryUser = "lewisflude";
+  system.primaryUser = username;
 
   # macOS System Settings
   system.defaults = {
     # Dock Settings
     dock = {
-      # Appearance
-      autohide = true;
-      magnification = true;
-      tilesize = 48;
-      mineffect = "genie";
-      launchanim = true;
+      # Frontend Developer Setup - TypeScript/React focused
+      persistent-apps = [
+        # Primary development tools (most used)
+        "/System/Volumes/Data/Applications/Docker.app"
+        "/Users/${username}/Applications/Home Manager Trampolines/Firefox Developer Edition.app" # Primary browser for development
 
-      # Behavior
-      static-only = false;
-      showhidden = true;
-      enable-spring-load-actions-on-all-items = true;
-      appswitcher-all-displays = true;
-      minimize-to-application = false;
-      mouse-over-hilite-stack = true;
-      mru-spaces = true;
-      slow-motion-allowed = true;
+        # Design & Planning
+        "/System/Volumes/Data/Applications/Figma.app"
+        "/System/Volumes/Data/Applications/Notion.app"
+        "/System/Volumes/Data/Applications/Obsidian.app"
 
-      # Position
-      orientation = "left";
+        # Communication & Database
+        "/Users/${username}/Applications/Home Manager Trampolines/Slack.app"
+        "/Users/${username}/Applications/Home Manager Trampolines/TablePlus.app"
 
-      # Mission Control
-      expose-animation-duration = 0.5;
-      expose-group-apps = true;
+        # System utilities
+        "/System/Applications/System Settings.app"
+      ];
 
-      # Hot Corners
-      wvous-tl-corner = 2; # Mission Control
-      wvous-tr-corner = 4; # Desktop
-      wvous-bl-corner = 3; # Application Windows
-      wvous-br-corner = 5; # Start Screen Saver
-    };
-
-    # Finder Settings
-    finder = {
-      AppleShowAllExtensions = true;
-      AppleShowAllFiles = true;
-      CreateDesktop = false;
-      FXEnableExtensionChangeWarning = false;
-      QuitMenuItem = true;
-      _FXShowPosixPathInTitle = true;
+      # Persistent folders (optional)
+      persistent-others = [
+        "/Users/${username}/Downloads"
+        "/Users/${username}/Documents"
+      ];
     };
 
     # Control Center Settings
@@ -115,11 +109,14 @@
         ShowSidebar = true;
       };
       "com.apple.Safari" = {
-        "com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled" =
-          true;
+        "com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled" = true;
       };
-      "com.apple.TimeMachine" = { DoNotOfferNewDisksForBackup = true; };
-      "com.apple.menuextra.battery" = { ShowPercent = true; };
+      "com.apple.TimeMachine" = {
+        DoNotOfferNewDisksForBackup = false;
+      };
+      "com.apple.menuextra.battery" = {
+        ShowPercent = true;
+      };
     };
 
     # Global Domain Settings
@@ -147,8 +144,7 @@
       "com.apple.sound.beep.volume" = 0.0; # Mute system sound
 
       # Function Keys
-      "com.apple.keyboard.fnState" =
-        true; # Use F1-F12 keys as standard function keys
+      "com.apple.keyboard.fnState" = true; # Use F1-F12 keys as standard function keys
     };
 
     # Trackpad Settings

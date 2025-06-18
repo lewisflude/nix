@@ -1,6 +1,7 @@
+{ username, ... }:
 {
-  users.users.lewisflude = {
-    name = "lewisflude";
-    home = "/Users/lewisflude";
+  users.users.${username} = {
+    name = username;
+    home = "/Users/${username}";
   };
 }

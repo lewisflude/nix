@@ -1,9 +1,12 @@
-{ catppuccin
-, ...
-}: {
+{
+  catppuccin,
+  username,
+  ...
+}:
+{
   home.stateVersion = "25.05";
-  home.username = "lewisflude";
-  home.homeDirectory = "/Users/lewisflude";
+  home.username = username;
+  home.homeDirectory = "/Users/${username}";
 
   imports = [
     ./git.nix
@@ -14,9 +17,12 @@
     ./theme.nix
     ./terminal.nix
     ./direnv.nix
+    ./python.nix
     catppuccin.homeModules.catppuccin
   ];
-  programs = { home-manager.enable = true; };
+  programs = {
+    home-manager.enable = true;
+  };
 
   # User-specific environment variables
   home.sessionVariables = {

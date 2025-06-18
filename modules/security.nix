@@ -1,11 +1,6 @@
-{ pkgs, ... }: {
-  # Configure SSH
-  services.openssh = { enable = true; };
-
-  # Configure environment variables for GPG
-  environment.variables = { GPG_TTY = "$(tty)"; };
-
-  # Enable Touch ID for sudo
+{ pkgs, ... }:
+{
+  # Enable Touch ID for sudo (nix-darwin only supports sudo_local PAM service)
   security.pam.services.sudo_local = {
     enable = true;
     touchIdAuth = true;

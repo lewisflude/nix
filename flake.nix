@@ -4,7 +4,10 @@
   # Settings that are picked up automatically by every `nix` invocation that
   # touches this flake (requires `nix --accept-flake-config` the first time).
   nixConfig = {
-    experimental-features = [ "nix-command" "flakes" ];
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
   };
 
   inputs = {
@@ -38,18 +41,18 @@
   };
 
   outputs =
-    inputs@{ self
-    , darwin
-    , nixpkgs
-    , home-manager
-    , mac-app-util
-    , nix-homebrew
-    , homebrew-core
-    , homebrew-cask
-    , homebrew-nx
-    , homebrew-j178
-    , catppuccin
-    ,
+    inputs@{
+      self,
+      darwin,
+      nixpkgs,
+      home-manager,
+      mac-app-util,
+      nix-homebrew,
+      homebrew-core,
+      homebrew-cask,
+      homebrew-nx,
+      homebrew-j178,
+      catppuccin,
     }:
     let
       username = "lewisflude";
@@ -57,16 +60,18 @@
       system = "aarch64-darwin";
       hostname = "Lewiss-MacBook-Pro";
 
-      specialArgs = inputs // { inherit username useremail hostname; };
+      specialArgs = inputs // {
+        inherit username useremail hostname;
+      };
     in
     {
       # Provide a formatter so `nix fmt` works
-      formatter.${system} = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
+      formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
 
       # Developer shell with common tools
       devShells.${system}.default = nixpkgs.legacyPackages.${system}.mkShell {
         packages = with nixpkgs.legacyPackages.${system}; [
-          nixpkgs-fmt
+          nixfmt-rfc-style
           jq
           yq
           git
@@ -91,6 +96,7 @@
           ./modules/system.nix
           ./modules/security.nix
           ./modules/environment.nix
+          ./modules/backup.nix
           home-manager.darwinModules.home-manager
           mac-app-util.darwinModules.default
           nix-homebrew.darwinModules.nix-homebrew
@@ -115,8 +121,7 @@
             home-manager.useUserPackages = true;
             home-manager.verbose = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.sharedModules =
-              [ mac-app-util.homeManagerModules.default ];
+            home-manager.sharedModules = [ mac-app-util.homeManagerModules.default ];
             home-manager.extraSpecialArgs = specialArgs;
             home-manager.users.${username} = import ./home;
 
