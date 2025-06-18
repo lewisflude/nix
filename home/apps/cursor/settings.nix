@@ -43,10 +43,9 @@ in
     "editor.codeActionsOnSave" = {
       "source.organizeImports" = "always";
       "source.fixAll" = "always";
-      "source.fixAll.eslint" = "always";
       "source.fixAll.biome" = "always";
     };
-    
+
     # File Management
     "files.exclude" = commonIgnores;
     "files.readonlyInclude" = {
@@ -54,11 +53,11 @@ in
     };
     "files.watcherExclude" = watcherIgnores;
     "files.autoSave" = "onFocusChange";
-    
+
     # Search Configuration
     "search.exclude" = commonIgnores;
     "search.useIgnoreFiles" = true;
-    
+
     # Workbench (optimized for narrow screens)
     "workbench.startupEditor" = "none";
     "workbench.editor.enablePreview" = false;
@@ -70,30 +69,30 @@ in
     "workbench.editor.tabSizing" = "shrink";
     "workbench.sideBar.width" = 200;
     "workbench.panel.defaultLocation" = "right";
-    
+
     # Auto-hide sidebar on narrow screens
     "workbench.statusBar.visible" = true;
     "breadcrumbs.enabled" = false;
-    
+
     # Security & Telemetry
     "telemetry.telemetryLevel" = "off";
     "security.workspace.trust.enabled" = false;
-    
+
     # Terminal (optimized for half-screen)
     "terminal.integrated.defaultProfile.osx" = "zsh";
     "terminal.integrated.fontSize" = 13;
     "terminal.integrated.lineHeight" = 1.2;
     "terminal.integrated.minimumContrastRatio" = 4.5;
-    
+
     # Explorer
     "explorer.compactFolders" = true;
     "explorer.fileNesting.enabled" = true;
     "explorer.openEditors.visible" = 0;
-    
+
     # Extension Recommendations (reduce sidebar clutter)
     "extensions.showRecommendationsOnlyOnDemand" = true;
     "extensions.ignoreRecommendations" = true;
-    
+
     # Git
     "git.autofetch" = true;
     "git.confirmSync" = false;

@@ -11,7 +11,6 @@
     "editor.codeActionsOnSave" = {
       "source.organizeImports" = "always";
       "source.fixAll" = "always";
-      "source.fixAll.eslint" = "always";
       "source.fixAll.biome" = "always";
     };
 
@@ -55,18 +54,6 @@
     "biomejs.lspBin" = "biome";
     "biomejs.rename" = true;
     "biomejs.requireConfigFile" = false;
-
-    # ESLint Configuration
-    "eslint.validate" = [
-      "javascript"
-      "typescript"
-      "javascriptreact"
-      "typescriptreact"
-      "vue"
-      "svelte"
-    ];
-    "eslint.format.enable" = true;
-    "eslint.codeActionsOnSave.mode" = "all";
 
     # File Type Formatters
     "[javascript]" = {

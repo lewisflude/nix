@@ -14,7 +14,6 @@
     # Development Tools
     mkhl.direnv
     bradlc.vscode-tailwindcss
-    dbaeumer.vscode-eslint
     biomejs.biome
 
     # Git Integration
