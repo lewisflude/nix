@@ -26,12 +26,24 @@ let
     eamodio.gitlens
     github.vscode-pull-request-github
   ];
+  devExperience = with pkgs.vscode-extensions; [
+    usernamehw.errorlens # Inline error/warning display
+    yoavbls.pretty-ts-errors # Human-readable TypeScript errors
+    redhat.vscode-yaml # YAML validation & IntelliSense
+  ];
+  languages = with pkgs.vscode-extensions; [
+    ms-python.python # Python language support
+    ms-python.pylint # Python linting
+    golang.go # Go language support
+    timonwong.shellcheck # Shell script linting
+    ms-vscode-remote.remote-containers # Docker development
+    davidanson.vscode-markdownlint # Markdown linting
+  ];
   # DRY ignore patterns
   commonIgnores = {
     "**/.DS_Store" = true;
     "**/.direnv" = true;
     "**/.git" = true;
-    "**/node_modules" = true;
   };
   watcherIgnores = commonIgnores // {
     "**/.git/objects/**" = true;
@@ -41,7 +53,10 @@ let
   };
   # Extra config for bulky/complex JSON
   extraConfig = {
-    "editor.rulers" = [ 80 120 ];
+    "editor.rulers" = [
+      80
+      120
+    ];
     "editor.quickSuggestions" = {
       "other" = true;
       "comments" = true;
@@ -51,20 +66,18 @@ let
       "source.organizeImports" = "always";
       "source.fixAll" = "always";
     };
-    "files.readonlyInclude" = { "/nix/store/**" = true; };
-    "files.watcherExclude" = watcherIgnores;
-    "search.exclude" = {
-      "**/bower_components" = true;
-      "**/node_modules" = true;
-      "**/*.code-search" = true;
+    "files.readonlyInclude" = {
+      "/nix/store/**" = true;
     };
+    "files.watcherExclude" = watcherIgnores;
   };
-in {
+in
+{
   programs.vscode = {
     enable = true;
     package = pkgs.code-cursor;
     profiles.default = {
-      extensions = coreLangs ++ tools ++ gitTools;
+      extensions = coreLangs ++ tools ++ gitTools ++ devExperience ++ languages;
       userSettings = {
         # Accessibility
         "editor.accessibilitySupport" = "on";
@@ -80,25 +93,44 @@ in {
         "chat.webSearchTool" = true;
         "cursor.beta.notepads" = true;
         "cursor.beta.updateFrequency" = "standard";
+        "cursor.beta.completeWithSpeedReads" = true;
+        "cursor.beta.codeSuggestions" = true;
+        "cursor.beta.predictiveSelection" = true;
         "cursor.models.default" = "gpt-4o";
         "cursor.models.enabled" = [
           "gpt-4o"
           "claude-3.5-sonnet"
-          "claude-3.7-sonnet"
-          "claude-3.7-sonnet-max"
-          "gemini-2.5-pro-exp-03-25"
           "gemini-2.5-pro-max"
           "o3"
-          "o4-mini"
         ];
         "cursor.rules.user" = [
           "Prefer concise, well-documented, idiomatic code in all languages."
+          "Follow existing code patterns and conventions in the project."
+          "Use TypeScript strict mode and proper type annotations."
+          "Optimize for readability and maintainability over cleverness."
         ];
+
+        # Context Optimization
+        "cursor.context.maxTokens" = 8000;
+        "cursor.context.includeCurrentFile" = true;
+        "cursor.context.smartSelection" = true;
+
+        # AI Completion Tuning
+        "cursor.completions.multilineThreshold" = 3;
+        "cursor.completions.ghostText" = true;
+        "cursor.completions.debounceDelay" = 150;
+
         "cursorTab.autoImport" = true;
         "cursorTab.suggestionsInComments" = true;
 
         # Editor UX
+        "editor.bracketPairColorization.enabled" = true;
         "editor.inlineSuggest.enabled" = true;
+        "editor.linkedEditing" = true;
+        "editor.minimap.enabled" = false;
+        "editor.semanticHighlighting.enabled" = true;
+        "editor.showFoldingControls" = "always";
+        "editor.smoothScrolling" = true;
         "editor.suggest.preview" = true;
 
         # File handling
@@ -112,7 +144,9 @@ in {
         "files.trimTrailingWhitespace" = true;
 
         # Nix-specific override
-        "[nix]" = { "editor.defaultFormatter" = "jnoortheen.nix-ide"; };
+        "[nix]" = {
+          "editor.defaultFormatter" = "jnoortheen.nix-ide";
+        };
 
         # TypeScript/JavaScript
         "[typescript]" = {
@@ -139,6 +173,19 @@ in {
           "editor.defaultFormatter" = "biomejs.biome";
           "editor.formatOnSave" = true;
         };
+        # CSS/SCSS
+        "[css]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+          "editor.formatOnSave" = true;
+        };
+        "[scss]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+          "editor.formatOnSave" = true;
+        };
+        "[less]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+          "editor.formatOnSave" = true;
+        };
         # Rust
         "[rust]" = {
           "editor.defaultFormatter" = "rust-lang.rust-analyzer";
@@ -146,8 +193,63 @@ in {
         };
         "rust-analyzer.checkOnSave.command" = "clippy";
 
+        # Python
+        "[python]" = {
+          "editor.defaultFormatter" = "ms-python.black-formatter";
+          "editor.formatOnSave" = true;
+          "editor.codeActionsOnSave" = {
+            "source.organizeImports" = "always";
+          };
+        };
+        "python.defaultInterpreterPath" = "python3";
+        "python.linting.enabled" = true;
+        "python.linting.pylintEnabled" = true;
+
+        # Go
+        "[go]" = {
+          "editor.defaultFormatter" = "golang.go";
+          "editor.formatOnSave" = true;
+          "editor.codeActionsOnSave" = {
+            "source.organizeImports" = "always";
+          };
+        };
+        "go.formatTool" = "goimports";
+        "go.lintTool" = "golangci-lint";
+
+        # Markdown
+        "[markdown]" = {
+          "editor.defaultFormatter" = "davidanson.vscode-markdownlint";
+          "editor.formatOnSave" = true;
+          "editor.wordWrap" = "on";
+        };
+
+        # Shell
+        "[shellscript]" = {
+          "editor.defaultFormatter" = "timonwong.shellcheck";
+        };
+
+        # TypeScript
+        "typescript.preferences.renameShorthandProperties" = false;
+
         # Performance
         "files.maxMemoryForLargeFilesMB" = 4096;
+
+        # Editor Performance
+        "editor.acceptSuggestionOnEnter" = "smart";
+        "editor.suggest.localityBonus" = true;
+        "editor.suggest.shareSuggestSelections" = false;
+        "editor.renderWhitespace" = "boundary";
+        "editor.renderControlCharacters" = false;
+
+        # Memory & Tab Management
+        "workbench.editor.limit.enabled" = true;
+        "workbench.editor.limit.value" = 15;
+        "workbench.editor.limit.perEditorGroup" = true;
+
+        # File System Performance
+        "search.useIgnoreFiles" = true;
+        "search.useGlobalIgnoreFiles" = true;
+        "files.hotExit" = "onExitAndWindowClose";
 
         # Security
         "security.workspace.trust.enabled" = true;
@@ -155,6 +257,15 @@ in {
         # Telemetry
         "telemetry.telemetryLevel" = "off";
         "circleci.hostUrl" = "https://circleci.com";
+
+        # Workbench
+        "workbench.editor.enablePreview" = false;
+
+        # Git
+        "git.autofetch" = false;
+
+        # Extensions
+        "extensions.autoUpdate" = false;
       } // extraConfig;
     };
   };

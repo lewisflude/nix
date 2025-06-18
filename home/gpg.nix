@@ -1,9 +1,13 @@
-{ pkgs, ... }: {
-  home.packages = [ pkgs.gnupg pkgs.pinentry_mac ];
+{ pkgs, ... }:
+{
+  home.packages = [
+    pkgs.gnupg
+    pkgs.pinentry_mac
+  ];
 
   services.gpg-agent = {
     enable = true;
-    enableSshSupport = true;
+    enableSshSupport = false;
     defaultCacheTtl = 3600;
     maxCacheTtl = 7200;
     extraConfig = ''

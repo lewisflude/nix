@@ -1,67 +1,63 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   home.packages = with pkgs; [
-    # Development Tools & IDEs
-    code-cursor # AI-assisted code editor based on VS Code
-    vscode
-    helix
+    anchor
     awscli2
-
-    # Programming Languages & Runtimes
+    bat
+    betterdisplay
+    biome
+    black
+    claude-code
+    codex
+    coreutils
+    curl
+    delta
+    fd
+    firefox-devedition
+    fzf
+    gh
+    helix
+    htop
+    http-server
+    insomnia
+    jq
+    lazygit
+    marksman
+    nil
+    nixfmt-rfc-style
     nodejs_22
     nodePackages.pnpm
     nodePackages.typescript
-
-    # Language Servers & Linters
-    nil
     nodePackages.typescript-language-server
-    biome
-    yaml-language-server
-    marksman
-    rust-analyzer
+    nodePackages.vscode-langservers-extracted
+    pgadmin4
+    pgcli
+    playwright
     pyright
-    nodePackages.vscode-langservers-extracted # JSON language server
-    black
-    rustfmt
-    nixpkgs-fmt
-
-    # Development Environment Tools
-    direnv
-    nix-direnv
-    nixfmt-classic
-
-    # Version Control & Git Tools
-    git
-    gh
-    lazygit
-    delta
-
-    # CLI Utilities & System Tools
+    raycast
     ripgrep
-    fd
-    fzf
-    zellij
-    coreutils
-    curl
-    htop
+    rustup
+    slack
+    solana-cli
+    tableplus
     tree
     wget
-    bat # Better cat
-    jq # JSON processor
-    yq # YAML processor
-
-    # Testing & Development Tools
-    playwright
-    http-server # Alternative to live-server
+    yaml-language-server
+    yq
+    zellij
+    dockutil
   ];
+
+  # Simple program configurations
+  programs.ripgrep.enable = true;
+
   imports = [
     ./apps/bat.nix
     ./apps/direnv.nix
     ./apps/fzf.nix
-    ./apps/ripgrep.nix
     ./apps/zoxide.nix
-    ./apps/cursor.nix
+    ./apps/cursor-new.nix  # Using modular cursor config
     ./apps/helix.nix
     ./apps/yazi.nix
-    ./apps/firefox.nix
   ];
 }

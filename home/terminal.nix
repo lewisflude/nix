@@ -1,4 +1,5 @@
-{ pkgs, ... }:  {
+{ pkgs, ... }:
+{
   home.packages = with pkgs; [
     clipse
     wget
@@ -33,7 +34,6 @@
     zellij
   ];
 
-
   programs = {
     ghostty = {
       enable = true;
@@ -43,7 +43,11 @@
         # Font configuration
         font-family = "Iosevka Nerd Font Mono";
         font-size = "16";
-        font-feature = ["+calt" "+liga" "+dlig"];
+        font-feature = [
+          "+calt"
+          "+liga"
+          "+dlig"
+        ];
 
         # Window appearance
         window-colorspace = "display-p3";

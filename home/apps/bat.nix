@@ -1,6 +1,8 @@
 {
   programs.bat = {
     enable = true;
-    config = { italic-text = "always"; };
+    config = {
+      italic-text = "always";
+    };
   };
 }
