@@ -84,10 +84,6 @@
       "editor.defaultFormatter" = "biomejs.biome";
       "editor.formatOnSave" = true;
     };
-    "[yaml]" = {
-      "editor.defaultFormatter" = "biomejs.biome";
-      "editor.formatOnSave" = true;
-    };
     "[css]" = {
       "editor.defaultFormatter" = "biomejs.biome";
       "editor.formatOnSave" = true;

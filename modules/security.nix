@@ -13,4 +13,11 @@
     yubico-pam
     yubikey-manager
   ];
+
+  # Disable built-in SSH agent to avoid conflicts with GPG agent
+  launchd.daemons."com.openssh.ssh-agent" = {
+    serviceConfig = {
+      Disabled = true;
+    };
+  };
 }
