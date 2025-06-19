@@ -45,10 +45,10 @@
         export OPEN_API_KEY="$(cat ~/.config/secrets/openai-key)"
       fi
 
-      # Start ssh-agent if not running, and add GitHub SSH key
-      if ! pgrep -u "$USER" ssh-agent > /dev/null; then
-        eval "$(ssh-agent -s)"
-      fi
+      # Ensure GPG agent is running for SSH support
+      gpgconf --launch gpg-agent
+      
+      # Add GitHub SSH key to GPG agent if available
       if [[ -f ~/.ssh/id_ecdsa_sk_github ]]; then
         if ! ssh-add -l | grep -q "$(ssh-keygen -lf ~/.ssh/id_ecdsa_sk_github.pub 2>/dev/null | awk '{print $2}')"; then
           ssh-add ~/.ssh/id_ecdsa_sk_github 2>/dev/null

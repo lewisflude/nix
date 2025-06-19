@@ -1,7 +1,7 @@
 # Cursor/VSCode Editor Settings
 # Core editor configuration and behavior
 
-{ ... }:
+{ pkgs, ... }:
 let
   inherit (import ./constants.nix { }) commonIgnores watcherIgnores;
 in
@@ -81,5 +81,16 @@ in
     # Git
     "git.autofetch" = true;
     "git.confirmSync" = false;
+    "git.enableCommitSigning" = true;
+    "git.path" = "${pkgs.git}/bin/git";
+    "git.useEditorAsCommitInput" = false;
+    "git.gpgPath" = "${pkgs.gnupg}/bin/gpg";
+    "git.signingKeyId" = "D4DD67DDDBAEF83F";
+    
+    # GPG Integration
+    "terminal.integrated.env.osx" = {
+      "GPG_TTY" = "$(tty)";
+      "SSH_AUTH_SOCK" = "/Users/lewisflude/.gnupg/S.gpg-agent.ssh";
+    };
   };
 }
