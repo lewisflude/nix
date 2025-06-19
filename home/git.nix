@@ -1,4 +1,9 @@
-{ username, useremail, ... }:
+{
+  username,
+  useremail,
+  pkgs,
+  ...
+}:
 {
   programs.git = {
     enable = true;
@@ -8,10 +13,14 @@
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
       pull.rebase = true;
+      gpg.program = "${pkgs.gnupg}/bin/gpg";
+      gpg.format = "openpgp";
+      commit.gpgsign = true;
+      tag.gpgsign = true;
+      user.signingkey = "D4DD67DDDBAEF83F";
     };
     signing = {
       key = "D4DD67DDDBAEF83F";
-      format = "openpgp";
       signByDefault = true;
     };
 

@@ -5,19 +5,6 @@
     pkgs.pinentry_mac
   ];
 
-  services.gpg-agent = {
-    enable = true;
-    enableSshSupport = false;
-    defaultCacheTtl = 28800;
-    maxCacheTtl = 86400;
-    pinentry.package = pkgs.pinentry_mac;
-    extraConfig = ''
-      allow-preset-passphrase
-      grab
-      no-allow-external-cache
-    '';
-  };
-
   programs.gpg = {
     enable = true;
     settings = {
@@ -25,4 +12,23 @@
       use-agent = true;
     };
   };
+
+  services.gpg-agent = {
+    enable = true;
+    enableSshSupport = true;
+
+    pinentry.package = pkgs.pinentry_mac;
+
+    defaultCacheTtl = 28800;
+    maxCacheTtl = 86400;
+
+    extraConfig = ''
+      default-cache-ttl-ssh 3600
+      max-cache-ttl-ssh     7200
+      allow-preset-passphrase
+      grab
+      no-allow-external-cache
+    '';
+  };
+
 }

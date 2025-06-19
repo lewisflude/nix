@@ -1,15 +1,19 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 {
   programs.ssh = {
     enable = true;
     package = pkgs.openssh.override { withSecurityKey = true; };
 
     extraConfig = ''
-      IgnoreUnknown UseKeychain        # let non-Apple OpenSSH ignore it
-
       Host *
-        AddKeysToAgent yes
+        IdentityAgent ${config.home.homeDirectory}/.gnupg/S.gpg-agent.ssh
         IdentitiesOnly yes
+        AddKeysToAgent yes
         ServerAliveInterval 60
         ServerAliveCountMax 3
         ControlMaster auto
@@ -20,6 +24,8 @@
     matchBlocks."github.com".extraOptions = {
       IdentityFile = "~/.ssh/id_ecdsa_sk_github";
       IdentitiesOnly = "yes";
+      # Only use this identity for SSH connections, not Git signing
+      ForwardAgent = "no";
     };
   };
 
