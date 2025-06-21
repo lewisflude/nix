@@ -12,23 +12,21 @@
     "javascript.updateImportsOnFileMove.enabled" = "always";
 
     # Python
-    "python.defaultInterpreterPath" = "python3";
-    "python.analysis.typeCheckingMode" = "basic";
+    "python.analysis.typeCheckingMode" = "strict";
 
     # Go
-    "go.formatTool" = "goimports";
-    "go.lintTool" = "golangci-lint";
-    "go.useLanguageServer" = true;
+    "gopls" = {
+      "ui.diagnostic.staticcheck" = true;
+    };
 
     # Rust
-    "rust-analyzer.checkOnSave.command" = "clippy";
-    "rust-analyzer.cargo.features" = "all";
+    "rust-analyzer.check.command" = "clippy";
+    "rust-analyzer.procMacro.enable" = true;
 
     # Biome Configuration (JavaScript/TypeScript)
-    "biomejs.enable" = true;
-    "biomejs.lspBin" = "biome";
-    "biomejs.rename" = true;
-    "biomejs.requireConfigFile" = false;
+    "biome.enabled" = true;
+    "biome.lsp.bin" = "biome";
+    "biome.requireConfiguration" = false;
 
     # Per-Language Formatters
     "[python]" = {
@@ -78,6 +76,12 @@
     };
     "[dockerfile]" = {
       "editor.defaultFormatter" = "ms-azuretools.vscode-docker";
+    };
+
+    "editor.formatOnSave" = true;
+    "editor.codeActionsOnSave" = {
+      "source.fixAll.biome" = "explicit";
+      "source.organizeImports.biome" = "explicit";
     };
   };
 }
