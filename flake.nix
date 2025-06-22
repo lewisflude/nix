@@ -184,6 +184,9 @@
           
           # NixOS-specific modules
           ./hosts/${hostName}/configuration.nix
+          ./modules/nixos/boot.nix
+          ./modules/nixos/networking.nix
+          ./modules/nixos/audio.nix
           
           # TODO: Re-enable home-manager once basic system works
           # home-manager.nixosModules.home-manager
