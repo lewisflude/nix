@@ -29,7 +29,7 @@ in
     zfs.package = pkgs.zfs_unstable;
     supportedFilesystems = [ "zfs" ];
     loader.timeout = 0;
-    kernelParams = [ "quiet" "splash" "rd.systemd.show_status=false" "rd.udev.log_level=3" ];
+    kernelParams = [ "quiet" "splash" "rd.systemd.show_status=false" "rd.udev.log_level=3" "nvidia-drm.modeset=1" ];
     consoleLogLevel = 0;
     initrd.verbose = false;
     kernel.sysctl = {

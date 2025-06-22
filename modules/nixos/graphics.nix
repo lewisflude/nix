@@ -24,6 +24,8 @@ in
     NIXOS_OZONE_WL = "1";
     __GL_GSYNC_ALLOWED = "1";
     __GL_VRR_ALLOWED = "0";
+    GBM_BACKEND = "nvidia-drm";
+    WLR_NO_HARDWARE_CURSORS = "1";
 
   };
   hardware = {

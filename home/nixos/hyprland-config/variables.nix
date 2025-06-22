@@ -6,12 +6,7 @@
     "$fileManager" = "ghostty -e yazi";
     "$menu" = "fuzzel --launch-prefix='uwsm app -- '";
 
-    # Monitor configuration (placeholder - adjust for actual setup)
-    monitor = [
-      # Main monitor example (adjust resolution/refresh rate as needed)
-      "DP-1,3440x1440@165,0x0,1,bitdepth,10,vrr,1"
-      # Additional monitors can be added here
-    ];
+    monitor = [ ",preferred,auto,1" ];
 
     # Input settings
     input = {
