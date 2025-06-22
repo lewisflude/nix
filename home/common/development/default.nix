@@ -1,0 +1,5 @@
+{
+  imports = [
+    ./version-control.nix
+  ];
+}
