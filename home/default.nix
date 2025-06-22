@@ -1,25 +1,28 @@
 {
   catppuccin,
   username,
+  system,
+  lib,
   ...
 }:
 {
   home.stateVersion = "25.05";
   home.username = username;
-  home.homeDirectory = "/Users/${username}";
+  
+  # Platform-specific home directory
+  home.homeDirectory = if lib.hasInfix "darwin" system 
+    then "/Users/${username}"
+    else "/home/${username}";
 
   imports = [
-    ./git.nix
-    ./shell.nix
-    ./apps.nix
-    ./ssh.nix
-    ./gpg.nix
-    ./theme.nix
-    ./terminal.nix
-    ./direnv.nix
-    ./python.nix
-    catppuccin.homeModules.catppuccin
+    # Common configurations (cross-platform)
+    ./common
+    
+    # Platform-specific configurations
+  ] ++ lib.optionals (lib.hasInfix "darwin" system) [
+    ./darwin
   ];
+  
   programs = {
     home-manager.enable = true;
   };

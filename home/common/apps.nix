@@ -1,10 +1,9 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    anchor
+    # Development tools (cross-platform)
     awscli2
     bat
-    betterdisplay
     biome
     black
     claude-code
@@ -13,13 +12,11 @@
     curl
     delta
     fd
-    firefox-devedition
     fzf
     gh
     helix
     htop
     http-server
-    insomnia
     jq
     lazygit
     marksman
@@ -30,22 +27,17 @@
     nodePackages.typescript
     nodePackages.typescript-language-server
     nodePackages.vscode-langservers-extracted
-    pgadmin4
     pgcli
     playwright
     pyright
-    raycast
     ripgrep
     rustup
-    slack
     solana-cli
-    tableplus
     tree
     wget
     yaml-language-server
     yq
     zellij
-    dockutil
   ];
 
   # Simple program configurations
