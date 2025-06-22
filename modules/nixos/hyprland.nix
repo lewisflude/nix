@@ -1,10 +1,10 @@
-{ pkgs, lib, config, inputs, system, ... }:
+{ pkgs, lib, config, hyprland, system, ... }:
 {
   # Enable Hyprland with UWSM
   programs.hyprland = {
     enable = true;
-    package = inputs.hyprland.packages.${system}.hyprland;
-    portalPackage = inputs.hyprland.packages.${system}.xdg-desktop-portal-hyprland;
+    package = hyprland.packages.${system}.hyprland;
+    portalPackage = hyprland.packages.${system}.xdg-desktop-portal-hyprland;
   };
 
   # UWSM (Universal Wayland Session Manager)
@@ -25,7 +25,7 @@
     enable = true;
     wlr.enable = true;
     extraPortals = with pkgs; [
-      inputs.hyprland.packages.${system}.xdg-desktop-portal-hyprland
+      hyprland.packages.${system}.xdg-desktop-portal-hyprland
     ];
   };
 
@@ -45,19 +45,12 @@
     };
   };
 
-  # NVIDIA-specific Wayland configuration
-  environment.sessionVariables = lib.mkIf (builtins.elem "nvidia" config.services.xserver.videoDrivers) {
-    # NVIDIA Wayland compatibility
-    LIBVA_DRIVER_NAME = "nvidia";
+  # General Wayland configuration
+  environment.sessionVariables = {
+    # General Wayland settings
     XDG_SESSION_TYPE = "wayland";
-    GBM_BACKEND = "nvidia-drm";
-    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
     WLR_NO_HARDWARE_CURSORS = "1";
-    
-    # Hyprland-specific NVIDIA settings
-    WLR_RENDERER_ALLOW_SOFTWARE = "1";
     CLUTTER_BACKEND = "wayland";
-    WLR_BACKEND = "vulkan";
   };
 
   # Required packages for Hyprland desktop environment
@@ -118,7 +111,8 @@
     noto-fonts-cjk-sans
     noto-fonts-emoji
     font-awesome
-    (nerdfonts.override { fonts = [ "Iosevka" "JetBrainsMono" ]; })
+    nerd-fonts.iosevka
+    nerd-fonts.jetbrains-mono
   ];
 
   # Security settings for desktop environment
