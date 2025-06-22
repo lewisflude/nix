@@ -45,13 +45,6 @@
     };
   };
 
-  # General Wayland configuration
-  environment.sessionVariables = {
-    # General Wayland settings
-    XDG_SESSION_TYPE = "wayland";
-    WLR_NO_HARDWARE_CURSORS = "1";
-    CLUTTER_BACKEND = "wayland";
-  };
 
   # Required packages for Hyprland desktop environment
   environment.systemPackages = with pkgs; [
@@ -59,22 +52,22 @@
     wl-clipboard
     wlr-randr
     wayland-utils
-    
+
     # Screenshot tools
     grim
     slurp
     swappy
-    
+
     # Authentication and permissions
     polkit_gnome
-    
+
     # Brightness control
     brightnessctl
-    
+
     # System utilities
     playerctl
     pavucontrol
-    
+
     # File manager integration
     xdg-utils
   ];
@@ -85,7 +78,7 @@
     udev.extraRules = ''
       ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="*", GROUP="video", MODE="0664"
     '';
-    
+
     # Enable location service for night light
     geoclue2.enable = true;
   };
@@ -97,7 +90,7 @@
       enable = true;
       enable32Bit = true;
     };
-    
+
     # Enable Bluetooth
     bluetooth = {
       enable = true;
@@ -117,7 +110,7 @@
 
   # Security settings for desktop environment
   security = {
-    pam.services.swaylock = {};
-    rtkit.enable = true;  # For real-time audio processing
+    pam.services.swaylock = { };
+    rtkit.enable = true; # For real-time audio processing
   };
 }
