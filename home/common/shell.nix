@@ -1,4 +1,10 @@
-{ pkgs, config, system, lib, ... }:
+{
+  pkgs,
+  config,
+  system,
+  lib,
+  ...
+}:
 {
   programs.zsh = {
     enable = true;
@@ -6,9 +12,11 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     shellAliases = {
-      switch = if lib.hasInfix "darwin" system 
-        then "darwin-rebuild switch --flake ~/.config/nix#macbook-pro" 
-        else "sudo nixos-rebuild switch --flake ~/.config/nix#desktop";
+      switch =
+        if lib.hasInfix "darwin" system then
+          "sudo darwin-rebuild switch --flake ~/.config/nix#macbook-pro"
+        else
+          "sudo nixos-rebuild switch --flake ~/.config/nix#desktop";
       ls = "lsd";
       l = "ls -l";
       la = "ls -a";
@@ -19,7 +27,7 @@
       update = "system-update";
       backup = "~/.config/nix/backup.sh";
       backup-restore = "ls -la ~/Backups/nix-config";
-      
+
       # Nix store management
       nix-optimize = "sudo /etc/nix-optimization/optimize-store.sh";
       nix-clean = "sudo /etc/nix-optimization/quick-clean.sh";
@@ -49,7 +57,7 @@
 
       # Ensure GPG agent is running for SSH support
       gpgconf --launch gpg-agent
-      
+
       # Add GitHub SSH key to GPG agent if available
       if [[ -f ~/.ssh/id_ecdsa_sk_github ]]; then
         if ! ssh-add -l | grep -q "$(ssh-keygen -lf ~/.ssh/id_ecdsa_sk_github.pub 2>/dev/null | awk '{print $2}')"; then

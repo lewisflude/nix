@@ -17,13 +17,12 @@ in
     "editor.occurrencesHighlight" = "off";
     "editor.matchBrackets" = "near";
 
-    # Code Actions & Formatting (consolidated here to avoid duplication)
+    # Code Actions & Formatting (biome-specific settings in language-settings.nix)
     "editor.formatOnSave" = true;
     "editor.formatOnPaste" = true;
     "editor.codeActionsOnSave" = {
       "source.organizeImports" = "always";
       "source.fixAll" = "always";
-      "source.fixAll.biome" = "always";
     };
 
     # File Management
