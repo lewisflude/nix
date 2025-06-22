@@ -6,10 +6,10 @@
     ./media.nix
     ./messaging.nix
     ./password-management.nix
-    ./yubikey-touch-detector.nix
     ./waybar.nix
-    ./mangohud.nix
     ./version-control.nix
+    ./file-manager.nix
+    ./launcher.nix
     # Individual program configs are imported by specific modules
     ./bat.nix
     ./direnv.nix
