@@ -114,19 +114,24 @@
         (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
 
       # Developer shells for all systems
-      devShells = nixpkgs.lib.genAttrs 
-        (builtins.attrValues (builtins.mapAttrs (name: host: host.system) hosts))
-        (system: nixpkgs.legacyPackages.${system}.mkShell {
-          packages = with nixpkgs.legacyPackages.${system}; [
-            nixfmt-rfc-style
-            jq
-            yq
-            git
-            gh
-            direnv
-            nix-direnv
-          ];
-        });
+      devShells = builtins.listToAttrs (
+        builtins.map (hostConfig: {
+          name = hostConfig.system;
+          value = {
+            default = nixpkgs.legacyPackages.${hostConfig.system}.mkShell {
+              packages = with nixpkgs.legacyPackages.${hostConfig.system}; [
+                nixfmt-rfc-style
+                jq
+                yq
+                git
+                gh
+                direnv
+                nix-direnv
+              ];
+            };
+          };
+        }) (builtins.attrValues hosts)
+      );
 
       # Darwin configurations
       darwinConfigurations = builtins.mapAttrs 
