@@ -1,10 +1,10 @@
-{ inputs ? {}
+{ inputs
 , pkgs
 , lib
 , ...
 }: {
 
-  programs.hyprland = lib.mkIf (inputs ? hyprland) {
+  programs.hyprland = {
     enable = true;
     withUWSM = true;
     package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;

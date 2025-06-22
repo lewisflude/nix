@@ -1,14 +1,12 @@
 { config
 , pkgs
-, inputs ? {}
+, inputs
 , lib
 , ...
 }:
 let
   package = config.boot.kernelPackages.nvidiaPackages.beta;
-  pkgs-unstable = if (inputs ? hyprland && inputs.hyprland ? inputs && inputs.hyprland.inputs ? nixpkgs)
-    then inputs.hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}
-    else pkgs;
+  pkgs-unstable = inputs.hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
 in
 {
 
