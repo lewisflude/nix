@@ -190,6 +190,7 @@
           ./modules/nixos/boot.nix
           ./modules/nixos/networking.nix
           ./modules/nixos/audio.nix
+          ./modules/nixos/hyprland.nix
           
           # Home Manager integration
           home-manager.nixosModules.home-manager
