@@ -55,13 +55,56 @@
       catppuccin,
     }:
     let
-      username = "lewisflude";
-      useremail = "lewis@lewisflude.com";
-      system = "aarch64-darwin";
-      hostname = "Lewiss-MacBook-Pro";
+      # Import host configurations
+      hosts = {
+        macbook-pro = import ./hosts/macbook-pro;
+      };
 
-      specialArgs = inputs // {
-        inherit username useremail hostname;
+      # Helper function to create Darwin system
+      mkDarwinSystem = hostName: hostConfig: darwin.lib.darwinSystem {
+        system = hostConfig.system;
+        specialArgs = inputs // hostConfig;
+        modules = [
+          ./modules/core.nix
+          ./modules/users.nix
+          ./modules/apps.nix
+          ./modules/shell.nix
+          ./modules/dev.nix
+          ./modules/docker.nix
+          ./modules/system.nix
+          ./modules/security.nix
+          ./modules/environment.nix
+          ./modules/backup.nix
+          ./modules/nix-optimization.nix
+          home-manager.darwinModules.home-manager
+          mac-app-util.darwinModules.default
+          nix-homebrew.darwinModules.nix-homebrew
+
+          {
+            nix-homebrew = {
+              enable = true;
+              enableRosetta = true;
+              user = hostConfig.username;
+              taps = {
+                "homebrew/homebrew-cask" = homebrew-cask;
+                "homebrew/homebrew-core" = homebrew-core;
+                "nrwl/homebrew-nx" = homebrew-nx;
+                "j178/homebrew-tap" = homebrew-j178;
+              };
+              mutableTaps = false;
+            };
+          }
+
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.verbose = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.sharedModules = [ mac-app-util.homeManagerModules.default ];
+            home-manager.extraSpecialArgs = inputs // hostConfig;
+            home-manager.users.${hostConfig.username} = import ./home;
+          }
+        ];
       };
     in
     {
