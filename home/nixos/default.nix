@@ -9,7 +9,6 @@
     ./hyprlock.nix
     ./mako.nix
     ./waybar.nix
-    ./hyprpaper.nix
     ./desktop-apps.nix
   ];
 }
