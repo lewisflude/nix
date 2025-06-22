@@ -202,6 +202,9 @@
           musnix.nixosModules.musnix
           solaar.nixosModules.default
 
+          # Make inputs available to all modules
+          { _module.args = { inherit inputs; }; }
+
           # Home Manager integration
           home-manager.nixosModules.home-manager
           {

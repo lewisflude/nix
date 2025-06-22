@@ -1,9 +1,15 @@
 {
+  lib,
+  system,
+  ...
+}:
+{
   imports = [
-    # ./bar.nix  # disabled to avoid conflicts with nixos-specific waybar config
     ./theme.nix
-    # ./desktop-environment.nix  # disabled to avoid conflicts with nixos-specific configs
-    # ./hyprland.nix  # disabled to avoid conflicts with nixos-specific config
-    # ./hyprland  # hyprland directory disabled due to conflicts
+    # Platform-specific desktop configs are handled in nixos/ and darwin/ directories
+    # to avoid conflicts between different desktop environments
+  ] ++ lib.optionals (lib.hasInfix "darwin" system) [
+    # macOS-specific desktop configs would go here
+    ./desktop-environment.nix  # Basic desktop utilities for macOS
   ];
 }
