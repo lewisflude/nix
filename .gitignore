@@ -66,3 +66,6 @@ logs/
 # Backup files
 *.backup
 backup-*
+
+# Old configuration directory - reference only
+old-nixos-config/

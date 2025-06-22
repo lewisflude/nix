@@ -22,6 +22,48 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    
+    # NixOS-specific inputs
+    hyprland = {
+      url = "github:hyprwm/Hyprland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    hyprland-plugins = {
+      url = "github:hyprwm/hyprland-plugins";
+      inputs.hyprland.follows = "hyprland";
+    };
+    astal = {
+      url = "github:aylur/astal";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    sops-nix = {
+      url = "github:mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    waybar.url = "github:Alexays/Waybar/master";
+    ghostty = {
+      url = "github:ghostty-org/ghostty";
+    };
+    musnix = {
+      url = "github:musnix/musnix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixpkgs-mozilla = {
+      url = "github:mozilla/nixpkgs-mozilla";
+    };
+    yazi.url = "github:sxyazi/yazi";
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    solaar = {
+      url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nvidia-patch = {
+      url = "github:icewind1991/nvidia-patch-nixos";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    cursor.url = "github:omarcresp/cursor-flake/main";
+    
+    # macOS-specific homebrew inputs
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
       flake = false;
@@ -53,11 +95,26 @@
       homebrew-nx,
       homebrew-j178,
       catppuccin,
+      hyprland,
+      hyprland-plugins,
+      astal,
+      sops-nix,
+      waybar,
+      ghostty,
+      musnix,
+      nixpkgs-mozilla,
+      yazi,
+      nixos-hardware,
+      solaar,
+      nvidia-patch,
+      cursor,
+      ...
     }:
     let
       # Import host configurations
       hosts = {
         macbook-pro = import ./hosts/macbook-pro;
+        jupiter = import ./hosts/jupiter;
       };
 
       # Helper function to create Darwin system
@@ -109,6 +166,37 @@
           }
         ];
       };
+
+      # Helper function to create NixOS system
+      mkNixosSystem = hostName: hostConfig: nixpkgs.lib.nixosSystem {
+        system = hostConfig.system;
+        specialArgs = inputs // hostConfig;
+        modules = [
+          # Common modules (cross-platform)
+          ./modules/common/core.nix
+          ./modules/common/users.nix
+          ./modules/common/shell.nix
+          ./modules/common/dev.nix
+          ./modules/common/docker.nix
+          ./modules/common/security.nix
+          ./modules/common/environment.nix
+          ./modules/common/nix-optimization.nix
+          
+          # NixOS-specific modules
+          ./hosts/${hostName}/configuration.nix
+          
+          # TODO: Re-enable home-manager once basic system works
+          # home-manager.nixosModules.home-manager
+          # {
+          #   home-manager.useGlobalPkgs = true;
+          #   home-manager.useUserPackages = true;
+          #   home-manager.verbose = true;
+          #   home-manager.backupFileExtension = "backup";
+          #   home-manager.extraSpecialArgs = inputs // hostConfig;
+          #   home-manager.users.${hostConfig.username} = import ./home;
+          # }
+        ];
+      };
     in
     {
       # Provide formatters for all systems
@@ -140,5 +228,10 @@
       darwinConfigurations = builtins.mapAttrs 
         (name: hostConfig: mkDarwinSystem name hostConfig)
         (nixpkgs.lib.filterAttrs (name: host: host.system == "aarch64-darwin" || host.system == "x86_64-darwin") hosts);
+
+      # NixOS configurations
+      nixosConfigurations = builtins.mapAttrs 
+        (name: hostConfig: mkNixosSystem name hostConfig)
+        (nixpkgs.lib.filterAttrs (name: host: host.system == "x86_64-linux" || host.system == "aarch64-linux") hosts);
     };
 }
