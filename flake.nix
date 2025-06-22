@@ -108,69 +108,29 @@
       };
     in
     {
-      # Provide a formatter so `nix fmt` works
-      formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
+      # Provide formatters for all systems
+      formatter = nixpkgs.lib.genAttrs 
+        (builtins.attrValues (builtins.mapAttrs (name: host: host.system) hosts))
+        (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
 
-      # Developer shell with common tools
-      devShells.${system}.default = nixpkgs.legacyPackages.${system}.mkShell {
-        packages = with nixpkgs.legacyPackages.${system}; [
-          nixfmt-rfc-style
-          jq
-          yq
-          git
-          gh
-          direnv
-          nix-direnv
-        ];
-      };
+      # Developer shells for all systems
+      devShells = nixpkgs.lib.genAttrs 
+        (builtins.attrValues (builtins.mapAttrs (name: host: host.system) hosts))
+        (system: nixpkgs.legacyPackages.${system}.mkShell {
+          packages = with nixpkgs.legacyPackages.${system}; [
+            nixfmt-rfc-style
+            jq
+            yq
+            git
+            gh
+            direnv
+            nix-direnv
+          ];
+        });
 
-      # Build darwin flake using:
-      # $ darwin-rebuild build --flake .#Lewiss-MacBook-Pro
-      darwinConfigurations."${hostname}" = darwin.lib.darwinSystem {
-        inherit system specialArgs;
-
-        modules = [
-          ./modules/core.nix
-          ./modules/users.nix
-          ./modules/apps.nix
-          ./modules/shell.nix
-          ./modules/dev.nix
-          ./modules/docker.nix
-          ./modules/system.nix
-          ./modules/security.nix
-          ./modules/environment.nix
-          ./modules/backup.nix
-          ./modules/nix-optimization.nix
-          home-manager.darwinModules.home-manager
-          mac-app-util.darwinModules.default
-          nix-homebrew.darwinModules.nix-homebrew
-
-          {
-            nix-homebrew = {
-              enable = true;
-              enableRosetta = true;
-              user = username;
-              taps = {
-                "homebrew/homebrew-cask" = homebrew-cask;
-                "homebrew/homebrew-core" = homebrew-core;
-                "nrwl/homebrew-nx" = homebrew-nx;
-                "j178/homebrew-tap" = homebrew-j178;
-              };
-              mutableTaps = false;
-            };
-          }
-
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.verbose = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.sharedModules = [ mac-app-util.homeManagerModules.default ];
-            home-manager.extraSpecialArgs = specialArgs;
-            home-manager.users.${username} = import ./home;
-
-          }
-        ];
-      };
+      # Darwin configurations
+      darwinConfigurations = builtins.mapAttrs 
+        (name: hostConfig: mkDarwinSystem name hostConfig)
+        (nixpkgs.lib.filterAttrs (name: host: host.system == "aarch64-darwin" || host.system == "x86_64-darwin") hosts);
     };
 }
