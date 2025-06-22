@@ -30,12 +30,6 @@
     };
 
   # Basic system configuration (nixpkgs config handled in flake)
-  nixpkgs = {
-    config = {
-      allowUnfree = true;
-      cudaSupport = true;
-    };
-  };
 
   # User configuration
   users.users.${username} = {
