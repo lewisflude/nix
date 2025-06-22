@@ -9,7 +9,7 @@
 {
   # Nix daemon & CLI settings
   nix = {
-    enable = false; # managed by Determinate Nix installation
+    enable = lib.mkDefault (!lib.hasInfix "darwin" system); # Enable on Linux, disable on Darwin (managed by Determinate Nix installation)
     # package explicit for clarity
     package = pkgs.nix;
 

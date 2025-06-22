@@ -1,0 +1,8 @@
+keys:
+  - &users:
+    - &username 9FF5123074AF5871A6D9A22C4EE1F251042A46F1
+creation_rules:
+  - path_regex: secrets.yaml$
+    key_groups:
+      - pgp:
+          - *username

@@ -1,33 +1,37 @@
 {
-  catppuccin,
-  username,
+  configVars ? { username = "lewis"; hostname = "jupiter"; },
+  username ? configVars.username,
   system,
   lib,
   ...
 }:
 {
-  home.stateVersion = "25.05";
+  home.stateVersion = "24.05";
   home.username = username;
-  
+
   # Platform-specific home directory
-  home.homeDirectory = if lib.hasInfix "darwin" system 
+  home.homeDirectory = if lib.hasInfix "darwin" system
     then "/Users/${username}"
     else "/home/${username}";
 
   imports = [
     # Common configurations (cross-platform)
     ./common
-    
+
     # Platform-specific configurations
   ] ++ lib.optionals (lib.hasInfix "darwin" system) [
     ./darwin
   ] ++ lib.optionals (lib.hasInfix "linux" system) [
     ./nixos
   ];
-  
+
   programs = {
     home-manager.enable = true;
+    git.enable = true;
   };
+
+  # Enable systemd user services on Linux
+  systemd.user.startServices = lib.mkIf (lib.hasInfix "linux" system) "sd-switch";
 
   # User-specific environment variables
   home.sessionVariables = {
