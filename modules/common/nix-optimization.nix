@@ -146,8 +146,9 @@
     options = "--delete-older-than 7d";
   };
   
+} // lib.optionalAttrs (lib.hasInfix "linux" system) {
   # Systemd timer for store optimization (Linux only)
-  systemd = lib.mkIf (lib.hasInfix "linux" system) {
+  systemd = {
     timers.nix-store-optimization = {
       wantedBy = [ "timers.target" ];
       timerConfig = {
@@ -164,8 +165,9 @@
     };
   };
 
-  # Darwin-specific launchd configuration
-  launchd = lib.mkIf (lib.hasInfix "darwin" system) {
+} // lib.optionalAttrs (lib.hasInfix "darwin" system) {
+  # Darwin-specific launchd configuration  
+  launchd = {
     daemons.nix-garbage-collection = {
       serviceConfig = {
         ProgramArguments = [

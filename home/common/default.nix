@@ -1,17 +1,19 @@
 {
-  catppuccin,
-  username,
+  lib,
+  system,
   ...
 }:
 {
   imports = [
-    ./git.nix
-    ./shell.nix
-    ./apps.nix
-    ./ssh.nix
-    ./theme.nix
-    ./direnv.nix
-    ./python.nix
-    catppuccin.homeModules.catppuccin
+    # Cross-platform modules
+    ./shell
+    ./programs
+    ./development
+    ./system
+    ./lib
+
+    # Linux-specific modules (desktop environment)
+  ] ++ lib.optionals (lib.hasInfix "linux" system) [
+    ./desktop
   ];
 }

@@ -22,7 +22,7 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     # NixOS-specific inputs
     hyprland = {
       url = "github:hyprwm/Hyprland";
@@ -62,7 +62,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     cursor.url = "github:omarcresp/cursor-flake/main";
-    
+
     # macOS-specific homebrew inputs
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
@@ -131,7 +131,7 @@
           ./modules/common/security.nix
           ./modules/common/environment.nix
           ./modules/common/nix-optimization.nix
-          
+
           # Darwin-specific modules
           ./modules/darwin/apps.nix
           ./modules/darwin/system.nix
@@ -170,28 +170,38 @@
       # Helper function to create NixOS system
       mkNixosSystem = hostName: hostConfig: nixpkgs.lib.nixosSystem {
         system = hostConfig.system;
-        specialArgs = inputs // hostConfig;
+        pkgs = import nixpkgs {
+          inherit (hostConfig) system;
+          config.allowUnfree = true;
+          config.allowUnfreePredicate = _: true;
+          overlays = [
+            yazi.overlays.default
+            (_: _: { waybar_git = waybar.packages.${hostConfig.system}.waybar; })
+            (final: prev: {
+              ghostty = ghostty.packages.${hostConfig.system}.default;
+            })
+          ];
+        };
+        specialArgs = inputs // hostConfig // {
+          configVars = import ./config-vars.nix;
+          keysDirectory = "${self}/keys";
+        };
         modules = [
-          # Common modules (cross-platform)
-          ./modules/common/core.nix
-          ./modules/common/users.nix
-          ./modules/common/shell.nix
-          # TODO: Fix dev.nix for cross-platform compatibility  
-          # ./modules/common/dev.nix
-          ./modules/common/docker.nix
-          # TODO: Fix security.nix for cross-platform compatibility  
-          # ./modules/common/security.nix
-          ./modules/common/environment.nix
-          # TODO: Fix nix-optimization.nix for cross-platform compatibility
-          # ./modules/common/nix-optimization.nix
-          
-          # NixOS-specific modules
+          # Host-specific configuration
           ./hosts/${hostName}/configuration.nix
-          ./modules/nixos/boot.nix
-          ./modules/nixos/networking.nix
-          ./modules/nixos/audio.nix
+
+          # All NixOS modules (auto-imported via default.nix)
+          ./modules/nixos
+
+          # Desktop environment (conditionally loaded)
           ./modules/nixos/hyprland.nix
-          
+
+          # External modules
+          sops-nix.nixosModules.sops
+          catppuccin.nixosModules.catppuccin
+          musnix.nixosModules.musnix
+          solaar.nixosModules.default
+
           # Home Manager integration
           home-manager.nixosModules.home-manager
           {
@@ -199,7 +209,13 @@
             home-manager.useUserPackages = true;
             home-manager.verbose = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = inputs // hostConfig;
+            home-manager.extraSpecialArgs = inputs // hostConfig // {
+              configVars = import ./config-vars.nix;
+            };
+            home-manager.sharedModules = [
+              sops-nix.homeManagerModules.sops
+              catppuccin.homeModules.catppuccin
+            ];
             home-manager.users.${hostConfig.username} = import ./home;
           }
         ];
@@ -207,7 +223,7 @@
     in
     {
       # Provide formatters for all systems
-      formatter = nixpkgs.lib.genAttrs 
+      formatter = nixpkgs.lib.genAttrs
         (builtins.attrValues (builtins.mapAttrs (name: host: host.system) hosts))
         (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
 
@@ -232,12 +248,12 @@
       );
 
       # Darwin configurations
-      darwinConfigurations = builtins.mapAttrs 
+      darwinConfigurations = builtins.mapAttrs
         (name: hostConfig: mkDarwinSystem name hostConfig)
         (nixpkgs.lib.filterAttrs (name: host: host.system == "aarch64-darwin" || host.system == "x86_64-darwin") hosts);
 
       # NixOS configurations
-      nixosConfigurations = builtins.mapAttrs 
+      nixosConfigurations = builtins.mapAttrs
         (name: hostConfig: mkNixosSystem name hostConfig)
         (nixpkgs.lib.filterAttrs (name: host: host.system == "x86_64-linux" || host.system == "aarch64-linux") hosts);
     };
