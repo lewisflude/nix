@@ -1,5 +1,48 @@
 # Secrets directory - never commit
 secrets/
+~/.config/secrets/
+~/.config/secrets/*
+
+# SSH keys and configuration
+~/.ssh/
+~/.ssh/id_*
+~/.ssh/known_hosts
+~/.ssh/config
+
+# GPG keys and configuration
+~/.gnupg/
+~/.gnupg/*.key
+~/.gnupg/*.gpg
+~/.gnupg/private-keys-v1.d/
+~/.gnupg/openpgp-revocs.d/
+~/.gnupg/S.gpg-agent*
+~/.gnupg/gpg-agent.conf
+
+# API keys and tokens
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.csr
+openai-key
+api-key
+access-token
+
+# Environment files with secrets
+.env
+.env.local
+.env.*.local
+.envrc
+
+# macOS system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # Build results
 result
@@ -8,4 +51,18 @@ result-*
 # Temporary files
 *.tmp
 *.bak
-.DS_Store
+*.swp
+*.swo
+*~
+
+# Log files
+*.log
+logs/
+
+# Cache directories
+.cache/
+.nix/
+
+# Backup files
+*.backup
+backup-*
