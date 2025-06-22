@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, config, system, lib, ... }:
 {
   programs.zsh = {
     enable = true;
@@ -6,7 +6,9 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     shellAliases = {
-      switch = "sudo darwin-rebuild switch --flake ~/.config/nix";
+      switch = if lib.hasInfix "darwin" system 
+        then "darwin-rebuild switch --flake ~/.config/nix#macbook-pro" 
+        else "sudo nixos-rebuild switch --flake ~/.config/nix#desktop";
       ls = "lsd";
       l = "ls -l";
       la = "ls -a";
