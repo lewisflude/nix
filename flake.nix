@@ -65,17 +65,20 @@
         system = hostConfig.system;
         specialArgs = inputs // hostConfig;
         modules = [
-          ./modules/core.nix
-          ./modules/users.nix
-          ./modules/apps.nix
-          ./modules/shell.nix
-          ./modules/dev.nix
-          ./modules/docker.nix
-          ./modules/system.nix
-          ./modules/security.nix
-          ./modules/environment.nix
-          ./modules/backup.nix
-          ./modules/nix-optimization.nix
+          # Common modules (cross-platform)
+          ./modules/common/core.nix
+          ./modules/common/users.nix
+          ./modules/common/shell.nix
+          ./modules/common/dev.nix
+          ./modules/common/docker.nix
+          ./modules/common/security.nix
+          ./modules/common/environment.nix
+          ./modules/common/nix-optimization.nix
+          
+          # Darwin-specific modules
+          ./modules/darwin/apps.nix
+          ./modules/darwin/system.nix
+          ./modules/darwin/backup.nix
           home-manager.darwinModules.home-manager
           mac-app-util.darwinModules.default
           nix-homebrew.darwinModules.nix-homebrew

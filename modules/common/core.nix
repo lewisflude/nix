@@ -2,6 +2,8 @@
   self,
   pkgs,
   username,
+  system,
+  lib,
   ...
 }:
 {
@@ -21,11 +23,12 @@
     };
   };
 
+  # Platform-specific configuration revision and state version
   system.configurationRevision = self.rev or self.dirtyRev or null;
-  system.stateVersion = 6;
+  system.stateVersion = if lib.hasInfix "darwin" system then 6 else "25.05";
 
   nixpkgs = {
-    hostPlatform = "aarch64-darwin";
+    hostPlatform = system;
     config.allowUnfree = true;
   };
 }
