@@ -21,6 +21,8 @@
     # Platform-specific configurations
   ] ++ lib.optionals (lib.hasInfix "darwin" system) [
     ./darwin
+  ] ++ lib.optionals (lib.hasInfix "linux" system) [
+    ./nixos
   ];
   
   programs = {

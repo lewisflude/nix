@@ -176,11 +176,14 @@
           ./modules/common/core.nix
           ./modules/common/users.nix
           ./modules/common/shell.nix
-          ./modules/common/dev.nix
+          # TODO: Fix dev.nix for cross-platform compatibility  
+          # ./modules/common/dev.nix
           ./modules/common/docker.nix
-          ./modules/common/security.nix
+          # TODO: Fix security.nix for cross-platform compatibility  
+          # ./modules/common/security.nix
           ./modules/common/environment.nix
-          ./modules/common/nix-optimization.nix
+          # TODO: Fix nix-optimization.nix for cross-platform compatibility
+          # ./modules/common/nix-optimization.nix
           
           # NixOS-specific modules
           ./hosts/${hostName}/configuration.nix
@@ -188,16 +191,16 @@
           ./modules/nixos/networking.nix
           ./modules/nixos/audio.nix
           
-          # TODO: Re-enable home-manager once basic system works
-          # home-manager.nixosModules.home-manager
-          # {
-          #   home-manager.useGlobalPkgs = true;
-          #   home-manager.useUserPackages = true;
-          #   home-manager.verbose = true;
-          #   home-manager.backupFileExtension = "backup";
-          #   home-manager.extraSpecialArgs = inputs // hostConfig;
-          #   home-manager.users.${hostConfig.username} = import ./home;
-          # }
+          # Home Manager integration
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.verbose = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.extraSpecialArgs = inputs // hostConfig;
+            home-manager.users.${hostConfig.username} = import ./home;
+          }
         ];
       };
     in
