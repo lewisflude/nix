@@ -30,4 +30,8 @@
       no-allow-external-cache
     '';
   };
+
+  home.file.".gnupg/sshcontrol".text = ''
+    495B10388160753867D2B6F7CAED2ED08F4D4323
+  '';
 }
