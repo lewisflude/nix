@@ -24,7 +24,7 @@
       "workspace 3,class:^(ghostty|foot|kitty|alacritty|wezterm)$" # Terminals
       "workspace 4,class:^(discord|slack|telegram-desktop|element-desktop|signal-desktop)$" # Communication
       "workspace 5,class:^(thunderbird|evolution|geary|mailspring)$" # Email
-      "workspace 6,class:^(spotify|rhythmbox|clementine|lollypop)$" # Music
+      "workspace 6,class:^(spotify|clementine|lollypop)$" # Music
 
       # Gaming workspace and optimizations
       "workspace special:gaming,class:^(steam_app_|steam_app|lutris|gamescope)$"
@@ -39,7 +39,7 @@
       # General window behavior
       "tile,class:^(firefox|brave|chromium|google-chrome|code|vscodium|sublime_text|jetbrains-.*)$"
       "animation slide,class:^(firefox|brave|chromium|google-chrome|code|vscodium|sublime_text|jetbrains-.*)$"
-      "animation fade,class:^(discord|slack|telegram-desktop|element-desktop|signal-desktop|thunderbird|evolution|geary|mailspring|spotify|rhythmbox|clementine|lollypop)$"
+      "animation fade,class:^(discord|slack|telegram-desktop|element-desktop|signal-desktop|thunderbird|evolution|geary|mailspring|spotify|clementine|lollypop)$"
     ];
 
     # Special workspace configurations
