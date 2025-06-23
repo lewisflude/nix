@@ -6,11 +6,11 @@
   ...
 }:
 {
-  # Base theme configuration (Catppuccin Mocha) - Linux only
-  catppuccin = lib.mkIf (lib.hasInfix "linux" system) {
+  # Base theme configuration (Catppuccin Mocha)
+  catppuccin = {
     flavor = "mocha";
     enable = true;
-    mako.enable = false;
+    mako.enable = lib.mkIf (lib.hasInfix "linux" system) false;
   };
 
   # Linux-specific theme configuration
