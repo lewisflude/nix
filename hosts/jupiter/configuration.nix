@@ -39,6 +39,9 @@
       isNormalUser = true;
       # No password set - rely on SSH keys and sudo authentication
       hashedPassword = null;
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPeK0wgNYUtZScvg64MoZObPaqjaDd7Gdj4GBsDcqAt7 lewis@lewisflude.com"
+      ];
       extraGroups = [
         "wheel"
         "audio"
