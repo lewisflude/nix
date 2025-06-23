@@ -113,7 +113,7 @@
     let
       # Import host configurations
       hosts = {
-        "Lewiss-MacBook-Pro" = import ./hosts/macbook-pro;
+        "Lewiss-MacBook-Pro" = import ./hosts/Lewiss-MacBook-Pro;
         jupiter = import ./hosts/jupiter;
       };
 
@@ -124,6 +124,8 @@
           system = hostConfig.system;
           specialArgs = inputs // hostConfig;
           modules = [
+            ./hosts/${hostName}/configuration.nix
+
             # Common modules (cross-platform)
             ./modules/common
 
@@ -228,12 +230,16 @@
       devShells = builtins.listToAttrs (
         builtins.map (hostConfig: {
           name = hostConfig.system;
-          value = 
+          value =
             let
               pkgs = nixpkgs.legacyPackages.${hostConfig.system};
-              shellsConfig = import ./shells { inherit pkgs; lib = pkgs.lib; };
+              shellsConfig = import ./shells {
+                inherit pkgs;
+                lib = pkgs.lib;
+              };
             in
-            shellsConfig.devShells // {
+            shellsConfig.devShells
+            // {
               default = pkgs.mkShell {
                 packages = with pkgs; [
                   nixfmt-rfc-style

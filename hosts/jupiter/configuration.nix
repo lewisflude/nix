@@ -4,7 +4,10 @@
   pkgs,
   username,
   hostname,
-  configVars ? { username = username; hostname = hostname; },
+  configVars ? {
+    username = username;
+    hostname = hostname;
+  },
   inputs,
   ...
 }:
@@ -56,7 +59,7 @@
   };
 
   # Set timezone
-  time.timeZone = lib.mkForce "America/New_York";
+  time.timeZone = lib.mkForce "Europe/London";
 
   # Enable X11 (desktop environment handled by modules)
   services.xserver.enable = true;
@@ -66,7 +69,7 @@
   # Configure sudo for passwordless access for wheel group
   security.sudo = {
     enable = true;
-    wheelNeedsPassword = false;  # Allow wheel group sudo without password
+    wheelNeedsPassword = false; # Allow wheel group sudo without password
   };
 
   # System state version
