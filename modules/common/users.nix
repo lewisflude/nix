@@ -17,7 +17,8 @@
       "docker"
     ];
     shell = pkgs.zsh;
-    initialPassword = "changeMe";
+    # No password set - secure authentication via SSH keys
+    hashedPassword = null;
   };
 
   # Create user group on Linux
