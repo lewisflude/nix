@@ -83,32 +83,31 @@
   };
 
   outputs =
-    inputs@{
-      self,
-      darwin,
-      nixpkgs,
-      home-manager,
-      mac-app-util,
-      nix-homebrew,
-      homebrew-core,
-      homebrew-cask,
-      homebrew-nx,
-      homebrew-j178,
-      catppuccin,
-      hyprland,
-      hyprland-plugins,
-      astal,
-      sops-nix,
-      waybar,
-      ghostty,
-      musnix,
-      nixpkgs-mozilla,
-      yazi,
-      nixos-hardware,
-      solaar,
-      nvidia-patch,
-      cursor,
-      ...
+    inputs@{ self
+    , darwin
+    , nixpkgs
+    , home-manager
+    , mac-app-util
+    , nix-homebrew
+    , homebrew-core
+    , homebrew-cask
+    , homebrew-nx
+    , homebrew-j178
+    , catppuccin
+    , hyprland
+    , hyprland-plugins
+    , astal
+    , sops-nix
+    , waybar
+    , ghostty
+    , musnix
+    , nixpkgs-mozilla
+    , yazi
+    , nixos-hardware
+    , solaar
+    , nvidia-patch
+    , cursor
+    , ...
     }:
     let
       # Import host configurations
@@ -232,22 +231,24 @@
 
       # Developer shells for all systems
       devShells = builtins.listToAttrs (
-        builtins.map (hostConfig: {
-          name = hostConfig.system;
-          value = {
-            default = nixpkgs.legacyPackages.${hostConfig.system}.mkShell {
-              packages = with nixpkgs.legacyPackages.${hostConfig.system}; [
-                nixfmt-rfc-style
-                jq
-                yq
-                git
-                gh
-                direnv
-                nix-direnv
-              ];
+        builtins.map
+          (hostConfig: {
+            name = hostConfig.system;
+            value = {
+              default = nixpkgs.legacyPackages.${hostConfig.system}.mkShell {
+                packages = with nixpkgs.legacyPackages.${hostConfig.system}; [
+                  nixfmt-rfc-style
+                  jq
+                  yq
+                  git
+                  gh
+                  direnv
+                  nix-direnv
+                ];
+              };
             };
-          };
-        }) (builtins.attrValues hosts)
+          })
+          (builtins.attrValues hosts)
       );
 
       # Darwin configurations
@@ -259,5 +260,20 @@
       nixosConfigurations = builtins.mapAttrs
         (name: hostConfig: mkNixosSystem name hostConfig)
         (nixpkgs.lib.filterAttrs (name: host: host.system == "x86_64-linux" || host.system == "aarch64-linux") hosts);
+
+      # Standalone home-manager configurations
+      homeConfigurations = builtins.mapAttrs
+        (name: hostConfig: home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.${hostConfig.system};
+          extraSpecialArgs = inputs // hostConfig // {
+            configVars = import ./config-vars.nix;
+          };
+          modules = [
+            ./home
+            sops-nix.homeManagerModules.sops
+            catppuccin.homeModules.catppuccin
+          ];
+        })
+        hosts;
     };
 }
