@@ -9,7 +9,6 @@ let
 
   # ==== CORE THEME & UI EXTENSIONS ====
   themes = [
-    vsc.catppuccin.catppuccin-vsc
   ];
 
   # ==== ESSENTIAL PRODUCTIVITY EXTENSIONS ====
@@ -62,7 +61,6 @@ let
 
   # ==== DEVOPS & INFRASTRUCTURE ====
   devops = [
-    vsc.ms-azuretools.vscode-docker
     vsc.ms-vscode-remote.remote-containers
   ];
 
@@ -70,6 +68,8 @@ let
   webDev = [
     vsc.ms-vscode.vscode-typescript-next
     vsc.ms-vscode.vscode-css-peek
+    vsc.ms-vscode.vscode-json
+    vsc.ms-vscode.vscode-eslint
   ];
 
   codeQuality = [
