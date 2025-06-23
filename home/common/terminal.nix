@@ -2,7 +2,6 @@
   pkgs,
   lib,
   system,
-  username,
   ...
 }:
 {
@@ -40,19 +39,22 @@
       pigz # Parallel gzip
       jq # JSON processor
 
-      git-extras
-      lazygit
-      lazydocker
-      zellij
+      # Git tools
+      git-extras # Extra git commands
+      lazygit # Git TUI
+      lazydocker # Docker TUI
+      zellij # Terminal multiplexer
     ]
     ++ lib.optionals (lib.hasInfix "linux" system) [
-      foot
-      networkmanager
-      doas
-      lsof
+      # Linux-specific packages
+      foot # Wayland terminal
+      networkmanager # Network management
+      doas # Privilege escalation
+      lsof # List open files
     ]
     ++ lib.optionals (lib.hasInfix "darwin" system) [
-      nil
+      # Darwin-specific packages
+      nil # Nix language server
     ];
 
   imports = [
@@ -69,15 +71,9 @@
     enableZshIntegration = true;
     settings = {
       font-family = "Iosevka";
-      font-family-bold = "Iosevka";
-      font-family-italic = "Iosevka";
-      font-family-bold-italic = "Iosevka";
       font-feature = "+calt,+liga,+dlig";
       font-size = 12;
       font-synthetic-style = true;
-
-      theme = "catppuccin-mocha";
-
       cursor-color = "#f5e0dc";
       cursor-style = "block";
       cursor-style-blink = false;

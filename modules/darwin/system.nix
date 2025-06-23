@@ -152,12 +152,6 @@
       Clicking = true;
       TrackpadRightClick = true;
     };
-
-    # Firewall Settings
-    alf = {
-      globalstate = 1;
-      allowsignedenabled = 1;
-    };
   };
   nix.extraOptions = ''
     extra-sandbox-paths = /System/Library/Frameworks /Library/Frameworks
