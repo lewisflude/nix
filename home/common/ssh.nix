@@ -4,28 +4,30 @@
   config,
   ...
 }:
+
 {
   programs.ssh = {
     enable = true;
     package = pkgs.openssh.override { withSecurityKey = true; };
 
-    extraConfig = ''
-      Host *
-        IdentityAgent ${config.home.homeDirectory}/.gnupg/S.gpg-agent.ssh
-        IdentitiesOnly yes
-        AddKeysToAgent yes
-        ServerAliveInterval 60
-        ServerAliveCountMax 3
-        ControlMaster auto
-        ControlPath ~/.ssh/control/%r@%h:%p
-        ControlPersist 10m
-    '';
+    addKeysToAgent = "yes";
+    # SSH agent is handled by GPG agent via environment variable
 
-    matchBlocks."github.com".extraOptions = {
-      IdentityFile = "~/.ssh/id_ecdsa_sk_github";
-      IdentitiesOnly = "yes";
-      # Only use this identity for SSH connections, not Git signing
-      ForwardAgent = "no";
+    matchBlocks = {
+      "*" = {
+        identitiesOnly = true;
+        serverAliveInterval = 60;
+        serverAliveCountMax = 3;
+        controlMaster = "auto";
+        controlPath = "~/.ssh/control/%r@%h:%p";
+        controlPersist = "10m";
+      };
+
+      "github.com" = {
+        identityFile = "~/.ssh/id_ed25519";
+        identitiesOnly = true;
+        forwardAgent = false;
+      };
     };
   };
 
