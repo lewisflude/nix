@@ -58,15 +58,7 @@
   # Enable X11 (desktop environment handled by modules)
   services.xserver.enable = true;
 
-  # Enable OpenSSH with secure configuration
-  services.openssh = {
-    enable = true;
-    settings = {
-      PasswordAuthentication = false;
-      PermitRootLogin = "no";
-      PubkeyAuthentication = true;
-    };
-  };
+  # SSH configuration handled by modules/nixos/ssh.nix
 
   # Configure sudo for passwordless access for wheel group
   security.sudo = {
