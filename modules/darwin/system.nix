@@ -69,7 +69,7 @@
 
         # Communication & Database
         "/Users/${username}/Applications/Home Manager Trampolines/Slack.app"
-        "/Users/${username}/Applications/Home Manager Trampolines/TablePlus.app"
+        "/etc/profiles/per-user/${username}/bin/tableplus"
 
         # System utilities
         "/System/Applications/System Settings.app"

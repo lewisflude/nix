@@ -23,6 +23,10 @@
     "typescript.inlayHints.includeInlayFunctionLikeReturnTypeHints" = true;
     "typescript.inlayHints.includeInlayEnumMemberValueHints" = true;
     "typescript.preferences.useLabelDetailsInCompletionEntries" = true;
+    # Ensure Go to Definition works properly
+    "typescript.preferences.includePackageJsonAutoImports" = "auto";
+    "typescript.workspaceSymbols.scope" = "allOpenProjects";
+    "typescript.disableAutomaticTypeAcquisition" = false;
 
     # JavaScript Configuration (Enhanced)
     "javascript.preferences.quoteStyle" = "double";
@@ -39,6 +43,9 @@
     "javascript.inlayHints.includeInlayPropertyDeclarationTypeHints" = true;
     "javascript.inlayHints.includeInlayFunctionLikeReturnTypeHints" = true;
     "javascript.inlayHints.includeInlayEnumMemberValueHints" = true;
+    # Ensure Go to Definition works properly for JavaScript
+    "javascript.preferences.includePackageJsonAutoImports" = "auto";
+    "javascript.workspaceSymbols.scope" = "allOpenProjects";
 
     # ==== PYTHON ECOSYSTEM ====
 
@@ -267,23 +274,11 @@
       "editor.tabSize" = 2;
     };
 
-    # Shell Scripts
-    "[shellscript]" = {
-      "editor.defaultFormatter" = "foxundermoon.shell-format";
-      "editor.insertSpaces" = true;
-      "editor.tabSize" = 2;
-    };
-
     # YAML
     "[yaml]" = {
       "editor.insertSpaces" = true;
       "editor.tabSize" = 2;
       "editor.autoIndent" = "advanced";
-    };
-
-    # Docker
-    "[dockerfile]" = {
-      "editor.defaultFormatter" = "ms-azuretools.vscode-docker";
     };
 
     # TOML
