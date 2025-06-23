@@ -1,6 +1,6 @@
 { pkgs, config, lib, system, ... }: {
-  # Base theme configuration (Catppuccin Mocha)
-  catppuccin = {
+  # Base theme configuration (Catppuccin Mocha) - Linux only
+  catppuccin = lib.mkIf (lib.hasInfix "linux" system) {
     flavor = "mocha";
     enable = true;
     mako.enable = false;
