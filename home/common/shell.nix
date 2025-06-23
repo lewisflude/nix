@@ -16,7 +16,7 @@
         if lib.hasInfix "darwin" system then
           "sudo darwin-rebuild switch --flake ~/.config/nix#macbook-pro"
         else
-          "sudo nixos-rebuild switch --flake ~/.config/nix#desktop";
+          "sudo nixos-rebuild switch --flake ~/.config/nix#jupiter";
       ls = "lsd";
       l = "ls -l";
       la = "ls -a";
