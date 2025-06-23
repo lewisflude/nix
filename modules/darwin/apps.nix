@@ -17,7 +17,6 @@
     ];
     brews = [
       "circleci"
-      "prefligit"
       "nx"
     ];
     # GUI applications
@@ -28,6 +27,7 @@
       "beekeeper-studio"
       "betterdisplay"
       "chatgpt"
+      "docker"
       "figma"
       "ghostty@tip"
       "google-chrome@canary"
