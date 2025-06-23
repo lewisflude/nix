@@ -9,6 +9,7 @@
   # Base theme configuration (Catppuccin Mocha)
   catppuccin = {
     flavor = "mocha";
+    accent = "mauve";
     enable = true;
     mako.enable = lib.mkIf (lib.hasInfix "linux" system) false;
   };

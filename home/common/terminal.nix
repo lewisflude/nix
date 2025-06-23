@@ -67,7 +67,6 @@
     enable = true;
     package = if lib.hasInfix "linux" system then pkgs.ghostty else null;
     enableZshIntegration = true;
-    clearDefaultKeybinds = true;
     settings = {
       font-family = "Iosevka";
       font-family-bold = "Iosevka";
