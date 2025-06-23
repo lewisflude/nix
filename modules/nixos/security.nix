@@ -16,7 +16,8 @@
   systemd.extraConfig = "DefaultLimitNOFILE=524288";
   security.pki.certificateFiles = [ ../mitmproxy-ca-cert.pem ];
 
-  nix.settings = {
-    access-tokens = "github.com=REDACTED_GITHUB_TOKEN";
-  };
+  # GitHub access token should be configured via environment variable or SOPS
+  # nix.settings = {
+  #   access-tokens = "github.com=\${GITHUB_TOKEN}";
+  # };
 }
