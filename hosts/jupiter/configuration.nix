@@ -31,21 +31,25 @@
 
   # Basic system configuration (nixpkgs config handled in flake)
 
-  # User configuration
-  users.users.${username} = {
-    home = "/home/${username}";
-    isNormalUser = true;
-    initialPassword = "correcthorsebatterystaple";
-    extraGroups = [
-      "wheel"
-      "audio"
-      "video"
-      "nvidia"
-      "docker"
-      "git"
-      "networkmanager"
-    ];
-    shell = pkgs.zsh;
+  # User configuration - secure setup without passwords
+  users = {
+    mutableUsers = false; # Prevent password changes outside of configuration
+    users.${username} = {
+      home = "/home/${username}";
+      isNormalUser = true;
+      # No password set - rely on SSH keys and sudo authentication
+      hashedPassword = null;
+      extraGroups = [
+        "wheel"
+        "audio"
+        "video"
+        "nvidia"
+        "docker"
+        "git"
+        "networkmanager"
+      ];
+      shell = pkgs.zsh;
+    };
   };
 
   # Set timezone
@@ -54,8 +58,21 @@
   # Enable X11 (desktop environment handled by modules)
   services.xserver.enable = true;
 
-  # Enable OpenSSH
-  services.openssh.enable = true;
+  # Enable OpenSSH with secure configuration
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+      PubkeyAuthentication = true;
+    };
+  };
+
+  # Configure sudo for passwordless access for wheel group
+  security.sudo = {
+    enable = true;
+    wheelNeedsPassword = false;  # Allow wheel group sudo without password
+  };
 
   # System state version
   system.stateVersion = "24.05";
