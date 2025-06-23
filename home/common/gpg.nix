@@ -1,14 +1,14 @@
 { pkgs, ... }:
 {
-  home.packages = [
-    pkgs.gnupg
-    pkgs.pinentry_mac
+  home.packages = with pkgs; [
+    gnupg
+    (if pkgs.stdenv.isDarwin then pinentry_mac else pinentry-curses)
   ];
 
   programs.gpg = {
     enable = true;
     settings = {
-      default-key = "D4DD67DDDBAEF83F";
+      default-key = "48B34CF9C735A6AE";
       use-agent = true;
     };
   };
@@ -17,7 +17,7 @@
     enable = true;
     enableSshSupport = true;
 
-    pinentry.package = pkgs.pinentry_mac;
+    pinentry.package = if pkgs.stdenv.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-curses;
 
     defaultCacheTtl = 28800;
     maxCacheTtl = 86400;
@@ -30,5 +30,4 @@
       no-allow-external-cache
     '';
   };
-
 }

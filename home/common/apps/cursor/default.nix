@@ -146,7 +146,7 @@ in
 {
   # ==== CONDITIONAL VSCODE CONFIGURATION ====
 
-  home.activation.makeVSCodeConfigWritable =
+  home.activation.makeVSCodeConfigWritable = mkIf pkgs.stdenv.isDarwin (
     let
       configPath = "${config.home.homeDirectory}/Library/Application Support/Cursor/User/settings.json";
     in
@@ -156,7 +156,8 @@ in
       data = ''
         install -m 0640 "$(readlink ${configPath})" ${configPath}
       '';
-    };
+    }
+  );
 
   # Only enable if we have at least basic settings
   programs.vscode = mkIf (hasValidCoreSettings || allUserSettings != { }) {

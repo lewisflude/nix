@@ -17,10 +17,10 @@
       gpg.format = "openpgp";
       commit.gpgsign = true;
       tag.gpgsign = true;
-      user.signingkey = "D4DD67DDDBAEF83F";
+      user.signingkey = "48B34CF9C735A6AE";
     };
     signing = {
-      key = "D4DD67DDDBAEF83F";
+      key = "48B34CF9C735A6AE";
       signByDefault = true;
     };
 
