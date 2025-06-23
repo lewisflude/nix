@@ -7,7 +7,10 @@
   imports = [
     # Cross-platform modules
     ./apps.nix
-    ./shell
+    ./git.nix
+    ./python.nix
+    ./shell.nix
+    ./ssh.nix
     ./terminal.nix
     ./theme.nix
     ./development

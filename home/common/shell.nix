@@ -112,5 +112,92 @@
     ".local/bin/python3".source = "${pkgs.python311}/bin/python3.11";
     ".local/bin/pip".source = "${pkgs.python311}/bin/pip3.11";
     ".local/bin/pip3".source = "${pkgs.python311}/bin/pip3.11";
+    ".p10k.zsh".source = ./lib/p10k.zsh;
   };
+
+  # Add useful scripts from shell/scripts.nix
+  home.packages = with pkgs; [
+    (writeShellScriptBin "system-update" ''
+      #!/bin/sh
+      set -e
+      FLAKE_PATH="${config.home.homeDirectory}/.config/nix"
+      UPDATE_INPUTS=0
+      RUN_GC=0
+      BUILD_ONLY=0
+
+      # Parse arguments
+      if [ $# -eq 0 ]; then
+        :
+      else
+        for arg in "$@"; do
+          case $arg in
+            --full)
+              UPDATE_INPUTS=1
+              RUN_GC=1
+              ;;
+            --inputs)
+              UPDATE_INPUTS=1
+              ;;
+            --gc)
+              RUN_GC=1
+              ;;
+            --build-only)
+              BUILD_ONLY=1
+              ;;
+            --help)
+              echo "Usage: system-update [options]"
+              echo "  --full       Do a complete update (flake update + GC)"
+              echo "  --inputs     Update flake inputs"
+              echo "  --gc         Run garbage collection"
+              echo "  --build-only Just build but don't activate"
+              echo "  --help       Show this help"
+              exit 0
+              ;;
+          esac
+        done
+      fi
+
+      if [ $UPDATE_INPUTS -eq 1 ]; then
+        echo "🔄 Updating flake inputs..."
+        nix flake update --flake "$FLAKE_PATH"
+      fi
+
+      if [ $BUILD_ONLY -eq 1 ]; then
+        echo "⚙️ Building system configuration..."
+        sudo nixos-rebuild build --flake "$FLAKE_PATH"#jupiter
+        echo "🏠 Building home-manager configuration..."
+        home-manager build --flake "$FLAKE_PATH"#jupiter
+      else
+        echo "⚙️ Building and activating system configuration..."
+        sudo nixos-rebuild switch --flake "$FLAKE_PATH"#jupiter
+        echo "🏠 Updating home-manager configuration..."
+        home-manager switch --flake "$FLAKE_PATH"#jupiter
+      fi
+
+      if [ $RUN_GC -eq 1 ]; then
+        echo "🧹 Running garbage collection..."
+        nix-collect-garbage -d
+      fi
+
+      echo "✨ System update complete!"
+    '')
+    (writeShellScriptBin "gaming-mode" ''
+      #!/usr/bin/env bash
+      GAMING_MODE_FILE="/tmp/gaming-mode"
+      
+      if [ -f "$GAMING_MODE_FILE" ]; then
+        rm "$GAMING_MODE_FILE"
+        hyprctl keyword misc:vrr 1
+        powerprofilesctl set balanced
+        echo "powersave" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+        notify-send "Gaming Mode" "Disabled" -i "󰊵"
+      else
+        touch "$GAMING_MODE_FILE"
+        hyprctl keyword misc:vrr 1
+        powerprofilesctl set performance
+        echo "performance" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+        notify-send "Gaming Mode" "Enabled" -i "󰊴"
+      fi
+    '')
+  ];
 }
