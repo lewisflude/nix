@@ -1,6 +1,5 @@
 {
-  configVars ? { username = "lewis"; hostname = "jupiter"; },
-  username ? configVars.username,
+  username,
   system,
   lib,
   ...
