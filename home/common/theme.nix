@@ -1,4 +1,11 @@
-{ pkgs, config, lib, system, ... }: {
+{
+  pkgs,
+  config,
+  lib,
+  system,
+  ...
+}:
+{
   # Base theme configuration (Catppuccin Mocha) - Linux only
   catppuccin = lib.mkIf (lib.hasInfix "linux" system) {
     flavor = "mocha";
@@ -15,7 +22,7 @@
       nerd-fonts.iosevka
       gtk4
     ];
-    
+
     pointerCursor = {
       name = "catppuccin-mocha-mauve-cursors";
       package = pkgs.catppuccin-cursors.mochaMauve;
@@ -30,7 +37,7 @@
         defaultCursor = "left_ptr";
       };
     };
-    
+
     sessionVariables = {
       WALLPAPER_DIR = "${config.home.homeDirectory}/wallpapers";
       GTK_THEME = "Catpuccin-GTK-Dark";
@@ -60,6 +67,6 @@
     };
   };
 
-  # Font configuration
-  fonts.fontconfig.enable = true;
+  # Font configuration (Linux only)
+  fonts.fontconfig.enable = lib.mkIf (lib.hasInfix "linux" system) true;
 }

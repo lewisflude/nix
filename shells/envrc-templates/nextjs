@@ -1,0 +1,24 @@
+# Next.js project environment
+use flake ~/.config/nix#nextjs
+
+# Project-specific environment variables
+export NODE_ENV=development
+export NEXT_TELEMETRY_DISABLED=1
+
+# Auto-install dependencies
+if [[ -f "package.json" && ! -d "node_modules" ]]; then
+  echo "📦 Installing Next.js dependencies..."
+  pnpm install
+fi
+
+# Auto-generate types if using TypeScript
+if [[ -f "tsconfig.json" ]]; then
+  export TYPESCRIPT=true
+fi
+
+# Set up development aliases
+alias dev="pnpm dev"
+alias build="pnpm build"
+alias start="pnpm start"
+alias lint="pnpm lint"
+alias type-check="pnpm type-check"

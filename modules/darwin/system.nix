@@ -24,13 +24,13 @@
     };
   };
 
-  # Fonts
-  fonts = {
-    packages = with pkgs; [
-      nerd-fonts.jetbrains-mono
-      nerd-fonts.iosevka
-    ];
-  };
+  # Fonts - temporarily disabled due to Python compatibility issues
+  # fonts = {
+  #   packages = with pkgs; [
+  #     nerd-fonts.jetbrains-mono
+  #     nerd-fonts.iosevka
+  #   ];
+  # };
 
   # Networking
   networking = {
