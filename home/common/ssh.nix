@@ -18,9 +18,6 @@
         identitiesOnly = true;
         serverAliveInterval = 60;
         serverAliveCountMax = 3;
-        controlMaster = "auto";
-        controlPath = "~/.ssh/control/%r@%h:%p";
-        controlPersist = "10m";
       };
 
       "github.com" = {
@@ -31,7 +28,4 @@
     };
   };
 
-  home.activation.createSshControlDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    mkdir -p ~/.ssh/control
-  '';
 }
