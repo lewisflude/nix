@@ -56,8 +56,8 @@
     ./apps/zoxide.nix
   ];
 
-  # Base ghostty configuration (common across platforms)
-  programs.ghostty = {
+  # Base ghostty configuration (Linux only - use homebrew on Darwin)
+  programs.ghostty = lib.mkIf (lib.hasInfix "linux" system) {
     enable = true;
     enableZshIntegration = true;
     settings = {

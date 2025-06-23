@@ -113,7 +113,7 @@
     let
       # Import host configurations
       hosts = {
-        macbook-pro = import ./hosts/macbook-pro;
+        "Lewiss-MacBook-Pro" = import ./hosts/macbook-pro;
         jupiter = import ./hosts/jupiter;
       };
 
@@ -162,7 +162,10 @@
               home-manager.useUserPackages = true;
               home-manager.verbose = true;
               home-manager.backupFileExtension = "backup";
-              home-manager.sharedModules = [ mac-app-util.homeManagerModules.default ];
+              home-manager.sharedModules = [ 
+                mac-app-util.homeManagerModules.default 
+                catppuccin.homeModules.catppuccin
+              ];
               home-manager.extraSpecialArgs = inputs // hostConfig;
               home-manager.users.${hostConfig.username} = import ./home;
             }

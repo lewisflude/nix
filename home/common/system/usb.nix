@@ -1,11 +1,11 @@
-{ pkgs, ... }: {
-  home.packages = with pkgs; [
+{ pkgs, lib, system, ... }: {
+  home.packages = lib.optionals (lib.hasInfix "linux" system) (with pkgs; [
     usbutils
     evhz
     piper
-  ];
+  ]);
 
-  services.udiskie = {
+  services.udiskie = lib.mkIf (lib.hasInfix "linux" system) {
     enable = true;
     settings = {
       # workaround for
