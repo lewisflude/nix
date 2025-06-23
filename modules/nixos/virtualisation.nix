@@ -3,7 +3,6 @@
   environment.systemPackages = with pkgs; [
     nvidia-container-toolkit
     nvidia-docker
-    nvidia-container-toolkit
   ];
   virtualisation = {
     docker = {
@@ -14,13 +13,9 @@
         settings = {
           experimental = true;
           features.cdi = true;
-          live-restore = true;
           log-driver = "journald";
           default-runtime = "nvidia";
-          runtimes.nvidia = {
-            path = "nvidia-container-runtime";
-            runtimeArgs = [ ];
-          };
+
           dns = [
             "1.1.1.1"
             "8.8.8.8"
@@ -33,9 +28,10 @@
   };
 
   systemd.services.nvidia-cdi = {
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = [ "docker.service" ];
     before = [ "docker.service" ];
     serviceConfig = {
+      ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p /var/run/cdi";
       ExecStart = "${pkgs.nvidia-container-toolkit}/bin/nvidia-ctk cdi generate --output=/var/run/cdi/nvidia.yaml";
       Type = "oneshot";
     };
