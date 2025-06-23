@@ -29,7 +29,8 @@
       "chatgpt"
       "docker"
       "figma"
-      "ghostty"
+      "ghostty@tip"
+      "google-chrome@canary"
       "gpg-suite"
       "imageoptim"
       "linear-linear"
@@ -38,6 +39,7 @@
       "obsidian"
       "raycast"
       "responsively"
+      "slack"
     ];
 
     # Mac App Store applications

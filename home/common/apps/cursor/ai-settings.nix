@@ -1,83 +1,124 @@
 # Cursor AI-Specific Configuration
-# AI assistant, chat, and Cursor-specific features
+# AI assistant, chat, and Cursor-specific features optimized for performance and stability
 
 { ... }:
 {
   userSettings = {
-    # Core AI Performance Configuration
-    "cursor.general.modelTemperature" = 0.2; # Conservative for code generation
-    "cursor.general.requestDelayTime" = 200; # Faster AI responses
-    "cursor.general.requestTimeoutLength" = 30000;
+    # ==== CORE AI PERFORMANCE CONFIGURATION ====
+
+    # AI Response Settings (Conservative for reliability)
+    "cursor.general.modelTemperature" = 0.2; # Lower temperature for more consistent code generation
+    "cursor.general.requestDelayTime" = 200; # Balanced response time
+    "cursor.general.requestTimeoutLength" = 30000; # 30 second timeout
+    "cursor.general.maxConcurrentRequests" = 3; # Prevent overwhelming API
+    "cursor.general.enableRequestBatching" = true; # Batch requests for efficiency
+
+    # Privacy & Telemetry (Strict Privacy)
     "cursor.privateTelemetryEnabled" = false;
+    "cursor.general.enableAnalytics" = false;
+    "cursor.general.enableCrashReporting" = false;
+    "cursor.general.enableDataCollection" = false;
 
-    # AI Model Configuration (Optimized for 2024/2025)
-    "cursor.ai.defaultModel" = "gpt-4o";
-    "cursor.ai.fallbackModel" = "claude-3.5-sonnet";
-    "cursor.ai.experimentalModel" = "o3";
+    # ==== AI MODEL CONFIGURATION ====
 
-    # Context & Memory Management
-    "cursor.chat.maxConversationLength" = 50; # Prevent context bloat
+    # Primary Models (Updated for 2024/2025 - verify these exist)
+    "cursor.ai.defaultModel" = "gpt-4o"; # Primary model for general use
+    "cursor.ai.fallbackModel" = "claude-3.5-sonnet"; # Fallback for when primary fails
+
+    # Context & Memory Management (Performance Optimized)
+    "cursor.chat.maxConversationLength" = 30; # Reduced to prevent context bloat
     "cursor.general.enableContextMemory" = true;
     "cursor.general.enableSemanticCache" = true;
+    "cursor.general.enableBackgroundProcessing" = true;
 
-    # Code Generation Settings (Enhanced Safety)
+    # ==== CODE GENERATION SETTINGS ====
+
+    # Context Sources (Selective for Performance)
     "cursor.chat.codeGeneration.useCodebaseContext" = true;
     "cursor.chat.codeGeneration.includeCommentsInCodeGeneration" = true;
-    "cursor.chat.codeGeneration.useTerminalContext" = true;
-    "cursor.chat.codeGeneration.enableGitContext" = true; # Use git history for better context
-    "cursor.chat.codeGeneration.maxFileCount" = 20; # Limit files in context to improve performance
+    "cursor.chat.codeGeneration.useTerminalContext" = false; # Disabled for privacy
+    "cursor.chat.codeGeneration.enableGitContext" = true;
+    "cursor.chat.codeGeneration.maxFileCount" = 15; # Reduced for better performance
 
-    # Chat Interface & UX Settings
-    "cursor.chat.autoRefresh" = true;
-    "cursor.chat.autoScrollToBottom" = true;
+    # Code Safety & Quality
     "cursor.chat.iterateOnLints" = true;
-    "cursor.chat.webSearchTool" = true;
-    "cursor.chat.suggestFollowUpQuestions" = true;
-    "cursor.chat.enableSmartSelection" = true;
-    "cursor.chat.enableCodeDiffPreview" = true; # Show diffs before applying
+    "cursor.chat.enableCodeDiffPreview" = true; # Preview changes before applying
 
-    # Code Completion (Tab) Settings - Performance Optimized
+    # ==== CHAT INTERFACE SETTINGS ====
+
+    # Chat UX (Productivity Focused)
+    "cursor.chat.autoRefresh" = false; # Disabled to prevent distractions
+    "cursor.chat.autoScrollToBottom" = true;
+    "cursor.chat.suggestFollowUpQuestions" = false; # Disabled to reduce noise
+    "cursor.chat.enableSmartSelection" = true;
+    "cursor.chat.webSearchTool" = false; # Disabled for privacy and focus
+
+    # Conversation Management
+    "cursor.chat.enableConversationHistory" = true; # Useful for context
+
+    # ==== CODE COMPLETION (TAB) SETTINGS ====
+
+    # Tab Completion Performance (Optimized)
     "cursor.cursorTab.enablePartialAccepts" = true;
     "cursor.cursorTab.enableSuggestions" = true;
     "cursor.cursorTab.triggerSuggestions" = true;
-    "cursor.cursorTab.multilineAccepts" = true; # Accept multi-line suggestions
-    "cursor.cursorTab.suggestionsDelay" = 150; # Faster suggestions
-    "cursor.cursorTab.maxSuggestions" = 3; # Limit to reduce noise
+    "cursor.cursorTab.multilineAccepts" = true;
+    "cursor.cursorTab.suggestionsDelay" = 100; # Slightly slower for stability
+    "cursor.cursorTab.maxSuggestions" = 2; # Reduced to minimize noise
 
-    # Agent & Safety Settings (Enhanced Protection)
+    # ==== AGENT & SAFETY SETTINGS ====
+
+    # File System Protection (Enhanced Safety)
     "cursor.agent.dotFilesProtection" = true;
     "cursor.agent.outsideWorkspaceProtection" = true;
-    "cursor.agent.enableCodeReview" = true; # Review changes before applying
-    "cursor.agent.requireConfirmation" = true; # Confirm destructive operations
-    "cursor.agent.maxFilesPerOperation" = 10; # Limit scope of agent operations
+    "cursor.agent.requireConfirmation" = true; # Always confirm destructive operations
+    "cursor.agent.maxFilesPerOperation" = 5; # Reduced scope for safety
 
-    # Privacy & Security Settings
-    "cursor.general.enableAnalytics" = false;
-    "cursor.general.enableCrashReporting" = false;
-    "cursor.chat.enableConversationHistory" = true; # Keep for context but review periodically
-    "cursor.general.enableDataCollection" = false;
+    # Code Review & Validation
+    "cursor.agent.enableCodeReview" = true; # AI-powered code review
 
-    # Composer Settings (Multi-file editing)
-    "cursor.composer.enableLargeFileHandling" = true;
-    "cursor.composer.maxFilesInComposer" = 5; # Limit complexity
+    # ==== COMPOSER SETTINGS ====
+
+    # Multi-file Editing (Conservative Limits)
+    "cursor.composer.enableLargeFileHandling" = false; # Disabled for performance
+    "cursor.composer.maxFilesInComposer" = 3; # Reduced complexity
     "cursor.composer.enableFileTree" = true;
 
-    # Beta Features (Curated Selection)
-    "cursor.beta.notepads" = true;
-    "cursor.beta.useNewChatUI" = true;
-    "cursor.beta.useNewComposeUI" = true;
-    "cursor.beta.enableAIReview" = true; # AI-powered code review
+    # ==== STABLE FEATURES ONLY ====
 
-    # Performance & Resource Management
-    "cursor.general.enableBackgroundProcessing" = true;
-    "cursor.general.maxConcurrentRequests" = 3; # Prevent overwhelming servers
-    "cursor.general.enableRequestBatching" = true; # Batch requests for efficiency
-
-    # Platform-Specific Settings (macOS)
+    # UI Improvements (Stable Features Only)
     "cursor.general.enableDismissedTerminalNotification" = true;
-    "cursor.general.enableLiveBarsDebugMode" = false;
     "cursor.general.enableTerminalContextAwareCommenting" = true;
-    "cursor.general.enableWindows11SnapAssistGUI" = false; # Disable Windows-specific features
-    "cursor.general.enableWindowsTerminalShell" = false;
+
+    # Platform Optimization (macOS Specific)
+    "cursor.general.enableLiveBarsDebugMode" = false; # Disabled for performance
+    "cursor.general.enableWindows11SnapAssistGUI" = false; # Not needed on macOS
+    "cursor.general.enableWindowsTerminalShell" = false; # Not needed on macOS
+
+    # ==== PERFORMANCE TUNING ====
+
+    # Resource Management
+    "cursor.general.enableSmartThrottling" = true; # Enable intelligent request throttling
+    "cursor.general.cacheTimeout" = 300000; # 5 minute cache timeout
+    "cursor.general.maxCacheSize" = 100; # Limit cache size for memory management
+
+    # ==== REMOVED DEPRECATED/EXPERIMENTAL SETTINGS ====
+
+    # The following settings have been removed as they may not exist or are unstable:
+    # - cursor.ai.experimentalModel (may not exist)
+    # - cursor.beta.* settings (unstable)
+    # - Various experimental features that may cause issues
+
+    # ==== ADDITIONAL PRODUCTIVITY SETTINGS ====
+
+    # Smart Suggestions
+    "cursor.general.enableInlineCompletion" = true;
+    "cursor.general.enableMultilineCompletion" = true;
+    "cursor.general.completionDelay" = 150; # Balanced delay
+
+    # Error Handling
+    "cursor.general.enableErrorRecovery" = true;
+    "cursor.general.retryFailedRequests" = true;
+    "cursor.general.maxRetries" = 2; # Limited retries to prevent delays
   };
 }

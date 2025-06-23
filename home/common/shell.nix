@@ -14,7 +14,7 @@
     shellAliases = {
       switch =
         if lib.hasInfix "darwin" system then
-          "sudo darwin-rebuild switch --flake ~/.config/nix#macbook-pro"
+          "sudo darwin-rebuild switch --flake ~/.config/nix"
         else
           "sudo nixos-rebuild switch --flake ~/.config/nix#jupiter";
       ls = "lsd";
