@@ -6,7 +6,6 @@
 {
   imports = [
     # Cross-platform system modules
-    ./auto-update.nix
     ./yubikey.nix
     ./usb.nix
     ./keyboard.nix
@@ -14,6 +13,7 @@
 
     # Linux-specific system modules
   ] ++ lib.optionals (lib.hasInfix "linux" system) [
+    ./auto-update.nix
     ./mangohud.nix
     ./yubikey-touch-detector.nix
   ];

@@ -1,0 +1,18 @@
+# Rust project environment
+use flake .#rust
+
+# Set Rust environment variables
+export RUST_BACKTRACE=1
+export RUST_LOG=debug
+
+# Enable faster linking on macOS
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export RUSTFLAGS="-C link-arg=-fuse-ld=lld"
+fi
+
+# Auto-format on save (if using with editor integration)
+export RUST_FMT_ON_SAVE=1
+
+# Cargo watch for development
+alias dev="cargo watch -x 'run'"
+alias test-watch="cargo watch -x 'test'"

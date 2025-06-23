@@ -1,11 +1,11 @@
-{ pkgs, configVars, ... }: {
+{ pkgs, hostname, ... }: {
   environment.systemPackages = with pkgs; [
     networkmanagerapplet
   ];
 
 
   networking = {
-    hostName = configVars.hostname;
+    hostName = hostname;
     enableIPv6 = true;
     networkmanager.enable = true;
     networkmanager.dns = "systemd-resolved";

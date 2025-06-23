@@ -125,24 +125,16 @@
           specialArgs = inputs // hostConfig;
           modules = [
             # Common modules (cross-platform)
-            ./modules/common/core.nix
-            ./modules/common/users.nix
-            ./modules/common/shell.nix
-            ./modules/common/dev.nix
-            ./modules/common/docker.nix
-            ./modules/common/security.nix
-            ./modules/common/environment.nix
-            ./modules/common/nix-optimization.nix
+            ./modules/common
 
             # Darwin-specific modules
-            ./modules/darwin/apps.nix
-            ./modules/darwin/system.nix
-            ./modules/darwin/backup.nix
+            ./modules/darwin
             home-manager.darwinModules.home-manager
             mac-app-util.darwinModules.default
             nix-homebrew.darwinModules.nix-homebrew
 
             {
+
               nix-homebrew = {
                 enable = true;
                 enableRosetta = true;
@@ -162,8 +154,8 @@
               home-manager.useUserPackages = true;
               home-manager.verbose = true;
               home-manager.backupFileExtension = "backup";
-              home-manager.sharedModules = [ 
-                mac-app-util.homeManagerModules.default 
+              home-manager.sharedModules = [
+                mac-app-util.homeManagerModules.default
                 catppuccin.homeModules.catppuccin
               ];
               home-manager.extraSpecialArgs = inputs // hostConfig;
@@ -188,7 +180,8 @@
             # Host-specific configuration
             ./hosts/${hostName}/configuration.nix
 
-            # All NixOS modules (auto-imported via default.nix)
+            # Common and NixOS modules
+            ./modules/common
             ./modules/nixos
 
             # Desktop environment (conditionally loaded)
@@ -235,19 +228,24 @@
       devShells = builtins.listToAttrs (
         builtins.map (hostConfig: {
           name = hostConfig.system;
-          value = {
-            default = nixpkgs.legacyPackages.${hostConfig.system}.mkShell {
-              packages = with nixpkgs.legacyPackages.${hostConfig.system}; [
-                nixfmt-rfc-style
-                jq
-                yq
-                git
-                gh
-                direnv
-                nix-direnv
-              ];
+          value = 
+            let
+              pkgs = nixpkgs.legacyPackages.${hostConfig.system};
+              shellsConfig = import ./shells { inherit pkgs; lib = pkgs.lib; };
+            in
+            shellsConfig.devShells // {
+              default = pkgs.mkShell {
+                packages = with pkgs; [
+                  nixfmt-rfc-style
+                  jq
+                  yq
+                  git
+                  gh
+                  direnv
+                  nix-direnv
+                ];
+              };
             };
-          };
         }) (builtins.attrValues hosts)
       );
 
