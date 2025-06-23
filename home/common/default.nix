@@ -6,8 +6,10 @@
 {
   imports = [
     # Cross-platform modules
+    ./apps.nix
     ./shell
-    ./programs
+    ./terminal.nix
+    ./theme.nix
     ./development
     ./system
     ./lib

@@ -3,22 +3,15 @@
   home.packages = with pkgs; [
     # Development tools (cross-platform)
     awscli2
-    bat
     biome
     black
     claude-code
     codex
     coreutils
-    curl
     delta
-    fd
-    fzf
     gh
-    helix
     htop
     http-server
-    jq
-    lazygit
     marksman
     nil
     nixfmt-rfc-style
@@ -30,23 +23,18 @@
     pgcli
     playwright
     pyright
-    ripgrep
     rustup
     solana-cli
     tree
-    wget
     yaml-language-server
     yq
-    zellij
   ];
-
-  # Simple program configurations
-  programs.ripgrep.enable = true;
 
   imports = [
     ./apps/bat.nix
     ./apps/direnv.nix
     ./apps/fzf.nix
+    ./apps/ripgrep.nix
     ./apps/zoxide.nix
     ./apps/cursor
     ./apps/helix.nix
