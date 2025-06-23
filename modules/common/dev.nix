@@ -24,6 +24,4 @@
     RUSTFLAGS = "-L ${pkgs.libiconv}/lib";
   };
 
-  # Enable OpenSSL
-  security.pam.services.sudo_local.touchIdAuth = true;
 }

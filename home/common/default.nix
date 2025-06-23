@@ -13,6 +13,7 @@
       ./ssh.nix
       ./terminal.nix
       ./theme.nix
+      ./gpg.nix
       ./development
       ./system
       ./lib
