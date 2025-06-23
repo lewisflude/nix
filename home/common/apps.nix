@@ -31,11 +31,6 @@
   ];
 
   imports = [
-    ./apps/bat.nix
-    ./apps/direnv.nix
-    ./apps/fzf.nix
-    ./apps/ripgrep.nix
-    ./apps/zoxide.nix
     ./apps/cursor
     ./apps/helix.nix
     ./apps/yazi.nix
