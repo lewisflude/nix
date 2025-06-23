@@ -148,7 +148,7 @@ in
 
   home.activation.makeVSCodeConfigWritable = mkIf pkgs.stdenv.isDarwin (
     let
-      configPath = "${config.home.homeDirectory}/Library/Application Support/Cursor/User/settings.json";
+      configPath = "${config.home.homeDirectory}/Library/Application\\ Support/Cursor/User/settings.json";
     in
     {
       after = [ "writeBoundary" ];

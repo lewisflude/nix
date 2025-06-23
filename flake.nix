@@ -141,6 +141,7 @@
                 enable = true;
                 enableRosetta = true;
                 user = hostConfig.username;
+                autoMigrate = true;
                 taps = {
                   "homebrew/homebrew-cask" = homebrew-cask;
                   "homebrew/homebrew-core" = homebrew-core;

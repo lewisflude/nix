@@ -60,7 +60,7 @@
       persistent-apps = [
         # Primary development tools (most used)
         "/System/Volumes/Data/Applications/Docker.app"
-        "/Users/${username}/Applications/Home Manager Trampolines/Firefox Developer Edition.app" # Primary browser for development
+        "/System/Volumes/Data/Applications/Google Chrome Canary.app" # Primary browser for development
 
         # Design & Planning
         "/System/Volumes/Data/Applications/Figma.app"
@@ -68,7 +68,7 @@
         "/System/Volumes/Data/Applications/Obsidian.app"
 
         # Communication & Database
-        "/Users/${username}/Applications/Home Manager Trampolines/Slack.app"
+        "/System/Volumes/Data/Applications/Slack.app"
         "/etc/profiles/per-user/${username}/bin/tableplus"
 
         # System utilities
