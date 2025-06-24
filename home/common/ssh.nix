@@ -13,6 +13,10 @@
     addKeysToAgent = "yes";
     # SSH agent is handled by GPG agent via environment variable
 
+    controlMaster = "auto";
+    controlPath = "~/.ssh/master-%r@%h:%p";
+    controlPersist = "10m";
+
     matchBlocks = {
       "*" = {
         identitiesOnly = true;
@@ -21,7 +25,6 @@
       };
 
       "github.com" = {
-        identityFile = "~/.ssh/id_ed25519";
         identitiesOnly = true;
         forwardAgent = false;
       };
