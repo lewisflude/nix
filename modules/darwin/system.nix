@@ -16,6 +16,12 @@
     postgresql_16
   ];
 
+  # Sudo Configuration
+  security.pam.enableSudoTouchIdAuth = true; # Enable Touch ID for sudo
+  environment.etc."sudoers.d/timeout".text = ''
+    Defaults timestamp_timeout=30  # Set sudo timeout to 30 minutes
+  '';
+
   # Power Management Settings
   power = {
     sleep = {
