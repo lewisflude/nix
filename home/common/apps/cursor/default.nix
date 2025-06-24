@@ -48,7 +48,7 @@ let
     (safeImport ./language-settings.nix {
       userSettings = { };
     })
-      { };
+      { inherit lib; };
 
   aiSettings =
     (safeImport ./ai-settings.nix {

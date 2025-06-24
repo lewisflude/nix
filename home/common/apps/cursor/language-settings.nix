@@ -2,295 +2,140 @@
 # Comprehensive language server configurations and per-language formatters
 # Organized by language category for better maintainability
 
-{ ... }:
-{
-  userSettings = {
-    # ==== TYPESCRIPT & JAVASCRIPT ECOSYSTEM ====
+{ lib, ... }:
+let
+  standards = import ../../development/language-standards.nix;
 
-    # TypeScript Configuration (Enhanced)
-    "typescript.preferences.quoteStyle" = "double";
-    "typescript.suggest.autoImports" = true;
-    "typescript.suggest.enabled" = true;
-    "typescript.suggest.paths" = true;
-    "typescript.suggest.includeCompletionsForModuleExports" = true;
-    "typescript.updateImportsOnFileMove.enabled" = "always";
-    "typescript.inlayHints.enabled" = "on";
-    "typescript.inlayHints.includeInlayParameterNameHints" = "all";
-    "typescript.inlayHints.includeInlayParameterNameHintsWhenArgumentMatchesName" = false;
-    "typescript.inlayHints.includeInlayFunctionParameterTypeHints" = true;
-    "typescript.inlayHints.includeInlayVariableTypeHints" = true;
-    "typescript.inlayHints.includeInlayPropertyDeclarationTypeHints" = true;
-    "typescript.inlayHints.includeInlayFunctionLikeReturnTypeHints" = true;
-    "typescript.inlayHints.includeInlayEnumMemberValueHints" = true;
-    "typescript.preferences.useLabelDetailsInCompletionEntries" = true;
-    # Ensure Go to Definition works properly
-    "typescript.preferences.includePackageJsonAutoImports" = "auto";
-    "typescript.workspaceSymbols.scope" = "allOpenProjects";
-    "typescript.disableAutomaticTypeAcquisition" = false;
-
-    # JavaScript Configuration (Enhanced)
-    "javascript.preferences.quoteStyle" = "double";
-    "javascript.suggest.autoImports" = true;
-    "javascript.suggest.enabled" = true;
-    "javascript.suggest.paths" = true;
-    "javascript.suggest.includeCompletionsForModuleExports" = true;
-    "javascript.updateImportsOnFileMove.enabled" = "always";
-    "javascript.inlayHints.enabled" = "on";
-    "javascript.inlayHints.includeInlayParameterNameHints" = "all";
-    "javascript.inlayHints.includeInlayParameterNameHintsWhenArgumentMatchesName" = false;
-    "javascript.inlayHints.includeInlayFunctionParameterTypeHints" = true;
-    "javascript.inlayHints.includeInlayVariableTypeHints" = true;
-    "javascript.inlayHints.includeInlayPropertyDeclarationTypeHints" = true;
-    "javascript.inlayHints.includeInlayFunctionLikeReturnTypeHints" = true;
-    "javascript.inlayHints.includeInlayEnumMemberValueHints" = true;
-    # Ensure Go to Definition works properly for JavaScript
-    "javascript.preferences.includePackageJsonAutoImports" = "auto";
-    "javascript.workspaceSymbols.scope" = "allOpenProjects";
-
-    # ==== PYTHON ECOSYSTEM ====
-
-    # Python Language Server (Enhanced)
-    "python.analysis.typeCheckingMode" = "strict";
-    "python.analysis.autoImportCompletions" = true;
-    "python.analysis.autoSearchPaths" = true;
-    "python.analysis.diagnosticMode" = "workspace";
-    "python.analysis.stubPath" = "typings";
-    "python.analysis.typeshedPaths" = [ ];
-    "python.analysis.useLibraryCodeForTypes" = true;
-    "python.analysis.completeFunctionParens" = true;
-    "python.analysis.inlayHints.variableTypes" = true;
-    "python.analysis.inlayHints.functionReturnTypes" = true;
-    "python.analysis.inlayHints.callArgumentNames" = "partial";
-
-    # Python Testing
-    "python.testing.autoTestDiscoverOnSaveEnabled" = true;
-    "python.testing.pytestEnabled" = true;
-    "python.testing.unittestEnabled" = false;
-    "python.testing.promptToConfigure" = false;
-
-    # ==== GO ECOSYSTEM ====
-
-    # Go Language Server (Enhanced)
-    "gopls" = {
-      "ui.diagnostic.staticcheck" = true;
-      "ui.completion.usePlaceholders" = true;
-      "ui.semanticTokens" = true;
-      "ui.codelenses" = {
-        "gc_details" = false;
-        "generate" = true;
-        "regenerate_cgo" = true;
-        "test" = true;
-        "tidy" = true;
-        "upgrade_dependency" = true;
-        "vendor" = true;
-      };
-      "ui.inlayhint" = {
-        "assignVariableTypes" = true;
-        "compositeLiteralFields" = true;
-        "compositeLiteralTypes" = true;
-        "constantValues" = true;
-        "functionTypeParameters" = true;
-        "parameterNames" = true;
-        "rangeVariableTypes" = true;
-      };
-    };
-
-    # Go Formatting & Imports
-    "go.useLanguageServer" = true;
-    "go.formatTool" = "goimports";
-    "go.lintTool" = "golangci-lint";
-    "go.lintOnSave" = "package";
-
-    # ==== RUST ECOSYSTEM ====
-
-    # Rust Analyzer (Enhanced)
-    "rust-analyzer.check.command" = "clippy";
-    "rust-analyzer.procMacro.enable" = true;
-    "rust-analyzer.cargo.buildScripts.enable" = true;
-    "rust-analyzer.diagnostics.enable" = true;
-    "rust-analyzer.diagnostics.enableExperimental" = true;
-    "rust-analyzer.completion.addCallArgumentSnippets" = true;
-    "rust-analyzer.completion.addCallParenthesis" = true;
-    "rust-analyzer.inlayHints.enable" = true;
-    "rust-analyzer.inlayHints.chainingHints" = true;
-    "rust-analyzer.inlayHints.parameterHints" = true;
-    "rust-analyzer.inlayHints.typeHints" = true;
-    "rust-analyzer.lens.enable" = true;
-    "rust-analyzer.lens.methodReferences" = true;
-    "rust-analyzer.lens.references" = true;
-
-    # ==== C/C++ ECOSYSTEM ====
-
-    # C/C++ Configuration (placeholder for when extension is available)
-    # "C_Cpp.intelliSenseEngine" = "default";
-    # "C_Cpp.autocomplete" = "default";
-    # "C_Cpp.errorSquiggles" = "enabled";
-    # "C_Cpp.dimInactiveRegions" = true;
-
-    # ==== JAVA ECOSYSTEM ====
-
-    # Java Configuration (placeholder for when extension is available)
-    # "java.configuration.detectJdksAtStart" = true;
-    # "java.compile.nullAnalysis.mode" = "automatic";
-    # "java.inlayHints.parameterNames.enabled" = "all";
-
-    # ==== NIX ECOSYSTEM ====
-
-    # Nix Language Configuration
-    "nix.enableLanguageServer" = true;
-    "nix.serverPath" = "nil";
-    "nix.serverSettings" = {
-      "nil" = {
-        "diagnostics" = {
-          "ignored" = [
-            "unused_binding"
-            "unused_with"
-          ];
-        };
-        "formatting" = {
-          "command" = [ "nixfmt" ];
-        };
-      };
-    };
-
-    # ==== SHELL SCRIPTING ====
-
-    # Bash/Shell Configuration
-    "bashIde.globPattern" = "**/@(.bashrc|.bash_profile|.zshrc|.zprofile|*.sh|*.bash|*.zsh)";
-    "shellcheck.enableQuickFix" = true;
-    "shellcheck.run" = "onType";
-
-    # ==== MARKUP & DOCUMENTATION ====
-
-    # Markdown Configuration (Enhanced)
-    "markdown.preview.breaks" = true;
-    "markdown.preview.linkify" = true;
-    "markdown.preview.typographer" = true;
-    "markdown.extension.toc.levels" = "1..6";
-    "markdown.extension.preview.autoShowPreviewToSide" = false;
-
-    # YAML Configuration
-    "yaml.completion" = true;
-    "yaml.hover" = true;
-    "yaml.validate" = true;
-    "yaml.format.enable" = true;
-    "yaml.format.singleQuote" = false;
-    "yaml.format.bracketSpacing" = true;
-
-    # JSON Configuration
-    "json.validate.enable" = true;
-    "json.format.enable" = true;
-    "json.schemaDownload.enable" = true;
-
-    # ==== BIOME CONFIGURATION ====
-
-    # Biome Settings (Modern JavaScript/TypeScript Tooling)
-    "biome.enabled" = true;
-    "biome.lsp.bin" = "biome";
-    "biome.requireConfiguration" = false;
-
-    # ==== PER-LANGUAGE FORMATTERS ====
-
-    # Python
-    "[python]" = {
-      "editor.defaultFormatter" = "ms-python.black-formatter";
-      "editor.codeActionsOnSave" = {
-        "source.organizeImports" = "explicit";
-      };
-    };
-
-    # Go
-    "[go]" = {
-      "editor.defaultFormatter" = "golang.go";
-      "editor.codeActionsOnSave" = {
-        "source.organizeImports" = "explicit";
-      };
-    };
-
-    # Rust
-    "[rust]" = {
-      "editor.defaultFormatter" = "rust-lang.rust-analyzer";
-      "editor.codeActionsOnSave" = {
-        "source.fixAll" = "explicit";
-      };
-    };
-
-    # JavaScript & TypeScript (Biome)
-    "[javascript]" = {
-      "editor.defaultFormatter" = "biomejs.biome";
-      "editor.codeActionsOnSave" = {
-        "source.fixAll.biome" = "explicit";
-        "source.organizeImports.biome" = "explicit";
-      };
-    };
-    "[javascriptreact]" = {
-      "editor.defaultFormatter" = "biomejs.biome";
-      "editor.codeActionsOnSave" = {
-        "source.fixAll.biome" = "explicit";
-        "source.organizeImports.biome" = "explicit";
-      };
-    };
-    "[typescript]" = {
-      "editor.defaultFormatter" = "biomejs.biome";
-      "editor.codeActionsOnSave" = {
-        "source.fixAll.biome" = "explicit";
-        "source.organizeImports.biome" = "explicit";
-      };
-    };
-    "[typescriptreact]" = {
-      "editor.defaultFormatter" = "biomejs.biome";
-      "editor.codeActionsOnSave" = {
-        "source.fixAll.biome" = "explicit";
-        "source.organizeImports.biome" = "explicit";
-      };
-    };
-
-    # JSON & CSS (Biome)
-    "[json]" = {
-      "editor.defaultFormatter" = "biomejs.biome";
-    };
-    "[jsonc]" = {
-      "editor.defaultFormatter" = "biomejs.biome";
-    };
-    "[css]" = {
-      "editor.defaultFormatter" = "biomejs.biome";
-    };
-    "[scss]" = {
-      "editor.defaultFormatter" = "biomejs.biome";
-    };
-
-    # HTML & Markdown (Biome)
-    "[html]" = {
-      "editor.defaultFormatter" = "biomejs.biome";
-    };
-    "[markdown]" = {
-      "editor.defaultFormatter" = "biomejs.biome";
-    };
-
-    # Nix
-    "[nix]" = {
-      "editor.defaultFormatter" = "jnoortheen.nix-ide";
-      "editor.insertSpaces" = true;
-      "editor.tabSize" = 2;
-    };
-
-    # YAML
-    "[yaml]" = {
-      "editor.insertSpaces" = true;
-      "editor.tabSize" = 2;
-      "editor.autoIndent" = "advanced";
-    };
-
-    # TOML
-    "[toml]" = {
-      "editor.insertSpaces" = true;
-      "editor.tabSize" = 2;
-    };
-
-    # ==== GLOBAL EDITOR OVERRIDES ====
-
-    # Remove duplicate settings that were moved to settings.nix
-    # Note: formatOnSave and codeActionsOnSave are handled globally in settings.nix
-    # Language-specific overrides above take precedence
+  # Map simple formatter names to VSCode extension IDs
+  formatterMap = {
+    biome = "biomejs.biome";
+    black = "ms-python.black-formatter";
+    rustfmt = "rust-lang.rust-analyzer";
+    "nixpkgs-fmt" = "jnoortheen.nix-ide";
+    goimports = "golang.go"; # Assuming goimports is the standard
   };
+
+  # Generate per-language formatter settings from the standards file
+  perLanguageFormatters =
+    lib.attrsets.genAttrs
+      [
+        "javascript"
+        "javascriptreact"
+        "typescript"
+        "typescriptreact"
+        "json"
+        "jsonc"
+        "css"
+        "graphql"
+        "python"
+        "rust"
+        "nix"
+      ]
+      (
+        lang:
+        let
+          # Determine the base language standard (e.g., 'javascriptreact' uses 'javascript')
+          standardName =
+            {
+              javascriptreact = "javascript";
+              typescriptreact = "typescript";
+              jsonc = "json";
+            }
+            .${lang} or lang;
+
+          standard = standards.languages.${standardName} or { };
+          formatterId =
+            if standard ? formatter && standard.formatter != null then
+              formatterMap.${standard.formatter} or null
+            else
+              null;
+        in
+        lib.optionalAttrs (formatterId != null) {
+          "editor.defaultFormatter" = formatterId;
+          "editor.tabSize" = standard.indent or 2;
+          "editor.insertSpaces" = true;
+
+          "editor.codeActionsOnSave" =
+            if standard.formatter == "biome" then
+              {
+                "source.fixAll.biome" = "explicit";
+                "source.organizeImports.biome" = "explicit";
+              }
+            else if lang == "python" then
+              { "source.organizeImports" = "explicit"; }
+            else if lang == "go" then
+              { "source.organizeImports" = "explicit"; }
+            else if lang == "rust" then
+              { "source.fixAll" = "explicit"; }
+            else
+              { };
+        }
+      );
+
+  # Shared settings for TypeScript & JavaScript
+  jsTsShared = {
+    ".preferences.quoteStyle" = "double";
+    ".suggest.autoImports" = true;
+    ".updateImportsOnFileMove.enabled" = "always";
+    ".inlayHints.enabled" = "on";
+    ".preferences.includePackageJsonAutoImports" = "auto";
+    ".workspaceSymbols.scope" = "allOpenProjects";
+  };
+
+  # Helper to add a prefix to attribute set keys
+  prefixKeys =
+    prefix: attrs:
+    builtins.listToAttrs (
+      builtins.map (name: {
+        name = "${prefix}${name}";
+        value = attrs.${name};
+      }) (builtins.attrNames attrs)
+    );
+
+in
+{
+  userSettings = lib.mkMerge [
+    (prefixKeys "javascript" jsTsShared)
+    (prefixKeys "typescript" jsTsShared)
+    perLanguageFormatters
+    {
+      # ==== PYTHON ECOSYSTEM ====
+      "python.analysis.typeCheckingMode" = "strict";
+      "python.analysis.autoImportCompletions" = true;
+      "python.analysis.diagnosticMode" = "workspace";
+      "python.testing.pytestEnabled" = true;
+
+      # ==== GO ECOSYSTEM ====
+      "go.useLanguageServer" = true;
+      "go.lintTool" = "golangci-lint";
+      "gopls".ui.semanticTokens = true;
+
+      # ==== RUST ECOSYSTEM ====
+      "rust-analyzer.check.command" = "clippy";
+
+      # ==== NIX ECOSYSTEM ====
+      "nix.enableLanguageServer" = true;
+      "nix.serverPath" = "nil";
+      "nix.serverSettings".nil.formatting.command = [ "nixfmt" ];
+
+      # ==== BIOME CONFIGURATION ====
+      "biome.enabled" = true;
+
+      # ==== MISC ====
+      "shellcheck.enableQuickFix" = true;
+      "files.associations" = {
+        ".bashrc" = "shellscript";
+        ".zshrc" = "shellscript";
+      };
+
+      "[yaml]" = {
+        "editor.insertSpaces" = true;
+        "editor.tabSize" = 2;
+      };
+      "[toml]" = {
+        "editor.insertSpaces" = true;
+        "editor.tabSize" = 2;
+      };
+    }
+  ];
 }
