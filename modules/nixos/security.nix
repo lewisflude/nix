@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ ... }:
+{
   security.pam.loginLimits = [
     {
       domain = "*";
@@ -15,6 +16,9 @@
   ];
   systemd.extraConfig = "DefaultLimitNOFILE=524288";
   security.pki.certificateFiles = [ ../mitmproxy-ca-cert.pem ];
+
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.login.enableGnomeKeyring = true;
 
   # GitHub access token should be configured via environment variable or SOPS
   # nix.settings = {
