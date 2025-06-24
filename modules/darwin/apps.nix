@@ -18,6 +18,7 @@
     brews = [
       "circleci"
       "nx"
+      "pinentry-mac"
     ];
     # GUI applications
     casks = [

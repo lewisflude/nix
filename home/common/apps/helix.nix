@@ -1,147 +1,58 @@
+{ lib, ... }:
+let
+  standards = import ../development/language-standards.nix;
+
+  # Helper function to create indentation string
+  makeIndentString = n: builtins.concatStringsSep "" (builtins.genList (x: " ") n);
+in
 {
   programs.helix = {
     enable = true;
     languages = {
-      language = [
-        {
-          name = "nix";
-          scope = "source.nix";
-          injection-regex = "nix";
-          file-types = [ "nix" ];
-          comment-token = "#";
-          language-servers = [ "nil" ];
-          indent = {
-            tab-width = 2;
-            unit = "  ";
-          };
-          formatter = {
-            command = "nixpkgs-fmt";
-          };
-          auto-format = true;
-        }
-        {
-          name = "typescript";
-          scope = "source.ts";
-          injection-regex = "ts";
-          file-types = [
-            "ts"
-            "tsx"
-          ];
-          comment-token = "//";
-          language-servers = [ "typescript-language-server" ];
-          indent = {
-            tab-width = 2;
-            unit = "  ";
-          };
-          formatter = {
-            command = "biome";
-          };
-          auto-format = true;
-        }
-        {
-          name = "javascript";
-          scope = "source.js";
-          injection-regex = "js";
-          file-types = [
-            "js"
-            "jsx"
-          ];
-          comment-token = "//";
-          language-servers = [ "typescript-language-server" ];
-          indent = {
-            tab-width = 2;
-            unit = "  ";
-          };
-          formatter = {
-            command = "biome";
-          };
-          auto-format = true;
-        }
-        {
-          name = "json";
-          scope = "source.json";
-          injection-regex = "json";
-          file-types = [ "json" ];
-          language-servers = [ "vscode-langservers-extracted" ];
-          indent = {
-            tab-width = 2;
-            unit = "  ";
-          };
-          formatter = {
-            command = "biome";
-          };
-          auto-format = true;
-        }
-        {
-          name = "yaml";
-          scope = "source.yaml";
-          injection-regex = "yaml";
-          file-types = [
-            "yaml"
-            "yml"
-          ];
-          language-servers = [ "yaml-language-server" ];
-          indent = {
-            tab-width = 2;
-            unit = "  ";
-          };
-          formatter = {
-            command = "biome";
-          };
-          auto-format = true;
-        }
-        {
-          name = "markdown";
-          scope = "source.md";
-          injection-regex = "markdown";
-          file-types = [
-            "md"
-            "markdown"
-          ];
-          language-servers = [ "marksman" ];
-          indent = {
-            tab-width = 2;
-            unit = "  ";
-          };
-          formatter = {
-            command = "biome";
-          };
-          auto-format = true;
-        }
-        {
-          name = "rust";
-          scope = "source.rust";
-          injection-regex = "rust";
-          file-types = [ "rs" ];
-          language-servers = [ "rust-analyzer" ];
-          indent = {
-            tab-width = 4;
-            unit = "    ";
-          };
-          formatter = {
-            command = "rustfmt";
-          };
-          auto-format = true;
-        }
-        {
-          name = "python";
-          scope = "source.python";
-          injection-regex = "python";
-          file-types = [ "py" ];
-          language-servers = [ "pyright" ];
-          indent = {
-            tab-width = 4;
-            unit = "    ";
-          };
-          formatter = {
-            command = "black";
-          };
-          auto-format = true;
-        }
-      ];
+      language = lib.mapAttrsToList (
+        name: value:
+        (
+          {
+            inherit name;
+            scope = "source.${name}";
+            injection-regex = name;
+            file-types = value.fileTypes or [ name ];
+            language-servers = [ value.lsp ];
+            comment-token = value.comment or "";
+            indent = {
+              tab-width = value.indent;
+              unit = value.unit or (makeIndentString value.indent);
+            };
+            auto-format = value.formatter != null;
+          }
+          // lib.optionalAttrs (value.formatter != null) {
+            formatter = {
+              command = value.formatter;
+            };
+          }
+        )
+      ) standards.languages;
     };
 
     settings = {
+      editor = {
+        line-number = "relative";
+        cursorline = true;
+        bufferline = "multiple";
+        soft-wrap.enable = true;
+      };
+
+      editor.cursor-shape = {
+        insert = "bar";
+        normal = "block";
+        select = "underline";
+      };
+
+      editor.indent-guides = {
+        render = true;
+        character = "┊";
+      };
+
       keys.normal = {
         space.space = "file_picker";
         space.w = ":w";
@@ -178,12 +89,16 @@
       };
 
       editor.whitespace = {
-        render = "all";
+        render = {
+          space = "all";
+          tab = "all";
+        };
         characters = {
           space = "·";
           nbsp = "⍽";
           tab = "→";
           newline = "⏎";
+          tabpad = " ";
         };
       };
 
