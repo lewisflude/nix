@@ -1,0 +1,50 @@
+---
+description: Cursor editor configuration and settings management
+globs: ["**/cursor/*.nix", "**/cursor/**"]
+alwaysApply: false
+---
+
+# Cursor Configuration Standards
+
+## Settings Organization
+- Separate concerns: main settings, language configs, AI settings
+- Use `userSettings` attribute for VS Code compatible settings
+- Import language standards from centralized configuration
+- Keep cursor-specific files minimal and focused
+
+## Language Configuration
+- Generate language-specific settings programmatically
+- Use formatter mappings from language standards
+- Apply consistent indentation and style rules
+- Handle language aliases (jsx→js, tsx→ts) properly
+
+## File Structure
+- `settings.nix` - Core editor settings and UI preferences
+- `language-settings.nix` - Auto-generated language configurations  
+- `ai-settings.nix` - Cursor AI behavior (keep minimal)
+- Avoid duplicate settings across files
+
+## VS Code Compatibility
+- Use only documented VS Code settings in `userSettings`
+- Avoid invalid or undocumented `cursor.*` settings
+- Configure Cursor-specific features through UI, not JSON
+- Test settings compatibility before applying
+
+## Best Practices for This Project
+- Reference `language-standards.nix` for formatter consistency
+- Use constants for shared ignore patterns
+- Keep AI configuration minimal - use rules instead of settings
+- Document any non-obvious configuration choices
+- Version control all configuration files
+
+## AI Integration
+- Use `.cursor/rules` for AI behavior instead of JSON settings
+- Create project-specific rules for domain knowledge
+- Keep global rules focused on coding standards
+- Test AI rules with representative prompts
+
+## Maintenance
+- Remove invalid settings regularly
+- Update formatter mappings when adding new languages
+- Keep documentation current with actual usage
+- Test configuration changes in isolation

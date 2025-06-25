@@ -23,10 +23,7 @@ in
     "editor.guides.indentation" = true;
     "editor.formatOnSave" = true;
     "editor.formatOnPaste" = true;
-    "editor.codeActionsOnSave" = {
-      "source.organizeImports" = "always";
-      "source.fixAll" = "always";
-    };
+
     "editor.semanticHighlighting.enabled" = true;
     "terminal.integrated.minimumContrastRatio" = 1;
     "window.titleBarStyle" = "custom";
@@ -37,13 +34,15 @@ in
     "files.trimTrailingWhitespace" = true;
     "files.insertFinalNewline" = true;
     "files.hotExit" = "onExit";
-    "search.exclude" = commonIgnores;
+
     "search.useIgnoreFiles" = true;
     "search.useGitIgnore" = true;
     "search.smartCase" = true;
     "search.showLineNumbers" = true;
     "search.maxResults" = 20000;
+
     "workbench.colorTheme" = "Catppuccin Mocha";
+
     "explorer.compactFolders" = false;
     "explorer.confirmDelete" = true;
     "explorer.confirmDragAndDrop" = true;
@@ -60,6 +59,7 @@ in
       "Cargo.toml" = "Cargo.lock";
       "flake.nix" = "flake.lock";
     };
+
     "git.autofetch" = true;
     "git.confirmSync" = false;
     "git.enableCommitSigning" = true;
@@ -84,10 +84,10 @@ in
     "terminal.integrated.env.osx" = {
       "GPG_TTY" = "$(tty)";
     };
+
     "telemetry.telemetryLevel" = "off";
     "security.workspace.trust.enabled" = false;
     "extensions.ignoreRecommendations" = true;
     "extensions.autoCheckUpdates" = false;
-
   };
 }
