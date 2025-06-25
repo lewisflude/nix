@@ -40,5 +40,21 @@
         "mcp/time"
       ];
     };
+    "Framelink Figma MCP" = {
+      "command" = "npx";
+      "args" = [
+        "-y"
+        "figma-developer-mcp"
+        "--figma-api-key=REDACTED_FIGMA_KEY
+"
+        "--stdio"
+      ];
+    };
+    "playwright" = {
+      "command" = "npx";
+      "args" = [
+        "@playwright/mcp@latest"
+      ];
+    };
   };
 }
