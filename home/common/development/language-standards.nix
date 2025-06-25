@@ -8,7 +8,7 @@
     # Nix
     nix = {
       lsp = "nil";
-      formatter = "nixpkgs-fmt";
+      formatter = "nixfmt";
       indent = 2;
       comment = "#";
     };
@@ -61,12 +61,18 @@
     # Other
     yaml = {
       lsp = "yaml-language-server";
-      formatter = null; # Biome doesn't support YAML formatting
+      formatter = "yamlfmt"; # Use yamlfmt for YAML formatting
       indent = 2;
       fileTypes = [
         "yaml"
         "yml"
       ];
+    };
+    toml = {
+      lsp = "taplo";
+      formatter = "taplo"; # Use taplo for TOML formatting
+      indent = 2;
+      fileTypes = [ "toml" ];
     };
     markdown = {
       lsp = "marksman";

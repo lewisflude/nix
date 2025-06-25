@@ -1,0 +1,55 @@
+---
+description: Home Manager configuration patterns and best practices
+globs: ["home/**/*.nix"]
+alwaysApply: false
+---
+
+# Home Manager Configuration Rules
+
+## Module Structure
+- Always include proper module imports at the top
+- Use `{ pkgs, lib, config, ... }:` parameter pattern
+- Return attribute sets with `programs`, `services`, `home` sections
+- Keep module-specific logic contained within each file
+
+## Application Configuration
+- Use `programs.<app>.enable = true` pattern for applications
+- Configure settings through `programs.<app>.settings` when available
+- Prefer structured Nix expressions over raw config strings
+- Use `home.file` only when program-specific options don't exist
+
+## Settings Management
+- Use `userSettings` pattern for editor configurations
+- Merge multiple setting sources with `lib.mkMerge`
+- Reference external constants and standards files
+- Avoid duplicating configuration across different apps
+
+## Package Management  
+- Use `home.packages` for user-installed packages
+- Prefer `programs.<app>` over plain package installation
+- Group related packages logically in lists
+- Document why specific packages are included
+
+## File and Directory Management
+- Use `home.file` for dotfiles that need special handling
+- Set proper file permissions with `mode` attribute
+- Use `home.sessionVariables` for environment variables
+- Organize XDG directories properly
+
+## Service Configuration
+- Enable services through `services.<service>.enable`
+- Configure service-specific settings in dedicated blocks
+- Use proper systemd service patterns when needed
+- Consider dependencies between services
+
+## Development Environment
+- Keep development tools in separate modules
+- Use language-specific configuration patterns
+- Integrate with system-wide package management
+- Maintain consistency with editor configurations
+
+## This Project Patterns
+- Follow the `home/common/` structure for shared configs
+- Use `home/common/apps/` for application-specific settings
+- Reference `language-standards.nix` for development tool consistency
+- Keep platform-specific configs separate from common ones
