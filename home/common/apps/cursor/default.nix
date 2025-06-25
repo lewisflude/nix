@@ -26,7 +26,7 @@ in
   # Manage the MCP configuration file
   home.file.".cursor/mcp.json" = {
     text = builtins.toJSON {
-      servers = mcpConfig.mcpServers;
+      mcpServers = mcpConfig.mcpServers;
     };
   };
 }
