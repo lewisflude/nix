@@ -2,6 +2,7 @@
   pkgs,
   hostname,
   username,
+  lib,
   config,
   ...
 }:
@@ -14,13 +15,53 @@
     ext4fuse
     openssl
     postgresql_16
+    yubikey-personalization
+    yubico-piv-tool
+    opensc
+    pcsctools
   ];
 
-  # Sudo Configuration
-  security.pam.enableSudoTouchIdAuth = true; # Enable Touch ID for sudo
+  # Sudo and Login Configuration
+
   environment.etc."sudoers.d/timeout".text = ''
     Defaults timestamp_timeout=30  # Set sudo timeout to 30 minutes
   '';
+
+  security.pam.services.sudo_local = {
+    enable = true;
+    touchIdAuth = true;
+    watchIdAuth = true;
+    reattach = true;
+    text = lib.mkForce ''
+      #%PAM-1.0
+      # Your smartcard + unix auth stack:
+      auth       sufficient   pam_smartcard.so debug
+      auth       required     pam_unix.so
+    '';
+  };
+
+  # Additional smartcard configuration
+  environment.etc."SmartcardServices/readers.conf".text = ''
+    name = "Yubico YubiKey"
+    ids = (0x1050:0x0407, 0x1050:0x0111, 0x1050:0x0112, 0x1050:0x0115, 0x1050:0x0116, 0x1050:0x0404, 0x1050:0x0405, 0x1050:0x0406, 0x1050:0x0407, 0x1050:0x0410)
+    driver = "smartcard"
+    systemManaged = true
+  '';
+
+  # Ensure smartcard services are running
+  launchd.daemons.smartcard = {
+    serviceConfig = {
+      Label = "com.apple.SmartCardServices";
+      ProgramArguments = [
+        "/System/Library/Frameworks/PCSC.framework/Versions/Current/XPCServices/com.apple.SmartCardServices.pcsc.xpc"
+      ];
+      MachServices = {
+        "com.apple.SmartCardServices" = true;
+      };
+      KeepAlive = true;
+      RunAtLoad = true;
+    };
+  };
 
   # Power Management Settings
   power = {
@@ -29,14 +70,6 @@
       computer = 60;
     };
   };
-
-  # Fonts - temporarily disabled due to Python compatibility issues
-  # fonts = {
-  #   packages = with pkgs; [
-  #     nerd-fonts.jetbrains-mono
-  #     nerd-fonts.iosevka
-  #   ];
-  # };
 
   # Networking
   networking = {

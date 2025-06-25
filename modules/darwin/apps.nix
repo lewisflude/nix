@@ -29,6 +29,7 @@
       "betterdisplay"
       "chatgpt"
       "docker"
+      "docker-desktop"
       "figma"
       "ghostty@tip"
       "google-chrome@canary"
