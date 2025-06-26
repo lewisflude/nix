@@ -17,6 +17,7 @@
     ];
     brews = [
       "circleci"
+      "node"
       "nx"
       "pinentry-mac"
     ];
