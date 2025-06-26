@@ -38,7 +38,6 @@
 
     # Configuration
     ./nixpkgs.nix
-    ./overlays.nix
     ./secrets.nix
     ./theme.nix
 

@@ -1,8 +1,10 @@
 keys:
-  - &users:
-    - &username 9FF5123074AF5871A6D9A22C4EE1F251042A46F1
+  - &lewis_gpg 7369D9C25A365E6C926ADBAB48B34CF9C735A6AE
+
 creation_rules:
-  - path_regex: secrets.yaml$
-    key_groups:
-      - pgp:
-          - *username
+  - path_regex: secrets/.*\.yaml$
+    pgp: *lewis_gpg
+  - path_regex: secrets/.*\.json$
+    pgp: *lewis_gpg
+  - path_regex: hosts/.*/secrets\.yaml$
+    pgp: *lewis_gpg

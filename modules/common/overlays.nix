@@ -9,6 +9,8 @@
       # Yazi overlay
       inputs.yazi.overlays.default
 
+      inputs.mcp-servers-nix.overlays.default
+
       # Waybar overlay
       (final: _: { waybar_git = inputs.waybar.packages.${final.system}.waybar; })
 

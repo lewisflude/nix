@@ -1,13 +1,7 @@
 {
-  config,
   lib,
   pkgs,
   username,
-  hostname,
-  configVars ? {
-    username = username;
-    hostname = hostname;
-  },
   inputs,
   ...
 }:

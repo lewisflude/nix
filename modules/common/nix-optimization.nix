@@ -31,6 +31,7 @@
     # Binary cache settings for faster builds
     substituters =
       [
+        "https://lewisflude.cachix.org"
         "https://cache.nixos.org"
         "https://hyprland.cachix.org"
         "https://nix-community.cachix.org"
@@ -45,6 +46,7 @@
       ];
     trusted-substituters =
       [
+        "https://lewisflude.cachix.org"
         "https://cache.nixos.org"
         "https://hyprland.cachix.org"
         "https://nix-community.cachix.org"
@@ -67,6 +69,7 @@
         "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
         "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
         "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+        "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc="
       ]
       ++ lib.optionals (lib.hasInfix "darwin" system) [
         "cache.determinate.systems-1:cd9bVm9wnyQHfHpLRhHGDMWWgPEXFEoKhiMuQ1jmNj8="
