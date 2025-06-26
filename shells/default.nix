@@ -7,7 +7,7 @@
     nextjs = import ./projects/nextjs.nix { inherit pkgs; };
     react-native = import ./projects/react-native.nix { inherit pkgs lib; };
     api-backend = import ./projects/api-backend.nix { inherit pkgs; };
-    
+
     # Utility shells
     shell-selector = import ./utils/shell-selector.nix { inherit pkgs; };
     # Node.js/TypeScript development
@@ -23,7 +23,7 @@
         nodePackages.typescript-language-server
         nodePackages.vscode-langservers-extracted
       ];
-      
+
       shellHook = ''
         echo "🚀 Node.js development environment loaded"
         echo "Node version: $(node --version)"
@@ -34,17 +34,17 @@
     # Python development
     python = pkgs.mkShell {
       buildInputs = with pkgs; [
-        python312
-        python312Packages.pip
-        python312Packages.virtualenv
-        python312Packages.pytest
-        python312Packages.black
-        python312Packages.isort
-        python312Packages.mypy
-        python312Packages.ruff
-        python312Packages.poetry
+        python313
+        python313Packages.pip
+        python313Packages.virtualenv
+        python313Packages.pytest
+        python313Packages.black
+        python313Packages.isort
+        python313Packages.mypy
+        python313Packages.ruff
+        python313Packages.poetry
       ];
-      
+
       shellHook = ''
         echo "🐍 Python development environment loaded"
         echo "Python version: $(python --version)"
@@ -64,7 +64,7 @@
         cargo-edit
         cargo-audit
       ];
-      
+
       shellHook = ''
         echo "🦀 Rust development environment loaded"
         echo "Rust version: $(rustc --version)"
@@ -81,7 +81,7 @@
         gotools
         delve
       ];
-      
+
       shellHook = ''
         echo "🐹 Go development environment loaded"
         echo "Go version: $(go version)"
@@ -104,7 +104,7 @@
         html-tidy
         sass
       ];
-      
+
       shellHook = ''
         echo "🌐 Web development environment loaded"
         echo "Node version: $(node --version)"
@@ -122,7 +122,7 @@
         nodePackages.pnpm
         anchor-cli
       ];
-      
+
       shellHook = ''
         echo "⚡ Solana development environment loaded"
         echo "Solana version: $(solana --version)"
@@ -144,7 +144,7 @@
         gcloud
         azure-cli
       ];
-      
+
       shellHook = ''
         echo "🛠️  DevOps environment loaded"
         echo "kubectl version: $(kubectl version --client --short)"
