@@ -18,13 +18,11 @@
     marksman
     nil
     nixfmt-rfc-style
-    nodejs_22
     nodePackages.pnpm
     nodePackages.typescript
     nodePackages.typescript-language-server
     nodePackages.vscode-langservers-extracted
     pgcli
-    playwright
     pyright
     rustup
     solana-cli
@@ -35,7 +33,14 @@
 
   imports = [
     ./apps/cursor
-    ./apps/helix.nix
+    ./apps/bat.nix
+    ./apps/direnv.nix
+    ./apps/fzf.nix
+    ./apps/ripgrep.nix
     ./apps/yazi.nix
+    ./apps/zoxide.nix
+    ./apps/helix.nix
+    ./apps/mcp-hub.nix
+    ./apps/mcp.nix
   ];
 }

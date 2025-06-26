@@ -1,10 +1,21 @@
-{ mcpConfigs ? null, ... }:
 {
-  # Claude Desktop MCP configuration
-  home.file."Library/Application Support/Claude/claude_desktop_config.json" = 
-    if mcpConfigs != null then {
-      text = builtins.toJSON mcpConfigs.claude;
-    } else {
-      text = "{}";
+  pkgs,
+  config,
+  ...
+}:
+{
+  home.packages = with pkgs; [
+    uv
+  ];
+  services.mcp.enable = true;
+  services.mcp.servers = {
+    kagi = {
+      command = "uvx";
+      args = [ "kagimcp" ];
+      env = {
+        KAGI_API_KEY = config.sops.secrets.KAGI_API_KEY.path;
+      };
+      port = 11431;
     };
+  };
 }
