@@ -74,7 +74,20 @@ let
 in
 {
   config = {
-    environment.systemPackages = builtins.attrValues mcp-servers.packages ++ [ cursor-with-mcp ];
+    environment.systemPackages = 
+      let
+        enabledPackages = builtins.filter (pkg: 
+          let
+            name = pkg.pname or (builtins.parseDrvName pkg.name).name;
+            programName = if builtins.hasAttr name mcpPrograms 
+                         then name 
+                         else if name == "mcp-server-fetch" then "fetch"
+                         else name;
+          in
+          builtins.hasAttr programName mcpPrograms && mcpPrograms.${programName}.enable or false
+        ) (builtins.attrValues mcp-servers.packages);
+      in
+      enabledPackages ++ [ cursor-with-mcp ];
 
     # Keep cursor config in system for backward compatibility with existing setup
     environment.etc."cursor_mcp_config.json" = {
