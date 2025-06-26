@@ -1,10 +1,9 @@
-{ pkgs
-, config
-, ...
-}: {
-  home.shell = {
-    enableShellIntegration = true;
-  };
+{
+  pkgs,
+  config,
+  ...
+}:
+{
 
   home.file = {
     ".p10k.zsh" = {
@@ -42,7 +41,11 @@
       size = 10000;
       ignoreAllDups = true;
       path = "${config.home.homeDirectory}/.zsh_history";
-      ignorePatterns = [ "rm *" "pkill *" "cp *" ];
+      ignorePatterns = [
+        "rm *"
+        "pkill *"
+        "cp *"
+      ];
     };
 
     plugins = [

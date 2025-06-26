@@ -1,8 +1,3 @@
-# Secrets directory - never commit
-secrets/
-~/.config/secrets/
-~/.config/secrets/*
-
 # SSH keys and configuration
 ~/.ssh/
 ~/.ssh/id_*

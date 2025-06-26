@@ -9,14 +9,15 @@
       # Yazi overlay
       inputs.yazi.overlays.default
 
-      inputs.mcp-servers-nix.overlays.default
-
       # Waybar overlay
       (final: _: { waybar_git = inputs.waybar.packages.${final.system}.waybar; })
 
       # Ghostty overlay
       (final: prev: {
         ghostty = inputs.ghostty.packages.${final.system}.default;
+      })
+      (final: prev: {
+        mcp-hub = inputs.mcp-hub.packages.${final.system}.default;
       })
     ]
     ++ lib.optionals (inputs ? nvidia-patch) [

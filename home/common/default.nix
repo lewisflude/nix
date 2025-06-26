@@ -15,16 +15,12 @@
       ./gpg.nix
       ./development
       ./system
+      ./sops.nix
       ./lib
-
+      ./modules.nix
     ]
     ++ lib.optionals (lib.hasInfix "linux" system) [
       ./desktop
     ];
 
-  programs.direnv = {
-    enable = true;
-    enableZshIntegration = true;
-    nix-direnv.enable = true;
-  };
 }

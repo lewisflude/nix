@@ -3,30 +3,22 @@
   hostname,
   username,
   lib,
-  config,
   ...
 }:
 {
 
-  # System Libraries
   environment.systemPackages = with pkgs; [
     libiconv
     pkg-config
     openssl
-    yubikey-personalization
-    yubico-piv-tool
-    opensc
     pcsctools
     sops
   ];
-
-  # Sudo and Login Configuration
 
   environment.etc."sudoers.d/timeout".text = ''
     Defaults timestamp_timeout=30  # Set sudo timeout to 30 minutes
   '';
 
-  # Power Management Settings
   power = {
     sleep = {
       display = 30;
@@ -34,19 +26,15 @@
     };
   };
 
-  # Networking
   networking = {
     hostName = hostname;
     computerName = hostname;
     localHostName = hostname;
   };
 
-  # SSH Configuration
   services.openssh = {
     enable = true;
   };
-
-  security.pam.services.sudo_local.touchIdAuth = true;
 
   programs.ssh = {
     extraConfig = ''

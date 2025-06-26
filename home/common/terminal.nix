@@ -57,14 +57,6 @@
       nil # Nix language server
     ];
 
-  imports = [
-    ./apps/bat.nix
-    ./apps/direnv.nix
-    ./apps/fzf.nix
-    ./apps/ripgrep.nix
-    ./apps/zoxide.nix
-  ];
-
   programs.ghostty = {
     enable = true;
     package = if lib.hasInfix "linux" system then pkgs.ghostty else null;

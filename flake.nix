@@ -62,7 +62,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     cursor.url = "github:omarcresp/cursor-flake/main";
-    mcp-servers-nix.url = "github:natsukium/mcp-servers-nix";
+    mcp-hub.url = "github:ravitemer/mcp-hub";
 
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
@@ -112,8 +112,7 @@
       nixos-hardware,
       solaar,
       nvidia-patch,
-      mcp-servers-nix,
-
+      mcp-hub,
       cursor,
       ...
     }:
@@ -170,6 +169,7 @@
               home-manager.verbose = true;
               home-manager.backupFileExtension = "backup";
               home-manager.sharedModules = [
+                sops-nix.homeManagerModules.sops
                 mac-app-util.homeManagerModules.default
                 catppuccin.homeModules.catppuccin
               ];
@@ -225,8 +225,9 @@
                   configVars = import ./config-vars.nix;
                 };
               home-manager.sharedModules = [
-                sops-nix.homeManagerModules.sops
                 catppuccin.homeModules.catppuccin
+                inputs.sops-nix.homeManagerModules.sops
+
               ];
               home-manager.users.${hostConfig.username} = import ./home;
             }
@@ -295,7 +296,6 @@
             };
           modules = [
             ./home
-            sops-nix.homeManagerModules.sops
             catppuccin.homeModules.catppuccin
           ];
         }

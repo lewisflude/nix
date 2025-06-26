@@ -1,6 +1,5 @@
 {
   # User configuration
-  hostname = "jupiter";
   email = "lewis@lewisflude.com";
   fullName = "Lewis Flude";
 
