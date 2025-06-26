@@ -7,12 +7,12 @@
   # System preferences
   timezone = "America/New_York";
   locale = "en_US.UTF-8";
-  
+
   # Development preferences
   editor = "helix";
   shell = "zsh";
   terminal = "ghostty";
-  
+
   # Theme preferences
   theme = {
     name = "catppuccin";
@@ -29,7 +29,7 @@
   # Development environment
   languages = {
     node = "22";
-    python = "3.12";
+    python = "3.13";
     rust = "stable";
   };
 
