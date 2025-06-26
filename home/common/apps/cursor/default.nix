@@ -1,4 +1,8 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  ...
+}:
 
 let
   constants = import ./constants.nix { };
@@ -6,7 +10,7 @@ let
   languageSettings = import ./language-settings.nix { inherit lib; };
   aiSettings = import ./ai-settings.nix { };
   extensions = import ./extensions.nix { inherit pkgs lib; };
-  mcpConfig = import ./mcp-config.nix { };
+
 in
 {
   programs.vscode = {
@@ -20,13 +24,6 @@ in
         aiSettings.userSettings
       ];
       extensions = extensions.extensions;
-    };
-  };
-
-  # Manage the MCP configuration file
-  home.file.".cursor/mcp.json" = {
-    text = builtins.toJSON {
-      mcpServers = mcpConfig.mcpServers;
     };
   };
 }

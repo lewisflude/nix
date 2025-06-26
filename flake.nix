@@ -62,8 +62,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     cursor.url = "github:omarcresp/cursor-flake/main";
+    mcp-servers-nix.url = "github:natsukium/mcp-servers-nix";
 
-    # macOS-specific homebrew inputs
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
       flake = false;
@@ -112,6 +112,8 @@
       nixos-hardware,
       solaar,
       nvidia-patch,
+      mcp-servers-nix,
+
       cursor,
       ...
     }:
@@ -139,6 +141,10 @@
             home-manager.darwinModules.home-manager
             mac-app-util.darwinModules.default
             nix-homebrew.darwinModules.nix-homebrew
+            sops-nix.darwinModules.sops
+
+            # Make inputs available to all modules
+            { _module.args = { inherit inputs; }; }
 
             {
 

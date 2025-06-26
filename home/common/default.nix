@@ -6,7 +6,6 @@
 {
   imports =
     [
-      # Cross-platform modules
       ./apps.nix
       ./git.nix
       ./shell.nix
@@ -18,13 +17,11 @@
       ./system
       ./lib
 
-      # Linux-specific modules (desktop environment)
     ]
     ++ lib.optionals (lib.hasInfix "linux" system) [
       ./desktop
     ];
 
-  # Enable direnv for development environments
   programs.direnv = {
     enable = true;
     enableZshIntegration = true;

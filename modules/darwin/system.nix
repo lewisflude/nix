@@ -12,13 +12,12 @@
   environment.systemPackages = with pkgs; [
     libiconv
     pkg-config
-    ext4fuse
     openssl
-    postgresql_16
     yubikey-personalization
     yubico-piv-tool
     opensc
     pcsctools
+    sops
   ];
 
   # Sudo and Login Configuration
@@ -26,42 +25,6 @@
   environment.etc."sudoers.d/timeout".text = ''
     Defaults timestamp_timeout=30  # Set sudo timeout to 30 minutes
   '';
-
-  security.pam.services.sudo_local = {
-    enable = true;
-    touchIdAuth = true;
-    watchIdAuth = true;
-    reattach = true;
-    text = lib.mkForce ''
-      #%PAM-1.0
-      # Your smartcard + unix auth stack:
-      auth       sufficient   pam_smartcard.so debug
-      auth       required     pam_unix.so
-    '';
-  };
-
-  # Additional smartcard configuration
-  environment.etc."SmartcardServices/readers.conf".text = ''
-    name = "Yubico YubiKey"
-    ids = (0x1050:0x0407, 0x1050:0x0111, 0x1050:0x0112, 0x1050:0x0115, 0x1050:0x0116, 0x1050:0x0404, 0x1050:0x0405, 0x1050:0x0406, 0x1050:0x0407, 0x1050:0x0410)
-    driver = "smartcard"
-    systemManaged = true
-  '';
-
-  # Ensure smartcard services are running
-  launchd.daemons.smartcard = {
-    serviceConfig = {
-      Label = "com.apple.SmartCardServices";
-      ProgramArguments = [
-        "/System/Library/Frameworks/PCSC.framework/Versions/Current/XPCServices/com.apple.SmartCardServices.pcsc.xpc"
-      ];
-      MachServices = {
-        "com.apple.SmartCardServices" = true;
-      };
-      KeepAlive = true;
-      RunAtLoad = true;
-    };
-  };
 
   # Power Management Settings
   power = {
@@ -82,39 +45,43 @@
   services.openssh = {
     enable = true;
   };
-  environment.etc."ssh/ssh_config.d/secure.conf".text = ''
-    # Secure SSH configuration
-    Host *
-      PasswordAuthentication no
-      PubkeyAuthentication yes
-  '';
+
+  security.pam.services.sudo_local.touchIdAuth = true;
+
+  programs.ssh = {
+    extraConfig = ''
+      Host *
+        PasswordAuthentication no
+        PubkeyAuthentication yes
+        PKCS11Provider ${pkgs.opensc}/lib/opensc-pkcs11.so
+    '';
+  };
 
   system.primaryUser = username;
 
-  # macOS System Settings
-  system.defaults = {
-    # Dock Settings
-    dock = {
-      # Frontend Developer Setup - TypeScript/React focused
-      persistent-apps = [
-        # Primary development tools (most used)
-        "/System/Volumes/Data/Applications/Docker.app"
-        "/System/Volumes/Data/Applications/Google Chrome Canary.app" # Primary browser for development
-
-        # Design & Planning
-        "/System/Volumes/Data/Applications/Figma.app"
-        "/System/Volumes/Data/Applications/Notion.app"
-        "/System/Volumes/Data/Applications/Obsidian.app"
-
-        # Communication & Database
-        "/System/Volumes/Data/Applications/Slack.app"
-        "/etc/profiles/per-user/${username}/bin/tableplus"
-
-        # System utilities
-        "/System/Applications/System Settings.app"
+  system.defaults.dock.persistent-apps =
+    let
+      homebrewApps = lib.filter (app: builtins.pathExists app) [
+        "/Applications/Docker.app"
+        "/Applications/Google Chrome Canary.app"
+        "/Applications/Figma.app"
+        "/Applications/Notion.app"
+        "/Applications/Obsidian.app"
+        "/Applications/Slack.app"
+        "/Applications/Linear.app"
+        "/Applications/Raycast.app"
+        "/Applications/Beekeeper Studio.app"
+        "/Applications/ChatGPT.app"
       ];
 
-      # Persistent folders (optional)
+      systemApps = [
+        "/System/Applications/System Settings.app"
+      ];
+    in
+    homebrewApps ++ systemApps;
+
+  system.defaults = {
+    dock = {
       persistent-others = [
         "/Users/${username}/Downloads"
         "/Users/${username}/Documents"
@@ -192,7 +159,4 @@
       TrackpadRightClick = true;
     };
   };
-  nix.extraOptions = ''
-    extra-sandbox-paths = /System/Library/Frameworks /Library/Frameworks
-  '';
 }
