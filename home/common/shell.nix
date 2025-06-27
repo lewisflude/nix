@@ -110,6 +110,7 @@
   # Environment variables managed by home-manager
   home.sessionVariables = {
     SSH_AUTH_SOCK = "$(gpgconf --list-dirs agent-ssh-socket)";
+    EDITOR = "hx";
   };
 
   # Environment path management
