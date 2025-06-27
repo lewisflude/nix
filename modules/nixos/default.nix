@@ -38,7 +38,6 @@
 
     # Configuration
     ./nixpkgs.nix
-    ./secrets.nix
     ./theme.nix
 
     # Scripts
