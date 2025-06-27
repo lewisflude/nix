@@ -1,109 +1,81 @@
 # Development Shells
 
-This directory contains organized development environments for different project types and workflows.
+This directory provides reproducible development environments for a variety of project types and workflows, using Nix flakes and Home Manager.
 
-## Quick Start
+## 🚀 Quick Start
 
-### Using Shell Selector
+### 1. Interactive Shell Selection
 ```bash
-# Interactive shell selection
 nix develop ~/.config/nix#shell-selector
 select_dev_shell
-
-# Quick project setup
-nix develop ~/.config/nix#shell-selector  
-setup_project
 ```
 
-### Direct Shell Usage
+### 2. Direct Shell Usage
 ```bash
 # Project-specific environments
 nix develop ~/.config/nix#nextjs          # Next.js projects
 nix develop ~/.config/nix#react-native    # Mobile development
 nix develop ~/.config/nix#api-backend     # Backend APIs
 
-# General purpose environments  
+# General purpose environments
 nix develop ~/.config/nix#node            # Node.js/TypeScript
-nix develop ~/.config/nix#python          # Python development
-nix develop ~/.config/nix#rust            # Rust development
-nix develop ~/.config/nix#go              # Go development
+nix develop ~/.config/nix#python          # Python
+nix develop ~/.config/nix#rust            # Rust
+nix develop ~/.config/nix#go              # Go
 nix develop ~/.config/nix#web             # Full-stack web
-nix develop ~/.config/nix#devops          # Infrastructure/DevOps
+nix develop ~/.config/nix#devops          # DevOps/Infra
 ```
 
-## Project Setup with .envrc
+### 3. Project-based with direnv
+1. Copy a template for your project:
+   ```bash
+   cp ~/.config/nix/shells/envrc-templates/node .envrc  # or nextjs, python, etc.
+   direnv allow
+   ```
+2. The environment loads automatically when you `cd` into the project directory.
 
-### 1. Copy Template
-```bash
-# For Next.js projects
-cp ~/.config/nix/shells/envrc-templates/nextjs .envrc
+---
 
-# For React Native projects  
-cp ~/.config/nix/shells/envrc-templates/mobile .envrc
-
-# For API backends
-cp ~/.config/nix/shells/envrc-templates/api .envrc
-```
-
-### 2. Enable direnv
-```bash
-direnv allow
-```
-
-### 3. Automatic Environment Loading
-The environment will automatically load when you `cd` into the project directory.
-
-## Available Environments
+## 🧩 Available Environments
 
 ### Project-Specific Shells
-
-| Shell | Description | Key Tools |
-|-------|-------------|-----------|
-| `nextjs` | Next.js React projects | Node.js 22, pnpm, TypeScript, Tailwind |
-| `react-native` | Mobile app development | React Native CLI, CocoaPods, Watchman |
-| `api-backend` | Backend API services | Node.js, Prisma, PostgreSQL, Redis |
+| Shell           | Description             | Key Tools                                 |
+|-----------------|-------------------------|-------------------------------------------|
+| `nextjs`        | Next.js React projects  | Node.js 22, pnpm, TypeScript, Tailwind    |
+| `react-native`  | Mobile app development  | React Native CLI, CocoaPods, Watchman     |
+| `api-backend`   | Backend API services    | Node.js, Prisma, PostgreSQL, Redis        |
 
 ### General Purpose Shells
-
-| Shell | Description | Key Tools |
-|-------|-------------|-----------|
-| `node` | Node.js/TypeScript | Node.js 22, pnpm, TypeScript, ESLint |
-| `python` | Python development | Python 3.12, Poetry, pytest, Black |
-| `rust` | Rust development | rustc, cargo, clippy, rust-analyzer |
-| `go` | Go development | Go, gopls, golangci-lint |
-| `web` | Full-stack web | Node.js, Sass, Tailwind |
-| `solana` | Blockchain development | Solana CLI, Anchor, Rust |
-| `devops` | Infrastructure/DevOps | kubectl, terraform, docker, AWS CLI |
+| Shell      | Description           | Key Tools                                 |
+|------------|-----------------------|-------------------------------------------|
+| `node`     | Node.js/TypeScript    | Node.js 22, pnpm, TypeScript, ESLint      |
+| `python`   | Python development    | Python 3.12, Poetry, pytest, Black        |
+| `rust`     | Rust development      | rustc, cargo, clippy, rust-analyzer       |
+| `go`       | Go development        | Go, gopls, golangci-lint                  |
+| `web`      | Full-stack web        | Node.js, Sass, Tailwind                   |
+| `solana`   | Blockchain dev        | Solana CLI, Anchor, Rust                  |
+| `devops`   | Infra/DevOps          | kubectl, terraform, docker, AWS CLI       |
 
 ### Utility Shells
+| Shell            | Description                        | Features                  |
+|------------------|------------------------------------|---------------------------|
+| `shell-selector` | Interactive environment selection  | fzf-based, project wizard |
 
-| Shell | Description | Features |
-|-------|-------------|----------|
-| `shell-selector` | Interactive environment selection | fzf-based selection, project wizard |
+---
 
-## Features
+## ⚡ Features
+- **Auto-dependencies:**
+  - Node.js: Installs npm/pnpm/yarn deps
+  - Python: Creates venv, installs requirements
+  - Mobile: Installs iOS pods as needed
+- **Environment variables:**
+  - `NODE_ENV=development`, `RUST_BACKTRACE=1`, DB URLs, etc.
+- **Aliases:**
+  - `dev`, `build`, `test`, `lint`, and project-specific shortcuts
 
-### Auto-Dependencies
-- **Node.js projects**: Auto-installs npm/pnpm/yarn dependencies
-- **Python projects**: Creates virtual environments, installs requirements
-- **Mobile projects**: Auto-installs iOS pods when needed
+---
 
-### Environment Variables
-Each environment sets appropriate development variables:
-- `NODE_ENV=development`
-- `RUST_BACKTRACE=1`
-- Database URLs for API projects
-- Platform-specific configurations
-
-### Aliases
-Convenient aliases for common commands:
-- `dev` - Start development server
-- `build` - Build project
-- `test` - Run tests  
-- `lint` - Run linter
-- Project-specific shortcuts
-
-## Directory Structure
+## 📁 Directory Structure
 
 ```
 shells/
@@ -115,58 +87,57 @@ shells/
 ├── utils/                   # Utility shells
 │   └── shell-selector.nix
 ├── envrc-templates/         # .envrc templates for direnv
-│   ├── nextjs
-│   ├── mobile
 │   ├── api
+│   ├── mobile
+│   ├── nextjs
 │   ├── node
 │   ├── python
 │   └── rust
-└── README.md               # This file
+└── README.md                # This file
 ```
 
-## Adding New Environments
+---
 
-### 1. Create Shell Definition
-```nix
-# shells/projects/my-project.nix
-{ pkgs, ... }:
+## ➕ Adding New Environments
 
-pkgs.mkShell {
-  buildInputs = with pkgs; [
-    # your tools here
-  ];
-  
-  shellHook = ''
-    echo "🚀 My Project environment loaded"
-    # setup commands
-  '';
-}
-```
+1. **Create a shell definition:**
+   ```nix
+   # shells/projects/my-project.nix
+   { pkgs, ... }:
+   pkgs.mkShell {
+     buildInputs = with pkgs; [
+       # your tools here
+     ];
+     shellHook = ''
+       echo "🚀 My Project environment loaded"
+       # setup commands
+     '';
+   }
+   ```
+2. **Add to `shells/default.nix`:**
+   ```nix
+   devShells = {
+     my-project = import ./projects/my-project.nix { inherit pkgs; };
+     # ... other shells
+   };
+   ```
+3. **Create a .envrc template:**
+   ```bash
+   # shells/envrc-templates/my-project
+   use flake ~/.config/nix#my-project
+   export MY_VAR=value
+   ```
+4. **Update the shell selector:**
+   Add your new environment to the `shells` array in `utils/shell-selector.nix`.
 
-### 2. Add to shells/default.nix  
-```nix
-devShells = {
-  my-project = import ./projects/my-project.nix { inherit pkgs; };
-  # ... other shells
-};
-```
+---
 
-### 3. Create .envrc Template
-```bash
-# shells/envrc-templates/my-project
-use flake ~/.config/nix#my-project
+## ✅ Best Practices
+1. Use direnv for automatic environment loading
+2. Prefer project-specific environments when possible
+3. Follow consistent naming patterns
+4. Document changes and test new shells on all platforms
 
-# Project-specific setup
-export MY_VAR=value
-```
+---
 
-### 4. Update Shell Selector
-Add your new environment to the `shells` array in `utils/shell-selector.nix`.
-
-## Best Practices
-
-1. **Use direnv**: Set up `.envrc` files for automatic environment loading
-2. **Project-specific**: Choose the most specific environment for your project type  
-3. **Consistent naming**: Follow the established naming patterns
-4. **Document changes**: Update this README when adding new environments
-5. **Test thoroughly**: Ensure new shells work across different systems
+For more details, see the main [README.md](../README.md).
