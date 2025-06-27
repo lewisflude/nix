@@ -1,8 +1,4 @@
 {
-  # Unified Language Standards
-  # This file is the single source of truth for language-specific configurations.
-  # Editors like Helix and Cursor should source their settings from here to ensure
-  # consistency and simplify maintenance.
 
   languages = {
     # Nix

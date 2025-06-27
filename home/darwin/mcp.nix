@@ -7,6 +7,14 @@
   home.packages = with pkgs; [
     uv
   ];
+
+  home.file."bin/kagi-mcp-wrapper".text = ''
+    #!/usr/bin/env bash
+    export KAGI_API_KEY="$(cat ${config.sops.secrets.KAGI_API_KEY.path})"
+    exec ${pkgs.uv}/bin/uvx kagimcp "$@"
+  '';
+  home.file."bin/kagi-mcp-wrapper".executable = true;
+
   services.mcp.enable = true;
   services.mcp.targets = {
     cursor = {
@@ -20,11 +28,8 @@
   };
   services.mcp.servers = {
     kagi = {
-      command = "${pkgs.uv}/bin/uvx";
-      args = [ "kagimcp" ];
-      env = {
-        KAGI_API_KEY = builtins.readFile config.sops.secrets.KAGI_API_KEY.path;
-      };
+      command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
+      args = [ ];
       port = 11431;
     };
     fetch = {
