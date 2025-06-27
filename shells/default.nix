@@ -57,7 +57,6 @@
       buildInputs = with pkgs; [
         rustc
         cargo
-        rustfmt
         rust-analyzer
         clippy
         cargo-watch

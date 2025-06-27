@@ -7,7 +7,6 @@
     # Development tools (cross-platform)
     awscli2
     biome
-    black
     claude-code
     codex
     coreutils
