@@ -31,6 +31,9 @@
       command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
       args = [ ];
       port = 11431;
+      env = {
+        KAGI_API_KEY = config.sops.secrets.KAGI_API_KEY.path;
+      };
     };
     fetch = {
       command = "${pkgs.uv}/bin/uvx";
