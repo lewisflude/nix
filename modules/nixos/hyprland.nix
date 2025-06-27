@@ -1,4 +1,4 @@
-{ pkgs, lib, config, hyprland, system, ... }:
+{ pkgs, hyprland, system, ... }:
 {
   # Enable Hyprland with UWSM
   programs.hyprland = {
