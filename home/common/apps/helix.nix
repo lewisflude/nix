@@ -18,12 +18,14 @@ in
             injection-regex = name;
             file-types = value.fileTypes or [ name ];
             language-servers = [ value.lsp ];
-            comment-token = value.comment or "";
             indent = {
               tab-width = value.indent;
               unit = value.unit or (makeIndentString value.indent);
             };
             auto-format = value.formatter != null;
+          }
+          // lib.optionalAttrs (value ? comment) {
+            comment-tokens = [ value.comment ];
           }
           // lib.optionalAttrs (value.formatter != null) {
             formatter = {
