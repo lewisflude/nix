@@ -33,7 +33,6 @@
     ./zfs.nix
 
     # Authentication
-    ./password-management.nix
     ./yubikey.nix
 
     # Configuration
