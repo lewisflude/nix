@@ -1,5 +1,6 @@
 {
   pkgs,
+  config,
   ...
 }:
 
@@ -20,16 +21,11 @@ in
   ];
 
   security.pam.services.sudo_local.touchIdAuth = true;
+  security.pam.services.sudo_local.watchIdAuth = true;
 
   security.pam.services = {
     sudo_local.text = ''
-      # sudo: auth account password session
-      auth        sufficient     pam_smartcard.so
-      auth        required      pam_opendirectory.so
-      auth        required      pam_deny.so
-      account     required      pam_permit.so
-      password    required      pam_deny.so
-      session     required      pam_permit.so
+      auth sufficient ${pkgs.pam_u2f}/lib/security/pam_u2f.so cue pinverification=1 userpresence=1
     '';
   };
 
