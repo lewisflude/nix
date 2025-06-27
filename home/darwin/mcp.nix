@@ -23,7 +23,7 @@
       command = "${pkgs.uv}/bin/uvx";
       args = [ "kagimcp" ];
       env = {
-        KAGI_API_KEY = config.sops.secrets.KAGI_API_KEY.path;
+        KAGI_API_KEY = builtins.readFile config.sops.secrets.KAGI_API_KEY.path;
       };
       port = 11431;
     };

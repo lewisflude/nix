@@ -10,7 +10,6 @@
       lsp = "nil";
       formatter = "nixfmt";
       indent = 2;
-      comment = "#";
     };
 
     # Web (Biome)
@@ -18,7 +17,6 @@
       lsp = "typescript-language-server";
       formatter = "biome";
       indent = 2;
-      comment = "//";
       fileTypes = [
         "ts"
         "tsx"
@@ -28,7 +26,6 @@
       lsp = "typescript-language-server";
       formatter = "biome";
       indent = 2;
-      comment = "//";
       fileTypes = [
         "js"
         "jsx"
@@ -44,14 +41,12 @@
       lsp = "vscode-langservers-extracted";
       formatter = "biome";
       indent = 2;
-      comment = "/*";
       fileTypes = [ "css" ];
     };
     graphql = {
       lsp = "graphql-language-server";
       formatter = "biome";
       indent = 2;
-      comment = "#";
       fileTypes = [
         "graphql"
         "gql"
