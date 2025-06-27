@@ -40,7 +40,5 @@
     ./apps/yazi.nix
     ./apps/zoxide.nix
     ./apps/helix.nix
-    ./apps/mcp-hub.nix
-    ./apps/mcp.nix
   ];
 }

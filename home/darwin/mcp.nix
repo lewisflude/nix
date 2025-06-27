@@ -8,6 +8,16 @@
     uv
   ];
   services.mcp.enable = true;
+  services.mcp.targets = {
+    cursor = {
+      directory = "${config.home.homeDirectory}/.cursor";
+      fileName = "mcp.json";
+    };
+    claude = {
+      directory = "/Users/${config.home.username}/Library/Application Support/Claude";
+      fileName = "claude_desktop_config.json";
+    };
+  };
   services.mcp.servers = {
     # kagi = {
     #   command = "${pkgs.uv}/bin/uvx";
