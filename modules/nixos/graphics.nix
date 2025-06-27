@@ -26,6 +26,8 @@ in
     __GL_VRR_ALLOWED = "0";
     GBM_BACKEND = "nvidia-drm";
     WLR_NO_HARDWARE_CURSORS = "1";
+    WLR_RENDERER_ALLOW_SOFTWARE = "1";
+    WLR_BACKENDS = "headless,drm";
 
   };
   hardware = {

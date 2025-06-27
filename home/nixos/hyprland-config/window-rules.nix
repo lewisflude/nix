@@ -1,7 +1,7 @@
 {
   wayland.windowManager.hyprland.settings = {
     monitor = [
-      "DP-1,3440x1440@165,0x0,1,bitdepth,10,vrr,1,cm,hdredid,sdrbrightness,1.2,sdrsaturation, 0.98"
+      "DP-1,3440x1440@165,0x0,1,vrr,1"
     ];
 
     windowrule = [
