@@ -101,20 +101,9 @@
       homebrew-j178,
       homebrew-domt4,
       catppuccin,
-      hyprland,
-      hyprland-plugins,
-      astal,
       sops-nix,
-      waybar,
-      ghostty,
       musnix,
-      nixpkgs-mozilla,
-      yazi,
-      nixos-hardware,
       solaar,
-      nvidia-patch,
-      mcp-hub,
-      cursor,
       ...
     }:
     let
@@ -237,7 +226,7 @@
     {
       # Provide formatters for all systems
       formatter = nixpkgs.lib.genAttrs (builtins.attrValues (
-        builtins.mapAttrs (name: host: host.system) hosts
+        builtins.mapAttrs (_name: host: host.system) hosts
       )) (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
 
       # Developer shells for all systems
@@ -272,20 +261,20 @@
       # Darwin configurations
       darwinConfigurations = builtins.mapAttrs (name: hostConfig: mkDarwinSystem name hostConfig) (
         nixpkgs.lib.filterAttrs (
-          name: host: host.system == "aarch64-darwin" || host.system == "x86_64-darwin"
+          _name: host: host.system == "aarch64-darwin" || host.system == "x86_64-darwin"
         ) hosts
       );
 
       # NixOS configurations
       nixosConfigurations = builtins.mapAttrs (name: hostConfig: mkNixosSystem name hostConfig) (
         nixpkgs.lib.filterAttrs (
-          name: host: host.system == "x86_64-linux" || host.system == "aarch64-linux"
+          _name: host: host.system == "x86_64-linux" || host.system == "aarch64-linux"
         ) hosts
       );
 
       # Standalone home-manager configurations
       homeConfigurations = builtins.mapAttrs (
-        name: hostConfig:
+        _name: hostConfig:
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.${hostConfig.system};
           extraSpecialArgs =

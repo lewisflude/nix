@@ -2,7 +2,7 @@
 # Comprehensive extension collection organized by category for senior developers
 # Modular design allows for easy customization and selective loading
 
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 
 let
   vsc = pkgs.vscode-extensions;
@@ -77,9 +77,6 @@ let
   ];
 
   # ==== AI & ASSISTANCE ====
-  aiTools = [
-
-  ];
 
   # ==== OPTIONAL/SPECIALIZED EXTENSIONS ====
   specialized = [
