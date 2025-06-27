@@ -19,7 +19,6 @@
       "circleci"
       "node"
       "nx"
-      "pinentry-mac"
     ];
     # GUI applications
     casks = [

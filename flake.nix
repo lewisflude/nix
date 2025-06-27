@@ -84,6 +84,7 @@
       url = "github:domt4/homebrew-autoupdate";
       flake = false;
     };
+
   };
 
   outputs =
