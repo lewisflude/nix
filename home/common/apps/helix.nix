@@ -3,7 +3,7 @@ let
   standards = import ../development/language-standards.nix;
 
   # Helper function to create indentation string
-  makeIndentString = n: builtins.concatStringsSep "" (builtins.genList (x: " ") n);
+  makeIndentString = n: builtins.concatStringsSep "" (builtins.genList (_x: " ") n);
 in
 {
   programs.helix = {

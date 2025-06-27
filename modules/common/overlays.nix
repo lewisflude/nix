@@ -13,10 +13,10 @@
       (final: _: { waybar_git = inputs.waybar.packages.${final.system}.waybar; })
 
       # Ghostty overlay
-      (final: prev: {
+      (final: _prev: {
         ghostty = inputs.ghostty.packages.${final.system}.default;
       })
-      (final: prev: {
+      (final: _prev: {
         mcp-hub = inputs.mcp-hub.packages.${final.system}.default;
       })
     ]

@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 
@@ -59,7 +58,7 @@ let
     };
   };
 
-  mkMcpConfig = name: serverCfg: {
+  mkMcpConfig = _name: serverCfg: {
     command = serverCfg.command;
     args = serverCfg.args;
     env = serverCfg.env;
