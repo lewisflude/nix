@@ -19,14 +19,14 @@
     };
   };
   services.mcp.servers = {
-    # kagi = {
-    #   command = "${pkgs.uv}/bin/uvx";
-    #   args = [ "kagimcp" ];
-    #   env = {
-    #     KAGI_API_KEY = config.sops.secrets.KAGI_API_KEY.path;
-    #   };
-    #   port = 11431;
-    # };
+    kagi = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [ "kagimcp" ];
+      env = {
+        KAGI_API_KEY = config.sops.secrets.KAGI_API_KEY.path;
+      };
+      port = 11431;
+    };
     fetch = {
       command = "${pkgs.uv}/bin/uvx";
       args = [ "mcp-server-fetch" ];
