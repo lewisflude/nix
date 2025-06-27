@@ -42,6 +42,23 @@ let
     };
   };
 
+  mcpTargetType = types.submodule {
+    options = {
+      name = mkOption {
+        type = types.str;
+        description = "The name of the MCP target";
+      };
+      directory = mkOption {
+        type = types.path;
+        description = "The directory to store the MCP target";
+      };
+      fileName = mkOption {
+        type = types.str;
+        description = "The file name to store the MCP target";
+      };
+    };
+  };
+
   mkMcpConfig = name: serverCfg: {
     command = serverCfg.command;
     args = serverCfg.args;
@@ -56,6 +73,22 @@ in
 {
   options.services.mcp = {
     enable = mkEnableOption "MCP (Model Context Protocol) servers";
+
+    targets = mkOption {
+      type = types.attrsOf mcpTargetType;
+      default = { };
+      description = "MCP targets to configure";
+      example = {
+        "cursor" = {
+          directory = "/Users/${config.home.username}/.cursor";
+          fileName = "mcp.json";
+        };
+        "claude" = {
+          directory = "/Users/${config.home.username}/Library/Application Support/Claude";
+          fileName = "claude_desktop_config.json";
+        };
+      };
+    };
 
     servers = mkOption {
       type = types.attrsOf mcpServerType;
@@ -81,15 +114,13 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.file =
-      {
-        ".mcp/gateway.json".text = builtins.toJSON mcpConfigJson;
-        ".cursor/mcp.json".text = builtins.toJSON mcpConfigJson;
-      }
-      // lib.optionalAttrs pkgs.stdenv.isDarwin {
-        "Library/Application Support/Claude/claude_desktop_config.json".text =
-          builtins.toJSON mcpConfigJson;
-      };
-
+    home.file = (
+      builtins.listToAttrs (
+        map (target: {
+          name = "${target.directory}/${target.fileName}";
+          value.text = builtins.toJSON mcpConfigJson;
+        }) (attrValues cfg.targets)
+      )
+    );
   };
 }
