@@ -6,6 +6,7 @@
 {
   nixpkgs.overlays =
     [
+
       # Yazi overlay
       inputs.yazi.overlays.default
 
