@@ -41,11 +41,5 @@
 
     # Scripts
     ./sh.nix
-
-    # Home Assistant
-    ./home-assistant.nix
-
-    # Music Assistant
-    ./music-assistant.nix
   ];
 }

@@ -11,6 +11,7 @@
     flavor = "mocha";
     accent = "mauve";
     enable = true;
+    waybar.mode = "createLink";
     mako.enable = lib.mkIf (lib.hasInfix "linux" system) false;
   };
 

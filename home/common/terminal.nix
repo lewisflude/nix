@@ -62,7 +62,7 @@
     package = if lib.hasInfix "linux" system then pkgs.ghostty else null;
     enableZshIntegration = true;
     settings = {
-      font-family = "Iosevka";
+      font-family = "Iosevka Nerd Font";
       font-feature = "+calt,+liga,+dlig";
       font-size = 12;
       font-synthetic-style = true;

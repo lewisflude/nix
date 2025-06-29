@@ -1,8 +1,10 @@
-{ lib
-, modulesPath
-, pkgs
-, ...
-}: {
+{
+  lib,
+  modulesPath,
+  pkgs,
+  ...
+}:
+{
 
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -13,13 +15,31 @@
   ];
   boot = {
     initrd.supportedFilesystems = [ "zfs" ];
-    initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "thunderbolt" "usbhid" "usb_storage" "sd_mod" "zfs" "veth" "bridge" "br_netfilter" "xt_nat" ];
+    initrd.availableKernelModules = [
+      "xhci_pci"
+      "ahci"
+      "nvme"
+      "thunderbolt"
+      "usbhid"
+      "usb_storage"
+      "sd_mod"
+      "zfs"
+      "veth"
+      "bridge"
+      "br_netfilter"
+      "xt_nat"
+    ];
     initrd.kernelModules = [ ];
-    kernelModules = [ "kvm-intel" "zfs" "hid_sony" ];
+    kernelModules = [
+      "kvm-intel"
+      "zfs"
+      "hid_sony"
+    ];
     extraModulePackages = [ ];
   };
   hardware.cpu.intel.updateMicrocode = true;
   hardware.enableAllFirmware = true;
+  hardware.i2c.enable = true;
   powerManagement.cpuFreqGovernor = "performance";
 
   services.auto-cpufreq = {
@@ -63,13 +83,27 @@
     "/mnt/disk1" = {
       device = "/dev/disk/by-id/ata-WDC_WD140EDFZ-11A0VA0_9LGED2YG-part1";
       fsType = "xfs";
-      options = [ "defaults" "nofail" "noatime" "logbufs=8" "allocsize=64m" "x-systemd.after=mnt-storage.mount" ];
+      options = [
+        "defaults"
+        "nofail"
+        "noatime"
+        "logbufs=8"
+        "allocsize=64m"
+        "x-systemd.after=mnt-storage.mount"
+      ];
     };
 
     "/mnt/disk2" = {
       device = "/dev/disk/by-id/ata-WDC_WD140EDFZ-11A0VA0_Y5JTWKLC-part1";
       fsType = "xfs";
-      options = [ "defaults" "nofail" "noatime" "logbufs=8" "allocsize=64m" "x-systemd.after=mnt-storage.mount" ];
+      options = [
+        "defaults"
+        "nofail"
+        "noatime"
+        "logbufs=8"
+        "allocsize=64m"
+        "x-systemd.after=mnt-storage.mount"
+      ];
     };
     "/mnt/storage" = {
       device = "/mnt/disk1:/mnt/disk2";

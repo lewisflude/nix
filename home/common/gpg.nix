@@ -15,7 +15,7 @@
 
     settings = {
       default-key = "48B34CF9C735A6AE";
-      use-agent = true;
+      pinentry-mode = "loopback";
     };
   };
 
@@ -25,7 +25,7 @@
 
     pinentry.package = if pkgs.stdenv.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-curses;
 
-    defaultCacheTtl = 28800;
+    defaultCacheTtl = 86400;
     maxCacheTtl = 86400;
 
     extraConfig = ''
@@ -34,6 +34,7 @@
       allow-preset-passphrase
       grab
       no-allow-external-cache
+      allow-loopback-pinentry
     '';
   };
 
