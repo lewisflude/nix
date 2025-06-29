@@ -56,7 +56,7 @@ in
       settings = {
         background = [
           {
-            path = "${config.home.sessionVariables.WALLPAPER_DIR}/nurburgring.png";
+            path = "${config.home.sessionVariables.WALLPAPER_DIR}/nix-wallpaper-nineish-catppuccin-mocha.png";
           }
         ];
       };
