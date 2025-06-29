@@ -10,6 +10,7 @@ in
     "editor.fontSize" = 14;
     "editor.lineHeight" = 1.5;
     "editor.fontLigatures" = true;
+    "editor.fontFamily" = "Iosevka Nerd Font, Iosevka";
     "editor.rulers" = [
       80
       120
@@ -78,9 +79,13 @@ in
     ];
 
     "terminal.integrated.defaultProfile.osx" = "zsh";
+    "terminal.integrated.defaultProfile.linux" = "zsh";
     "terminal.integrated.fontSize" = 14;
     "terminal.integrated.scrollback" = 10000;
     "terminal.integrated.shellIntegration.enabled" = true;
+    "terminal.integrated.env.linux" = {
+      "GPG_TTY" = "$(tty)";
+    };
     "terminal.integrated.env.osx" = {
       "GPG_TTY" = "$(tty)";
     };
