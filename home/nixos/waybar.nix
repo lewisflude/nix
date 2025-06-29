@@ -11,6 +11,11 @@ let
   };
 in
 {
+
+  wayland.windowManager.hyprland.settings.layerrule = [
+    "blur,waybar,ignorealpha,ignorezero"
+  ];
+
   programs.waybar = {
     enable = true;
     package = pkgs.waybar_git;
@@ -37,6 +42,7 @@ in
           "custom/brightness"
           "pulseaudio"
           "clock"
+          "tray"
         ];
 
         # Workspace icons
@@ -93,22 +99,31 @@ in
 
         # Load-sparkline alerts
         "custom/alerts" = {
-          exec = "${config.home.homeDirectory}/bin/system-spark";
+          exec = "${config.home.homeDirectory}/bin/system-spark-percentage";
+          return-type = "json";
           interval = 10;
-          format = "{spark}";
-          tooltip-format = "Load history: {loadHistory}";
+          format = "{icon}";
+          format-icons = {
+            "default" = "▁▁▁"; # 0-25%
+            "low" = "▂▂▂"; # 25-50%
+            "medium" = "▅▅▅"; # 50-80%
+            "high" = "▇▇▇"; # 80%+
+          };
         };
-
         # Brightness control
         "custom/brightness" = {
-          exec = "/home/lewis/.nix-profile/bin/brightness get";
+          exec = "${config.home.homeDirectory}/bin/brightness get";
           format = " {}%";
           tooltip = false;
           interval = 30;
-          on-click = "/home/lewis/.nix-profile/bin/brightness set 100";
-          on-click-right = "/home/lewis/.nix-profile/bin/brightness set 0";
-          on-scroll-up = "/home/lewis/.nix-profile/bin/brightness up";
-          on-scroll-down = "/home/lewis/.nix-profile/bin/brightness down";
+          on-click = "${config.home.homeDirectory}/bin/brightness set 100";
+          on-click-right = "${config.home.homeDirectory}/bin/brightness set 0";
+          on-scroll-up = "${config.home.homeDirectory}/bin/brightness up";
+          on-scroll-down = "${config.home.homeDirectory}/bin/brightness down";
+        };
+        tray = {
+          icon-size = 24;
+          spacing = 10;
         };
 
         # Audio volume
@@ -185,20 +200,29 @@ in
     executable = true;
   };
 
-  # System-spark helper script
-  home.file."bin/system-spark" = {
+  # Script that converts load to percentage and uses 'alt' for icon selection
+  home.file."bin/system-spark-percentage" = {
     text = ''
       #!/usr/bin/env bash
       IFS=',' read -r load1 load5 load15 _ < <(uptime | sed -E 's/.*load average: //')
-      spark=""
-      for load in $load1 $load5 $load15; do
-        lv=$(echo "$load" | awk '{printf "%d", $1*10}')
-        if (( lv >= 20 )); then spark+=▇;
-        elif (( lv >= 10 )); then spark+=▅;
-        elif (( lv >= 5 )); then spark+=▂;
-        else spark+=▁; fi
-      done
-      echo "{\"spark\":\"$spark\",\"loadHistory\":\"$load1,$load5,$load15\"}"
+
+      # Convert 1-minute load to percentage (load of 2.0 = 100%)
+      load_pct=$(echo "$load1" | awk '{printf "%d", ($1/2.0)*100}')
+      if [ $load_pct -gt 100 ]; then load_pct=100; fi
+
+      # Determine icon category based on load percentage
+      if [ $load_pct -ge 80 ]; then
+        alt="high"
+      elif [ $load_pct -ge 50 ]; then
+        alt="medium"
+      elif [ $load_pct -ge 25 ]; then
+        alt="med-low"
+      else
+        alt="low"
+      fi
+
+      # Output JSON with percentage and alt for icon selection
+      printf '{"percentage":%d,"alt":"%s"}' "$load_pct" "$alt" | jq --unbuffered --compact-output
     '';
     executable = true;
   };
