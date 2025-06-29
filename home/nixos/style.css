@@ -1,0 +1,73 @@
+@import "./catppuccin.css";
+
+
+/* Bar container */
+window#waybar {
+  padding: 8px;
+  border-radius: 0;
+}
+
+/* Module spacing */
+#workspaces,
+#window,
+#cpu,
+#memory,
+#network,
+#pulseaudio,
+#custom-brightness,
+#custom-alerts,
+#custom-backup,
+#clock {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+/* Workspace buttons */
+#workspaces button {
+  padding: 8px;
+  font-family: "Iosevka Nerd Font", Iosevka, "JetBrains Mono", "Fira Code", monospace;
+  border-radius: 0;
+}
+
+#workspaces button:hover {
+  background: alpha(@surface1, 0.5);
+}
+
+/* Font and icon size */
+* {
+  font-family: "Iosevka Nerd Font", Iosevka, "JetBrains Mono", "Fira Code", monospace;
+  font-size: 14px;
+}
+
+/* Existing color and module rules remain below */
+#workspaces button.active {
+  color: @mauve;
+}
+
+#workspaces button {
+  background: transparent;
+  border: none;
+  color: @subtext1;
+}
+
+#clock {
+  font-weight: bold;
+  color: @rosewater;
+}
+
+#cpu,
+#memory {
+  color: @yellow;
+}
+
+#network {
+  color: @sky;
+}
+
+#pulseaudio {
+  color: @teal;
+}
+
+#custom-brightness {
+  color: @pink;
+}

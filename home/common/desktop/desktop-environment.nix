@@ -1,6 +1,7 @@
-{ config
-, pkgs
-, ...
+{
+  config,
+  pkgs,
+  ...
 }:
 let
   yaziWlClipboardSrc = pkgs.fetchFromGitHub {
@@ -16,6 +17,11 @@ in
     mako
     lm_sensors
     mangohud
+    gsimplecal
+    brightnessctl
+    brillo
+    ddcutil
+    jq
   ];
   programs = {
     yazi = {
@@ -34,13 +40,15 @@ in
         wl-clipboard = yaziWlClipboardSrc;
       };
       keymap = {
-        manager.prepend_keymap = [{
-          on = "<C-y>";
-          run = [
-            "shell -- for path in \"$@\"; do echo \"file://$path\"; done | wl-copy -t text/uri-list"
-            "yank"
-          ];
-        }];
+        manager.prepend_keymap = [
+          {
+            on = "<C-y>";
+            run = [
+              "shell -- for path in \"$@\"; do echo \"file://$path\"; done | wl-copy -t text/uri-list"
+              "yank"
+            ];
+          }
+        ];
       };
     };
     hyprlock = {
@@ -108,4 +116,3 @@ in
   };
 
 }
-

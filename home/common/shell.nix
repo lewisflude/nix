@@ -57,6 +57,8 @@
     };
     initContent = ''
       export KAGI_API_KEY="$(cat ${config.sops.secrets.KAGI_API_KEY.path})"
+      export SOPS_GPG_EXEC="$(which gpg)"
+      export SOPS_GPG_ARGS="--pinentry-mode=loopback"
 
       eval "$(${pkgs.zoxide}/bin/zoxide init zsh)"
       source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
