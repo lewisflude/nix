@@ -17,10 +17,10 @@
     marksman
     nil
     nixfmt-rfc-style
-    nodePackages.pnpm
-    nodePackages.typescript
-    nodePackages.typescript-language-server
-    nodePackages.vscode-langservers-extracted
+    nodePackages_latest.pnpm
+    nodePackages_latest.typescript
+    nodePackages_latest.typescript-language-server
+    nodePackages_latest.vscode-langservers-extracted
     pgcli
     pyright
     rustup
