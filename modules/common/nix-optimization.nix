@@ -82,11 +82,6 @@
     ];
   };
 
-  # System-wide packages for store management
-  environment.systemPackages = with pkgs; [
-    nix-tree # Visualize Nix store dependencies
-    nix-du # Analyze store disk usage
-  ];
 
   # Store optimization scripts
   environment.etc."nix-optimization/optimize-store.sh".text = ''
@@ -170,15 +165,27 @@
     sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
   '';
 
-  # Make scripts executable
-  system.activationScripts.nix-optimization.text = ''
-    chmod +x /etc/nix-optimization/*.sh
+  # Make scripts executable and available system-wide
+  environment.etc."nix-optimization/optimize-store.sh".mode = "0755";
+  environment.etc."nix-optimization/quick-clean.sh".mode = "0755";
+  environment.etc."nix-optimization/analyze-store.sh".mode = "0755";
 
-    # Create symlinks for easy access
-    ln -sf /etc/nix-optimization/optimize-store.sh /usr/local/bin/nix-optimize || true
-    ln -sf /etc/nix-optimization/quick-clean.sh /usr/local/bin/nix-clean || true
-    ln -sf /etc/nix-optimization/analyze-store.sh /usr/local/bin/nix-analyze || true
-  '';
+  # Create system-wide symlinks using environment.systemPackages approach
+  environment.systemPackages = with pkgs; [
+    nix-tree # Visualize Nix store dependencies
+    nix-du # Analyze store disk usage
+    
+    # Create wrapper scripts for easy access
+    (writeShellScriptBin "nix-optimize" ''
+      exec /etc/nix-optimization/optimize-store.sh "$@"
+    '')
+    (writeShellScriptBin "nix-clean" ''
+      exec /etc/nix-optimization/quick-clean.sh "$@"
+    '')
+    (writeShellScriptBin "nix-analyze" ''
+      exec /etc/nix-optimization/analyze-store.sh "$@"
+    '')
+  ];
 
   # Platform-specific garbage collection
   # NixOS/Linux - use systemd timers and built-in garbage collection
