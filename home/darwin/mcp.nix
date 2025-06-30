@@ -69,7 +69,7 @@
         "mcp/sequentialthinking"
       ];
       env = {
-        PATH = "${pkgs.nodejs_22}/bin" + ":" + (builtins.getEnv "PATH");
+        PATH = "${pkgs.nodejs_24}/bin" + ":" + (builtins.getEnv "PATH");
       };
       port = 11435;
     };

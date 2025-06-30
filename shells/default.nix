@@ -13,7 +13,7 @@
     # Node.js/TypeScript development
     node = pkgs.mkShell {
       buildInputs = with pkgs; [
-        nodejs_22
+        nodejs_24
         typescript
         nodePackages.pnpm
         nodePackages.npm
@@ -92,7 +92,7 @@
     # Web development (full-stack)
     web = pkgs.mkShell {
       buildInputs = with pkgs; [
-        nodejs_22
+        nodejs_24
         typescript
         nodePackages.pnpm
         nodePackages.eslint
@@ -117,7 +117,7 @@
         solana-cli
         rustc
         cargo
-        nodejs_22
+        nodejs_24
         nodePackages.pnpm
         anchor-cli
       ];

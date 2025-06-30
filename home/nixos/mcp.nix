@@ -49,7 +49,7 @@
       port = 11434;
     };
     nx = {
-      command = "${pkgs.nodejs_22}/bin/npx";
+      command = "${pkgs.nodejs_24}/bin/npx";
       args = [
         "nx-mcp@latest"
         "/Users/lewisflude/Code/dex-web"
@@ -65,7 +65,7 @@
         "mcp/sequentialthinking"
       ];
       env = {
-        PATH = "${pkgs.nodejs_22}/bin" + ":" + (builtins.getEnv "PATH");
+        PATH = "${pkgs.nodejs_24}/bin" + ":" + (builtins.getEnv "PATH");
       };
       port = 11435;
     };
