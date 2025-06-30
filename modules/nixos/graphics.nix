@@ -1,7 +1,8 @@
-{ config
-, pkgs
-, inputs
-, ...
+{
+  config,
+  pkgs,
+  inputs,
+  ...
 }:
 let
   package = config.boot.kernelPackages.nvidiaPackages.beta;
@@ -17,16 +18,9 @@ in
     vulkan-tools
   ];
   environment.sessionVariables = {
-    LIBVA_DRIVER_NAME = "nvidia";
-    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-    NVD_BACKEND = "direct";
-    NIXOS_OZONE_WL = "1";
-    __GL_GSYNC_ALLOWED = "1";
-    __GL_VRR_ALLOWED = "0";
-    GBM_BACKEND = "nvidia-drm";
     WLR_NO_HARDWARE_CURSORS = "1";
     WLR_RENDERER_ALLOW_SOFTWARE = "1";
-    WLR_BACKENDS = "headless,drm";
+    WLR_BACKENDS = "headless,drm,wayland";
 
   };
   hardware = {
