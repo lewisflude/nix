@@ -27,7 +27,7 @@
 
   # Development environment
   languages = {
-    node = "22";
+    node = "24";
     python = "3.13";
     rust = "stable";
   };

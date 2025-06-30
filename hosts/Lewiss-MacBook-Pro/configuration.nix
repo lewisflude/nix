@@ -31,5 +31,4 @@
 
   time.timeZone = lib.mkForce "Europe/London";
 
-  system.stateVersion = "24.05";
 }

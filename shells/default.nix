@@ -15,13 +15,13 @@
       buildInputs = with pkgs; [
         nodejs_24
         typescript
-        nodePackages.pnpm
-        nodePackages.npm
-        nodePackages.yarn
-        nodePackages.eslint
-        nodePackages.prettier
-        nodePackages.typescript-language-server
-        nodePackages.vscode-langservers-extracted
+        nodePackages_latest.pnpm
+        nodePackages_latest.npm
+        nodePackages_latest.yarn
+        nodePackages_latest.eslint
+        nodePackages_latest.prettier
+        nodePackages_latest.typescript-language-server
+        nodePackages_latest.vscode-langservers-extracted
       ];
 
       shellHook = ''
@@ -94,11 +94,11 @@
       buildInputs = with pkgs; [
         nodejs_24
         typescript
-        nodePackages.pnpm
-        nodePackages.eslint
-        nodePackages.prettier
-        nodePackages.typescript-language-server
-        nodePackages.vscode-langservers-extracted
+        nodePackages_latest.pnpm
+        nodePackages_latest.eslint
+        nodePackages_latest.prettier
+        nodePackages_latest.typescript-language-server
+        nodePackages_latest.vscode-langservers-extracted
         tailwindcss-language-server
         html-tidy
         sass
@@ -118,7 +118,7 @@
         rustc
         cargo
         nodejs_24
-        nodePackages.pnpm
+        nodePackages_latest.pnpm
         anchor-cli
       ];
 

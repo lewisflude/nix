@@ -12,7 +12,6 @@
 
       # Waybar overlay
       (final: _: { waybar_git = inputs.waybar.packages.${final.system}.waybar; })
-
       # Ghostty overlay
       (final: _prev: {
         ghostty = inputs.ghostty.packages.${final.system}.default;
