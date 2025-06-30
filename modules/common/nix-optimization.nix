@@ -84,91 +84,94 @@
 
 
   # Store optimization scripts
-  environment.etc."nix-optimization/optimize-store.sh".text = ''
-    #!/usr/bin/env bash
-    # Comprehensive Nix store optimization script
+  environment.etc."nix-optimization/optimize-store.sh" = {
+    text = ''
+      #!/usr/bin/env bash
+      # Comprehensive Nix store optimization script
 
-    set -euo pipefail
+      set -euo pipefail
 
-    echo "🧹 Starting Nix store optimization..."
+      echo "🧹 Starting Nix store optimization..."
 
-    # 1. Show current store size
-    echo "📊 Current store size:"
-    du -sh /nix/store
+      # 1. Show current store size
+      echo "📊 Current store size:"
+      du -sh /nix/store
 
-    # 2. Garbage collect old generations
-    echo "🗑️ Collecting garbage (older than 7 days)..."
-    nix-collect-garbage --delete-older-than 7d
+      # 2. Garbage collect old generations
+      echo "🗑️ Collecting garbage (older than 7 days)..."
+      nix-collect-garbage --delete-older-than 7d
 
-    # 3. Optimize store (deduplicate)
-    echo "🔧 Optimizing store (deduplicating)..."
-    nix store optimise
+      # 3. Optimize store (deduplicate)
+      echo "🔧 Optimizing store (deduplicating)..."
+      nix store optimise
 
-    # 4. Clean up user profiles
-    echo "👤 Cleaning user profiles..."
-    nix profile wipe-history --older-than 7d || true
+      # 4. Clean up user profiles
+      echo "👤 Cleaning user profiles..."
+      nix profile wipe-history --older-than 7d || true
 
-    # 5. Show final store size
-    echo "📊 Final store size:"
-    du -sh /nix/store
+      # 5. Show final store size
+      echo "📊 Final store size:"
+      du -sh /nix/store
 
-    echo "✅ Store optimization complete!"
-  '';
+      echo "✅ Store optimization complete!"
+    '';
+    mode = "0755";
+  };
 
   # Quick cleanup script for manual use
-  environment.etc."nix-optimization/quick-clean.sh".text = ''
-    #!/usr/bin/env bash
-    # Quick cleanup for immediate space recovery
+  environment.etc."nix-optimization/quick-clean.sh" = {
+    text = ''
+      #!/usr/bin/env bash
+      # Quick cleanup for immediate space recovery
 
-    set -euo pipefail
+      set -euo pipefail
 
-    echo "⚡ Quick Nix cleanup..."
+      echo "⚡ Quick Nix cleanup..."
 
-    # Show current size
-    echo "Before: $(du -sh /nix/store | cut -f1)"
+      # Show current size
+      echo "Before: $(du -sh /nix/store | cut -f1)"
 
-    # Quick garbage collection
-    nix-collect-garbage -d
+      # Quick garbage collection
+      nix-collect-garbage -d
 
-    # Show final size
-    echo "After: $(du -sh /nix/store | cut -f1)"
+      # Show final size
+      echo "After: $(du -sh /nix/store | cut -f1)"
 
-    echo "✅ Quick cleanup complete!"
-  '';
+      echo "✅ Quick cleanup complete!"
+    '';
+    mode = "0755";
+  };
 
   # Store analysis script
-  environment.etc."nix-optimization/analyze-store.sh".text = ''
-    #!/usr/bin/env bash
-    # Analyze Nix store usage and find large packages
+  environment.etc."nix-optimization/analyze-store.sh" = {
+    text = ''
+      #!/usr/bin/env bash
+      # Analyze Nix store usage and find large packages
 
-    set -euo pipefail
+      set -euo pipefail
 
-    echo "🔍 Analyzing Nix store..."
+      echo "🔍 Analyzing Nix store..."
 
-    # Store statistics
-    echo "📊 Store Statistics:"
-    nix store info
-    echo
+      # Store statistics
+      echo "📊 Store Statistics:"
+      nix store info
+      echo
 
-    # Largest store paths
-    echo "📦 Largest store paths:"
-    nix path-info --recursive --size /run/current-system | sort -nk2 | tail -20
-    echo
+      # Largest store paths
+      echo "📦 Largest store paths:"
+      nix path-info --recursive --size /run/current-system | sort -nk2 | tail -20
+      echo
 
-    # Show roots keeping things alive
-    echo "🌳 Current GC roots:"
-    nix-store --gc --print-roots | head -10
-    echo
+      # Show roots keeping things alive
+      echo "🌳 Current GC roots:"
+      nix-store --gc --print-roots | head -10
+      echo
 
-    # Show profile generations
-    echo "👤 Profile generations:"
-    sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
-  '';
-
-  # Make scripts executable and available system-wide
-  environment.etc."nix-optimization/optimize-store.sh".mode = "0755";
-  environment.etc."nix-optimization/quick-clean.sh".mode = "0755";
-  environment.etc."nix-optimization/analyze-store.sh".mode = "0755";
+      # Show profile generations
+      echo "👤 Profile generations:"
+      sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
+    '';
+  };
 
   # Create system-wide symlinks using environment.systemPackages approach
   environment.systemPackages = with pkgs; [
