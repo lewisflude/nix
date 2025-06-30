@@ -10,5 +10,6 @@
     ./waybar.nix
     ./desktop-apps.nix
     ./mcp.nix
+    ./yazi.nix
   ];
 }

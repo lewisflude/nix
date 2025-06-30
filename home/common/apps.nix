@@ -36,7 +36,6 @@
     ./apps/direnv.nix
     ./apps/fzf.nix
     ./apps/ripgrep.nix
-    ./apps/yazi.nix
     ./apps/zoxide.nix
     ./apps/helix.nix
   ];

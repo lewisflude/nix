@@ -5,7 +5,7 @@
     ./dev.nix
     ./docker.nix
     ./environment.nix
-    ./nix-optimization.nix
+    # ./nix-optimization.nix  # Temporarily disabled
     ./overlays.nix
     ./cachix.nix
   ];
