@@ -1,10 +1,8 @@
-{ pkgs, ... }: {
+{ pkgs, inputs, ... }:
+{
   home.packages = with pkgs; [
+    (inputs.hyprland-contrib.packages.${pkgs.system}.grimblast)
     nautilus # GNOME file manager
-
-
-
-
 
     htop # Process monitor
     btop # Modern system monitor
