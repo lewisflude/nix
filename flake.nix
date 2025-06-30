@@ -40,6 +40,10 @@
       url = "github:mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hyprland-contrib = {
+      url = "github:hyprwm/contrib";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     waybar.url = "github:Alexays/Waybar/master";
     ghostty = {
       url = "github:ghostty-org/ghostty";
