@@ -3,12 +3,12 @@
 pkgs.mkShell {
   buildInputs = with pkgs; [
     nodejs_24
-    nodePackages.pnpm
-    nodePackages.typescript
-    nodePackages.prisma
-    nodePackages.eslint
-    nodePackages.prettier
-    nodePackages.typescript-language-server
+    nodePackages_latest.pnpm
+    nodePackages_latest.typescript
+    nodePackages_latest.prisma
+    nodePackages_latest.eslint
+    nodePackages_latest.prettier
+    nodePackages_latest.typescript-language-server
     # Database tools
     postgresql
     redis
@@ -17,7 +17,7 @@ pkgs.mkShell {
     jq
     httpie
     # Monitoring
-    nodePackages.pm2
+    nodePackages_latest.pm2
   ];
 
   shellHook = ''

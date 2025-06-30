@@ -27,6 +27,15 @@
   system.configurationRevision = self.rev or self.dirtyRev or null;
   system.stateVersion = lib.mkDefault (if lib.hasInfix "darwin" system then 6 else "25.05");
 
+  environment.etc."nix/nix.custom.conf" = lib.mkIf pkgs.stdenv.isDarwin {
+    text = ''
+      # Written by modules/common/core.nix
+      lazy-trees = true
+      trusted-users = root ${username}
+      warn-dirty = false
+    '';
+  };
+
   nixpkgs = {
     hostPlatform = system;
     config.allowUnfree = true;

@@ -48,7 +48,4 @@
     enable = true;
     wheelNeedsPassword = false; # Allow wheel group sudo without password
   };
-
-  # System state version
-  system.stateVersion = "24.05";
 }

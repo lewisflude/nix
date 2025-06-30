@@ -5,12 +5,12 @@ pkgs.mkShell {
     with pkgs;
     [
       nodejs_24
-      nodePackages.pnpm
-      nodePackages.typescript
-      nodePackages.eslint
-      nodePackages.prettier
-      nodePackages."@react-native-community/cli"
-      nodePackages.typescript-language-server
+      nodePackages_latest.pnpm
+      nodePackages_latest.typescript
+      nodePackages_latest.eslint
+      nodePackages_latest.prettier
+      nodePackages_latest."@react-native-community/cli"
+      nodePackages_latest.typescript-language-server
       # Mobile development tools
       cocoapods
       watchman

@@ -3,12 +3,12 @@
 pkgs.mkShell {
   buildInputs = with pkgs; [
     nodejs_24
-    nodePackages.pnpm
-    nodePackages.typescript
-    nodePackages.eslint
-    nodePackages.prettier
-    nodePackages."@next/codemod"
-    nodePackages.typescript-language-server
+    nodePackages_latest.pnpm
+    nodePackages_latest.typescript
+    nodePackages_latest.eslint
+    nodePackages_latest.prettier
+    nodePackages_latest."@next/codemod"
+    nodePackages_latest.typescript-language-server
     tailwindcss-language-server
   ];
 
