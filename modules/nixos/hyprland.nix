@@ -1,8 +1,14 @@
-{ pkgs, hyprland, system, ... }:
+{
+  pkgs,
+  hyprland,
+  system,
+  ...
+}:
 {
   # Enable Hyprland with UWSM
   programs.hyprland = {
     enable = true;
+    withUWSM = true;
     package = hyprland.packages.${system}.hyprland;
     portalPackage = hyprland.packages.${system}.xdg-desktop-portal-hyprland;
   };
@@ -44,7 +50,6 @@
       TimeoutStopSec = 10;
     };
   };
-
 
   # Required packages for Hyprland desktop environment
   environment.systemPackages = with pkgs; [
