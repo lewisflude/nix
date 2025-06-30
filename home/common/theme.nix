@@ -39,11 +39,6 @@
         defaultCursor = "left_ptr";
       };
     };
-
-    sessionVariables = {
-      WALLPAPER_DIR = "${config.home.homeDirectory}/wallpapers";
-      GTK_THEME = "Catpuccin-GTK-Dark";
-    };
   };
 
   # GTK configuration (Linux only)

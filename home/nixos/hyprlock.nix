@@ -1,4 +1,5 @@
-{ ... }: {
+{ config, ... }:
+{
   programs.hyprlock = {
     enable = true;
     settings = {
@@ -8,15 +9,15 @@
         hide_cursor = true;
         no_fade_in = false;
       };
-      
+
       background = [
         {
-          path = "screenshot";
+          path = "${config.home.homeDirectory}/wallpapers/nix-wallpaper-nineish-catppuccin-mocha.png";
           blur_passes = 3;
           blur_size = 8;
         }
       ];
-      
+
       input-field = [
         {
           size = "200, 50";
@@ -32,7 +33,7 @@
           shadow_passes = 2;
         }
       ];
-      
+
       label = [
         {
           text = "cmd[update:1000] echo \"$TIME\"";

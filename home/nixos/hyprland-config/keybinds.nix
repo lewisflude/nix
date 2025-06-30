@@ -3,12 +3,12 @@
     bind =
       [
         "$mod, Q, exec, uwsm app -- $terminal"
-        "$mod, R, exec, $menu"
+        "$mod, R, exec, uwsm app -- $menu"
         "$mod, F, exec, uwsm app -- firefox"
         "$mod SHIFT, F, fullscreen"
-        "$mod, V, exec,  $terminal --class clipse -e 'clipse'"
+        "$mod, V, exec, uwsm app -- $terminal --class clipse -e 'clipse'"
         "$mod, C, killactive,"
-        "$mod, M, exit,"
+        "$mod, M, exec, uwsm stop"
         "$mod, E, exec, uwsm app -- $fileManager"
         "$mod, P, pseudo,"
         "$mod, J, togglesplit,"
@@ -22,33 +22,26 @@
         "$mod SHIFT, G, movetoworkspace, special:gaming"
         "$mod, mouse_down, workspace, e+1"
         "$mod, mouse_up, workspace, e-1"
-        # Screenshots with grimblast
-        ", Print, exec, grimblast save screen"
-        "$mod, Print, exec, grimblast save area"
-        "$mod SHIFT, Print, exec, grimblast save active"
+        ", Print, exec, uwsm app -- grimblast save screen"
+        "$mod, Print, exec, uwsm app -- grimblast save area"
+        "$mod SHIFT, Print, exec, uwsm app -- grimblast save active"
       ]
-      ++ (
-        # workspaces
-        # binds $mod + [shift +] {1..9} to [move to] workspace {1..9}
-        builtins.concatLists (
-          builtins.genList (
-            i:
-            let
-              ws = i + 1;
-            in
-            [
-              "$mod, code:1${toString i}, workspace, ${toString ws}"
-              "$mod SHIFT, code:1${toString i}, movetoworkspace, ${toString ws}"
-            ]
-          ) 9
-        )
-      );
-
+      ++ (builtins.concatLists (
+        builtins.genList (
+          i:
+          let
+            ws = i + 1;
+          in
+          [
+            "$mod, code:1${toString i}, workspace, ${toString ws}"
+            "$mod SHIFT, code:1${toString i}, movetoworkspace, ${toString ws}"
+          ]
+        ) 9
+      ));
     bindm = [
       "$mod, mouse:272, movewindow"
       "$mod, mouse:273, resizewindow"
     ];
-
     bindel = [
       ",XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"
       ",XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"

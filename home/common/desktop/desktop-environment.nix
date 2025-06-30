@@ -51,16 +51,6 @@ in
         ];
       };
     };
-    hyprlock = {
-      enable = true;
-      settings = {
-        background = [
-          {
-            path = "${config.home.sessionVariables.WALLPAPER_DIR}/nix-wallpaper-nineish-catppuccin-mocha.png";
-          }
-        ];
-      };
-    };
 
     fuzzel = {
       enable = true;

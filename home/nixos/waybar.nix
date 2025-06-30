@@ -142,7 +142,7 @@ in
 
         # Clock and calendar
         clock = {
-          format = " {:%a %d %b %H:%M}";
+          format = "  {:%a %d %b %H:%M}";
           tooltip-format = "{:%A, %d %B %Y | %H:%M:%S}";
           interval = 60;
           on-click = "gsimplecal";
