@@ -10,7 +10,6 @@
   # Development preferences
   editor = "helix";
   shell = "zsh";
-  terminal = "ghostty";
 
   # Theme preferences
   theme = {

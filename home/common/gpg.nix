@@ -15,7 +15,6 @@
 
     settings = {
       default-key = "48B34CF9C735A6AE";
-      pinentry-mode = "loopback";
     };
   };
 
@@ -23,7 +22,7 @@
     enable = true;
     enableSshSupport = true;
 
-    pinentry.package = if pkgs.stdenv.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-curses;
+    pinentry.package = if pkgs.stdenv.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-gnome3;
 
     defaultCacheTtl = 86400;
     maxCacheTtl = 86400;

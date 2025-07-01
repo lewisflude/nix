@@ -6,7 +6,5 @@
     package = null;
     portalPackage = null;
     systemd.enable = false;
-    systemd.variables = [ "--all" ];
   };
-
 }
