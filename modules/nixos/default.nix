@@ -42,5 +42,8 @@
 
     # Scripts
     ./sh.nix
+
+    # Nix optimization
+    ./nix-optimization.nix
   ];
 }
