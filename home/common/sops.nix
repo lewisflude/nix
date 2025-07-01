@@ -20,6 +20,9 @@
 
     secrets = {
       KAGI_API_KEY = { };
+      CIRCLECI_TOKEN = { };
+      GITHUB_PERSONAL_ACCESS_TOKEN = { };
+      OBSIDIAN_API_KEY = { };
     };
   };
 }

@@ -2,7 +2,6 @@
 let
   standards = import ../development/language-standards.nix;
 
-  # Helper function to create indentation string
   makeIndentString = n: builtins.concatStringsSep "" (builtins.genList (_x: " ") n);
 in
 {
@@ -41,6 +40,18 @@ in
         line-number = "relative";
         cursorline = true;
         bufferline = "multiple";
+        true-color = true;
+        undercurl = true;
+        color-modes = true;
+        scrolloff = 8;
+        rulers = [
+          80
+          120
+        ];
+        completion-trigger-len = 1;
+        idle-timeout = 0;
+        middle-click-paste = true;
+        end-of-line-diagnostics = "hint";
         soft-wrap.enable = true;
       };
 
@@ -52,23 +63,18 @@ in
 
       editor.indent-guides = {
         render = true;
-        character = "┊";
+        character = "╎";
       };
 
-      keys.normal = {
-        space.space = "file_picker";
-        space.w = ":w";
-        space.q = ":q";
-        esc = [
-          "collapse_selection"
-          "keep_primary_selection"
-        ];
+      editor.inline-diagnostics = {
+        cursor-line = "error";
+        other-lines = "disable";
       };
 
       editor.lsp = {
         display-messages = true;
         display-inlay-hints = true;
-        auto-signature-help = true;
+        auto-signature-help = false;
       };
 
       editor.statusline = {
@@ -84,6 +90,7 @@ in
           "selections"
           "position"
           "file-encoding"
+          "file-type"
         ];
         mode.normal = "NORMAL";
         mode.insert = "INSERT";
@@ -92,14 +99,12 @@ in
 
       editor.whitespace = {
         render = {
-          space = "all";
+          space = "none";
           tab = "all";
+          newline = "none";
         };
         characters = {
-          space = "·";
-          nbsp = "⍽";
           tab = "→";
-          newline = "⏎";
           tabpad = " ";
         };
       };
@@ -109,6 +114,27 @@ in
         parents = true;
         ignore = true;
         git-ignore = true;
+      };
+
+      keys.normal = {
+        space.space = "file_picker";
+        space.w = ":w";
+        space.q = ":q";
+        "A-," = "goto_previous_buffer";
+        "A-." = "goto_next_buffer";
+        "A-w" = ":buffer-close";
+        "A-/" = "repeat_last_motion";
+        "C-," = ":config-open";
+        esc = [
+          "collapse_selection"
+          "keep_primary_selection"
+        ];
+      };
+
+      keys.insert = {
+        j = {
+          k = "normal_mode";
+        };
       };
     };
   };

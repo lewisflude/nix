@@ -40,39 +40,47 @@
       args = [ "mcp-server-fetch" ];
       port = 11432;
     };
-    git = {
-      command = "${pkgs.docker}/bin/docker";
-      args = [
-        "run"
-        "-i"
-        "--rm"
-        "--mount"
-        "type=bind,source=/Users/lewisflude/Code,dst=/Users/lewisflude/Code"
-        "mcp/git"
-      ];
-      port = 11434;
-    };
+
     nx = {
       command = "${pkgs.nodejs_24}/bin/npx";
       args = [
         "nx-mcp@latest"
         "/Users/lewisflude/Code/dex-web"
       ];
-      port = 11435;
+      port = 11437;
     };
-    sequentialThinking = {
+    sequential-thinking = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-sequential-thinking"
+      ];
+      port = 11438;
+    };
+    github = {
       command = "${pkgs.docker}/bin/docker";
       args = [
         "run"
-        "--rm"
         "-i"
-        "mcp/sequentialthinking"
+        "--rm"
+        "-e"
+        "GITHUB_PERSONAL_ACCESS_TOKEN"
+        "ghcr.io/github/github-mcp-server"
       ];
       env = {
-        PATH = "${pkgs.nodejs_24}/bin" + ":" + (builtins.getEnv "PATH");
+        GITHUB_PERSONAL_ACCESS_TOKEN = config.sops.secrets.GITHUB_PERSONAL_ACCESS_TOKEN.path;
       };
-      port = 11435;
     };
-
+    mcp-obsidian = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [
+        "mcp-obsidian"
+      ];
+      env = {
+        OBSIDIAN_API_KEY = config.sops.secrets.OBSIDIAN_API_KEY.path;
+        OBSIDIAN_HOST = "127.0.0.1";
+        OBSIDIAN_PORT = "27124";
+      };
+    };
   };
 }
