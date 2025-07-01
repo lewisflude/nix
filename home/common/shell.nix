@@ -117,11 +117,10 @@
     EDITOR = "hx";
   };
 
-  # Environment path management
-  home.sessionPath = [
-    "$HOME/.local/bin"
-    "$HOME/.nix-profile/bin"
-  ];
+  # Ensure Hyprland inherits the proper PATH from Home Manager
+  systemd.user.sessionVariables = {
+    PATH = "$PATH";
+  };
 
   home.file = {
     ".p10k.zsh".source = ./lib/p10k.zsh;

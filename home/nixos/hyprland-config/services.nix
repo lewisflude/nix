@@ -1,5 +1,11 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
+  home.packages = with pkgs; [
+    nwg-dock-hyprland
+    nwg-drawer
+    nwg-displays
+    nwg-look
+  ];
   services = {
     hyprpaper = {
       enable = true;

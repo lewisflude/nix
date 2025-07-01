@@ -14,6 +14,10 @@
       "col.inactive_border" = "rgba(595959aa)";
     };
 
+    xwayland = {
+      force_zero_scaling = true;
+    };
+
     decoration = {
       rounding = 6;
       active_opacity = 1.0;

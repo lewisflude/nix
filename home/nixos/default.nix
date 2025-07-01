@@ -1,6 +1,5 @@
 {
   imports = [
-    ./terminal.nix
     ./browser.nix
     ./hyprland.nix
     ./hyprland-config

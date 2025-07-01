@@ -18,6 +18,7 @@ in
 
   programs.waybar = {
     enable = true;
+    systemd.enable = true;
     package = pkgs.waybar_git;
     style = ./style.css;
 

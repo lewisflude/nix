@@ -1,46 +1,115 @@
+{ lib, ... }:
+let
+  # Helper to create a regex from a list of app classes
+  mkClass = apps: "^(${lib.strings.concatStringsSep "|" apps})$";
+
+  # Application lists for rules
+  browsers = [
+    "firefox"
+    "brave"
+    "chromium"
+    "google-chrome"
+  ];
+  chatApps = [
+    "discord"
+    "slack"
+    "telegram-desktop"
+    "element-desktop"
+    "signal-desktop"
+  ];
+  codeEditors = [
+    "code"
+    "cursor"
+    "vscodium"
+    "sublime_text"
+    "jetbrains-.*"
+  ];
+  emailClients = [
+    "thunderbird"
+    "evolution"
+    "geary"
+    "mailspring"
+  ];
+  floatingMedia = [
+    "mpv"
+    "vlc"
+    "obs"
+    "gimp"
+    "inkscape"
+    "blender"
+  ];
+  floatingUtils = [
+    "pavucontrol"
+    "nm-connection-editor"
+    "1Password"
+    "blueman-manager"
+    "blueberry"
+    "qt5ct"
+    "qt6ct"
+  ];
+  gamingApps = [
+    "steam_app_"
+    "steam_app"
+    "lutris"
+    "gamescope"
+  ];
+  musicPlayers = [
+    "spotify"
+    "clementine"
+    "lollypop"
+  ];
+  terminals = [
+    "ghostty"
+    "foot"
+    "kitty"
+    "alacritty"
+    "wezterm"
+  ];
+
+in
 {
   wayland.windowManager.hyprland.settings = {
-
     windowrule = [
-
-      # Floating utilities
-      "float,class:^(pavucontrol|nm-connection-editor|1Password|blueman-manager|blueberry|qt5ct|qt6ct)$"
+      # --- Floating Rules ---
+      # Utilities
+      "float,class:${mkClass floatingUtils}"
       "size 622 652,class:^(pavucontrol|nm-connection-editor|1Password)$"
       "center,class:^(pavucontrol|nm-connection-editor|1Password)$"
       "animation slide,class:^(pavucontrol|nm-connection-editor|1Password)$"
 
-      # Floating media
-      "float,class:^(mpv|vlc|obs|gimp|inkscape|blender)$"
+      # Media
+      "float,class:${mkClass floatingMedia}"
       "size 1280 720,class:^(mpv|vlc)$"
       "center,class:^(mpv|vlc)$"
       "workspace special:media,class:^(mpv|vlc|obs)$"
       "animation fade,class:^(mpv|vlc|obs)$"
 
-      # Workspace assignments matching Waybar icons
-      "workspace 1,class:^(firefox|brave|chromium|google-chrome)$" #  Browser
-      "workspace 2,class:^(ghostty|foot|kitty|alacritty|wezterm)$" #  Terminal
-      "workspace 3,class:^(code|vscodium|sublime_text|jetbrains-.*)$" #  Code/IDEs
-      "workspace 4,class:^(spotify|clementine|lollypop)$" #  Music
-      "workspace 5,class:^(discord|slack|telegram-desktop|element-desktop|signal-desktop)$" #  Chat
-      "workspace 6,class:^(thunderbird|evolution|geary|mailspring)$" #  Email (default)
-
-      # Gaming workspace and optimizations
-      "workspace special:gaming,class:^(steam_app_|steam_app|lutris|gamescope)$"
+      # --- Workspace Assignments ---
+      "workspace 1,class:${mkClass browsers}" #  Browser
+      "workspace 2,class:${mkClass terminals}" #  Terminal
+      "workspace 3,class:${mkClass codeEditors}" #  Code/IDEs
+      "workspace 4,class:${mkClass musicPlayers}" #  Music
+      "workspace 5,class:${mkClass chatApps}" #  Chat
+      "workspace 6,class:${mkClass emailClients}" #  Email (default)
+      "workspace special:gaming,class:${mkClass gamingApps}"
       "workspace special:gaming,title:^(Steam)$"
-      "immediate,class:^(steam_app_|gamescope|firefox|brave|chromium|google-chrome)$"
-      "noanim,class:^(steam_app_|steam_app|lutris|gamescope)$"
-      "opacity 1.0,class:^(steam_app_|steam_app|lutris|gamescope)$"
-      "fullscreen,class:^(gamescope)$"
-      "noblur,class:^(steam_app_|steam_app|lutris|gamescope|firefox|brave|chromium|google-chrome)$"
-      "noshadow,class:^(steam_app_|steam_app|lutris|gamescope|firefox|brave|chromium|google-chrome)$"
 
-      # General tiling & animations
-      "tile,class:^(firefox|brave|chromium|google-chrome|code|vscodium|sublime_text|jetbrains-.*)$"
-      "animation slide,class:^(firefox|brave|chromium|google-chrome|code|vscodium|sublime_text|jetbrains-.*)$"
-      "animation fade,class:^(discord|slack|telegram-desktop|element-desktop|signal-desktop|thunderbird|evolution|geary|mailspring|spotify|clementine|lollypop)$"
+      # --- Performance & Style Optimizations ---
+      # Gaming
+      "immediate,class:(${mkClass gamingApps}|${mkClass browsers})"
+      "noanim,class:${mkClass gamingApps}"
+      "opacity 1.0,class:${mkClass gamingApps}"
+      "fullscreen,class:^(gamescope)$"
+      "noblur,class:(${mkClass gamingApps}|${mkClass browsers})"
+      "noshadow,class:(${mkClass gamingApps}|${mkClass browsers})"
+
+      # Tiling & animations for common apps
+      "tile,class:(${mkClass browsers}|${mkClass codeEditors})"
+      "animation slide,class:(${mkClass browsers}|${mkClass codeEditors})"
+      "animation fade,class:(${mkClass chatApps}|${mkClass emailClients}|${mkClass musicPlayers})"
     ];
 
-    # Special workspace configurations
+    # --- Special Workspace Configurations ---
     workspace = [
       "special:gaming, rounding:false, blur:false, animation:false"
       "special:magic, rounding:true, blur:true, animation:true"

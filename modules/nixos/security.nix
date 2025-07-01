@@ -16,7 +16,7 @@
   ];
   systemd.extraConfig = "DefaultLimitNOFILE=524288";
   security.pki.certificateFiles = [ ../mitmproxy-ca-cert.pem ];
-
+  security.polkit.enable = true;
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.login.enableGnomeKeyring = true;
 

@@ -2,29 +2,29 @@
   wayland.windowManager.hyprland.settings = {
     bind =
       [
-        "$mod, Q, exec, uwsm app -- $terminal"
-        "$mod, R, exec, uwsm app -- $menu"
-        "$mod, F, exec, uwsm app -- firefox"
-        "$mod SHIFT, F, fullscreen"
-        "$mod, V, exec, uwsm app -- $terminal --class clipse -e 'clipse'"
-        "$mod, C, killactive,"
-        "$mod, M, exec, uwsm stop"
-        "$mod, E, exec, uwsm app -- $fileManager"
-        "$mod, P, pseudo,"
-        "$mod, J, togglesplit,"
-        "$mod, left, movefocus, l"
-        "$mod, right, movefocus, r"
-        "$mod, up, movefocus, u"
-        "$mod, down, movefocus, d"
-        "$mod, S, togglespecialworkspace, magic"
-        "$mod, G, togglespecialworkspace, gaming"
-        "$mod SHIFT, S, movetoworkspace, special:magic"
-        "$mod SHIFT, G, movetoworkspace, special:gaming"
-        "$mod, mouse_down, workspace, e+1"
-        "$mod, mouse_up, workspace, e-1"
+        "$mainMod, Q, exec, uwsm app -- $terminal"
+        "$mainMod, R, exec, uwsm app -- $menu"
+        "$mainMod, F, exec, uwsm app -- firefox"
+        "$mainMod SHIFT, F, fullscreen"
+        "$mainMod, V, exec, uwsm app -- $terminal -e clipse"
+        "$mainMod, C, killactive,"
+        "$mainMod, M, exec, uwsm stop"
+        "$mainMod, E, exec, uwsm app -- $fileManager"
+        "$mainMod, P, pseudo,"
+        "$mainMod, J, togglesplit,"
+        "$mainMod, left, movefocus, l"
+        "$mainMod, right, movefocus, r"
+        "$mainMod, up, movefocus, u"
+        "$mainMod, down, movefocus, d"
+        "$mainMod, S, togglespecialworkspace, magic"
+        "$mainMod, G, togglespecialworkspace, gaming"
+        "$mainMod SHIFT, S, movetoworkspace, special:magic"
+        "$mainMod SHIFT, G, movetoworkspace, special:gaming"
+        "$mainMod, mouse_down, workspace, e+1"
+        "$mainMod, mouse_up, workspace, e-1"
         ", Print, exec, uwsm app -- grimblast save screen"
-        "$mod, Print, exec, uwsm app -- grimblast save area"
-        "$mod SHIFT, Print, exec, uwsm app -- grimblast save active"
+        "$mainMod, Print, exec, uwsm app -- grimblast save area"
+        "$mainMod SHIFT, Print, exec, uwsm app -- grimblast save active"
       ]
       ++ (builtins.concatLists (
         builtins.genList (
@@ -33,14 +33,14 @@
             ws = i + 1;
           in
           [
-            "$mod, code:1${toString i}, workspace, ${toString ws}"
-            "$mod SHIFT, code:1${toString i}, movetoworkspace, ${toString ws}"
+            "$mainMod, code:1${toString i}, workspace, ${toString ws}"
+            "$mainMod SHIFT, code:1${toString i}, movetoworkspace, ${toString ws}"
           ]
         ) 9
       ));
     bindm = [
-      "$mod, mouse:272, movewindow"
-      "$mod, mouse:273, resizewindow"
+      "$mainMod, mouse:272, movewindow"
+      "$mainMod, mouse:273, resizewindow"
     ];
     bindel = [
       ",XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"
