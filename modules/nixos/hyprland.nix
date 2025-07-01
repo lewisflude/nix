@@ -15,6 +15,19 @@
     package = hyprland.packages.${system}.hyprland;
     portalPackage = hyprland.packages.${system}.xdg-desktop-portal-hyprland;
   };
+  xdg.portal = {
+    enable = true;
+    extraPortals = [
+      pkgs.xdg-desktop-portal-gtk
+    ];
+    config = {
+      common = {
+        default = [
+          "hyprland"
+        ];
+      };
+    };
+  };
 
   # Required packages for Hyprland desktop environment
   environment.systemPackages = with pkgs; [

@@ -86,6 +86,8 @@
 
       mouse-hide-while-typing = true;
       mouse-scroll-multiplier = 3;
+
+      window-decoration = "server";
     };
   };
 }
