@@ -68,6 +68,7 @@
         "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
         "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
         "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+        "ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns="
         "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc="
       ]
       ++ lib.optionals (lib.hasInfix "darwin" system) [
@@ -81,7 +82,6 @@
       "ca-derivations" # Content-addressed derivations
     ];
   };
-
 
   # Store optimization scripts
   environment.etc."nix-optimization/optimize-store.sh" = {
@@ -177,7 +177,7 @@
   environment.systemPackages = with pkgs; [
     nix-tree # Visualize Nix store dependencies
     nix-du # Analyze store disk usage
-    
+
     # Create wrapper scripts for easy access
     (writeShellScriptBin "nix-optimize" ''
       exec /etc/nix-optimization/optimize-store.sh "$@"

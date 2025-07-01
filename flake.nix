@@ -46,9 +46,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     waybar.url = "github:Alexays/Waybar/master";
-    ghostty = {
-      url = "github:ghostty-org/ghostty";
-    };
     musnix = {
       url = "github:musnix/musnix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -89,7 +86,6 @@
       url = "github:domt4/homebrew-autoupdate";
       flake = false;
     };
-
   };
 
   outputs =

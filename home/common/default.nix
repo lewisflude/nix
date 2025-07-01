@@ -4,23 +4,18 @@
   ...
 }:
 {
-  imports =
-    [
-      ./apps.nix
-      ./git.nix
-      ./shell.nix
-      ./ssh.nix
-      ./terminal.nix
-      ./theme.nix
-      ./gpg.nix
-      ./development
-      ./system
-      ./sops.nix
-      ./lib
-      ./modules.nix
-    ]
-    ++ lib.optionals (lib.hasInfix "linux" system) [
-      ./desktop
-    ];
-
+  imports = [
+    ./apps.nix
+    ./git.nix
+    ./shell.nix
+    ./ssh.nix
+    ./theme.nix
+    ./gpg.nix
+    ./development
+    ./system
+    ./sops.nix
+    ./lib
+    ./modules.nix
+    ./terminal.nix
+  ];
 }

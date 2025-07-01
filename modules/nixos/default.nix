@@ -9,12 +9,8 @@
     ./audio.nix
     ./bluetooth.nix
     ./graphics.nix
-    ./keyboard.nix
     ./mouse.nix
     ./usb.nix
-
-    # Desktop
-    ./desktop-environment.nix
 
     # Services
     ./ssh.nix
@@ -35,9 +31,14 @@
     # Authentication
     ./yubikey.nix
 
+    # Desktop
+    ./hyprland.nix
+    ./desktop-environment.nix
+
     # Configuration
     ./nixpkgs.nix
     ./theme.nix
+    ./environment.nix
 
     # Scripts
     ./sh.nix
