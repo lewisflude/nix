@@ -69,7 +69,7 @@ in
     "git.openRepositoryInParentFolders" = "always";
     "git.decorations.enabled" = true;
     "git.timeline.enabled" = true;
-    "git.inputValidation" = "always";
+    "git.inputValidation" = true;
     "git.inputValidationLength" = 72;
     "git.inputValidationSubjectLength" = 50;
     "git.branchProtection" = [
