@@ -94,8 +94,6 @@
       darwin,
       nixpkgs,
       home-manager,
-      hyprland-contrib,
-      hyprland,
       mac-app-util,
       nix-homebrew,
       homebrew-core,
