@@ -1,17 +1,15 @@
 {
   pkgs,
-  inputs,
   ...
 }:
 {
   home.packages = with pkgs; [
-    (inputs.hyprland-contrib.packages.${pkgs.system}.grimblast)
+    grimblast
     nautilus # GNOME file manager
-
     htop # Process monitor
     btop # Modern system monitor
-
     clipse # CLI clipboard manager (already in terminal.nix, but good to have)
+    ddcutil # Display control utility
 
   ];
 
