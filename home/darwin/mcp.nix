@@ -71,6 +71,15 @@
         GITHUB_PERSONAL_ACCESS_TOKEN = config.sops.secrets.GITHUB_PERSONAL_ACCESS_TOKEN.path;
       };
     };
+    filesystem = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-filesystem"
+        "${config.home.homeDirectory}"
+      ];
+      port = 11439;
+    };
     mcp-obsidian = {
       command = "${pkgs.uv}/bin/uvx";
       args = [

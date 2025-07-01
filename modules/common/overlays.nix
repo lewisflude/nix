@@ -12,7 +12,7 @@
       inputs.yazi.overlays.default
 
       # Waybar overlay
-      (final: _: { waybar_git = inputs.waybar.packages.${system}.waybar; })
+      (_: _: { waybar_git = inputs.waybar.packages.${system}.waybar; })
 
     ]
     ++ lib.optionals (inputs ? nvidia-patch) [
