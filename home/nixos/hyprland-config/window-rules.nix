@@ -92,7 +92,7 @@ in
       "workspace 5,class:${mkClass chatApps}" #  Chat
       "workspace 6,class:${mkClass emailClients}" #  Email (default)
       "workspace special:gaming,class:${mkClass gamingApps}"
-      "workspace special:gaming,title:^(Steam)$"
+      "workspace special:gaming silent,title:^(Steam)$"
 
       # --- Performance & Style Optimizations ---
       # Gaming
