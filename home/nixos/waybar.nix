@@ -12,10 +12,6 @@ let
 in
 {
 
-  # wayland.windowManager.hyprland.settings.layerrule = [
-  #   "blur,waybar,ignorealpha,ignorezero"
-  # ];
-
   programs.waybar = {
     enable = true;
     systemd.enable = true;
@@ -28,11 +24,10 @@ in
         layer = "top";
         output = [ "DP-1" ];
 
-        # Left-aligned modules
-        # modules-left = [
-        #   "hyprland/workspaces"
-        #   "hyprland/window"
-        # ];
+        modules-left = [
+          "niri/workspaces"
+          "niri/window"
+        ];
 
         # Right-aligned modules (with custom progress & alerts)
         modules-right = [
@@ -48,19 +43,19 @@ in
         ];
 
         # Workspace icons
-        # "hyprland/workspaces" = {
-        #   format = "{icon}";
-        #   format-icons = workspaceIcons;
-        #   on-click = "activate";
-        #   persistent-workspaces = {
-        #     "*" = 5;
-        #   };
-        # };
+        "niri/workspaces" = {
+          format = "{icon}";
+          format-icons = workspaceIcons;
+          on-click = "activate";
+          persistent-workspaces = {
+            "*" = 5;
+          };
+        };
 
         # Active window title
-        # "hyprland/window" = {
-        #   format = "{title}";
-        # };
+        "niri/window" = {
+          format = "{title}";
+        };
 
         # Network status
         network = {
