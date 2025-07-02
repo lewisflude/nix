@@ -25,4 +25,16 @@
       OBSIDIAN_API_KEY = { };
     };
   };
+
+  systemd.user.services.sops-nix = {
+    Unit = {
+      After = [ "gpg-agent.service" ];
+      Wants = [ "gpg-agent.service" ];
+    };
+    Service = {
+      Restart = "on-failure";
+      RestartSec = "10s";
+      StartLimitBurst = 3;
+    };
+  };
 }
