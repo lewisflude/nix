@@ -6,7 +6,6 @@
 }:
 let
   package = config.boot.kernelPackages.nvidiaPackages.beta;
-  pkgs-unstable = inputs.hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
 in
 {
 
@@ -26,8 +25,6 @@ in
   hardware = {
     graphics = {
       enable = true;
-      package = pkgs-unstable.mesa;
-      package32 = pkgs-unstable.pkgsi686Linux.mesa;
       enable32Bit = true;
       extraPackages = with pkgs; [
         vaapiVdpau

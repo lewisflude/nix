@@ -39,6 +39,9 @@
         "https://devenv.cachix.org"
         "https://yazi.cachix.org"
         "https://cuda-maintainers.cachix.org"
+        "https://ghostty.cachix.org"
+        "https://niri.cachix.org"
+
       ]
       ++ lib.optionals (lib.hasInfix "darwin" system) [
         "https://cache.determinate.systems"
@@ -54,6 +57,9 @@
         "https://devenv.cachix.org"
         "https://yazi.cachix.org"
         "https://cuda-maintainers.cachix.org"
+        "https://ghostty.cachix.org"
+        "https://niri.cachix.org"
+
       ]
       ++ lib.optionals (lib.hasInfix "darwin" system) [
         "https://cache.determinate.systems"
@@ -69,6 +75,9 @@
         "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
         "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
         "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc="
+        "ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns="
+        "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
+
       ]
       ++ lib.optionals (lib.hasInfix "darwin" system) [
         "cache.determinate.systems-1:cd9bVm9wnyQHfHpLRhHGDMWWgPEXFEoKhiMuQ1jmNj8="
