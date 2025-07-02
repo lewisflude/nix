@@ -19,6 +19,7 @@
   security.polkit.enable = true;
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.login.enableGnomeKeyring = true;
+  boot.initrd.systemd.enable = true;
 
   # GitHub access token should be configured via environment variable or SOPS
   # nix.settings = {
