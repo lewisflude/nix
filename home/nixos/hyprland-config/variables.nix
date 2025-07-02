@@ -1,12 +1,18 @@
 {
+  pkgs,
   ...
 }:
+
+let
+  builtGhostty = "${pkgs.ghostty}/bin/ghostty";
+
+in
 
 {
   wayland.windowManager.hyprland.settings = {
     "$mainMod" = "SUPER";
-    "$terminal" = "ghostty";
-    "$fileManager" = "ghostty -e yazi";
+    "$terminal" = builtGhostty;
+    "$fileManager" = builtGhostty + " -e yazi";
     "$menu" = "fuzzel --launch-prefix='uwsm app -- '";
 
     input = {

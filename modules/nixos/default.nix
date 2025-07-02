@@ -19,6 +19,7 @@
     ./gaming.nix
     ./virtualisation.nix
     ./wine.nix
+    ./terminal.nix
 
     # Development
     ./java.nix
@@ -32,8 +33,11 @@
     ./yubikey.nix
 
     # Desktop
-    ./hyprland.nix
+    # ./hyprland.nix
     ./desktop-environment.nix
+    ./niri.nix
+    ./xdg.nix
+    ./xwayland.nix
 
     # Configuration
     ./nixpkgs.nix

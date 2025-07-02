@@ -47,7 +47,7 @@
 
   # Linux specific
   linux = {
-    compositor = "hyprland";
+    compositor = "niri";
     displayManager = "sddm";
     audioSystem = "pipewire";
   };
