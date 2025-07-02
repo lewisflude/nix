@@ -32,7 +32,6 @@
       max-cache-ttl-ssh     7200
       allow-preset-passphrase
       grab
-      no-allow-external-cache
       allow-loopback-pinentry
     '';
   };
