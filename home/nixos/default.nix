@@ -1,8 +1,8 @@
 {
   imports = [
     ./browser.nix
-    ./hyprland.nix
-    ./hyprland-config
+    # ./hyprland.nix
+    # ./hyprland-config
     ./launcher.nix
     ./hyprlock.nix
     ./mako.nix
@@ -10,5 +10,6 @@
     ./desktop-apps.nix
     ./mcp.nix
     ./yazi.nix
+    ./niri.nix
   ];
 }

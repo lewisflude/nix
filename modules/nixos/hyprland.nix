@@ -6,28 +6,12 @@
 }:
 {
   # Enable Hyprland with UWSM
-  programs.hyprland = {
-    enable = true;
-    withUWSM = true;
-    xwayland = {
-      enable = true;
-    };
-    package = hyprland.packages.${system}.hyprland;
-    portalPackage = hyprland.packages.${system}.xdg-desktop-portal-hyprland;
-  };
-  xdg.portal = {
-    enable = true;
-    extraPortals = [
-      pkgs.xdg-desktop-portal-gtk
-    ];
-    config = {
-      common = {
-        default = [
-          "hyprland"
-        ];
-      };
-    };
-  };
+  # programs.hyprland = {
+  #   enable = false;
+  #   withUWSM = true;
+  #   package = hyprland.packages.${system}.hyprland;
+  #   portalPackage = hyprland.packages.${system}.xdg-desktop-portal-hyprland;
+  # };
 
   # Required packages for Hyprland desktop environment
   environment.systemPackages = with pkgs; [

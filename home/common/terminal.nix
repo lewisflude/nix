@@ -2,6 +2,7 @@
   pkgs,
   lib,
   system,
+  ghostty,
   ...
 }:
 {
@@ -87,7 +88,9 @@
       mouse-hide-while-typing = true;
       mouse-scroll-multiplier = 3;
 
-      window-decoration = "server";
+      window-decoration = "auto";
+      gtk-single-instance = true;
+      linux-cgroup = "single-instance";
     };
   };
 }

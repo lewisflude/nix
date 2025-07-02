@@ -86,6 +86,15 @@
       url = "github:domt4/homebrew-autoupdate";
       flake = false;
     };
+    ghostty = {
+      url = "github:ghostty-org/ghostty";
+    };
+    niri-unstable = {
+      url = "github:sodiboo/niri-flake";
+    };
+    swww = {
+      url = "github:LGFae/swww";
+    };
   };
 
   outputs =
@@ -105,6 +114,7 @@
       sops-nix,
       musnix,
       solaar,
+      niri-unstable,
       ...
     }:
     let
@@ -195,9 +205,9 @@
             # External modules
             sops-nix.nixosModules.sops
             catppuccin.nixosModules.catppuccin
+            niri-unstable.nixosModules.niri
             musnix.nixosModules.musnix
             solaar.nixosModules.default
-
             # Make inputs available to all modules
             { _module.args = { inherit inputs; }; }
 
@@ -217,7 +227,6 @@
               home-manager.sharedModules = [
                 catppuccin.homeModules.catppuccin
                 inputs.sops-nix.homeManagerModules.sops
-
               ];
               home-manager.users.${hostConfig.username} = import ./home;
             }

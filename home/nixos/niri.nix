@@ -1,0 +1,59 @@
+{ pkgs, ... }:
+let
+  # Default applications
+  terminal = "ghostty";
+  launcher = "fuzzel";
+  screenLocker = "swaylock";
+in
+{
+  home.packages = with pkgs; [
+    swww
+    swaylock
+  ];
+
+  imports = [
+    ./niri/keybinds.nix
+  ];
+
+  programs.niri = {
+    package = pkgs.niri-unstable;
+    settings = {
+
+      environment = {
+        DISPLAY = ":0";
+        NIXOS_OZONE_WL = "1";
+
+        ELECTRON_OZONE_PLATFORM_HINT = "auto";
+
+        _JAVA_AWT_WM_NONREPARENTING = "1";
+
+        QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
+        QT_QPA_PLATFORM = "wayland";
+        QT_QPA_PLATFORMTHEME = "gtk3";
+
+        XDG_CURRENT_DESKTOP = "niri";
+        XDG_SESSION_DESKTOP = "niri";
+        XDG_SESSION_TYPE = "wayland";
+      };
+      xwayland-satellite = {
+        enable = true;
+        path = "${pkgs.xwayland-satellite-unstable}/bin/xwayland-satellite";
+      };
+      binds = {
+        "Mod+T" = {
+          action.spawn = [ terminal ];
+        };
+        "Mod+D" = {
+          action.spawn = [ launcher ];
+        };
+        "Super+Alt+L" = {
+          action.spawn = [ screenLocker ];
+        };
+      };
+
+      spawn-at-startup = [
+        { command = [ "swww-daemon" ]; }
+      ];
+    };
+  };
+}
