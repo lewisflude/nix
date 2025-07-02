@@ -49,5 +49,8 @@
 
     # Nix optimization
     ./nix-optimization.nix
+
+    # Home Assistant
+    ./home-assistant.nix
   ];
 }
