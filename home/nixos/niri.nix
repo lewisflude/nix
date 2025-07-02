@@ -28,9 +28,8 @@ in
           mode = {
             width = 3440;
             height = 1440;
-            refresh = 165.00;
+            refresh = 164.90;
           };
-          scale = 1.25;
           variable-refresh-rate = true;
         };
       };
@@ -70,14 +69,47 @@ in
       spawn-at-startup = [
         {
           command = [
-            "uwsm app -- ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
-
-            "systemctl enable - -user com.mitchellh.ghostty.service"
-            "uwsm app -- swaylock"
-            "uwsm app -- swww-daemon"
-            "swww img ${config.home.homeDirectory}/wallpapers/nix-wallpaper-nineish-catppuccin-mocha.png"
-            "pw-link 'Main-Output-Proxy:monitor_FL' 'alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX0'"
-            "pw-link 'Main-Output-Proxy:monitor_FR' 'alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX1'"
+            "${pkgs.uwsm}/bin/uwsm"
+            "app"
+            "--"
+            "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
+          ];
+        }
+        {
+          command = [
+            "systemctl"
+            "enable"
+            "--user"
+            "com.mitchellh.ghostty.service"
+          ];
+        }
+        {
+          command = [
+            "${pkgs.uwsm}/bin/uwsm"
+            "app"
+            "--"
+            "${pkgs.swww}/bin/swww-daemon"
+          ];
+        }
+        {
+          command = [
+            "${pkgs.swww}/bin/swww"
+            "img"
+            "${config.home.homeDirectory}/wallpapers/nix-wallpaper-nineish-catppuccin-mocha.png"
+          ];
+        }
+        {
+          command = [
+            "pw-link"
+            "Main-Output-Proxy:monitor_FL"
+            "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX0"
+          ];
+        }
+        {
+          command = [
+            "pw-link"
+            "Main-Output-Proxy:monitor_FR"
+            "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX1"
           ];
         }
       ];
