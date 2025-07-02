@@ -52,7 +52,17 @@ in
       };
 
       spawn-at-startup = [
-        { command = [ "swww-daemon" ]; }
+        {
+          command = [
+            "uwsm app -- ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
+
+            "systemctl enable - -user com.mitchellh.ghostty.service"
+
+            "swww-daemon"
+            "pw-link 'Main-Output-Proxy:monitor_FL' 'alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX0'"
+            "pw-link 'Main-Output-Proxy:monitor_FR' 'alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX1'"
+          ];
+        }
       ];
     };
   };

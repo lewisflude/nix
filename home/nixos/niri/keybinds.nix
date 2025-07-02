@@ -65,7 +65,9 @@
       ];
     };
 
-    # "Mod+Q".action.close-window = { };
+    "Mod+O".action.toggle-overview = { };
+
+    "Mod+Q".action.close-window = { };
 
     "Mod+Left".action.focus-column-left = { };
     "Mod+Down".action.focus-window-down = { };
