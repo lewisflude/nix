@@ -116,7 +116,7 @@
         "cache.files=partial"
         "dropcacheonclose=true"
         "category.create=mfs"
-        "minfreespace=50G"
+        "minfreespace=1G"
         "x-systemd.before=local-fs.target"
       ];
     };

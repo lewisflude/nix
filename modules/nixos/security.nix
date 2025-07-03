@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 {
   security.pam.loginLimits = [
     {
@@ -20,6 +20,15 @@
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.login.enableGnomeKeyring = true;
   boot.initrd.systemd.enable = true;
+
+  programs._1password = {
+    enable = true;
+  };
+
+  programs._1password-gui = {
+    enable = true;
+    package = pkgs._1password-gui-beta;
+  };
 
   # GitHub access token should be configured via environment variable or SOPS
   # nix.settings = {

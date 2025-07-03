@@ -7,5 +7,6 @@
     ./environment.nix
     ./overlays.nix
     ./cachix.nix
+    ./sops.nix
   ];
 }

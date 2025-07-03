@@ -1,5 +1,6 @@
 {
   pkgs,
+  config,
   username,
   ...
 }:
@@ -11,10 +12,10 @@
 
   sops = {
 
-    defaultSopsFile = ../../secrets/secrets.yaml;
+    defaultSopsFile = ../../secrets/user.yaml;
 
     gnupg = {
-      home = if pkgs.stdenv.isDarwin then "/Users/${username}/.gnupg" else "/home/${username}/.gnupg";
+      home = "${config.home.homeDirectory}/.gnupg";
       sshKeyPaths = [ ];
     };
 
