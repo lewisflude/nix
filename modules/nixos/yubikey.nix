@@ -12,14 +12,6 @@
     yubikey-personalization # For udev rules and user utility
   ];
 
-  programs._1password = {
-    enable = true;
-  };
-
-  programs._1password-gui = {
-    enable = true;
-  };
-
   security.pam = {
     u2f = {
       enable = true;

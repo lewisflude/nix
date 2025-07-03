@@ -16,7 +16,11 @@
 
   virtualisation = {
     oci-containers = {
-      backend = "docker";
+      backend = "podman";
+    };
+    podman = {
+      enable = true;
+      defaultNetwork.settings.dns_enabled = true;
     };
     docker = {
       package = pkgs.docker_28;
