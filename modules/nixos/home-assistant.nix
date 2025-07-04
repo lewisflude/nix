@@ -1,5 +1,18 @@
-{ config, ... }:
+{ config, pkgs, ... }:
+
+let
+  home-llm = pkgs.callPackage ./home-assistant/custom-components/home-llm.nix { inherit pkgs; };
+in
 {
+  environment.systemPackages = with pkgs; [
+    gcc
+    libgcc
+    gnumake
+    cmake
+    extra-cmake-modules
+
+  ];
+
   sops.templates."hass-secrets.yaml" = {
     content = ''
       latitude: ${config.sops.placeholder.LATITUDE}
@@ -14,6 +27,15 @@
   services.home-assistant = {
     enable = true;
     configDir = "/var/lib/hass";
+
+    blueprints = {
+      script = [
+        (pkgs.fetchurl {
+          url = "https://raw.githubusercontent.com/music-assistant/voice-support/main/llm-script-blueprint/llm_voice_script.yaml";
+          sha256 = "sha256-qu+dQWBke5hGJL8+FTj0ghxeao4LjAPFMIckLXnn3eg=";
+        })
+      ];
+    };
     extraComponents = [
       # Components required to complete the onboarding
       "analytics"
@@ -28,6 +50,7 @@
       "esphome"
       "denonavr"
       "apple_tv"
+      "ollama"
       "ipp"
       "mjpeg"
       "mpd"
@@ -45,7 +68,13 @@
       # https://www.home-assistant.io/integrations/isal
       "isal"
     ];
+    customComponents = with pkgs; [
+      home-assistant-custom-components.localtuya
+      home-llm
+
+    ];
     openFirewall = true;
+
     config = {
       lovelace.mode = "yaml";
       homeassistant = {
@@ -55,6 +84,19 @@
         unit_system = "metric";
         time_zone = "Europe/London";
       };
+      script = [
+        {
+          llm_script_for_music_assistant_voice_requests = {
+            alias = "LLM Script for Music Assistant voice requests";
+            use_blueprint = {
+              path = "llm_voice_script.yaml";
+              input = {
+                default_player = "media_player.office";
+              };
+            };
+          };
+        }
+      ];
       http = {
         base_url = "!secret base_url";
         server_host = [ "0.0.0.0" ];
