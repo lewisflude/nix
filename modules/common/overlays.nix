@@ -17,8 +17,6 @@
       (_: _: { waybar-git = inputs.waybar.packages.${system}.waybar; })
       # Hyprland-contrib overlay
       (_: _: { grimblast = inputs.hyprland-contrib.packages.${system}.grimblast; })
-      # Firefox-nightly overlay
-      (_: _: { firefox-nightly = inputs.firefox-nightly.packages.${system}.firefox-nightly-bin; })
       # NUR overlay
       inputs.nur.overlays.default
 
