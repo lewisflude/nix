@@ -23,6 +23,10 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    codex = {
+      url = "github:openai/codex";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # NixOS-specific inputs
     hyprland = {
@@ -46,12 +50,20 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     waybar.url = "github:Alexays/Waybar/master";
+    firefox-nightly = {
+      url = "github:nix-community/flake-firefox-nightly";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     musnix = {
       url = "github:musnix/musnix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs-mozilla = {
       url = "github:mozilla/nixpkgs-mozilla";
+    };
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     yazi.url = "github:sxyazi/yazi";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
@@ -109,6 +121,7 @@
       catppuccin,
       sops-nix,
       musnix,
+      nur,
       solaar,
       niri-unstable,
       ...
@@ -202,6 +215,7 @@
             catppuccin.nixosModules.catppuccin
             niri-unstable.nixosModules.niri
             musnix.nixosModules.musnix
+            nur.modules.nixos.default
             solaar.nixosModules.default
             # Make inputs available to all modules
             { _module.args = { inherit inputs; }; }

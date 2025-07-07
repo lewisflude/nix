@@ -29,9 +29,4 @@
     enable = true;
     package = pkgs._1password-gui-beta;
   };
-
-  # GitHub access token should be configured via environment variable or SOPS
-  # nix.settings = {
-  #   access-tokens = "github.com=\${GITHUB_TOKEN}";
-  # };
 }

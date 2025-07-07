@@ -7,7 +7,7 @@
 }:
 let
   platformLib = import ../../lib/functions.nix { inherit lib system; };
-  
+
   # Dynamic paths
   claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
   codeDirectory = "${config.home.homeDirectory}/Code";
@@ -78,7 +78,7 @@ in
         "ghcr.io/github/github-mcp-server"
       ];
       env = {
-        GITHUB_PERSONAL_ACCESS_TOKEN = config.sops.secrets.GITHUB_PERSONAL_ACCESS_TOKEN.path;
+        GITHUB_PERSONAL_ACCESS_TOKEN = "/run/secrets/GITHUB_PERSONAL_ACCESS_TOKEN";
       };
     };
     filesystem = {

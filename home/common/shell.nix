@@ -59,6 +59,11 @@ in
         export KAGI_API_KEY="$(cat ${config.sops.secrets.KAGI_API_KEY.path})"
       ''}
 
+      # GitHub token is managed at system level
+      if [[ -f /run/secrets/GITHUB_PERSONAL_ACCESS_TOKEN ]]; then
+        export GITHUB_TOKEN="$(cat /run/secrets/GITHUB_PERSONAL_ACCESS_TOKEN)"
+      fi
+
       export SOPS_GPG_EXEC="$(which gpg)"
       export SOPS_GPG_ARGS="--pinentry-mode=loopback"
 

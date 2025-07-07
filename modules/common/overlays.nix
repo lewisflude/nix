@@ -17,6 +17,11 @@
       (_: _: { waybar-git = inputs.waybar.packages.${system}.waybar; })
       # Hyprland-contrib overlay
       (_: _: { grimblast = inputs.hyprland-contrib.packages.${system}.grimblast; })
+      # Firefox-nightly overlay
+      (_: _: { firefox-nightly = inputs.firefox-nightly.packages.${system}.firefox-nightly-bin; })
+      # NUR overlay
+      inputs.nur.overlays.default
+
       # Ghostty overlay
       (_: _: {
         ghostty = inputs.ghostty.packages.${system}.default.override {
@@ -25,6 +30,11 @@
           enableWayland = true;
           # revision = "custom"; # if you want custom revision
         };
+      })
+      # Codex CLI overlay
+      (_: _: {
+        codex-cli = inputs.codex.packages.${system}.codex-cli;
+        codex-rs = inputs.codex.packages.${system}.codex-rs;
       })
       (final: _prev: {
         swww = inputs.swww.packages.${final.system}.swww;
