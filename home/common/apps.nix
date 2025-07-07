@@ -7,7 +7,7 @@
     # Development tools (cross-platform)
     awscli2
     claude-code
-    codex
+    codex-rs
     coreutils
     delta
     gh
@@ -23,7 +23,7 @@
     tree
     yaml-language-server
     yq
-    
+
     # Note: Language servers moved to development/language-tools.nix:
     # - nil (Nix LSP)
     # - nixfmt-rfc-style (Nix formatter)

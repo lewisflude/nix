@@ -2,7 +2,6 @@
   imports = [
     # System core
     ./nix.nix
-    ./sops.nix
     ./boot.nix
     ./networking.nix
     ./security.nix
