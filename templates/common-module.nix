@@ -12,7 +12,7 @@ in
 {
   # Cross-platform configuration only
   # Platform-specific logic should be moved to modules/darwin/ or modules/nixos/
-  
+
   # Example cross-platform package installation
   environment.systemPackages = with pkgs; [
     # Only packages that work identically on all platforms
@@ -21,11 +21,12 @@ in
     git
   ];
 
-  # Example cross-platform service configuration
+  # Example cross-platform service configuration using username parameter
   services.example = {
     enable = true;
     # Only settings that are identical across platforms
     port = 8080;
+    user = username;
   };
 
   # Example using platform helpers for conditional config
@@ -34,4 +35,10 @@ in
     enable = true;
     package = platformLib.platformPackage pkgs.example-linux pkgs.example-darwin;
   };
+
+  # Example user-specific configuration using username parameter
+  # users.users.${username} = {
+  #   description = "Cross-platform user ${username}";
+  #   # Additional cross-platform user configuration
+  # };
 }

@@ -3,7 +3,6 @@
 let
   home-llm = pkgs.callPackage ./home-assistant/custom-components/home-llm.nix { inherit pkgs; };
   intent_script_yaml = ./home-assistant/intent-scripts/intent_script.yaml;
-  python3Packages = pkgs.python313Packages;
 in
 {
   environment.systemPackages = with pkgs; [
