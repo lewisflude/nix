@@ -1,8 +1,18 @@
 {
   pkgs,
   config,
+  lib,
+  system,
   ...
 }:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+  
+  # Dynamic paths
+  claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
+  codeDirectory = "${config.home.homeDirectory}/Code";
+  dexWebProject = "${codeDirectory}/dex-web";
+in
 {
   home.packages = with pkgs; [
     uv
@@ -22,7 +32,7 @@
       fileName = "mcp.json";
     };
     claude = {
-      directory = "/Users/${config.home.username}/Library/Application Support/Claude";
+      directory = claudeConfigDir;
       fileName = "claude_desktop_config.json";
     };
   };
@@ -45,7 +55,7 @@
       command = "${pkgs.nodejs_24}/bin/npx";
       args = [
         "nx-mcp@latest"
-        "/Users/lewisflude/Code/dex-web"
+        dexWebProject
       ];
       port = 11437;
     };

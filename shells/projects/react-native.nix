@@ -1,4 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, lib, system, ... }:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
 
 pkgs.mkShell {
   buildInputs =
@@ -16,7 +19,7 @@ pkgs.mkShell {
       watchman
       # Android tools would be system-specific
     ]
-    ++ lib.optionals pkgs.stdenv.isDarwin [
+    ++ lib.optionals platformLib.isDarwin [
       # macOS-specific tools for iOS development
       xcbuild
     ];

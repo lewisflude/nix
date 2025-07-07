@@ -1,8 +1,11 @@
-{ pkgs, ... }:
+{ pkgs, lib, system, ... }:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
 {
   home.packages = with pkgs; [
     gnupg
-    (if pkgs.stdenv.isDarwin then pinentry_mac else pinentry-curses)
+    (platformLib.platformPackage pinentry-curses pinentry_mac)
   ];
 
   programs.gpg = {
@@ -22,7 +25,7 @@
     enable = true;
     enableSshSupport = true;
 
-    pinentry.package = if pkgs.stdenv.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-gnome3;
+    pinentry.package = platformLib.platformPackage pkgs.pinentry-gnome3 pkgs.pinentry_mac;
 
     defaultCacheTtl = 86400;
     maxCacheTtl = 86400;
