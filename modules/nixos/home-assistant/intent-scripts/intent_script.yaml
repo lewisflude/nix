@@ -1,0 +1,51 @@
+HassWeatherForecast:
+  description: >
+    Use this function to retrieve hourly and daily weather forecast or conditions for the upcoming week including today.
+    It does not require any parameters and returns the forecasts in a json structure.
+
+  action:
+    - service: script.weather_forecast_duplicate
+      response_variable: daily_summary
+    - stop: ""
+      response_variable: daily_summary
+
+  speech:
+    text: >
+      The weather forecast is: {{ action_response }}
+
+HassPlayMusic:
+  description: >
+    Use this function to play music based on the user query.
+    The "name" parameter is required and must always include the title of the song and artist name combined.
+    If the users query specifies an "album" or "playlist," include those words as part of the query.
+    The "area" parameter is required and must always include the area name where the music should be played.
+    If the users query does not specifies an area, you should use any area name that has media player entity.
+
+  action:
+    - service: script.play_music
+      data:
+        query: "{{ name }}"
+        area: "{{ area }}"
+
+  speech:
+    text: >
+      Playing {{ name }} in {{ area }}.
+
+HassRetrieveAttributes:
+  description: >
+    Use this function to retrieve attributes of an entity.
+    The "name" parameter is required and must contain the entity name.
+    If the requested attribute is not listed in the overview, use this function.
+    If the attribute requested is the color of a light, respond only with the color name.
+
+  action:
+    - service: script.get_entity_attributes
+      data:
+        entity_name: "{{ name }}"
+      response_variable: attributes
+    - stop: ""
+      response_variable: attributes
+
+  speech:
+    text: >
+      The entity attributes are: {{ action_response }}
