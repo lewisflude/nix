@@ -1,11 +1,12 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   services.pipewire = {
     enable = true;
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
     raopOpenFirewall = true;
-    
+
     wireplumber = {
       # Low-latency ALSA configuration
       configPackages = [
@@ -23,7 +24,7 @@
           }
         '')
       ];
-      
+
       # Bluetooth audio configuration
       extraConfig."10-bluez" = {
         "monitor.bluez.properties" = {
@@ -39,7 +40,7 @@
         };
       };
     };
-    
+
     extraConfig = {
       # PulseAudio compatibility layer
       pipewire-pulse = {
@@ -60,31 +61,45 @@
           }
         ];
       };
-      
+
       # Core PipeWire configuration
       pipewire = {
+
+        "99-silent-bell.conf" = {
+          "context.properties" = {
+            "module.x11.bell" = false;
+          };
+        };
+
         # AirPlay support
         "10-airplay" = {
           "context.modules" = [
             {
               name = "libpipewire-module-raop-discover";
+              args = {
+                "raop.latency.ms" = 500;
+              };
             }
           ];
         };
-        
+
         # Base configuration
         "context.properties" = {
           "link.max-buffers" = 16;
           "log.level" = 2;
           "default.clock.rate" = 48000;
-          "default.clock.allowed-rates" = [ 44100 48000 96000 ];
+          "default.clock.allowed-rates" = [
+            44100
+            48000
+            96000
+          ];
           "default.clock.quantum" = 256;
           "default.clock.min-quantum" = 32;
           "default.clock.max-quantum" = 8192;
           "core.daemon" = true;
           "core.realtime" = true;
         };
-        
+
         # Low-latency optimization
         "92-low-latency" = {
           "context.properties" = {
@@ -94,21 +109,26 @@
             "default.clock.max-quantum" = 256;
           };
         };
-        
+
         # ALSA compatibility
         "99-alsa-compat.conf" = {
           "context.properties" = {
             "alsa.support-audio-fallback" = true;
           };
-          "context.objects" = [{
-            factory = "adapter";
-            args = {
-              "factory.name" = "support.null-audio-sink";
-              "node.name" = "alsa-compatibility";
-              "media.class" = "Audio/Sink";
-              "audio.position" = [ "FL" "FR" ];
-            };
-          }];
+          "context.objects" = [
+            {
+              factory = "adapter";
+              args = {
+                "factory.name" = "support.null-audio-sink";
+                "node.name" = "alsa-compatibility";
+                "media.class" = "Audio/Sink";
+                "audio.position" = [
+                  "FL"
+                  "FR"
+                ];
+              };
+            }
+          ];
         };
       };
     };

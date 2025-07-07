@@ -9,7 +9,7 @@
 buildHomeAssistantComponent rec {
   owner = "acon96";
   domain = "llama_conversation";
-  version = "dc1e7613b8a3ab036d4dfa8a3cfcece840cd371b";
+  version = "0.3.9";
 
   src = fetchFromGitHub {
     owner = "acon96";
