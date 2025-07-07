@@ -4,7 +4,6 @@
 }:
 {
   home.packages = with pkgs; [
-    grimblast
     nautilus # GNOME file manager
     htop # Process monitor
     btop # Modern system monitor
