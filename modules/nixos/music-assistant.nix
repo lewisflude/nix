@@ -1,7 +1,4 @@
 {
-  pkgs,
-  config,
-  username,
   ...
 }:
 let
