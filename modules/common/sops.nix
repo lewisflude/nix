@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+let
+  rootGroup = if pkgs.stdenv.isDarwin then "wheel" else "root";
+in
 {
 
   environment.systemPackages = with pkgs; [
@@ -18,17 +21,17 @@
       LATITUDE = {
         mode = "0400";
         owner = "root";
-        group = "root";
+        group = rootGroup;
       };
       LONGITUDE = {
         mode = "0400";
         owner = "root";
-        group = "root";
+        group = rootGroup;
       };
       HOME_ASSISTANT_BASE_URL = {
         mode = "0400";
         owner = "root";
-        group = "root";
+        group = rootGroup;
       };
     };
   };
