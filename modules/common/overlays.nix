@@ -26,7 +26,7 @@
           # revision = "custom"; # if you want custom revision
         };
       })
-      (final: prev: {
+      (final: _prev: {
         swww = inputs.swww.packages.${final.system}.swww;
       })
     ]

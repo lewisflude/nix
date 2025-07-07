@@ -7,7 +7,7 @@
 {
   # Darwin-specific system configuration
   # No platform detection needed - this module only loads on Darwin
-  
+
   # macOS system settings
   system.defaults = {
     dock.autohide = true;
@@ -38,11 +38,21 @@
     # Darwin-specific service configuration
   };
 
-  # LaunchDaemons (Darwin equivalent of systemd)
+  # LaunchDaemons (Darwin equivalent of systemd) - using username parameter
   launchd.daemons.example = {
     serviceConfig = {
-      ProgramArguments = [ "/path/to/program" ];
+      ProgramArguments = [
+        "/path/to/program"
+        "--user"
+        username
+      ];
       RunAtLoad = true;
     };
   };
+
+  # Example user-specific configuration using username parameter
+  # users.users.${username} = {
+  #   description = "User ${username}";
+  #   # Additional user configuration
+  # };
 }
