@@ -15,6 +15,15 @@ in
     enable = true;
     waybar.mode = "createLink";
     mako.enable = lib.mkIf platformLib.isLinux false;
+    firefox = {
+      profiles = {
+        default = {
+          enable = true;
+          accent = "mauve";
+          flavor = "mocha";
+        };
+      };
+    };
   };
 
   # Linux-specific theme configuration
