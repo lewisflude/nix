@@ -50,6 +50,7 @@
       "Kagi Search" = 1622835804;
       "Xcode" = 497799835;
       "Yubico Authenticator" = 1497506650;
+      "Keka" = 470158793;
     };
   };
 }
