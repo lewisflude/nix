@@ -1,13 +1,10 @@
 {
-  lib,
-  system,
-  ...
-}:
-{
   imports = [
-    # Platform-specific desktop configs are handled in nixos/ and darwin/ directories
-  ] ++ lib.optionals (lib.hasInfix "linux" system) [
-    # Linux-specific desktop configs (Wayland/X11 applications)
-    ./desktop-environment.nix
+    # Desktop configurations are now handled in platform-specific directories:
+    # - home/nixos/ for Linux desktop applications
+    # - home/darwin/ for macOS desktop applications
+    
+    # This directory now contains only cross-platform desktop configurations
+    # (currently none - all desktop configs are platform-specific)
   ];
 }

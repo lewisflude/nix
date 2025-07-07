@@ -4,6 +4,9 @@
   system,
   ...
 }:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
 
 {
   # Nix Store Optimization and Garbage Collection Configuration
@@ -43,7 +46,7 @@
         "https://niri.cachix.org"
 
       ]
-      ++ lib.optionals (lib.hasInfix "darwin" system) [
+      ++ lib.optionals platformLib.isDarwin [
         "https://cache.determinate.systems"
       ];
     trusted-substituters =
@@ -61,7 +64,7 @@
         "https://niri.cachix.org"
 
       ]
-      ++ lib.optionals (lib.hasInfix "darwin" system) [
+      ++ lib.optionals platformLib.isDarwin [
         "https://cache.determinate.systems"
       ];
     trusted-public-keys =
@@ -79,7 +82,7 @@
         "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
 
       ]
-      ++ lib.optionals (lib.hasInfix "darwin" system) [
+      ++ lib.optionals platformLib.isDarwin [
         "cache.determinate.systems-1:cd9bVm9wnyQHfHpLRhHGDMWWgPEXFEoKhiMuQ1jmNj8="
       ];
 
@@ -200,14 +203,14 @@
 
   # Platform-specific garbage collection
   # NixOS/Linux - use systemd timers and built-in garbage collection
-  nix.gc = lib.mkIf (lib.hasInfix "linux" system) {
+  nix.gc = lib.mkIf platformLib.isLinux {
     automatic = true;
     dates = "weekly";
     options = "--delete-older-than 7d";
   };
 
 }
-// lib.optionalAttrs (lib.hasInfix "linux" system) {
+// lib.optionalAttrs platformLib.isLinux {
   # Systemd timer for store optimization (Linux only)
   systemd = {
     timers.nix-store-optimization = {
@@ -227,7 +230,7 @@
   };
 
 }
-// lib.optionalAttrs (lib.hasInfix "darwin" system) {
+// lib.optionalAttrs platformLib.isDarwin {
   # Darwin-specific launchd configuration
   launchd = {
     daemons.nix-garbage-collection = {

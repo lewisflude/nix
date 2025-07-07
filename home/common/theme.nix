@@ -4,6 +4,9 @@
   system,
   ...
 }:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
 {
   # Base theme configuration (Catppuccin Mocha)
   catppuccin = {
@@ -11,11 +14,11 @@
     accent = "mauve";
     enable = true;
     waybar.mode = "createLink";
-    mako.enable = lib.mkIf (lib.hasInfix "linux" system) false;
+    mako.enable = lib.mkIf platformLib.isLinux false;
   };
 
   # Linux-specific theme configuration
-  home = lib.optionalAttrs (lib.hasInfix "linux" system) {
+  home = lib.optionalAttrs platformLib.isLinux {
     packages = with pkgs; [
       magnetic-catppuccin-gtk
       nwg-look
@@ -41,7 +44,7 @@
   };
 
   # GTK configuration (Linux only)
-  gtk = lib.mkIf (lib.hasInfix "linux" system) {
+  gtk = lib.mkIf platformLib.isLinux {
     enable = true;
     font = {
       name = "Iosevka";
@@ -64,5 +67,5 @@
   };
 
   # Font configuration (Linux only)
-  fonts.fontconfig.enable = lib.mkIf (lib.hasInfix "linux" system) true;
+  fonts.fontconfig.enable = lib.mkIf platformLib.isLinux true;
 }

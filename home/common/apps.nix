@@ -6,7 +6,6 @@
   home.packages = with pkgs; [
     # Development tools (cross-platform)
     awscli2
-    biome
     claude-code
     codex
     coreutils
@@ -14,20 +13,23 @@
     gh
     htop
     http-server
-    marksman
-    nil
-    nixfmt-rfc-style
     nodePackages_latest.pnpm
     nodePackages_latest.typescript
     nodePackages_latest.typescript-language-server
     nodePackages_latest.vscode-langservers-extracted
     pgcli
-    pyright
     rustup
     solana-cli
     tree
     yaml-language-server
     yq
+    
+    # Note: Language servers moved to development/language-tools.nix:
+    # - nil (Nix LSP)
+    # - nixfmt-rfc-style (Nix formatter)
+    # - biome (JS/TS formatter)
+    # - marksman (Markdown LSP)
+    # - pyright (Python LSP)
   ];
 
   imports = [

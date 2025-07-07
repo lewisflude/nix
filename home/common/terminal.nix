@@ -5,6 +5,9 @@
   ghostty,
   ...
 }:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
 {
   # Common terminal packages across all platforms
   home.packages =
@@ -46,21 +49,22 @@
       lazydocker # Docker TUI
       zellij # Terminal multiplexer
     ]
-    ++ lib.optionals (lib.hasInfix "linux" system) [
-      # Linux-specific packages
-      foot # Wayland terminal
-      networkmanager # Network management
-      doas # Privilege escalation
-      lsof # List open files
-    ]
-    ++ lib.optionals (lib.hasInfix "darwin" system) [
-      # Darwin-specific packages
-      nil # Nix language server
-    ];
+    ++ platformLib.platformPackages
+      [
+        # Linux-specific packages
+        foot # Wayland terminal
+        networkmanager # Network management
+        doas # Privilege escalation
+        lsof # List open files
+      ]
+      [
+        # Darwin-specific packages
+        # Note: nil (Nix language server) moved to development/language-tools.nix
+      ];
 
   programs.ghostty = {
     enable = true;
-    package = if lib.hasInfix "linux" system then pkgs.ghostty else null;
+    package = platformLib.platformPackage pkgs.ghostty null;
     enableZshIntegration = true;
     settings = {
       font-family = "Iosevka Nerd Font";
