@@ -3,15 +3,7 @@
   ...
 }:
 {
-  # Enable Hyprland with UWSM
-  # programs.hyprland = {
-  #   enable = false;
-  #   withUWSM = true;
-  #   package = hyprland.packages.${system}.hyprland;
-  #   portalPackage = hyprland.packages.${system}.xdg-desktop-portal-hyprland;
-  # };
 
-  # Required packages for Hyprland desktop environment
   environment.systemPackages = with pkgs; [
     # Core Wayland tools
     wl-clipboard

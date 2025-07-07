@@ -97,55 +97,5 @@
       pw-link "alsa_input.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-input-0:capture_AUX0" "Microphone-Proxy:input_MONO"
 
     '')
-    (writeShellScriptBin "gaming-mode" ''
-      #!/usr/bin/env bash
-
-      GAMING_MODE_FILE="/tmp/gaming-mode"
-
-      toggle_gaming_mode() {
-          if [ -f "$GAMING_MODE_FILE" ]; then
-              # Disable gaming mode
-              rm "$GAMING_MODE_FILE"
-
-              # Reset system settings
-              hyprctl keyword misc:vrr 1
-              powerprofilesctl set balanced
-              ratbagctl profile active default
-
-              # Reset CPU governor
-              echo "powersave" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-
-              # Reset GPU settings if NVIDIA
-              if command -v nvidia-smi &> /dev/null; then
-                  nvidia-smi -pm 0
-                  nvidia-settings -a "GPUPowerMizerMode=0"
-              fi
-
-              notify-send "Gaming Mode" "Disabled" -i "󰊵"
-          else
-              # Enable gaming mode
-              touch "$GAMING_MODE_FILE"
-
-              # Set gaming optimizations
-              hyprctl keyword misc:vrr 1
-              powerprofilesctl set performance
-              ratbagctl profile active gaming
-
-              # Set CPU governor to performance
-              echo "performance" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-
-              # Set GPU settings if NVIDIA
-              if command -v nvidia-smi &> /dev/null; then
-                  nvidia-smi -pm 1
-                  nvidia-settings -a "GPUPowerMizerMode=1"
-              fi
-
-              notify-send "Gaming Mode" "Enabled" -i "󰊴"
-          fi
-      }
-
-      # Run the toggle function
-      toggle_gaming_mode
-    '')
   ];
 }

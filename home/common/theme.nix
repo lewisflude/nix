@@ -41,10 +41,6 @@ in
       package = pkgs.catppuccin-cursors.mochaMauve;
       size = 24;
       gtk.enable = true;
-      hyprcursor = {
-        enable = true;
-        size = 24;
-      };
       x11 = {
         enable = true;
         defaultCursor = "left_ptr";
