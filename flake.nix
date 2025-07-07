@@ -29,14 +29,6 @@
     };
 
     # NixOS-specific inputs
-    hyprland = {
-      url = "github:hyprwm/Hyprland";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    hyprland-plugins = {
-      url = "github:hyprwm/hyprland-plugins";
-      inputs.hyprland.follows = "hyprland";
-    };
     astal = {
       url = "github:aylur/astal";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -45,10 +37,7 @@
       url = "github:mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hyprland-contrib = {
-      url = "github:hyprwm/contrib";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+
     waybar.url = "github:Alexays/Waybar/master";
     musnix = {
       url = "github:musnix/musnix";
@@ -202,9 +191,6 @@
             # Common and NixOS modules
             ./modules/common
             ./modules/nixos
-
-            # Desktop environment (conditionally loaded)
-            ./modules/nixos/hyprland.nix
 
             # External modules
             sops-nix.nixosModules.sops

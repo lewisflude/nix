@@ -16,7 +16,7 @@ This is a cross-platform Nix configuration using flakes, supporting both macOS (
 
 ### Platform Support
 - **macOS**: Uses nix-darwin with Homebrew integration
-- **Linux**: Uses NixOS with Hyprland/Niri compositors
+- **Linux**: Uses NixOS with Niri compositor
 - **Shared**: Home Manager for user-level configurations
 
 ## Common Commands
@@ -107,7 +107,6 @@ sops secrets.yaml
 - **`home/nixos/`**: Linux-specific user configurations
   - `system/` - Linux system integration (USB, keyboard, gaming, auto-update)
   - `browser.nix` - Web browser configuration
-  - `hyprland-packages.nix` - Hyprland desktop environment packages
   - `waybar.nix` - Status bar configuration
   - `mako.nix` - Notification daemon
 
@@ -128,7 +127,7 @@ in
 **Available Helpers:**
 - `isLinux`, `isDarwin`, `isAarch64`, `isX86_64` - Platform detection
 - `platformPackages` - Conditional package inclusion
-- `platformModules` - Conditional module imports  
+- `platformModules` - Conditional module imports
 - `homeDir`, `configDir`, `dataDir`, `cacheDir` - Dynamic path helpers
 - `rootGroup` - Platform-specific root group
 - `systemRebuildCommand` - Platform-specific rebuild commands
@@ -204,7 +203,7 @@ direnv allow
 - **home-manager**: User environment management
 - **sops-nix**: Secrets management
 - **catppuccin**: Consistent theming
-- **hyprland**: Wayland compositor (Linux)
+- **niri**: Wayland compositor (Linux)
 - **cursor**: Cursor editor integration
 
 ### Homebrew Integration (macOS)

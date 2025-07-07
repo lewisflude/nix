@@ -34,7 +34,6 @@
     ./yubikey.nix
 
     # Desktop
-    # ./hyprland.nix
     ./desktop-environment.nix
     ./niri.nix
     ./xdg.nix
@@ -43,7 +42,6 @@
     # Configuration
     ./nixpkgs.nix
     ./theme.nix
-    ./environment.nix
 
     # Scripts
     ./sh.nix

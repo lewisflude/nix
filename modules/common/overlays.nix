@@ -15,8 +15,7 @@
 
       # Waybar overlay
       (_: _: { waybar-git = inputs.waybar.packages.${system}.waybar; })
-      # Hyprland-contrib overlay
-      (_: _: { grimblast = inputs.hyprland-contrib.packages.${system}.grimblast; })
+
       # NUR overlay
       inputs.nur.overlays.default
 
