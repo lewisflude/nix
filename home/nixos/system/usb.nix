@@ -1,11 +1,13 @@
-{ pkgs, lib, system, ... }: {
-  home.packages = lib.optionals (lib.hasInfix "linux" system) (with pkgs; [
+{ pkgs, ... }: 
+{
+  # Linux USB utilities and management
+  home.packages = with pkgs; [
     usbutils
     evhz
     piper
-  ]);
+  ];
 
-  services.udiskie = lib.mkIf (lib.hasInfix "linux" system) {
+  services.udiskie = {
     enable = true;
     settings = {
       # workaround for
@@ -16,5 +18,4 @@
       };
     };
   };
-
 }

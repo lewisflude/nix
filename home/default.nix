@@ -4,13 +4,15 @@
   lib,
   ...
 }:
+let
+  platformLib = import ../lib/functions.nix { inherit lib system; };
+in
 {
   home.stateVersion = "24.05";
   home.username = username;
 
   # Platform-specific home directory
-  home.homeDirectory =
-    if lib.hasInfix "darwin" system then "/Users/${username}" else "/home/${username}";
+  home.homeDirectory = platformLib.homeDir username;
 
   imports =
     [
@@ -19,12 +21,15 @@
 
       # Platform-specific configurations
     ]
-    ++ lib.optionals (lib.hasInfix "darwin" system) [
-      ./darwin
-    ]
-    ++ lib.optionals (lib.hasInfix "linux" system) [
-      ./nixos
-    ];
+    ++ platformLib.platformModules
+      [
+        # Linux modules
+        ./nixos
+      ]
+      [
+        # Darwin modules
+        ./darwin
+      ];
 
   programs = {
     home-manager.enable = true;

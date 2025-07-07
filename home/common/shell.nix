@@ -5,6 +5,9 @@
   lib,
   ...
 }:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
 {
 
   programs.zsh = {
@@ -13,11 +16,7 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     shellAliases = {
-      switch =
-        if lib.hasInfix "darwin" system then
-          "sudo darwin-rebuild switch --flake ~/.config/nix"
-        else
-          "sudo nixos-rebuild switch --flake ~/.config/nix#jupiter";
+      switch = platformLib.systemRebuildCommand;
       ls = "lsd";
       l = "ls -l";
       la = "ls -a";
@@ -210,7 +209,7 @@
         echo "✨ System update complete!"
       '')
     ]
-    ++ lib.optionals (lib.hasInfix "linux" system) [
+    ++ lib.optionals platformLib.isLinux [
       # Linux-only gaming mode script
       (writeShellScriptBin "gaming-mode" ''
         #!/usr/bin/env bash

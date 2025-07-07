@@ -6,38 +6,44 @@
   lib,
   ...
 }:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
 {
-  # Nix daemon & CLI settings
+  # Cross-platform Nix configuration
   nix = {
-    enable = lib.mkDefault (!lib.hasInfix "darwin" system); # Enable on Linux, disable on Darwin (managed by Determinate Nix installation)
-    # package explicit for clarity
+    # Package explicit for clarity
     package = pkgs.nix;
 
     settings = {
-      # Basic settings - detailed optimization handled in nix-optimization.nix
+      # Basic cross-platform settings - detailed optimization handled in nix-optimization.nix
       warn-dirty = false;
+      
+      # Basic trusted users (platform-specific ones are handled in platform modules)
       trusted-users = [
         "root"
         username
       ];
+      
+      # Experimental features
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
     };
   };
 
-  # Platform-specific configuration revision and state version
+  # Configuration revision tracking
   system.configurationRevision = self.rev or self.dirtyRev or null;
-  system.stateVersion = lib.mkDefault (if lib.hasInfix "darwin" system then 6 else "25.05");
+  system.stateVersion = lib.mkDefault platformLib.platformStateVersion;
 
-  environment.etc."nix/nix.custom.conf" = lib.mkIf pkgs.stdenv.isDarwin {
-    text = ''
-      # Written by modules/common/core.nix
-      lazy-trees = true
-      trusted-users = root ${username}
-      warn-dirty = false
-    '';
-  };
-
+  # Cross-platform nixpkgs configuration
   nixpkgs = {
     hostPlatform = system;
-    config.allowUnfree = true;
+    config = {
+      allowUnfree = true;
+      allowBroken = false;
+      allowUnsupportedSystem = false;
+    };
   };
 }
