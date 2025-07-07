@@ -1,14 +1,14 @@
 keys:
   - &lewis_gpg 7369D9C25A365E6C926ADBAB48B34CF9C735A6AE
-  - &nixos_age age1dn3panz9kx6g6petqm8lyund72gslwt29p6grlq9cf5t3cd68gcqxlv289
+  - &all_age_keys "age1dn3panz9kx6g6petqm8lyund72gslwt29p6grlq9cf5t3cd68gcqxlv289,age15q885zhzw0x5kk75upc30cql3nhkj7ugrxr0gs80tds988acgetszzd4px"
 
 creation_rules:
   - path_regex: secrets/.*\.yaml$
     pgp: *lewis_gpg
-    age: *nixos_age
+    age: *all_age_keys
   - path_regex: secrets/.*\.json$
     pgp: *lewis_gpg
-    age: *nixos_age
+    age: *all_age_keys
   - path_regex: hosts/.*/secrets\.yaml$
     pgp: *lewis_gpg
-    age: *nixos_age
+    age: *all_age_keys

@@ -17,6 +17,7 @@
     ];
     brews = [
       "circleci"
+      "mas"
       "node"
       "nx"
     ];
@@ -28,7 +29,6 @@
       "beekeeper-studio"
       "betterdisplay"
       "chatgpt"
-      "docker"
       "docker-desktop"
       "figma"
       "ghostty@tip"

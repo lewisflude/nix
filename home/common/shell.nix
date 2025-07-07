@@ -55,7 +55,10 @@ in
       ];
     };
     initContent = ''
-      export KAGI_API_KEY="$(cat ${config.sops.secrets.KAGI_API_KEY.path})"
+      ${lib.optionalString (config.sops.secrets ? KAGI_API_KEY) ''
+        export KAGI_API_KEY="$(cat ${config.sops.secrets.KAGI_API_KEY.path})"
+      ''}
+
       export SOPS_GPG_EXEC="$(which gpg)"
       export SOPS_GPG_ARGS="--pinentry-mode=loopback"
 
