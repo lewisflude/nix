@@ -487,22 +487,6 @@
         "type": "github"
       }
     },
-    "homebrew-domt4": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1749074701,
-        "narHash": "sha256-1pePtWRLf45uiFUeZWRrlK7aePR4tr0wtkhnPoEM1nk=",
-        "owner": "domt4",
-        "repo": "homebrew-autoupdate",
-        "rev": "0304d73c2409fae061dc9a16d5bbc236fd87277f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "domt4",
-        "repo": "homebrew-autoupdate",
-        "type": "github"
-      }
-    },
     "homebrew-j178": {
       "flake": false,
       "locked": {
@@ -1223,7 +1207,6 @@
         "home-manager": "home-manager",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
-        "homebrew-domt4": "homebrew-domt4",
         "homebrew-j178": "homebrew-j178",
         "homebrew-nx": "homebrew-nx",
         "hyprland": "hyprland",

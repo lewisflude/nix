@@ -82,10 +82,7 @@
       url = "github:j178/homebrew-tap";
       flake = false;
     };
-    homebrew-domt4 = {
-      url = "github:domt4/homebrew-autoupdate";
-      flake = false;
-    };
+
     ghostty = {
       url = "github:ghostty-org/ghostty";
     };
@@ -109,7 +106,6 @@
       homebrew-cask,
       homebrew-nx,
       homebrew-j178,
-      homebrew-domt4,
       catppuccin,
       sops-nix,
       musnix,
@@ -158,7 +154,6 @@
                   "homebrew/homebrew-core" = homebrew-core;
                   "nrwl/homebrew-nx" = homebrew-nx;
                   "j178/homebrew-tap" = homebrew-j178;
-                  "domt4/homebrew-autoupdate" = homebrew-domt4;
                 };
                 mutableTaps = false;
               };
