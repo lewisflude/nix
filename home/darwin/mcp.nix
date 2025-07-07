@@ -77,6 +77,8 @@
         "-y"
         "@modelcontextprotocol/server-filesystem"
         "${config.home.homeDirectory}"
+        "${config.home.homeDirectory}/.config"
+
       ];
       port = 11439;
     };
