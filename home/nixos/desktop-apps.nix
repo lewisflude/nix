@@ -3,6 +3,9 @@
   ...
 }:
 {
+  home.packages = with pkgs; [
+    ddcutil
+  ];
 
   # XDG MIME type associations for better file handling
   xdg.mimeApps = {
