@@ -15,8 +15,6 @@ in
         packages = with addons; [
           ublock-origin
           kagi-search
-          onepassword-password-manager
-          web-scrobbler
         ];
       };
 
@@ -39,24 +37,35 @@ in
         };
       };
 
-      settings = lib.mkOverride 10 (
-        lib.mkMerge [
-          {
-            "media.hardware-video-decoding.enabled" = true;
-            "browser.tabs.unloadOnLowMemory" = true;
-          }
-          (lib.mkIf pkgs.stdenv.isLinux {
-            "media.ffmpeg.vaapi.enabled" = true;
-          })
-          {
-            "browser.sessionstore.resume_from_crash" = true;
-            "signon.rememberSignons" = false;
-            "toolkit.telemetry.enabled" = false;
-            "datareporting.healthreport.uploadEnabled" = false;
-            "extensions.pocket.enabled" = false;
-          }
-        ]
-      );
+      settings = {
+        "media.hardware-video-decoding.enabled" = true;
+        "browser.tabs.unloadOnLowMemory" = true;
+        "media.ffmpeg.vaapi.enabled" = true;
+
+        "dom.ipc.processCount" = 4; # Reduce processes for lower memory use
+        "browser.tabs.remote.autostart" = true;
+        "layers.acceleration.force-enabled" = false; # Disable if GPU issues
+
+        "browser.cache.memory.capacity" = 2097152; # Set a lower cache size, like 2GB
+
+        "network.http.max-connections" = 600;
+        "network.dnsCacheExpiration" = 600;
+
+        "toolkit.telemetry.enabled" = false;
+        "datareporting.healthreport.uploadEnabled" = false;
+        "extensions.pocket.enabled" = false;
+
+        "privacy.trackingprotection.enabled" = true;
+        "privacy.trackingprotection.strictMode.enabled" = true;
+        "privacy.donottrackheader.enabled" = true;
+        "privacy.resistFingerprinting" = true;
+
+        "network.trr.mode" = 2;
+        "network.trr.uri" = "https://mozilla.cloudflare-dns.com/dns-query";
+
+        "dom.security.https_only_mode" = true;
+        "dom.security.https_only_mode_ever_enabled" = true;
+      };
     };
   };
 
