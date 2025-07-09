@@ -1,8 +1,6 @@
 {
   description = "Example nix-darwin system flake";
 
-  # Settings that are picked up automatically by every `nix` invocation that
-  # touches this flake (requires `nix --accept-flake-config` the first time).
   nixConfig = {
     experimental-features = [
       "nix-command"
@@ -11,7 +9,6 @@
   };
 
   inputs = {
-
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     darwin.url = "github:nix-darwin/nix-darwin/master";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
@@ -27,8 +24,6 @@
       url = "github:openai/codex";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # NixOS-specific inputs
     astal = {
       url = "github:aylur/astal";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -37,7 +32,6 @@
       url = "github:mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     waybar.url = "github:Alexays/Waybar/master";
     musnix = {
       url = "github:musnix/musnix";
@@ -62,7 +56,6 @@
     };
     cursor.url = "github:omarcresp/cursor-flake/main";
     mcp-hub.url = "github:ravitemer/mcp-hub";
-
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
       flake = false;
@@ -79,7 +72,6 @@
       url = "github:j178/homebrew-tap";
       flake = false;
     };
-
     ghostty = {
       url = "github:ghostty-org/ghostty";
     };
@@ -112,13 +104,11 @@
       ...
     }:
     let
-      # Import host configurations
       hosts = {
         "Lewiss-MacBook-Pro" = import ./hosts/Lewiss-MacBook-Pro;
         jupiter = import ./hosts/jupiter;
       };
 
-      # Helper function to create Darwin system
       mkDarwinSystem =
         hostName: hostConfig:
         darwin.lib.darwinSystem {
@@ -126,22 +116,14 @@
           specialArgs = inputs // hostConfig;
           modules = [
             ./hosts/${hostName}/configuration.nix
-
-            # Common modules (cross-platform)
             ./modules/common
-
-            # Darwin-specific modules
             ./modules/darwin
             home-manager.darwinModules.home-manager
             mac-app-util.darwinModules.default
             nix-homebrew.darwinModules.nix-homebrew
             sops-nix.darwinModules.sops
-
-            # Make inputs available to all modules
             { _module.args = { inherit inputs; }; }
-
             {
-
               nix-homebrew = {
                 enable = true;
                 enableRosetta = true;
@@ -156,11 +138,10 @@
                 mutableTaps = false;
               };
             }
-
             {
               home-manager.useGlobalPkgs = true;
               home-manager.verbose = true;
-              home-manager.backupFileExtension = "backup";
+              home-manager.backupFileExtension = "backup-" + builtins.toString self.lastModified;
               home-manager.sharedModules = [
                 sops-nix.homeManagerModules.sops
                 mac-app-util.homeManagerModules.default
@@ -172,7 +153,6 @@
           ];
         };
 
-      # Helper function to create NixOS system
       mkNixosSystem =
         hostName: hostConfig:
         nixpkgs.lib.nixosSystem {
@@ -185,30 +165,22 @@
               keysDirectory = "${self}/keys";
             };
           modules = [
-            # Host-specific configuration
             ./hosts/${hostName}/configuration.nix
-
-            # Common and NixOS modules
             ./modules/common
             ./modules/nixos
-
-            # External modules
             sops-nix.nixosModules.sops
             catppuccin.nixosModules.catppuccin
             niri-unstable.nixosModules.niri
             musnix.nixosModules.musnix
             nur.modules.nixos.default
             solaar.nixosModules.default
-            # Make inputs available to all modules
             { _module.args = { inherit inputs; }; }
-
-            # Home Manager integration
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.verbose = true;
-              home-manager.backupFileExtension = "backup";
+              home-manager.backupFileExtension = "backup-" + builtins.toString self.lastModified;
               home-manager.extraSpecialArgs =
                 inputs
                 // hostConfig
@@ -225,12 +197,10 @@
         };
     in
     {
-      # Provide formatters for all systems
       formatter = nixpkgs.lib.genAttrs (builtins.attrValues (
         builtins.mapAttrs (_name: host: host.system) hosts
       )) (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
 
-      # Developer shells for all systems
       devShells = builtins.listToAttrs (
         builtins.map (hostConfig: {
           name = hostConfig.system;
@@ -259,21 +229,18 @@
         }) (builtins.attrValues hosts)
       );
 
-      # Darwin configurations
       darwinConfigurations = builtins.mapAttrs (name: hostConfig: mkDarwinSystem name hostConfig) (
         nixpkgs.lib.filterAttrs (
           _name: host: host.system == "aarch64-darwin" || host.system == "x86_64-darwin"
         ) hosts
       );
 
-      # NixOS configurations
       nixosConfigurations = builtins.mapAttrs (name: hostConfig: mkNixosSystem name hostConfig) (
         nixpkgs.lib.filterAttrs (
           _name: host: host.system == "x86_64-linux" || host.system == "aarch64-linux"
         ) hosts
       );
 
-      # Standalone home-manager configurations
       homeConfigurations = builtins.mapAttrs (
         _name: hostConfig:
         home-manager.lib.homeManagerConfiguration {
