@@ -2,7 +2,6 @@
 {
   # Configure Homebrew
   homebrew = {
-    enable = true;
     onActivation = {
       cleanup = "zap";
       autoUpdate = true;
@@ -36,6 +35,7 @@
       "gpg-suite"
       "imageoptim"
       "linear-linear"
+      "logi-options+"
       "notion"
       "obs@beta"
       "raycast"
