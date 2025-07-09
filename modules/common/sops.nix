@@ -5,7 +5,7 @@
 }:
 let
   # Platform-specific group configuration
-  platformGroup = if (lib.strings.hasSuffix "darwin" system) then "wheel" else "users";
+  platformGroup = if (lib.strings.hasSuffix "darwin" system) then "admin" else "users";
 
   # Common secret configuration
   mkSecret =
