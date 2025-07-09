@@ -12,6 +12,8 @@
     delta
     gh
     htop
+    btop
+    ddcutil
     http-server
     nodePackages_latest.pnpm
     nodePackages_latest.typescript
