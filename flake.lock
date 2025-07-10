@@ -570,6 +570,26 @@
         "type": "github"
       }
     },
+    "nh": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1751375534,
+        "narHash": "sha256-9z1W64dDVtVxqgPzUbjIQqRfygg1hdivUOZ6d/H+yFg=",
+        "owner": "nix-community",
+        "repo": "nh",
+        "rev": "d0abb8eebe32f79ce4659e68dd777cf497a5d3d2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nh",
+        "type": "github"
+      }
+    },
     "niri-stable": {
       "flake": false,
       "locked": {
@@ -890,6 +910,7 @@
         "mac-app-util": "mac-app-util",
         "mcp-hub": "mcp-hub",
         "musnix": "musnix",
+        "nh": "nh",
         "niri-unstable": "niri-unstable",
         "nix-homebrew": "nix-homebrew",
         "nixos-hardware": "nixos-hardware",
