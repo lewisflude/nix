@@ -210,6 +210,7 @@
               shellsConfig = import ./shells {
                 inherit pkgs;
                 lib = pkgs.lib;
+                system = hostConfig.system;
               };
             in
             shellsConfig.devShells
