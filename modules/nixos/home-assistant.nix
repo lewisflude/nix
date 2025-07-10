@@ -6,12 +6,9 @@ let
 in
 {
   environment.systemPackages = with pkgs; [
-    gcc
-    libgcc
     gnumake
     cmake
     extra-cmake-modules
-
   ];
 
   sops.templates."hass-secrets.yaml" = {

@@ -562,7 +562,6 @@ in
 
   # System update script using nh
   home.packages = with pkgs; [
-    nh
     (writeShellScriptBin "system-update" ''
       #!/bin/sh
       set -e
