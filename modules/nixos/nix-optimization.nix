@@ -198,13 +198,6 @@ in
     '')
   ];
 
-  # Platform-specific garbage collection
-  # NixOS/Linux - use systemd timers and built-in garbage collection
-  nix.gc = lib.mkIf platformLib.isLinux {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 7d";
-  };
 
 }
 // lib.optionalAttrs platformLib.isLinux {
