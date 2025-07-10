@@ -20,6 +20,9 @@
     # "Mod+D".action.spawn = "fuzzel";
     # "Super+Alt+L".action.spawn = "swaylock";
 
+    # Quickly open Obsidian notes
+    "Mod+Ctrl+O".action.spawn = [ "obsidian" ];
+
     # # You can also use a shell. Do this if you need pipes, multiple commands, etc.
     # Note: the entire command goes as a single argument in the end.
     # Mod+T { spawn "bash" "-c" "notify-send hello && exec alacritty"; }
