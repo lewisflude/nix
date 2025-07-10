@@ -19,6 +19,9 @@
       # NUR overlay
       inputs.nur.overlays.default
 
+      # NH overlay
+      inputs.nh.overlays.default
+
       # Ghostty overlay
       (_: _: {
         ghostty = inputs.ghostty.packages.${system}.default.override {

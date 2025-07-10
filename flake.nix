@@ -54,6 +54,10 @@
       url = "github:icewind1991/nvidia-patch-nixos";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nh = {
+      url = "github:nix-community/nh";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     cursor.url = "github:omarcresp/cursor-flake/main";
     mcp-hub.url = "github:ravitemer/mcp-hub";
     homebrew-core = {
@@ -101,6 +105,7 @@
       nur,
       solaar,
       niri-unstable,
+      nh,
       ...
     }:
     let

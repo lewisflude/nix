@@ -15,5 +15,6 @@
     ./lib
     ./modules.nix
     ./terminal.nix
+    ./nh.nix
   ];
 }
