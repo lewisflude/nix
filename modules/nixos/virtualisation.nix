@@ -1,9 +1,6 @@
 { pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
-    nvidia-container-toolkit
-    nvidia-docker
-    docker-credential-helpers
   ];
 
   networking.nat = {

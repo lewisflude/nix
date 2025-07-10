@@ -139,7 +139,6 @@
         helm
         opentofu
         terragrunt
-        docker
         docker-compose
         k9s
         awscli2
