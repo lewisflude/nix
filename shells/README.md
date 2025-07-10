@@ -41,15 +41,15 @@ nix develop ~/.config/nix#devops          # DevOps/Infra
 ### Project-Specific Shells
 | Shell           | Description             | Key Tools                                 |
 |-----------------|-------------------------|-------------------------------------------|
-| `nextjs`        | Next.js React projects  | Node.js 22, pnpm, TypeScript, Tailwind    |
+| `nextjs`        | Next.js React projects  | Node.js 24, pnpm, TypeScript, Tailwind    |
 | `react-native`  | Mobile app development  | React Native CLI, CocoaPods, Watchman     |
 | `api-backend`   | Backend API services    | Node.js, Prisma, PostgreSQL, Redis        |
 
 ### General Purpose Shells
 | Shell      | Description           | Key Tools                                 |
 |------------|-----------------------|-------------------------------------------|
-| `node`     | Node.js/TypeScript    | Node.js 22, pnpm, TypeScript, ESLint      |
-| `python`   | Python development    | Python 3.12, Poetry, pytest, Black        |
+| `node`     | Node.js/TypeScript    | Node.js 24, pnpm, TypeScript, ESLint      |
+| `python`   | Python development    | Python 3.13, Poetry, pytest, Black        |
 | `rust`     | Rust development      | rustc, cargo, clippy, rust-analyzer       |
 | `go`       | Go development        | Go, gopls, golangci-lint                  |
 | `web`      | Full-stack web        | Node.js, Sass, Tailwind                   |

@@ -16,13 +16,16 @@ cd ~/.config/nix
 ```
 
 ### 3. Build Your System
+Replace `<hostname>` with the directory name under `hosts/` that matches your
+machine (e.g. `Lewiss-MacBook-Pro` or `jupiter`).
+
 - **macOS:**
   ```bash
-  sudo darwin-rebuild switch --flake ~/.config/nix#Lewiss-MacBook-Pro
+  sudo darwin-rebuild switch --flake ~/.config/nix#<hostname>
   ```
 - **Linux:**
   ```bash
-  sudo nixos-rebuild switch --flake ~/.config/nix#jupiter
+  sudo nixos-rebuild switch --flake ~/.config/nix#<hostname>
   ```
 
 ## 📁 Directory Structure
