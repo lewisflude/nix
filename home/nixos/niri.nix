@@ -112,14 +112,7 @@ in
             "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
           ];
         }
-        {
-          command = [
-            "systemctl"
-            "enable"
-            "--user"
-            "com.mitchellh.ghostty.service"
-          ];
-        }
+
         {
           command = [
             "${pkgs.uwsm}/bin/uwsm"
