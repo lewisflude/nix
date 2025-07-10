@@ -153,7 +153,6 @@ in
       ll = "eza -l --git --header";
       lsd = "eza"; # Fallback alias
       cd = "z";
-      grep = "rg";
       find = "fd";
       cat = "bat";
       top = "htop";
