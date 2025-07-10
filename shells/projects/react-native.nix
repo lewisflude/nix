@@ -14,12 +14,12 @@ pkgs.mkShell {
       nodePackages_latest.prettier
       nodePackages_latest.typescript-language-server
       # Mobile development tools
-      cocoapods
       watchman
       # Android tools would be system-specific
     ]
     ++ lib.optionals platformLib.isDarwin [
       # macOS-specific tools for iOS development
+      cocoapods
       xcbuild
     ];
 
