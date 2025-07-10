@@ -12,7 +12,6 @@ pkgs.mkShell {
       nodePackages_latest.typescript
       nodePackages_latest.eslint
       nodePackages_latest.prettier
-      nodePackages_latest."@react-native-community/cli"
       nodePackages_latest.typescript-language-server
       # Mobile development tools
       cocoapods
