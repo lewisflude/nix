@@ -1,11 +1,11 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, system, ... }:
 
 {
   # Development shells for different project types
   devShells = {
     # Project-specific shells
     nextjs = import ./projects/nextjs.nix { inherit pkgs; };
-    react-native = import ./projects/react-native.nix { inherit pkgs lib; };
+    react-native = import ./projects/react-native.nix { inherit pkgs lib system; };
     api-backend = import ./projects/api-backend.nix { inherit pkgs; };
 
     # Utility shells
