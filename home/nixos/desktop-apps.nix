@@ -34,6 +34,9 @@
       "x-terminal-emulator" = "ghostty.desktop";
       "inode/directory" = "org.gnome.Nautilus.desktop";
       "x-scheme-handler/onepassword" = "1password.desktop";
+      "text/html" = "firefox.desktop";
+      "x-scheme-handler/http" = "firefox.desktop";
+      "x-scheme-handler/https" = "firefox.desktop";
       "application/x-ms-dos-executable" = "wine.desktop";
       "application/x-wine-extension-ini" = "wine.desktop";
       "application/x-wine-extension-exe" = "wine.desktop";
