@@ -8,6 +8,5 @@
     ./overlays.nix
     ./cachix.nix
     ./sops.nix
-    ./nh.nix
   ];
 }
