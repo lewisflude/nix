@@ -58,14 +58,14 @@ in
         file = "autopair.zsh";
       }
       {
-        name = "zsh-notify";
+        name = "zsh-auto-notify";
         src = pkgs.fetchFromGitHub {
-          owner = "marzocchi";
-          repo = "zsh-notify";
-          rev = "9c1dac81a48ec85d742ebf236172b4d92aab2f3f";
-          sha256 = "sha256-ovmnl+V1B7J/yav0ep4qVqlZOD3Ex8sfrkC92dXPLFI=";
+          owner = "MichaelAquilina";
+          repo = "zsh-auto-notify";
+          rev = "master";
+          sha256 = "sha256-s3TBAsXOpmiXMAQkbaS5de0t0hNC1EzUUb0ZG+p9keE=";
         };
-        file = "notify.plugin.zsh";
+        file = "auto-notify.plugin.zsh";
       }
       {
         name = "zsh-abbr";
@@ -254,11 +254,14 @@ in
       zsh-defer -c 'export YSU_MESSAGE_POSITION="after"'
       zsh-defer -c 'export YSU_HARDCORE=1'
       
-      # Configure zsh-notify (check if desktop environment is available)
-      zsh-defer -c 'if [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]]; then
-        export SYS_NOTIFIER="notify-send"
-        export NOTIFY_COMMAND_COMPLETE_TIMEOUT=10
-      fi'
+      # Configure zsh-auto-notify
+      export AUTO_NOTIFY_THRESHOLD=10
+      export AUTO_NOTIFY_TITLE="Command finished"
+      export AUTO_NOTIFY_BODY="Completed in %elapsed seconds"
+      export AUTO_NOTIFY_IGNORE=(
+        "man" "less" "more" "vim" "nano" "htop" "top" "ssh" "scp" "rsync"
+        "watch" "tail" "sleep" "ping" "curl" "wget" "git log" "git diff"
+      )
       
       # Better word selection for navigation
       export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
