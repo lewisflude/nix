@@ -38,8 +38,7 @@
   # Set timezone
   time.timeZone = lib.mkForce "Europe/London";
 
-  # Enable X11 (desktop environment handled by modules)
-  services.xserver.enable = true;
+  # X11 configuration handled by modules/nixos/graphics.nix
 
   # SSH configuration handled by modules/nixos/ssh.nix
 

@@ -18,9 +18,18 @@ in
   programs.niri = {
     package = pkgs.niri-unstable;
     settings = {
-
+      input = {
+        mouse = {
+          natural-scroll = true;
+          accel-speed = 0.2;
+          accel-profile = "flat";
+          scroll-factor = 1.0;
+          scroll-button = 273;
+        };
+      };
       outputs = {
         "DP-1" = {
+          scale = 1.25;
           position = {
             x = 0;
             y = 0;
@@ -31,6 +40,34 @@ in
             refresh = 164.90;
           };
           variable-refresh-rate = true;
+        };
+      };
+
+      layout = {
+        gaps = 16;
+        always-center-single-column = true;
+        empty-workspace-above-first = true;
+        default-column-display = "tabbed";
+        focus-ring = {
+          width = 2;
+        };
+        border = {
+          width = 2;
+        };
+        shadow = {
+          enable = true;
+          softness = 50;
+          spread = 8;
+          draw-behind-window = true;
+        };
+        tab-indicator = {
+          hide-when-single-tab = true;
+          place-within-column = true;
+          gap = 4;
+          width = 4;
+          position = "right";
+          gaps-between-tabs = 2;
+          corner-radius = 4;
         };
       };
 

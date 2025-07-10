@@ -12,7 +12,6 @@
     # Note: Updated Darwin SDK references for future compatibility
 
     # Build essentials
-    gcc
     gnumake
     xcodebuild
   ];
