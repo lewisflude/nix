@@ -551,6 +551,9 @@ in
     
     # Directory stack configuration
     DIRSTACKSIZE = "20";  # Maximum number of directories in stack
+    
+    # NH flake configuration
+    NH_FLAKE = "${config.home.homeDirectory}/.config/nix";
   };
 
   home.file = {
@@ -564,7 +567,8 @@ in
       #!/bin/sh
       set -e
       
-      FLAKE_PATH="${config.home.homeDirectory}/.config/nix"
+      # Use NH_FLAKE environment variable if set, fallback to default
+      FLAKE_PATH="''${NH_FLAKE:-${config.home.homeDirectory}/.config/nix}"
       
       # Detect system
       if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -601,10 +605,10 @@ in
       
       if [ $BUILD_ONLY -eq 1 ]; then
         echo "⚙️ Building configuration..."
-        $NH_CMD build "$FLAKE_PATH#$HOST_NAME"
+        $NH_CMD build "$FLAKE_PATH"
       else
         echo "⚙️ Switching configuration..."
-        $NH_CMD switch "$FLAKE_PATH#$HOST_NAME"
+        $NH_CMD switch "$FLAKE_PATH"
       fi
       
       [ $RUN_GC -eq 1 ] && { echo "🧹 Cleaning up..."; nh clean all; }
