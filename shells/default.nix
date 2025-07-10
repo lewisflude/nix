@@ -124,13 +124,11 @@
         cargo
         nodejs_24
         nodePackages_latest.pnpm
-        anchor-cli
       ];
 
       shellHook = ''
         echo "⚡ Solana development environment loaded"
         echo "Solana version: $(solana --version)"
-        echo "Anchor version: $(anchor --version)"
       '';
     };
 
@@ -139,20 +137,20 @@
       buildInputs = with pkgs; [
         kubectl
         helm
-        terraform
+        opentofu
         terragrunt
         docker
         docker-compose
         k9s
-        aws-cli
-        gcloud
+        awscli2
+        google-cloud-sdk
         azure-cli
       ];
 
       shellHook = ''
         echo "🛠️  DevOps environment loaded"
         echo "kubectl version: $(kubectl version --client --short)"
-        echo "terraform version: $(terraform version)"
+        echo "OpenTofu version: $(tofu version)"
       '';
     };
   };
