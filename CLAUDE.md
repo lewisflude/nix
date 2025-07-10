@@ -223,3 +223,8 @@ direnv allow
 - **Missing dependencies**: Check if tools are included in the shell definition
 - **Environment variables**: Verify shellHook configuration
 - **Node.js version conflicts**: Use the version specified in shells configuration (Node.js 24)
+
+## Editor Integrations
+- **ChatGPT Codex**: see `CODEX.md` for CLI guidance.
+- **Cursor**: configuration lives in `.cursor/` with an overview in `CURSOR.md`.
+- **Claude**: this file provides project architecture and usage tips.
