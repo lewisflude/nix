@@ -1,4 +1,9 @@
-{ pkgs, lib, system, ... }:
+{
+  pkgs,
+  lib,
+  system,
+  ...
+}:
 
 {
   # Development shells for different project types
@@ -42,7 +47,7 @@
         python313Packages.isort
         python313Packages.mypy
         python313Packages.ruff
-        python313Packages.poetry
+        poetry
       ];
 
       shellHook = ''

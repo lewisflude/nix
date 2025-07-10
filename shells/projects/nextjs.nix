@@ -7,7 +7,6 @@ pkgs.mkShell {
     nodePackages_latest.typescript
     nodePackages_latest.eslint
     nodePackages_latest.prettier
-    nodePackages_latest."@next/codemod"
     nodePackages_latest.typescript-language-server
     tailwindcss-language-server
   ];

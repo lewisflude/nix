@@ -24,6 +24,7 @@ in
 
       # Enhanced command line tools
       lsd # Better ls
+      eza # Modern ls alternative
       rsync # File synchronization
       trash-cli # Safe rm replacement
       micro # Terminal text editor
@@ -39,6 +40,7 @@ in
       aria2 # Download manager
       tldr # Better man pages
       mcfly # Shell history
+      atuin # Modern shell history
       atool # Archive manager
       pigz # Parallel gzip
       jq # JSON processor
@@ -49,18 +51,19 @@ in
       lazydocker # Docker TUI
       zellij # Terminal multiplexer
     ]
-    ++ platformLib.platformPackages
-      [
-        # Linux-specific packages
-        foot # Wayland terminal
-        networkmanager # Network management
-        doas # Privilege escalation
-        lsof # List open files
-      ]
-      [
-        # Darwin-specific packages
-        # Note: nil (Nix language server) moved to development/language-tools.nix
-      ];
+    ++
+      platformLib.platformPackages
+        [
+          # Linux-specific packages
+          foot # Wayland terminal
+          networkmanager # Network management
+          doas # Privilege escalation
+          lsof # List open files
+        ]
+        [
+          # Darwin-specific packages
+          # Note: nil (Nix language server) moved to development/language-tools.nix
+        ];
 
   programs.ghostty = {
     enable = true;
@@ -71,30 +74,9 @@ in
       font-feature = "+calt,+liga,+dlig";
       font-size = 12;
       font-synthetic-style = true;
-      cursor-color = "#f5e0dc";
-      cursor-style = "block";
-      cursor-style-blink = false;
-      cursor-text = "#cdd6f4";
 
       scrollback-limit = 100000;
-      copy-on-select = true;
-      clipboard-read = "allow";
-      clipboard-write = "allow";
-      clipboard-paste-protection = false;
-      click-repeat-interval = 500;
 
-      background-opacity = 0.95;
-      background-blur = true;
-      window-padding-x = 8;
-      window-padding-y = 8;
-      window-save-state = "always";
-
-      mouse-hide-while-typing = true;
-      mouse-scroll-multiplier = 3;
-
-      window-decoration = "auto";
-      gtk-single-instance = true;
-      linux-cgroup = "single-instance";
     };
   };
 }

@@ -38,7 +38,6 @@
       "linear-linear"
       "notion"
       "obs@beta"
-      "obsidian"
       "raycast"
       "responsively"
       "slack"

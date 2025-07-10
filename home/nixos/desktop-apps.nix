@@ -5,6 +5,26 @@
 {
   home.packages = with pkgs; [
     ddcutil
+
+    # Media
+    mpv
+    imv
+
+    # Office & Productivity
+    libreoffice
+    thunderbird
+    evince
+
+    # Graphics & Design
+    gimp
+    krita
+
+    # Communication
+    discord
+    telegram-desktop
+
+    # System Utilities
+    file-roller
   ];
 
   # XDG MIME type associations for better file handling
