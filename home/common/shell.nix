@@ -151,7 +151,6 @@ in
       la = "eza -la";
       lt = "eza --tree";
       ll = "eza -l --git --header";
-      lsd = "eza"; # Fallback alias
       cd = "z";
       find = "fd";
       cat = "bat";
