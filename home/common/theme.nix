@@ -14,7 +14,7 @@ in
     accent = "mauve";
     enable = true;
     waybar.mode = "createLink";
-    mako.enable = lib.mkIf platformLib.isLinux false;
+    mako.enable = lib.mkIf platformLib.isLinux true;
     firefox = {
       profiles = {
         default = {
