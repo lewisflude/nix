@@ -20,7 +20,6 @@
     ./gaming.nix
     ./virtualisation.nix
     ./wine.nix
-    ./terminal.nix
 
     # Development
     ./java.nix

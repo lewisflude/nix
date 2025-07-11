@@ -22,17 +22,16 @@
       eval "$(direnv hook zsh)"
       source "${pkgs.fzf}/share/fzf/key-bindings.zsh"
       source "${pkgs.fzf}/share/fzf/completion.zsh"
-      eval "$(mcfly init zsh)"
       export MANPAGER="sh -c 'col -bx | bat -l man -p'"
     '';
 
     shellAliases = {
-      ls = "lsd";
-      l = "ls -l";
-      la = "ls -a";
-      lla = "ls -la";
+      ls = "eza";
+      l = "eza -l";
+      la = "eza -la";
+      lla = "eza -la";
       cd = "z";
-      lt = "ls --tree";
+      lt = "eza --tree";
       edit = "sudo -e";
       update = "system-update";
     };
