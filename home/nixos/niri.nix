@@ -4,7 +4,7 @@ let
   terminal = "ghostty";
   launcher = "fuzzel";
   screenLocker = "swaylock";
-  
+
   # Import theme constants
   themeConstants = import ./theme-constants.nix { inherit config pkgs; };
 in
@@ -47,12 +47,12 @@ in
       };
 
       layout = {
-        gaps = 18;
+        gaps = 8;
         always-center-single-column = true;
         empty-workspace-above-first = true;
         default-column-display = "tabbed";
         focus-ring = {
-          width = 3;
+          width = 2;
           active = {
             color = themeConstants.niri.colors.focus-ring.active;
           };
@@ -74,8 +74,8 @@ in
         };
         shadow = {
           enable = true;
-          softness = 60;
-          spread = 6;
+          softness = 50;
+          spread = 4;
           offset = {
             x = 0;
             y = 8;
@@ -86,11 +86,11 @@ in
         tab-indicator = {
           hide-when-single-tab = true;
           place-within-column = true;
-          gap = 6;
-          width = 6;
+          gap = 4;
+          width = 4;
           position = "right";
-          gaps-between-tabs = 3;
-          corner-radius = 6;
+          gaps-between-tabs = 2;
+          corner-radius = 4;
           active = {
             color = themeConstants.niri.colors.tab-indicator.active;
           };
