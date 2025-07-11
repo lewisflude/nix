@@ -23,23 +23,19 @@ in
       devenv # Development environments
 
       # Enhanced command line tools
-      lsd # Better ls
       eza # Modern ls alternative
       rsync # File synchronization
       trash-cli # Safe rm replacement
       micro # Terminal text editor
       fd # Better find
-      bottom # Better top
       duf # Better df
       ncdu # Disk usage analyzer
       dust # Disk usage tree
-      glances # System monitor
       procs # Better ps
       gping # Ping with graph
       mosh # Mobile shell
       aria2 # Download manager
       tldr # Better man pages
-      mcfly # Shell history
       atuin # Modern shell history
       atool # Archive manager
       pigz # Parallel gzip
@@ -55,7 +51,6 @@ in
       platformLib.platformPackages
         [
           # Linux-specific packages
-          foot # Wayland terminal
           networkmanager # Network management
           doas # Privilege escalation
           lsof # List open files
