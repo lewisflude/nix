@@ -1,4 +1,8 @@
-{ ... }:
+{ pkgs, config, ... }:
+let
+  # Dynamic Catppuccin color palette access
+  palette = (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors;
+in
 {
   programs.fuzzel = {
     enable = true;
@@ -27,6 +31,16 @@
       border = {
         width = 2;
         radius = 10;
+      };
+      
+      colors = {
+        background = palette.base.hex;
+        text = palette.text.hex;
+        match = palette.mauve.hex;
+        selection = palette.surface1.hex;
+        selection-text = palette.text.hex;
+        selection-match = palette.mauve.hex;
+        border = palette.lavender.hex;
       };
       dmenu = {
         exit-immediately-if-empty = true;
