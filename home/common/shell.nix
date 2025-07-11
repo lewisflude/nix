@@ -7,6 +7,8 @@
 }:
 let
   platformLib = import ../../lib/functions.nix { inherit lib system; };
+  # Dynamic Catppuccin color palette access
+  palette = (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors;
 in
 {
 
@@ -19,7 +21,7 @@ in
         "history"
         "completion"
       ];
-      highlight = "fg=#ff00ff,bg=cyan,bold,underline";
+      highlight = "fg=${palette.mauve.hex},bg=${palette.surface1.hex},bold,underline";
     };
     syntaxHighlighting.enable = true;
 
