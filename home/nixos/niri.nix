@@ -4,6 +4,9 @@ let
   terminal = "ghostty";
   launcher = "fuzzel";
   screenLocker = "swaylock";
+  
+  # Import theme constants
+  themeConstants = import ./theme-constants.nix { inherit config pkgs; };
 in
 {
   home.packages = with pkgs; [
@@ -44,30 +47,83 @@ in
       };
 
       layout = {
-        gaps = 16;
+        gaps = 18;
         always-center-single-column = true;
         empty-workspace-above-first = true;
         default-column-display = "tabbed";
         focus-ring = {
-          width = 2;
+          width = 3;
+          active = {
+            color = themeConstants.niri.colors.focus-ring.active;
+          };
+          inactive = {
+            color = themeConstants.niri.colors.focus-ring.inactive;
+          };
         };
         border = {
-          width = 2;
+          width = 1;
+          active = {
+            color = themeConstants.niri.colors.border.active;
+          };
+          inactive = {
+            color = themeConstants.niri.colors.border.inactive;
+          };
+          urgent = {
+            color = themeConstants.niri.colors.border.urgent;
+          };
         };
         shadow = {
           enable = true;
-          softness = 50;
-          spread = 8;
+          softness = 60;
+          spread = 6;
+          offset = {
+            x = 0;
+            y = 8;
+          };
+          color = themeConstants.niri.colors.shadow;
           draw-behind-window = true;
         };
         tab-indicator = {
           hide-when-single-tab = true;
           place-within-column = true;
-          gap = 4;
-          width = 4;
+          gap = 6;
+          width = 6;
           position = "right";
-          gaps-between-tabs = 2;
-          corner-radius = 4;
+          gaps-between-tabs = 3;
+          corner-radius = 6;
+          active = {
+            color = themeConstants.niri.colors.tab-indicator.active;
+          };
+          inactive = {
+            color = themeConstants.niri.colors.tab-indicator.inactive;
+          };
+        };
+      };
+
+      prefer-no-csd = true;
+
+      animations = {
+        enable = true;
+        slowdown = 1.0;
+        workspace-switch = {
+          enable = true;
+          kind = {
+            spring = {
+              damping-ratio = 1.0;
+              stiffness = 1000;
+              epsilon = 0.0001;
+            };
+          };
+        };
+        window-movement = {
+          enable = true;
+          kind = {
+            spring = {
+              damping-ratio = 1.0;
+              stiffness = 800;
+              epsilon = 0.0001;
+            };
+          };
         };
       };
 
