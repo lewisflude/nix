@@ -50,6 +50,11 @@ in
         "privacy.resistFingerprinting" = true;
         "dom.security.https_only_mode" = true;
         "dom.security.https_only_mode_ever_enabled" = true;
+        
+        # Disable automatic backups and session restore to prevent file conflicts
+        "browser.sessionstore.max_resumed_crashes" = 0;
+        "browser.sessionstore.resume_from_crash" = false;
+        "browser.bookmarks.max_backups" = 0;
       };
     };
   };

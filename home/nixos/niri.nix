@@ -1,10 +1,5 @@
 { pkgs, config, ... }:
 let
-  # Default applications
-  terminal = "ghostty";
-  launcher = "fuzzel";
-  screenLocker = "swaylock";
-
   # Import theme constants
   themeConstants = import ./theme-constants.nix { inherit config pkgs; };
 in
@@ -12,6 +7,11 @@ in
   home.packages = with pkgs; [
     swww
     swaylock
+    grimblast
+    swayidle
+    grim
+    slurp
+    wl-clipboard
   ];
 
   imports = [
@@ -47,7 +47,7 @@ in
       };
 
       layout = {
-        gaps = 8;
+        gaps = 16;
         always-center-single-column = true;
         empty-workspace-above-first = true;
         default-column-display = "tabbed";
@@ -59,6 +59,12 @@ in
           inactive = {
             color = themeConstants.niri.colors.focus-ring.inactive;
           };
+        };
+        struts = {
+          left = 0;
+          right = 0;
+          top = 40;
+          bottom = 0;
         };
         border = {
           width = 1;
@@ -147,17 +153,6 @@ in
         enable = true;
         path = "${pkgs.xwayland-satellite-unstable}/bin/xwayland-satellite";
       };
-      binds = {
-        "Mod+T" = {
-          action.spawn = [ terminal ];
-        };
-        "Mod+D" = {
-          action.spawn = [ launcher ];
-        };
-        "Super+Alt+L" = {
-          action.spawn = [ screenLocker ];
-        };
-      };
 
       spawn-at-startup = [
         {
@@ -175,6 +170,24 @@ in
             "app"
             "--"
             "${pkgs.swww}/bin/swww-daemon"
+          ];
+        }
+
+        {
+          command = [
+            "${pkgs.swayidle}/bin/swayidle"
+            "-w"
+            "timeout"
+            "300"
+            "${pkgs.swaylock}/bin/swaylock -f"
+            "timeout"
+            "600"
+            "niri msg action power-off-monitors"
+            "timeout"
+            "900"
+            "systemctl suspend"
+            "before-sleep"
+            "${pkgs.swaylock}/bin/swaylock -f"
           ];
         }
         {
