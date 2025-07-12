@@ -89,4 +89,4 @@
 
 ---
 
-**Note**: These are general guidelines. Always defer to project-specific rules and team conventions when they exist.
+**Note**: These are general guidelines. Always defer to project-specific rules and team conventions when they exist. Update local documentation when adopting project-specific variations.
