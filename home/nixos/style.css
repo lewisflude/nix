@@ -5,8 +5,11 @@ window#waybar {
   font-family: "Iosevka Nerd Font", Iosevka, "JetBrains Mono", "Fira Code",
     monospace;
   background-color: transparent;
-  padding: 4px;
-  margin: 4px;
+}
+
+window#waybar > box {
+  margin: 8px;
+  margin-bottom: 0;
 }
 /* Module spacing */
 #window,
@@ -27,8 +30,9 @@ window#waybar {
   min-width: 48px;
   padding-right: 8px;
   padding-top: 4px;
-  padding-bottom: 4px;
+  padding-bottom: 0;
   margin: 4px;
+  margin-bottom: 0;
 }
 #workspaces {
   background-color: transparent;
