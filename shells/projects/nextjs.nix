@@ -2,12 +2,7 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    nodejs_24
-    nodePackages_latest.pnpm
-    nodePackages_latest.typescript
-    nodePackages_latest.eslint
-    nodePackages_latest.prettier
-    nodePackages_latest.typescript-language-server
+    myPackages.nodejs.full
     tailwindcss-language-server
   ];
 
@@ -19,7 +14,9 @@ pkgs.mkShell {
     alias dev="pnpm dev"
     alias build="pnpm build"
     alias start="pnpm start"
-    alias lint="pnpm lint"
+    alias lint="biome lint ."
+    alias format="biome format . --write"
+    alias check="biome check ."
     alias type-check="pnpm type-check"
 
     if [[ -f "package.json" && ! -d "node_modules" ]]; then

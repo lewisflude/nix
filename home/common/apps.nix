@@ -10,20 +10,15 @@
     codex-rs
     coreutils
     delta
-    gh
     htop
     btop
-    http-server
-    nodePackages_latest.pnpm
-    nodePackages_latest.typescript
-    nodePackages_latest.typescript-language-server
-    nodePackages_latest.vscode-langservers-extracted
+  ] ++ pkgs.myPackages.nodejs.full
+    ++ pkgs.myPackages.common.full ++ [
     pgcli
     rustup
     solana-cli
     tree
     yaml-language-server
-    yq
 
     # Note: Language servers moved to development/language-tools.nix:
     # - nil (Nix LSP)
