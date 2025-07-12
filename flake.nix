@@ -116,10 +116,15 @@
 
       mkDarwinSystem =
         hostName: hostConfig:
+        let
+          configVars = import ./config-vars.nix;
+        in
         darwin.lib.darwinSystem {
           system = hostConfig.system;
-          specialArgs = inputs // hostConfig;
+          specialArgs = inputs // hostConfig // { inherit configVars; };
           modules = [
+            # Apply overlays first
+            { nixpkgs.overlays = import ./lib/overlays.nix { inherit configVars; }; }
             ./hosts/${hostName}/configuration.nix
             ./modules/common
             ./modules/darwin
@@ -160,16 +165,21 @@
 
       mkNixosSystem =
         hostName: hostConfig:
+        let
+          configVars = import ./config-vars.nix;
+        in
         nixpkgs.lib.nixosSystem {
           system = hostConfig.system;
           specialArgs =
             inputs
             // hostConfig
             // {
-              configVars = import ./config-vars.nix;
+              inherit configVars;
               keysDirectory = "${self}/keys";
             };
           modules = [
+            # Apply overlays first
+            { nixpkgs.overlays = import ./lib/overlays.nix { inherit configVars; }; }
             ./hosts/${hostName}/configuration.nix
             ./modules/common
             ./modules/nixos
@@ -249,13 +259,20 @@
 
       homeConfigurations = builtins.mapAttrs (
         _name: hostConfig:
+        let
+          configVars = import ./config-vars.nix;
+          pkgs = import nixpkgs {
+            system = hostConfig.system;
+            overlays = import ./lib/overlays.nix { inherit configVars; };
+          };
+        in
         home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.${hostConfig.system};
+          inherit pkgs;
           extraSpecialArgs =
             inputs
             // hostConfig
             // {
-              configVars = import ./config-vars.nix;
+              inherit configVars;
             };
           modules = [
             ./home

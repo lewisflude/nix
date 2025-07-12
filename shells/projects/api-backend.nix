@@ -2,13 +2,8 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    nodejs_24
-    nodePackages_latest.pnpm
-    nodePackages_latest.typescript
+    myPackages.nodejs.full
     nodePackages_latest.prisma
-    nodePackages_latest.eslint
-    nodePackages_latest.prettier
-    nodePackages_latest.typescript-language-server
     postgresql
     redis
     curl
