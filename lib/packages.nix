@@ -10,26 +10,14 @@ in {
   nodejs = {
     core = with pkgs; [
       pkgs."nodejs_${nodeVersion}"
-      nodePackages_latest.pnpm
-      nodePackages_latest.yarn
-      nodePackages_latest.npm
     ];
     
     tools = with pkgs; [
-      nodePackages_latest.typescript
-      nodePackages_latest.typescript-language-server
-      nodePackages_latest.vscode-langservers-extracted
       biome
     ];
     
     full = with pkgs; [
       pkgs."nodejs_${nodeVersion}"
-      nodePackages_latest.pnpm
-      nodePackages_latest.yarn
-      nodePackages_latest.npm
-      nodePackages_latest.typescript
-      nodePackages_latest.typescript-language-server
-      nodePackages_latest.vscode-langservers-extracted
       biome
     ];
   };
@@ -120,33 +108,15 @@ in {
   web = {
     core = with pkgs; [
       pkgs."nodejs_${nodeVersion}"
-      nodePackages_latest.pnpm
-      nodePackages_latest.yarn
-      nodePackages_latest.npm
-      nodePackages_latest.typescript
-      nodePackages_latest.typescript-language-server
-      nodePackages_latest.vscode-langservers-extracted
       biome
     ];
     
     tools = with pkgs; [
-      nodePackages_latest.live-server
-      nodePackages_latest.http-server
-      nodePackages_latest.serve
     ];
     
     full = with pkgs; [
       pkgs."nodejs_${nodeVersion}"
-      nodePackages_latest.pnpm
-      nodePackages_latest.yarn
-      nodePackages_latest.npm
-      nodePackages_latest.typescript
-      nodePackages_latest.typescript-language-server
-      nodePackages_latest.vscode-langservers-extracted
       biome
-      nodePackages_latest.live-server
-      nodePackages_latest.http-server
-      nodePackages_latest.serve
     ];
   };
 
