@@ -24,6 +24,7 @@ sudo nixos-rebuild switch --flake ~/.config/nix#<hostname>
 # Update inputs and format
 nix flake update
 nix fmt
+nix flake check     # ensure builds succeed
 
 # Launch development shell
 nix develop ~/.config/nix#shell-selector
@@ -36,3 +37,4 @@ select_dev_shell
 - Run `nix fmt` before committing
 - Validate changes with `nix flake check`
 - Document non-obvious configuration choices
+- Follow `home/common/apps/cursor/global-cursor-rules.md` for style
