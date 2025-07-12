@@ -49,6 +49,8 @@ machine (e.g. `Lewiss-MacBook-Pro` or `jupiter`).
 │   └── utils/               # Utility shells (e.g., shell-selector)
 ├── lib/                     # Helper functions/utilities
 ├── secrets/                 # Secrets management (SOPS)
+├── templates/               # Module templates for new configs
+├── graph.svg                # Dependency graph (generated)
 └── README.md                # This file
 ```
 
@@ -120,6 +122,7 @@ Secrets are managed with SOPS and age keys.
 - **Update flake inputs:**
   ```bash
   nix flake update
+  nix flake check       # Verify builds
   ```
 - **System update:**
   ```bash
