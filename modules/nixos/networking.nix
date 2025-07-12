@@ -14,117 +14,117 @@
       enable = true;
       allowedTCPPorts = [
         # System services
-        22 # SSH
-        80 # HTTP
-        443 # HTTPS
+        22
+        80
+        443
 
         # Email services
-        21 # FTP
-        25 # SMTP
-        465 # SMTPS
-        587 # SMTP submission
+        21
+        25
+        465
+        587
 
         # Media and entertainment
-        8096 # Jellyfin media server
-        5000 # Jellyfin DLNA
-        8123 # Home Assistant
-        6600 # MPD (Music Player Daemon)
+        8096
+        5000
+        8123
+        6600
 
         # Gaming services
-        27015 # Steam
-        27036 # Steam
+        27015
+        27036
 
         # Development and tools
-        8080 # Common dev server
-        9090 # Prometheus/dev tools
-        5555 # ADB
-        8095 # Atlassian tools
-        3030 # Development servers
-        7000 # Development/Jenkins
-        11434 # Ollama AI
+        8080
+        9090
+        5555
+        8095
+        3030
+        7000
+        11434
 
         # Torrent/P2P
-        6969 # Torrent tracker
-        6881 # BitTorrent
-        7575 # Torrent client
+        6969
+        6881
+        7575
 
         # Media streaming/casting
-        8008 # Chromecast
-        8009 # Chromecast
-        1900 # UPnP
-        2869 # UPnP
-        554 # RTSP
-        3689 # DAAP (iTunes)
-        5228 # Google services
+        8008
+        8009
+        1900
+        2869
+        554
+        3689
+        5228
 
         # Remote access
-        5900 # VNC
-        3283 # Apple Remote Desktop
-        47990 # Logitech
+        5900
+        3283
+        47990
 
         # Application specific
-        563 # NNTPS
-        5353 # mDNS/Bonjour
-        3456 # ITV
-        5001 # Synology
-        1188 # HP network scanning
-        2875 # HP network printing
-        2880 # HP network printing
-        7100 # X11 forwarding range start
-        8191 # Roon
-        9696 # Prowlarr
-        5055 # Overseerr
-        5690 # Sabnzbd
-        7878 # Radarr
-        8989 # Sonarr
-        8200 # Hashicorp Vault
-        8686 # Lidarr
-        8787 # Readarr
-        8920 # Jellyseerr
-        8888 # Jupyter/development
-        5656 # Media server
-        3001 # Development server
+        563
+        5353
+        3456
+        5001
+        1188
+        2875
+        2880
+        7100
+        8191
+        9696
+        5055
+        5690
+        7878
+        8989
+        8200
+        8686
+        8787
+        8920
+        8888
+        5656
+        3001
       ];
 
       allowedUDPPorts = [
-        5353 # mDNS/Bonjour
-        1900 # UPnP
-        8008 # Chromecast
-        8009 # Chromecast
-        7000 # Development/Jenkins
-        7100 # X11 forwarding
-        554 # RTSP
-        5000 # Jellyfin DLNA
-        5001 # Synology
-        123 # NTP
-        5900 # VNC
-        3283 # Apple Remote Desktop
+        5353
+        1900
+        8008
+        8009
+        7000
+        7100
+        554
+        5000
+        5001
+        123
+        5900
+        3283
       ];
 
       allowedUDPPortRanges = [
         {
           from = 6000;
           to = 7000;
-        } # Development/gaming
+        }
         {
           from = 16384;
           to = 16403;
-        } # WebRTC/media streaming
+        }
         {
           from = 47998;
           to = 48000;
-        } # Steam/gaming
+        }
         {
           from = 49152;
           to = 65535;
-        } # Ephemeral ports
+        }
       ];
 
       allowedTCPPortRanges = [
         {
           from = 49152;
           to = 65535;
-        } # Ephemeral ports
+        }
       ];
 
     };
