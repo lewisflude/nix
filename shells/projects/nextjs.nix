@@ -2,7 +2,7 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    myPackages.nodejs.full
+    nodejs_24
     tailwindcss-language-server
   ];
 

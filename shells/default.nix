@@ -18,15 +18,7 @@
     # Node.js/TypeScript development
     node = pkgs.mkShell {
       buildInputs = with pkgs; [
-        myPackages.nodejs.full
-        typescript
-        nodePackages_latest.pnpm
-        nodePackages_latest.npm
-        nodePackages_latest.yarn
-        nodePackages_latest.eslint
-        nodePackages_latest.prettier
-        nodePackages_latest.typescript-language-server
-        nodePackages_latest.vscode-langservers-extracted
+        nodejs_24
       ];
 
       shellHook = ''
@@ -97,13 +89,7 @@
     # Web development (full-stack)
     web = pkgs.mkShell {
       buildInputs = with pkgs; [
-        myPackages.nodejs.full
-        typescript
-        nodePackages_latest.pnpm
-        nodePackages_latest.eslint
-        nodePackages_latest.prettier
-        nodePackages_latest.typescript-language-server
-        nodePackages_latest.vscode-langservers-extracted
+        nodejs_24
         tailwindcss-language-server
         html-tidy
         sass
@@ -122,8 +108,7 @@
         solana-cli
         rustc
         cargo
-        myPackages.nodejs.full
-        nodePackages_latest.pnpm
+        nodejs_24
       ];
 
       shellHook = ''

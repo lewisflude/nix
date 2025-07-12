@@ -7,8 +7,7 @@ pkgs.mkShell {
   buildInputs =
     with pkgs;
     [
-      myPackages.nodejs.full
-      nodePackages_latest.typescript-language-server
+      nodejs_24
       watchman
     ]
     ++ lib.optionals platformLib.isDarwin [
