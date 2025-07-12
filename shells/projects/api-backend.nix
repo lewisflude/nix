@@ -2,14 +2,12 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    myPackages.nodejs.full
-    nodePackages_latest.prisma
+    nodejs_24
     postgresql
     redis
     curl
     jq
     httpie
-    nodePackages_latest.pm2
   ];
 
   shellHook = ''
