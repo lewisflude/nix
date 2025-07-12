@@ -7,11 +7,7 @@ pkgs.mkShell {
   buildInputs =
     with pkgs;
     [
-      nodejs_24
-      nodePackages_latest.pnpm
-      nodePackages_latest.typescript
-      nodePackages_latest.eslint
-      nodePackages_latest.prettier
+      myPackages.nodejs.full
       nodePackages_latest.typescript-language-server
       watchman
     ]
