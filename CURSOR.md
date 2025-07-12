@@ -11,4 +11,4 @@ The project defines a cross-platform Nix setup using flakes. Both macOS and Linu
 - `shells/` – dev shells and direnv templates
 - `lib/` – helper functions
 
-Coding conventions and AI behaviour are configured under `.cursor/rules`. Format Nix files with `nix fmt` and consult `README.md` or `CLAUDE.md` for deeper details.
+Coding conventions and AI behaviour are configured under `.cursor/rules`. Format Nix files with `nix fmt` and consult `README.md` or `CLAUDE.md` for deeper details. Global style guidance lives in `home/common/apps/cursor/global-cursor-rules.md`.

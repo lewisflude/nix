@@ -137,6 +137,7 @@ shells/
 2. Prefer project-specific environments when possible
 3. Follow consistent naming patterns
 4. Document changes and test new shells on all platforms
+5. Follow `home/common/apps/cursor/global-cursor-rules.md` for coding style
 
 ---
 

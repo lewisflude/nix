@@ -228,3 +228,4 @@ direnv allow
 - **ChatGPT Codex**: see `CODEX.md` for CLI guidance.
 - **Cursor**: configuration lives in `.cursor/` with an overview in `CURSOR.md`.
 - **Claude**: this file provides project architecture and usage tips.
+- **Global rules**: follow `home/common/apps/cursor/global-cursor-rules.md` for style guidance.
