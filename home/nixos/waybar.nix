@@ -23,7 +23,6 @@ in
         log-level = 3;
         layer = "bottom";
         position = "top";
-        mode = "overlay";
         output = [ "DP-1" ];
 
         modules-left = [
