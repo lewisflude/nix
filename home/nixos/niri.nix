@@ -175,23 +175,6 @@ in
 
         {
           command = [
-            "${pkgs.swayidle}/bin/swayidle"
-            "-w"
-            "timeout"
-            "300"
-            "${pkgs.swaylock}/bin/swaylock -f"
-            "timeout"
-            "600"
-            "niri msg action power-off-monitors"
-            "timeout"
-            "900"
-            "systemctl suspend"
-            "before-sleep"
-            "${pkgs.swaylock}/bin/swaylock -f"
-          ];
-        }
-        {
-          command = [
             "${pkgs.swww}/bin/swww"
             "img"
             "${config.home.homeDirectory}/wallpapers/nix-wallpaper-nineish-catppuccin-mocha.png"

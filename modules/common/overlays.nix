@@ -31,11 +31,7 @@
           # revision = "custom"; # if you want custom revision
         };
       })
-      # Codex CLI overlay
-      (_: _: {
-        codex-cli = inputs.codex.packages.${system}.codex-cli;
-        codex-rs = inputs.codex.packages.${system}.codex-rs;
-      })
+    
       (final: _prev: {
         swww = inputs.swww.packages.${final.system}.swww;
       })

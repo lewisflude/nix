@@ -20,10 +20,6 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    codex = {
-      url = "github:openai/codex";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     astal = {
       url = "github:aylur/astal";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -116,15 +112,11 @@
 
       mkDarwinSystem =
         hostName: hostConfig:
-        let
-          configVars = import ./config-vars.nix;
-        in
+       
         darwin.lib.darwinSystem {
           system = hostConfig.system;
-          specialArgs = inputs // hostConfig // { inherit configVars; };
+          specialArgs = inputs // hostConfig;
           modules = [
-            # Apply overlays first
-            { nixpkgs.overlays = import ./lib/overlays.nix { inherit configVars; }; }
             ./hosts/${hostName}/configuration.nix
             ./modules/common
             ./modules/darwin
@@ -165,21 +157,17 @@
 
       mkNixosSystem =
         hostName: hostConfig:
-        let
-          configVars = import ./config-vars.nix;
-        in
+      
         nixpkgs.lib.nixosSystem {
           system = hostConfig.system;
           specialArgs =
             inputs
             // hostConfig
             // {
-              inherit configVars;
               keysDirectory = "${self}/keys";
             };
           modules = [
             # Apply overlays first
-            { nixpkgs.overlays = import ./lib/overlays.nix { inherit configVars; }; }
             ./hosts/${hostName}/configuration.nix
             ./modules/common
             ./modules/nixos
@@ -198,10 +186,8 @@
               home-manager.backupFileExtension = "backup-" + builtins.toString self.lastModified;
               home-manager.extraSpecialArgs =
                 inputs
-                // hostConfig
-                // {
-                  configVars = import ./config-vars.nix;
-                };
+                // hostConfig;
+        
               home-manager.sharedModules = [
                 catppuccin.homeModules.catppuccin
                 inputs.sops-nix.homeManagerModules.sops
@@ -260,20 +246,16 @@
       homeConfigurations = builtins.mapAttrs (
         _name: hostConfig:
         let
-          configVars = import ./config-vars.nix;
           pkgs = import nixpkgs {
             system = hostConfig.system;
-            overlays = import ./lib/overlays.nix { inherit configVars; };
           };
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           extraSpecialArgs =
             inputs
-            // hostConfig
-            // {
-              inherit configVars;
-            };
+            // hostConfig;
+
           modules = [
             ./home
             catppuccin.homeModules.catppuccin
