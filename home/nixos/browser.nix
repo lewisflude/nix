@@ -11,11 +11,12 @@ in
       isDefault = true;
 
       extensions = {
-        force = true;
         packages = with addons; [
           ublock-origin
           kagi-search
+          onepassword-password-manager
         ];
+        force = true; # Acknowledge that we want to override previous extension settings
       };
 
       search = {
@@ -38,23 +39,31 @@ in
       };
 
       settings = {
+        # Hardware acceleration and performance
         "media.hardware-video-decoding.enabled" = true;
-        "browser.tabs.unloadOnLowMemory" = true;
         "media.ffmpeg.vaapi.enabled" = true;
+        "media.rdd-ffmpeg.enabled" = true;
+        "layers.acceleration.force-enabled" = true;
+        "gfx.webrender.all" = true;
+        "webgl.force-enabled" = true;
+        "layers.offmainthreadcomposition.enabled" = true;
+        "gfx.canvas.azure.accelerated" = true;
+        "layers.async-video.enabled" = true;
+        "gfx.x11-egl.force-enabled" = true;
+
+        # Memory management
+        "browser.tabs.unloadOnLowMemory" = true;
+
+        # Privacy and telemetry
         "toolkit.telemetry.enabled" = false;
         "datareporting.healthreport.uploadEnabled" = false;
-        "extensions.pocket.enabled" = false;
         "privacy.trackingprotection.enabled" = true;
         "privacy.trackingprotection.strictMode.enabled" = true;
         "privacy.donottrackheader.enabled" = true;
         "privacy.resistFingerprinting" = true;
         "dom.security.https_only_mode" = true;
         "dom.security.https_only_mode_ever_enabled" = true;
-        
-        # Disable automatic backups and session restore to prevent file conflicts
-        "browser.sessionstore.max_resumed_crashes" = 0;
-        "browser.sessionstore.resume_from_crash" = false;
-        "browser.bookmarks.max_backups" = 0;
+
       };
     };
   };
