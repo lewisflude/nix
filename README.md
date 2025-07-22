@@ -33,7 +33,6 @@ machine (e.g. `Lewiss-MacBook-Pro` or `jupiter`).
 ```
 .
 ├── flake.nix                # Main flake configuration (inputs/outputs)
-├── config-vars.nix          # User preferences and variables
 ├── hosts/                   # Host-specific configs (per machine)
 │   ├── jupiter/             # Example NixOS host
 │   └── Lewiss-MacBook-Pro/  # Example macOS host
@@ -104,7 +103,6 @@ Secrets are managed with SOPS and age keys.
 - **User packages:** Add to `home/common/apps.nix`
 - **Development tools:** Add to the relevant shell in `shells/`
 - **Host-specific config:** Add or edit hosts in `hosts/` following the existing pattern
-- **Shared settings:** Use `config-vars.nix` for user info, theme, and preferences
 
 ## 🧩 Home Manager & System Modules
 - **Home Manager:**

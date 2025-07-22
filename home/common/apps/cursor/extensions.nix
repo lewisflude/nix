@@ -29,9 +29,6 @@ let
 
   # ==== EXTENDED PROGRAMMING LANGUAGES ====
   extraLangs = [
-    vsc.ms-python.python
-    vsc.ms-python.pylint
-    vsc.ms-python.black-formatter
     vsc.golang.go
     vsc.shd101wyy.markdown-preview-enhanced
     vsc.bierner.markdown-mermaid
