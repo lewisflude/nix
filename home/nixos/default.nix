@@ -11,7 +11,7 @@
     ./desktop-apps.nix
     ./yazi.nix
     ./niri.nix
-
+    ./swayidle.nix
     # Services
     ./mcp.nix
   ];

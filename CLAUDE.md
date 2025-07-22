@@ -132,10 +132,6 @@ in
 - `rootGroup` - Platform-specific root group
 - `systemRebuildCommand` - Platform-specific rebuild commands
 
-### Configuration Variables
-- **`config-vars.nix`**: User preferences, theme settings, and system-specific configurations
-- Key variables: email, fullName, timezone, editor, shell, theme, language versions
-
 ### Development Shells
 - **Project-specific**: `nextjs`, `react-native`, `api-backend`
 - **Language-specific**: `node`, `python`, `rust`, `go`

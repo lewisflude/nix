@@ -7,18 +7,16 @@
     # Development tools (cross-platform)
     awscli2
     claude-code
-    codex-rs
     coreutils
     delta
     htop
     btop
-  ] ++ pkgs.myPackages.nodejs.full
-    ++ pkgs.myPackages.common.full ++ [
     pgcli
     rustup
     solana-cli
     tree
     yaml-language-server
+    monero-gui
 
     # Note: Language servers moved to development/language-tools.nix:
     # - nil (Nix LSP)

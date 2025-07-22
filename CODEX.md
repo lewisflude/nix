@@ -12,7 +12,6 @@ This project contains a flake-based Nix configuration supporting both macOS (nix
 - `modules/` – reusable system modules (`common`, `darwin`, `nixos`)
 - `home/` – Home Manager modules
 - `shells/` – development environments and `.envrc` templates
-- `config-vars.nix` – user preferences
 - `secrets/` – SOPS-encrypted secrets
 
 ## Typical Commands
