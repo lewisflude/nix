@@ -112,7 +112,7 @@
 
       mkDarwinSystem =
         hostName: hostConfig:
-       
+
         darwin.lib.darwinSystem {
           system = hostConfig.system;
           specialArgs = inputs // hostConfig;
@@ -143,7 +143,6 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.verbose = true;
-              home-manager.backupFileExtension = "backup-" + builtins.toString self.lastModified;
               home-manager.sharedModules = [
                 sops-nix.homeManagerModules.sops
                 mac-app-util.homeManagerModules.default
@@ -157,7 +156,7 @@
 
       mkNixosSystem =
         hostName: hostConfig:
-      
+
         nixpkgs.lib.nixosSystem {
           system = hostConfig.system;
           specialArgs =
@@ -183,11 +182,8 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.verbose = true;
-              home-manager.backupFileExtension = "backup-" + builtins.toString self.lastModified;
-              home-manager.extraSpecialArgs =
-                inputs
-                // hostConfig;
-        
+              home-manager.extraSpecialArgs = inputs // hostConfig;
+
               home-manager.sharedModules = [
                 catppuccin.homeModules.catppuccin
                 inputs.sops-nix.homeManagerModules.sops
@@ -252,9 +248,7 @@
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs =
-            inputs
-            // hostConfig;
+          extraSpecialArgs = inputs // hostConfig;
 
           modules = [
             ./home
