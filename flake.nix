@@ -182,6 +182,7 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.verbose = true;
+              home-manager.backupFileExtension = "backup";
               home-manager.extraSpecialArgs = inputs // hostConfig;
 
               home-manager.sharedModules = [
