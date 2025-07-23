@@ -16,7 +16,6 @@
     solana-cli
     tree
     yaml-language-server
-    monero-gui
 
     # Note: Language servers moved to development/language-tools.nix:
     # - nil (Nix LSP)
