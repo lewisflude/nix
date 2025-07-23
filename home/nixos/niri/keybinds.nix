@@ -8,10 +8,6 @@ let
 in
 {
   programs.niri.settings.binds =
-    with config.lib.niri.actions;
-    let
-      sh = spawn "sh" "-c";
-    in
     {
       # https://github.com/sodiboo/niri-flake/issues/483
       # Keys consist of modifiers separated by + signs, followed by an XKB key name
@@ -363,19 +359,19 @@ in
       # Built-in Niri screenshots
       "Print" = {
         allow-inhibiting = false;
-        action = sh ''grim -g "$(slurp)" - | wl-copy'';
+        action.spawn = [ "sh" "-c" ''grim -g "$(slurp)" - | wl-copy'' ];
       };
       
       # Window-specific screenshot
       "Shift+Print" = {
         allow-inhibiting = false;
-        action = sh ''grim -g "$(slurp -w)" - | wl-copy'';
+        action.spawn = [ "sh" "-c" ''grim -g "$(slurp -w)" - | wl-copy'' ];
       };
       
       # Full screen screenshot
       "Ctrl+Print" = {
         allow-inhibiting = false;
-        action = sh ''grim - | wl-copy'';
+        action.spawn = [ "sh" "-c" ''grim - | wl-copy'' ];
       };
 
       # Applications such as remote-desktop clients and software KVM switches may
