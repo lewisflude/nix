@@ -53,5 +53,8 @@
 
     # Music Assistant
     ./music-assistant.nix
+
+    # Home Manager support
+    ./home-manager-cleanup.nix
   ];
 }

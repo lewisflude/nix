@@ -11,12 +11,12 @@ in
       isDefault = true;
 
       extensions = {
+        force = true;
         packages = with addons; [
           ublock-origin
           kagi-search
           onepassword-password-manager
         ];
-        force = true; # Acknowledge that we want to override previous extension settings
       };
 
       search = {
