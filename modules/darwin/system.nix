@@ -60,6 +60,7 @@
         "/Applications/Raycast.app"
         "/Applications/Beekeeper Studio.app"
         "/Applications/ChatGPT.app"
+        "/Applications/Steam.app"
       ];
 
       systemApps = [
