@@ -2,6 +2,7 @@
 {
   # Configure Homebrew
   homebrew = {
+    enable = true;
     onActivation = {
       cleanup = "zap";
       autoUpdate = true;
@@ -42,6 +43,8 @@
       "raycast"
       "responsively"
       "slack"
+      "steam"
+      "moonlight"
     ];
 
     # Mac App Store applications
