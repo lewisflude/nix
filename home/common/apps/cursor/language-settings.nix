@@ -10,6 +10,7 @@ let
     goimports = "golang.go";
     yamlfmt = "redhat.vscode-yaml";
     taplo = "tamasfe.even-better-toml";
+    clang-format = "ms-vscode.cpptools"; # C++ formatter for Unreal Engine development
   };
 
   # Get all languages from standards, plus React variants

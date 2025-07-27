@@ -6,5 +6,6 @@
     ./backup.nix
     ./terminal.nix
     ./yubikey.nix
+    ./gaming.nix
   ];
 }

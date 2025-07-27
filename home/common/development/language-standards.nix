@@ -90,5 +90,23 @@
       unit = "    ";
       fileTypes = [ "py" ];
     };
+
+    # C++ for Unreal Engine development
+    cpp = {
+      lsp = "clangd";
+      formatter = "clang-format";
+      indent = 4;
+      unit = "    ";
+      fileTypes = [
+        "cpp"
+        "cxx"
+        "cc"
+        "c++"
+        "hpp"
+        "hxx"
+        "h"
+        "hh"
+      ];
+    };
   };
 }
