@@ -19,6 +19,7 @@
   security.polkit.enable = true;
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.login.enableGnomeKeyring = true;
+  security.pam.services.swaylock = {};
   boot.initrd.systemd.enable = true;
 
   programs._1password = {
