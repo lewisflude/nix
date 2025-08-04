@@ -99,7 +99,11 @@ in
       args = [ "mcp-server-fetch" ];
       port = 11432;
     };
-
+    git = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [ "mcp-server-git" ];
+      port = 11433;
+    };
     nx = {
       command = "${pkgs.nodejs_24}/bin/npx";
       args = [
