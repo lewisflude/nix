@@ -170,5 +170,26 @@
       port = 11442;
     };
 
+    love2d-docs = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [
+        "--with" "mcp"
+        "--with" "httpx"
+        "--with" "beautifulsoup4"
+        "python" "${../../scripts/mcp_love2d_docs.py}"
+      ];
+      port = 11440;
+    };
+    lua-docs = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [
+        "--with" "mcp"
+        "--with" "httpx"
+        "--with" "beautifulsoup4"
+        "python" "${../../scripts/mcp_lua_docs.py}"
+      ];
+      port = 11441;
+    };
+
   };
 }
