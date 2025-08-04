@@ -5,15 +5,12 @@ Love2D API Documentation MCP Server
 Provides access to Love2D API documentation and examples through MCP.
 """
 
-import json
-import sys
-import requests
-from typing import Dict, List, Any, Optional
-import re
 from dataclasses import dataclass
+from typing import Any, Dict, List
+
 from mcp import types
-from mcp.server import Server
-import mcp.server.stdio
+from mcp.server import Server, stdio
+import anyio
 
 # Love2D API categories and their documentation URLs
 LOVE2D_API_BASE = "https://love2d.org/wiki"
@@ -144,7 +141,7 @@ class Love2DDocumentationServer:
         
         self.loaded = True
 
-server = Server("love2d-api")
+server = Server(name="love2d-api", version="0.1")
 docs = Love2DDocumentationServer()
 
 @server.list_tools()
@@ -384,15 +381,13 @@ end'''
     
     return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
 
+
 async def main():
     """Main entry point for the MCP server"""
-    async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            server.create_initialization_options()
-        )
+    opts = server.create_initialization_options()
+    async with stdio.stdio_server() as (read, write):
+        await server.run(read, write, opts)
+
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    anyio.run(main)
