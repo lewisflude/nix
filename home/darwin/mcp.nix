@@ -165,6 +165,7 @@ in
         "mcp"
         "--with"
         "requests"
+        "python"
         "${config.home.homeDirectory}/.config/nix/mcp-servers/love2d-api.py"
       ];
       port = 11440;
