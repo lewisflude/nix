@@ -111,6 +111,11 @@
       args = [ "mcp-server-fetch" ];
       port = 11432;
     };
+    git = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [ "mcp-server-git" ];
+      port = 11433;
+    };
     github = {
       command = "${pkgs.nodejs_24}/bin/npx";
       args = [
@@ -134,6 +139,14 @@
         "@modelcontextprotocol/server-memory"
       ];
       port = 11436;
+    };
+    sequential-thinking = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-sequential-thinking"
+      ];
+      port = 11437;
     };
     love2d-api = {
       command = "${pkgs.uv}/bin/uvx";
