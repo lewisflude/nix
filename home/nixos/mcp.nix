@@ -117,9 +117,6 @@
         "-y"
         "@modelcontextprotocol/server-github"
       ];
-      env = {
-        GITHUB_PERSONAL_ACCESS_TOKEN = config.sops.secrets.GITHUB_PERSONAL_ACCESS_TOKEN.path;
-      };
       port = 11434;
     };
     nx = {
