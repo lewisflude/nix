@@ -6,11 +6,12 @@ in
 {
   home.packages = with pkgs; [
     swww
-    swaylock
+    gtklock
     grimblast
     swayidle
     grim
     slurp
+    swappy
     wl-clipboard
   ];
 
@@ -42,7 +43,7 @@ in
             height = 1440;
             refresh = 164.90;
           };
-          variable-refresh-rate = true;
+          variable-refresh-rate = "on-demand";
         };
       };
 

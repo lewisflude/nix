@@ -32,6 +32,7 @@ let
     vsc.golang.go
     vsc.shd101wyy.markdown-preview-enhanced
     vsc.bierner.markdown-mermaid
+    vsc.sumneko.lua # Lua language server (Love2D development)
   ];
 
   # ==== DEVELOPMENT TOOLING ====

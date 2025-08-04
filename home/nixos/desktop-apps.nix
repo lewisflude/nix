@@ -25,6 +25,13 @@
 
     # System Utilities
     file-roller
+    swaylock-effects
+
+    # Game Development
+    love # Love2D game engine
+
+    # Fonts required for applications
+    font-awesome # Required for swappy icons
   ];
 
   # XDG MIME type associations for better file handling

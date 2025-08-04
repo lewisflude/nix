@@ -8,7 +8,9 @@
 let
   platformLib = import ../../lib/functions.nix { inherit lib system; };
   # Dynamic Catppuccin color palette access
-  palette = (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors;
+  palette =
+    (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
+    .${config.catppuccin.flavor}.colors;
 in
 {
 
@@ -196,6 +198,9 @@ in
       # Development environments
       dev = "nix develop ~/.config/nix#shell-selector";
 
+      # Screen lock with theme
+      lock = "swaylock --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --ring-color cba6f7 --key-hl-color b4befe --line-color 00000000 --inside-color 1e1e2e88 --separator-color 00000000 --text-color cdd6f4 --grace 2 --fade-in 0.2";
+
       # Abbreviation helpers
       abbr-list = "abbr list";
       abbr-add = "abbr add";
@@ -248,6 +253,7 @@ in
       eval "$(${pkgs.zoxide}/bin/zoxide init zsh)"
       eval "$(direnv hook zsh)"
       eval "$(${pkgs.atuin}/bin/atuin init zsh)"
+      eval "$(direnv hook zsh)"
 
       # Theme setup (critical for prompt)
       source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme

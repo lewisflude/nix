@@ -15,6 +15,37 @@
 
     # Utility shells
     shell-selector = import ./utils/shell-selector.nix { inherit pkgs; };
+
+    # Love2D game development
+    love2d = pkgs.mkShell {
+      buildInputs = with pkgs; [
+        love # Love2D game engine
+        lua # Lua interpreter
+        lua-language-server # Lua LSP
+        stylua # Lua formatter
+        selene # Lua linter
+        luaPackages.luacheck # Lua static analyzer
+      ];
+
+      shellHook = ''
+        echo "🎮 Love2D game development environment loaded"
+        echo "Love2D version: $(love --version 2>/dev/null || echo 'love command not found')"
+        echo "Lua version: $(lua -v)"
+        echo ""
+        echo "Available tools:"
+        echo "  love        - Run Love2D games"
+        echo "  lua         - Lua interpreter"
+        echo "  stylua      - Lua code formatter"
+        echo "  selene      - Lua linter"
+        echo "  luacheck    - Lua static analyzer"
+        echo ""
+        echo "Getting started:"
+        echo "  1. Create a main.lua file"
+        echo "  2. Run 'love .' to start your game"
+        echo "  3. Visit https://love2d.org/wiki for documentation"
+      '';
+    };
+
     # Node.js/TypeScript development
     node = pkgs.mkShell {
       buildInputs = with pkgs; [
