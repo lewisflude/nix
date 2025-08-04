@@ -14,11 +14,14 @@
       value = "524288";
     }
   ];
-  systemd.extraConfig = "DefaultLimitNOFILE=524288";
+  systemd.settings.Manager.DefaultLimitNOFILE = "524288";
   security.pki.certificateFiles = [ ../mitmproxy-ca-cert.pem ];
   security.polkit.enable = true;
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.login.enableGnomeKeyring = true;
+  security.pam.services.greetd.enableGnomeKeyring = true;
+  security.pam.services.sudo.enableGnomeKeyring = true;
+  security.pam.services.su.enableGnomeKeyring = true;
   security.pam.services.swaylock = {};
   boot.initrd.systemd.enable = true;
 

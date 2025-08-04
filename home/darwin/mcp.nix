@@ -16,6 +16,7 @@ in
 {
   home.packages = with pkgs; [
     uv
+    python3
   ];
 
   home.file."bin/kagi-mcp-wrapper".text = ''
@@ -36,6 +37,54 @@ in
       fileName = "claude_desktop_config.json";
     };
   };
+  # Activation script to register MCP servers with Claude Code
+  home.activation.setupClaudeMcp = lib.hm.dag.entryAfter ["writeBoundary"] (let
+    cfg = config.services.mcp;
+    
+    # Generate claude mcp add commands for each configured server
+    mcpAddCommands = lib.concatStringsSep "\n        " (
+      lib.mapAttrsToList (name: serverCfg:
+        let
+          # Build the command arguments
+          args = lib.escapeShellArgs ([serverCfg.command] ++ serverCfg.args);
+          # Build environment variable exports
+          envVars = lib.concatStringsSep " " (
+            lib.mapAttrsToList (key: value: 
+              "export ${lib.escapeShellArg key}=${lib.escapeShellArg value};"
+            ) serverCfg.env
+          );
+        in
+        ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${args} || echo "Failed to add ${name} server"''
+      ) cfg.servers
+    );
+  in
+  ''
+    if command -v claude >/dev/null 2>&1; then
+      echo "Registering MCP servers with Claude Code..."
+      
+      # Remove existing servers first (ignore errors)
+      ${pkgs.findutils}/bin/find ~/.config/claude -name "*.json" -delete 2>/dev/null || true
+      
+      # Add each configured server
+      $DRY_RUN_CMD ${pkgs.writeShellScript "setup-claude-mcp" ''
+        echo "Removing existing MCP servers..."
+        # Remove existing servers in all scopes (ignore errors)
+        for server in ${lib.concatStringsSep " " (lib.mapAttrsToList (name: _: lib.escapeShellArg name) cfg.servers)}; do
+          claude mcp remove "$server" -s user 2>/dev/null || true
+          claude mcp remove "$server" -s project 2>/dev/null || true
+          claude mcp remove "$server" 2>/dev/null || true
+        done
+        
+        echo "Running MCP server registration commands..."
+        ${mcpAddCommands}
+        
+        echo "Claude MCP server registration complete"
+      ''}
+    else
+      echo "Claude CLI not found, skipping MCP server registration"
+    fi
+  '');
+
   services.mcp.servers = {
     kagi = {
       command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
@@ -103,25 +152,39 @@ in
         OBSIDIAN_PORT = "27124";
       };
     };
-    love2d-docs = {
+    love2d-api = {
       command = "${pkgs.uv}/bin/uvx";
       args = [
-        "--with" "mcp"
-        "--with" "httpx"
-        "--with" "beautifulsoup4"
-        "python" "${../../scripts/mcp_love2d_docs.py}"
+        "--python"
+        "${pkgs.python3}/bin/python3"
+        "--with"
+        "mcp"
+        "--with"
+        "requests"
+        "${config.home.homeDirectory}/.config/nix/mcp-servers/love2d-api.py"
       ];
       port = 11440;
     };
-    lua-docs = {
-      command = "${pkgs.uv}/bin/uvx";
+    love2d-filesystem = {
+      command = "${pkgs.nodejs_24}/bin/npx";
       args = [
-        "--with" "mcp"
-        "--with" "httpx"
-        "--with" "beautifulsoup4"
-        "python" "${../../scripts/mcp_lua_docs.py}"
+        "-y"
+        "@modelcontextprotocol/server-filesystem"
+        "${codeDirectory}/love2d-projects"
+        "${config.home.homeDirectory}/.local/share/love"
       ];
       port = 11441;
+    };
+    general-filesystem = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-filesystem"
+        "${codeDirectory}"
+        "${config.home.homeDirectory}/.config"
+        "${config.home.homeDirectory}/Documents"
+      ];
+      port = 11442;
     };
   };
 }
