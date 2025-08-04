@@ -36,8 +36,9 @@
     mcpAddCommands = lib.concatStringsSep "\n        " (
       lib.mapAttrsToList (name: serverCfg:
         let
-          # Build the command arguments
-          args = lib.escapeShellArgs ([serverCfg.command] ++ serverCfg.args);
+          # Build the command and arguments separately
+          command = lib.escapeShellArg serverCfg.command;
+          args = lib.concatStringsSep " " (map lib.escapeShellArg serverCfg.args);
           # Build environment variable exports
           envVars = lib.concatStringsSep " " (
             lib.mapAttrsToList (key: value: 
@@ -45,7 +46,7 @@
             ) serverCfg.env
           );
         in
-        ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${args} || echo "Failed to add ${name} server"''
+        ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${command} -- ${args} || echo "Failed to add ${name} server"''
       ) cfg.servers
     );
   in
@@ -110,13 +111,15 @@
       args = [ "mcp-server-fetch" ];
       port = 11432;
     };
-    git = {
+    github = {
       command = "${pkgs.nodejs_24}/bin/npx";
       args = [
         "-y"
-        "@modelcontextprotocol/server-git"
-        "${config.home.homeDirectory}/Code"
+        "@modelcontextprotocol/server-github"
       ];
+      env = {
+        GITHUB_PERSONAL_ACCESS_TOKEN = config.sops.secrets.GITHUB_PERSONAL_ACCESS_TOKEN.path;
+      };
       port = 11434;
     };
     nx = {
@@ -127,11 +130,11 @@
       ];
       port = 11435;
     };
-    sequentialThinking = {
+    memory = {
       command = "${pkgs.nodejs_24}/bin/npx";
       args = [
         "-y"
-        "@modelcontextprotocol/server-sequential-thinking"
+        "@modelcontextprotocol/server-memory"
       ];
       port = 11436;
     };
