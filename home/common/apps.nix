@@ -7,6 +7,7 @@
     # Development tools (cross-platform)
     awscli2
     claude-code
+    codex
     coreutils
     delta
     htop
