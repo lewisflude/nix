@@ -44,22 +44,23 @@ let
   # ==== GIT & VERSION CONTROL ====
   git = [
     vsc.eamodio.gitlens
-      # vsc.github.vscode-pull-request-github # Temporarily disabled - incompatible with current Cursor version
+    vsc.github.vscode-pull-request-github # Re-enabled - compatibility issues likely resolved
   ];
 
   # ==== DEBUGGING & TESTING ====
   debugging = [
-
+    # Keep minimal - only add if you actually use testing
   ];
 
   # ==== DATABASE & DATA TOOLS ====
   database = [
-
+    # Keep minimal - only add if you work with databases
   ];
 
   # ==== DEVOPS & INFRASTRUCTURE ====
   devops = [
     vsc.ms-vscode-remote.remote-containers
+    # Removed Kubernetes tools - add only if needed
   ];
 
   # ==== WEB DEVELOPMENT ====
@@ -71,7 +72,8 @@ let
   ];
 
   codeQuality = [
-
+    vsc.ms-vscode.vscode-eslint # Already in webDev, but needed for essentials
+    # Removed spell checker - add only if needed
   ];
 
   # ==== AI & ASSISTANCE ====
