@@ -29,6 +29,13 @@ in
     "terminal.integrated.minimumContrastRatio" = 1;
     "window.titleBarStyle" = "custom";
 
+    # Wayland stability improvements
+    "window.nativeTabs" = false;
+    "window.experimental.useSandbox" = false;
+    "workbench.enableExperiments" = false;
+    "terminal.integrated.gpuAcceleration" = "off";
+    "editor.accessibilitySupport" = "off";
+
     "files.exclude" = commonIgnores;
     "files.watcherExclude" = watcherIgnores;
     "files.autoSave" = "onFocusChange";

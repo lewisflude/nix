@@ -60,6 +60,7 @@
   environment.systemPackages = with pkgs; [
     libsecret
     seahorse
+    protonvpn-gui
   ];
 
   programs.gnupg.agent = {

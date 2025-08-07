@@ -44,7 +44,7 @@ let
   # ==== GIT & VERSION CONTROL ====
   git = [
     vsc.eamodio.gitlens
-    vsc.github.vscode-pull-request-github
+      # vsc.github.vscode-pull-request-github # Temporarily disabled - incompatible with current Cursor version
   ];
 
   # ==== DEBUGGING & TESTING ====
