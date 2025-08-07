@@ -76,6 +76,13 @@
     };
 
     # Systems
+    go = {
+      lsp = "gopls";
+      formatter = "goimports";
+      indent = 4;
+      unit = "    ";
+      fileTypes = [ "go" ];
+    };
     rust = {
       lsp = "rust-analyzer";
       formatter = "rustfmt";

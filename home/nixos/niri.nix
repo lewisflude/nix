@@ -139,6 +139,9 @@ in
         NIXOS_OZONE_WL = "1";
 
         ELECTRON_OZONE_PLATFORM_HINT = "auto";
+        
+        # Force specific Electron apps to use X11 to avoid crashes
+        CURSOR_ENABLE_WAYLAND = "0";
 
         _JAVA_AWT_WM_NONREPARENTING = "1";
 

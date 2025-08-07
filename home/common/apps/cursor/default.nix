@@ -1,6 +1,9 @@
 {
   pkgs,
   lib,
+  cursor,
+  config,
+  system,
   ...
 }:
 
@@ -13,9 +16,16 @@ let
 
 in
 {
+  # Essential crash prevention through environment
+  home.sessionVariables = {
+    NODE_OPTIONS = "--max-old-space-size=4096"; # Prevent JS memory crashes
+  };
+
   programs.vscode = {
     enable = true;
-    package = pkgs.code-cursor;
+    # Use the cursor-flake package which has proper Wayland/Niri support built-in
+    # This includes automatic platform detection and proper Wayland flags
+    package = cursor.packages.${pkgs.system}.default;
     mutableExtensionsDir = false;
     profiles.default = {
       userSettings = lib.mkMerge [

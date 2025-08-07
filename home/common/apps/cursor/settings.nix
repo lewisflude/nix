@@ -29,15 +29,41 @@ in
     "terminal.integrated.minimumContrastRatio" = 1;
     "window.titleBarStyle" = "custom";
 
-    # Wayland stability improvements
-    "window.nativeTabs" = false;
-    "window.experimental.useSandbox" = false;
-    "workbench.enableExperiments" = false;
-    "terminal.integrated.gpuAcceleration" = "off";
-    "editor.accessibilitySupport" = "off";
+    # ==== CRASH PREVENTION & STABILITY SETTINGS ====
+    # Memory management and performance optimizations
+    "files.autoSaveDelay" = 5000; # Increase autosave delay to reduce I/O stress
+    "editor.quickSuggestionsDelay" = 100; # Reduce suggestion frequency
+    "editor.acceptSuggestionOnEnter" = "smart"; # Prevent accidental completions
+
+    # File watcher limits to prevent system overload
+    "files.watcherExclude" = watcherIgnores;
+    "search.followSymlinks" = false; # Prevent infinite loops in search
+    "search.maxResults" = 10000; # Reduce from 20000 to prevent memory issues
+
+    # Extension stability settings
+    "extensions.autoUpdate" = false; # Prevent automatic updates that can cause instability
+    "extensions.autoCheckUpdates" = false;
+    "extensions.ignoreRecommendations" = true;
+
+    # Window and rendering stability
+    "window.restoreWindows" = "none"; # Prevent crash loops on startup
+    "window.enableMenuBarMnemonics" = false; # Reduce menu-related crashes
+    "workbench.reduceMotion" = "on"; # Reduce animations that can cause GPU issues
+    "workbench.enableExperiments" = false; # Disable experimental features
+
+    # Git performance and stability
+    "git.autoRepositoryDetection" = "subFolders"; # Re-enabled with scope to prevent excessive scanning
+    "git.scanRepositories" = [ ]; # Disable automatic repository scanning
+
+    # Language server stability - Re-enable useful TypeScript features
+    "typescript.preferences.includePackageJsonAutoImports" = "on"; # Re-enabled for better DX
+    "typescript.suggest.autoImports" = true; # Re-enabled - very helpful for productivity
+
+    # Chat and AI stability settings
+    "workbench.experimental.settingsProfiles.enabled" = false;
+    "workbench.experimental.cloudChanges.enabled" = false;
 
     "files.exclude" = commonIgnores;
-    "files.watcherExclude" = watcherIgnores;
     "files.autoSave" = "onFocusChange";
     "files.trimTrailingWhitespace" = true;
     "files.insertFinalNewline" = true;
@@ -47,7 +73,6 @@ in
     "search.useGitIgnore" = true;
     "search.smartCase" = true;
     "search.showLineNumbers" = true;
-    "search.maxResults" = 20000;
 
     "workbench.colorTheme" = "Catppuccin Mocha";
 
@@ -99,7 +124,5 @@ in
 
     "telemetry.telemetryLevel" = "off";
     "security.workspace.trust.enabled" = false;
-    "extensions.ignoreRecommendations" = true;
-    "extensions.autoCheckUpdates" = false;
   };
 }
