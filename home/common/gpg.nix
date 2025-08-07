@@ -1,4 +1,9 @@
-{ pkgs, lib, system, ... }:
+{
+  pkgs,
+  lib,
+  system,
+  ...
+}:
 let
   platformLib = import ../../lib/functions.nix { inherit lib system; };
 in
