@@ -242,9 +242,9 @@ in
         export KAGI_API_KEY="$(cat ${config.sops.secrets.KAGI_API_KEY.path})"
       ''}
 
-      if [[ -f /run/secrets/GITHUB_PERSONAL_ACCESS_TOKEN ]]; then
-        export GITHUB_TOKEN="$(cat /run/secrets/GITHUB_PERSONAL_ACCESS_TOKEN)"
-      fi
+      ${lib.optionalString (config.sops.secrets ? GITHUB_TOKEN) ''
+        export GITHUB_TOKEN="$(cat ${config.sops.secrets.GITHUB_TOKEN.path})"
+      ''}
 
       export SOPS_GPG_EXEC="$(which gpg)"
       export SOPS_GPG_ARGS="--pinentry-mode=loopback"
