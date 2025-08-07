@@ -15,7 +15,7 @@ in
     enable = true;
     waybar.mode = "createLink";
     mako.enable = lib.mkIf platformLib.isLinux true;
-    firefox = {
+    firefox = lib.mkIf platformLib.isLinux {
       profiles = {
         default = {
           enable = true;

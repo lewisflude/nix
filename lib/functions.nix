@@ -4,6 +4,8 @@ rec {
   # Base platform detection
   isLinux = lib.hasInfix "linux" system;
   isDarwin = lib.hasInfix "darwin" system;
+  ifLinux = value: lib.optionalAttrs isLinux value;
+  ifDarwin = value: lib.optionalAttrs isDarwin value;
   isAarch64 = lib.hasInfix "aarch64" system;
   isX86_64 = lib.hasInfix "x86_64" system;
 
