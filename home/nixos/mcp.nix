@@ -38,15 +38,16 @@
         let
           # Build the command and arguments separately
           command = lib.escapeShellArg serverCfg.command;
-          args = lib.concatStringsSep " " (map lib.escapeShellArg serverCfg.args);
+          argsStr = lib.concatStringsSep " " (map lib.escapeShellArg serverCfg.args);
+          argsPart = lib.optionalString (argsStr != "") "-- ${argsStr}";
           # Build environment variable exports
           envVars = lib.concatStringsSep " " (
-            lib.mapAttrsToList (key: value: 
+            lib.mapAttrsToList (key: value:
               "export ${lib.escapeShellArg key}=${lib.escapeShellArg value};"
             ) serverCfg.env
           );
         in
-        ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${command} -- ${args} || echo "Failed to add ${name} server"''
+        ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${command} ${argsPart} || echo "Failed to add ${name} server"''
       ) cfg.servers
     );
   in
@@ -102,9 +103,6 @@
       command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
       args = [ ];
       port = 11431;
-      env = {
-        KAGI_API_KEY = config.sops.secrets.KAGI_API_KEY.path;
-      };
     };
     fetch = {
       command = "${pkgs.uv}/bin/uvx";
@@ -113,7 +111,7 @@
     };
     git = {
       command = "${pkgs.uv}/bin/uvx";
-      args = [ "mcp-server-git" ];
+      args = [ "mcp-server-git" "--repository" "${config.home.homeDirectory}/Code/dex-web" ];
       port = 11433;
     };
     github = {
@@ -192,7 +190,7 @@
         "--with" "beautifulsoup4"
         "python" "${../../scripts/mcp_love2d_docs.py}"
       ];
-      port = 11440;
+      port = 11443;
     };
     lua-docs = {
       command = "${pkgs.uv}/bin/uvx";
@@ -202,7 +200,21 @@
         "--with" "beautifulsoup4"
         "python" "${../../scripts/mcp_lua_docs.py}"
       ];
-      port = 11441;
+      port = 11444;
+    };
+
+    time = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [ "mcp-server-time" ];
+      port = 11445;
+    };
+    everything = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-everything"
+      ];
+      port = 11446;
     };
 
   };
