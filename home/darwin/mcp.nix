@@ -45,16 +45,16 @@ in
     mcpAddCommands = lib.concatStringsSep "\n        " (
       lib.mapAttrsToList (name: serverCfg:
         let
-          # Build the command arguments
-          args = lib.escapeShellArgs ([serverCfg.command] ++ serverCfg.args);
-          # Build environment variable exports
+          command = lib.escapeShellArg serverCfg.command;
+          argsStr = lib.concatStringsSep " " (map lib.escapeShellArg serverCfg.args);
+          argsPart = lib.optionalString (argsStr != "") "-- ${argsStr}";
           envVars = lib.concatStringsSep " " (
-            lib.mapAttrsToList (key: value: 
+            lib.mapAttrsToList (key: value:
               "export ${lib.escapeShellArg key}=${lib.escapeShellArg value};"
             ) serverCfg.env
           );
         in
-        ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${args} || echo "Failed to add ${name} server"''
+        ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${command} ${argsPart} || echo "Failed to add ${name} server"''
       ) cfg.servers
     );
   in
@@ -90,9 +90,6 @@ in
       command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
       args = [ ];
       port = 11431;
-      env = {
-        KAGI_API_KEY = config.sops.secrets.KAGI_API_KEY.path;
-      };
     };
     fetch = {
       command = "${pkgs.uv}/bin/uvx";
@@ -101,7 +98,7 @@ in
     };
     git = {
       command = "${pkgs.uv}/bin/uvx";
-      args = [ "mcp-server-git" ];
+      args = [ "mcp-server-git" "--repository" dexWebProject ];
       port = 11433;
     };
     nx = {
@@ -111,6 +108,14 @@ in
         dexWebProject
       ];
       port = 11437;
+    };
+    memory = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-memory"
+      ];
+      port = 11436;
     };
     sequential-thinking = {
       command = "${pkgs.nodejs_24}/bin/npx";
@@ -130,6 +135,7 @@ in
         "GITHUB_PERSONAL_ACCESS_TOKEN"
         "ghcr.io/github/github-mcp-server"
       ];
+      port = 11434;
       env = {
         GITHUB_PERSONAL_ACCESS_TOKEN = "/run/secrets/GITHUB_PERSONAL_ACCESS_TOKEN";
       };
@@ -190,6 +196,19 @@ in
         "${config.home.homeDirectory}/Documents"
       ];
       port = 11442;
+    };
+    time = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [ "mcp-server-time" ];
+      port = 11443;
+    };
+    everything = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-everything"
+      ];
+      port = 11444;
     };
   };
 }
