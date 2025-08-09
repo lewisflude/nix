@@ -1,0 +1,17 @@
+*** Begin Patch
+*** Update File: home/darwin/mcp.nix
+@@ home.file."bin/kagi-mcp-wrapper".text = ''
+-    export KAGI_SUMMARIZER_ENGINE="$(cat ${config.sops.secrets.KAGI_SUMMARIZER_ENGINE.path})"
++    ${lib.optionalString (lib.hasAttr "KAGI_SUMMARIZER_ENGINE" config.sops.secrets) ''
++    export KAGI_SUMMARIZER_ENGINE="$(cat ${config.sops.secrets.KAGI_SUMMARIZER_ENGINE.path})"
++    ''}
+*** End Patch
+
+*** Update File: home/nixos/mcp.nix
+@@ home.file."bin/kagi-mcp-wrapper".text = ''
+-    export KAGI_SUMMARIZER_ENGINE="$(cat ${config.sops.secrets.KAGI_SUMMARIZER_ENGINE.path})"
++    ${lib.optionalString (lib.hasAttr "KAGI_SUMMARIZER_ENGINE" config.sops.secrets) ''
++    export KAGI_SUMMARIZER_ENGINE="$(cat ${config.sops.secrets.KAGI_SUMMARIZER_ENGINE.path})"
++    ''}
+*** End Patch
+*** End Patch
