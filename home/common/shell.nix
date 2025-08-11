@@ -7,9 +7,26 @@
 }:
 let
   platformLib = import ../../lib/functions.nix { inherit lib system; };
+
+  # Catppuccin palette (assumes catppuccin HM module is enabled in your config)
   palette =
-    (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
-    .${config.catppuccin.flavor}.colors;
+    if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
+      (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
+      .${config.catppuccin.flavor}.colors
+    else
+      {
+        mauve = {
+          hex = "b48ead";
+        };
+        surface1 = {
+          hex = "3b4252";
+        };
+      };
+
+  # Safe SOPS guards
+  hasKagi = lib.hasAttrByPath [ "sops" "secrets" "KAGI_API_KEY" ] config;
+  hasGh = lib.hasAttrByPath [ "sops" "secrets" "GITHUB_TOKEN" ] config;
+
 in
 {
   xdg.enable = true;
@@ -18,7 +35,25 @@ in
     fzf = {
       enable = true;
       enableZshIntegration = true;
-      defaultOptions = [ "--height 40%" "--layout=reverse" "--border" ];
+      defaultOptions = [
+        "--height 40%"
+        "--layout=reverse"
+        "--border"
+      ];
+      defaultCommand = lib.mkDefault (
+        if pkgs ? fd then
+          "${lib.getExe pkgs.fd} --hidden --strip-cwd-prefix --exclude .git"
+        else if pkgs ? ripgrep then
+          "${lib.getExe pkgs.ripgrep} --files --hidden --follow --glob '!.git'"
+        else
+          null
+      );
+      fileWidgetCommand = lib.mkDefault (
+        if pkgs ? fd then
+          "${lib.getExe pkgs.fd} --type f --hidden --strip-cwd-prefix --exclude .git"
+        else
+          null
+      );
     };
 
     direnv = {
@@ -41,13 +76,10 @@ in
     zsh = {
       enable = true;
       enableCompletion = true;
-      dotDir = ".config/zsh";
+      dotDir = "${config.xdg.configHome}/zsh";
 
-      autosuggestion = {
-        enable = true;
-        strategy = [ "history" "completion" ];
-        highlight = "fg=${palette.mauve.hex},bg=${palette.surface1.hex},bold,underline";
-      };
+      # Zsh autosuggestion plugin
+      autosuggestion.enable = true;
 
       syntaxHighlighting.enable = true;
       historySubstringSearch.enable = true;
@@ -151,16 +183,39 @@ in
       '';
 
       setOptions = [
-        "AUTO_MENU" "COMPLETE_IN_WORD" "ALWAYS_TO_END"
-        "HIST_VERIFY" "HIST_REDUCE_BLANKS" "HIST_IGNORE_SPACE"
-        "HIST_NO_FUNCTIONS" "HIST_EXPIRE_DUPS_FIRST" "HIST_FIND_NO_DUPS"
-        "HIST_SAVE_NO_DUPS" "HIST_BEEP" "BANG_HIST"
-        "AUTO_PUSHD" "PUSHD_IGNORE_DUPS" "PUSHD_SILENT" "PUSHD_TO_HOME"
-        "CDABLE_VARS" "AUTO_CD" "MULTIOS"
-        "EXTENDED_GLOB" "GLOB_DOTS" "GLOBSTARSHORT" "NUMERIC_GLOB_SORT"
-        "MARK_DIRS" "NOMATCH" "CASE_GLOB" "BAD_PATTERN"
-        "INTERACTIVE_COMMENTS" "LONG_LIST_JOBS" "NOTIFY" "HASH_LIST_ALL"
-        "AUTO_LIST" "AUTO_PARAM_SLASH"
+        "AUTO_MENU"
+        "COMPLETE_IN_WORD"
+        "ALWAYS_TO_END"
+        "HIST_VERIFY"
+        "HIST_REDUCE_BLANKS"
+        "HIST_IGNORE_SPACE"
+        "HIST_NO_FUNCTIONS"
+        "HIST_EXPIRE_DUPS_FIRST"
+        "HIST_FIND_NO_DUPS"
+        "HIST_SAVE_NO_DUPS"
+        "HIST_BEEP"
+        "BANG_HIST"
+        "AUTO_PUSHD"
+        "PUSHD_IGNORE_DUPS"
+        "PUSHD_SILENT"
+        "PUSHD_TO_HOME"
+        "CDABLE_VARS"
+        "AUTO_CD"
+        "MULTIOS"
+        "EXTENDED_GLOB"
+        "GLOB_DOTS"
+        "GLOBSTARSHORT"
+        "NUMERIC_GLOB_SORT"
+        "MARK_DIRS"
+        "NOMATCH"
+        "CASE_GLOB"
+        "BAD_PATTERN"
+        "INTERACTIVE_COMMENTS"
+        "LONG_LIST_JOBS"
+        "NOTIFY"
+        "HASH_LIST_ALL"
+        "AUTO_LIST"
+        "AUTO_PARAM_SLASH"
       ];
 
       shellAliases = lib.mkMerge [
@@ -193,7 +248,7 @@ in
           gco = "git checkout";
           gb = "git branch";
           glog = "git log --oneline --graph --decorate";
-          ports = "netstat -tulanp";
+          ports = "ss -tulanp || netstat -tulanp";
           myip = "curl -s ifconfig.me";
           nix-search = "nh search";
           nix-info = "nix-shell -p nix-info --run 'nix-info -m'";
@@ -212,7 +267,7 @@ in
           lsconfig = "eza -la **/*.{json,yaml,yml,toml,ini,conf,cfg}";
         }
         (lib.mkIf pkgs.stdenv.isLinux {
-          lock = "swaylock --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --ring-color cba6f7 --key-hl-color b4befe --line-color 00000000 --inside-color 1e1e2e88 --separator-color 00000000 --text-color cdd6f4 --grace 2 --fade-in 0.2";
+          lock = "saylock --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --ring-color cba6f7 --key-hl-color b4befe --line-color 00000000 --inside-color 1e1e2e88 --separator-color 00000000 --text-color cdd6f4 --grace 2 --fade-in 0.2";
         })
       ];
 
@@ -222,7 +277,15 @@ in
         ignoreAllDups = true;
         path = "${config.home.homeDirectory}/.zsh_history";
         ignorePatterns = [
-          "rm *" "pkill *" "cp *" "history*" "exit" "ls" "cd" "pwd" "clear"
+          "rm *"
+          "pkill *"
+          "cp *"
+          "history*"
+          "exit"
+          "ls"
+          "cd"
+          "pwd"
+          "clear"
         ];
         share = true;
         extended = true;
@@ -231,15 +294,22 @@ in
         ignoreSpace = true;
       };
 
-      initExtra = ''
-        ${lib.optionalString (config.sops.secrets ? KAGI_API_KEY) ''
+      initContent = ''
+        ${lib.optionalString hasKagi ''
           export KAGI_API_KEY="$(cat ${config.sops.secrets.KAGI_API_KEY.path})"
         ''}
-        ${lib.optionalString (config.sops.secrets ? GITHUB_TOKEN) ''
+        ${lib.optionalString hasGh ''
           export GITHUB_TOKEN="$(cat ${config.sops.secrets.GITHUB_TOKEN.path})"
         ''}
 
-        export SOPS_GPG_EXEC="$(which gpg)"
+        export SSH_AUTH_SOCK="$(${pkgs.gnupg}/bin/gpgconf --list-dirs agent-ssh-socket)"
+
+        # Autosuggestions tuning
+        typeset -ga ZSH_AUTOSUGGEST_STRATEGY
+        ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+        export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=${palette.mauve.hex},bg=${palette.surface1.hex},bold,underline"
+
+        export SOPS_GPG_EXEC="${lib.getExe pkgs.gnupg}"
         export SOPS_GPG_ARGS="--pinentry-mode=loopback"
 
         source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
@@ -301,134 +371,10 @@ in
 
         zsh-defer -c 'if [[ ~/.zshrc -nt ~/.zshrc.zwc ]]; then zcompile ~/.zshrc; fi'
 
-        function gclone() {
-          [[ -z "$1" ]] && { echo "Usage: gclone <repo-url>"; return 1; }
-          git clone "$1" && cd "$(basename "$1" .git)" || return 1
-        }
-        function gacp() {
-          [[ -z "$1" ]] && { echo "Usage: gacp <commit-message>"; return 1; }
-          git add . && git commit -m "$1" && git push || return 1
-        }
-        function gnew() {
-          [[ -z "$1" ]] && { echo "Usage: gnew <branch-name>"; return 1; }
-          git checkout -b "$1" && git push -u origin "$1" || return 1
-        }
-        function mkcd() {
-          [[ -z "$1" ]] && { echo "Usage: mkcd <directory>"; return 1; }
-          mkdir -p "$1" && cd "$1" || return 1
-        }
-        function cdf() {
-          local file=$(fzf)
-          [[ -z "$file" ]] && { echo "No file selected"; return 1; }
-          cd "$(dirname "$file")" || return 1
-        }
-        function up() {
-          local levels=''${1:-1}
-          [[ ! "$levels" =~ ^[0-9]+$ ]] && { echo "Usage: up [number]"; return 1; }
-          local path=""
-          for ((i=1; i<=levels; i++)); do
-            path="../$path"
-          done
-          cd "$path" || return 1
-        }
-        function bk() { cd "$OLDPWD" || return 1 }
-        function cdl() {
-          [[ -z "$1" ]] && { echo "Usage: cdl <directory>"; return 1; }
-          cd "$1" && eza || return 1
-        }
-        function 1() { cd -1 2>/dev/null || { echo "Directory stack entry 1 not found"; return 1; } }
-        function 2() { cd -2 2>/dev/null || { echo "Directory stack entry 2 not found"; return 1; } }
-        function 3() { cd -3 2>/dev/null || { echo "Directory stack entry 3 not found"; return 1; } }
-        function 4() { cd -4 2>/dev/null || { echo "Directory stack entry 4 not found"; return 1; } }
-        function 5() { cd -5 2>/dev/null || { echo "Directory stack entry 5 not found"; return 1; } }
-        function findcode() {
-          print -l **/*.(js|ts|jsx|tsx|py|go|rs|c|cpp|h|hpp|java|php|rb|swift|kt)~*/(node_modules|target|build|dist|vendor)/*
-        }
-        function findconfig() {
-          print -l **/*.(json|yaml|yml|toml|ini|conf|cfg|env)~*/(node_modules|target|build|dist|vendor)/*
-        }
-        function finddocs() {
-          print -l **/*.(md|txt|rst|adoc|tex|pdf)~*/(node_modules|target|build|dist|vendor)/*
-        }
-        function findlarge() {
-          print -l **/*(.Lm+10)
-        }
-        function findrecent() {
-          print -l **/*(.mm-7)
-        }
-        function findold() {
-          print -l **/*(.mm+30)
-        }
-        function extract() {
-          [[ -z "$1" ]] && { echo "Usage: extract <file>"; return 1; }
-          [[ ! -f "$1" ]] && { echo "Error: '$1' is not a valid file"; return 1; }
-          case "$1" in
-            *.tar.bz2)   tar xjf "$1" || return 1 ;;
-            *.tar.gz)    tar xzf "$1" || return 1 ;;
-            *.bz2)       bunzip2 "$1" || return 1 ;;
-            *.rar)       unrar x "$1" || return 1 ;;
-            *.gz)        gunzip "$1" || return 1 ;;
-            *.tar)       tar xf "$1" || return 1 ;;
-            *.tbz2)      tar xjf "$1" || return 1 ;;
-            *.tgz)       tar xzf "$1" || return 1 ;;
-            *.zip)       unzip "$1" || return 1 ;;
-            *.Z)         uncompress "$1" || return 1 ;;
-            *.7z)        7z x "$1" || return 1 ;;
-            *.xz)        unxz "$1" || return 1 ;;
-            *.exe)       cabextract "$1" || return 1 ;;
-            *)           echo "Error: '$1' cannot be extracted via extract()"; return 1 ;;
-          esac
-          echo "Successfully extracted '$1'"
-        }
-        function mktmp() {
-          local tmp_dir=$(mktemp -d) || { echo "Failed to create temporary directory"; return 1; }
-          echo "Created: $tmp_dir"
-          cd "$tmp_dir" || return 1
-        }
-        function backup() {
-          [[ -z "$1" ]] && { echo "Usage: backup <file>"; return 1; }
-          [[ ! -f "$1" ]] && { echo "Error: '$1' is not a valid file"; return 1; }
-          local backup_name="$1.backup.$(date +%Y%m%d_%H%M%S)"
-          cp "$1" "$backup_name" || return 1
-          echo "Backup created: $backup_name"
-        }
-        function port() {
-          [[ -z "$1" ]] && { echo "Usage: port <port-number>"; return 1; }
-          [[ ! "$1" =~ ^[0-9]+$ ]] && { echo "Error: Port must be a number"; return 1; }
-          lsof -ti:"$1" || { echo "No process found on port $1"; return 1; }
-        }
-        function killport() {
-          [[ -z "$1" ]] && { echo "Usage: killport <port-number>"; return 1; }
-          [[ ! "$1" =~ ^[0-9]+$ ]] && { echo "Error: Port must be a number"; return 1; }
-          local pid=$(lsof -ti:"$1")
-          [[ -z "$pid" ]] && { echo "No process found on port $1"; return 1; }
-          kill -9 "$pid" || return 1
-          echo "Killed process $pid on port $1"
-        }
-        function weather() {
-          local location=''${1:-""}
-          curl -s "wttr.in/$location" || { echo "Failed to fetch weather data"; return 1; }
-        }
-        function serve() {
-          local port='${1:-8000}'
-          [[ ! "$port" =~ ^[0-9]+$ ]] && { echo "Error: Port must be a number"; return 1; }
-          command -v python >/dev/null 2>&1 || { echo "Python not found"; return 1; }
-          echo "Starting server on port $port..."
-          python -m http.server "$port" || return 1
-        }
-        function nix-dev() {
-          if [[ -f shell.nix || -f .envrc ]]; then
-            nix-shell || return 1
-          else
-            echo "No shell.nix or .envrc found in current directory"
-            return 1
-          fi
-        }
-        function flake-init() {
-          [[ -z "$1" ]] && { echo "Usage: flake-init <template-name>"; return 1; }
-          nix flake init --template "github:nix-community/templates#$1" || return 1
-          echo "Initialized flake with template: $1"
-        }
+        # Source project functions from your repo at runtime to avoid flake source requirements
+        if [[ -f "${config.home.homeDirectory}/.config/nix/home/common/lib/zsh/functions.zsh" ]]; then
+          source "${config.home.homeDirectory}/.config/nix/home/common/lib/zsh/functions.zsh"
+        fi
 
         ${
           let
@@ -436,7 +382,7 @@ in
               owner = "tom-doerr";
               repo = "zsh_codex";
               rev = "6ede649f1260abc5ffe91ef050d00549281dc461";
-              hash = "sha256-m3m+ErBakBMrBsoiYgI8AdJZwXgcpz4C9hIM5Q+6lO4=";
+              sha256 = "sha256-m3m+ErBakBMrBsoiYgI8AdJZwXgcpz4C9hIM5Q+6lO4=";
             };
           in
           ''
@@ -451,7 +397,6 @@ in
   };
 
   home.sessionVariables = {
-    SSH_AUTH_SOCK = "$(gpgconf --list-dirs agent-ssh-socket)";
     EDITOR = "hx";
     DIRSTACKSIZE = "20";
     NH_FLAKE = "${config.home.homeDirectory}/.config/nix";
@@ -464,44 +409,70 @@ in
   home.packages = with pkgs; [
     (writeShellApplication {
       name = "system-update";
-      runtimeInputs = [ nh nix coreutils ];
+      runtimeInputs = [
+        nh
+        nix
+        coreutils
+      ];
       text = ''
-        set -e
-        FLAKE_PATH="${NH_FLAKE:-${config.home.homeDirectory}/.config/nix}"
-        if [[ "${stdenv.hostPlatform.isDarwin}" == "1" ]]; then
-          NH_CMD="nh darwin"
-        else
-          NH_CMD="nh os"
+        set -Eeuo pipefail
+        IFS=$'\n\t'
+
+        FLAKE_PATH="''${NH_FLAKE:-${config.home.homeDirectory}/.config/nix}"
+        NH_TARGET="${if pkgs.stdenv.isDarwin then "darwin" else "os"}"
+
+        # If this shell has NoNewPrivs=1 (e.g., launched from a sandboxed user service),
+        # re-exec this command via systemd-run with NoNewPrivileges disabled so sudo works.
+        if [ "$(awk '/NoNewPrivs/ {print $2}' /proc/self/status 2>/dev/null || echo 0)" = "1" ]; then
+          if command -v systemd-run >/dev/null 2>&1; then
+            echo "Detected NoNewPrivs=1; re-executing via systemd-run to allow sudo…"
+            exec systemd-run --user --pty --same-dir --wait --collect -p NoNewPrivileges=no system-update "$@"
+          else
+            echo "NoNewPrivs=1 and systemd-run not found. Run from a non-sandboxed terminal or a VT."
+            exit 1
+          fi
         fi
+
         UPDATE_INPUTS=0
         RUN_GC=0
         BUILD_ONLY=0
+        DRY_RUN=0
         for arg in "$@"; do
           case "$arg" in
             --full) UPDATE_INPUTS=1; RUN_GC=1 ;;
             --inputs) UPDATE_INPUTS=1 ;;
             --gc) RUN_GC=1 ;;
             --build-only) BUILD_ONLY=1 ;;
+            --check|--dry-run) DRY_RUN=1 ;;
             --help)
-              echo "Usage: system-update [--full|--inputs|--gc|--build-only|--help]"
+              echo "Usage: system-update [--full|--inputs|--gc|--build-only|--check|--help]"
               exit 0 ;;
           esac
         done
+
         if [[ $UPDATE_INPUTS -eq 1 ]]; then
           echo "Updating inputs…"
           nix flake update --flake "$FLAKE_PATH"
         fi
-        if [[ $BUILD_ONLY -eq 1 ]]; then
-          echo "Building…"
-          $NH_CMD build "$FLAKE_PATH"
+
+        if [[ $DRY_RUN -eq 1 ]]; then
+          echo "Checking switch…"
+          nh "$NH_TARGET" switch -- --dry-run "$FLAKE_PATH"
         else
-          echo "Switching…"
-          $NH_CMD switch "$FLAKE_PATH"
+          if [[ $BUILD_ONLY -eq 1 ]]; then
+            echo "Building…"
+            nh "$NH_TARGET" build "$FLAKE_PATH"
+          else
+            echo "Switching…"
+            nh "$NH_TARGET" switch "$FLAKE_PATH"
+          fi
         fi
+
         if [[ $RUN_GC -eq 1 ]]; then
           echo "Cleaning…"
           nh clean all
         fi
+
         echo "Done."
       '';
     })
