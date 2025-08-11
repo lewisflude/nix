@@ -8,6 +8,7 @@
     awscli2
     claude-code
     codex
+    gemini-cli
     coreutils
     delta
     htop
