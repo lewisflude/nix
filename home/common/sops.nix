@@ -22,6 +22,8 @@
       KAGI_API_KEY = { };
       CIRCLECI_TOKEN = { };
       OBSIDIAN_API_KEY = { };
+      OPENAI_API_KEY = { };
+      GITHUB_TOKEN = { };
     };
   };
 
