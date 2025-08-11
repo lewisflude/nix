@@ -18,6 +18,7 @@
     # Graphics & Design
     gimp
     krita
+    aseprite
 
     # Communication
     discord
@@ -26,6 +27,13 @@
     # System Utilities
     file-roller
     swaylock-effects
+
+    # File Manager (Thunar) and helpers
+    xfce.thunar
+    xfce.thunar-volman
+    ffmpegthumbnailer
+    xfce.thunar-archive-plugin
+    gvfs
 
     # Game Development
     love # Love2D game engine
@@ -39,7 +47,9 @@
     enable = true;
     defaultApplications = {
       "x-terminal-emulator" = "ghostty.desktop";
-      "inode/directory" = "org.gnome.Nautilus.desktop";
+      # Use Thunar as the default file manager for directories
+      "inode/directory" = "Thunar.desktop";
+      "application/x-directory" = "Thunar.desktop";
       "x-scheme-handler/onepassword" = "1password.desktop";
       "text/html" = "firefox.desktop";
       "x-scheme-handler/http" = "firefox.desktop";

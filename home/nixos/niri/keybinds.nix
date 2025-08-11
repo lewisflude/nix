@@ -2,7 +2,12 @@
 let
   brightness = "${config.home.homeDirectory}/bin/brightness";
   # Default applications
-  terminal = "${pkgs.ghostty}/bin/ghostty";
+  terminal = [
+    "uwsm"
+    "app"
+    "--"
+    "${pkgs.ghostty}/bin/ghostty"
+  ];
   launcher = "fuzzel";
   screenLocker = "${pkgs.swaylock-effects}/bin/swaylock";
 in
@@ -24,7 +29,7 @@ in
     "Mod+Shift+Slash".action.show-hotkey-overlay = { };
 
     # Suggested binds for running programs: terminal, app launcher, screen locker.
-    "Mod+T".action.spawn = [ terminal ];
+    "Mod+T".action.spawn = terminal;
     "Mod+D".action.spawn = [ launcher ];
     "Super+Alt+L".action.spawn = [ screenLocker ];
 
