@@ -25,7 +25,10 @@ in
     enable = true;
     # Use the cursor-flake package which has proper Wayland/Niri support built-in
     # This includes automatic platform detection and proper Wayland flags
-    package = cursor.packages.${pkgs.system}.default;
+    package = 
+      if cursor.packages ? ${pkgs.system}
+      then cursor.packages.${pkgs.system}.default
+      else pkgs.vscode;
     mutableExtensionsDir = false;
     profiles.default = {
       userSettings = lib.mkMerge [
