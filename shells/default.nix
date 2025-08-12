@@ -110,7 +110,6 @@ let
     devops = pkgs.mkShell {
       buildInputs = with pkgs; [
         kubectl
-        helm
         opentofu
         terragrunt
         docker-compose
@@ -118,7 +117,9 @@ let
         awscli2
         google-cloud-sdk
         azure-cli
-      ];
+      ] ++ (lib.optionals pkgs.stdenv.isLinux [
+        helm  # helm is not available on macOS
+      ]);
       shellHook = ''
         echo "🛠️  DevOps environment loaded"
         echo "kubectl version: $(kubectl version --client --short)"

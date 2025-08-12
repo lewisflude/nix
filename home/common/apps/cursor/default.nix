@@ -23,12 +23,10 @@ in
 
   programs.vscode = {
     enable = true;
-    # Use the cursor-flake package which has proper Wayland/Niri support built-in
-    # This includes automatic platform detection and proper Wayland flags
-    package = 
-      if cursor.packages ? ${pkgs.system}
-      then cursor.packages.${pkgs.system}.default
-      else pkgs.vscode;
+    # Use cursor flake on Linux for proper Wayland/Niri support, nixpkgs on Darwin
+    package = if pkgs.stdenv.isLinux 
+      then cursor.packages.${pkgs.system}.default  # Cursor flake with Wayland support
+      else pkgs.code-cursor;  # Standard nixpkgs cursor for macOS
     mutableExtensionsDir = false;
     profiles.default = {
       userSettings = lib.mkMerge [
