@@ -23,7 +23,7 @@ let
   # ==== CORE PROGRAMMING LANGUAGES ====
   coreLangs = [
     vsc.jnoortheen.nix-ide
-    vsc.rust-lang.rust-analyzer
+    # vsc.rust-lang.rust-analyzer  # Temporarily disabled due to hash mismatch
     vsc.bradlc.vscode-tailwindcss
   ];
 
