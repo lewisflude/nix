@@ -44,6 +44,8 @@ in
       allowUnfree = true;
       allowBroken = false;
       allowUnsupportedSystem = false;
+      # Use the latest pnpm fetcher to avoid evaluation errors
+      pnpm.fetcherVersion = 2;
     };
   };
 }
