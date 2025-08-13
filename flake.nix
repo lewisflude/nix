@@ -105,7 +105,6 @@
       nur,
       solaar,
       niri-unstable,
-      nh,
       pre-commit-hooks,
       ...
     }:
