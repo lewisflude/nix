@@ -38,52 +38,57 @@ in
     };
   };
   # Activation script to register MCP servers with Claude Code
-  home.activation.setupClaudeMcp = lib.hm.dag.entryAfter ["writeBoundary"] (let
-    cfg = config.services.mcp;
-    
-    # Generate claude mcp add commands for each configured server
-    mcpAddCommands = lib.concatStringsSep "\n        " (
-      lib.mapAttrsToList (name: serverCfg:
-        let
-          command = lib.escapeShellArg serverCfg.command;
-          argsStr = lib.concatStringsSep " " (map lib.escapeShellArg serverCfg.args);
-          argsPart = lib.optionalString (argsStr != "") "-- ${argsStr}";
-          envVars = lib.concatStringsSep " " (
-            lib.mapAttrsToList (key: value:
-              "export ${lib.escapeShellArg key}=${lib.escapeShellArg value};"
-            ) serverCfg.env
-          );
-        in
-        ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${command} ${argsPart} || echo "Failed to add ${name} server"''
-      ) cfg.servers
-    );
-  in
-  ''
-    if command -v claude >/dev/null 2>&1; then
-      echo "Registering MCP servers with Claude Code..."
-      
-      # Remove existing servers first (ignore errors)
-      ${pkgs.findutils}/bin/find ~/.config/claude -name "*.json" -delete 2>/dev/null || true
-      
-      # Add each configured server
-      $DRY_RUN_CMD ${pkgs.writeShellScript "setup-claude-mcp" ''
-        echo "Removing existing MCP servers..."
-        # Remove existing servers in all scopes (ignore errors)
-        for server in ${lib.concatStringsSep " " (lib.mapAttrsToList (name: _: lib.escapeShellArg name) cfg.servers)}; do
-          claude mcp remove "$server" -s user 2>/dev/null || true
-          claude mcp remove "$server" -s project 2>/dev/null || true
-          claude mcp remove "$server" 2>/dev/null || true
-        done
-        
-        echo "Running MCP server registration commands..."
-        ${mcpAddCommands}
-        
-        echo "Claude MCP server registration complete"
-      ''}
-    else
-      echo "Claude CLI not found, skipping MCP server registration"
-    fi
-  '');
+  home.activation.setupClaudeMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] (
+    let
+      cfg = config.services.mcp;
+
+      # Generate claude mcp add commands for each configured server
+      mcpAddCommands = lib.concatStringsSep "\n        " (
+        lib.mapAttrsToList (
+          name: serverCfg:
+          let
+            command = lib.escapeShellArg serverCfg.command;
+            argsStr = lib.concatStringsSep " " (map lib.escapeShellArg serverCfg.args);
+            argsPart = lib.optionalString (argsStr != "") "-- ${argsStr}";
+            envVars = lib.concatStringsSep " " (
+              lib.mapAttrsToList (
+                key: value: "export ${lib.escapeShellArg key}=${lib.escapeShellArg value};"
+              ) serverCfg.env
+            );
+          in
+          ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${command} ${argsPart} || echo "Failed to add ${name} server"''
+        ) cfg.servers
+      );
+    in
+    ''
+      if command -v claude >/dev/null 2>&1; then
+        echo "Registering MCP servers with Claude Code..."
+
+        # Remove existing servers first (ignore errors)
+        ${pkgs.findutils}/bin/find ~/.config/claude -name "*.json" -delete 2>/dev/null || true
+
+        # Add each configured server
+        $DRY_RUN_CMD ${pkgs.writeShellScript "setup-claude-mcp" ''
+          echo "Removing existing MCP servers..."
+          # Remove existing servers in all scopes (ignore errors)
+          for server in ${
+            lib.concatStringsSep " " (lib.mapAttrsToList (name: _: lib.escapeShellArg name) cfg.servers)
+          }; do
+            claude mcp remove "$server" -s user 2>/dev/null || true
+            claude mcp remove "$server" -s project 2>/dev/null || true
+            claude mcp remove "$server" 2>/dev/null || true
+          done
+
+          echo "Running MCP server registration commands..."
+          ${mcpAddCommands}
+
+          echo "Claude MCP server registration complete"
+        ''}
+      else
+        echo "Claude CLI not found, skipping MCP server registration"
+      fi
+    ''
+  );
 
   services.mcp.servers = {
     kagi = {
@@ -98,7 +103,11 @@ in
     };
     git = {
       command = "${pkgs.uv}/bin/uvx";
-      args = [ "mcp-server-git" "--repository" dexWebProject ];
+      args = [
+        "mcp-server-git"
+        "--repository"
+        dexWebProject
+      ];
       port = 11433;
     };
     nx = {
@@ -209,6 +218,9 @@ in
         "@modelcontextprotocol/server-everything"
       ];
       port = 11444;
+    };
+    figma = {
+      url = "http://127.0.0.1:3845/mcp";
     };
   };
 }
