@@ -9,6 +9,8 @@ let
     "5" = ""; # Chat
     default = ""; # Unknown
   };
+  uwsm = "${pkgs.uwsm}/bin/uwsm";
+  ghostty = "${pkgs.ghostty}/bin/ghostty";
 in
 {
 
@@ -65,7 +67,7 @@ in
           format-ethernet = " {ifname}";
           tooltip-format = "{ifname} via {gwaddr}\n{ipaddr}/{cidr}\nUp: {bandwidthUpBits}bps\nDown: {bandwidthDownBits}bps";
           interval = 5;
-          on-click = "uwsm app -- nm-connection-editor";
+          on-click = "${uwsm} app -- nm-connection-editor";
         };
 
         # CPU usage (with CSS alert support)
@@ -73,7 +75,7 @@ in
           format = " {usage}%";
           tooltip-format = "CPU: {usage}%\nLoad: {load}";
           interval = 2;
-          on-click = "uwsm app -- ghostty -e btop";
+          on-click = "${uwsm} app -- ${ghostty} -e btop";
           format-alt = "{usage}";
         };
 
@@ -82,7 +84,7 @@ in
           format = " {used:0.1f}G/{total:0.1f}G";
           tooltip-format = "Memory: {used:0.1f}G / {total:0.1f}G\nAvailable: {avail:0.1f}G";
           interval = 5;
-          on-click = "uwsm app -- ghostty -e btop";
+          on-click = "${uwsm} app -- ${ghostty} -e btop";
           format-alt = "{used_percent}";
         };
 
@@ -135,7 +137,7 @@ in
           ];
           tooltip-format = "Device: {desc}\nVolume: {volume}%";
           scroll-step = 5;
-          on-click = "uwsm app -- pavucontrol";
+          on-click = "${uwsm} app -- pavucontrol";
         };
 
         # Clock and calendar
@@ -143,7 +145,7 @@ in
           format = "  {:%a %d %b %H:%M}";
           tooltip-format = "{:%A, %d %B %Y | %H:%M:%S}";
           interval = 60;
-          on-click = "uwsm app -- gsimplecal";
+          on-click = "${uwsm} app -- gsimplecal";
         };
       };
     };
