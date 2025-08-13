@@ -1,14 +1,21 @@
 { config, pkgs, ... }:
 let
   brightness = "${config.home.homeDirectory}/bin/brightness";
+  # Ensure all applications launch through uwsm
+  uwsm = "${pkgs.uwsm}/bin/uwsm";
   # Default applications
   terminal = [
-    "uwsm"
+    uwsm
     "app"
     "--"
     "${pkgs.ghostty}/bin/ghostty"
   ];
-  launcher = "fuzzel";
+  launcher = [
+    uwsm
+    "app"
+    "--"
+    "fuzzel"
+  ];
   screenLocker = "${pkgs.swaylock-effects}/bin/swaylock";
 in
 {
@@ -30,12 +37,12 @@ in
 
     # Suggested binds for running programs: terminal, app launcher, screen locker.
     "Mod+T".action.spawn = terminal;
-    "Mod+D".action.spawn = [ launcher ];
+    "Mod+D".action.spawn = launcher;
     "Super+Alt+L".action.spawn = [ screenLocker ];
 
     # Quickly open Obsidian notes
     "Mod+Ctrl+O".action.spawn = [
-      "uwsm"
+      uwsm
       "app"
       "--"
       "obsidian"
@@ -149,6 +156,7 @@ in
     "Mod+O".action.toggle-overview = { };
 
     "Mod+Q".action.close-window = { };
+    "Mod+Shift+Q".action.kill-window = { };
 
     "Mod+Left".action.focus-column-left = { };
     "Mod+Down".action.focus-window-down = { };
