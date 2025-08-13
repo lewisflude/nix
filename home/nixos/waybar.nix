@@ -151,11 +151,12 @@ in
     };
   };
 
-  # Brightness helper script (unchanged)
+  # Brightness helper script that stores the last set value
   home.file."bin/brightness" = {
     text = ''
       #!/usr/bin/env bash
-      CACHE_FILE="/tmp/brightness_cache"
+      CACHE_FILE="$HOME/.config/niri/last_brightness"
+      mkdir -p "$(dirname "$CACHE_FILE")"
       case "$1" in
         get)
           if [ -f "$CACHE_FILE" ]; then
