@@ -1,4 +1,4 @@
-{ ... }:
+_:
 {
   # Configure Homebrew
   homebrew = {

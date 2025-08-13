@@ -2,7 +2,6 @@
   pkgs,
   lib,
   cursor,
-  config,
   system,
   ...
 }:
