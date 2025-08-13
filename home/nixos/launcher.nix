@@ -9,13 +9,13 @@ in
     settings = {
       main = {
         font = "Iosevka:size=12";
-        terminal = "ghostty -e";
+        terminal = "${pkgs.ghostty}/bin/ghostty -e";
         layer = "overlay";
         width = 30;
         horizontal-pad = 20;
         vertical-pad = 15;
         inner-pad = 5;
-        launch-prefix = "uwsm app --";
+        launch-prefix = "${pkgs.uwsm}/bin/uwsm app --";
         lines = 15;
         line-height = 20;
         letter-spacing = 0;
