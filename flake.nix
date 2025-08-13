@@ -81,6 +81,10 @@
     swww = {
       url = "github:LGFae/swww";
     };
+    pre-commit-hooks = {
+      url = "github:cachix/pre-commit-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -102,6 +106,7 @@
       solaar,
       niri-unstable,
       nh,
+      pre-commit-hooks,
       ...
     }:
     let
@@ -109,6 +114,8 @@
         "Lewiss-MacBook-Pro" = import ./hosts/Lewiss-MacBook-Pro;
         jupiter = import ./hosts/jupiter;
       };
+
+      systems = builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
 
       mkDarwinSystem =
         hostName: hostConfig:
@@ -195,9 +202,19 @@
         };
     in
     {
-      formatter = nixpkgs.lib.genAttrs (builtins.attrValues (
-        builtins.mapAttrs (_name: host: host.system) hosts
-      )) (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+      formatter = nixpkgs.lib.genAttrs systems
+        (system: nixpkgs.legacyPackages.${system}.alejandra);
+
+      checks = nixpkgs.lib.genAttrs systems (system: {
+        pre-commit-check = pre-commit-hooks.lib.${system}.run {
+          src = ./.;
+          hooks = {
+            alejandra.enable = true;
+            deadnix.enable = true;
+            statix.enable = true;
+          };
+        };
+      });
 
       devShells = builtins.listToAttrs (
         builtins.map (hostConfig: {
@@ -214,15 +231,17 @@
             shellsConfig.devShells
             // {
               default = pkgs.mkShell {
-                packages = with pkgs; [
-                  nixfmt-rfc-style
-                  jq
-                  yq
-                  git
-                  gh
-                  direnv
-                  nix-direnv
-                ];
+                inherit (self.checks.${hostConfig.system}.pre-commit-check) shellHook;
+                buildInputs =
+                  self.checks.${hostConfig.system}.pre-commit-check.enabledPackages
+                  ++ (with pkgs; [
+                    jq
+                    yq
+                    git
+                    gh
+                    direnv
+                    nix-direnv
+                  ]);
               };
             };
         }) (builtins.attrValues hosts)
