@@ -11,6 +11,7 @@
     ./bluetooth.nix
     ./graphics.nix
     ./mouse.nix
+    ./monitor-brightness.nix
     ./usb.nix
 
     # Services
