@@ -1,0 +1,17 @@
+name: NixOS Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v22
+
+      - name: Run NixOS Test
+        run: nix build --file tests/default.nix
