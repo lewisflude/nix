@@ -156,7 +156,8 @@ in
     "Mod+O".action.toggle-overview = { };
 
     "Mod+Q".action.close-window = { };
-    "Mod+Shift+Q".action.kill-window = { };
+    # niri no longer supports `kill-window`; use `close-window` instead.
+    "Mod+Shift+Q".action.close-window = { };
 
     "Mod+Left".action.focus-column-left = { };
     "Mod+Down".action.focus-window-down = { };
