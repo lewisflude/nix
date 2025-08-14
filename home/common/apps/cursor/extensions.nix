@@ -13,25 +13,18 @@ let
 
   # ==== ESSENTIAL PRODUCTIVITY EXTENSIONS ====
   productivity = [
-    vsc.usernamehw.errorlens
-    vsc.christian-kohler.path-intellisense
     vsc.redhat.vscode-yaml
     vsc.yoavbls.pretty-ts-errors
-
   ];
 
   # ==== CORE PROGRAMMING LANGUAGES ====
   coreLangs = [
     vsc.jnoortheen.nix-ide
-    # vsc.rust-lang.rust-analyzer  # Temporarily disabled due to hash mismatch
     vsc.bradlc.vscode-tailwindcss
   ];
 
   # ==== EXTENDED PROGRAMMING LANGUAGES ====
   extraLangs = [
-    vsc.golang.go
-    vsc.shd101wyy.markdown-preview-enhanced
-    vsc.bierner.markdown-mermaid
     vsc.sumneko.lua # Lua language server (Love2D development)
   ];
 
@@ -43,8 +36,6 @@ let
 
   # ==== GIT & VERSION CONTROL ====
   git = [
-    vsc.eamodio.gitlens
-    vsc.github.vscode-pull-request-github # Re-enabled - compatibility issues likely resolved
   ];
 
   # ==== DEBUGGING & TESTING ====
@@ -59,7 +50,6 @@ let
 
   # ==== DEVOPS & INFRASTRUCTURE ====
   devops = [
-    vsc.ms-vscode-remote.remote-containers
     # Removed Kubernetes tools - add only if needed
   ];
 
@@ -68,12 +58,9 @@ let
     vsc.ms-vscode.vscode-typescript-next
     vsc.ms-vscode.vscode-css-peek
     vsc.ms-vscode.vscode-json
-    vsc.ms-vscode.vscode-eslint
   ];
 
   codeQuality = [
-    vsc.ms-vscode.vscode-eslint # Already in webDev, but needed for essentials
-    # Removed spell checker - add only if needed
   ];
 
   # ==== AI & ASSISTANCE ====
