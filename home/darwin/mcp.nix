@@ -220,7 +220,13 @@ in
       port = 11444;
     };
     figma = {
-      url = "http://127.0.0.1:3845/mcp";
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "mcp-remote"
+        "http://127.0.0.1:3845/mcp"
+      ];
+      port = 11445;
     };
   };
 }
