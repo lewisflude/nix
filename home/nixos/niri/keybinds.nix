@@ -1,14 +1,16 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  ghostty,
+  ...
+}:
 let
   brightness = "${config.home.homeDirectory}/bin/brightness";
   # Ensure all applications launch through uwsm
   uwsm = "${pkgs.uwsm}/bin/uwsm";
   # Default applications
   terminal = [
-    uwsm
-    "app"
-    "--"
-    "${pkgs.ghostty}/bin/ghostty"
+    "${ghostty.packages.${pkgs.system}.default}/bin/ghostty"
   ];
   launcher = [
     uwsm

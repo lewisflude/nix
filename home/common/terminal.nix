@@ -71,7 +71,6 @@ in
       font-synthetic-style = true;
 
       scrollback-limit = 100000;
-
     };
   };
 }

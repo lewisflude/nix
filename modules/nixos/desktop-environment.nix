@@ -4,6 +4,7 @@
     wofi
     tuigreet
     sway
+    gtk4
   ];
 
   time.timeZone = "Europe/London";
