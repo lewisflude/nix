@@ -1,7 +1,6 @@
 {
   pkgs,
   lib,
-  cursor,
   config,
   system,
   ...
@@ -23,10 +22,7 @@ in
 
   programs.vscode = {
     enable = true;
-    # Use cursor flake on Linux for proper Wayland/Niri support, nixpkgs on Darwin
-    package = if pkgs.stdenv.isLinux 
-      then cursor.packages.${pkgs.system}.default  # Cursor flake with Wayland support
-      else pkgs.code-cursor;  # Standard nixpkgs cursor for macOS
+    package = pkgs.code-cursor;
     mutableExtensionsDir = false;
     profiles.default = {
       userSettings = lib.mkMerge [
