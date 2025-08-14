@@ -1,66 +1,86 @@
-{
-  config,
-  pkgs,
-  ...
-}:
+{ config, pkgs, ... }:
 let
-  package = config.boot.kernelPackages.nvidiaPackages.beta;
+  package = config.boot.kernelPackages.nvidiaPackages.beta; # keep if you want beta; consider stable if crashes persist
 in
 {
-
+  ########################################
+  # Packages and tools
+  ########################################
   environment.systemPackages = with pkgs; [
-    nvidia-vaapi-driver
+    vulkan-tools
+    mesa-demos # glxinfo / eglinfo
+    libva # VA-API loader
+    libva-utils # vainfo
+    nvidia-vaapi-driver # NVDEC bridge for VA-API
     egl-wayland
     nv-codec-headers
-    cudaPackages.cuda_nvcc
-    vulkan-tools
-    mesa
-    libGL
-    libglvnd
-    mesa-demos
+    # cudaPackages.cuda_nvcc # keep only if you actually build CUDA locally
   ];
-  environment.sessionVariables = {
-    WLR_NO_HARDWARE_CURSORS = "1";
-    WLR_RENDERER_ALLOW_SOFTWARE = "1";
-    WLR_BACKENDS = "headless,drm,wayland";
 
-    # NVIDIA EGL/Wayland support
-    GBM_BACKEND = "nvidia-drm";
-    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+  ########################################
+  # Session environment (conservative, stable)
+  ########################################
+  environment.sessionVariables = {
+    # Prefer native Wayland for Electron; fall back to X11 per-app if needed
+    ELECTRON_OZONE_PLATFORM_HINT = "auto";
+
+    # NVIDIA VA-API bridge; harmless if a given app doesn’t use it
     LIBVA_DRIVER_NAME = "nvidia";
-    __GL_VRR_ALLOWED = "0";
+    NVD_BACKEND = "direct";
+
+    # Historical NVIDIA cursor workaround — start OFF; enable only if you see the classic “cursor trail” bug
+    # WLR_NO_HARDWARE_CURSORS = "1";
+
+    # REMOVE the following legacy/fragile knobs:
+    # WLR_RENDERER_ALLOW_SOFTWARE
+    # WLR_BACKENDS
+    # GBM_BACKEND
+    # __GLX_VENDOR_LIBRARY_NAME (not needed outside X11)
   };
+
+  ########################################
+  # Graphics stack
+  ########################################
   hardware = {
     graphics = {
       enable = true;
-      enable32Bit = true;
+      enable32Bit = true; # set false unless you need 32-bit (Steam/Proton, some games)
+      # Keep this clean: mesa drivers come via hardware.graphics; avoid extra shim layers
       extraPackages = with pkgs; [
-        vaapiVdpau
-        libvdpau-va-gl
         nvidia-vaapi-driver
-        mesa
-        libGL
-        libglvnd
+        # Avoid these for NVIDIA + VA-API bridge:
+        # vaapiVdpau
+        # libvdpau-va-gl
       ];
     };
-    nvidia-container-toolkit = {
-      enable = true;
-    };
+
     nvidia = {
-      modesetting.enable = true;
-      open = false;
+      modesetting.enable = true; # required for Wayland/GBM
+      open = false; # flip to true if you want the open kernel module and it’s stable for you
       nvidiaSettings = true;
       package = package;
     };
+
+    nvidia-container-toolkit.enable = true;
   };
-  services = {
-    xserver = {
-      enable = true;
-      videoDrivers = [ "nvidia" ];
-    };
-    udev.extraRules = ''
-      ACTION=="add", DEVPATH=="/bus/pci/drivers/nvidia", RUN+="${pkgs.nvidia-container-toolkit}/bin/nvidia-ctk system create-dev-char-symlinks --create-all"
-    '';
+
+  ########################################
+  # X11 / XWayland
+  ########################################
+  services.xserver = {
+    enable = false; # don’t start a full X server on Wayland
+    videoDrivers = [ "nvidia" ];
   };
+
+  ########################################
+  # Udev helper for nvidia-container-toolkit
+  ########################################
+  services.udev.extraRules = ''
+    ACTION=="add", DEVPATH=="/bus/pci/drivers/nvidia", RUN+="${pkgs.nvidia-container-toolkit}/bin/nvidia-ctk system create-dev-char-symlinks --create-all"
+  '';
+
+  ########################################
+  # Kernel module blacklist
+  ########################################
   boot.blacklistedKernelModules = [ "nouveau" ];
 }

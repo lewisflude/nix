@@ -135,23 +135,21 @@ in
       };
 
       environment = {
-        DISPLAY = ":0";
-        NIXOS_OZONE_WL = "1";
-
+        # Let Electron choose Wayland natively; falls back to X11 when needed
         ELECTRON_OZONE_PLATFORM_HINT = "auto";
-        
-        # Force specific Electron apps to use X11 to avoid crashes
-        CURSOR_ENABLE_WAYLAND = "0";
 
-        _JAVA_AWT_WM_NONREPARENTING = "1";
-
-        QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
-        QT_QPA_PLATFORM = "wayland";
-        QT_QPA_PLATFORMTHEME = "gtk3";
-
+        # Keep Wayland identity explicit (these are fine)
         XDG_CURRENT_DESKTOP = "niri";
         XDG_SESSION_DESKTOP = "niri";
         XDG_SESSION_TYPE = "wayland";
+
+        # Qt on Wayland, no client-side deco
+        QT_QPA_PLATFORM = "wayland";
+        QT_QPA_PLATFORMTHEME = "gtk3";
+        QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
+
+        # Java focus behavior (harmless)
+        _JAVA_AWT_WM_NONREPARENTING = "1";
       };
       xwayland-satellite = {
         enable = true;
