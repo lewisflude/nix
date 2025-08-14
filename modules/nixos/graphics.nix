@@ -14,12 +14,21 @@ in
     nv-codec-headers
     cudaPackages.cuda_nvcc
     vulkan-tools
+    mesa
+    libGL
+    libglvnd
+    mesa-demos
   ];
   environment.sessionVariables = {
     WLR_NO_HARDWARE_CURSORS = "1";
     WLR_RENDERER_ALLOW_SOFTWARE = "1";
     WLR_BACKENDS = "headless,drm,wayland";
 
+    # NVIDIA EGL/Wayland support
+    GBM_BACKEND = "nvidia-drm";
+    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    LIBVA_DRIVER_NAME = "nvidia";
+    __GL_VRR_ALLOWED = "0";
   };
   hardware = {
     graphics = {
@@ -29,6 +38,9 @@ in
         vaapiVdpau
         libvdpau-va-gl
         nvidia-vaapi-driver
+        mesa
+        libGL
+        libglvnd
       ];
     };
     nvidia-container-toolkit = {
