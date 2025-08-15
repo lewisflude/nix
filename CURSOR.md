@@ -1,7 +1,7 @@
 # CURSOR.md
 
 > **📍 Documentation Moved:** This guide has been consolidated into [`docs/ai-assistants/`](docs/ai-assistants/) for better organization.
-> 
+>
 > **→ Go to:** [`docs/ai-assistants/README.md`](docs/ai-assistants/README.md) for the complete AI assistant guide.
 
 ---

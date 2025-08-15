@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   # macOS Game Development Configuration
   environment.systemPackages = with pkgs; [
     # Development tools for Unreal Engine

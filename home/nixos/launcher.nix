@@ -1,9 +1,11 @@
-{ pkgs, config, ... }:
-let
+{
+  pkgs,
+  config,
+  ...
+}: let
   # Dynamic Catppuccin color palette access
   palette = (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors;
-in
-{
+in {
   programs.fuzzel = {
     enable = true;
     settings = {
@@ -32,7 +34,7 @@ in
         width = 2;
         radius = 10;
       };
-      
+
       colors = {
         background = palette.base.hex;
         text = palette.text.hex;

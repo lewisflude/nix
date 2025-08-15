@@ -3,11 +3,9 @@
   lib,
   system,
   ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
-in
-{
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
+in {
   # Base theme configuration (Catppuccin Mocha)
   catppuccin = {
     flavor = "mocha";

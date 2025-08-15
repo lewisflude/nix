@@ -4,14 +4,11 @@
   system,
   ghostty,
   ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
-in
-{
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
+in {
   # Common terminal packages across all platforms
-  home.packages =
-    with pkgs;
+  home.packages = with pkgs;
     [
       # Core utilities
       clipse # Clipboard manager
@@ -47,18 +44,17 @@ in
       lazydocker # Docker TUI
       zellij # Terminal multiplexer
     ]
-    ++
-      platformLib.platformPackages
-        [
-          # Linux-specific packages
-          networkmanager # Network management
-          doas # Privilege escalation
-          lsof # List open files
-        ]
-        [
-          # Darwin-specific packages
-          # Note: nil (Nix language server) moved to development/language-tools.nix
-        ];
+    ++ platformLib.platformPackages
+    [
+      # Linux-specific packages
+      networkmanager # Network management
+      doas # Privilege escalation
+      lsof # List open files
+    ]
+    [
+      # Darwin-specific packages
+      # Note: nil (Nix language server) moved to development/language-tools.nix
+    ];
 
   programs.ghostty = {
     enable = true;

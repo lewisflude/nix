@@ -3,24 +3,22 @@
   lib,
   system,
   ...
-}:
-
-let
-  platformLib = import ../lib/functions.nix { inherit lib system; };
+}: let
+  platformLib = import ../lib/functions.nix {inherit lib system;};
 
   devShellsCommon = {
-    nextjs = import ./projects/nextjs.nix { inherit pkgs; };
+    nextjs = import ./projects/nextjs.nix {inherit pkgs;};
 
     react-native = import ./projects/react-native.nix {
       inherit pkgs lib system;
     };
 
-    api-backend = import ./projects/api-backend.nix { inherit pkgs; };
+    api-backend = import ./projects/api-backend.nix {inherit pkgs;};
 
-    shell-selector = import ./utils/shell-selector.nix { inherit pkgs; };
+    shell-selector = import ./utils/shell-selector.nix {inherit pkgs;};
 
     node = pkgs.mkShell {
-      buildInputs = with pkgs; [ nodejs_24 ];
+      buildInputs = with pkgs; [nodejs_24];
       shellHook = ''
         echo "🚀 Node.js development environment loaded"
         echo "Node version: $(node --version)"
@@ -108,18 +106,20 @@ let
     };
 
     devops = pkgs.mkShell {
-      buildInputs = with pkgs; [
-        kubectl
-        opentofu
-        terragrunt
-        docker-compose
-        k9s
-        awscli2
-        google-cloud-sdk
-        azure-cli
-      ] ++ (lib.optionals pkgs.stdenv.isLinux [
-        helm  # helm is not available on macOS
-      ]);
+      buildInputs = with pkgs;
+        [
+          kubectl
+          opentofu
+          terragrunt
+          docker-compose
+          k9s
+          awscli2
+          google-cloud-sdk
+          azure-cli
+        ]
+        ++ (lib.optionals pkgs.stdenv.isLinux [
+          helm # helm is not available on macOS
+        ]);
       shellHook = ''
         echo "🛠️  DevOps environment loaded"
         echo "kubectl version: $(kubectl version --client --short)"
@@ -157,8 +157,6 @@ let
       '';
     };
   };
-
-in
-{
+in {
   devShells = devShellsCommon // devShellsLinuxOnly;
 }

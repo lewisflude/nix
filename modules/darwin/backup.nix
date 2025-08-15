@@ -1,5 +1,8 @@
-{ pkgs, username, ... }:
 {
+  pkgs,
+  username,
+  ...
+}: {
   # System-level backup configuration
   environment.systemPackages = with pkgs; [
     rsync

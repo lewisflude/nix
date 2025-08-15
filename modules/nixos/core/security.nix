@@ -1,6 +1,7 @@
-{ pkgs, lib, ... }:
-
 {
+  pkgs,
+  ...
+}: {
   # ─── limits and baseline security ────────────────────────────────────────────
   security.pam.loginLimits = [
     {
@@ -18,8 +19,7 @@
   ];
   systemd.settings.Manager.DefaultLimitNOFILE = "524288";
 
-  # TODO: Re-enable when certificate path handling is properly configured  
-  # security.pki.certificateFiles = [ ../../../secrets/certificates/mitmproxy-ca-cert.pem ];
+
   security.polkit.enable = true;
 
   # ─── GNOME Keyring ───────────────────────────────────────────────────────────
@@ -28,7 +28,7 @@
   security.pam.services.greetd.enableGnomeKeyring = true;
   security.pam.services.sudo.enableGnomeKeyring = true;
   security.pam.services.su.enableGnomeKeyring = true;
-  security.pam.services.swaylock = { };
+  security.pam.services.swaylock = {};
 
   # ─── Automatic Keyring Unlock for Auto-login ────────────────────────────────
   # Enable systemd user services for GNOME keyring integration
@@ -41,14 +41,14 @@
       ExecStart = "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --foreground --components=secrets,ssh";
       Restart = "on-failure";
     };
-    wantedBy = [ "default.target" ];
+    wantedBy = ["default.target"];
   };
 
   # Auto-unlock login keyring for passwordless login sessions
   systemd.user.services.unlock-login-keyring = {
     description = "Unlock GNOME login keyring for auto-login sessions";
-    after = [ "gnome-keyring-daemon.service" ];
-    wants = [ "gnome-keyring-daemon.service" ];
+    after = ["gnome-keyring-daemon.service"];
+    wants = ["gnome-keyring-daemon.service"];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -64,7 +64,7 @@
         fi
       ''}";
     };
-    wantedBy = [ "default.target" ];
+    wantedBy = ["default.target"];
   };
 
   # ─── Session Environment Setup ───────────────────────────────────────────────

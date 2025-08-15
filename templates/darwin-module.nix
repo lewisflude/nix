@@ -3,8 +3,7 @@
   pkgs,
   username,
   ...
-}:
-{
+}: {
   # Darwin-specific system configuration
   # No platform detection needed - this module only loads on Darwin
 

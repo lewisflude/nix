@@ -5,11 +5,9 @@
   system,
   lib,
   ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
-in
-{
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
+in {
   # Cross-platform Nix configuration
   nix = {
     # Package explicit for clarity
@@ -18,13 +16,13 @@ in
     settings = {
       # Basic cross-platform settings - detailed optimization handled in nix-optimization.nix
       warn-dirty = false;
-      
+
       # Basic trusted users (platform-specific ones are handled in platform modules)
       trusted-users = [
         "root"
         username
       ];
-      
+
       # Experimental features
       experimental-features = [
         "nix-command"

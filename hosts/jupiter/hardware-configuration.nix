@@ -3,9 +3,7 @@
   modulesPath,
   pkgs,
   ...
-}:
-{
-
+}: {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
@@ -14,7 +12,7 @@
     xfsprogs
   ];
   boot = {
-    initrd.supportedFilesystems = [ "zfs" ];
+    initrd.supportedFilesystems = ["zfs"];
     initrd.availableKernelModules = [
       "xhci_pci"
       "ahci"
@@ -29,13 +27,13 @@
       "br_netfilter"
       "xt_nat"
     ];
-    initrd.kernelModules = [ ];
+    initrd.kernelModules = [];
     kernelModules = [
       "kvm-intel"
       "zfs"
       "hid_sony"
     ];
-    extraModulePackages = [ ];
+    extraModulePackages = [];
   };
   hardware.cpu.intel.updateMicrocode = true;
   hardware.enableAllFirmware = true;

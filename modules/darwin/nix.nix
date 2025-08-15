@@ -2,8 +2,7 @@
   config,
   username,
   ...
-}:
-{
+}: {
   # Darwin-specific Nix configuration
 
   # Custom Nix configuration for macOS
