@@ -1,4 +1,4 @@
-# Template for modules/common/ - Cross-platform system modules only
+# Template for modules/shared/ - Cross-platform system modules only
 {
   pkgs,
   lib,
