@@ -5,11 +5,9 @@
   system,
   username,
   ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
-in
-{
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
+in {
   # Cross-platform configuration only
   # Platform-specific logic should be moved to modules/darwin/ or modules/nixos/
 

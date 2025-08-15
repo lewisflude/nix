@@ -11,7 +11,7 @@ nix-config/
 ├── 📄 flake.lock                   # Locked flake dependencies
 ├── 📁 docs/                        # 📚 Documentation (you are here)
 ├── 📁 hosts/                       # 🖥️  Host-specific configurations
-├── 📁 modules/                     # ⚙️  System-level modules  
+├── 📁 modules/                     # ⚙️  System-level modules
 ├── 📁 home/                        # 🏠 Home Manager user configurations
 ├── 📁 shells/                      # 💻 Development environments
 ├── 📁 scripts/                     # 🔧 Utility and maintenance scripts
@@ -32,7 +32,7 @@ hosts/
 │   ├── hardware-configuration.nix  # Hardware-specific settings
 │   └── default.nix                 # Host module exports
 └── Lewiss-MacBook-Pro/             # macOS laptop example
-    ├── configuration.nix           # Main host configuration  
+    ├── configuration.nix           # Main host configuration
     └── default.nix                 # Host module exports
 ```
 
@@ -72,7 +72,7 @@ modules/
     │   ├── desktop-environment.nix # DE configuration
     │   ├── graphics.nix            # GPU/graphics settings
     │   ├── hyprland.nix            # Hyprland compositor
-    │   ├── niri.nix                # Niri compositor  
+    │   ├── niri.nix                # Niri compositor
     │   ├── theme.nix               # System theming
     │   ├── xwayland.nix            # X11 compatibility
     │   └── default.nix             # Desktop module exports
@@ -138,7 +138,7 @@ home/
 │   │   ├── obsidian.nix            # Note-taking app
 │   │   ├── ripgrep.nix             # Fast grep replacement
 │   │   └── zoxide.nix              # Smart cd replacement
-│   ├── development/                # Development tools & environments  
+│   ├── development/                # Development tools & environments
 │   │   ├── go.nix                  # Go programming language
 │   │   ├── language-standards.nix  # Code formatting standards
 │   │   ├── language-tools.nix      # Language-specific tooling
@@ -223,7 +223,7 @@ shells/
 
 **Available Shells:**
 - **Languages:** `node`, `python`, `rust`, `go`, `java`
-- **Frameworks:** `nextjs`, `react-native`  
+- **Frameworks:** `nextjs`, `react-native`
 - **Purposes:** `web`, `api-backend`, `devops`, `solana`
 - **Utilities:** `shell-selector`
 

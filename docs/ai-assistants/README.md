@@ -21,7 +21,7 @@ This is a **cross-platform Nix configuration** using flakes, supporting both **m
 
 ### Platform Support
 - **macOS:** nix-darwin with Homebrew integration
-- **Linux:** NixOS with Niri compositor  
+- **Linux:** NixOS with Niri compositor
 - **Shared:** Home Manager for user-level configurations
 
 ## 🔧 Common Commands Reference
@@ -56,7 +56,7 @@ nix develop ~/.config/nix#python        # Python with pip/poetry
 nix develop ~/.config/nix#rust          # Rust with cargo
 nix develop ~/.config/nix#go            # Go development
 nix develop ~/.config/nix#web           # Full-stack web development
-nix develop ~/.config/nix#nextjs        # Next.js projects  
+nix develop ~/.config/nix#nextjs        # Next.js projects
 nix develop ~/.config/nix#react-native  # Mobile development
 nix develop ~/.config/nix#api-backend   # Backend API development
 nix develop ~/.config/nix#devops        # DevOps/Infrastructure
@@ -86,7 +86,7 @@ sops secrets.yaml
 ```
 modules/
 ├── shared/           # Pure cross-platform system configurations
-│   ├── core.nix      # Cross-platform Nix settings 
+│   ├── core.nix      # Cross-platform Nix settings
 │   ├── sops.nix      # Secrets management
 │   ├── dev.nix       # Development tools
 │   └── docker.nix    # Containerization
@@ -98,7 +98,7 @@ modules/
     ├── core/         # Essential system modules
     ├── desktop/      # UI & desktop environment
     ├── hardware/     # Hardware-specific configs
-    ├── services/     # Background services  
+    ├── services/     # Background services
     ├── development/  # Dev environments & virtualization
     └── system/       # System configuration & management
 ```
@@ -117,7 +117,7 @@ home/
 │   └── mcp.nix       # Model Context Protocol servers
 └── nixos/            # Linux-specific user configs
     ├── browser.nix   # Web browser configuration
-    ├── waybar.nix    # Status bar  
+    ├── waybar.nix    # Status bar
     └── system/       # Linux system integration
 ```
 
@@ -132,10 +132,10 @@ in
 {
   # Conditional packages
   home.packages = platformLib.platformPackages [linuxPackages] [darwinPackages];
-  
+
   # Dynamic paths
   home.homeDirectory = platformLib.homeDir username;
-  
+
   # Platform detection
   services.someService = platformLib.mkIf platformLib.isLinux { enable = true; };
 }
@@ -143,7 +143,7 @@ in
 
 **Available Helper Functions:**
 - `isLinux`, `isDarwin`, `isAarch64`, `isX86_64` - Platform detection
-- `platformPackages` - Conditional package inclusion  
+- `platformPackages` - Conditional package inclusion
 - `platformModules` - Conditional module imports
 - `homeDir`, `configDir`, `dataDir`, `cacheDir` - Dynamic path helpers
 - `rootGroup` - Platform-specific root group (`wheel` vs `root`)
@@ -157,7 +157,7 @@ in
 3. **Use centralized helpers** from `lib/functions.nix` for platform detection
 4. **Avoid conditional imports** in common modules - use platform-specific modules instead
 
-### Module Development Guidelines  
+### Module Development Guidelines
 1. **Import platform helpers:** Always use `lib/functions.nix` for consistency
 2. **Single responsibility:** Each module should handle one specific area
 3. **Avoid duplication:** Check for existing package installations before adding new ones
@@ -173,7 +173,7 @@ in
 
 ### Code Quality Standards
 - **Format:** Always run `nix fmt` before committing
-- **Validation:** Use `nix flake check` to ensure builds succeed  
+- **Validation:** Use `nix flake check` to ensure builds succeed
 - **Documentation:** Document non-obvious configuration choices
 - **Testing:** Test builds before committing (`nixos-rebuild build` / `darwin-rebuild build`)
 - **Style:** Follow consistent 2-space indentation and logical attribute organization
@@ -201,7 +201,7 @@ in
 
 ### Key Flake Inputs
 - **nixpkgs:** Main package repository
-- **nix-darwin:** macOS system configuration  
+- **nix-darwin:** macOS system configuration
 - **home-manager:** User environment management
 - **sops-nix:** Secrets management
 - **catppuccin:** Consistent theming

@@ -4,31 +4,27 @@
   system,
   lib,
   ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
 
   # Catppuccin palette (assumes catppuccin HM module is enabled in your config)
   palette =
-    if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
-      (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
+    if lib.hasAttrByPath ["catppuccin" "sources" "palette"] config
+    then (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
       .${config.catppuccin.flavor}.colors
-    else
-      {
-        mauve = {
-          hex = "b48ead";
-        };
-        surface1 = {
-          hex = "3b4252";
-        };
+    else {
+      mauve = {
+        hex = "b48ead";
       };
+      surface1 = {
+        hex = "3b4252";
+      };
+    };
 
   # Safe SOPS guards
-  hasKagi = lib.hasAttrByPath [ "sops" "secrets" "KAGI_API_KEY" ] config;
-  hasGh = lib.hasAttrByPath [ "sops" "secrets" "GITHUB_TOKEN" ] config;
-
-in
-{
+  hasKagi = lib.hasAttrByPath ["sops" "secrets" "KAGI_API_KEY"] config;
+  hasGh = lib.hasAttrByPath ["sops" "secrets" "GITHUB_TOKEN"] config;
+in {
   xdg.enable = true;
 
   programs = {
@@ -41,18 +37,16 @@ in
         "--border"
       ];
       defaultCommand = lib.mkDefault (
-        if pkgs ? fd then
-          "${lib.getExe pkgs.fd} --hidden --strip-cwd-prefix --exclude .git"
-        else if pkgs ? ripgrep then
-          "${lib.getExe pkgs.ripgrep} --files --hidden --follow --glob '!.git'"
-        else
-          null
+        if pkgs ? fd
+        then "${lib.getExe pkgs.fd} --hidden --strip-cwd-prefix --exclude .git"
+        else if pkgs ? ripgrep
+        then "${lib.getExe pkgs.ripgrep} --files --hidden --follow --glob '!.git'"
+        else null
       );
       fileWidgetCommand = lib.mkDefault (
-        if pkgs ? fd then
-          "${lib.getExe pkgs.fd} --type f --hidden --strip-cwd-prefix --exclude .git"
-        else
-          null
+        if pkgs ? fd
+        then "${lib.getExe pkgs.fd} --type f --hidden --strip-cwd-prefix --exclude .git"
+        else null
       );
     };
 
@@ -70,7 +64,7 @@ in
     atuin = {
       enable = true;
       enableZshIntegration = true;
-      flags = [ "--disable-up-arrow" ];
+      flags = ["--disable-up-arrow"];
     };
 
     zsh = {
@@ -384,8 +378,7 @@ in
               rev = "6ede649f1260abc5ffe91ef050d00549281dc461";
               sha256 = "sha256-m3m+ErBakBMrBsoiYgI8AdJZwXgcpz4C9hIM5Q+6lO4=";
             };
-          in
-          ''
+          in ''
             if [[ -f "${zsh_codex}/zsh_codex.plugin.zsh" ]]; then
               source "${zsh_codex}/zsh_codex.plugin.zsh"
               bindkey '^X' create_completion
@@ -419,7 +412,11 @@ in
         IFS=$'\n\t'
 
         FLAKE_PATH="''${NH_FLAKE:-${config.home.homeDirectory}/.config/nix}"
-        NH_TARGET="${if pkgs.stdenv.isDarwin then "darwin" else "os"}"
+        NH_TARGET="${
+          if pkgs.stdenv.isDarwin
+          then "darwin"
+          else "os"
+        }"
 
         # If this shell has NoNewPrivs=1 (e.g., launched from a sandboxed user service),
         # re-exec this command via systemd-run with NoNewPrivileges disabled so sudo works.

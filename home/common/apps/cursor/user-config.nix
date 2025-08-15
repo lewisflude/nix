@@ -1,9 +1,7 @@
 # User-Specific Configuration
 # Machine/user-specific settings that may vary between setups
 # Copy this file and customize for your environment
-
-{ ... }:
-{
+_: {
   userSettings = {
     # Git Signing (customize these for your setup)
     # Uncomment and set your signing key ID:

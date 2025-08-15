@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     # System-level development dependencies
     pkg-config
@@ -22,5 +21,4 @@
     CPATH = "${pkgs.libiconv}/include";
     RUSTFLAGS = "-L ${pkgs.libiconv}/lib";
   };
-
 }

@@ -1,5 +1,4 @@
-{ config, pkgs, ... }:
-{
+_: {
   # UWSM environment configuration for NVIDIA EGL support
   home.file.".config/uwsm/env".text = ''
     # NVIDIA EGL/Wayland support for GTK4 applications like Ghostty

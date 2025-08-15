@@ -2,9 +2,7 @@
   pkgs,
   config,
   ...
-}:
-{
-
+}: {
   home.file = {
     ".p10k.zsh" = {
       source = ../lib/p10k.zsh;

@@ -2,36 +2,31 @@
   pkgs,
   cursorInfo,
   cursorVersion,
-}:
-let
-  inherit (pkgs)
+}: let
+  inherit
+    (pkgs)
     stdenvNoCC
-    fetchurl
     undmg
     lib
     ;
   pname = "cursor";
-  src = fetchurl {
-    url = cursorInfo.darwin.url;
-    sha256 = cursorInfo.darwin.sha256; # SRI
-  };
 in
-stdenvNoCC.mkDerivation {
-  inherit pname;
-  version = cursorVersion;
-  nativeBuildInputs = [ undmg ];
-  dontUnpack = true;
+  stdenvNoCC.mkDerivation {
+    inherit pname;
+    version = cursorVersion;
+    nativeBuildInputs = [undmg];
+    dontUnpack = true;
 
-  installPhase = ''
-    mkdir -p $out/Applications
-    undmg "$src"
-    cp -R "Cursor.app" "$out/Applications/Cursor.app"
-  '';
+    installPhase = ''
+      mkdir -p $out/Applications
+      undmg "$src"
+      cp -R "Cursor.app" "$out/Applications/Cursor.app"
+    '';
 
-  meta = with lib; {
-    description = "Cursor — AI-first code editor";
-    homepage = "https://www.cursor.com/";
-    license = licenses.unfree;
-    platforms = platforms.darwin;
-  };
-}
+    meta = with lib; {
+      description = "Cursor — AI-first code editor";
+      homepage = "https://www.cursor.com/";
+      license = licenses.unfree;
+      platforms = platforms.darwin;
+    };
+  }

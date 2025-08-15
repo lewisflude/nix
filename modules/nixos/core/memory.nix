@@ -1,10 +1,7 @@
 {
-  config,
-  pkgs,
   lib,
   ...
-}:
-{
+}: {
   zramSwap = {
     enable = true;
     algorithm = "zstd";
@@ -34,5 +31,4 @@
     "vm.page-cluster" = 0; # reduce swap-in/out burst size
     "fs.inotify.max_user_watches" = 1048576; # large repos & IDEs
   };
-
 }

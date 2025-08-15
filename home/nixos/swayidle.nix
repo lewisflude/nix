@@ -2,12 +2,10 @@
   config,
   pkgs,
   ...
-}:
-let
+}: let
   # Access Catppuccin color palette
   palette = (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors;
-in
-{
+in {
   services.swayidle = {
     enable = true;
     timeouts = [

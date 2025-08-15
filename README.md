@@ -28,12 +28,12 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 ```
 .
 ├── 📄 README.md              # This file - quick start
-├── 📄 flake.nix              # Main flake configuration 
+├── 📄 flake.nix              # Main flake configuration
 ├── 📁 docs/                  # 📚 Complete documentation
 ├── 📁 hosts/                 # 🖥️  Host-specific configs
 ├── 📁 modules/               # ⚙️  System-level modules
 │   ├── shared/               #     Cross-platform modules
-│   ├── darwin/               #     macOS-specific modules  
+│   ├── darwin/               #     macOS-specific modules
 │   └── nixos/                #     Linux-specific modules
 ├── 📁 home/                  # 🏠 Home Manager configs
 │   ├── common/               #     Cross-platform user configs

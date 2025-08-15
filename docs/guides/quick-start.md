@@ -68,7 +68,7 @@ select_dev_shell  # Interactive menu
 Or jump directly into a specific environment:
 ```bash
 nix develop ~/.config/nix#node     # Node.js + TypeScript
-nix develop ~/.config/nix#python   # Python + pip/poetry  
+nix develop ~/.config/nix#python   # Python + pip/poetry
 nix develop ~/.config/nix#rust     # Rust + Cargo
 ```
 
@@ -101,7 +101,7 @@ nixos-rebuild build --flake ~/.config/nix#<hostname>    # Linux
 # Format Nix files
 nix fmt
 
-# Clean up old builds  
+# Clean up old builds
 nix-collect-garbage -d
 nix store optimise
 ```

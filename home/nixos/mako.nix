@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   services.mako = {
     enable = true;
     settings = {
@@ -19,7 +19,7 @@
       max-visible = 5;
       padding = "12";
       width = 400;
-      
+
       # Interaction improvements
       group-by = "app-name";
       sort = "-time";
@@ -28,21 +28,21 @@
       on-button-right = "dismiss-all";
       on-touch = "dismiss";
     };
-    
+
     extraConfig = ''
       [urgency=low]
       default-timeout=3000
-      
+
       [urgency=normal]
       default-timeout=5000
-      
+
       [urgency=high]
       default-timeout=0
-      
+
       [category=mpd]
       default-timeout=3000
       group-by=category
-      
+
       [summary~=".*[Bb]attery.*"]
       default-timeout=8000
     '';

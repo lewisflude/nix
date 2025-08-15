@@ -1,9 +1,11 @@
-{ pkgs, config, ... }:
-let
-  # Import theme constants
-  themeConstants = import ./theme-constants.nix { inherit config pkgs; };
-in
 {
+  pkgs,
+  config,
+  ...
+}: let
+  # Import theme constants
+  themeConstants = import ./theme-constants.nix {inherit config pkgs;};
+in {
   home.packages = with pkgs; [
     swww
     gtklock

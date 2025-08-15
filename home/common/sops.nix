@@ -2,35 +2,32 @@
   pkgs,
   config,
   ...
-}:
-{
-
+}: {
   home.packages = with pkgs; [
     sops
   ];
 
   sops = {
-
     defaultSopsFile = ../../secrets/user.yaml;
 
     gnupg = {
       home = "${config.home.homeDirectory}/.gnupg";
-      sshKeyPaths = [ ];
+      sshKeyPaths = [];
     };
 
     secrets = {
-      KAGI_API_KEY = { };
-      CIRCLECI_TOKEN = { };
-      OBSIDIAN_API_KEY = { };
-      OPENAI_API_KEY = { };
-      GITHUB_TOKEN = { };
+      KAGI_API_KEY = {};
+      CIRCLECI_TOKEN = {};
+      OBSIDIAN_API_KEY = {};
+      OPENAI_API_KEY = {};
+      GITHUB_TOKEN = {};
     };
   };
 
   systemd.user.services.sops-nix = {
     Unit = {
-      After = [ "gpg-agent.service" ];
-      Wants = [ "gpg-agent.service" ];
+      After = ["gpg-agent.service"];
+      Wants = ["gpg-agent.service"];
     };
     Service = {
       Restart = "on-failure";

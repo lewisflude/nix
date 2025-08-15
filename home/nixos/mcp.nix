@@ -3,10 +3,9 @@
   config,
   lib,
   ...
-}:
-
-let
-  inherit (lib)
+}: let
+  inherit
+    (lib)
     concatStringsSep
     mapAttrsToList
     escapeShellArg
@@ -61,21 +60,17 @@ let
   };
 
   # ----- helpers for activation script generation -----
-  mkEnvExports =
-    envAttrs: concatStringsSep " " (mapAttrsToList (k: v: "export ${k}=${escapeShellArg v};") envAttrs);
+  mkEnvExports = envAttrs: concatStringsSep " " (mapAttrsToList (k: v: "export ${k}=${escapeShellArg v};") envAttrs);
 
-  mkAddCmd =
-    name: serverCfg:
-    let
-      envExports = mkEnvExports (serverCfg.env or { });
-      command = escapeShellArg serverCfg.command;
-      argsStr = concatStringsSep " " (map escapeShellArg (serverCfg.args or [ ]));
-      argsPart = optionalString (argsStr != "") "-- ${argsStr}";
-    in
-    ''
-      # ${name}
-      ${envExports} claude mcp add ${escapeShellArg name} -s user ${command} ${argsPart}
-    '';
+  mkAddCmd = name: serverCfg: let
+    envExports = mkEnvExports (serverCfg.env or {});
+    command = escapeShellArg serverCfg.command;
+    argsStr = concatStringsSep " " (map escapeShellArg (serverCfg.args or []));
+    argsPart = optionalString (argsStr != "") "-- ${argsStr}";
+  in ''
+    # ${name}
+    ${envExports} claude mcp add ${escapeShellArg name} -s user ${command} ${argsPart}
+  '';
 
   declaredNames = mapAttrsToList (n: _: escapeShellArg n) config.services.mcp.servers;
   addCommands = concatStringsSep "\n" (mapAttrsToList mkAddCmd config.services.mcp.servers);
@@ -155,9 +150,7 @@ let
             claude mcp list || true
             echo "[mcp] Claude MCP registration complete."
   '';
-
-in
-{
+in {
   ################################
   # Tooling (single declaration)
   ################################
@@ -194,232 +187,229 @@ in
   };
 
   # Servers
-  services.mcp.servers =
-    let
-      tsls = "${pkgs.nodePackages.typescript-language-server}/bin/typescript-language-server";
-      luals = "${pkgs.lua-language-server}/bin/lua-language-server";
-    in
-    {
+  services.mcp.servers = let
+    tsls = "${pkgs.nodePackages.typescript-language-server}/bin/typescript-language-server";
+    luals = "${pkgs.lua-language-server}/bin/lua-language-server";
+  in {
+    # --- Existing servers (kept) ---
 
-      # --- Existing servers (kept) ---
-
-      everything = {
-        command = "${pkgs.nodejs_24}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-everything@latest"
-        ];
-        port = 11446;
-      };
-
-      github = {
-        command = "${githubWrapper}/bin/github-mcp-wrapper";
-        args = [ ];
-        port = 11434;
-      };
-
-      memory = {
-        command = "${pkgs.nodejs_24}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-memory@latest"
-        ];
-        port = 11436;
-      };
-
-      sequential-thinking = {
-        command = "${pkgs.nodejs_24}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-sequential-thinking@latest"
-        ];
-        port = 11437;
-      };
-
-      general-filesystem = {
-        command = "${pkgs.nodejs_24}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-filesystem@latest"
-          "${config.home.homeDirectory}/Code"
-          "${config.home.homeDirectory}/.config"
-          "${config.home.homeDirectory}/Documents"
-        ];
-        port = 11442;
-      };
-
-      love2d-filesystem = {
-        command = "${pkgs.nodejs_24}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-filesystem@latest"
-          "${config.home.homeDirectory}/Code/love2d-projects"
-          "${config.home.homeDirectory}/.local/share/love"
-        ];
-        port = 11441;
-      };
-
-      # Kagi via wrapper (unchanged)
-      kagi = {
-        command = "${kagiWrapper}/bin/kagi-mcp-wrapper";
-        args = [ ];
-        port = 11431;
-      };
-
-      # Python uvx servers (unchanged)
-      fetch = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--from"
-          "mcp-server-fetch"
-          "mcp-server-fetch"
-        ];
-        port = 11432;
-      };
-
-      git = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--from"
-          "mcp-server-git"
-          "mcp-server-git"
-          "--repository"
-          "${config.home.homeDirectory}/Code/dex-web"
-        ];
-        port = 11433;
-      };
-
-      time = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--from"
-          "mcp-server-time"
-          "mcp-server-time"
-        ];
-        port = 11445;
-      };
-
-      love2d-api = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--python"
-          "${py}"
-          "--with"
-          "mcp"
-          "--with"
-          "requests"
-          "python"
-          "${../../mcp-servers/love2d-api.py}"
-        ];
-        port = 11440;
-      };
-
-      love2d-docs = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--python"
-          "${py}"
-          "--with"
-          "mcp"
-          "--with"
-          "httpx"
-          "--with"
-          "beautifulsoup4"
-          "python"
-          "${../../scripts/mcp/mcp_love2d_docs.py}"
-        ];
-        port = 11443;
-      };
-
-      lua-docs = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--python"
-          "${py}"
-          "--with"
-          "mcp"
-          "--with"
-          "httpx"
-          "--with"
-          "beautifulsoup4"
-          "python"
-          "${../../scripts/mcp/mcp_lua_docs.py}"
-        ];
-        port = 11444;
-      };
-
-      # --- New: OpenAI (npm) via wrapper
-      openai = {
-        command = "${openaiWrapper}/bin/openai-mcp-wrapper";
-        args = [ ];
-        port = 11439;
-      };
-
-      # --- New: CLI MCP (secure command runner)
-      cli = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--from"
-          "cli-mcp-server"
-          "cli-mcp-server"
-        ];
-        port = 11438;
-        env = {
-          # Restrict command surface and working dir; edit to taste
-          ALLOWED_DIR = "${config.home.homeDirectory}/Code";
-          ALLOWED_COMMANDS = "git,ls,cat,pwd,rg,nix,just";
-          ALLOWED_FLAGS = "-l,-a,--help,--version";
-          COMMAND_TIMEOUT = "10"; # seconds
-          MAX_COMMAND_LENGTH = "2048"; # chars
-          ALLOW_SHELL_OPERATORS = "0"; # block pipes, &&, ;, etc.
-        };
-      };
-
-      # --- New: LSP → MCP bridges
-      lsp-ts = {
-        command = "${pkgs.nodejs_24}/bin/npx";
-        args = [
-          "-y"
-          "tritlo/lsp-mcp"
-          "ts"
-          "${tsls}"
-          "--stdio"
-        ];
-        port = 11447;
-      };
-
-      lsp-lua = {
-        command = "${pkgs.nodejs_24}/bin/npx";
-        args = [
-          "-y"
-          "tritlo/lsp-mcp"
-          "lua"
-          "${luals}"
-          "--stdio"
-        ];
-        port = 11448;
-      };
-
-      # (Optional) Luau/Roblox — add later once you have a concrete LSP path
-      # lsp-luau = {
-      #   command = "${pkgs.nodejs_24}/bin/npx";
-      #   args    = [ "-y" "tritlo/lsp-mcp" "lua" "/absolute/path/to/roblox-lsp" "--stdio" ];
-      #   port    = 11449;
-      # };
+    everything = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-everything@latest"
+      ];
+      port = 11446;
     };
+
+    github = {
+      command = "${githubWrapper}/bin/github-mcp-wrapper";
+      args = [];
+      port = 11434;
+    };
+
+    memory = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-memory@latest"
+      ];
+      port = 11436;
+    };
+
+    sequential-thinking = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-sequential-thinking@latest"
+      ];
+      port = 11437;
+    };
+
+    general-filesystem = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-filesystem@latest"
+        "${config.home.homeDirectory}/Code"
+        "${config.home.homeDirectory}/.config"
+        "${config.home.homeDirectory}/Documents"
+      ];
+      port = 11442;
+    };
+
+    love2d-filesystem = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-filesystem@latest"
+        "${config.home.homeDirectory}/Code/love2d-projects"
+        "${config.home.homeDirectory}/.local/share/love"
+      ];
+      port = 11441;
+    };
+
+    # Kagi via wrapper (unchanged)
+    kagi = {
+      command = "${kagiWrapper}/bin/kagi-mcp-wrapper";
+      args = [];
+      port = 11431;
+    };
+
+    # Python uvx servers (unchanged)
+    fetch = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [
+        "--from"
+        "mcp-server-fetch"
+        "mcp-server-fetch"
+      ];
+      port = 11432;
+    };
+
+    git = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [
+        "--from"
+        "mcp-server-git"
+        "mcp-server-git"
+        "--repository"
+        "${config.home.homeDirectory}/Code/dex-web"
+      ];
+      port = 11433;
+    };
+
+    time = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [
+        "--from"
+        "mcp-server-time"
+        "mcp-server-time"
+      ];
+      port = 11445;
+    };
+
+    love2d-api = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [
+        "--python"
+        "${py}"
+        "--with"
+        "mcp"
+        "--with"
+        "requests"
+        "python"
+        "${../../mcp-servers/love2d-api.py}"
+      ];
+      port = 11440;
+    };
+
+    love2d-docs = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [
+        "--python"
+        "${py}"
+        "--with"
+        "mcp"
+        "--with"
+        "httpx"
+        "--with"
+        "beautifulsoup4"
+        "python"
+        "${../../scripts/mcp/mcp_love2d_docs.py}"
+      ];
+      port = 11443;
+    };
+
+    lua-docs = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [
+        "--python"
+        "${py}"
+        "--with"
+        "mcp"
+        "--with"
+        "httpx"
+        "--with"
+        "beautifulsoup4"
+        "python"
+        "${../../scripts/mcp/mcp_lua_docs.py}"
+      ];
+      port = 11444;
+    };
+
+    # --- New: OpenAI (npm) via wrapper
+    openai = {
+      command = "${openaiWrapper}/bin/openai-mcp-wrapper";
+      args = [];
+      port = 11439;
+    };
+
+    # --- New: CLI MCP (secure command runner)
+    cli = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [
+        "--from"
+        "cli-mcp-server"
+        "cli-mcp-server"
+      ];
+      port = 11438;
+      env = {
+        # Restrict command surface and working dir; edit to taste
+        ALLOWED_DIR = "${config.home.homeDirectory}/Code";
+        ALLOWED_COMMANDS = "git,ls,cat,pwd,rg,nix,just";
+        ALLOWED_FLAGS = "-l,-a,--help,--version";
+        COMMAND_TIMEOUT = "10"; # seconds
+        MAX_COMMAND_LENGTH = "2048"; # chars
+        ALLOW_SHELL_OPERATORS = "0"; # block pipes, &&, ;, etc.
+      };
+    };
+
+    # --- New: LSP → MCP bridges
+    lsp-ts = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "tritlo/lsp-mcp"
+        "ts"
+        "${tsls}"
+        "--stdio"
+      ];
+      port = 11447;
+    };
+
+    lsp-lua = {
+      command = "${pkgs.nodejs_24}/bin/npx";
+      args = [
+        "-y"
+        "tritlo/lsp-mcp"
+        "lua"
+        "${luals}"
+        "--stdio"
+      ];
+      port = 11448;
+    };
+
+    # (Optional) Luau/Roblox — add later once you have a concrete LSP path
+    # lsp-luau = {
+    #   command = "${pkgs.nodejs_24}/bin/npx";
+    #   args    = [ "-y" "tritlo/lsp-mcp" "lua" "/absolute/path/to/roblox-lsp" "--stdio" ];
+    #   port    = 11449;
+    # };
+  };
 
   #################################################
   # Activation & systemd bits unchanged
   #################################################
-  home.activation.setupClaudeMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.setupClaudeMcp = lib.hm.dag.entryAfter ["writeBoundary"] ''
     ${registerScript}
   '';
 
   systemd.user.services.mcp-claude-register = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
       Description = "Register MCP servers for Claude CLI (idempotent)";
-      After = [ "graphical-session.target" ];
-      PartOf = [ "graphical-session.target" ];
+      After = ["graphical-session.target"];
+      PartOf = ["graphical-session.target"];
     };
     Service = {
       Type = "oneshot";
@@ -429,7 +419,7 @@ in
       ];
     };
     Install = {
-      WantedBy = [ "default.target" ];
+      WantedBy = ["default.target"];
     };
   };
 }

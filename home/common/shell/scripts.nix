@@ -1,5 +1,8 @@
-{ pkgs, config, ... }:
 {
+  pkgs,
+  config,
+  ...
+}: {
   home.packages = with pkgs; [
     (writeShellScriptBin "system-update" ''
       #!/bin/sh

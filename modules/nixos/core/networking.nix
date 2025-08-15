@@ -1,5 +1,8 @@
-{ pkgs, hostname, ... }:
 {
+  pkgs,
+  hostname,
+  ...
+}: {
   environment.systemPackages = with pkgs; [
     networkmanagerapplet
   ];
@@ -126,9 +129,7 @@
           to = 65535;
         }
       ];
-
     };
-
   };
 
   services.resolved.enable = true;
@@ -154,6 +155,6 @@
 
   services.dbus = {
     implementation = "broker";
-    packages = [ pkgs.avahi ];
+    packages = [pkgs.avahi];
   };
 }
