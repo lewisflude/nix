@@ -5,7 +5,7 @@
   ...
 }:
 let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
+  platformLib = import ../../../lib/functions.nix { inherit lib system; };
 in
 
 {
