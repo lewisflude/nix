@@ -2,7 +2,7 @@
 
 let
   # Browser constants to avoid repetition and ensure consistency
-  desktopFile = "google-chrome.desktop"; # Use Google Chrome as default (with declarative config)
+  desktopFile = "chromium-browser.desktop"; # Use Chromium as default (with declarative config)
 
   # Shared MIME types for web content
   webMimeTypes = [
@@ -18,7 +18,7 @@ let
 in
 {
   home.packages = [
-    # Chrome configured via programs.chromium below with declarative extensions
+    # Chromium configured via programs.chromium below with declarative extensions
     pkgs.firefox # Auto-detects Wayland/X11 environment
   ];
 
@@ -33,16 +33,14 @@ in
     defaultApplications = mimeDefaults;
   };
 
-  # Specialized Chrome launchers for specific use cases
-  # Note: Main Chrome is configured via programs.chromium below with optimal flags and declarative extensions
+  # Specialized Chromium launchers for specific use cases
+  # Note: Main Chromium is configured via programs.chromium below with optimal flags and declarative extensions
   xdg.desktopEntries = {
-    # Removed redundant google-chrome-wayland entry - main Chrome already has optimal Wayland flags
-
-    "chrome-dev" = {
-      name = "Chrome (Developer)";
-      comment = "Chrome with dev tools and separate profile for development";
-      exec = "${pkgs.google-chrome}/bin/google-chrome-stable --enable-features=UseOzonePlatform --ozone-platform=wayland --user-data-dir=/tmp/chrome-dev-session --auto-open-devtools-for-tabs --no-default-browser-check --no-first-run";
-      icon = "google-chrome";
+    "chromium-dev" = {
+      name = "Chromium (Developer)";
+      comment = "Chromium with dev tools and separate profile for development";
+      exec = "${pkgs.chromium}/bin/chromium --enable-features=UseOzonePlatform --ozone-platform=wayland --user-data-dir=/tmp/chromium-dev-session --auto-open-devtools-for-tabs --no-default-browser-check --no-first-run";
+      icon = "chromium";
       type = "Application";
       categories = [
         "Development"
@@ -51,11 +49,11 @@ in
       terminal = false;
     };
 
-    "chrome-incognito" = {
-      name = "Chrome (Incognito)";
-      comment = "Chrome in private browsing mode";
-      exec = "${pkgs.google-chrome}/bin/google-chrome-stable --enable-features=UseOzonePlatform --ozone-platform=wayland --incognito";
-      icon = "google-chrome";
+    "chromium-incognito" = {
+      name = "Chromium (Incognito)";
+      comment = "Chromium in private browsing mode";
+      exec = "${pkgs.chromium}/bin/chromium --enable-features=UseOzonePlatform --ozone-platform=wayland --incognito";
+      icon = "chromium";
       type = "Application";
       categories = [
         "Network"
@@ -148,19 +146,19 @@ in
     };
   };
 
-  # Google Chrome with declarative extensions and optimal performance flags
+  # Chromium with declarative extensions and optimal performance flags
   programs.chromium = {
     enable = true;
-    package = pkgs.google-chrome; # Using Google Chrome for better compatibility
+    package = pkgs.chromium; # Using open-source Chromium
 
     # Extensions with IDs from Chrome Web Store URLs
     extensions = [
       # Privacy & Security
       "eimadpbcbfnmbkopoojfekhnkhdbieeh" # Dark Reader
       "pkehgijcmpdhfbdbbnkijodmdjhbjlgp" # Privacy Badger
-      "cjpalhdlnbpafiamejdnhcphjbkeiagm" # uBlock Origin
 
-      # Productivity
+      # Search & Productivity
+      "cdglnehniifkbagbbombnjghhcihifij" # Kagi Search (matches Firefox setup)
       "aapbdbdomjkkjkaonfhkkikfgjllcleb" # Google Translate
       "aeblfdkhhhdcdjpifhhbdiojplfjncoa" # 1Password - Password Manager (aligned with Firefox)
 

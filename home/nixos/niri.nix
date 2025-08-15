@@ -171,17 +171,6 @@ in
             "${pkgs.uwsm}/bin/uwsm"
             "app"
             "--"
-            "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon"
-            "--start"
-            "--components=secrets,ssh"
-          ];
-        }
-
-        {
-          command = [
-            "${pkgs.uwsm}/bin/uwsm"
-            "app"
-            "--"
             "${pkgs.swww}/bin/swww-daemon"
           ];
         }
