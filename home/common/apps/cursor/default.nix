@@ -22,7 +22,7 @@ in
 
   programs.vscode = {
     enable = true;
-    package = pkgs.code-cursor;
+    package = pkgs.cursor;
     mutableExtensionsDir = false;
     profiles.default = {
       userSettings = lib.mkMerge [

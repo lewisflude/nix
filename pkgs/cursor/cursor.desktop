@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Cursor
+Exec=cursor %U
+Comment=The AI-first code editor
+Type=Application
+Icon=cursor
+Categories=Development;IDE;
