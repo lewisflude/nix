@@ -32,7 +32,7 @@ in
       specialArgs = inputs // hostConfig;
       modules = [
         ../hosts/${hostName}/configuration.nix
-        ../modules/common
+        ../modules/shared
         ../modules/darwin
         home-manager.darwinModules.home-manager
         mac-app-util.darwinModules.default
@@ -82,7 +82,7 @@ in
         };
       modules = [
         ../hosts/${hostName}/configuration.nix
-        ../modules/common
+        ../modules/shared
         ../modules/nixos
         sops-nix.nixosModules.sops
         catppuccin.nixosModules.catppuccin

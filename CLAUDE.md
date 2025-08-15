@@ -74,7 +74,7 @@ sops secrets.yaml
 ### Module Structure
 
 #### System Modules (`modules/`)
-- **`modules/common/`**: Pure cross-platform system configurations only
+- **`modules/shared/`**: Pure cross-platform system configurations only
   - `core.nix` - Cross-platform Nix settings and nixpkgs config
   - `sops.nix` - Cross-platform SOPS package installation
   - `dev.nix` - Development tools and environments
@@ -155,7 +155,7 @@ in
 
 ### File Organization Principles
 - Host-specific configurations in `hosts/<hostname>/`
-- Pure cross-platform modules in `modules/common/` and `home/common/`
+- Pure cross-platform modules in `modules/shared/` and `home/common/`
 - Platform-specific modules in `modules/{darwin,nixos}/` and `home/{darwin,nixos}/`
 - Development tools organized by purpose in `home/common/development/`
 - System integration in `home/{platform}/system/`

@@ -111,7 +111,7 @@ Secrets are managed with SOPS and age keys.
   - Development: `home/common/development/`
   - Desktop/system: `home/common/desktop/`, `home/common/system/`
 - **System Modules:**
-  - Shared: `modules/common/`
+  - Shared: `modules/shared/`
   - macOS: `modules/darwin/`
   - Linux: `modules/nixos/`
 
