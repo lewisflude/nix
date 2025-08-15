@@ -326,7 +326,7 @@ in
           "--with"
           "beautifulsoup4"
           "python"
-          "${../../scripts/mcp_love2d_docs.py}"
+          "${../../scripts/mcp/mcp_love2d_docs.py}"
         ];
         port = 11443;
       };
@@ -343,7 +343,7 @@ in
           "--with"
           "beautifulsoup4"
           "python"
-          "${../../scripts/mcp_lua_docs.py}"
+          "${../../scripts/mcp/mcp_lua_docs.py}"
         ];
         port = 11444;
       };
