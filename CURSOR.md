@@ -1,5 +1,11 @@
 # CURSOR.md
 
+> **📍 Documentation Moved:** This guide has been consolidated into [`docs/ai-assistants/`](docs/ai-assistants/) for better organization.
+> 
+> **→ Go to:** [`docs/ai-assistants/README.md`](docs/ai-assistants/README.md) for the complete AI assistant guide.
+
+---
+
 This guide provides Cursor AI with an overview of the repository.
 
 The project defines a cross-platform Nix setup using flakes. Both macOS and Linux machines share Home Manager modules, and development shells in `shells/` offer reproducible tooling for multiple languages.
