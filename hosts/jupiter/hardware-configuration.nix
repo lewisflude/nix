@@ -40,21 +40,6 @@
   hardware.cpu.intel.updateMicrocode = true;
   hardware.enableAllFirmware = true;
   hardware.i2c.enable = true;
-  powerManagement.cpuFreqGovernor = "performance";
-
-  services.auto-cpufreq = {
-    enable = true;
-    settings = {
-      battery = {
-        governor = "powersave";
-        turbo = "never";
-      };
-      charger = {
-        governor = "performance";
-        turbo = "auto";
-      };
-    };
-  };
 
   services.udev.extraRules = ''
     # Use BFQ scheduler for HDDs
@@ -89,7 +74,6 @@
         "noatime"
         "logbufs=8"
         "allocsize=64m"
-        "x-systemd.after=mnt-storage.mount"
       ];
     };
 
@@ -102,7 +86,6 @@
         "noatime"
         "logbufs=8"
         "allocsize=64m"
-        "x-systemd.after=mnt-storage.mount"
       ];
     };
     "/mnt/storage" = {
@@ -124,6 +107,7 @@
   swapDevices = [
     {
       device = "/dev/disk/by-uuid/65835c4c-3b5f-4ced-bf61-c73a6e76e562";
+      priority = 10;
     }
   ];
 

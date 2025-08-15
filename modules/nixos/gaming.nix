@@ -21,10 +21,6 @@ in
   ];
 
   programs = {
-    gamemode = {
-      enable = true;
-    };
-
     steam = {
       enable = true;
       gamescopeSession.enable = true;
@@ -32,8 +28,8 @@ in
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
       package = pkgs.steam.override {
-        extraPkgs = pkgs:
-          with pkgs; [
+        extraPkgs =
+          pkgs: with pkgs; [
             xorg.libXcursor
             xorg.libXi
             xorg.libXinerama

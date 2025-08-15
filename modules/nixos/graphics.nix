@@ -11,7 +11,6 @@ in
     mesa-demos # glxinfo / eglinfo
     libva # VA-API loader
     libva-utils # vainfo
-    nvidia-vaapi-driver # NVDEC bridge for VA-API
     egl-wayland
     nv-codec-headers
     # cudaPackages.cuda_nvcc # keep only if you actually build CUDA locally
@@ -27,6 +26,8 @@ in
     # NVIDIA VA-API bridge; harmless if a given app doesn’t use it
     LIBVA_DRIVER_NAME = "nvidia";
     NVD_BACKEND = "direct";
+    __GL_VRR_ALLOWED = "1";
+    __GL_GSYNC_ALLOWED = "1";
 
     # Historical NVIDIA cursor workaround — start OFF; enable only if you see the classic “cursor trail” bug
     # WLR_NO_HARDWARE_CURSORS = "1";
@@ -59,6 +60,9 @@ in
       open = false; # flip to true if you want the open kernel module and it’s stable for you
       nvidiaSettings = true;
       package = package;
+      powerManagement.enable = true;
+      nvidiaPersistenced = true;
+
     };
 
     nvidia-container-toolkit.enable = true;
