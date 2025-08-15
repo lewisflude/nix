@@ -18,7 +18,8 @@
   ];
   systemd.settings.Manager.DefaultLimitNOFILE = "524288";
 
-  security.pki.certificateFiles = [ ../../../secrets/certificates/mitmproxy-ca-cert.pem ];
+  # TODO: Re-enable when certificate path handling is properly configured  
+  # security.pki.certificateFiles = [ ../../../secrets/certificates/mitmproxy-ca-cert.pem ];
   security.polkit.enable = true;
 
   # ─── GNOME Keyring ───────────────────────────────────────────────────────────
