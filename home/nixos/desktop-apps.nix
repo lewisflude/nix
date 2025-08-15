@@ -47,13 +47,9 @@
     enable = true;
     defaultApplications = {
       "x-terminal-emulator" = "ghostty.desktop";
-      # Use Thunar as the default file manager for directories
       "inode/directory" = "Thunar.desktop";
       "application/x-directory" = "Thunar.desktop";
       "x-scheme-handler/onepassword" = "1password.desktop";
-      "text/html" = "firefox.desktop";
-      "x-scheme-handler/http" = "firefox.desktop";
-      "x-scheme-handler/https" = "firefox.desktop";
       "application/x-ms-dos-executable" = "wine.desktop";
       "application/x-wine-extension-ini" = "wine.desktop";
       "application/x-wine-extension-exe" = "wine.desktop";

@@ -16,6 +16,8 @@
 
     # Services
     ./ssh.nix
+    ./power.nix
+    ./memory.nix
 
     # Applications
     ./gaming.nix

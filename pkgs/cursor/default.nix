@@ -4,7 +4,7 @@
   cursorVersion ? cursorInfo.version,
 }:
 if pkgs.stdenv.isLinux then
-  (import ./linux.nix { inherit pkgs cursorInfo cursorVersion; })
+  (import ./linux.nix { inherit pkgs cursorInfo cursorVersion; lib = pkgs.lib; })
 else if pkgs.stdenv.isDarwin then
   (import ./darwin.nix { inherit pkgs cursorInfo cursorVersion; })
 else
