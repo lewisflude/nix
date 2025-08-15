@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -65,7 +64,6 @@
 
       # Core PipeWire configuration
       pipewire = {
-
         "99-silent-bell.conf" = {
           "context.properties" = {
             "module.x11.bell" = false;

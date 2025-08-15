@@ -1,10 +1,7 @@
 # Cursor/VSCode Extensions Configuration
 # Comprehensive extension collection organized by category for senior developers
 # Modular design allows for easy customization and selective loading
-
-{ pkgs, ... }:
-
-let
+{pkgs, ...}: let
   vsc = pkgs.vscode-extensions;
 
   # ==== CORE THEME & UI EXTENSIONS ====
@@ -67,7 +64,6 @@ let
 
   # ==== OPTIONAL/SPECIALIZED EXTENSIONS ====
   specialized = [
-
   ];
 
   # ==== EXTENSION SETS COMPOSITION ====
@@ -75,34 +71,34 @@ let
     inherit themes productivity;
 
     # Core languages that most developers need
-    coreLangs = coreLangs;
+    inherit coreLangs;
 
     # Extended language support
-    extraLangs = extraLangs;
+    inherit extraLangs;
 
     # Development tooling essentials
     tooling = devTools;
 
     # Git and version control
-    git = git;
+    inherit git;
 
     # Developer experience improvements
     dx = productivity ++ debugging; # Combine productivity and debugging
 
     # DevOps and infrastructure
-    devops = devops;
+    inherit devops;
 
     # Web development specific
-    webDev = webDev;
+    inherit webDev;
 
     # Database and data tools
-    database = database;
+    inherit database;
 
     # Code quality and analysis
-    codeQuality = codeQuality;
+    inherit codeQuality;
 
     # Specialized/optional extensions
-    specialized = specialized;
+    inherit specialized;
   };
 
   # ==== CURATED EXTENSION COLLECTIONS ====
@@ -121,9 +117,7 @@ let
 
   # Frontend developer collection
   frontend = essentials ++ webDev;
-
-in
-{
+in {
   inherit extSets;
 
   # Primary extension list (essentials + commonly used)

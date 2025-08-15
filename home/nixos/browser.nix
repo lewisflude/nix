@@ -1,6 +1,8 @@
-{ pkgs, lib, ... }:
-
-let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   # Browser constants to avoid repetition and ensure consistency
   desktopFile = "chromium-browser.desktop"; # Use Chromium as default (with declarative config)
 
@@ -14,9 +16,8 @@ let
   addons = pkgs.nur.repos.rycee.firefox-addons;
 
   # Convert list to defaultApplications format
-  mimeDefaults = lib.genAttrs webMimeTypes (type: [ desktopFile ]);
-in
-{
+  mimeDefaults = lib.genAttrs webMimeTypes (_type: [desktopFile]);
+in {
   home.packages = [
     # Chromium configured via programs.chromium below with declarative extensions
     pkgs.firefox # Auto-detects Wayland/X11 environment
@@ -100,7 +101,7 @@ in
       search = {
         force = true;
         default = "Kagi";
-        order = [ "Kagi" ];
+        order = ["Kagi"];
         engines.Kagi = {
           urls = [
             {
@@ -113,7 +114,7 @@ in
               ];
             }
           ];
-          definedAliases = [ "@k" ];
+          definedAliases = ["@k"];
         };
       };
       settings = {
@@ -180,5 +181,4 @@ in
       "--enable-gpu-rasterization"
     ];
   };
-
 }

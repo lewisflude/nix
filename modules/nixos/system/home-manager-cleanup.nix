@@ -1,10 +1,8 @@
 {
   username,
-  lib,
   pkgs,
   ...
-}:
-{
+}: {
   # System activation script to clean up Home Manager backup files
   # This prevents conflicts where backup files already exist and Home Manager can't create new ones
 

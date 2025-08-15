@@ -3,8 +3,7 @@
   pkgs,
   config,
   ...
-}:
-{
+}: {
   # Platform-specific Home Manager configuration
   # No platform detection needed - this module only loads on the target platform
 

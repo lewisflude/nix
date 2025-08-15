@@ -1,9 +1,4 @@
-{
-  pkgs,
-  ...
-}:
-{
-
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     # Core Wayland tools
     wl-clipboard

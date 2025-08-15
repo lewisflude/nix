@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   home.file.".config/MangoHud/MangoHud.conf" = {
     text = ''
       # MangoHud configuration

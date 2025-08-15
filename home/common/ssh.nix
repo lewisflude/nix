@@ -1,12 +1,7 @@
-{
-  pkgs,
-  ...
-}:
-
-{
+{pkgs, ...}: {
   programs.ssh = {
     enable = true;
-    package = pkgs.openssh.override { withSecurityKey = true; };
+    package = pkgs.openssh.override {withSecurityKey = true;};
 
     addKeysToAgent = "yes";
     # SSH agent is handled by GPG agent via environment variable
@@ -28,5 +23,4 @@
       };
     };
   };
-
 }

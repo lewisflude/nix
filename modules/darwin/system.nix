@@ -4,9 +4,7 @@
   username,
   lib,
   ...
-}:
-{
-
+}: {
   environment.systemPackages = with pkgs; [
     libiconv
     pkg-config
@@ -47,26 +45,25 @@
 
   system.primaryUser = username;
 
-  system.defaults.dock.persistent-apps =
-    let
-      homebrewApps = lib.filter (app: builtins.pathExists app) [
-        "/Applications/Docker.app"
-        "/Applications/Google Chrome Canary.app"
-        "/Applications/Figma.app"
-        "/Applications/Notion.app"
-        "/Applications/Obsidian.app"
-        "/Applications/Slack.app"
-        "/Applications/Linear.app"
-        "/Applications/Raycast.app"
-        "/Applications/Beekeeper Studio.app"
-        "/Applications/ChatGPT.app"
-        "/Applications/Steam.app"
-      ];
+  system.defaults.dock.persistent-apps = let
+    homebrewApps = lib.filter (app: builtins.pathExists app) [
+      "/Applications/Docker.app"
+      "/Applications/Google Chrome Canary.app"
+      "/Applications/Figma.app"
+      "/Applications/Notion.app"
+      "/Applications/Obsidian.app"
+      "/Applications/Slack.app"
+      "/Applications/Linear.app"
+      "/Applications/Raycast.app"
+      "/Applications/Beekeeper Studio.app"
+      "/Applications/ChatGPT.app"
+      "/Applications/Steam.app"
+    ];
 
-      systemApps = [
-        "/System/Applications/System Settings.app"
-      ];
-    in
+    systemApps = [
+      "/System/Applications/System Settings.app"
+    ];
+  in
     homebrewApps ++ systemApps;
 
   system.defaults = {

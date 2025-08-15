@@ -1,6 +1,4 @@
-{ lib, ... }:
-
-let
+{lib, ...}: let
   standards = import ../../development/language-standards.nix;
   formatterMap = {
     biome = "biomejs.biome";
@@ -19,47 +17,43 @@ let
     "javascriptreact"
     "typescriptreact"
   ];
-  jsonVariants = [ "jsonc" ];
+  jsonVariants = ["jsonc"];
   languages = baseLanguages ++ reactVariants ++ jsonVariants;
 
   entries = lib.filter (e: e != null) (
     lib.map (
-      lang:
-      let
+      lang: let
         aliasMap = {
           javascriptreact = "javascript";
           typescriptreact = "typescript";
           jsonc = "json";
         };
         stdName = aliasMap.${lang} or lang;
-        std = standards.languages.${stdName} or { };
+        std = standards.languages.${stdName} or {};
       in
-      if std ? formatter && std.formatter != null then
-        {
+        if std ? formatter && std.formatter != null
+        then {
           name = "[${lang}]";
           value = lib.filterAttrs (_: v: v != null) {
             "editor.defaultFormatter" = formatterMap.${std.formatter};
             "editor.insertSpaces" = true;
             "editor.tabSize" = std.indent or 2;
             "editor.codeActionsOnSave" =
-              if std.formatter == "biome" then
-                {
-                  "source.fixAll.biome" = "explicit";
-                  "source.organizeImports.biome" = "explicit";
-                }
-              else
-                null;
+              if std.formatter == "biome"
+              then {
+                "source.fixAll.biome" = "explicit";
+                "source.organizeImports.biome" = "explicit";
+              }
+              else null;
           };
         }
-      else
-        null
-    ) languages
+        else null
+    )
+    languages
   );
 
   perLanguageFormatters = builtins.listToAttrs entries;
-
-in
-{
+in {
   userSettings = lib.mkMerge [
     perLanguageFormatters
   ];

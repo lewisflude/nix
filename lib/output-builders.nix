@@ -1,20 +1,19 @@
 # Output builder functions to simplify flake outputs generation
-{ inputs, hosts }:
-
-let
+{
+  inputs,
+  hosts,
+}: let
   inherit (inputs) nixpkgs pre-commit-hooks home-manager;
-  inherit (builtins)
+  inherit
+    (builtins)
     mapAttrs
-    filterAttrs
     attrValues
     listToAttrs
     map
     ;
 
   systems = builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
-in
-
-{
+in {
   # Generate formatter outputs for all systems
   mkFormatters = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
@@ -34,25 +33,23 @@ in
   mkDevShells = builtins.listToAttrs (
     builtins.map (hostConfig: {
       name = hostConfig.system;
-      value =
-        let
-          pkgs = nixpkgs.legacyPackages.${hostConfig.system};
-          shellsConfig = import ../shells {
-            inherit pkgs;
-            lib = pkgs.lib;
-            system = hostConfig.system;
-          };
-        in
+      value = let
+        pkgs = nixpkgs.legacyPackages.${hostConfig.system};
+        shellsConfig = import ../shells {
+          inherit pkgs;
+          inherit (pkgs) lib;
+          inherit (hostConfig) system;
+        };
+      in
         shellsConfig.devShells
         // {
-          default =
-            let
-              preCommitCheck = inputs.self.checks.${hostConfig.system}.pre-commit-check or { };
-            in
+          default = let
+            preCommitCheck = inputs.self.checks.${hostConfig.system}.pre-commit-check or {};
+          in
             pkgs.mkShell {
               shellHook = preCommitCheck.shellHook or "";
               buildInputs =
-                (preCommitCheck.enabledPackages or [ ])
+                (preCommitCheck.enabledPackages or [])
                 ++ (with pkgs; [
                   jq
                   yq
@@ -67,20 +64,21 @@ in
   );
 
   # Generate Home Manager configurations
-  mkHomeConfigurations = builtins.mapAttrs (
-    _name: hostConfig:
-    let
-      pkgs = import nixpkgs {
-        system = hostConfig.system;
-      };
-    in
-    home-manager.lib.homeManagerConfiguration {
-      inherit pkgs;
-      extraSpecialArgs = inputs // hostConfig;
-      modules = [
-        ../home
-        inputs.catppuccin.homeModules.catppuccin
-      ];
-    }
-  ) hosts;
+  mkHomeConfigurations =
+    builtins.mapAttrs (
+      _name: hostConfig: let
+        pkgs = import nixpkgs {
+          inherit (hostConfig) system;
+        };
+      in
+        home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          extraSpecialArgs = inputs // hostConfig;
+          modules = [
+            ../home
+            inputs.catppuccin.homeModules.catppuccin
+          ];
+        }
+    )
+    hosts;
 }

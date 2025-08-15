@@ -1,9 +1,7 @@
 # Shared constants for Cursor/VSCode configuration
 # Comprehensive file ignore patterns for modern development environments
 # Organized by category for easy maintenance and understanding
-
-{ }:
-let
+_: let
   # ==== SYSTEM & OS FILES ====
   systemFiles = {
     # macOS
@@ -217,7 +215,7 @@ let
     "**/*.sublime-project" = true;
     "**/*.sublime-workspace" = true;
 
-        # Vim
+    # Vim
     "**/*.swp" = true;
     "**/*.swo" = true;
 
@@ -298,9 +296,7 @@ let
     "**/.git" = true;
     "**/node_modules" = true;
   };
-
-in
-{
+in {
   inherit
     commonIgnores
     searchIgnores

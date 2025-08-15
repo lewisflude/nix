@@ -1,5 +1,4 @@
-{ ... }:
-{
+_: {
   # Configure Homebrew
   homebrew = {
     enable = true;

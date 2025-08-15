@@ -1,5 +1,8 @@
-{ config, pkgs, ... }:
 {
+  config,
+  pkgs,
+  ...
+}: {
   xdg.configFile."swappy/config".text = ''
     [Default]
     save_dir=${config.home.homeDirectory}/Pictures/Screenshots

@@ -1,8 +1,10 @@
-{ config, pkgs, ... }:
-let
-  package = config.boot.kernelPackages.nvidiaPackages.stable;
-in
 {
+  config,
+  pkgs,
+  ...
+}: let
+  package = config.boot.kernelPackages.nvidiaPackages.stable;
+in {
   ########################################
   # Packages and tools
   ########################################
@@ -59,10 +61,9 @@ in
       modesetting.enable = true; # required for Wayland/GBM
       open = false; # flip to true if you want the open kernel module and it’s stable for you
       nvidiaSettings = true;
-      package = package;
+      inherit package;
       powerManagement.enable = true;
       nvidiaPersistenced = true;
-
     };
 
     nvidia-container-toolkit.enable = true;
@@ -73,7 +74,7 @@ in
   ########################################
   services.xserver = {
     enable = false; # don’t start a full X server on Wayland
-    videoDrivers = [ "nvidia" ];
+    videoDrivers = ["nvidia"];
   };
 
   ########################################
@@ -86,5 +87,5 @@ in
   ########################################
   # Kernel module blacklist
   ########################################
-  boot.blacklistedKernelModules = [ "nouveau" ];
+  boot.blacklistedKernelModules = ["nouveau"];
 }

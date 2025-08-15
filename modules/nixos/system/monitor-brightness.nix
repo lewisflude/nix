@@ -1,5 +1,8 @@
-{ pkgs, username, ... }:
-let
+{
+  pkgs,
+  username,
+  ...
+}: let
   restoreBrightness = pkgs.writeShellScript "restore-external-brightness" ''
     #!/usr/bin/env bash
     sleep 2
@@ -10,7 +13,7 @@ let
     fi
   '';
 in {
-  environment.systemPackages = with pkgs; [ ddcutil ];
+  environment.systemPackages = with pkgs; [ddcutil];
   services.udev.extraRules = ''
     SUBSYSTEM=="drm", KERNEL=="card0-DP-1", ACTION=="change", RUN+="${restoreBrightness}"
   '';
