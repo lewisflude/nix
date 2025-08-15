@@ -1,0 +1,110 @@
+name: "🤖 Update Cursor"
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-cursor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Install Nix"
+        uses: cachix/install-nix-action@v22
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - name: "Ensure jq"
+        run: |
+          set -euo pipefail
+          if ! command -v jq >/dev/null 2>&1; then
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+
+      - name: "Fetch latest version (by date)"
+        id: fetch
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION_HISTORY_URL="https://raw.githubusercontent.com/oslook/cursor-ai-downloads/refs/heads/main/version-history.json"
+          RAW_JSON="$(curl -fsSL --proto '=https' --tlsv1.2 "$VERSION_HISTORY_URL")"
+
+          # Validate and pick newest by date
+          if ! jq -e '.versions and (.versions | length > 0)' >/dev/null <<<"$RAW_JSON"; then
+            echo "Bad JSON: missing .versions" >&2
+            exit 1
+          fi
+          LATEST_INFO="$(jq -r '.versions | sort_by(.date) | last' <<<"$RAW_JSON")"
+
+          LATEST_VERSION="$(jq -r '.version' <<<"$LATEST_INFO")"
+          LATEST_DATE="$(jq -r '.date' <<<"$LATEST_INFO")"
+          LINUX_URL="$(jq -r '.platforms["linux-x64"] // empty' <<<"$LATEST_INFO")"
+          DARWIN_URL="$(jq -r '.platforms["darwin-universal"] // .platforms["darwin-arm64"] // .platforms["darwin-x64"] // empty' <<<"$LATEST_INFO")"
+
+          if [[ -z "$LATEST_VERSION" || -z "$LATEST_DATE" || -z "$LINUX_URL" || -z "$DARWIN_URL" ]]; then
+            echo "Missing required fields (version/date/linux-x64/darwin*)" >&2
+            exit 1
+          fi
+
+          CURRENT_VERSION="$(jq -r '.version' cursor-info.json 2>/dev/null || echo '')"
+          echo "current=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "latest=$LATEST_VERSION" >> "$GITHUB_OUTPUT"
+          echo "linux_url=$LINUX_URL" >> "$GITHUB_OUTPUT"
+          echo "darwin_url=$DARWIN_URL" >> "$GITHUB_OUTPUT"
+
+          if [[ "$CURRENT_VERSION" == "$LATEST_VERSION" ]]; then
+            echo "update=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "update=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: "Prefetch & update cursor-info.json (SRI)"
+        if: steps.fetch.outputs.update == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          linux_url='${{ steps.fetch.outputs.linux_url }}'
+          darwin_url='${{ steps.fetch.outputs.darwin_url }}'
+          latest='${{ steps.fetch.outputs.latest }}'
+
+          LINUX_B32="$(nix-prefetch-url --type sha256 "$linux_url")"
+          LINUX_SRI="$(nix hash to-sri --type sha256 "$LINUX_B32")"
+
+          DARWIN_B32="$(nix-prefetch-url --type sha256 "$darwin_url")"
+          DARWIN_SRI="$(nix hash to-sri --type sha256 "$DARWIN_B32")"
+
+          jq -n \
+            --arg version "$latest" \
+            --arg linux_url "$linux_url" \
+            --arg linux_sha256 "$LINUX_SRI" \
+            --arg darwin_url "$darwin_url" \
+            --arg darwin_sha256 "$DARWIN_SRI" \
+            '{
+              version: $version,
+              linux:  { url: $linux_url,  sha256: $linux_sha256 },
+              darwin: { url: $darwin_url, sha256: $darwin_sha256 }
+            }' > cursor-info.json
+
+          echo "Updated cursor-info.json:"
+          cat cursor-info.json
+
+      - name: "Create Pull Request"
+        if: steps.fetch.outputs.update == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "feat(cursor): update to v${{ steps.fetch.outputs.latest }}"
+          title: "🤖 chore: Update Cursor to v${{ steps.fetch.outputs.latest }}"
+          body: |
+            Automated PR to update Cursor to the latest version.
+            **Version:** `${{ steps.fetch.outputs.latest }}`
+          branch: "chore/update-cursor"
+          labels: "dependencies, automated"
+          committer: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
