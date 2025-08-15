@@ -16,7 +16,7 @@ in
     auto-optimise-store = true;
 
     # Build optimization
-    max-jobs = "auto";
+    max-jobs = 8;
     cores = 0; # Use all available cores
 
     # Cache optimization
@@ -31,57 +31,54 @@ in
     download-buffer-size = 524288000;
 
     # Binary cache settings for faster builds
-    substituters =
-      [
-        "https://lewisflude.cachix.org"
-        "https://cache.nixos.org"
-        "https://nix-community.cachix.org"
-        "https://ags.cachix.org"
-        "https://catppuccin.cachix.org"
-        "https://devenv.cachix.org"
-        "https://yazi.cachix.org"
-        "https://cuda-maintainers.cachix.org"
-        "https://ghostty.cachix.org"
-        "https://niri.cachix.org"
+    substituters = [
+      "https://lewisflude.cachix.org"
+      "https://cache.nixos.org"
+      "https://nix-community.cachix.org"
+      "https://ags.cachix.org"
+      "https://catppuccin.cachix.org"
+      "https://devenv.cachix.org"
+      "https://yazi.cachix.org"
+      "https://cuda-maintainers.cachix.org"
+      "https://ghostty.cachix.org"
+      "https://niri.cachix.org"
 
-      ]
-      ++ lib.optionals platformLib.isDarwin [
-        "https://cache.determinate.systems"
-      ];
-    trusted-substituters =
-      [
-        "https://lewisflude.cachix.org"
-        "https://cache.nixos.org"
-        "https://nix-community.cachix.org"
-        "https://ags.cachix.org"
-        "https://catppuccin.cachix.org"
-        "https://devenv.cachix.org"
-        "https://yazi.cachix.org"
-        "https://cuda-maintainers.cachix.org"
-        "https://ghostty.cachix.org"
-        "https://niri.cachix.org"
+    ]
+    ++ lib.optionals platformLib.isDarwin [
+      "https://cache.determinate.systems"
+    ];
+    trusted-substituters = [
+      "https://lewisflude.cachix.org"
+      "https://cache.nixos.org"
+      "https://nix-community.cachix.org"
+      "https://ags.cachix.org"
+      "https://catppuccin.cachix.org"
+      "https://devenv.cachix.org"
+      "https://yazi.cachix.org"
+      "https://cuda-maintainers.cachix.org"
+      "https://ghostty.cachix.org"
+      "https://niri.cachix.org"
 
-      ]
-      ++ lib.optionals platformLib.isDarwin [
-        "https://cache.determinate.systems"
-      ];
-    trusted-public-keys =
-      [
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-        "ags.cachix.org-1:naAvMrz0CuYqeyGNyLgE010iUiuf/qx6kYrUv3NwAJ8="
-        "catppuccin.cachix.org-1:noG/4HkbhJb+lUAdKrph6LaozJvAeEEZj4N732IysmU="
-        "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
-        "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
-        "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
-        "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc="
-        "ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns="
-        "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
+    ]
+    ++ lib.optionals platformLib.isDarwin [
+      "https://cache.determinate.systems"
+    ];
+    trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "ags.cachix.org-1:naAvMrz0CuYqeyGNyLgE010iUiuf/qx6kYrUv3NwAJ8="
+      "catppuccin.cachix.org-1:noG/4HkbhJb+lUAdKrph6LaozJvAeEEZj4N732IysmU="
+      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+      "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
+      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+      "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc="
+      "ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns="
+      "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
 
-      ]
-      ++ lib.optionals platformLib.isDarwin [
-        "cache.determinate.systems-1:cd9bVm9wnyQHfHpLRhHGDMWWgPEXFEoKhiMuQ1jmNj8="
-      ];
+    ]
+    ++ lib.optionals platformLib.isDarwin [
+      "cache.determinate.systems-1:cd9bVm9wnyQHfHpLRhHGDMWWgPEXFEoKhiMuQ1jmNj8="
+    ];
 
     # Experimental features for performance
     experimental-features = [
@@ -197,7 +194,6 @@ in
       exec /etc/nix-optimization/analyze-store.sh "$@"
     '')
   ];
-
 
 }
 // lib.optionalAttrs platformLib.isLinux {

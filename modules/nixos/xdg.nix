@@ -11,10 +11,15 @@
 
     # Keep defaults simple and compositor-agnostic
     config = {
-      common.default = "gtk";
+      common.default = [
+        "wlr"
+        "gtk"
+      ];
+      niri.default = [
+        "wlr"
+        "gtk"
+      ];
       gtk.default = "gtk";
-      # Optional: if you want to be explicit for niri:
-      niri.default = "gtk";
     };
   };
 
