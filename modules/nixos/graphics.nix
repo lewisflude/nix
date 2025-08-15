@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 let
-  package = config.boot.kernelPackages.nvidiaPackages.beta; # keep if you want beta; consider stable if crashes persist
+  package = config.boot.kernelPackages.nvidiaPackages.stable;
 in
 {
   ########################################
