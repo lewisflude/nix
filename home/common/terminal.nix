@@ -22,7 +22,7 @@ in {
       # Enhanced command line tools
       eza # Modern ls alternative
       rsync # File synchronization
-      trash-cli # Safe rm replacement
+      trash-cli # Better trash (safer rm replacement)
       micro # Terminal text editor
       fd # Better find
       duf # Better df
@@ -42,7 +42,8 @@ in {
       git-extras # Extra git commands
       lazygit # Git TUI
       lazydocker # Docker TUI
-      zellij # Terminal multiplexer
+      zellij # Terminal multiplexer (modern)
+      tmux # Traditional terminal multiplexer
     ]
     ++ platformLib.platformPackages
     [
@@ -50,6 +51,7 @@ in {
       networkmanager # Network management
       doas # Privilege escalation
       lsof # List open files
+      wtype # Wayland text input automation (xdotool equivalent)
     ]
     [
       # Darwin-specific packages

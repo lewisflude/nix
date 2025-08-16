@@ -4,7 +4,7 @@
 
     # Media
     mpv
-    imv
+    swayimg # Wayland-native image viewer with better scaling
 
     # Office & Productivity
     libreoffice
@@ -15,6 +15,7 @@
     gimp
     krita
     aseprite
+    pixelorama # Free, open-source pixel art editor with excellent Wayland support
 
     # Communication
     discord
@@ -23,13 +24,13 @@
     # System Utilities
     file-roller
     swaylock-effects
+    dragon-drop # Drag and drop from terminal to GUI apps
 
-    # File Manager (Thunar) and helpers
-    xfce.thunar
-    xfce.thunar-volman
+    # File Manager (Nautilus) - Wayland-native file manager
+    nautilus
+    sushi # File previewer for Nautilus
     ffmpegthumbnailer
-    xfce.thunar-archive-plugin
-    gvfs
+    gvfs # Virtual filesystem support
 
     # Game Development
     love # Love2D game engine
@@ -43,13 +44,22 @@
     enable = true;
     defaultApplications = {
       "x-terminal-emulator" = "ghostty.desktop";
-      "inode/directory" = "Thunar.desktop";
-      "application/x-directory" = "Thunar.desktop";
+      "inode/directory" = "org.gnome.Nautilus.desktop";
+      "application/x-directory" = "org.gnome.Nautilus.desktop";
       "x-scheme-handler/onepassword" = "1password.desktop";
       "application/x-ms-dos-executable" = "wine.desktop";
       "application/x-wine-extension-ini" = "wine.desktop";
       "application/x-wine-extension-exe" = "wine.desktop";
       "application/x-wine-extension-msi" = "wine.desktop";
+
+      # Image file associations for swayimg
+      "image/jpeg" = "swayimg.desktop";
+      "image/jpg" = "swayimg.desktop";
+      "image/png" = "swayimg.desktop";
+      "image/gif" = "swayimg.desktop";
+      "image/webp" = "swayimg.desktop";
+      "image/bmp" = "swayimg.desktop";
+      "image/svg+xml" = "swayimg.desktop";
     };
   };
 

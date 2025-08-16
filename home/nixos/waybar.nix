@@ -42,6 +42,7 @@ in {
           "custom/alerts"
           "custom/brightness"
           "pulseaudio"
+          "custom/notifications"
           "clock"
           "tray"
         ];
@@ -139,6 +140,28 @@ in {
           tooltip-format = "Device: {desc}\nVolume: {volume}%";
           scroll-step = 5;
           on-click = "${uwsm} app -- pavucontrol";
+        };
+
+        # SwayNC notification center integration
+        "custom/notifications" = {
+          tooltip = false;
+          format = "{icon} {alt}";
+          format-icons = {
+            notification = " ";
+            none = " ";
+            dnd-notification = " ";
+            dnd-none = " ";
+            inhibited-notification = " ";
+            inhibited-none = " ";
+            dnd-inhibited-notification = " ";
+            dnd-inhibited-none = " ";
+          };
+          return-type = "json";
+          exec-if = "which swaync-client";
+          exec = "swaync-client -swb";
+          on-click = "swaync-client -t -sw";
+          on-click-right = "swaync-client -d -sw";
+          escape = true;
         };
 
         # Clock and calendar

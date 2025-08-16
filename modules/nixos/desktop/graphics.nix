@@ -19,26 +19,27 @@ in {
   ];
 
   ########################################
-  # Session environment (conservative, stable)
+  # Session environment (optimized for RTX 4090 + Wayland gaming/work)
   ########################################
   environment.sessionVariables = {
-    # Prefer native Wayland for Electron; fall back to X11 per-app if needed
-    ELECTRON_OZONE_PLATFORM_HINT = "auto";
-
-    # NVIDIA VA-API bridge; harmless if a given app doesn’t use it
+    # NVIDIA optimization for Wayland
     LIBVA_DRIVER_NAME = "nvidia";
     NVD_BACKEND = "direct";
+
+    # VRR/G-SYNC support for RTX 4090 (excellent support)
     __GL_VRR_ALLOWED = "1";
     __GL_GSYNC_ALLOWED = "1";
 
-    # Historical NVIDIA cursor workaround — start OFF; enable only if you see the classic “cursor trail” bug
-    # WLR_NO_HARDWARE_CURSORS = "1";
+    # Gaming performance optimizations
+    __GL_SHADER_DISK_CACHE = "1";
+    __GL_THREADED_OPTIMIZATIONS = "1";
 
-    # REMOVE the following legacy/fragile knobs:
-    # WLR_RENDERER_ALLOW_SOFTWARE
-    # WLR_BACKENDS
-    # GBM_BACKEND
-    # __GLX_VENDOR_LIBRARY_NAME (not needed outside X11)
+    # RTX 4090 specific optimizations
+    __GL_SYNC_TO_VBLANK = "0"; # Let VRR/compositor handle this
+    __GL_ALLOW_UNOFFICIAL_PROTOCOL = "1";
+
+    # NVIDIA cursor fix (uncomment if you see cursor trails)
+    # WLR_NO_HARDWARE_CURSORS = "1";
   };
 
   ########################################
@@ -59,11 +60,22 @@ in {
 
     nvidia = {
       modesetting.enable = true; # required for Wayland/GBM
-      open = false; # flip to true if you want the open kernel module and it’s stable for you
+      open = false; # RTX 4090 works well with proprietary drivers
       nvidiaSettings = true;
       inherit package;
-      powerManagement.enable = true;
+
+      # Power management optimizations for RTX 4090
+      powerManagement = {
+        enable = true;
+        finegrained = false; # RTX 4090 doesn't need fine-grained power management
+      };
+
+      # Keep GPU state persistent for better performance
       nvidiaPersistenced = true;
+
+      # RTX 4090 performance optimizations
+      forceFullCompositionPipeline = false; # Let VRR handle frame pacing
+      prime.offload.enableOffloadCmd = false; # RTX 4090 is primary GPU
     };
 
     nvidia-container-toolkit.enable = true;
