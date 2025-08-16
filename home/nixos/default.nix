@@ -6,7 +6,7 @@
     # Desktop environment
     ./browser.nix
     ./launcher.nix
-    ./mako.nix
+    ./swaync.nix
     ./waybar.nix
     ./desktop-apps.nix
     ./yazi.nix

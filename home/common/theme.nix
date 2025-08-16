@@ -13,6 +13,7 @@ in {
     enable = true;
     waybar.mode = "createLink";
     mako.enable = lib.mkIf platformLib.isLinux true;
+    swaync.enable = lib.mkIf platformLib.isLinux true;
     firefox = lib.mkIf platformLib.isLinux {
       profiles = {
         default = {

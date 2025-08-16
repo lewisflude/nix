@@ -9,12 +9,12 @@ in {
   home.packages = with pkgs; [
     swww
     gtklock
-    grimblast
     swayidle
     grim
     slurp
     swappy
     wl-clipboard
+    # Note: grimblast removed - using niri's built-in screenshot functionality
   ];
 
   imports = [
@@ -137,21 +137,39 @@ in {
       };
 
       environment = {
-        # Let Electron choose Wayland natively; falls back to X11 when needed
-        ELECTRON_OZONE_PLATFORM_HINT = "auto";
+        # Optimized Wayland environment for RTX 4090 + high-performance workflow
 
-        # Keep Wayland identity explicit (these are fine)
+        # Electron/Chromium apps - force Wayland for best performance
+        ELECTRON_OZONE_PLATFORM_HINT = "auto";
+        NIXOS_OZONE_WL = "1";
+
+        # Firefox Wayland optimization
+        MOZ_ENABLE_WAYLAND = "1";
+        MOZ_WEBRENDER = "1";
+
+        # Session identity
         XDG_CURRENT_DESKTOP = "niri";
         XDG_SESSION_DESKTOP = "niri";
         XDG_SESSION_TYPE = "wayland";
 
-        # Qt on Wayland, no client-side deco
+        # Qt Wayland optimizations
         QT_QPA_PLATFORM = "wayland";
         QT_QPA_PLATFORMTHEME = "gtk3";
         QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
+        QT_AUTO_SCREEN_SCALE_FACTOR = "1";
+        QT_WAYLAND_FORCE_DPI = "physical";
 
-        # Java focus behavior (harmless)
+        # Java AWT compatibility
         _JAVA_AWT_WM_NONREPARENTING = "1";
+
+        # SDL2 Wayland preference (for games)
+        SDL_VIDEODRIVER = "wayland,x11";
+
+        # GTK prefer dark theme (optional but common)
+        GTK_THEME = "Adwaita:dark";
+
+        # Font rendering enhancement for sharper text
+        FREETYPE_PROPERTIES = "cff:no-stem-darkening=0 autofitter:no-stem-darkening=0";
       };
       xwayland-satellite = {
         enable = true;

@@ -2,26 +2,36 @@
   xdg.portal = {
     enable = true;
 
-    # Use GTK for file dialogs; WLR for screencast/screen-share on Wayland
+    # Optimized portals for Wayland-native performance
     extraPortals = [
       pkgs.xdg-desktop-portal-gtk
       pkgs.xdg-desktop-portal-wlr
     ];
 
-    # Keep defaults simple and compositor-agnostic
+    # Specific portal assignments for optimal Wayland performance
     config = {
-      common.default = [
-        "wlr"
-        "gtk"
-      ];
-      niri.default = [
-        "wlr"
-        "gtk"
-      ];
-      gtk.default = "gtk";
+      common = {
+        default = ["gtk"];
+        # WLR handles Wayland-specific features better
+        "org.freedesktop.impl.portal.Screenshot" = ["wlr"];
+        "org.freedesktop.impl.portal.ScreenCast" = ["wlr"];
+        "org.freedesktop.impl.portal.Wallpaper" = ["wlr"];
+        # GTK handles file dialogs and general UI better
+        "org.freedesktop.impl.portal.FileChooser" = ["gtk"];
+        "org.freedesktop.impl.portal.AppChooser" = ["gtk"];
+      };
+      niri = {
+        default = ["gtk"];
+        # Same optimized assignments for Niri
+        "org.freedesktop.impl.portal.Screenshot" = ["wlr"];
+        "org.freedesktop.impl.portal.ScreenCast" = ["wlr"];
+        "org.freedesktop.impl.portal.Wallpaper" = ["wlr"];
+        "org.freedesktop.impl.portal.FileChooser" = ["gtk"];
+        "org.freedesktop.impl.portal.AppChooser" = ["gtk"];
+      };
     };
   };
 
-  # Optional but often helpful when using GTK apps & portals:
+  # Essential for GTK apps and portals on Wayland
   programs.dconf.enable = true;
 }
