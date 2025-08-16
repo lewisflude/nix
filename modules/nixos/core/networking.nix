@@ -132,29 +132,31 @@
     };
   };
 
-  services.resolved.enable = true;
+  services = {
+    resolved.enable = true;
+
+    avahi = {
+      enable = true;
+      nssmdns4 = true;
+      openFirewall = true;
+      publish = {
+        enable = true;
+        addresses = true;
+        domain = true;
+        hinfo = true;
+        userServices = true;
+        workstation = true;
+      };
+    };
+
+    dbus = {
+      implementation = "broker";
+      packages = [pkgs.avahi];
+    };
+  };
 
   boot.kernel.sysctl = {
     "net.ipv4.conf.all.forwarding" = 1;
     "net.ipv6.conf.all.forwarding" = 1;
-  };
-
-  services.avahi = {
-    enable = true;
-    nssmdns4 = true;
-    openFirewall = true;
-    publish = {
-      enable = true;
-      addresses = true;
-      domain = true;
-      hinfo = true;
-      userServices = true;
-      workstation = true;
-    };
-  };
-
-  services.dbus = {
-    implementation = "broker";
-    packages = [pkgs.avahi];
   };
 }

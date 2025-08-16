@@ -91,9 +91,11 @@ in {
           "file-encoding"
           "file-type"
         ];
-        mode.normal = "NORMAL";
-        mode.insert = "INSERT";
-        mode.select = "SELECT";
+        mode = {
+          normal = "NORMAL";
+          insert = "INSERT";
+          select = "SELECT";
+        };
       };
 
       editor.whitespace = {
@@ -116,9 +118,11 @@ in {
       };
 
       keys.normal = {
-        space.space = "file_picker";
-        space.w = ":w";
-        space.q = ":q";
+        space = {
+          space = "file_picker";
+          w = ":w";
+          q = ":q";
+        };
         "A-," = "goto_previous_buffer";
         "A-." = "goto_next_buffer";
         "A-w" = ":buffer-close";

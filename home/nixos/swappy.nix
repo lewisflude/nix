@@ -17,17 +17,21 @@
     auto_save=false
   '';
 
-  # Ensure Screenshots directory exists
-  home.file."Pictures/Screenshots/.keep".text = "";
+  home.file = {
+    # Ensure Screenshots directory exists
+    "Pictures/Screenshots/.keep".text = "";
 
-  # Create a wrapper script to fix GTK/scaling issues
-  home.file."bin/swappy-fixed".text = ''
-    #!/usr/bin/env bash
-    export GDK_SCALE=1
-    export GDK_DPI_SCALE=1
-    export GTK_THEME=Catppuccin-GTK-Dark
-    # Filter out specific GTK theme parsing warnings while preserving other messages
-    exec ${pkgs.swappy}/bin/swappy "$@" 2> >(grep -v "Theme parsing error: gtk.css" >&2)
-  '';
-  home.file."bin/swappy-fixed".executable = true;
+    # Create a wrapper script to fix GTK/scaling issues
+    "bin/swappy-fixed" = {
+      text = ''
+        #!/usr/bin/env bash
+        export GDK_SCALE=1
+        export GDK_DPI_SCALE=1
+        export GTK_THEME=Catppuccin-GTK-Dark
+        # Filter out specific GTK theme parsing warnings while preserving other messages
+        exec ${pkgs.swappy}/bin/swappy "$@" 2> >(grep -v "Theme parsing error: gtk.css" >&2)
+      '';
+      executable = true;
+    };
+  };
 }
