@@ -109,10 +109,10 @@ in {
 
   config = mkIf cfg.enable {
     home.file = builtins.listToAttrs (
-        map (target: {
-          name = "${target.directory}/${target.fileName}";
-          value.text = builtins.toJSON mcpConfigJson;
-        }) (attrValues cfg.targets)
-      );
+      map (target: {
+        name = "${target.directory}/${target.fileName}";
+        value.text = builtins.toJSON mcpConfigJson;
+      }) (attrValues cfg.targets)
+    );
   };
 }

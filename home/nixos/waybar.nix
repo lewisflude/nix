@@ -152,80 +152,82 @@ in {
     };
   };
 
-  # Brightness helper script that stores the last set value
-  home.file."bin/brightness" = {
-    text = ''
-      #!/usr/bin/env bash
-      CACHE_FILE="$HOME/.config/niri/last_brightness"
-      mkdir -p "$(dirname "$CACHE_FILE")"
-      case "$1" in
-        get)
-          if [ -f "$CACHE_FILE" ]; then
-            cat "$CACHE_FILE"
-          else
-            brightness=$(timeout 2 ddcutil getvcp 10 --brief 2>/dev/null | awk '{print $4}' || echo "50")
-            echo "$brightness" | tee "$CACHE_FILE"
-          fi
-          ;;
-        up)
-          current=$(cat "$CACHE_FILE" 2>/dev/null || echo "50")
-          new=$((current + 5)); [ $new -gt 100 ] && new=100
-          echo "$new" | tee "$CACHE_FILE"
-          nohup timeout 3 ddcutil setvcp 10 "$new" --brief >/dev/null 2>&1 &
-          ;;
-        down)
-          current=$(cat "$CACHE_FILE" 2>/dev/null || echo "50")
-          new=$((current - 5)); [ $new -lt 0 ] && new=0
-          echo "$new" | tee "$CACHE_FILE"
-          nohup timeout 3 ddcutil setvcp 10 "$new" --brief >/dev/null 2>&1 &
-          ;;
-        set)
-          echo "$2" | tee "$CACHE_FILE"
-          nohup timeout 3 ddcutil setvcp 10 "$2" --brief >/dev/null 2>&1 &
-          ;;
-      esac
-    '';
-    executable = true;
-  };
+  home.file = {
+    # Brightness helper script that stores the last set value
+    "bin/brightness" = {
+      text = ''
+        #!/usr/bin/env bash
+        CACHE_FILE="$HOME/.config/niri/last_brightness"
+        mkdir -p "$(dirname "$CACHE_FILE")"
+        case "$1" in
+          get)
+            if [ -f "$CACHE_FILE" ]; then
+              cat "$CACHE_FILE"
+            else
+              brightness=$(timeout 2 ddcutil getvcp 10 --brief 2>/dev/null | awk '{print $4}' || echo "50")
+              echo "$brightness" | tee "$CACHE_FILE"
+            fi
+            ;;
+          up)
+            current=$(cat "$CACHE_FILE" 2>/dev/null || echo "50")
+            new=$((current + 5)); [ $new -gt 100 ] && new=100
+            echo "$new" | tee "$CACHE_FILE"
+            nohup timeout 3 ddcutil setvcp 10 "$new" --brief >/dev/null 2>&1 &
+            ;;
+          down)
+            current=$(cat "$CACHE_FILE" 2>/dev/null || echo "50")
+            new=$((current - 5)); [ $new -lt 0 ] && new=0
+            echo "$new" | tee "$CACHE_FILE"
+            nohup timeout 3 ddcutil setvcp 10 "$new" --brief >/dev/null 2>&1 &
+            ;;
+          set)
+            echo "$2" | tee "$CACHE_FILE"
+            nohup timeout 3 ddcutil setvcp 10 "$2" --brief >/dev/null 2>&1 &
+            ;;
+        esac
+      '';
+      executable = true;
+    };
 
-  # Backup-status helper script
-  home.file."bin/backup-status" = {
-    text = ''
-      #!/usr/bin/env bash
-      HOME_DIR="$HOME"
-      stats=$(rsync --dry-run --stats "$HOME_DIR/data/" /backup/ 2>/dev/null)
-      transferred=$(awk '/Number of files transferred/ {print $NF}' <<<"$stats")
-      total=$(awk '/Total file size/ {print $NF}' <<<"$stats")
-      if (( total > 0 )); then pct=$((100 * transferred / total)); else pct=100; fi
-      echo "{\"percentage\":$pct}"
-    '';
-    executable = true;
-  };
+    # Backup-status helper script
+    "bin/backup-status" = {
+      text = ''
+        #!/usr/bin/env bash
+        HOME_DIR="$HOME"
+        stats=$(rsync --dry-run --stats "$HOME_DIR/data/" /backup/ 2>/dev/null)
+        transferred=$(awk '/Number of files transferred/ {print $NF}' <<<"$stats")
+        total=$(awk '/Total file size/ {print $NF}' <<<"$stats")
+        if (( total > 0 )); then pct=$((100 * transferred / total)); else pct=100; fi
+        echo "{\"percentage\":$pct}"
+      '';
+      executable = true;
+    };
 
-  # Script that converts load to percentage and uses 'alt' for icon selection
-  home.file."bin/system-spark-percentage" = {
-    text = ''
-      #!/usr/bin/env bash
-      IFS=',' read -r load1 load5 load15 _ < <(uptime | sed -E 's/.*load average: //')
+    # Script that converts load to percentage and uses 'alt' for icon selection
+    "bin/system-spark-percentage" = {
+      text = ''
+        #!/usr/bin/env bash
+        IFS=',' read -r load1 load5 load15 _ < <(uptime | sed -E 's/.*load average: //')
 
-      # Convert 1-minute load to percentage (load of 2.0 = 100%)
-      load_pct=$(echo "$load1" | awk '{printf "%d", ($1/2.0)*100}')
-      if [ $load_pct -gt 100 ]; then load_pct=100; fi
+        # Convert 1-minute load to percentage (load of 2.0 = 100%)
+        load_pct=$(echo "$load1" | awk '{printf "%d", ($1/2.0)*100}')
+        if [ $load_pct -gt 100 ]; then load_pct=100; fi
 
-      # Determine icon category based on load percentage
-      if [ $load_pct -ge 80 ]; then
-        alt="high"
-      elif [ $load_pct -ge 50 ]; then
-        alt="medium"
-      elif [ $load_pct -ge 25 ]; then
-        alt="med-low"
-      else
-        alt="low"
-      fi
+        # Determine icon category based on load percentage
+        if [ $load_pct -ge 80 ]; then
+          alt="high"
+        elif [ $load_pct -ge 50 ]; then
+          alt="medium"
+        elif [ $load_pct -ge 25 ]; then
+          alt="med-low"
+        else
+          alt="low"
+        fi
 
-      # Output JSON with percentage and alt for icon selection
-      printf '{"percentage":%d,"alt":"%s"}' "$load_pct" "$alt" | jq --unbuffered --compact-output
-    '';
-    executable = true;
+        # Output JSON with percentage and alt for icon selection
+        printf '{"percentage":%d,"alt":"%s"}' "$load_pct" "$alt" | jq --unbuffered --compact-output
+      '';
+      executable = true;
+    };
   };
 }

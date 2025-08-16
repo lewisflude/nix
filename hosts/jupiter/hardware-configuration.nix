@@ -12,22 +12,24 @@
     xfsprogs
   ];
   boot = {
-    initrd.supportedFilesystems = ["zfs"];
-    initrd.availableKernelModules = [
-      "xhci_pci"
-      "ahci"
-      "nvme"
-      "thunderbolt"
-      "usbhid"
-      "usb_storage"
-      "sd_mod"
-      "zfs"
-      "veth"
-      "bridge"
-      "br_netfilter"
-      "xt_nat"
-    ];
-    initrd.kernelModules = [];
+    initrd = {
+      supportedFilesystems = ["zfs"];
+      availableKernelModules = [
+        "xhci_pci"
+        "ahci"
+        "nvme"
+        "thunderbolt"
+        "usbhid"
+        "usb_storage"
+        "sd_mod"
+        "zfs"
+        "veth"
+        "bridge"
+        "br_netfilter"
+        "xt_nat"
+      ];
+      kernelModules = [];
+    };
     kernelModules = [
       "kvm-intel"
       "zfs"
@@ -35,9 +37,12 @@
     ];
     extraModulePackages = [];
   };
-  hardware.cpu.intel.updateMicrocode = true;
-  hardware.enableAllFirmware = true;
-  hardware.i2c.enable = true;
+
+  hardware = {
+    cpu.intel.updateMicrocode = true;
+    enableAllFirmware = true;
+    i2c.enable = true;
+  };
 
   services.udev.extraRules = ''
     # Use BFQ scheduler for HDDs

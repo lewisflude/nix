@@ -12,13 +12,14 @@ in {
     opensc
   ];
 
-  security.pam.services.sudo_local.touchIdAuth = true;
-  security.pam.services.sudo_local.watchIdAuth = true;
-
   security.pam.services = {
-    sudo_local.text = ''
-      auth sufficient ${pkgs.pam_u2f}/lib/security/pam_u2f.so cue pinverification=1 userpresence=1
-    '';
+    sudo_local = {
+      touchIdAuth = true;
+      watchIdAuth = true;
+      text = ''
+        auth sufficient ${pkgs.pam_u2f}/lib/security/pam_u2f.so cue pinverification=1 userpresence=1
+      '';
+    };
   };
 
   environment.etc."u2f-mappings".source = u2fMappings; # immutable store path  [oai_citation:4‡joinemm.dev](https://joinemm.dev/blog/yubikey-nixos-guide)

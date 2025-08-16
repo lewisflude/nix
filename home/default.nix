@@ -6,11 +6,12 @@
 }: let
   platformLib = import ../lib/functions.nix {inherit lib system;};
 in {
-  home.stateVersion = "24.05";
-  home.username = username;
-
-  # Platform-specific home directory
-  home.homeDirectory = platformLib.homeDir username;
+  home = {
+    stateVersion = "24.05";
+    inherit username;
+    # Platform-specific home directory
+    homeDirectory = platformLib.homeDir username;
+  };
 
   imports =
     [

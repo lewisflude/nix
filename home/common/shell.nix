@@ -389,89 +389,109 @@ in {
     };
   };
 
-  home.sessionVariables = {
-    EDITOR = "hx";
-    DIRSTACKSIZE = "20";
-    NH_FLAKE = "${config.home.homeDirectory}/.config/nix";
-  };
+  home = {
+    sessionVariables = {
+      EDITOR = "hx";
+      DIRSTACKSIZE = "20";
+      NH_FLAKE = "${config.home.homeDirectory}/.config/nix";
+    };
 
-  home.file = {
-    ".p10k.zsh".source = ./lib/p10k.zsh;
-  };
+    file = {
+      ".p10k.zsh".source = ./lib/p10k.zsh;
+    };
 
-  home.packages = with pkgs; [
-    (writeShellApplication {
-      name = "system-update";
-      runtimeInputs = [
-        nh
-        nix
-        coreutils
-      ];
-      text = ''
-        set -Eeuo pipefail
-        IFS=$'\n\t'
+    packages = with pkgs; [
+      (writeShellApplication {
+        name = "system-update";
+        runtimeInputs = [
+          nh
+          nix
+          coreutils
+        ];
+        text = ''
+          set -Eeuo pipefail
+          IFS=$'\n\t'
 
-        FLAKE_PATH="''${NH_FLAKE:-${config.home.homeDirectory}/.config/nix}"
-        NH_TARGET="${
-          if pkgs.stdenv.isDarwin
-          then "darwin"
-          else "os"
-        }"
+          FLAKE_PATH="''${NH_FLAKE:-${config.home.homeDirectory}/.config/nix}"
+          NH_TARGET="${
+            if pkgs.stdenv.isDarwin
+            then "darwin"
+            else "os"
+          }"
 
-        # If this shell has NoNewPrivs=1 (e.g., launched from a sandboxed user service),
-        # re-exec this command via systemd-run with NoNewPrivileges disabled so sudo works.
-        if [ "$(awk '/NoNewPrivs/ {print $2}' /proc/self/status 2>/dev/null || echo 0)" = "1" ]; then
-          if command -v systemd-run >/dev/null 2>&1; then
-            echo "Detected NoNewPrivs=1; re-executing via systemd-run to allow sudo…"
-            exec systemd-run --user --pty --same-dir --wait --collect -p NoNewPrivileges=no system-update "$@"
-          else
-            echo "NoNewPrivs=1 and systemd-run not found. Run from a non-sandboxed terminal or a VT."
-            exit 1
+          # If this shell has NoNewPrivs=1 (e.g., launched from a sandboxed user service),
+          # re-exec this command via systemd-run with NoNewPrivileges disabled so sudo works.
+          if [ "$(awk '/NoNewPrivs/ {print $2}' /proc/self/status 2>/dev/null || echo 0)" = "1" ]; then
+            if command -v systemd-run >/dev/null 2>&1; then
+              echo "Detected NoNewPrivs=1; re-executing via systemd-run to allow sudo…"
+              exec systemd-run --user --pty --same-dir --wait --collect -p NoNewPrivileges=no system-update "$@"
+            else
+              echo "NoNewPrivs=1 and systemd-run not found. Run from a non-sandboxed terminal or a VT."
+              exit 1
+            fi
           fi
-        fi
 
-        UPDATE_INPUTS=0
-        RUN_GC=0
-        BUILD_ONLY=0
-        DRY_RUN=0
-        for arg in "$@"; do
-          case "$arg" in
-            --full) UPDATE_INPUTS=1; RUN_GC=1 ;;
-            --inputs) UPDATE_INPUTS=1 ;;
-            --gc) RUN_GC=1 ;;
-            --build-only) BUILD_ONLY=1 ;;
-            --check|--dry-run) DRY_RUN=1 ;;
-            --help)
-              echo "Usage: system-update [--full|--inputs|--gc|--build-only|--check|--help]"
-              exit 0 ;;
-          esac
-        done
+          UPDATE_INPUTS=0
+          RUN_GC=0
+          BUILD_ONLY=0
+          DRY_RUN=0
+          for arg in "$@"; do
+            case "$arg" in
+              --full) UPDATE_INPUTS=1; RUN_GC=1 ;;
+              --inputs) UPDATE_INPUTS=1 ;;
+              --gc) RUN_GC=1 ;;
+              --build-only) BUILD_ONLY=1 ;;
+              --check|--dry-run) DRY_RUN=1 ;;
+              --help)
+                echo "Usage: system-update [--full|--inputs|--gc|--build-only|--check|--help]"
+                exit 0 ;;
+            esac
+          done
 
-        if [[ $UPDATE_INPUTS -eq 1 ]]; then
-          echo "Updating inputs…"
-          nix flake update --flake "$FLAKE_PATH"
-        fi
-
-        if [[ $DRY_RUN -eq 1 ]]; then
-          echo "Checking switch…"
-          nh "$NH_TARGET" switch -- --dry-run "$FLAKE_PATH"
-        else
-          if [[ $BUILD_ONLY -eq 1 ]]; then
-            echo "Building…"
-            nh "$NH_TARGET" build "$FLAKE_PATH"
-          else
-            echo "Switching…"
-            nh "$NH_TARGET" switch "$FLAKE_PATH"
+          if [[ $UPDATE_INPUTS -eq 1 ]]; then
+            echo "Updating inputs…"
+            nix flake update --flake "$FLAKE_PATH"
           fi
-        fi
 
-        if [[ $RUN_GC -eq 1 ]]; then
-          echo "Cleaning…"
-          nh clean all
-        fi
+          if [[ $DRY_RUN -eq 1 ]]; then
+            echo "Checking switch…"
+            nh "$NH_TARGET" switch -- --dry-run "$FLAKE_PATH"
+          else
+            if [[ $BUILD_ONLY -eq 1 ]]; then
+              echo "Building…"
+              nh "$NH_TARGET" build "$FLAKE_PATH"
+            else
+              echo "Switching…"
+              nh "$NH_TARGET" switch "$FLAKE_PATH"
+            fi
+          fi
 
-        echo "Done."
-      '';
-    })
-  ];
+          if [[ $RUN_GC -eq 1 ]]; then
+            echo "Cleaning…"
+            nh clean all
+          fi
+
+          echo "Done."
+        '';
+      })
+
+      # Development CLI - Unified interface for Nix development tools
+      (writeShellApplication {
+        name = "dev";
+        runtimeInputs = with pkgs; [
+          bash
+          coreutils
+          findutils
+          git
+          nix
+          fzf
+          jq
+        ];
+        text = ''
+          CONFIG_ROOT="${config.home.homeDirectory}/.config/nix"
+          exec "$CONFIG_ROOT/scripts/build/dev.sh" "$@"
+        '';
+      })
+    ];
+  };
 }

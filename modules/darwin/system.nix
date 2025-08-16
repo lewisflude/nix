@@ -43,106 +43,111 @@
     '';
   };
 
-  system.primaryUser = username;
+  system = {
+    primaryUser = username;
 
-  system.defaults.dock.persistent-apps = let
-    homebrewApps = lib.filter (app: builtins.pathExists app) [
-      "/Applications/Docker.app"
-      "/Applications/Google Chrome Canary.app"
-      "/Applications/Figma.app"
-      "/Applications/Notion.app"
-      "/Applications/Obsidian.app"
-      "/Applications/Slack.app"
-      "/Applications/Linear.app"
-      "/Applications/Raycast.app"
-      "/Applications/Beekeeper Studio.app"
-      "/Applications/ChatGPT.app"
-      "/Applications/Steam.app"
+    defaults = lib.mkMerge [
+      {
+        dock.persistent-apps = let
+          homebrewApps = lib.filter (app: builtins.pathExists app) [
+            "/Applications/Docker.app"
+            "/Applications/Google Chrome Canary.app"
+            "/Applications/Figma.app"
+            "/Applications/Notion.app"
+            "/Applications/Obsidian.app"
+            "/Applications/Slack.app"
+            "/Applications/Linear.app"
+            "/Applications/Raycast.app"
+            "/Applications/Beekeeper Studio.app"
+            "/Applications/ChatGPT.app"
+            "/Applications/Steam.app"
+          ];
+
+          systemApps = [
+            "/System/Applications/System Settings.app"
+          ];
+        in
+          homebrewApps ++ systemApps;
+      }
+      {
+        dock = {
+          persistent-others = [
+            "/Users/${username}/Downloads"
+            "/Users/${username}/Documents"
+          ];
+        };
+
+        # Control Center Settings
+        controlcenter = {
+          NowPlaying = true;
+          Sound = true;
+        };
+
+        CustomUserPreferences = {
+          "com.apple.screensaver" = {
+            askForPassword = 0;
+            askForPasswordDelay = 0;
+          };
+          "com.apple.screencapture" = {
+            location = "~/Desktop";
+            type = "png";
+            disable-shadow = true;
+          };
+          "com.apple.finder" = {
+            AppleShowAllExtensions = true;
+            AppleShowAllFiles = true;
+            WebKitDeveloperExtras = true;
+            ShowPathbar = true;
+            ShowStatusBar = true;
+            FXPreferredViewStyle = "Nlsv"; # List view
+            ShowTabView = true;
+            ShowSidebar = true;
+          };
+          "com.apple.Safari" = {
+            "com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled" = true;
+          };
+          "com.apple.TimeMachine" = {
+            DoNotOfferNewDisksForBackup = false;
+          };
+          "com.apple.menuextra.battery" = {
+            ShowPercent = true;
+          };
+        };
+
+        # Global Domain Settings
+        NSGlobalDomain = {
+          # Text Input
+          NSAutomaticCapitalizationEnabled = false;
+          NSAutomaticPeriodSubstitutionEnabled = false;
+          NSAutomaticQuoteSubstitutionEnabled = false;
+          NSAutomaticDashSubstitutionEnabled = false;
+
+          # Keyboard
+          KeyRepeat = 5;
+          InitialKeyRepeat = 15;
+
+          # Trackpad
+          "com.apple.trackpad.scaling" = 0.5;
+          "com.apple.trackpad.trackpadCornerClickBehavior" = 1;
+
+          # Mouse and Trackpad
+          "com.apple.swipescrolldirection" = false; # Natural scrolling
+          "com.apple.mouse.tapBehavior" = 1; # Tap to click
+
+          # Sound
+          "com.apple.sound.beep.feedback" = 0; # Disable system sound effects
+          "com.apple.sound.beep.volume" = 0.0; # Mute system sound
+
+          # Function Keys
+          "com.apple.keyboard.fnState" = true; # Use F1-F12 keys as standard function keys
+        };
+
+        # Trackpad Settings
+        trackpad = {
+          Clicking = true;
+          TrackpadRightClick = true;
+        };
+      }
     ];
-
-    systemApps = [
-      "/System/Applications/System Settings.app"
-    ];
-  in
-    homebrewApps ++ systemApps;
-
-  system.defaults = {
-    dock = {
-      persistent-others = [
-        "/Users/${username}/Downloads"
-        "/Users/${username}/Documents"
-      ];
-    };
-
-    # Control Center Settings
-    controlcenter = {
-      NowPlaying = true;
-      Sound = true;
-    };
-
-    CustomUserPreferences = {
-      "com.apple.screensaver" = {
-        askForPassword = 0;
-        askForPasswordDelay = 0;
-      };
-      "com.apple.screencapture" = {
-        location = "~/Desktop";
-        type = "png";
-        disable-shadow = true;
-      };
-      "com.apple.finder" = {
-        AppleShowAllExtensions = true;
-        AppleShowAllFiles = true;
-        WebKitDeveloperExtras = true;
-        ShowPathbar = true;
-        ShowStatusBar = true;
-        FXPreferredViewStyle = "Nlsv"; # List view
-        ShowTabView = true;
-        ShowSidebar = true;
-      };
-      "com.apple.Safari" = {
-        "com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled" = true;
-      };
-      "com.apple.TimeMachine" = {
-        DoNotOfferNewDisksForBackup = false;
-      };
-      "com.apple.menuextra.battery" = {
-        ShowPercent = true;
-      };
-    };
-
-    # Global Domain Settings
-    NSGlobalDomain = {
-      # Text Input
-      NSAutomaticCapitalizationEnabled = false;
-      NSAutomaticPeriodSubstitutionEnabled = false;
-      NSAutomaticQuoteSubstitutionEnabled = false;
-      NSAutomaticDashSubstitutionEnabled = false;
-
-      # Keyboard
-      KeyRepeat = 5;
-      InitialKeyRepeat = 15;
-
-      # Trackpad
-      "com.apple.trackpad.scaling" = 0.5;
-      "com.apple.trackpad.trackpadCornerClickBehavior" = 1;
-
-      # Mouse and Trackpad
-      "com.apple.swipescrolldirection" = false; # Natural scrolling
-      "com.apple.mouse.tapBehavior" = 1; # Tap to click
-
-      # Sound
-      "com.apple.sound.beep.feedback" = 0; # Disable system sound effects
-      "com.apple.sound.beep.volume" = 0.0; # Mute system sound
-
-      # Function Keys
-      "com.apple.keyboard.fnState" = true; # Use F1-F12 keys as standard function keys
-    };
-
-    # Trackpad Settings
-    trackpad = {
-      Clicking = true;
-      TrackpadRightClick = true;
-    };
   };
 }
