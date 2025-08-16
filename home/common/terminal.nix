@@ -67,6 +67,8 @@ in {
       font-synthetic-style = true;
 
       scrollback-limit = 100000;
+
+      keybind = "shift+enter=text:\\n";
     };
   };
 }
