@@ -2,7 +2,8 @@
   pkgs,
   config,
   ...
-}: let
+}:
+let
   # Workspace icons mapping for maintainability (Iosevka Nerd Font)
   workspaceIcons = {
     "1" = ""; # Browser
@@ -14,7 +15,8 @@
   };
   uwsm = "${pkgs.uwsm}/bin/uwsm";
   ghostty = "${pkgs.ghostty}/bin/ghostty";
-in {
+in
+{
   programs.waybar = {
     enable = true;
     systemd.enable = true;
@@ -26,7 +28,7 @@ in {
         log-level = 3;
         layer = "bottom";
         position = "top";
-        output = ["DP-1"];
+        output = [ "DP-1" ];
 
         modules-left = [
           "niri/workspaces"
@@ -139,7 +141,7 @@ in {
           ];
           tooltip-format = "Device: {desc}\nVolume: {volume}%";
           scroll-step = 5;
-          on-click = "${uwsm} app -- pavucontrol";
+          on-click = "pwvucontrol";
         };
 
         # SwayNC notification center integration

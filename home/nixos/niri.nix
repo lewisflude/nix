@@ -2,10 +2,12 @@
   pkgs,
   config,
   ...
-}: let
+}:
+let
   # Import theme constants
-  themeConstants = import ./theme-constants.nix {inherit config pkgs;};
-in {
+  themeConstants = import ./theme-constants.nix { inherit config pkgs; };
+in
+{
   home.packages = with pkgs; [
     swww
     gtklock
@@ -171,6 +173,7 @@ in {
         # Font rendering enhancement for sharper text
         FREETYPE_PROPERTIES = "cff:no-stem-darkening=0 autofitter:no-stem-darkening=0";
       };
+
       xwayland-satellite = {
         enable = true;
         path = "${pkgs.xwayland-satellite-unstable}/bin/xwayland-satellite";

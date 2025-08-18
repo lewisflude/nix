@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   environment.systemPackages = with pkgs; [
     # Core Wayland tools
     wl-clipboard
@@ -18,7 +19,6 @@
 
     # System utilities
     playerctl
-    pavucontrol
 
     # File manager integration
     xdg-utils
