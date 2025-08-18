@@ -6,6 +6,11 @@
 }: let
   platformLib = import ../lib/functions.nix {inherit lib system;};
 
+  commonTools = with pkgs; [
+    pre-commit
+    git
+  ];
+
   devShellsCommon = {
     nextjs = import ./projects/nextjs.nix {inherit pkgs;};
 
@@ -18,7 +23,7 @@
     shell-selector = import ./utils/shell-selector.nix {inherit pkgs;};
 
     node = pkgs.mkShell {
-      buildInputs = with pkgs; [nodejs_24];
+      buildInputs = with pkgs; [nodejs_24] ++ commonTools;
       shellHook = ''
         echo "🚀 Node.js development environment loaded"
         echo "Node version: $(node --version)"
@@ -27,17 +32,20 @@
     };
 
     python = pkgs.mkShell {
-      buildInputs = with pkgs; [
-        python313
-        python313Packages.pip
-        python313Packages.virtualenv
-        python313Packages.pytest
-        python313Packages.black
-        python313Packages.isort
-        python313Packages.mypy
-        python313Packages.ruff
-        poetry
-      ];
+      buildInputs = with pkgs;
+        [
+          python313
+          python313Packages.pip
+          python313Packages.virtualenv
+          python313Packages.pytest
+          python313Packages.black
+          python313Packages.isort
+          python313Packages.mypy
+          python313Packages.ruff
+          poetry
+        ]
+        ++ commonTools;
+
       shellHook = ''
         echo "🐍 Python development environment loaded"
         echo "Python version: $(python --version)"
@@ -46,15 +54,18 @@
     };
 
     rust = pkgs.mkShell {
-      buildInputs = with pkgs; [
-        rustc
-        cargo
-        rust-analyzer
-        clippy
-        cargo-watch
-        cargo-edit
-        cargo-audit
-      ];
+      buildInputs = with pkgs;
+        [
+          rustc
+          cargo
+          rust-analyzer
+          clippy
+          cargo-watch
+          cargo-edit
+          cargo-audit
+        ]
+        ++ commonTools;
+
       shellHook = ''
         echo "🦀 Rust development environment loaded"
         echo "Rust version: $(rustc --version)"
@@ -63,13 +74,16 @@
     };
 
     go = pkgs.mkShell {
-      buildInputs = with pkgs; [
-        go
-        gopls
-        golangci-lint
-        gotools
-        delve
-      ];
+      buildInputs = with pkgs;
+        [
+          go
+          gopls
+          golangci-lint
+          gotools
+          delve
+        ]
+        ++ commonTools;
+
       shellHook = ''
         echo "🐹 Go development environment loaded"
         echo "Go version: $(go version)"
@@ -79,12 +93,15 @@
     };
 
     web = pkgs.mkShell {
-      buildInputs = with pkgs; [
-        nodejs_24
-        tailwindcss-language-server
-        html-tidy
-        sass
-      ];
+      buildInputs = with pkgs;
+        [
+          nodejs_24
+          tailwindcss-language-server
+          html-tidy
+          sass
+        ]
+        ++ commonTools;
+
       shellHook = ''
         echo "🌐 Web development environment loaded"
         echo "Node version: $(node --version)"
@@ -93,12 +110,15 @@
     };
 
     solana = pkgs.mkShell {
-      buildInputs = with pkgs; [
-        solana-cli
-        rustc
-        cargo
-        nodejs_24
-      ];
+      buildInputs = with pkgs;
+        [
+          solana-cli
+          rustc
+          cargo
+          nodejs_24
+        ]
+        ++ commonTools;
+
       shellHook = ''
         echo "⚡ Solana development environment loaded"
         echo "Solana version: $(solana --version)"
@@ -130,14 +150,17 @@
 
   devShellsLinuxOnly = platformLib.ifLinux {
     love2d = pkgs.mkShell {
-      buildInputs = with pkgs; [
-        love
-        lua
-        lua-language-server
-        stylua
-        selene
-        luaPackages.luacheck
-      ];
+      buildInputs = with pkgs;
+        [
+          love
+          lua
+          lua-language-server
+          stylua
+          selene
+          luaPackages.luacheck
+        ]
+        ++ commonTools;
+
       shellHook = ''
         echo "🎮 Love2D game development environment loaded"
         echo "Love2D version: $(love --version 2>/dev/null || echo 'not available')"
