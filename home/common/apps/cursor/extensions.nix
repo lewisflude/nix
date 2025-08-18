@@ -1,7 +1,8 @@
 # Cursor/VSCode Extensions Configuration
 # Comprehensive extension collection organized by category for senior developers
 # Modular design allows for easy customization and selective loading
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   vsc = pkgs.vscode-extensions;
 
   # ==== CORE THEME & UI EXTENSIONS ====
@@ -18,6 +19,8 @@
   coreLangs = [
     vsc.jnoortheen.nix-ide
     vsc.bradlc.vscode-tailwindcss
+    vsc.rust-lang.rust-analyzer # Rust language server with advanced analysis
+    vsc.tamasfe.even-better-toml # Enhanced TOML support for Cargo.toml
   ];
 
   # ==== EXTENDED PROGRAMMING LANGUAGES ====
@@ -38,6 +41,7 @@
   # ==== DEBUGGING & TESTING ====
   debugging = [
     # Keep minimal - only add if you actually use testing
+    vsc.vadimcn.vscode-lldb # Native debugger for Rust/C++ using LLDB
   ];
 
   # ==== DATABASE & DATA TOOLS ====
@@ -58,12 +62,14 @@
   ];
 
   codeQuality = [
+    vsc.usernamehw.errorlens # Enhanced error/warning display inline
   ];
 
   # ==== AI & ASSISTANCE ====
 
   # ==== OPTIONAL/SPECIALIZED EXTENSIONS ====
   specialized = [
+    vsc.serayuzgur.crates # Rust crate dependency management and version info
   ];
 
   # ==== EXTENSION SETS COMPOSITION ====
@@ -117,7 +123,8 @@
 
   # Frontend developer collection
   frontend = essentials ++ webDev;
-in {
+in
+{
   inherit extSets;
 
   # Primary extension list (essentials + commonly used)
