@@ -2,8 +2,7 @@
   pkgs,
   config,
   ...
-}:
-let
+}: let
   # Workspace icons mapping for maintainability (Iosevka Nerd Font)
   workspaceIcons = {
     "1" = ""; # Browser
@@ -15,8 +14,7 @@ let
   };
   uwsm = "${pkgs.uwsm}/bin/uwsm";
   ghostty = "${pkgs.ghostty}/bin/ghostty";
-in
-{
+in {
   programs.waybar = {
     enable = true;
     systemd.enable = true;
@@ -28,7 +26,7 @@ in
         log-level = 3;
         layer = "bottom";
         position = "top";
-        output = [ "DP-1" ];
+        output = ["DP-1"];
 
         modules-left = [
           "niri/workspaces"
@@ -147,16 +145,16 @@ in
         # SwayNC notification center integration
         "custom/notifications" = {
           tooltip = false;
-          format = "{icon} {alt}";
+          format = "{icon}";
           format-icons = {
-            notification = " ";
-            none = " ";
-            dnd-notification = " ";
-            dnd-none = " ";
-            inhibited-notification = " ";
-            inhibited-none = " ";
-            dnd-inhibited-notification = " ";
-            dnd-inhibited-none = " ";
+            "notification" = "<span foreground='red'><sup></sup></span>";
+            "none" = "";
+            "dnd-notification" = "<span foreground='red'><sup></sup></span>";
+            "dnd-none" = "";
+            "inhibited-notification" = "<span foreground='red'><sup></sup></span>";
+            "inhibited-none" = "";
+            "dnd-inhibited-notification" = "<span foreground='red'><sup></sup></span>";
+            "dnd-inhibited-none" = "";
           };
           return-type = "json";
           exec-if = "which swaync-client";
