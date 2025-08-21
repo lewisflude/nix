@@ -38,7 +38,9 @@
     # Fonts required for applications
     font-awesome # Required for swappy icons
   ];
-
+  services.cliphist = {
+    enable = true;
+  };
   # XDG MIME type associations for better file handling
   xdg.mimeApps = {
     enable = true;

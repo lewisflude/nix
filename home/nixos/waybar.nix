@@ -24,7 +24,7 @@ in {
     settings = {
       mainBar = {
         log-level = 3;
-        layer = "bottom";
+        layer = "top";
         position = "top";
         output = ["DP-1"];
 
@@ -42,9 +42,9 @@ in {
           "custom/alerts"
           "custom/brightness"
           "pulseaudio"
-          "custom/notifications"
           "clock"
           "tray"
+          "custom/notifications"
         ];
 
         # Workspace icons

@@ -10,7 +10,7 @@
       inputs.yazi.overlays.default
 
       # Niri overlay
-      inputs.niri-unstable.overlays.niri
+      inputs.niri.overlays.niri
 
       # Waybar overlay
       (_: _: {waybar-git = inputs.waybar.packages.${system}.waybar;})
