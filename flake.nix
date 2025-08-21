@@ -37,9 +37,18 @@
       url = "github:aylur/astal";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    waybar.url = "github:Alexays/Waybar/master";
-    niri-unstable.url = "github:sodiboo/niri-flake";
-    swww.url = "github:LGFae/swww";
+    waybar = {
+      url = "github:Alexays/Waybar/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    swww = {
+      url = "github:LGFae/swww";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Security and secrets
     sops-nix = {
@@ -54,16 +63,26 @@
     };
 
     # Development and packages
-    nixpkgs-mozilla.url = "github:mozilla/nixpkgs-mozilla";
+    nixpkgs-mozilla = {
+      url = "github:mozilla/nixpkgs-mozilla";
+    };
     nur = {
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    yazi.url = "github:sxyazi/yazi";
-    ghostty.url = "github:ghostty-org/ghostty";
+    yazi = {
+      url = "github:sxyazi/yazi";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    ghostty = {
+      url = "github:ghostty-org/ghostty";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # System and hardware
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware/master";
+    };
     solaar = {
       url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -78,7 +97,10 @@
       url = "github:nix-community/nh";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    mcp-hub.url = "github:ravitemer/mcp-hub";
+    mcp-hub = {
+      url = "github:ravitemer/mcp-hub";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Development and CI
     pre-commit-hooks = {

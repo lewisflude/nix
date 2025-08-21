@@ -6,5 +6,6 @@
     ./mangohud.nix
     ./usb.nix
     ./yubikey-touch-detector.nix
+    ./audio.nix
   ];
 }

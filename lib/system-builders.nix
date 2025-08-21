@@ -9,7 +9,7 @@
     nix-homebrew
     sops-nix
     catppuccin
-    niri-unstable
+    niri
     musnix
     nur
     solaar
@@ -81,7 +81,7 @@ in {
         ../modules/nixos
         sops-nix.nixosModules.sops
         catppuccin.nixosModules.catppuccin
-        niri-unstable.nixosModules.niri
+        niri.nixosModules.niri
         musnix.nixosModules.musnix
         nur.modules.nixos.default
         solaar.nixosModules.default
