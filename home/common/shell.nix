@@ -306,6 +306,9 @@ in {
         export SOPS_GPG_EXEC="${lib.getExe pkgs.gnupg}"
         export SOPS_GPG_ARGS="--pinentry-mode=loopback"
 
+        export NIX_FLAKE="${config.home.homeDirectory}/.config/nix"
+        export NH_CLEAN_ARGS="--keep-since 4d --keep 3"
+
         source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
         [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 

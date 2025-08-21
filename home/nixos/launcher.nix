@@ -4,7 +4,9 @@
   ...
 }: let
   # Dynamic Catppuccin color palette access
-  palette = (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors;
+  palette =
+    (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
+    .${config.catppuccin.flavor}.colors;
 in {
   programs.fuzzel = {
     enable = true;
@@ -23,11 +25,10 @@ in {
         letter-spacing = 0;
         image-size-ratio = 0.5;
         prompt = "> ";
-        indicator-radius = 0;
         tabs = 4;
         icons-enabled = true;
-        fuzzy = true;
-        drun-launch = true;
+        # "fuzzy" is not a valid option, this is the correct way
+        match-mode = "fuzzy";
       };
 
       border = {
@@ -36,17 +37,20 @@ in {
       };
 
       colors = {
-        background = palette.base.hex;
-        text = palette.text.hex;
-        match = palette.mauve.hex;
-        selection = palette.surface1.hex;
-        selection-text = palette.text.hex;
-        selection-match = palette.mauve.hex;
-        border = palette.lavender.hex;
+        # Fuzzel expects RGBA hex without the '#'. Append 'ff' for full opacity.
+        background = palette.base.hex + "ff";
+        text = palette.text.hex + "ff";
+        match = palette.mauve.hex + "ff";
+        selection = palette.surface1.hex + "ff";
+        selection-text = palette.text.hex + "ff";
+        selection-match = palette.mauve.hex + "ff";
+        border = palette.lavender.hex + "ff";
       };
+
       dmenu = {
         exit-immediately-if-empty = true;
       };
+
       key-bindings = {
         cancel = "Escape Control+g";
         execute = "Return KP_Enter Control+y";
@@ -57,13 +61,14 @@ in {
         cursor-end = "End Control+e";
         delete-prev = "BackSpace";
         delete-next = "Delete";
-        delete-line = "Control+k";
+        # Corrected action name
+        delete-to-end-of-line = "Control+k";
         prev = "Up Control+p";
         next = "Down Control+n";
-        first = "Home";
-        last = "End";
-        page-prev = "Page_Up";
-        page-next = "Page_Down";
+        # Corrected action names
+        prev-page = "Page_Up";
+        next-page = "Page_Down";
+        # Removed redundant/conflicting bindings for "Home" and "End"
       };
     };
   };

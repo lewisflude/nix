@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  package = config.boot.kernelPackages.nvidiaPackages.stable;
+  package = config.boot.kernelPackages.nvidiaPackages.beta;
 in {
   ########################################
   # Packages and tools
@@ -23,20 +23,31 @@ in {
   ########################################
   environment.sessionVariables = {
     # NVIDIA optimization for Wayland
-    LIBVA_DRIVER_NAME = "nvidia";
-    NVD_BACKEND = "direct";
+    # LIBVA_DRIVER_NAME = "nvidia";
+
+    # WORKING: EGL configuration for NVIDIA + Xwayland
+    # Use Mesa EGL for libepoxy compatibility, NVIDIA GLX for rendering
+    # __EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
+    # __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    # MESA_LOADER_DRIVER_OVERRIDE = "nvidia";
+    # DRI_PRIME = "1";
+    # __EGL_EXTERNAL_PLATFORM_CONFIG_DIRS = "/run/opengl-driver/share/egl/egl_external_platform.d";
 
     # VRR/G-SYNC support for RTX 4090 (excellent support)
-    __GL_VRR_ALLOWED = "1";
-    __GL_GSYNC_ALLOWED = "1";
+    # __GL_VRR_ALLOWED = "1";
+    # __GL_GSYNC_ALLOWED = "1";
 
     # Gaming performance optimizations
-    __GL_SHADER_DISK_CACHE = "1";
-    __GL_THREADED_OPTIMIZATIONS = "1";
+    # __GL_SHADER_DISK_CACHE = "1";
+    # __GL_THREADED_OPTIMIZATIONS = "1";
 
     # RTX 4090 specific optimizations
-    __GL_SYNC_TO_VBLANK = "0"; # Let VRR/compositor handle this
-    __GL_ALLOW_UNOFFICIAL_PROTOCOL = "1";
+    # __GL_SYNC_TO_VBLANK = "0"; # Let VRR/compositor handle this
+    # __GL_ALLOW_UNOFFICIAL_PROTOCOL = "1";
+
+    # Xwayland compatibility (uncomment if still having issues)
+    # WLR_XWAYLAND_FORCE_GLAMOR = "0";
+    # XWAYLAND_NO_GLAMOR = "1";
 
     # NVIDIA cursor fix (uncomment if you see cursor trails)
     # WLR_NO_HARDWARE_CURSORS = "1";
@@ -52,9 +63,6 @@ in {
       # Keep this clean: mesa drivers come via hardware.graphics; avoid extra shim layers
       extraPackages = with pkgs; [
         nvidia-vaapi-driver
-        # Avoid these for NVIDIA + VA-API bridge:
-        # vaapiVdpau
-        # libvdpau-va-gl
       ];
     };
 
@@ -85,7 +93,7 @@ in {
   # X11 / XWayland
   ########################################
   services.xserver = {
-    enable = false; # don’t start a full X server on Wayland
+    enable = false; # don't start a full X server on Wayland
     videoDrivers = ["nvidia"];
   };
 

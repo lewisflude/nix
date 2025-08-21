@@ -1,13 +1,12 @@
 {
   pkgs,
   config,
+  lib,
   ...
-}:
-let
+}: let
   # Import theme constants
-  themeConstants = import ./theme-constants.nix { inherit config pkgs; };
-in
-{
+  themeConstants = import ./theme-constants.nix {inherit config pkgs;};
+in {
   home.packages = with pkgs; [
     swww
     gtklock
@@ -16,7 +15,7 @@ in
     slurp
     swappy
     wl-clipboard
-    # Note: grimblast removed - using niri's built-in screenshot functionality
+    xwayland-satellite-unstable
   ];
 
   imports = [
@@ -26,6 +25,10 @@ in
   programs.niri = {
     package = pkgs.niri-unstable;
     settings = {
+      xwayland-satellite = {
+        enable = true;
+        path = "${lib.getExe pkgs.xwayland-satellite-unstable}";
+      };
       input = {
         mouse = {
           natural-scroll = true;
@@ -174,11 +177,6 @@ in
         FREETYPE_PROPERTIES = "cff:no-stem-darkening=0 autofitter:no-stem-darkening=0";
       };
 
-      xwayland-satellite = {
-        enable = true;
-        path = "${pkgs.xwayland-satellite-unstable}/bin/xwayland-satellite";
-      };
-
       spawn-at-startup = [
         {
           command = [
@@ -186,6 +184,12 @@ in
             "app"
             "--"
             "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
+          ];
+        }
+
+        {
+          command = [
+            "${lib.getExe pkgs.xwayland-satellite-unstable}"
           ];
         }
 
@@ -203,20 +207,6 @@ in
             "${pkgs.swww}/bin/swww"
             "img"
             "${config.home.homeDirectory}/wallpapers/nix-wallpaper-nineish-catppuccin-mocha.png"
-          ];
-        }
-        {
-          command = [
-            "pw-link"
-            "Main-Output-Proxy:monitor_FL"
-            "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX0"
-          ];
-        }
-        {
-          command = [
-            "pw-link"
-            "Main-Output-Proxy:monitor_FR"
-            "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX1"
           ];
         }
       ];
