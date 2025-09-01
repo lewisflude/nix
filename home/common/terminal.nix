@@ -70,7 +70,7 @@ in {
 
       scrollback-limit = 100000;
 
-      keybind = "shift+enter=text:\\n";
+      keybind = "shift+enter=text:\n";
     };
   };
 }

@@ -40,7 +40,7 @@ in {
     hostPlatform = system;
     config = {
       allowUnfree = true;
-      allowBroken = false;
+      allowBroken = true;
       allowUnsupportedSystem = false;
     };
   };

@@ -53,7 +53,7 @@ show_diff() {
   if command -v nvd &> /dev/null; then
     sudo nvd diff /run/current-system "$(nixos-rebuild build --flake ".#$hostname" --print-out-paths)"
   else
-    log_warning "nvd not found. Install it for better diffs: nix profile install nixpkgs#nvd"
+    log_warning "nvd not found. Install it for better diffs: nix profile add nixpkgs#nvd"
     log_info "Showing basic diff..."
     nixos-rebuild build --flake ".#$hostname" 2>&1 | grep -E "(ADDED|REMOVED|CHANGED|SIZE)"
   fi

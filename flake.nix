@@ -109,14 +109,7 @@
     };
 
     # Homebrew taps (non-flake)
-    homebrew-core = {
-      url = "github:homebrew/homebrew-core";
-      flake = false;
-    };
-    homebrew-cask = {
-      url = "github:homebrew/homebrew-cask";
-      flake = false;
-    };
+    # homebrew-core and homebrew-cask are managed automatically by Homebrew
     homebrew-nx = {
       url = "github:nrwl/homebrew-nx";
       flake = false;
@@ -150,8 +143,6 @@
       systemBuilders.mkDarwinSystem hostName hostConfig {
         inherit
           (inputs)
-          homebrew-core
-          homebrew-cask
           homebrew-nx
           homebrew-j178
           ;
