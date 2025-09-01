@@ -17,8 +17,6 @@
 in {
   # Darwin system builder
   mkDarwinSystem = hostName: hostConfig: {
-    homebrew-core,
-    homebrew-cask,
     homebrew-nx,
     homebrew-j178,
   }:
@@ -41,8 +39,7 @@ in {
             user = hostConfig.username;
             autoMigrate = true;
             taps = {
-              "homebrew/homebrew-cask" = homebrew-cask;
-              "homebrew/homebrew-core" = homebrew-core;
+              # homebrew-cask and homebrew-core are managed automatically by Homebrew
               "nrwl/homebrew-nx" = homebrew-nx;
               "j178/homebrew-tap" = homebrew-j178;
             };

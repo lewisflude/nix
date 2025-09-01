@@ -11,7 +11,7 @@
     btop
     pgcli
     rustup
-    solana-cli
+    # solana-cli  # Temporarily disabled due to compilation errors
     tree
     yaml-language-server
 
