@@ -1,6 +1,7 @@
 {pkgs, ...}: {
   programs.ssh = {
     enable = true;
+    enableDefaultConfig = false;
     package = pkgs.openssh.override {withSecurityKey = true;};
 
     matchBlocks = {
