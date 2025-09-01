@@ -112,7 +112,7 @@
     solana = pkgs.mkShell {
       buildInputs = with pkgs;
         [
-          solana-cli
+          # solana-cli  # Temporarily disabled due to compilation errors
           rustc
           cargo
           nodejs_24
