@@ -17,6 +17,9 @@ in {
       # Basic cross-platform settings - detailed optimization handled in nix-optimization.nix
       warn-dirty = false;
 
+      # Performance optimizations
+      lazy-trees = true;
+
       # Basic trusted users (platform-specific ones are handled in platform modules)
       trusted-users = [
         "root"
