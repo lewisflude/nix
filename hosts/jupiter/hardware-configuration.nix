@@ -49,6 +49,11 @@
     ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
     # Use none/mq-deadline for SSDs
     ACTION=="add|change", KERNEL=="sd[a-z]|nvme[0-9]n[0-9]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="none"
+     # Datacolor Spyder X Pro - multiple rule formats to ensure one works
+    SUBSYSTEM=="usb", ATTR{idVendor}=="085c", ATTR{idProduct}=="0a00", MODE="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="085c", ATTRS{idProduct}=="0a00", MODE="0666"
+    # Also handle as HID device
+    KERNEL=="hiddev*", ATTRS{idVendor}=="085c", ATTRS{idProduct}=="0a00", MODE="0666"
   '';
 
   fileSystems = {

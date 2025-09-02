@@ -16,6 +16,10 @@ in {
     swappy
     wl-clipboard
     xwayland-satellite-unstable
+    # Color management
+    argyllcms # For ICC profile tools (iccdump, colprof, etc.)
+    colord-gtk # GUI for managing color profiles
+    wl-gammactl # Wayland gamma/brightness/contrast control
   ];
 
   imports = [
@@ -116,6 +120,21 @@ in {
 
       prefer-no-csd = true;
 
+      # KVM display reliability improvements
+      hotkey-overlay.skip-at-startup = true;
+
+      window-rules = [
+        {
+          matches = [
+            {
+              app-id = "^displaycal$";
+            }
+          ];
+          default-column-width = {};
+          open-floating = true;
+        }
+      ];
+
       animations = {
         enable = true;
         slowdown = 1.0;
@@ -204,9 +223,21 @@ in {
 
         {
           command = [
+            "${pkgs.uwsm}/bin/uwsm"
+            "app"
+            "--"
             "${pkgs.swww}/bin/swww"
             "img"
             "${config.home.homeDirectory}/wallpapers/nix-wallpaper-nineish-catppuccin-mocha.png"
+          ];
+        }
+
+        {
+          command = [
+            "${pkgs.argyllcms}/bin/dispwin"
+            "-d"
+            "1"
+            "${config.home.homeDirectory}/.local/share/icc/aw3423dwf.icc"
           ];
         }
       ];
