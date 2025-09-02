@@ -16,6 +16,7 @@ in {
     (sunshine.override {cudaSupport = true;})
     moonlight-qt
     steam_run_url
+    dwarf-fortress
   ];
 
   programs = {

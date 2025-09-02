@@ -38,5 +38,8 @@
         # The greeter will now handle launching the user's chosen session.
       };
     };
+
+    # Color management daemon for ICC profile support
+    colord.enable = true;
   };
 }
