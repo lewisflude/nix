@@ -22,7 +22,7 @@ buildHomeAssistantComponent rec {
     python313Packages.tensorboard
     python313Packages.datasets
     python313Packages.peft
-    python313Packages.bitsandbytes
+    # python313Packages.bitsandbytes  # Disabled due to scikit-build-core build issue
     python313Packages.trl
     python313Packages.webcolors
     python313Packages.pandas

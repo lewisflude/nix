@@ -51,6 +51,10 @@ in {
 
     # NVIDIA cursor fix (uncomment if you see cursor trails)
     # WLR_NO_HARDWARE_CURSORS = "1";
+
+    # KVM display reliability improvements
+    __GL_SYNC_DISPLAY_DEVICE = "DP-1";
+    __GL_SYNC_TO_VBLANK = "1";
   };
 
   ########################################
@@ -78,8 +82,8 @@ in {
         finegrained = false; # RTX 4090 doesn't need fine-grained power management
       };
 
-      # Keep GPU state persistent for better performance
-      nvidiaPersistenced = true;
+      # Keep GPU state persistent for better performance and display reliability
+      nvidiaPersistenced = false; # Disabled due to RPC build issues - not essential for most users
 
       # RTX 4090 performance optimizations
       forceFullCompositionPipeline = false; # Let VRR handle frame pacing
@@ -102,6 +106,9 @@ in {
   ########################################
   services.udev.extraRules = ''
     ACTION=="add", DEVPATH=="/bus/pci/drivers/nvidia", RUN+="${pkgs.nvidia-container-toolkit}/bin/nvidia-ctk system create-dev-char-symlinks --create-all"
+
+    # KVM display detection reliability
+    KERNEL=="card[0-9]*", SUBSYSTEM=="drm", ACTION=="change", RUN+="${pkgs.bash}/bin/bash -c 'echo detect > /sys/class/drm/card1-DP-1/status'"
   '';
 
   ########################################

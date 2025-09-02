@@ -39,6 +39,15 @@ in {
 
     "Mod+Shift+P".action.power-off-monitors = {};
 
+    # KVM display recovery - force display reset
+    "Mod+Shift+D" = {
+      action.spawn = [
+        "sh"
+        "-c"
+        "niri msg action power-off-monitors && sleep 2 && niri msg action power-on-monitors"
+      ];
+    };
+
     "Mod+Shift+E".action.quit = {};
     "Ctrl+Alt+Delete".action.quit = {};
 
