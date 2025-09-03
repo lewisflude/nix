@@ -70,7 +70,10 @@ in {
 
       scrollback-limit = 100000;
 
-      keybind = "shift+enter=text:\n";
+      # Send ESC+CR so apps that expect Option+Enter (Esc+Enter)
+      # can treat Shift+Enter equivalently (e.g., Claude Code newline).
+      # Double-escaped for Nix so Ghostty sees \x1b and \r.
+      keybind = "shift+enter=text:\\x1b\\r";
     };
   };
 }
