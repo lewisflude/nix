@@ -336,6 +336,15 @@ in {
         bindkey '^P' history-substring-search-up
         bindkey '^N' history-substring-search-down
 
+        # Shift+Enter: insert literal newline in ZLE
+        # Support both our prior custom seq (\e[99997u) and ESC+CR (\e\r)
+        function _ghostty_insert_newline() { LBUFFER+=$'\n' }
+        zle -N ghostty-insert-newline _ghostty_insert_newline
+        bindkey -M emacs $'\e[99997u' ghostty-insert-newline
+        bindkey -M viins $'\e[99997u' ghostty-insert-newline
+        bindkey -M emacs $'\e\r'     ghostty-insert-newline
+        bindkey -M viins $'\e\r'     ghostty-insert-newline
+
         zstyle ':completion:*' matcher-list \
           'm:{a-zA-Z}={A-Za-z}' \
           'r:|[._-]=* r:|=*' \
