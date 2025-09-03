@@ -13,6 +13,7 @@
     musnix
     nur
     solaar
+    determinate
     ;
 in {
   # Darwin system builder
@@ -73,6 +74,7 @@ in {
           keysDirectory = "${self}/keys";
         };
       modules = [
+        determinate.nixosModules.default
         ../hosts/${hostName}/configuration.nix
         ../modules/shared
         ../modules/nixos
