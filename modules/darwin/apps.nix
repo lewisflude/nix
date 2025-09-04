@@ -37,6 +37,7 @@ _: {
       "imageoptim"
       "linear-linear"
       "logi-options+"
+      "musescore"
       "notion"
       "obs@beta"
       "raycast"
