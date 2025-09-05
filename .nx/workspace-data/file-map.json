@@ -104,11 +104,11 @@
       },
       {
         "file": "flake.lock",
-        "hash": "18430052317362904101"
+        "hash": "2150032201956353344"
       },
       {
         "file": "flake.nix",
-        "hash": "3098843886184081645"
+        "hash": "15016147416037030056"
       },
       {
         "file": "graph.svg",
@@ -116,7 +116,7 @@
       },
       {
         "file": "home/common/apps.nix",
-        "hash": "12434072772353896061"
+        "hash": "5271523190392428277"
       },
       {
         "file": "home/common/apps/bat.nix",
@@ -448,7 +448,7 @@
       },
       {
         "file": "lib/system-builders.nix",
-        "hash": "17588197654861175799"
+        "hash": "3142963614385769964"
       },
       {
         "file": "mcp-servers/love2d-api.py",
@@ -460,7 +460,7 @@
       },
       {
         "file": "modules/darwin/apps.nix",
-        "hash": "9116302751871616152"
+        "hash": "4739533116089088035"
       },
       {
         "file": "modules/darwin/backup.nix",
@@ -684,7 +684,7 @@
       },
       {
         "file": "modules/shared/core.nix",
-        "hash": "5259186164447950581"
+        "hash": "883465756341314153"
       },
       {
         "file": "modules/shared/default.nix",

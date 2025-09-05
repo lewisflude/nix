@@ -45,6 +45,7 @@ _: {
       "slack"
       "steam"
       "moonlight"
+      "whatsapp"
     ];
 
     # Mac App Store applications
