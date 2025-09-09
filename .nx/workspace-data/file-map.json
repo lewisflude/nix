@@ -460,7 +460,7 @@
       },
       {
         "file": "modules/darwin/apps.nix",
-        "hash": "4739533116089088035"
+        "hash": "11844354256793453471"
       },
       {
         "file": "modules/darwin/backup.nix",
