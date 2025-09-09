@@ -28,6 +28,7 @@ _: {
       "beekeeper-studio"
       "betterdisplay"
       "chatgpt"
+      "discord"
       "docker-desktop"
       "epic-games"
       "figma"
