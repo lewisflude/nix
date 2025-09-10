@@ -3,22 +3,30 @@
   config,
   ...
 }: {
-  environment.systemPackages = with pkgs; [
-    wofi
-    # sway # You can keep this if you want it as a fallback
-    gtk4
-  ];
+  environment.systemPackages = with pkgs;
+    [
+      wofi
+      # sway # You can keep this if you want it as a fallback
+      gtk4
+      uwsm # Needed for uwsm desktop entries to be available
+    ]
+    ++ config.services.displayManager.sessionPackages; # Include generated session packages
+
+  # Make wayland sessions available to greetd
+  environment.pathsToLink = ["/share/wayland-sessions"];
 
   time.timeZone = "Europe/London";
 
   # This part is correct and doesn't need to change.
+  programs.niri.enable = true;
+
   programs.uwsm = {
     enable = true;
     waylandCompositors = {
       niri = {
-        prettyName = "Niri";
+        prettyName = "Niri (UWSM)";
         comment = "Niri compositor managed by UWSM";
-        binPath = "${config.programs.niri.package}/bin/niri-session";
+        binPath = "${config.programs.niri.package}/bin/niri";
       };
     };
   };

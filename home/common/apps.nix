@@ -17,6 +17,7 @@ in {
       delta
       htop
       btop
+      kicad
       libnotify
       pgcli
       rustup
