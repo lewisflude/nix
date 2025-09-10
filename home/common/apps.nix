@@ -17,6 +17,7 @@ in {
       delta
       htop
       btop
+      libnotify
       pgcli
       rustup
       # solana-cli  # Temporarily disabled due to compilation errors
