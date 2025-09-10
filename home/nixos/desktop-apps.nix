@@ -24,6 +24,7 @@
 
     # System Utilities
     file-roller
+    libnotify
     swaylock-effects
     dragon-drop # Drag and drop from terminal to GUI apps
 
@@ -35,6 +36,9 @@
 
     # Game Development
     love # Love2D game engine
+
+    # Electronics/Circuit Design
+    ngspice # Next Generation Spice (Electronic Circuit Simulator)
 
     # Fonts required for applications
     font-awesome # Required for swappy icons
