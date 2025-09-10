@@ -9,29 +9,22 @@
 in {
   # Cross-platform Nix configuration
   nix = {
-    settings =
-      {
-        # Basic cross-platform settings - detailed optimization handled in nix-optimization.nix
-        warn-dirty = false;
+    settings = {
+      # Basic cross-platform settings - detailed optimization handled in nix-optimization.nix
+      warn-dirty = false;
 
-        # Basic trusted users (platform-specific ones are handled in platform modules)
-        trusted-users = [
-          "root"
-          username
-        ];
+      # Basic trusted users (platform-specific ones are handled in platform modules)
+      trusted-users = [
+        "root"
+        username
+      ];
 
-        # Experimental features
-        experimental-features =
-          [
-            "nix-command"
-            "flakes"
-          ]
-          ++ lib.optionals platformLib.isDarwin ["lazy-trees"];
-      }
-      // lib.optionalAttrs platformLib.isDarwin {
-        # Performance optimizations - lazy-trees only available on Darwin
-        lazy-trees = true;
-      };
+      # Experimental features
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+    };
   };
 
   # Configuration revision tracking
