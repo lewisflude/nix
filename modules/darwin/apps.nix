@@ -38,6 +38,7 @@ _: {
       "imageoptim"
       "linear-linear"
       "logi-options+"
+      "logitune"
       "musescore"
       "notion"
       "obs@beta"
