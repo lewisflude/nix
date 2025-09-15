@@ -3,10 +3,13 @@
   lib,
   system,
   ...
-}: let
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
-in {
-  home.packages = with pkgs;
+}:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
+{
+  home.packages =
+    with pkgs;
     [
       # Development tools (cross-platform)
       awscli2
@@ -17,7 +20,6 @@ in {
       delta
       htop
       btop
-      kicad
       libnotify
       pgcli
       rustup
@@ -32,12 +34,15 @@ in {
       # - marksman (Markdown LSP)
       # - pyright (Python LSP)
     ]
-    ++ platformLib.platformPackages [
-      # Linux-only packages
-      musescore
-    ] [
-      # macOS-only packages (MuseScore installed via Homebrew)
-    ];
+    ++
+      platformLib.platformPackages
+        [
+          # Linux-only packages
+          musescore
+        ]
+        [
+          # macOS-only packages (MuseScore installed via Homebrew)
+        ];
 
   imports = [
     ./apps/cursor

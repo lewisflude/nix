@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   home.packages = with pkgs; [
     ddcutil
     displaycal
@@ -11,6 +12,7 @@
     libreoffice
     thunderbird
     evince
+    kicad
 
     # Graphics & Design
     gimp
