@@ -42,6 +42,7 @@ _: {
       "musescore"
       "notion"
       "obs@beta"
+      "philips-hue-sync"
       "raycast"
       "responsively"
       "slack"
