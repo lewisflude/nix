@@ -1,6 +1,17 @@
 {pkgs, ...}: {
   # ─── limits and baseline security ────────────────────────────────────────────
   security = {
+    # Enable doas for privilege escalation
+    doas = {
+      enable = true;
+      extraRules = [
+        {
+          users = ["lewis"];
+          keepEnv = true;
+          persist = true;
+        }
+      ];
+    };
     pam = {
       loginLimits = [
         {
