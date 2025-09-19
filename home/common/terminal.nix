@@ -2,7 +2,6 @@
   pkgs,
   lib,
   system,
-  ghostty,
   ...
 }: let
   platformLib = import ../../lib/functions.nix {inherit lib system;};
@@ -49,7 +48,6 @@ in {
     [
       # Linux-specific packages
       networkmanager # Network management
-      doas # Privilege escalation
       lsof # List open files
       wtype # Wayland text input automation (xdotool equivalent)
     ]
