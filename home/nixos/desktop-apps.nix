@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   home.packages = with pkgs; [
     ddcutil
     displaycal
@@ -41,6 +40,25 @@
 
     # Electronics/Circuit Design
     ngspice # Next Generation Spice (Electronic Circuit Simulator)
+    qucs-s # Circuit simulator with GUI (Qucs-S)
+
+    # Audio Production & Music
+    ardour # Professional DAW
+    qjackctl # JACK audio connection kit control
+    guitarix # Guitar amplifier simulator and effects
+    rakarrack # Real-time guitar effects processor
+    calf # Professional audio plugins
+    helm # Polyphonic synthesizer
+    surge-XT # Hybrid synthesizer
+    vital # Modern wavetable synthesizer
+    dexed # DX7 FM synthesizer
+    vcv-rack # Modular synthesizer simulator
+
+    # Audio Programming & DSP
+    puredata # Visual programming for audio (Pure Data)
+
+    # Audio Analysis & Measurement
+    jaaa # Audio analyzer (JACK-based)
 
     # Fonts required for applications
     font-awesome # Required for swappy icons
