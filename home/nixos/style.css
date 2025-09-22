@@ -18,6 +18,7 @@ window#waybar > box {
 #network,
 #pulseaudio,
 #custom-brightness,
+#idle_inhibitor,
 #custom-notifications,
 #custom-alerts,
 #custom-backup,
@@ -101,6 +102,9 @@ window#waybar > box {
 }
 #custom-brightness {
   color: @blue;
+}
+#idle_inhibitor {
+  color: @sapphire;
 }
 #custom-alerts {
   color: @sky;
