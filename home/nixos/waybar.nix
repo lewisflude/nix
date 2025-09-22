@@ -41,6 +41,7 @@ in {
           "custom/backup"
           "custom/alerts"
           "custom/brightness"
+          "idle_inhibitor"
           "pulseaudio"
           "clock"
           "tray"
@@ -123,6 +124,18 @@ in {
           on-scroll-up = "${config.home.homeDirectory}/bin/brightness up";
           on-scroll-down = "${config.home.homeDirectory}/bin/brightness down";
         };
+
+        # Idle inhibitor (prevents screen sleep)
+        idle_inhibitor = {
+          format = "{icon}";
+          format-icons = {
+            activated = "☕";
+            deactivated = "😴";
+          };
+          tooltip-format-activated = "Staying awake - screen won't sleep (click to disable)";
+          tooltip-format-deactivated = "Screen can sleep (click to keep awake)";
+        };
+
         tray = {
           icon-size = 24;
           spacing = 10;
