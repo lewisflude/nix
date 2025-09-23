@@ -2,12 +2,16 @@
   pkgs,
   lib,
   system,
+  inputs,
   ...
-}: let
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
-in {
+}:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
+{
   # Common terminal packages across all platforms
-  home.packages = with pkgs;
+  home.packages =
+    with pkgs;
     [
       # Core utilities
       clipse # Clipboard manager
@@ -44,34 +48,31 @@ in {
       zellij # Terminal multiplexer (modern)
       tmux # Traditional terminal multiplexer
     ]
-    ++ platformLib.platformPackages
-    [
-      # Linux-specific packages
-      networkmanager # Network management
-      lsof # List open files
-      wtype # Wayland text input automation (xdotool equivalent)
-    ]
-    [
-      # Darwin-specific packages
-      # Note: nil (Nix language server) moved to development/language-tools.nix
-    ];
+    ++
+      platformLib.platformPackages
+        [
+          # Linux-specific packages
+          networkmanager # Network management
+          lsof # List open files
+          wtype # Wayland text input automation (xdotool equivalent)
+        ]
+        [
+          # Darwin-specific packages
+          # Note: nil (Nix language server) moved to development/language-tools.nix
+        ];
 
   programs.ghostty = {
     enable = true;
-    package = platformLib.platformPackage pkgs.ghostty null;
+    package = platformLib.platformPackage inputs.ghostty.packages.${system}.default pkgs.ghostty-bin;
     enableZshIntegration = true;
     settings = {
       font-family = "Iosevka Nerd Font";
       font-feature = "+calt,+liga,+dlig";
       font-size = 12;
       font-synthetic-style = true;
-
       scrollback-limit = 100000;
+      keybind = [ "shift+enter=text:\n" ];
 
-      # Send ESC+CR so apps that expect Option+Enter (Esc+Enter)
-      # can treat Shift+Enter equivalently (e.g., Claude Code newline).
-      # Double-escaped for Nix so Ghostty sees \x1b and \r.
-      keybind = "shift+enter=text:\\x1b\\r";
     };
   };
 }
