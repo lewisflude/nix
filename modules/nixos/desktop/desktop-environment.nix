@@ -1,16 +1,10 @@
-{
-  pkgs,
-  config,
-  ...
-}: {
-  environment.systemPackages = with pkgs;
-    [
-      wofi
-      # sway # You can keep this if you want it as a fallback
-      gtk4
-      uwsm # Needed for uwsm desktop entries to be available
-    ]
-    ++ config.services.displayManager.sessionPackages; # Include generated session packages
+{pkgs, ...}: {
+  environment.systemPackages = with pkgs; [
+    wofi
+    # sway # You can keep this if you want it as a fallback
+    gtk4
+    uwsm # Needed for uwsm desktop entries to be available
+  ];
 
   # Make wayland sessions available to greetd
   environment.pathsToLink = ["/share/wayland-sessions"];
@@ -26,7 +20,7 @@
       niri = {
         prettyName = "Niri (UWSM)";
         comment = "Niri compositor managed by UWSM";
-        binPath = "${config.programs.niri.package}/bin/niri";
+        binPath = "/run/current-system/sw/bin/niri-session";
       };
     };
   };
