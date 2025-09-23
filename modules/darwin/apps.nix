@@ -32,7 +32,6 @@ _: {
       "docker-desktop"
       "epic-games"
       "figma"
-      "ghostty@tip"
       "google-chrome@canary"
       "gpg-suite"
       "imageoptim"

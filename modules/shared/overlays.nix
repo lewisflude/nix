@@ -3,7 +3,10 @@
   lib,
   system,
   ...
-}: {
+}:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in {
   nixpkgs.overlays =
     [
       # Yazi overlay
@@ -24,7 +27,12 @@
       # NH overlay
       inputs.nh.overlays.default
 
-      # Ghostty overlay
+      (final: _prev: {
+        inherit (inputs.swww.packages.${final.system}) swww;
+      })
+    ]
+    ++ lib.optionals platformLib.isLinux [
+      # Ghostty overlay (linux only)
       (_: _: {
         ghostty = inputs.ghostty.packages.${system}.default.override {
           optimize = "ReleaseFast"; # or "Debug", "ReleaseSafe"
@@ -32,10 +40,6 @@
           enableWayland = true;
           # revision = "custom"; # if you want custom revision
         };
-      })
-
-      (final: _prev: {
-        inherit (inputs.swww.packages.${final.system}) swww;
       })
     ]
     ++ lib.optionals (inputs ? nvidia-patch) [
