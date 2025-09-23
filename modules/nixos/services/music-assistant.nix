@@ -13,6 +13,9 @@ in {
         image = "ghcr.io/music-assistant/server:latest";
         environment = {
           LOG_LEVEL = "info";
+          PUID = "1000";
+          PGID = "100";
+          UMASK = "022";
         };
         volumes = [
           "/var/lib/music-assistant:/data"
