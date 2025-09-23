@@ -89,11 +89,11 @@
 
         # nh commands (nh provides diff/build-tree/confirm UX)
         if [[ $IS_DARWIN -eq 1 ]]; then
-          CMD_BUILD_SYSTEM=( nh darwin build  "$FLAKE_SYSTEM" )
-          CMD_SWITCH_SYSTEM=( nh darwin switch "$FLAKE_SYSTEM" )
+          CMD_BUILD_SYSTEM=( nh darwin build  --write-to-substituter https://lewisflude.cachix.org "$FLAKE_SYSTEM" )
+          CMD_SWITCH_SYSTEM=( nh darwin switch --write-to-substituter https://lewisflude.cachix.org "$FLAKE_SYSTEM" )
         else
-          CMD_BUILD_SYSTEM=( nh os build      "$FLAKE_SYSTEM" )
-          CMD_SWITCH_SYSTEM=( nh os switch    "$FLAKE_SYSTEM" )
+          CMD_BUILD_SYSTEM=( nh os build      --write-to-substituter https://lewisflude.cachix.org "$FLAKE_SYSTEM" )
+          CMD_SWITCH_SYSTEM=( nh os switch    --write-to-substituter https://lewisflude.cachix.org "$FLAKE_SYSTEM" )
         fi
         CMD_BUILD_HOME=(  nh home build  "$FLAKE_HOME" )
         CMD_SWITCH_HOME=( nh home switch "$FLAKE_HOME" )
