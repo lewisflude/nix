@@ -10,10 +10,8 @@
   sops = {
     defaultSopsFile = ../../secrets/user.yaml;
 
-    gnupg = {
-      home = "${config.home.homeDirectory}/.gnupg";
-      sshKeyPaths = [];
-    };
+    # Use age for user secrets (no prompts)
+    age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
 
     secrets = {
       KAGI_API_KEY = {};
