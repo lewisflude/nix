@@ -14,7 +14,7 @@ in
       auto-optimise-store = true;
 
       # Build optimization
-      max-jobs = 8;
+      max-jobs = 24;
       cores = 0; # Use all available cores
 
       # Cache optimization
