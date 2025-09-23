@@ -1,11 +1,11 @@
 {
-  "version": "1.5.0",
+  "version": "1.6.35",
   "linux": {
-    "url": "https://downloads.cursor.com/production/2947db30cb622263bb9302d7bd2c27a52e11db65/linux/x64/Cursor-1.5.0-x86_64.AppImage",
-    "sha256": "sha256-jGK8nMeNSkARQ3OnJHjGZwbJ1+ZNq7ZzD9VprXU6aLI="
+    "url": "https://downloads.cursor.com/production/b753cece5c67c47cb5637199a5a5de2b7100c18f/linux/x64/Cursor-1.6.35-x86_64.AppImage",
+    "sha256": "sha256-62u8snx9nbJtsg7uROZNVzo3macrkTghTCep943e8+I="
   },
   "darwin": {
-    "url": "https://downloads.cursor.com/production/2947db30cb622263bb9302d7bd2c27a52e11db65/darwin/universal/Cursor-darwin-universal.dmg",
-    "sha256": "sha256-7GZ/6aYSbPXyuRnNU7UzD14fcJ9SwDEvhEPGXSZSZ3I="
+    "url": "https://downloads.cursor.com/production/b753cece5c67c47cb5637199a5a5de2b7100c18f/darwin/universal/Cursor-darwin-universal.dmg",
+    "sha256": "sha256-lK/DiJlqMIHuzywBBxMj8bM+TF6WKsFUuPF2aJnhiMI="
   }
 }
