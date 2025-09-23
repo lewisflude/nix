@@ -11,6 +11,7 @@
         controlPath = "~/.ssh/master-%r@%h:%p";
         controlPersist = "10m";
         identitiesOnly = true;
+        identityFile = "~/.ssh/id_ed25519_sk";
         serverAliveInterval = 60;
         serverAliveCountMax = 3;
       };
