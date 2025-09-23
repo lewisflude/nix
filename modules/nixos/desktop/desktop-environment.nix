@@ -1,4 +1,9 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}: {
   environment.systemPackages = with pkgs; [
     wofi
     # sway # You can keep this if you want it as a fallback
@@ -20,7 +25,9 @@
       niri = {
         prettyName = "Niri (UWSM)";
         comment = "Niri compositor managed by UWSM";
-        binPath = "/run/current-system/sw/bin/niri-session";
+        binPath = pkgs.writeShellScript "niri" ''
+          ${lib.getExe config.programs.niri.package} --session
+        '';
       };
     };
   };
