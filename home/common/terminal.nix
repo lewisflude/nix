@@ -71,7 +71,8 @@ in
       font-size = 12;
       font-synthetic-style = true;
       scrollback-limit = 100000;
-      keybind = [ "shift+enter=text:\n" ];
+      keybind = [ "shift+enter=text:''
+''" ];
 
     };
   };
