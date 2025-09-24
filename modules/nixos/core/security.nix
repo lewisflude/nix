@@ -114,7 +114,7 @@
     # ─── central, newline-terminated mapping file ────────────────────────────────
     etc."u2f_mappings" = {
       text = ''lewis:PaGbsjJa2IPXjK/nuSZEgqrqcP9JoxEO0IVVinIyfEXR0EbctKkhinM6f50ccHj7uSdy+YM2O+ToKVhqv5ynyQ==,cFyPyH4AUHDjTXelbVpfnc4DnESr8xJWyZC42DwEiofkoqQdt0lBdxPGLwjviysl7WlH+jlEw3Yhe5TBiBLNOg==,es256,+presence'';
-      mode = "0644";
+      mode = "0400";
     };
 
     # ─── user-space helpers ──────────────────────────────────────────────────────

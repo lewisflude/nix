@@ -1,7 +1,9 @@
 keys:
   - &lewis_gpg 7369D9C25A365E6C926ADBAB48B34CF9C735A6AE
   - &user_age_key age1lzf4exwy6guezs2wqftd5hf5ftkcjmcvd7lyukvud66py9pk4aeqwx2p9h
-  - &all_age_keys "age1dn3panz9kx6g6petqm8lyund72gslwt29p6grlq9cf5t3cd68gcqxlv289,age15q885zhzw0x5kk75upc30cql3nhkj7ugrxr0gs80tds988acgetszzd4px"
+  - &all_age_keys
+    - age1dn3panz9kx6g6petqm8lyund72gslwt29p6grlq9cf5t3cd68gcqxlv289
+    - age15q885zhzw0x5kk75upc30cql3nhkj7ugrxr0gs80tds988acgetszzd4px
 
 creation_rules:
   # System secrets - keep GPG for security
