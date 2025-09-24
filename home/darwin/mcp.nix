@@ -11,6 +11,8 @@
   claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
   codeDirectory = "${config.home.homeDirectory}/Code";
   dexWebProject = "${codeDirectory}/dex-web";
+
+  secretPath = name: "${config.home.homeDirectory}/Library/Application Support/sops-nix/secrets/${name}";
 in {
   home = {
     packages = with pkgs; [
@@ -22,7 +24,9 @@ in {
       "bin/kagi-mcp-wrapper" = {
         text = ''
           #!/usr/bin/env bash
-          export KAGI_API_KEY="$(cat ${config.sops.secrets.KAGI_API_KEY.path})"
+          if [ -r "${secretPath "KAGI_API_KEY"}" ]; then
+            export KAGI_API_KEY="$(cat "${secretPath "KAGI_API_KEY"}")"
+          fi
           exec ${pkgs.uv}/bin/uvx kagimcp "$@"
         '';
         executable = true;
@@ -170,7 +174,7 @@ in {
           "mcp-obsidian"
         ];
         env = {
-          OBSIDIAN_API_KEY = config.sops.secrets.OBSIDIAN_API_KEY.path;
+          OBSIDIAN_API_KEY = secretPath "OBSIDIAN_API_KEY";
           OBSIDIAN_HOST = "127.0.0.1";
           OBSIDIAN_PORT = "27124";
         };

@@ -2,9 +2,23 @@
   lib,
   config,
   pkgs,
+  username,
   ...
 }: let
-  username = "lewis";
+  userSecretsFile = ../../secrets/user.yaml;
+
+  userSecrets = lib.genAttrs [
+    "KAGI_API_KEY"
+    "CIRCLECI_TOKEN"
+    "OBSIDIAN_API_KEY"
+    "OPENAI_API_KEY"
+    "GITHUB_TOKEN"
+  ] (_: {
+    owner = username;
+    group = "staff";
+    mode = "0400";
+    sopsFile = userSecretsFile;
+  });
 in {
   # Darwin-specific SOPS configuration
   sops = {
@@ -17,15 +31,17 @@ in {
     ];
 
     # Platform-specific secret permissions for macOS
-    secrets = {
-      LATITUDE.group = "admin";
-      LONGITUDE.group = "admin";
-      HOME_ASSISTANT_BASE_URL.group = "admin";
-      GITHUB_PERSONAL_ACCESS_TOKEN = {
-        group = "admin";
-        mode = "0440"; # Allow group read for user access
-      };
-    };
+    secrets =
+      {
+        LATITUDE.group = "admin";
+        LONGITUDE.group = "admin";
+        HOME_ASSISTANT_BASE_URL.group = "admin";
+        GITHUB_PERSONAL_ACCESS_TOKEN = {
+          group = "admin";
+          mode = "0440"; # Allow group read for user access
+        };
+      }
+      // userSecrets;
   };
 
   # Ensure SOPS age directory exists
