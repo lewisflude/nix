@@ -21,9 +21,25 @@
       };
     };
 
-  # Safe SOPS guards
-  hasKagi = lib.hasAttrByPath ["sops" "secrets" "KAGI_API_KEY"] config;
-  hasGh = lib.hasAttrByPath ["sops" "secrets" "GITHUB_TOKEN"] config;
+  # Cross-platform secret lookup helpers
+  secretAvailable = name:
+    if pkgs.stdenv.isDarwin
+    then true
+    else lib.hasAttrByPath ["sops" "secrets" name] config;
+
+  secretPath = name:
+    if pkgs.stdenv.isDarwin
+    then "${config.home.homeDirectory}/Library/Application Support/sops-nix/secrets/${name}"
+    else config.sops.secrets.${name}.path;
+
+  secretExportSnippet = name: var: let
+    path = secretPath name;
+  in
+    lib.optionalString (secretAvailable name) ''
+      if [ -r ${lib.escapeShellArg path} ]; then
+        export ${var}="$(cat ${lib.escapeShellArg path})"
+      fi
+    '';
 in {
   xdg.enable = true;
 
@@ -289,12 +305,8 @@ in {
       };
 
       initContent = ''
-        ${lib.optionalString hasKagi ''
-          export KAGI_API_KEY="$(cat ${config.sops.secrets.KAGI_API_KEY.path})"
-        ''}
-        ${lib.optionalString hasGh ''
-          export GITHUB_TOKEN="$(cat ${config.sops.secrets.GITHUB_TOKEN.path})"
-        ''}
+        ${secretExportSnippet "KAGI_API_KEY" "KAGI_API_KEY"}
+        ${secretExportSnippet "GITHUB_TOKEN" "GITHUB_TOKEN"}
 
         export SSH_AUTH_SOCK="$(${pkgs.gnupg}/bin/gpgconf --list-dirs agent-ssh-socket)"
 

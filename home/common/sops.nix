@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   config,
   ...
 }: {
@@ -7,7 +8,7 @@
     sops
   ];
 
-  sops = {
+  sops = lib.mkIf (!pkgs.stdenv.isDarwin) {
     defaultSopsFile = ../../secrets/user.yaml;
 
     # Use age for user secrets (no prompts)
@@ -22,7 +23,7 @@
     };
   };
 
-  systemd.user.services.sops-nix = {
+  systemd.user.services.sops-nix = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
       After = ["gpg-agent.service"];
       Wants = ["gpg-agent.service"];
