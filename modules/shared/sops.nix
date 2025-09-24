@@ -3,13 +3,13 @@
   system,
   ...
 }: let
-  # Platform-specific group configuration
-  platformGroup =
+  # Dedicated group for system secrets; use an existing root-owned group on
+  # Darwin where dynamic group management is brittle.
+  secretsGroup =
     if (lib.strings.hasSuffix "darwin" system)
-    then "admin"
-    else "users";
+    then "wheel"
+    else "sops-secrets";
 
-  # Common secret configuration
   mkSecret = {
     mode ? "0400",
     allowUserRead ? false,
@@ -19,12 +19,16 @@
       then "0440"
       else mode;
     owner = "root";
-    group = platformGroup;
+    group = secretsGroup;
   };
 in {
   # Common SOPS configuration for all platforms
   sops = {
-    age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+    age = {
+      keyFile = "/var/lib/sops-nix/key.txt";
+      generateKey = true;
+      sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+    };
     defaultSopsFile = ../../secrets/secrets.yaml;
 
     secrets = {

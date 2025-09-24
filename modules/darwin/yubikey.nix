@@ -17,10 +17,12 @@ in {
       touchIdAuth = true;
       watchIdAuth = true;
       text = ''
-        auth sufficient ${pkgs.pam_u2f}/lib/security/pam_u2f.so cue pinverification=1 userpresence=1
+        auth sufficient ${pkgs.pam_u2f}/lib/security/pam_u2f.so authfile=/etc/u2f-mappings cue origin=pam://yubi pinverification=1 userpresence=1
       '';
     };
   };
 
-  environment.etc."u2f-mappings".source = u2fMappings; # immutable store path  [oai_citation:4‡joinemm.dev](https://joinemm.dev/blog/yubikey-nixos-guide)
+  environment.etc."u2f-mappings" = {
+    source = u2fMappings;
+  }; # immutable store path  [oai_citation:4‡joinemm.dev](https://joinemm.dev/blog/yubikey-nixos-guide)
 }
