@@ -14,8 +14,9 @@ in
       # Development tools (cross-platform)
       awscli2
       claude-code
+      final.gemini-cli-bin
       codex
-      gemini-cli
+      nx-latest
       coreutils
       delta
       htop
