@@ -328,16 +328,9 @@ in {
 
       # Python uvx servers (unchanged)
       fetch = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--from"
-          "mcp-server-fetch"
-          "mcp-server-fetch"
-        ];
+        command = "${pkgs.mcp-server-fetch}/bin/mcp-server-fetch";
+        args = [];
         port = 11432;
-        env = {
-          UV_PYTHON = "${pkgs.python3}/bin/python3";
-        };
       };
 
       git = {
