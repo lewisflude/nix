@@ -2,6 +2,7 @@ _: {
   # Configure Homebrew
   homebrew = {
     enable = true;
+
     onActivation = {
       cleanup = "zap";
       autoUpdate = true;
@@ -11,14 +12,11 @@ _: {
       no_quarantine = true;
     };
     taps = [
-      "nrwl/nx"
       "j178/tap"
     ];
     brews = [
       "circleci"
       "mas"
-      "node"
-      "nx"
     ];
     # GUI applications
     casks = [

@@ -21,6 +21,9 @@ in {
       # Cursor overlay
       (import ../../overlays/cursor.nix)
 
+      # Custom npm packages overlay
+      (import ../../overlays/npm-packages.nix)
+
       # NUR overlay
       inputs.nur.overlays.default
 

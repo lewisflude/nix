@@ -8,7 +8,7 @@
     pyright
     black
     # C++ development tools for Unreal Engine
-    clang-tools # Provides clangd and clang-format
+  
     lldb # Debugger for C++
     # Nix
     nil # Nix LSP

@@ -4,7 +4,7 @@
     pkg-config
     openssl
     libiconv
-    clang
+  
     cmake
 
     # macOS SDK and development tools
