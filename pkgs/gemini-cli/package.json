@@ -1,0 +1,12 @@
+{
+  "name": "gemini-cli",
+  "version": "0.1.0",
+  "description": "Gemini CLI package",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -16,7 +16,7 @@ in {
 
   programs.vscode = {
     enable = true;
-    package = pkgs.cursor;
+    package = pkgs.cursor.cursor;
     mutableExtensionsDir = false;
     profiles.default = {
       userSettings = lib.mkMerge [
