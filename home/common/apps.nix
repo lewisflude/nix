@@ -14,7 +14,7 @@ in
       # Development tools (cross-platform)
       awscli2
       claude-code
-      final.gemini-cli-bin
+      pkgs.gemini-cli-bin
       codex
       nx-latest
       coreutils

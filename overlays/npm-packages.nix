@@ -1,79 +1,71 @@
+# overlay.nix
 final: prev: {
-  # Custom npm packages not available in nixpkgs nodePackages
-  #
-  # Template for adding new packages:
-  # my-npm-package = prev.buildNpmPackage rec {
-  #   pname = "package-name";
-  #   version = "x.y.z";
-  #
-  #   src = prev.fetchFromNpm {
-  #     inherit pname version;
-  #     sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-  #   };
-  #   # OR for GitHub sources:
-  #   # src = prev.fetchFromGitHub {
-  #   #   owner = "username";
-  #   #   repo = "repo-name";
-  #   #   rev = "v${version}";
-  #   #   sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-  #   # };
-  #
-  #   npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-  #
-  #   meta = with prev.lib; {
-  #     description = "Package description";
-  #     homepage = "https://...";
-  #     license = licenses.mit; # or appropriate license
-  #     maintainers = [ maintainers.your-username ];
-  #   };
-  # };
 
+  # nx CLI (from the published npm tarball), built reproducibly via our lockfile.
   nx-latest = prev.buildNpmPackage rec {
     pname = "nx";
     version = "21.5.3";
 
+    # Fetch the upstream published package to preserve its package.json/bin.
     src = prev.fetchurl {
       url = "https://registry.npmjs.org/nx/-/nx-${version}.tgz";
+      # Pin the tarball (hash for the tarball itself).
+      # Compute once with: nix-prefetch-url --unpack <url>
       hash = "sha256-j/jGtZxoAKVAUVqUZaQCsZcdDthOYzHuk7Im3bGOZBk=";
     };
 
-    # Add the package-lock.json to the source
-    packageLock = ../pkgs/nx/package-lock.json;
-
-    # Copy the package-lock.json into the build directory
+    # Provide a lockfile we maintain in-repo for nx@21.5.3.
+    # This allows fully-offline, reproducible installs.
     postPatch = ''
-      cp ${packageLock} package-lock.json
+      cp ${../pkgs/nx/package-lock.json} ./package-lock.json
     '';
 
+    # nx is a CLI package—no build step needed.
     dontNpmBuild = true;
 
+    # Materialize the npm dependency cache deterministically.
+    # Compute once with: prefetch-npm-deps ../pkgs/nx/package-lock.json
     npmDepsHash = "sha256-/WdFmNDZZr4npLoWpczr8nFalQGQxAJLQa6Hza1tVBE=";
 
     meta = with prev.lib; {
       description = "Smart monorepos · Fast CI";
       homepage = "https://nx.dev";
       license = licenses.mit;
+      maintainers = [ maintainers.lewisflude ];
+      mainProgram = "nx";
     };
   };
 
+  # Google Gemini CLI built from your local source (projen-driven)
   gemini-cli-bin = prev.buildNpmPackage rec {
     pname = "@google/gemini-cli";
     version = "0.6.0";
 
-    src = prev.fetchurl {
-      url = "https://registry.npmjs.org/@google/gemini-cli/-/gemini-cli-${version}.tgz";
-      hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # Placeholder: Replace with actual hash
-    };
+    # Single source of truth: your local package with package.json + lockfile.
+    # Ensure ../pkgs/gemini-cli/package-lock.json exists and is current.
+    src = ../pkgs/gemini-cli;
 
-    npmDepsHash = "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="; # Placeholder: Replace with actual hash
+    # Some Google projects have tight peer ranges; this avoids resolution failures.
+    npmFlags = [ "--legacy-peer-deps" ];
+
+    # Projen-based workflows often need devDependencies present during build.
+    includeDevDependencies = true;
+
+    # Fully offline install using your lockfile’s dependency graph.
+    # Compute once with: prefetch-npm-deps ../pkgs/gemini-cli/package-lock.json
+    npmDepsHash = "sha256-651LYj4GVEHvqGJ3Gaw0GwFCRLrf639dOSW5IJG6rn0=";
+
+    # If your package.json has a "build" script, the default is fine.
+    # If it’s different (e.g. "projen build"), uncomment:
+    # npmBuildScript = "projen build";
 
     meta = with prev.lib; {
       description = "Google Gemini Command Line Interface";
       homepage = "https://github.com/google-gemini/gemini-cli";
-      license = licenses.apache20; # Assuming Apache 2.0 based on Google projects
-      maintainers = [ "your-username" ]; # Replace with your GitHub username
+      license = licenses.asl20;
+      maintainers = [ maintainers.lewisflude ];
+      # If package.json defines "bin", this exposes it automatically.
     };
   };
-
 
 }
