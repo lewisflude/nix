@@ -15,6 +15,7 @@ in
       awscli2
       claude-code
       pkgs.gemini-cli-bin
+      pkgs.cursor-cli
       codex
       nx-latest
       coreutils

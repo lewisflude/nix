@@ -8,7 +8,7 @@
     sops
   ];
 
-  sops = lib.mkIf (!pkgs.stdenv.isDarwin) {
+  sops = {
     defaultSopsFile = ../../secrets/user.yaml;
 
     # Use age for user secrets (no prompts)
@@ -20,6 +20,9 @@
       OBSIDIAN_API_KEY = {};
       OPENAI_API_KEY = {};
       GITHUB_TOKEN = {};
+      GITHUB_PERSONAL_ACCESS_TOKEN = {
+        sopsFile = ../../secrets/secrets.yaml;
+      };
     };
   };
 

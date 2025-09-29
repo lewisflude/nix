@@ -12,7 +12,7 @@
   codeDirectory = "${config.home.homeDirectory}/Code";
   dexWebProject = "${codeDirectory}/dex-web";
 
-  secretPath = name: "${config.home.homeDirectory}/Library/Application Support/sops-nix/secrets/${name}";
+  secretPath = name: config.sops.secrets.${name}.path;
 in {
   home = {
     packages = with pkgs; [
@@ -24,8 +24,8 @@ in {
       "bin/kagi-mcp-wrapper" = {
         text = ''
           #!/usr/bin/env bash
-          if [ -r "${secretPath "KAGI_API_KEY"}" ]; then
-            export KAGI_API_KEY="$(cat "${secretPath "KAGI_API_KEY"}")"
+          if [ -r "${config.sops.secrets.KAGI_API_KEY.path}" ]; then
+            export KAGI_API_KEY="$(cat "${config.sops.secrets.KAGI_API_KEY.path}")"
           fi
           exec ${pkgs.uv}/bin/uvx kagimcp "$@"
         '';
@@ -155,7 +155,7 @@ in {
         ];
         port = 11434;
         env = {
-          GITHUB_PERSONAL_ACCESS_TOKEN = "/run/secrets/GITHUB_PERSONAL_ACCESS_TOKEN";
+          GITHUB_PERSONAL_ACCESS_TOKEN = config.sops.secrets.GITHUB_PERSONAL_ACCESS_TOKEN.path;
         };
       };
       filesystem = {
@@ -174,7 +174,7 @@ in {
           "mcp-obsidian"
         ];
         env = {
-          OBSIDIAN_API_KEY = secretPath "OBSIDIAN_API_KEY";
+          OBSIDIAN_API_KEY = config.sops.secrets.OBSIDIAN_API_KEY.path;
           OBSIDIAN_HOST = "127.0.0.1";
           OBSIDIAN_PORT = "27124";
         };
@@ -227,15 +227,15 @@ in {
         ];
         port = 11444;
       };
-      figma = {
-        command = "${pkgs.nodejs_24}/bin/npx";
-        args = [
-          "-y"
-          "mcp-remote"
-          "http://127.0.0.1:3845/mcp"
-        ];
-        port = 11445;
-      };
+      # figma = {
+      #   command = "${pkgs.nodejs_24}/bin/npx";
+      #   args = [
+      #     "-y"
+      #     "mcp-remote"
+      #     "http://127.0.0.1:3845/mcp"
+      #   ];
+      #   port = 11445;
+      # };
     };
   };
 }
