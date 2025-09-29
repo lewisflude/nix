@@ -13,6 +13,8 @@
     "OBSIDIAN_API_KEY"
     "OPENAI_API_KEY"
     "GITHUB_TOKEN"
+    "GITHUB_PERSONAL_ACCESS_TOKEN"
+    "FIGMA_ACCESS_TOKEN"
   ] (_: {
     owner = username;
     group = "staff";

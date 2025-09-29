@@ -5,6 +5,7 @@
     experimental-features = [
       "nix-command"
       "flakes"
+      "lazy-trees"
     ];
   };
 
