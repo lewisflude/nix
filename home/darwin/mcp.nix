@@ -120,7 +120,7 @@ in {
         port = 11433;
       };
       nx = {
-        command = "${pkgs.nodejs_24}/bin/npx";
+        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
           "nx-mcp@latest"
           dexWebProject
@@ -128,7 +128,7 @@ in {
         port = 11437;
       };
       memory = {
-        command = "${pkgs.nodejs_24}/bin/npx";
+        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-memory"
@@ -136,7 +136,7 @@ in {
         port = 11436;
       };
       sequential-thinking = {
-        command = "${pkgs.nodejs_24}/bin/npx";
+        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-sequential-thinking"
@@ -159,7 +159,7 @@ in {
         };
       };
       filesystem = {
-        command = "${pkgs.nodejs_24}/bin/npx";
+        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-filesystem"
@@ -194,7 +194,7 @@ in {
         port = 11440;
       };
       love2d-filesystem = {
-        command = "${pkgs.nodejs_24}/bin/npx";
+        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-filesystem"
@@ -204,7 +204,7 @@ in {
         port = 11441;
       };
       general-filesystem = {
-        command = "${pkgs.nodejs_24}/bin/npx";
+        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-filesystem"
@@ -220,7 +220,7 @@ in {
         port = 11443;
       };
       everything = {
-        command = "${pkgs.nodejs_24}/bin/npx";
+        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-everything"
@@ -228,7 +228,7 @@ in {
         port = 11444;
       };
       # figma = {
-      #   command = "${pkgs.nodejs_24}/bin/npx";
+      #   command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
       #   args = [
       #     "-y"
       #     "mcp-remote"

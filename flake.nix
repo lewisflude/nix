@@ -35,10 +35,6 @@
     };
 
     # Desktop environment and UI
-    astal = {
-      url = "github:aylur/astal";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     waybar = {
       url = "github:Alexays/Waybar/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -65,9 +61,6 @@
     };
 
     # Development and packages
-    nixpkgs-mozilla = {
-      url = "github:mozilla/nixpkgs-mozilla";
-    };
     nur = {
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -97,10 +90,6 @@
     # Tools and utilities
     nh = {
       url = "github:nix-community/nh";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    mcp-hub = {
-      url = "github:ravitemer/mcp-hub";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
