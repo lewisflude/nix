@@ -9,7 +9,7 @@ in
   pkgs.mkShell {
     buildInputs = with pkgs;
       [
-        nodejs_24
+        (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
         watchman
       ]
       ++ lib.optionals platformLib.isDarwin [

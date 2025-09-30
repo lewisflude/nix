@@ -2,8 +2,10 @@
   pkgs,
   config,
   lib,
+  system,
   ...
 }: let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
   inherit
     (lib)
     concatStringsSep
@@ -18,7 +20,7 @@
     name = "openai-mcp-wrapper";
     runtimeInputs = [
       pkgs.coreutils
-      pkgs.nodejs_24
+      (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
     ];
     text = ''
       set -euo pipefail
@@ -29,7 +31,7 @@
       if [ -z "''${RUSTDOCFLAGS:-}" ]; then
         export RUSTDOCFLAGS="--cfg=docsrs"
       fi
-      exec ${pkgs.nodejs_24}/bin/npx -y @mzxrai/mcp-openai "$@"
+      exec ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @mzxrai/mcp-openai "$@"
     '';
   };
 
@@ -54,13 +56,13 @@
     name = "github-mcp-wrapper";
     runtimeInputs = [
       pkgs.coreutils
-      pkgs.nodejs_24
+      (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
     ];
     text = ''
       set -euo pipefail
       GITHUB_TOKEN="$(cat ${config.sops.secrets.GITHUB_TOKEN.path})"
       export GITHUB_TOKEN
-      exec ${pkgs.nodejs_24}/bin/npx -y @modelcontextprotocol/server-github@latest "$@"
+      exec ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @modelcontextprotocol/server-github@latest "$@"
     '';
   };
 
@@ -212,11 +214,11 @@
 
     # 3) Prefetch common npx servers (installs package cache)
     echo "[mcp-warm] Prefetching npx servers…"
-    ${pkgs.nodejs_24}/bin/npx -y @modelcontextprotocol/server-everything@latest --help >/dev/null 2>&1 || true
-    ${pkgs.nodejs_24}/bin/npx -y @modelcontextprotocol/server-filesystem@latest --help >/dev/null 2>&1 || true
-    ${pkgs.nodejs_24}/bin/npx -y @modelcontextprotocol/server-memory@latest --help >/dev/null 2>&1 || true
-    ${pkgs.nodejs_24}/bin/npx -y @modelcontextprotocol/server-sequential-thinking@latest --help >/dev/null 2>&1 || true
-    ${pkgs.nodejs_24}/bin/npx -y tritlo/lsp-mcp --help >/dev/null 2>&1 || true
+    ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @modelcontextprotocol/server-everything@latest --help >/dev/null 2>&1 || true
+    ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @modelcontextprotocol/server-filesystem@latest --help >/dev/null 2>&1 || true
+    ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @modelcontextprotocol/server-memory@latest --help >/dev/null 2>&1 || true
+    ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @modelcontextprotocol/server-sequential-thinking@latest --help >/dev/null 2>&1 || true
+    ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y tritlo/lsp-mcp --help >/dev/null 2>&1 || true
 
     echo "[mcp-warm] Warm-up complete."
   '';
@@ -228,7 +230,7 @@ in {
     packages = with pkgs; [
       uv
       python3
-      nodejs_24
+      (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
       coreutils
       gawk
       jq
@@ -275,7 +277,7 @@ in {
       # --- Existing servers (kept) ---
 
       everything = {
-        command = "${pkgs.nodejs_24}/bin/npx";
+        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-everything@latest"
@@ -290,7 +292,7 @@ in {
       };
 
       memory = {
-        command = "${pkgs.nodejs_24}/bin/npx";
+        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-memory@latest"
@@ -299,7 +301,7 @@ in {
       };
 
       sequential-thinking = {
-        command = "${pkgs.nodejs_24}/bin/npx";
+        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-sequential-thinking@latest"
@@ -308,7 +310,7 @@ in {
       };
 
       general-filesystem = {
-        command = "${pkgs.nodejs_24}/bin/npx";
+        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-filesystem@latest"
@@ -428,7 +430,7 @@ in {
 
       # --- New: LSP → MCP bridges
       lsp-ts = {
-        command = "${pkgs.nodejs_24}/bin/npx";
+        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
           "-y"
           "tritlo/lsp-mcp"
@@ -441,7 +443,7 @@ in {
 
       # (Optional) Luau/Roblox — add later once you have a concrete LSP path
       # lsp-luau = {
-      #   command = "${pkgs.nodejs_24}/bin/npx";
+      #   command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
       #   args    = [ "-y" "tritlo/lsp-mcp" "lua" "/absolute/path/to/roblox-lsp" "--stdio" ];
       #   port    = 11449;
       # };

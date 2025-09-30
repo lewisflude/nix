@@ -1,8 +1,12 @@
 {
   pkgs,
   config,
+  lib,
+  system,
   ...
-}: {
+}: let
+  platformLib = import ../../../lib/functions.nix { inherit lib system; };
+in {
   home.file = {
     ".p10k.zsh" = {
       source = ../lib/p10k.zsh;
@@ -37,7 +41,7 @@
       save = 10000;
       size = 10000;
       ignoreAllDups = true;
-      path = "${config.home.homeDirectory}/.zsh_history";
+      path = "${platformLib.homeDir config.home.username}/.zsh_history";
       ignorePatterns = [
         "rm *"
         "pkill *"
