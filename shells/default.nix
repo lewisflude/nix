@@ -13,18 +13,18 @@ let
   ];
 
   devShellsCommon = {
-    nextjs = import ./projects/nextjs.nix { inherit pkgs; };
+    nextjs = import ./projects/nextjs.nix { inherit pkgs lib system; };
 
     react-native = import ./projects/react-native.nix {
       inherit pkgs lib system;
     };
 
-    api-backend = import ./projects/api-backend.nix { inherit pkgs; };
+    api-backend = import ./projects/api-backend.nix { inherit pkgs lib system; };
 
     shell-selector = import ./utils/shell-selector.nix { inherit pkgs; };
 
     node = pkgs.mkShell {
-      buildInputs = with pkgs; [ nodejs_24 ] ++ commonTools;
+      buildInputs = with pkgs; [ (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs) ] ++ commonTools;
       shellHook = ''
         echo "🚀 Node.js development environment loaded"
         echo "Node version: $(node --version)"
@@ -100,7 +100,7 @@ let
       buildInputs =
         with pkgs;
         [
-          nodejs_24
+          (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
           tailwindcss-language-server
           html-tidy
           sass
@@ -121,7 +121,7 @@ let
           # solana-cli  # Temporarily disabled due to compilation errors
           rustc
           cargo
-          nodejs_24
+          (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
         ]
         ++ commonTools;
 

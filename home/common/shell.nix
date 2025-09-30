@@ -29,7 +29,7 @@
 
   secretPath = name:
     if pkgs.stdenv.isDarwin
-    then "${config.home.homeDirectory}/Library/Application Support/sops-nix/secrets/${name}"
+    then "${platformLib.dataDir config.home.username}/sops-nix/secrets/${name}"
     else config.sops.secrets.${name}.path;
 
   secretExportSnippet = name: var: let
@@ -285,7 +285,7 @@ in {
         save = 50000;
         size = 50000;
         ignoreAllDups = true;
-        path = "${config.home.homeDirectory}/.zsh_history";
+        path = "${platformLib.homeDir config.home.username}/.zsh_history";
         ignorePatterns = [
           "rm *"
           "pkill *"

@@ -1,7 +1,9 @@
-{pkgs, ...}:
+{pkgs, lib, system, ...}: let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    nodejs_24
+    (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
     tailwindcss-language-server
   ];
 

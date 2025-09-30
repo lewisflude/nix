@@ -36,7 +36,6 @@ in {
     hostPlatform = system;
     config = {
       allowUnfree = true;
-      allowBroken = true;
       allowUnsupportedSystem = false;
     };
   };

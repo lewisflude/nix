@@ -127,6 +127,9 @@ in
   # Use consistent helpers throughout configuration
   home.packages = platformLib.platformPackages [linuxPackages] [darwinPackages];
   home.homeDirectory = platformLib.homeDir username;
+
+  # Use centralized version constants
+  buildInputs = with pkgs; [ ${platformLib.versions.nodejs} ];
 }
 ```
 
@@ -137,6 +140,7 @@ in
 - `homeDir`, `configDir`, `dataDir`, `cacheDir` - Dynamic path helpers
 - `rootGroup` - Platform-specific root group
 - `systemRebuildCommand` - Platform-specific rebuild commands
+- `versions` - Central version constants (nodejs, python, go, rust)
 
 ### Development Shells
 - **Project-specific**: `nextjs`, `react-native`, `api-backend`
@@ -145,6 +149,12 @@ in
 - **Utility**: `shell-selector` for interactive environment selection
 
 ## Best Practices
+
+### Security and Stability Guidelines
+1. **NO `allowBroken` packages** - Handle broken packages with specific overlays or alternatives
+2. **Use centralized version constants** - All major dependencies versioned in `lib/functions.nix`
+3. **Minimize flake inputs** - Only include inputs that are actively used in the configuration
+4. **Use platformLib helpers** - Avoid hardcoded paths like `${config.home.homeDirectory}`
 
 ### Platform Separation Rules
 1. **Common modules** should contain ONLY cross-platform configurations
@@ -156,8 +166,9 @@ in
 1. **Import platform helpers**: Always use `lib/functions.nix` for consistency
 2. **Single responsibility**: Each module should handle one specific area
 3. **Avoid duplication**: Check for existing package installations before adding new ones
-4. **Dynamic paths**: Use `platformLib.homeDir`, `platformLib.dataDir` instead of hardcoded paths
-5. **Clear naming**: Use descriptive names like `desktop-environment.nix` not `de.nix`
+4. **Dynamic paths**: Use `platformLib.homeDir`, `platformLib.configDir` instead of hardcoded paths
+5. **Version consistency**: Use `platformLib.versions.nodejs` instead of `nodejs_24` directly
+6. **Clear naming**: Use descriptive names like `desktop-environment.nix` not `de.nix`
 
 ### File Organization Principles
 - Host-specific configurations in `hosts/<hostname>/`

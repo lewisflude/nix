@@ -3,6 +3,19 @@
   system,
   ...
 }: rec {
+  # Central version constants for consistency across the configuration
+  versions = {
+    nodejs = "nodejs_24";
+    python = "python313";
+    go = "go";
+    rust = {
+      package = "rustc";
+      cargo = "cargo";
+    };
+  };
+
+  # Helper to get versioned package
+  getVersionedPackage = pkgs: packageName: lib.getAttr packageName pkgs;
   # Base platform detection
   isLinux = lib.hasInfix "linux" system;
   isDarwin = lib.hasInfix "darwin" system;

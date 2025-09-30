@@ -2,8 +2,11 @@
   pkgs,
   lib,
   config,
+  system,
   ...
-}: {
+}: let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in {
   home.packages = with pkgs; [
     sops
   ];
@@ -12,7 +15,7 @@
     defaultSopsFile = ../../secrets/user.yaml;
 
     # Use age for user secrets (no prompts)
-    age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+    age.keyFile = "${platformLib.configDir config.home.username}/sops/age/keys.txt";
 
     secrets = {
       KAGI_API_KEY = {};
