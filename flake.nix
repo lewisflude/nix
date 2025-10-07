@@ -99,57 +99,52 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Homebrew taps (non-flake)
-    # homebrew-core and homebrew-cask are managed automatically by Homebrew
-    homebrew-nx = {
-      url = "github:nrwl/homebrew-nx";
-      flake = false;
-    };
     homebrew-j178 = {
       url = "github:j178/homebrew-tap";
       flake = false;
     };
   };
 
-  outputs = inputs @ {self, ...}: let
-    # Import host configurations and utilities
-    hostsConfig = import ./lib/hosts.nix {inherit (inputs.nixpkgs) lib;};
-    inherit (hostsConfig) hosts;
+  outputs =
+    inputs@{ self, ... }:
+    let
+      # Import host configurations and utilities
+      hostsConfig = import ./lib/hosts.nix { inherit (inputs.nixpkgs) lib; };
+      inherit (hostsConfig) hosts;
 
-    # Import system builders
-    systemBuilders = import ./lib/system-builders.nix {inherit inputs;};
+      # Import system builders
+      systemBuilders = import ./lib/system-builders.nix { inherit inputs; };
 
-    # Import output builders with necessary context
-    outputBuilders = import ./lib/output-builders.nix {
-      inputs =
-        inputs
-        // {
+      # Import output builders with necessary context
+      outputBuilders = import ./lib/output-builders.nix {
+        inputs = inputs // {
           inherit self;
         };
-      inherit hosts;
-    };
-
-    # Darwin system builder with homebrew inputs
-    mkDarwinSystem = hostName: hostConfig:
-      systemBuilders.mkDarwinSystem hostName hostConfig {
-        inherit
-          (inputs)
-          homebrew-nx
-          homebrew-j178
-          ;
+        inherit hosts;
       };
 
-    # NixOS system builder with self reference
-    mkNixosSystem = hostName: hostConfig: systemBuilders.mkNixosSystem hostName hostConfig {inherit self;};
-  in {
-    # Development and formatting outputs
-    formatter = outputBuilders.mkFormatters;
-    checks = outputBuilders.mkChecks;
-    devShells = outputBuilders.mkDevShells;
+      # Darwin system builder with homebrew inputs
+      mkDarwinSystem =
+        hostName: hostConfig:
+        systemBuilders.mkDarwinSystem hostName hostConfig {
+          inherit (inputs)
+            homebrew-j178
+            ;
+        };
 
-    # System configurations
-    darwinConfigurations = builtins.mapAttrs mkDarwinSystem (hostsConfig.getDarwinHosts hosts);
-    nixosConfigurations = builtins.mapAttrs mkNixosSystem (hostsConfig.getNixosHosts hosts);
-    homeConfigurations = outputBuilders.mkHomeConfigurations;
-  };
+      # NixOS system builder with self reference
+      mkNixosSystem =
+        hostName: hostConfig: systemBuilders.mkNixosSystem hostName hostConfig { inherit self; };
+    in
+    {
+      # Development and formatting outputs
+      formatter = outputBuilders.mkFormatters;
+      checks = outputBuilders.mkChecks;
+      devShells = outputBuilders.mkDevShells;
+
+      # System configurations
+      darwinConfigurations = builtins.mapAttrs mkDarwinSystem (hostsConfig.getDarwinHosts hosts);
+      nixosConfigurations = builtins.mapAttrs mkNixosSystem (hostsConfig.getNixosHosts hosts);
+      homeConfigurations = outputBuilders.mkHomeConfigurations;
+    };
 }

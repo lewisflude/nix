@@ -160,6 +160,20 @@ in {
       completionInit = ''
         setopt EXTENDED_GLOB
         autoload -Uz compinit
+        
+        # Handle insecure directories gracefully
+        # Check for insecure directories and fix them if possible
+        if ! compaudit 2>/dev/null; then
+          echo "Warning: Insecure zsh completion directories detected."
+          echo "Attempting to fix ownership issues..."
+          # Try to fix common ownership issues
+          if [[ -d "/usr/local/share/zsh" ]] && [[ -O "/usr/local/share/zsh" ]]; then
+            echo "Fixing /usr/local/share/zsh ownership..."
+            sudo chown -R root:wheel /usr/local/share/zsh 2>/dev/null || true
+          fi
+        fi
+        
+        # Initialize completion system
         if [[ -n ${config.xdg.cacheHome}/zsh/.zcompdump(#qN.mh+24) ]]; then
           compinit
         else

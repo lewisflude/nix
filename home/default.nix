@@ -2,6 +2,7 @@
   username,
   system,
   lib,
+  inputs,
   ...
 }: let
   platformLib = import ../lib/functions.nix {inherit lib system;};
