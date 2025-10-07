@@ -12,7 +12,7 @@
   codeDirectory = "${config.home.homeDirectory}/Code";
   dexWebProject = "${codeDirectory}/dex-web";
 
-  secretPath = name: config.sops.secrets.${name}.path;
+  secretPath = name: config.sops.secrets.${name}.path or "";
 in {
   home = {
     packages = with pkgs; [
@@ -24,8 +24,8 @@ in {
       "bin/kagi-mcp-wrapper" = {
         text = ''
           #!/usr/bin/env bash
-          if [ -r "${config.sops.secrets.KAGI_API_KEY.path}" ]; then
-            export KAGI_API_KEY="$(cat "${config.sops.secrets.KAGI_API_KEY.path}")"
+          if [ -r "${config.sops.secrets.KAGI_API_KEY.path or ""}" ]; then
+            export KAGI_API_KEY="$(cat "${config.sops.secrets.KAGI_API_KEY.path or ""}")"
           fi
           exec ${pkgs.uv}/bin/uvx kagimcp "$@"
         '';
@@ -155,7 +155,7 @@ in {
         ];
         port = 11434;
         env = {
-          GITHUB_PERSONAL_ACCESS_TOKEN = config.sops.secrets.GITHUB_PERSONAL_ACCESS_TOKEN.path;
+          GITHUB_PERSONAL_ACCESS_TOKEN = config.sops.secrets.GITHUB_PERSONAL_ACCESS_TOKEN.path or "";
         };
       };
       filesystem = {
@@ -174,7 +174,7 @@ in {
           "mcp-obsidian"
         ];
         env = {
-          OBSIDIAN_API_KEY = config.sops.secrets.OBSIDIAN_API_KEY.path;
+          OBSIDIAN_API_KEY = config.sops.secrets.OBSIDIAN_API_KEY.path or "";
           OBSIDIAN_HOST = "127.0.0.1";
           OBSIDIAN_PORT = "27124";
         };

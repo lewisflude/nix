@@ -52,7 +52,6 @@ in
     ./apps/direnv.nix
     ./apps/fzf.nix
     ./apps/ripgrep.nix
-    ./apps/zoxide.nix
     ./apps/helix.nix
     ./apps/obsidian.nix
   ];
