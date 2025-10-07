@@ -2,14 +2,14 @@
   config,
   pkgs,
   lib,
-  ghostty,
   ...
 }: let
   brightness = "${config.home.homeDirectory}/bin/brightness";
+  inputs = config._module.args.inputs or {};
 
   # Use lib.getExe for robust executable paths
   uwsm = lib.getExe pkgs.uwsm;
-  terminal = lib.getExe ghostty.packages.${pkgs.system}.default;
+  terminal = lib.getExe pkgs.ghostty;
   launcher = [
     uwsm
     "app"
@@ -114,7 +114,7 @@ in {
     };
 
     "Mod+E".action.spawn = [
-      "${ghostty.packages.${pkgs.system}.default}/bin/ghostty"
+      "${pkgs.ghostty}/bin/ghostty"
       "-e"
       "yazi"
     ];

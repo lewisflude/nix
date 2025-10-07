@@ -1,4 +1,18 @@
-_: {
+{ pkgs, ... }: {
+  # Fix /usr/local ownership issues that can cause zsh compinit security warnings
+  system.activationScripts.fixUsrLocalOwnership = ''
+    # Fix ownership of /usr/local directories that should be owned by root
+    if [ -d "/usr/local/share/zsh" ]; then
+      chown -R root:wheel /usr/local/share/zsh
+    fi
+    if [ -d "/usr/local/share/man" ]; then
+      chown -R root:wheel /usr/local/share/man
+    fi
+    if [ -d "/usr/local/share/info" ]; then
+      chown -R root:wheel /usr/local/share/info
+    fi
+  '';
+
   # Configure Homebrew
   homebrew = {
     enable = true;

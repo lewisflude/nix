@@ -2,11 +2,12 @@
   pkgs,
   lib,
   system,
-  inputs,
+  config,
   ...
 }:
 let
   platformLib = import ../../lib/functions.nix { inherit lib system; };
+  inputs = config._module.args.inputs or {};
 in
 {
   # Common terminal packages across all platforms
@@ -18,8 +19,6 @@ in
       wget # File downloader
       curl # HTTP client
       comma # Comma-separated values
-      rar # Archive manager
-      p7zip # 7-Zip archiver
       devenv # Development environments
 
       # Enhanced command line tools
@@ -28,16 +27,12 @@ in
       trash-cli # Better trash (safer rm replacement)
       micro # Terminal text editor
       fd # Better find
-      duf # Better df
-      ncdu # Disk usage analyzer
-      dust # Disk usage tree
+      dust # Disk usage tree (keeping most modern option)
       procs # Better ps
       gping # Ping with graph
-      mosh # Mobile shell
-      aria2 # Download manager
       tldr # Better man pages
       atuin # Modern shell history
-      atool # Archive manager
+      p7zip # 7-Zip archiver (keeping most universal option)
       pigz # Parallel gzip
       jq # JSON processor
 
@@ -46,7 +41,6 @@ in
       lazygit # Git TUI
       lazydocker # Docker TUI
       zellij # Terminal multiplexer (modern)
-      tmux # Traditional terminal multiplexer
     ]
     ++
       platformLib.platformPackages
@@ -63,7 +57,7 @@ in
 
   programs.ghostty = {
     enable = true;
-    package = platformLib.platformPackage inputs.ghostty.packages.${system}.default pkgs.ghostty-bin;
+    package = platformLib.platformPackage pkgs.ghostty pkgs.ghostty-bin;
     enableZshIntegration = true;
     settings = {
       font-family = "Iosevka Nerd Font";

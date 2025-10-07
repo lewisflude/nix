@@ -1,4 +1,4 @@
-{...}: {
+{inputs, ...}: {
   imports = [
     ./apps.nix
     ./git.nix
@@ -8,7 +8,6 @@
     ./gpg.nix
     ./development
     ./system
-    ./sops.nix
     ./lib
     ./modules.nix
     ./terminal.nix
