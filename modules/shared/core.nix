@@ -1,13 +1,12 @@
-{ self
-, username
-, system
-, lib
-, ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
-in
 {
+  self,
+  username,
+  system,
+  lib,
+  ...
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
+in {
   # Cross-platform Nix configuration
   nix = {
     settings = {

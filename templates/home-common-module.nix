@@ -1,14 +1,13 @@
 # Template for home/common/ - Cross-platform Home Manager modules only
-{ pkgs
-, lib
-, system
-, config
-, ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
-in
 {
+  pkgs,
+  lib,
+  system,
+  config,
+  ...
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
+in {
   # Cross-platform Home Manager configuration only
   # Platform-specific logic should be moved to home/darwin/ or home/nixos/
 
@@ -22,14 +21,14 @@ in
         jq
       ]
       ++ platformLib.platformPackages
-        [
-          # Linux-specific packages
-          linux-specific-package
-        ]
-        [
-          # Darwin-specific packages
-          darwin-specific-package
-        ];
+      [
+        # Linux-specific packages
+        linux-specific-package
+      ]
+      [
+        # Darwin-specific packages
+        darwin-specific-package
+      ];
 
     file = {
       # Cross-platform file configuration

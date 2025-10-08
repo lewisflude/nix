@@ -1,4 +1,4 @@
-{ username, ... }: {
+{username, ...}: {
   # NixOS-specific Nix configuration
 
   # Enable the Nix daemon (managed by systemd on NixOS)

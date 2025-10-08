@@ -1,6 +1,5 @@
 # System builder functions for Darwin and NixOS configurations
-{ inputs }:
-let
+{inputs}: let
   inherit
     (inputs)
     darwin
@@ -16,10 +15,9 @@ let
     solaar
     determinate
     ;
-in
-{
+in {
   # Darwin system builder
-  mkDarwinSystem = hostName: hostConfig: { homebrew-j178 }:
+  mkDarwinSystem = hostName: hostConfig: {homebrew-j178}:
     darwin.lib.darwinSystem {
       inherit (hostConfig) system;
       specialArgs = inputs // hostConfig;
@@ -31,7 +29,7 @@ in
         mac-app-util.darwinModules.default
         nix-homebrew.darwinModules.nix-homebrew
         sops-nix.darwinModules.sops
-        { _module.args = { inherit inputs; }; }
+        {_module.args = {inherit inputs;};}
         {
           nix-homebrew = {
             enable = true;
@@ -62,7 +60,7 @@ in
     };
 
   # NixOS system builder
-  mkNixosSystem = hostName: hostConfig: { self }:
+  mkNixosSystem = hostName: hostConfig: {self}:
     nixpkgs.lib.nixosSystem {
       inherit (hostConfig) system;
       specialArgs =
@@ -82,7 +80,7 @@ in
         musnix.nixosModules.musnix
         nur.modules.nixos.default
         solaar.nixosModules.default
-        { _module.args = { inherit inputs; }; }
+        {_module.args = {inherit inputs;};}
         home-manager.nixosModules.home-manager
         {
           home-manager = {

@@ -1,5 +1,4 @@
-{ lib, ... }:
-let
+{lib, ...}: let
   standards = import ../../development/language-standards.nix;
   formatterMap = {
     biome = "biomejs.biome";
@@ -18,22 +17,21 @@ let
     "javascriptreact"
     "typescriptreact"
   ];
-  jsonVariants = [ "jsonc" ];
+  jsonVariants = ["jsonc"];
   languages = baseLanguages ++ reactVariants ++ jsonVariants;
 
   entries = lib.filter (e: e != null) (
     lib.map
-      (
-        lang:
-        let
-          aliasMap = {
-            javascriptreact = "javascript";
-            typescriptreact = "typescript";
-            jsonc = "json";
-          };
-          stdName = aliasMap.${lang} or lang;
-          std = standards.languages.${stdName} or { };
-        in
+    (
+      lang: let
+        aliasMap = {
+          javascriptreact = "javascript";
+          typescriptreact = "typescript";
+          jsonc = "json";
+        };
+        stdName = aliasMap.${lang} or lang;
+        std = standards.languages.${stdName} or {};
+      in
         if std ? formatter && std.formatter != null
         then {
           name = "[${lang}]";
@@ -51,13 +49,12 @@ let
           };
         }
         else null
-      )
-      languages
+    )
+    languages
   );
 
   perLanguageFormatters = builtins.listToAttrs entries;
-in
-{
+in {
   userSettings = lib.mkMerge [
     perLanguageFormatters
   ];

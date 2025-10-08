@@ -1,1 +1,1 @@
-{ ... }: { imports = [ ./home-assistant.nix ./music-assistant.nix ./samba.nix ./ssh.nix ]; }
+{...}: {imports = [./home-assistant.nix ./music-assistant.nix ./samba.nix ./ssh.nix];}

@@ -1,6 +1,7 @@
-{ pkgs
-, hostname
-, ...
+{
+  pkgs,
+  hostname,
+  ...
 }: {
   environment.systemPackages = with pkgs; [
     networkmanagerapplet
@@ -150,7 +151,7 @@
 
     dbus = {
       implementation = "broker";
-      packages = [ pkgs.avahi ];
+      packages = [pkgs.avahi];
     };
   };
 

@@ -1,4 +1,4 @@
-{ lib, ... }: {
+{lib, ...}: {
   zramSwap = {
     enable = true;
     algorithm = "zstd";

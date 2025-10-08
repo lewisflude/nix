@@ -1,13 +1,12 @@
-{ pkgs
-, lib
-, config
-, system
-, ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
-in
 {
+  pkgs,
+  lib,
+  config,
+  system,
+  ...
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
+in {
   home.packages = with pkgs; [
     sops
   ];
@@ -19,11 +18,11 @@ in
     age.keyFile = "${platformLib.configDir config.home.username}/sops/age/keys.txt";
 
     secrets = {
-      KAGI_API_KEY = { };
-      CIRCLECI_TOKEN = { };
-      OBSIDIAN_API_KEY = { };
-      OPENAI_API_KEY = { };
-      GITHUB_TOKEN = { };
+      KAGI_API_KEY = {};
+      CIRCLECI_TOKEN = {};
+      OBSIDIAN_API_KEY = {};
+      OPENAI_API_KEY = {};
+      GITHUB_TOKEN = {};
       GITHUB_PERSONAL_ACCESS_TOKEN = {
         sopsFile = ../../secrets/secrets.yaml;
       };
@@ -32,8 +31,8 @@ in
 
   systemd.user.services.sops-nix = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
-      After = [ "gpg-agent.service" ];
-      Wants = [ "gpg-agent.service" ];
+      After = ["gpg-agent.service"];
+      Wants = ["gpg-agent.service"];
     };
     Service = {
       Restart = "on-failure";

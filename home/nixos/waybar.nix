@@ -1,8 +1,8 @@
-{ pkgs
-, config
-, ...
-}:
-let
+{
+  pkgs,
+  config,
+  ...
+}: let
   # Workspace icons mapping for maintainability (Iosevka Nerd Font)
   workspaceIcons = {
     "1" = ""; # Browser
@@ -14,8 +14,7 @@ let
   };
   uwsm = "${pkgs.uwsm}/bin/uwsm";
   ghostty = "${pkgs.ghostty}/bin/ghostty";
-in
-{
+in {
   programs.waybar = {
     enable = true;
     systemd.enable = true;
@@ -27,7 +26,7 @@ in
         log-level = 3;
         layer = "top";
         position = "top";
-        output = [ "DP-1" ];
+        output = ["DP-1"];
 
         modules-left = [
           "niri/workspaces"
