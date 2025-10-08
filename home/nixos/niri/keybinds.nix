@@ -5,7 +5,6 @@
 }:
 let
   brightness = "${config.home.homeDirectory}/bin/brightness";
-  inputs = config._module.args.inputs or { };
 
   # Use lib.getExe for robust executable paths
   uwsm = lib.getExe pkgs.uwsm;

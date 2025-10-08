@@ -421,12 +421,7 @@ in
         }
         eval "$(zoxide init zsh)"
 
-        # --- Zellij guarded auto-attach (interactive TTY only; skip IDE/CI; avoid recursion)
-        if [[ $- == *i* ]] && [[ -t 1 ]] && [[ -z "$ZELLIJ" ]] && [[ -z "$CI" ]] \
-          && [[ "$TERM_PROGRAM" != "vscode" ]] && [[ "$TERM_PROGRAM" != "cursor" ]]; then
-          # If Ghostty already launched zellij (most cases), $ZELLIJ is set and we won't recurse.
-          exec zellij attach -c default
-        fi
+
       '';
     };
   };

@@ -11,8 +11,6 @@ let
   claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
   codeDirectory = "${config.home.homeDirectory}/Code";
   dexWebProject = "${codeDirectory}/dex-web";
-
-  secretPath = name: config.sops.secrets.${name}.path or "";
 in
 {
   home = {

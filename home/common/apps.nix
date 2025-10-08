@@ -25,6 +25,7 @@ in
       # solana-cli  # Temporarily disabled due to compilation errors
       tree
       yaml-language-server
+      zellij
 
       # Note: Language servers moved to development/language-tools.nix:
       # - nil (Nix LSP)
