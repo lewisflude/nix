@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ ... }: {
   # Fix /usr/local ownership issues that can cause zsh compinit security warnings
   system.activationScripts.fixUsrLocalOwnership = ''
     # Fix ownership of /usr/local directories that should be owned by root

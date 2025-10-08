@@ -144,10 +144,9 @@
 
       # System configurations
       darwinConfigurations = builtins.mapAttrs mkDarwinSystem (hostsConfig.getDarwinHosts hosts);
-      nixosConfigurations =
-        if inputs.nixpkgs.system == "x86_64-linux"
-        then builtins.mapAttrs mkNixosSystem (hostsConfig.getNixosHosts hosts)
-        else { };
+      nixosConfigurations = builtins.mapAttrs mkNixosSystem
+        (inputs.nixpkgs.lib.filterAttrs (name: hostConfig: hostConfig.system == "x86_64-linux")
+          (hostsConfig.getNixosHosts hosts));
       homeConfigurations = outputBuilders.mkHomeConfigurations;
     };
 }

@@ -6,7 +6,6 @@
 }:
 let
   platformLib = import ../../lib/functions.nix { inherit lib system; };
-  inputs = config._module.args.inputs or { };
 in
 {
   # Common terminal packages across all platforms
