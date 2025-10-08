@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   # Linux USB utilities and management
   home.packages = with pkgs; [
     usbutils

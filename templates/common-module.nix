@@ -1,13 +1,14 @@
 # Template for modules/shared/ - Cross-platform system modules only
+{ pkgs
+, lib
+, system
+, username
+, ...
+}:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
 {
-  pkgs,
-  lib,
-  system,
-  username,
-  ...
-}: let
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
-in {
   # Cross-platform configuration only
   # Platform-specific logic should be moved to modules/darwin/ or modules/nixos/
 

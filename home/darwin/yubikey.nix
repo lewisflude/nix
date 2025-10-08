@@ -1,3 +1,3 @@
-{pkgs, ...}: {
-  home.packages = with pkgs; [terminal-notifier];
+{ pkgs, ... }: {
+  home.packages = with pkgs; [ terminal-notifier ];
 }

@@ -1,7 +1,6 @@
-{
-  lib,
-  system,
-  ...
+{ lib
+, system
+, ...
 }: rec {
   # Central version constants for consistency across the configuration
   versions = {

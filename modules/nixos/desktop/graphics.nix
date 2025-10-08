@@ -1,10 +1,11 @@
-{
-  config,
-  pkgs,
-  ...
-}: let
+{ config
+, pkgs
+, ...
+}:
+let
   package = config.boot.kernelPackages.nvidiaPackages.beta;
-in {
+in
+{
   ########################################
   # Packages and tools
   ########################################
@@ -98,7 +99,7 @@ in {
   ########################################
   services.xserver = {
     enable = false; # don't start a full X server on Wayland
-    videoDrivers = ["nvidia"];
+    videoDrivers = [ "nvidia" ];
   };
 
   ########################################
@@ -114,5 +115,5 @@ in {
   ########################################
   # Kernel module blacklist
   ########################################
-  boot.blacklistedKernelModules = ["nouveau"];
+  boot.blacklistedKernelModules = [ "nouveau" ];
 }

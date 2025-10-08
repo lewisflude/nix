@@ -1,4 +1,5 @@
-_: let
+_:
+let
   musicAssistantPort = 8095;
   musicAssistantStreamPort = 8097;
   dlnaPort = 8200;
@@ -6,7 +7,8 @@ _: let
   dlnaDiscoveryPort = 1900;
   upnpEventsPort = 2869;
   multicastDnsPort = 5353;
-in {
+in
+{
   virtualisation.oci-containers = {
     containers = {
       music-assistant-server = {

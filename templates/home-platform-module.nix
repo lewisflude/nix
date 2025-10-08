@@ -1,8 +1,7 @@
 # Template for home/darwin/ or home/nixos/ - Platform-specific Home Manager modules
-{
-  pkgs,
-  config,
-  ...
+{ pkgs
+, config
+, ...
 }: {
   # Platform-specific Home Manager configuration
   # No platform detection needed - this module only loads on the target platform

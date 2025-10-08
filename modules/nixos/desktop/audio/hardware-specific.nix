@@ -12,11 +12,11 @@ _: {
               "capture.props" = {
                 "node.name" = "Speakers";
                 "media.class" = "Audio/Sink";
-                "audio.position" = ["FL" "FR"];
+                "audio.position" = [ "FL" "FR" ];
               };
               "playback.props" = {
                 "node.name" = "playback.Speakers";
-                "audio.position" = ["AUX0" "AUX1"];
+                "audio.position" = [ "AUX0" "AUX1" ];
                 "target.object" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0";
                 "stream.dont-remix" = true;
                 "node.passive" = true;
@@ -30,7 +30,7 @@ _: {
               "node.name" = "game-audio-source";
               "node.description" = "Game Audio Source";
               "media.class" = "Audio/Source";
-              "audio.position" = ["FL" "FR"];
+              "audio.position" = [ "FL" "FR" ];
             };
           }
         ];

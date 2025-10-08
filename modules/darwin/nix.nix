@@ -1,7 +1,6 @@
-{
-  config,
-  username,
-  ...
+{ config
+, username
+, ...
 }: {
   # Darwin-specific Nix configuration
 
