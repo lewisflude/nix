@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   # Install swaync package
   home.packages = with pkgs; [
     swaynotificationcenter

@@ -1,17 +1,16 @@
-{
-  pkgs,
-  config,
-  system,
-  lib,
-  ...
-}: let
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
+{ pkgs
+, config
+, system
+, lib
+, ...
+}:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
 
   # Catppuccin palette (assumes catppuccin HM module is enabled in your config)
   palette =
-    if lib.hasAttrByPath ["catppuccin" "sources" "palette"] config
-    then (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
-      .${config.catppuccin.flavor}.colors
+    if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config
+    then (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors
     else {
       mauve = {
         hex = "b48ead";
@@ -25,22 +24,24 @@
   secretAvailable = name:
     if pkgs.stdenv.isDarwin
     then true
-    else lib.hasAttrByPath ["sops" "secrets" name] config;
+    else lib.hasAttrByPath [ "sops" "secrets" name ] config;
 
   secretPath = name:
     if pkgs.stdenv.isDarwin
     then "${platformLib.dataDir config.home.username}/sops-nix/secrets/${name}"
     else config.sops.secrets.${name}.path;
 
-  secretExportSnippet = name: var: let
-    path = secretPath name;
-  in
+  secretExportSnippet = name: var:
+    let
+      path = secretPath name;
+    in
     lib.optionalString (secretAvailable name) ''
       if [ -r ${lib.escapeShellArg path} ]; then
         export ${var}="$(cat ${lib.escapeShellArg path})"
       fi
     '';
-in {
+in
+{
   xdg.enable = true;
 
   programs = {
@@ -75,7 +76,7 @@ in {
     atuin = {
       enable = true;
       enableZshIntegration = true;
-      flags = ["--disable-up-arrow"];
+      flags = [ "--disable-up-arrow" ];
     };
 
     zsh = {

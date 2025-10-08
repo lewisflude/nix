@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   home.packages = [
     (pkgs.writeShellApplication {
       name = "system-update";

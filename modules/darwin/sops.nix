@@ -1,10 +1,10 @@
-{
-  lib,
-  config,
-  pkgs,
-  username,
-  ...
-}: let
+{ lib
+, config
+, pkgs
+, username
+, ...
+}:
+let
   userSecretsFile = ../../secrets/user.yaml;
 
   userSecrets =
@@ -16,13 +16,15 @@
       "GITHUB_TOKEN"
       "GITHUB_PERSONAL_ACCESS_TOKEN"
       "FIGMA_ACCESS_TOKEN"
-    ] (_: {
-      owner = username;
-      group = "staff";
-      mode = "0400";
-      sopsFile = userSecretsFile;
-    });
-in {
+    ]
+      (_: {
+        owner = username;
+        group = "staff";
+        mode = "0400";
+        sopsFile = userSecretsFile;
+      });
+in
+{
   # Darwin-specific SOPS configuration
   sops.secrets = userSecrets;
 

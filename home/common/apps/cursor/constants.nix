@@ -1,7 +1,8 @@
 # Shared constants for Cursor/VSCode configuration
 # Comprehensive file ignore patterns for modern development environments
 # Organized by category for easy maintenance and understanding
-_: let
+_:
+let
   # ==== SYSTEM & OS FILES ====
   systemFiles = {
     # macOS
@@ -296,7 +297,8 @@ _: let
     "**/.git" = true;
     "**/node_modules" = true;
   };
-in {
+in
+{
   inherit
     commonIgnores
     searchIgnores

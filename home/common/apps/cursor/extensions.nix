@@ -1,7 +1,8 @@
 # Cursor/VSCode Extensions Configuration
 # Comprehensive extension collection organized by category for senior developers
 # Modular design allows for easy customization and selective loading
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   vsc = pkgs.vscode-extensions;
 
   # ==== CORE THEME & UI EXTENSIONS ====
@@ -122,7 +123,8 @@
 
   # Frontend developer collection
   frontend = essentials ++ webDev;
-in {
+in
+{
   inherit extSets;
 
   # Primary extension list (essentials + commonly used)
