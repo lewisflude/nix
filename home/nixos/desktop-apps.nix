@@ -9,7 +9,6 @@
 
     # Office & Productivity
     libreoffice
-    thunderbird
     evince
     kicad
 

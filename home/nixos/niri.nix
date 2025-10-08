@@ -10,11 +10,8 @@
 in {
   home.packages = with pkgs; [
     swww
-    gtklock
-    swayidle
     grim
     slurp
-    swappy
     wl-clipboard
     xwayland-satellite-unstable
     # Color management

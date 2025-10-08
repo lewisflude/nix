@@ -3,8 +3,7 @@
   lib,
   ...
 }:
-with lib;
-let
+with lib; let
   cfg = config.services.mcp;
 
   mcpServerType = types.submodule {
@@ -16,7 +15,7 @@ let
 
       args = mkOption {
         type = types.listOf types.str;
-        default = [ ];
+        default = [];
         description = "Additional arguments to pass to the MCP server";
       };
 
@@ -27,13 +26,13 @@ let
 
       env = mkOption {
         type = types.attrsOf types.str;
-        default = { };
+        default = {};
         description = "Environment variables to set for the MCP server";
       };
 
       extraArgs = mkOption {
         type = types.listOf types.str;
-        default = [ ];
+        default = [];
         description = "Additional arguments to pass to the MCP server";
       };
     };
@@ -65,14 +64,13 @@ let
   mcpConfigJson = {
     mcpServers = mapAttrs mkMcpConfig cfg.servers;
   };
-in
-{
+in {
   options.services.mcp = {
     enable = mkEnableOption "MCP (Model Context Protocol) servers";
 
     targets = mkOption {
       type = types.attrsOf mcpTargetType;
-      default = { };
+      default = {};
       description = "MCP targets to configure";
       example = {
         "cursor" = {
@@ -88,12 +86,12 @@ in
 
     servers = mkOption {
       type = types.attrsOf mcpServerType;
-      default = { };
+      default = {};
       description = "MCP servers to configure";
       example = {
         kagi = {
           command = "uvx";
-          args = [ "kagimcp" ];
+          args = ["kagimcp"];
           port = 11431;
           env = {
             KAGI_API_KEY = "YOUR_API_KEY_HERE";
@@ -102,7 +100,7 @@ in
         };
         fetch = {
           command = "uvx @modelcontextprotocol/server-fetch";
-          args = [ "--stdio" ];
+          args = ["--stdio"];
           port = 11432;
         };
       };

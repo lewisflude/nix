@@ -8,7 +8,7 @@
     pyright
     black
     # C++ development tools for Unreal Engine
-  
+
     lldb # Debugger for C++
     # Nix
     nil # Nix LSP
