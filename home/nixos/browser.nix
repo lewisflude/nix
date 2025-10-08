@@ -20,7 +20,6 @@
 in {
   home.packages = [
     # Chromium configured via programs.chromium below with declarative extensions
-    pkgs.firefox # Auto-detects Wayland/X11 environment
   ];
 
   # Session variables for optimal Wayland browser support

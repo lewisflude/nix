@@ -1,4 +1,8 @@
-{inputs, ...}: {
+{
+  inputs,
+  pkgs,
+  ...
+}: {
   imports = [
     # System integration
     ./system
@@ -11,9 +15,16 @@
     ./desktop-apps.nix
     ./yazi.nix
     ./niri.nix
-    ./swappy.nix
-    ./swayidle.nix
     # Services
     ./mcp.nix
+    ./apps/thunderbird.nix
+    ./apps/gtklock.nix
+    ./apps/swayidle.nix
+    ./apps/swappy.nix
   ];
+
+  # Required for Nautilus to function correctly with GVfs
+  home.sessionVariables = {
+    GIO_EXTRA_MODULES = "${inputs.nixpkgs.legacyPackages.${pkgs.system}.gnome.gvfs}/lib/gio/modules";
+  };
 }

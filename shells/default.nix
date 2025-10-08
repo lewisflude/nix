@@ -3,9 +3,8 @@
   lib,
   system,
   ...
-}:
-let
-  platformLib = import ../lib/functions.nix { inherit lib system; };
+}: let
+  platformLib = import ../lib/functions.nix {inherit lib system;};
 
   commonTools = with pkgs; [
     pre-commit
@@ -13,18 +12,18 @@ let
   ];
 
   devShellsCommon = {
-    nextjs = import ./projects/nextjs.nix { inherit pkgs lib system; };
+    nextjs = import ./projects/nextjs.nix {inherit pkgs lib system;};
 
     react-native = import ./projects/react-native.nix {
       inherit pkgs lib system;
     };
 
-    api-backend = import ./projects/api-backend.nix { inherit pkgs lib system; };
+    api-backend = import ./projects/api-backend.nix {inherit pkgs lib system;};
 
-    shell-selector = import ./utils/shell-selector.nix { inherit pkgs; };
+    shell-selector = import ./utils/shell-selector.nix {inherit pkgs;};
 
     node = pkgs.mkShell {
-      buildInputs = with pkgs; [ (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs) ] ++ commonTools;
+      buildInputs = with pkgs; [(platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)] ++ commonTools;
       shellHook = ''
         echo "🚀 Node.js development environment loaded"
         echo "Node version: $(node --version)"
@@ -33,8 +32,7 @@ let
     };
 
     python = pkgs.mkShell {
-      buildInputs =
-        with pkgs;
+      buildInputs = with pkgs;
         [
           python313
           python313Packages.pip
@@ -56,8 +54,7 @@ let
     };
 
     rust = pkgs.mkShell {
-      buildInputs =
-        with pkgs;
+      buildInputs = with pkgs;
         [
           rustc
           cargo
@@ -77,8 +74,7 @@ let
     };
 
     go = pkgs.mkShell {
-      buildInputs =
-        with pkgs;
+      buildInputs = with pkgs;
         [
           go
           gopls
@@ -97,8 +93,7 @@ let
     };
 
     web = pkgs.mkShell {
-      buildInputs =
-        with pkgs;
+      buildInputs = with pkgs;
         [
           (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
           tailwindcss-language-server
@@ -115,8 +110,7 @@ let
     };
 
     solana = pkgs.mkShell {
-      buildInputs =
-        with pkgs;
+      buildInputs = with pkgs;
         [
           # solana-cli  # Temporarily disabled due to compilation errors
           rustc
@@ -132,8 +126,7 @@ let
     };
 
     devops = pkgs.mkShell {
-      buildInputs =
-        with pkgs;
+      buildInputs = with pkgs;
         [
           kubectl
           opentofu
@@ -157,8 +150,7 @@ let
 
   devShellsLinuxOnly = platformLib.ifLinux {
     love2d = pkgs.mkShell {
-      buildInputs =
-        with pkgs;
+      buildInputs = with pkgs;
         [
           love
           lua
@@ -188,7 +180,6 @@ let
       '';
     };
   };
-in
-{
+in {
   devShells = devShellsCommon // devShellsLinuxOnly;
 }

@@ -72,11 +72,6 @@ in {
       enableZshIntegration = true;
     };
 
-    zoxide = {
-      enable = true;
-      enableZshIntegration = true;
-    };
-
     atuin = {
       enable = true;
       enableZshIntegration = true;
@@ -160,7 +155,7 @@ in {
       completionInit = ''
         setopt EXTENDED_GLOB
         autoload -Uz compinit
-        
+
         # Handle insecure directories gracefully
         # Check for insecure directories and fix them if possible
         if ! compaudit 2>/dev/null; then
@@ -172,7 +167,7 @@ in {
             sudo chown -R root:wheel /usr/local/share/zsh 2>/dev/null || true
           fi
         fi
-        
+
         # Initialize completion system
         if [[ -n ${config.xdg.cacheHome}/zsh/.zcompdump(#qN.mh+24) ]]; then
           compinit
@@ -423,6 +418,14 @@ in {
             fi
           ''
         }
+        eval "$(zoxide init zsh)"
+
+        # --- Zellij guarded auto-attach (interactive TTY only; skip IDE/CI; avoid recursion)
+        if [[ $- == *i* ]] && [[ -t 1 ]] && [[ -z "$ZELLIJ" ]] && [[ -z "$CI" ]] \
+          && [[ "$TERM_PROGRAM" != "vscode" ]] && [[ "$TERM_PROGRAM" != "cursor" ]]; then
+          # If Ghostty already launched zellij (most cases), $ZELLIJ is set and we won't recurse.
+          exec zellij attach -c default
+        fi
       '';
     };
   };
@@ -439,6 +442,7 @@ in {
     };
 
     packages = with pkgs; [
+      zoxide
       (writeShellApplication {
         name = "system-update";
         runtimeInputs = [
@@ -532,4 +536,20 @@ in {
       })
     ];
   };
+
+  home.file.".config/direnv/lib/layout_zellij.sh".text = ''
+    layout_zellij() {
+      # Avoid recursion
+      if [ -n "$ZELLIJ" ]; then
+        return 0
+      fi
+
+      # Use repo-local layout if present, else default
+      if [ -f ".zellij.kdl" ]; then
+        exec zellij --layout .zellij.kdl attach -c "$(basename "$PWD")"
+      else
+        exec zellij attach -c "$(basename "$PWD")"
+      fi
+    }
+  '';
 }

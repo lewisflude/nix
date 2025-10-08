@@ -8,6 +8,7 @@
 in {
   services.swayidle = {
     enable = true;
+    package = pkgs.swayidle;
     timeouts = [
       {
         timeout = 300;
@@ -17,6 +18,12 @@ in {
         timeout = 600;
         command = "${pkgs.niri}/bin/niri msg action power-off-monitors";
         resumeCommand = "${pkgs.niri}/bin/niri msg action power-on-monitors";
+      }
+    ];
+    events = [
+      {
+        event = "before-sleep";
+        command = "${pkgs.swaylock-effects}/bin/swaylock";
       }
     ];
   };
