@@ -1,11 +1,12 @@
+{ inputs
+, lib
+, system
+, ...
+}:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
 {
-  inputs,
-  lib,
-  system,
-  ...
-}: let
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
-in {
   nixpkgs.overlays =
     [
       # Yazi overlay
@@ -15,7 +16,7 @@ in {
       inputs.niri.overlays.niri
 
       # Waybar overlay
-      (_: _: {waybar-git = inputs.waybar.packages.${system}.waybar;})
+      (_: _: { waybar-git = inputs.waybar.packages.${system}.waybar; })
 
       # Cursor overlay
       (import ../../overlays/cursor.nix)

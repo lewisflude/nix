@@ -1,12 +1,13 @@
+{ username
+, system
+, lib
+, inputs
+, ...
+}:
+let
+  platformLib = import ../lib/functions.nix { inherit lib system; };
+in
 {
-  username,
-  system,
-  lib,
-  inputs,
-  ...
-}: let
-  platformLib = import ../lib/functions.nix {inherit lib system;};
-in {
   home = {
     stateVersion = "24.05";
     inherit username;
@@ -22,14 +23,14 @@ in {
       # Platform-specific configurations
     ]
     ++ platformLib.platformModules
-    [
-      # Linux modules
-      ./nixos
-    ]
-    [
-      # Darwin modules
-      ./darwin
-    ];
+      [
+        # Linux modules
+        ./nixos
+      ]
+      [
+        # Darwin modules
+        ./darwin
+      ];
 
   programs = {
     home-manager.enable = true;

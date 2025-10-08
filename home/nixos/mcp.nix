@@ -1,11 +1,11 @@
-{
-  pkgs,
-  config,
-  lib,
-  system,
-  ...
-}: let
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
+{ pkgs
+, config
+, lib
+, system
+, ...
+}:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
   inherit
     (lib)
     concatStringsSep
@@ -121,21 +121,23 @@
 
   # ----- helpers for activation script generation -----
 
-  mkAddJsonCmd = name: serverCfg: let
-    json = builtins.toJSON ({
+  mkAddJsonCmd = name: serverCfg:
+    let
+      json = builtins.toJSON ({
         type = "stdio";
-        args = serverCfg.args or [];
-        env = serverCfg.env or {};
+        args = serverCfg.args or [ ];
+        env = serverCfg.env or { };
       }
       // {
         inherit (serverCfg) command;
       });
-    jsonArg = escapeShellArg json;
-  in ''
-    # ${name}
-    claude mcp remove ${escapeShellArg name} --scope user >/dev/null 2>&1 || true
-    claude mcp add-json ${escapeShellArg name} ${jsonArg} --scope user
-  '';
+      jsonArg = escapeShellArg json;
+    in
+    ''
+      # ${name}
+      claude mcp remove ${escapeShellArg name} --scope user >/dev/null 2>&1 || true
+      claude mcp add-json ${escapeShellArg name} ${jsonArg} --scope user
+    '';
 
   declaredNames = mapAttrsToList (n: _: escapeShellArg n) config.services.mcp.servers;
   addCommands = concatStringsSep "\n" (mapAttrsToList mkAddJsonCmd config.services.mcp.servers);
@@ -222,7 +224,8 @@
 
     echo "[mcp-warm] Warm-up complete."
   '';
-in {
+in
+{
   ################################
   # Combined home configuration
   ################################
@@ -243,10 +246,10 @@ in {
     ];
 
     # Run warm-up on switch, then register servers
-    activation.mcpWarm = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    activation.mcpWarm = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       ${warmScript}
     '';
-    activation.setupClaudeMcp = lib.hm.dag.entryAfter ["mcpWarm"] ''
+    activation.setupClaudeMcp = lib.hm.dag.entryAfter [ "mcpWarm" ] ''
       ${registerScript}
     '';
   };
@@ -269,195 +272,197 @@ in {
     };
 
     # Servers
-    servers = let
-      inherit (pkgs.nodePackages) typescript-language-server;
-      tsls = "${typescript-language-server}/bin/typescript-language-server";
-    in {
-      # --- Existing servers (kept) ---
+    servers =
+      let
+        inherit (pkgs.nodePackages) typescript-language-server;
+        tsls = "${typescript-language-server}/bin/typescript-language-server";
+      in
+      {
+        # --- Existing servers (kept) ---
 
-      everything = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-everything@latest"
-        ];
-        port = 11446;
-      };
+        everything = {
+          command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
+          args = [
+            "-y"
+            "@modelcontextprotocol/server-everything@latest"
+          ];
+          port = 11446;
+        };
 
-      github = {
-        command = "${githubWrapper}/bin/github-mcp-wrapper";
-        args = [];
-        port = 11434;
-      };
+        github = {
+          command = "${githubWrapper}/bin/github-mcp-wrapper";
+          args = [ ];
+          port = 11434;
+        };
 
-      memory = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-memory@latest"
-        ];
-        port = 11436;
-      };
+        memory = {
+          command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
+          args = [
+            "-y"
+            "@modelcontextprotocol/server-memory@latest"
+          ];
+          port = 11436;
+        };
 
-      sequential-thinking = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-sequential-thinking@latest"
-        ];
-        port = 11437;
-      };
+        sequential-thinking = {
+          command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
+          args = [
+            "-y"
+            "@modelcontextprotocol/server-sequential-thinking@latest"
+          ];
+          port = 11437;
+        };
 
-      general-filesystem = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-filesystem@latest"
-          "${config.home.homeDirectory}/Code"
-          "${config.home.homeDirectory}/.config"
-          "${config.home.homeDirectory}/Documents"
-        ];
-        port = 11442;
-      };
+        general-filesystem = {
+          command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
+          args = [
+            "-y"
+            "@modelcontextprotocol/server-filesystem@latest"
+            "${config.home.homeDirectory}/Code"
+            "${config.home.homeDirectory}/.config"
+            "${config.home.homeDirectory}/Documents"
+          ];
+          port = 11442;
+        };
 
-      # Kagi via wrapper (unchanged)
-      kagi = {
-        command = "${kagiWrapper}/bin/kagi-mcp-wrapper";
-        args = [];
-        port = 11431;
-      };
+        # Kagi via wrapper (unchanged)
+        kagi = {
+          command = "${kagiWrapper}/bin/kagi-mcp-wrapper";
+          args = [ ];
+          port = 11431;
+        };
 
-      # Python uvx servers (unchanged)
-      fetch = {
-        command = "${pkgs.mcp-server-fetch}/bin/mcp-server-fetch";
-        args = [];
-        port = 11432;
-      };
+        # Python uvx servers (unchanged)
+        fetch = {
+          command = "${pkgs.mcp-server-fetch}/bin/mcp-server-fetch";
+          args = [ ];
+          port = 11432;
+        };
 
-      git = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--from"
-          "mcp-server-git"
-          "mcp-server-git"
-          "--repository"
-          "${config.home.homeDirectory}/Code/dex-web"
-        ];
-        port = 11433;
-        env = {
-          UV_PYTHON = "${pkgs.python3}/bin/python3";
+        git = {
+          command = "${pkgs.uv}/bin/uvx";
+          args = [
+            "--from"
+            "mcp-server-git"
+            "mcp-server-git"
+            "--repository"
+            "${config.home.homeDirectory}/Code/dex-web"
+          ];
+          port = 11433;
+          env = {
+            UV_PYTHON = "${pkgs.python3}/bin/python3";
+          };
+        };
+
+        time = {
+          command = "${pkgs.uv}/bin/uvx";
+          args = [
+            "--from"
+            "mcp-server-time"
+            "mcp-server-time"
+          ];
+          port = 11445;
+          env = {
+            UV_PYTHON = "${pkgs.python3}/bin/python3";
+          };
+        };
+
+        # --- New: OpenAI (npm) via wrapper
+        openai = {
+          command = "${openaiWrapper}/bin/openai-mcp-wrapper";
+          args = [ ];
+          port = 11439;
+        };
+
+        # --- New: CLI MCP (secure command runner)
+        cli = {
+          command = "${pkgs.uv}/bin/uvx";
+          args = [
+            "--from"
+            "cli-mcp-server"
+            "cli-mcp-server"
+          ];
+          port = 11438;
+          env = {
+            # Restrict command surface and working dir; edit to taste
+            ALLOWED_DIR = "${config.home.homeDirectory}/Code";
+            ALLOWED_COMMANDS = "git,ls,cat,pwd,rg,nix,just";
+            ALLOWED_FLAGS = "-l,-a,--help,--version";
+            COMMAND_TIMEOUT = "10"; # seconds
+            MAX_COMMAND_LENGTH = "2048"; # chars
+            ALLOW_SHELL_OPERATORS = "0"; # block pipes, &&, ;, etc.
+            UV_PYTHON = "${pkgs.python3}/bin/python3";
+          };
+        };
+
+        # --- New: Rust Documentation MCP Servers (Bevy Game Development)
+        rust-docs-bevy = {
+          command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
+          args = [
+            "bevy@0.16.1"
+            "-F"
+            "default"
+          ];
+          port = 11440;
+        };
+
+        rust-docs-bevy-lunex = {
+          command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
+          args = [
+            "bevy_lunex@0.4.2"
+          ];
+          port = 11441;
+        };
+
+        rust-docs-hexx = {
+          command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
+          args = [
+            "hexx@0.20.0"
+            "-F"
+            "serde,mesh"
+          ];
+          port = 11442;
+        };
+
+        rust-docs-ron = {
+          command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
+          args = [
+            "ron@0.8.1"
+          ];
+          port = 11443;
+        };
+
+        # --- New: LSP → MCP bridges
+        lsp-ts = {
+          command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
+          args = [
+            "-y"
+            "tritlo/lsp-mcp"
+            "ts"
+            "${tsls}"
+            "--stdio"
+          ];
+          port = 11447;
+        };
+
+        # (Optional) Luau/Roblox — add later once you have a concrete LSP path
+        # lsp-luau = {
+        #   command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
+        #   args    = [ "-y" "tritlo/lsp-mcp" "lua" "/absolute/path/to/roblox-lsp" "--stdio" ];
+        #   port    = 11449;
+        # };
+
+        # --- Rust documentation server
+        rust-docs = {
+          # Example targeting reqwest; duplicate this stanza per crate you want.
+          command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
+          args = [
+            "reqwest@0.12"
+            # "-F" "some,features"  # uncomment/add if the crate needs features
+          ];
+          port = 11450;
         };
       };
-
-      time = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--from"
-          "mcp-server-time"
-          "mcp-server-time"
-        ];
-        port = 11445;
-        env = {
-          UV_PYTHON = "${pkgs.python3}/bin/python3";
-        };
-      };
-
-      # --- New: OpenAI (npm) via wrapper
-      openai = {
-        command = "${openaiWrapper}/bin/openai-mcp-wrapper";
-        args = [];
-        port = 11439;
-      };
-
-      # --- New: CLI MCP (secure command runner)
-      cli = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--from"
-          "cli-mcp-server"
-          "cli-mcp-server"
-        ];
-        port = 11438;
-        env = {
-          # Restrict command surface and working dir; edit to taste
-          ALLOWED_DIR = "${config.home.homeDirectory}/Code";
-          ALLOWED_COMMANDS = "git,ls,cat,pwd,rg,nix,just";
-          ALLOWED_FLAGS = "-l,-a,--help,--version";
-          COMMAND_TIMEOUT = "10"; # seconds
-          MAX_COMMAND_LENGTH = "2048"; # chars
-          ALLOW_SHELL_OPERATORS = "0"; # block pipes, &&, ;, etc.
-          UV_PYTHON = "${pkgs.python3}/bin/python3";
-        };
-      };
-
-      # --- New: Rust Documentation MCP Servers (Bevy Game Development)
-      rust-docs-bevy = {
-        command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
-        args = [
-          "bevy@0.16.1"
-          "-F"
-          "default"
-        ];
-        port = 11440;
-      };
-
-      rust-docs-bevy-lunex = {
-        command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
-        args = [
-          "bevy_lunex@0.4.2"
-        ];
-        port = 11441;
-      };
-
-      rust-docs-hexx = {
-        command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
-        args = [
-          "hexx@0.20.0"
-          "-F"
-          "serde,mesh"
-        ];
-        port = 11442;
-      };
-
-      rust-docs-ron = {
-        command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
-        args = [
-          "ron@0.8.1"
-        ];
-        port = 11443;
-      };
-
-      # --- New: LSP → MCP bridges
-      lsp-ts = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "tritlo/lsp-mcp"
-          "ts"
-          "${tsls}"
-          "--stdio"
-        ];
-        port = 11447;
-      };
-
-      # (Optional) Luau/Roblox — add later once you have a concrete LSP path
-      # lsp-luau = {
-      #   command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-      #   args    = [ "-y" "tritlo/lsp-mcp" "lua" "/absolute/path/to/roblox-lsp" "--stdio" ];
-      #   port    = 11449;
-      # };
-
-      # --- Rust documentation server
-      rust-docs = {
-        # Example targeting reqwest; duplicate this stanza per crate you want.
-        command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
-        args = [
-          "reqwest@0.12"
-          # "-F" "some,features"  # uncomment/add if the crate needs features
-        ];
-        port = 11450;
-      };
-    };
   };
 
   #################################################
@@ -467,8 +472,8 @@ in {
   systemd.user.services.mcp-claude-register = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
       Description = "Register MCP servers for Claude CLI (idempotent)";
-      After = ["graphical-session.target"];
-      PartOf = ["graphical-session.target"];
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
     };
     Service = {
       Type = "oneshot";
@@ -482,7 +487,7 @@ in {
       RestartSec = "30";
     };
     Install = {
-      WantedBy = ["default.target"];
+      WantedBy = [ "default.target" ];
     };
   };
 
@@ -490,7 +495,7 @@ in {
   systemd.user.services.mcp-warm = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
       Description = "Warm MCP servers (build binaries, prefetch packages)";
-      After = ["network-online.target"];
+      After = [ "network-online.target" ];
     };
     Service = {
       Type = "oneshot";
@@ -503,7 +508,7 @@ in {
       ];
     };
     Install = {
-      WantedBy = ["default.target"];
+      WantedBy = [ "default.target" ];
     };
   };
 }

@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   # macOS Game Development Configuration
   environment = {
     systemPackages = with pkgs; [

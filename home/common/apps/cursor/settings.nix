@@ -1,12 +1,13 @@
 # Cursor/VSCode Editor Settings
 # Optimized for senior developers: performance, productivity, and reliability
-{
-  pkgs,
-  constants,
-  ...
-}: let
+{ pkgs
+, constants
+, ...
+}:
+let
   inherit (constants) commonIgnores watcherIgnores;
-in {
+in
+{
   userSettings = {
     "editor.fontSize" = 14;
     "editor.lineHeight" = 1.5;
@@ -54,7 +55,7 @@ in {
 
     # Git performance and stability
     "git.autoRepositoryDetection" = "subFolders"; # Re-enabled with scope to prevent excessive scanning
-    "git.scanRepositories" = []; # Disable automatic repository scanning
+    "git.scanRepositories" = [ ]; # Disable automatic repository scanning
 
     # Language server stability - Re-enable useful TypeScript features
     "typescript.preferences.includePackageJsonAutoImports" = "on"; # Re-enabled for better DX

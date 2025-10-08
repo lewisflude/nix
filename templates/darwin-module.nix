@@ -1,8 +1,7 @@
 # Template for modules/darwin/ - Darwin/macOS-specific system modules
-{
-  pkgs,
-  username,
-  ...
+{ pkgs
+, username
+, ...
 }: {
   # Darwin-specific system configuration
   # No platform detection needed - this module only loads on Darwin

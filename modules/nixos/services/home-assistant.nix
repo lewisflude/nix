@@ -1,11 +1,12 @@
-{
-  config,
-  pkgs,
-  ...
-}: let
-  home-llm = pkgs.callPackage ./home-assistant/custom-components/home-llm.nix {inherit pkgs;};
+{ config
+, pkgs
+, ...
+}:
+let
+  home-llm = pkgs.callPackage ./home-assistant/custom-components/home-llm.nix { inherit pkgs; };
   intent_script_yaml = ./home-assistant/intent-scripts/intent_script.yaml;
-in {
+in
+{
   environment.systemPackages = with pkgs; [
     gnumake
     cmake
@@ -202,7 +203,7 @@ in {
             sequence = [
               {
                 action = "weather.get_forecasts";
-                metadata = {};
+                metadata = { };
                 data = {
                   type = "daily";
                 };
@@ -213,7 +214,7 @@ in {
               }
               {
                 action = "weather.get_forecasts";
-                metadata = {};
+                metadata = { };
                 data = {
                   type = "hourly";
                 };
@@ -311,21 +312,21 @@ in {
       ];
       http = {
         base_url = "!secret base_url";
-        server_host = ["0.0.0.0"];
+        server_host = [ "0.0.0.0" ];
         server_port = 8123;
         use_x_forwarded_for = true;
-        trusted_proxies = ["192.168.1.0/24"];
+        trusted_proxies = [ "192.168.1.0/24" ];
       };
       # Includes dependencies for a basic setup
       # https://www.home-assistant.io/integrations/default_config/
-      default_config = {};
+      default_config = { };
     };
   };
 
   systemd.services.hass-secrets-link = {
     description = "Link Home Assistant secrets file";
-    wantedBy = ["home-assistant.service"];
-    before = ["home-assistant.service"];
+    wantedBy = [ "home-assistant.service" ];
+    before = [ "home-assistant.service" ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -339,8 +340,8 @@ in {
 
   systemd.services.hass-intent-script-link = {
     description = "Link intent_script.yaml for Home Assistant";
-    wantedBy = ["home-assistant.service"];
-    before = ["home-assistant.service"];
+    wantedBy = [ "home-assistant.service" ];
+    before = [ "home-assistant.service" ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -350,5 +351,5 @@ in {
     };
   };
 
-  networking.firewall.allowedTCPPorts = [8123];
+  networking.firewall.allowedTCPPorts = [ 8123 ];
 }

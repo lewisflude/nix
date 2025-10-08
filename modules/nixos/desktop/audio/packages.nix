@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   # Audio-related packages
   environment.systemPackages = with pkgs; [
     pwvucontrol # PipeWire volume control (Wayland-native, closes properly)

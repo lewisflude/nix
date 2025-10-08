@@ -1,9 +1,8 @@
-{
-  lib,
-  buildHomeAssistantComponent,
-  fetchFromGitHub,
-  pkgs,
-  ...
+{ lib
+, buildHomeAssistantComponent
+, fetchFromGitHub
+, pkgs
+, ...
 }:
 buildHomeAssistantComponent rec {
   owner = "acon96";
@@ -39,6 +38,6 @@ buildHomeAssistantComponent rec {
     description = "Home LLM is a Home Assistant custom component that allows you to use LLMs to interact with your home automation system.";
     homepage = "https://github.com/acon96/home-llm";
     license = licenses.mit;
-    maintainers = with maintainers; [];
+    maintainers = with maintainers; [ ];
   };
 }

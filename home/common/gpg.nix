@@ -1,11 +1,12 @@
+{ pkgs
+, lib
+, system
+, ...
+}:
+let
+  platformLib = import ../../lib/functions.nix { inherit lib system; };
+in
 {
-  pkgs,
-  lib,
-  system,
-  ...
-}: let
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
-in {
   home.packages = with pkgs; [
     gnupg
     (platformLib.platformPackage pinentry-curses pinentry_mac)
