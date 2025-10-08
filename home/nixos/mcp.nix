@@ -5,7 +5,7 @@
   system,
   ...
 }: let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
   inherit
     (lib)
     concatStringsSep
@@ -233,7 +233,6 @@ in {
       (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
       coreutils
       gawk
-      jq
       kagiWrapper
       openaiWrapper
 

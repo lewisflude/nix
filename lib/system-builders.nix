@@ -1,7 +1,7 @@
 # System builder functions for Darwin and NixOS configurations
-{ inputs }:
-let
-  inherit (inputs)
+{inputs}: let
+  inherit
+    (inputs)
     darwin
     nixpkgs
     home-manager
@@ -15,14 +15,9 @@ let
     solaar
     determinate
     ;
-in
-{
+in {
   # Darwin system builder
-  mkDarwinSystem =
-    hostName: hostConfig:
-    {
-      homebrew-j178,
-    }:
+  mkDarwinSystem = hostName: hostConfig: {homebrew-j178}:
     darwin.lib.darwinSystem {
       inherit (hostConfig) system;
       specialArgs = inputs // hostConfig;
@@ -34,12 +29,12 @@ in
         mac-app-util.darwinModules.default
         nix-homebrew.darwinModules.nix-homebrew
         sops-nix.darwinModules.sops
-        { _module.args = { inherit inputs; }; }
+        {_module.args = {inherit inputs;};}
         {
           nix-homebrew = {
             enable = true;
             enableRosetta = true;
-            user = "root"; # Use root for system-wide Homebrew installation
+            user = "lewisflude"; # Use the actual user for a user-specific Homebrew installation
             autoMigrate = true;
             taps = {
               # homebrew-cask and homebrew-core are managed automatically by Homebrew
@@ -65,9 +60,7 @@ in
     };
 
   # NixOS system builder
-  mkNixosSystem =
-    hostName: hostConfig:
-    { self }:
+  mkNixosSystem = hostName: hostConfig: {self}:
     nixpkgs.lib.nixosSystem {
       inherit (hostConfig) system;
       specialArgs =
@@ -87,7 +80,7 @@ in
         musnix.nixosModules.musnix
         nur.modules.nixos.default
         solaar.nixosModules.default
-        { _module.args = { inherit inputs; }; }
+        {_module.args = {inherit inputs;};}
         home-manager.nixosModules.home-manager
         {
           home-manager = {

@@ -20,6 +20,5 @@
     use-xdg-base-directories = true;
 
     # Explicitly enable lazy-trees (enabled by default in Determinate Nix)
-
   };
 }

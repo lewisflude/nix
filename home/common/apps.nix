@@ -3,16 +3,12 @@
   lib,
   system,
   ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
-in
-{
-  home.packages =
-    with pkgs;
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
+in {
+  home.packages = with pkgs;
     [
       # Development tools (cross-platform)
-      awscli2
       claude-code
       pkgs.gemini-cli-bin
       pkgs.cursor-cli
@@ -36,15 +32,14 @@ in
       # - marksman (Markdown LSP)
       # - pyright (Python LSP)
     ]
-    ++
-      platformLib.platformPackages
-        [
-          # Linux-only packages
-          musescore
-        ]
-        [
-          # macOS-only packages (MuseScore installed via Homebrew)
-        ];
+    ++ platformLib.platformPackages
+    [
+      # Linux-only packages
+      musescore
+    ]
+    [
+      # macOS-only packages (MuseScore installed via Homebrew)
+    ];
 
   imports = [
     ./apps/cursor
@@ -54,5 +49,6 @@ in
     ./apps/ripgrep.nix
     ./apps/helix.nix
     ./apps/obsidian.nix
+    ./apps/aws.nix
   ];
 }

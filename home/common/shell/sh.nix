@@ -5,7 +5,7 @@
   system,
   ...
 }: let
-  platformLib = import ../../../lib/functions.nix { inherit lib system; };
+  platformLib = import ../../../lib/functions.nix {inherit lib system;};
 in {
   home.file = {
     ".p10k.zsh" = {
@@ -25,6 +25,10 @@ in {
       source "${pkgs.fzf}/share/fzf/key-bindings.zsh"
       source "${pkgs.fzf}/share/fzf/completion.zsh"
       export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+      source "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
+      if [ -f ${config.home.homeDirectory}/.p10k.zsh ]; then
+        source ${config.home.homeDirectory}/.p10k.zsh
+      fi
     '';
 
     shellAliases = {
@@ -59,11 +63,6 @@ in {
           rev = "v0.7.1";
           sha256 = "sha256-vpTyYq9ZgfgdDsWzjxVAE7FZH4MALMNZIFyEOBLm5Qo=";
         };
-      }
-      {
-        name = "powerlevel10k";
-        src = pkgs.zsh-powerlevel10k;
-        file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
       }
     ];
   };

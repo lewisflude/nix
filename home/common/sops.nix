@@ -1,44 +1,43 @@
-       [1mSTDIN[0m
-[38;2;127;132;156m   1[0m   [38;2;205;214;244m{[0m
-[38;2;127;132;156m   2[0m   [38;2;205;214;244m  pkgs,[0m
-[38;2;127;132;156m   3[0m   [38;2;205;214;244m  lib,[0m
-[38;2;127;132;156m   4[0m   [38;2;205;214;244m  config,[0m
-[38;2;127;132;156m   5[0m   [38;2;205;214;244m  system,[0m
-[38;2;127;132;156m   6[0m   [38;2;205;214;244m  ...[0m
-[38;2;127;132;156m   7[0m   [38;2;205;214;244m}: let[0m
-[38;2;127;132;156m   8[0m   [38;2;205;214;244m  platformLib = import ../../lib/functions.nix { inherit lib system; };[0m
-[38;2;127;132;156m   9[0m   [38;2;205;214;244min {[0m
-[38;2;127;132;156m  10[0m   [38;2;205;214;244m  home.packages = with pkgs; [[0m
-[38;2;127;132;156m  11[0m   [38;2;205;214;244m    sops[0m
-[38;2;127;132;156m  12[0m   [38;2;205;214;244m  ];[0m
-[38;2;127;132;156m  13[0m   
-[38;2;127;132;156m  14[0m   [38;2;205;214;244m  sops = {[0m
-[38;2;127;132;156m  15[0m   [38;2;205;214;244m    defaultSopsFile = ../../secrets/user.yaml;[0m
-[38;2;127;132;156m  16[0m   
-[38;2;127;132;156m  17[0m   [38;2;205;214;244m    # Use age for user secrets (no prompts)[0m
-[38;2;127;132;156m  18[0m   [38;2;205;214;244m    age.keyFile = "${platformLib.configDir config.home.username}/sops/age/keys.txt";[0m
-[38;2;127;132;156m  19[0m   
-[38;2;127;132;156m  20[0m   [38;2;205;214;244m    secrets = {[0m
-[38;2;127;132;156m  21[0m   [38;2;205;214;244m      KAGI_API_KEY = {};[0m
-[38;2;127;132;156m  22[0m   [38;2;205;214;244m      CIRCLECI_TOKEN = {};[0m
-[38;2;127;132;156m  23[0m   [38;2;205;214;244m      OBSIDIAN_API_KEY = {};[0m
-[38;2;127;132;156m  24[0m   [38;2;205;214;244m      OPENAI_API_KEY = {};[0m
-[38;2;127;132;156m  25[0m   [38;2;205;214;244m      GITHUB_TOKEN = {};[0m
-[38;2;127;132;156m  26[0m   [38;2;205;214;244m      GITHUB_PERSONAL_ACCESS_TOKEN = {[0m
-[38;2;127;132;156m  27[0m   [38;2;205;214;244m        sopsFile = ../../secrets/secrets.yaml;[0m
-[38;2;127;132;156m  28[0m   [38;2;205;214;244m      };[0m
-[38;2;127;132;156m  29[0m   [38;2;205;214;244m    };[0m
-[38;2;127;132;156m  30[0m   [38;2;205;214;244m  };[0m
-[38;2;127;132;156m  31[0m   
-[38;2;127;132;156m  32[0m   [38;2;205;214;244m  systemd.user.services.sops-nix = lib.mkIf pkgs.stdenv.isLinux {[0m
-[38;2;127;132;156m  33[0m   [38;2;205;214;244m    Unit = {[0m
-[38;2;127;132;156m  34[0m   [38;2;205;214;244m      After = ["gpg-agent.service"];[0m
-[38;2;127;132;156m  35[0m   [38;2;205;214;244m      Wants = ["gpg-agent.service"];[0m
-[38;2;127;132;156m  36[0m   [38;2;205;214;244m    };[0m
-[38;2;127;132;156m  37[0m   [38;2;205;214;244m    Service = {[0m
-[38;2;127;132;156m  38[0m   [38;2;205;214;244m      Restart = "on-failure";[0m
-[38;2;127;132;156m  39[0m   [38;2;205;214;244m      RestartSec = "10s";[0m
-[38;2;127;132;156m  40[0m   [38;2;205;214;244m      StartLimitBurst = 3;[0m
-[38;2;127;132;156m  41[0m   [38;2;205;214;244m    };[0m
-[38;2;127;132;156m  42[0m   [38;2;205;214;244m  };[0m
-[38;2;127;132;156m  43[0m   [38;2;205;214;244m}[0m
+{
+  pkgs,
+  lib,
+  config,
+  system,
+  ...
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
+in {
+  home.packages = with pkgs; [
+    sops
+  ];
+
+  sops = {
+    defaultSopsFile = ../../secrets/user.yaml;
+
+    # Use age for user secrets (no prompts)
+    age.keyFile = "${platformLib.configDir config.home.username}/sops/age/keys.txt";
+
+    secrets = {
+      KAGI_API_KEY = {};
+      CIRCLECI_TOKEN = {};
+      OBSIDIAN_API_KEY = {};
+      OPENAI_API_KEY = {};
+      GITHUB_TOKEN = {};
+      GITHUB_PERSONAL_ACCESS_TOKEN = {
+        sopsFile = ../../secrets/secrets.yaml;
+      };
+    };
+  };
+
+  systemd.user.services.sops-nix = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      After = ["gpg-agent.service"];
+      Wants = ["gpg-agent.service"];
+    };
+    Service = {
+      Restart = "on-failure";
+      RestartSec = "10s";
+      StartLimitBurst = 3;
+    };
+  };
+}

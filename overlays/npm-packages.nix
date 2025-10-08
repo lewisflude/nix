@@ -1,6 +1,5 @@
 # overlay.nix
 final: prev: {
-
   # nx CLI (from the published npm tarball), built reproducibly via our lockfile.
   nx-latest = prev.buildNpmPackage rec {
     pname = "nx";
@@ -31,9 +30,8 @@ final: prev: {
       description = "Smart monorepos · Fast CI";
       homepage = "https://nx.dev";
       license = licenses.mit;
-      maintainers = [ maintainers.lewisflude ];
+      maintainers = [maintainers.lewisflude];
       mainProgram = "nx";
     };
   };
-
 }

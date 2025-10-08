@@ -1,5 +1,10 @@
-{config, lib, system, ...}: let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
+{
+  config,
+  lib,
+  system,
+  ...
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
 in {
   programs.nh = {
     enable = true;

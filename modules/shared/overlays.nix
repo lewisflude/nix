@@ -3,9 +3,8 @@
   lib,
   system,
   ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
 in {
   nixpkgs.overlays =
     [

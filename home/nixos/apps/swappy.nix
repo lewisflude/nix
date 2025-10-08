@@ -3,6 +3,22 @@
   pkgs,
   ...
 }: {
+  programs.swappy = {
+    enable = true;
+    settings = {
+      save_dir = "${config.home.homeDirectory}/Pictures/Screenshots";
+      save_filename = "swappy-%Y%m%d-%H%M%S.png";
+      show_controls = true;
+      fill_color = "#313244";
+      line_color = "#f5e0dc";
+      text_color = "#cdd6f4";
+      font_family = "sans-serif";
+      text_size = 16;
+      line_size = 5;
+      early_exit = false;
+    };
+  };
+
   xdg.configFile."swappy/config".text = ''
     [Default]
     save_dir=${config.home.homeDirectory}/Pictures/Screenshots
