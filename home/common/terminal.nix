@@ -1,13 +1,12 @@
-{ pkgs
-, lib
-, system
-, config
-, ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
-in
 {
+  pkgs,
+  lib,
+  system,
+  config,
+  ...
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
+in {
   # Common terminal packages across all platforms
   home.packages = with pkgs;
     [
@@ -35,16 +34,16 @@ in
       git-extras # Extra git commands
     ]
     ++ platformLib.platformPackages
-      [
-        # Linux-specific packages
-        networkmanager # Network management
-        lsof # List open files
-        wtype # Wayland text input automation (xdotool equivalent)
-      ]
-      [
-        # Darwin-specific packages
-        # Note: nil (Nix language server) moved to development/language-tools.nix
-      ];
+    [
+      # Linux-specific packages
+      networkmanager # Network management
+      lsof # List open files
+      wtype # Wayland text input automation (xdotool equivalent)
+    ]
+    [
+      # Darwin-specific packages
+      # Note: nil (Nix language server) moved to development/language-tools.nix
+    ];
 
   programs.ghostty = {
     enable = true;
@@ -59,7 +58,7 @@ in
 
       initial-command = "zellij attach -c default";
 
-      keybind = [ "shift+enter=text:\n" ];
+      keybind = ["shift+enter=text:\n"];
     };
   };
 }

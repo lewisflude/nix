@@ -1,7 +1,8 @@
-{ username
-, useremail
-, pkgs
-, ...
+{
+  username,
+  useremail,
+  pkgs,
+  ...
 }: {
   programs.git = {
     enable = true;

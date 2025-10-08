@@ -1,3 +1,3 @@
 _final: prev: {
-  cursor = prev.callPackage ../pkgs/cursor { };
+  cursor = prev.callPackage ../pkgs/cursor {};
 }

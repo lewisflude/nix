@@ -1,13 +1,12 @@
-{ pkgs
-, config
-, lib
-, system
-, ...
-}:
-let
-  platformLib = import ../../../lib/functions.nix { inherit lib system; };
-in
 {
+  pkgs,
+  config,
+  lib,
+  system,
+  ...
+}: let
+  platformLib = import ../../../lib/functions.nix {inherit lib system;};
+in {
   home.file = {
     ".p10k.zsh" = {
       source = ../lib/p10k.zsh;

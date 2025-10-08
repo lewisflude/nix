@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   # ─── limits and baseline security ────────────────────────────────────────────
   security = {
     # Enable doas for privilege escalation
@@ -6,7 +6,7 @@
       enable = true;
       extraRules = [
         {
-          users = [ "lewis" ];
+          users = ["lewis"];
           keepEnv = true;
           persist = true;
         }
@@ -32,7 +32,7 @@
         greetd.enableGnomeKeyring = true;
         sudo.enableGnomeKeyring = true;
         su.enableGnomeKeyring = true;
-        swaylock = { };
+        swaylock = {};
         sudo.u2fAuth = true;
         login.u2fAuth = true;
         # optionally:
@@ -75,14 +75,14 @@
             "XDG_RUNTIME_DIR=/run/user/%i"
           ];
         };
-        wantedBy = [ "default.target" ];
+        wantedBy = ["default.target"];
       };
 
       # Auto-unlock login keyring for passwordless login sessions
       unlock-login-keyring = {
         description = "Unlock GNOME login keyring for auto-login sessions";
-        after = [ "gnome-keyring-daemon.service" ];
-        wants = [ "gnome-keyring-daemon.service" ];
+        after = ["gnome-keyring-daemon.service"];
+        wants = ["gnome-keyring-daemon.service"];
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
@@ -98,7 +98,7 @@
             fi
           ''}";
         };
-        wantedBy = [ "default.target" ];
+        wantedBy = ["default.target"];
       };
     };
   };

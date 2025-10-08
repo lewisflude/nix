@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-let
+{pkgs, ...}: let
   steam_run_url = pkgs.writeShellApplication {
     name = "steam-run-url";
     text = ''
@@ -9,13 +8,12 @@ let
       pkgs.coreutils # For `id` command
     ];
   };
-in
-{
+in {
   environment.systemPackages = with pkgs; [
     lutris
     mangohud
     protonup-qt
-    (sunshine.override { cudaSupport = true; })
+    (sunshine.override {cudaSupport = true;})
     moonlight-qt
     steam_run_url
     dwarf-fortress
@@ -49,7 +47,7 @@ in
   services = {
     sunshine = {
       enable = true;
-      package = pkgs.sunshine.override { cudaSupport = true; };
+      package = pkgs.sunshine.override {cudaSupport = true;};
       autoStart = true;
       capSysAdmin = true;
       openFirewall = true;

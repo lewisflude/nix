@@ -1,10 +1,10 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
   ];
 
   networking.nat = {
     enable = true;
-    internalInterfaces = [ "ve-+" ];
+    internalInterfaces = ["ve-+"];
     externalInterface = "ens3";
     # Lazy IPv6 connectivity for the container
     enableIPv6 = true;
@@ -28,11 +28,11 @@
         settings = {
           experimental = true;
           log-driver = "journald";
-          registry-mirrors = [ "https://mirror.gcr.io" ];
+          registry-mirrors = ["https://mirror.gcr.io"];
         };
       };
     };
   };
 
-  users.users.lewis.extraGroups = [ "docker" ];
+  users.users.lewis.extraGroups = ["docker"];
 }
