@@ -1,12 +1,11 @@
-{ pkgs
-, lib
-, system
-, ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
-in
 {
+  pkgs,
+  lib,
+  system,
+  ...
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
+in {
   home.packages = with pkgs;
     [
       # Development tools (cross-platform)
@@ -35,13 +34,13 @@ in
       # - pyright (Python LSP)
     ]
     ++ platformLib.platformPackages
-      [
-        # Linux-only packages
-        musescore
-      ]
-      [
-        # macOS-only packages (MuseScore installed via Homebrew)
-      ];
+    [
+      # Linux-only packages
+      musescore
+    ]
+    [
+      # macOS-only packages (MuseScore installed via Homebrew)
+    ];
 
   imports = [
     ./apps/cursor

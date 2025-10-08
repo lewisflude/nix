@@ -1,7 +1,8 @@
-{ pkgs
-, lib
-, config
-, ...
+{
+  pkgs,
+  lib,
+  config,
+  ...
 }: {
   environment.systemPackages = with pkgs; [
     wofi
@@ -11,7 +12,7 @@
   ];
 
   # Make wayland sessions available to greetd
-  environment.pathsToLink = [ "/share/wayland-sessions" ];
+  environment.pathsToLink = ["/share/wayland-sessions"];
 
   time.timeZone = "Europe/London";
 

@@ -1,18 +1,17 @@
-{ pkgs
-, config
-, lib
-, system
-, ...
-}:
-let
-  platformLib = import ../../lib/functions.nix { inherit lib system; };
+{
+  pkgs,
+  config,
+  lib,
+  system,
+  ...
+}: let
+  platformLib = import ../../lib/functions.nix {inherit lib system;};
 
   # Dynamic paths
   claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
   codeDirectory = "${config.home.homeDirectory}/Code";
   dexWebProject = "${codeDirectory}/dex-web";
-in
-{
+in {
   home = {
     packages = with pkgs; [
       uv
@@ -33,33 +32,30 @@ in
     };
 
     # Activation script to register MCP servers with Claude Code
-    activation.setupClaudeMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] (
+    activation.setupClaudeMcp = lib.hm.dag.entryAfter ["writeBoundary"] (
       let
         cfg = config.services.mcp;
 
         # Generate claude mcp add commands for each configured server
         mcpAddCommands = lib.concatStringsSep "\n        " (
           lib.mapAttrsToList
-            (
-              name: serverCfg:
-                let
-                  command = lib.escapeShellArg serverCfg.command;
-                  argsStr = lib.concatStringsSep " " (map lib.escapeShellArg serverCfg.args);
-                  argsPart = lib.optionalString (argsStr != "") "-- ${argsStr}";
-                  envVars = lib.concatStringsSep " " (
-                    lib.mapAttrsToList
-                      (
-                        key: value: "export ${lib.escapeShellArg key}=${lib.escapeShellArg value};"
-                      )
-                      serverCfg.env
-                  );
-                in
-                ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${command} ${argsPart} || echo "Failed to add ${name} server"''
-            )
-            cfg.servers
+          (
+            name: serverCfg: let
+              command = lib.escapeShellArg serverCfg.command;
+              argsStr = lib.concatStringsSep " " (map lib.escapeShellArg serverCfg.args);
+              argsPart = lib.optionalString (argsStr != "") "-- ${argsStr}";
+              envVars = lib.concatStringsSep " " (
+                lib.mapAttrsToList
+                (
+                  key: value: "export ${lib.escapeShellArg key}=${lib.escapeShellArg value};"
+                )
+                serverCfg.env
+              );
+            in ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${command} ${argsPart} || echo "Failed to add ${name} server"''
+          )
+          cfg.servers
         );
-      in
-      ''
+      in ''
         if command -v claude >/dev/null 2>&1; then
           echo "Registering MCP servers with Claude Code..."
 
@@ -106,12 +102,12 @@ in
     servers = {
       kagi = {
         command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
-        args = [ ];
+        args = [];
         port = 11431;
       };
       fetch = {
         command = "${pkgs.uv}/bin/uvx";
-        args = [ "mcp-server-fetch" ];
+        args = ["mcp-server-fetch"];
         port = 11432;
       };
       git = {
@@ -220,7 +216,7 @@ in
       };
       time = {
         command = "${pkgs.uv}/bin/uvx";
-        args = [ "mcp-server-time" ];
+        args = ["mcp-server-time"];
         port = 11443;
       };
       everything = {
