@@ -1,7 +1,6 @@
 { username
 , system
 , lib
-, inputs
 , ...
 }:
 let

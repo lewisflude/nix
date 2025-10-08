@@ -15,7 +15,6 @@ let
   pname = "cursor";
 
   # Select the per-arch source if available; otherwise fall back to a flat .darwin
-  host = stdenvNoCC.hostPlatform;
   darwinInfo = cursorInfo.darwin;
 
   src = fetchurl {

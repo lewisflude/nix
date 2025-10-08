@@ -5,13 +5,6 @@
 }:
 let
   inherit (inputs) nixpkgs pre-commit-hooks home-manager;
-  inherit
-    (builtins)
-    mapAttrs
-    attrValues
-    listToAttrs
-    map
-    ;
 
   systems = builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
 in
