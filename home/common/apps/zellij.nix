@@ -13,6 +13,7 @@
       theme "default"
       default_mode "locked"
       mouse_mode true
+      scroll_buffer_size 100000
       scroll_rebuffer_on_resize true
       pane_frames true
       copy_on_select true

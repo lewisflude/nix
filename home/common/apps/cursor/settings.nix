@@ -114,7 +114,7 @@ in {
     "terminal.integrated.defaultProfile.osx" = "zsh";
     "terminal.integrated.defaultProfile.linux" = "zsh";
     "terminal.integrated.fontSize" = 14;
-    "terminal.integrated.scrollback" = 10000;
+    "terminal.integrated.scrollback" = 100000;
     "terminal.integrated.shellIntegration.enabled" = true;
     "terminal.integrated.env.linux" = {
       "GPG_TTY" = "$(tty)";
