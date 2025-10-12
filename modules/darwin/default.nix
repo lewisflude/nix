@@ -7,5 +7,6 @@
     ./yubikey.nix
     ./gaming.nix
     ./karabiner.nix
+    ./keyboard.nix
   ];
 }

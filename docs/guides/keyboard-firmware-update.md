@@ -1,8 +1,8 @@
-# Firmware Update Guide for v2.0 Ergonomic Hybrid Layout
+# Firmware Update Guide for v2.0 Ergonomic Hybrid
 
 **Last Updated:** 2025-10-12
 
-This guide provides the simple, mandatory firmware instruction required for the v2.0 Ergonomic Hybrid keyboard layout to function correctly.
+This guide provides the simple, mandatory firmware instruction required for the v2.0 Ergonomic Hybrid keyboard configuration to function correctly.
 
 ---
 
@@ -30,7 +30,7 @@ To allow `keyd` to handle the "Hold for Super, Tap for Escape" functionality, yo
     - Launch VIA, VIAL, or whatever software you use to configure your keyboard.
 
 2.  **Select the Caps Lock Key:**
-    - On the base layer (Layer 0), click on the key at the Caps Lock position (typically index 51 on a TKL).
+    - On the base layer, click on the Caps Lock key.
 
 3.  **Assign the Correct Keycode:**
     - Go to the "Basic" or "Keys" section.

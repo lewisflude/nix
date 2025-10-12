@@ -37,9 +37,9 @@ in
           find . -maxdepth 3 -type d -name "Cursor.app" \
             -not -path "*/Contents/Frameworks/*" -print0
         )
-        if [ "''${
+        if [ "''${#appPaths[@]}" -eq 1 ]; then
           selected="''${appPaths[0]}"
-        elif [ "''${
+        elif [ "''${#appPaths[@]}" -eq 0 ]; then
           echo "error: no Cursor.app found after undmg"
           exit 1
         else

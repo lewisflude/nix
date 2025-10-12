@@ -250,7 +250,7 @@ global = {
 ### Carpal Tunnel / Temporary RSI
 
 **This configuration actually HELPS recovery:**
-- Home row modifiers reduce strain
+- More accessible modifiers reduce strain
 - Navigation layer eliminates arrow key reaches
 - Consider taking breaks every 25 minutes (Pomodoro technique)
 

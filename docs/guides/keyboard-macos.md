@@ -8,7 +8,7 @@
 
 This guide covers the **macOS-specific** implementation of the ergonomic hybrid keyboard configuration. It provides the same benefits as the NixOS setup but uses Karabiner-Elements instead of keyd.
 
-**For platform comparison:** See [Cross-Platform Guide](keyboard-cross-platform.md)
+**For platform comparison:** See [Getting Started Guide](keyboard-getting-started.md) for cross-platform details
 **For NixOS setup:** Configuration is automatic via `modules/nixos/system/keyd.nix`
 
 ---
@@ -154,8 +154,8 @@ Right Option + L      Right arrow
 
 **Page Navigation:**
 ```
-Right Option + Y      Home (start of line)
-Right Option + O      End (end of line)
+Right Option + Y      Home
+Right Option + O      End
 Right Option + U      Page Down
 Right Option + I      Page Up
 ```
@@ -262,7 +262,7 @@ open /Applications/VIA.app
 # File: ~/.config/nix/docs/reference/mnk88.layout.json
 
 # Make changes (optional)
-# For optimal ergonomics: Change Position 75 from LT(1,KC_CAPS) to KC_CAPS
+# For optimal ergonomics: Change Caps Lock from LT(1,KC_CAPS) to KC_CAPS
 ```
 
 **See:** [Firmware Update Guide](keyboard-firmware-update.md)
@@ -294,8 +294,8 @@ Hold Right Option + H → Cursor moves left
 Hold Right Option + L → Cursor moves right
 
 # Test Home/End
-Hold Right Option + Y → Cursor jumps to start of line
-Hold Right Option + O → Cursor jumps to end of line
+Hold Right Option + Y → Cursor jumps to start
+Hold Right Option + O → Cursor jumps to end
 
 # Test Word Navigation
 Hold Right Option + W → Jumps to next word
@@ -484,7 +484,7 @@ Comment out sections in `modules/darwin/karabiner.nix` you don't want:
 | **Firmware tool** | VIA (homebrew) | VIA/VIAL (nixpkgs) |
 | **System integration** | Native macOS | Wayland/X11 |
 
-**See:** [Cross-Platform Guide](keyboard-cross-platform.md) for detailed comparison
+**See:** [Getting Started Guide](keyboard-getting-started.md) for platform comparison
 
 ---
 
@@ -534,7 +534,7 @@ Already installed via Nix! Uses Right Option for navigation layer by default.
 macOS has different text navigation than Linux:
 
 ```
-Cmd + Left/Right      Home/End (line start/end)
+Cmd + Left/Right      Home/End
 Option + Left/Right   Word jump
 Cmd + Up/Down         File start/end
 ```
@@ -645,10 +645,9 @@ brew uninstall --cask karabiner-elements
 ## Resources
 
 ### Documentation
-- [Cross-Platform Guide](keyboard-cross-platform.md) - Compare macOS vs NixOS
+- [Getting Started](keyboard-getting-started.md) - Setup guide with cross-platform details
 - [Keyboard Reference](keyboard-reference.md) - Complete shortcut list
 - [Firmware Update](keyboard-firmware-update.md) - Update keyboard firmware
-- [Quick Start](keyboard-quickstart.md) - 5-minute setup
 
 ### External Resources
 - [Karabiner-Elements Documentation](https://karabiner-elements.pqrs.org/docs/)
@@ -687,4 +686,4 @@ open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibil
 
 **Your macOS keyboard is now optimized for speed, ergonomics, and productivity!** 🚀
 
-**Questions?** Check the [Troubleshooting](keyboard-reference.md#troubleshooting) section or [Cross-Platform Guide](keyboard-cross-platform.md).
+**Questions?** Check the [Reference Guide](keyboard-reference.md) for troubleshooting.

@@ -4,5 +4,6 @@
     ./yubikey.nix
     ./mcp.nix
     ./keyboard.nix
+    ./karabiner.nix
   ];
 }
