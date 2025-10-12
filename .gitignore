@@ -77,3 +77,4 @@ devenv.local.nix
 
 # nx
 .nx/
+nix.conf

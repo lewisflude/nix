@@ -145,3 +145,69 @@ function flake-init() {
   nix flake init --template "github:nix-community/templates#$1" || return 1
   echo "Initialized flake with template: $1"
 }
+
+# Zellij session management helpers
+function zj() {
+  # Smart Zellij launcher
+  if [ -n "$ZELLIJ" ]; then
+    echo "Already in a Zellij session: $ZELLIJ_SESSION_NAME"
+    return 1
+  fi
+  
+  if [ -n "$1" ]; then
+    # Attach to named session or create it
+    zellij attach -c "$1"
+  else
+    # List sessions and let user choose with fzf
+    local session=$(zellij list-sessions 2>/dev/null | fzf --height 40% --header "Select Zellij session:" | awk '{print $1}')
+    if [ -n "$session" ]; then
+      zellij attach "$session"
+    else
+      # No session selected, start new one
+      zellij
+    fi
+  fi
+}
+
+function zjk() {
+  # Kill Zellij sessions
+  if [ -z "$1" ]; then
+    echo "Usage: zjk <session-name|all>"
+    echo "Available sessions:"
+    zellij list-sessions 2>/dev/null
+    return 1
+  fi
+  
+  if [ "$1" = "all" ]; then
+    echo "Killing all Zellij sessions..."
+    zellij list-sessions 2>/dev/null | awk '{print $1}' | while read -r session; do
+      zellij kill-session "$session" 2>/dev/null && echo "Killed: $session"
+    done
+  else
+    zellij kill-session "$1" && echo "Killed session: $1"
+  fi
+}
+
+function zjls() {
+  # Better formatted session list
+  echo "Active Zellij Sessions:"
+  echo "======================"
+  zellij list-sessions 2>/dev/null
+}
+
+function zjc() {
+  # Clean up exited sessions
+  echo "Cleaning up exited Zellij sessions..."
+  local cleaned=0
+  zellij list-sessions 2>/dev/null | grep EXITED | awk '{print $1}' | while read -r session; do
+    zellij delete-session "$session" 2>/dev/null && {
+      echo "Deleted: $session"
+      cleaned=$((cleaned + 1))
+    }
+  done
+  if [ $cleaned -eq 0 ]; then
+    echo "No exited sessions found."
+  else
+    echo "Cleaned up $cleaned session(s)."
+  fi
+}

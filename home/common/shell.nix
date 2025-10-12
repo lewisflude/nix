@@ -261,6 +261,10 @@ in {
           lsz = "eza -la **/*.{zip,tar,gz,bz2,xz,7z}";
           lscode = "eza -la **/*.{js,ts,jsx,tsx,py,go,rs,c,cpp,h,hpp}";
           lsconfig = "eza -la **/*.{json,yaml,yml,toml,ini,conf,cfg}";
+          zjls = "zellij list-sessions";
+          zjk = "zellij kill-session";
+          zja = "zellij attach";
+          zjd = "zellij delete-session";
         }
         (lib.mkIf pkgs.stdenv.isLinux {
           lock = "saylock --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --ring-color cba6f7 --key-hl-color b4befe --line-color 00000000 --inside-color 1e1e2e88 --separator-color 00000000 --text-color cdd6f4 --grace 2 --fade-in 0.2";
@@ -470,13 +474,20 @@ in {
   };
   home.file.".config/direnv/lib/layout_zellij.sh".text = ''
     layout_zellij() {
+      # Don't nest Zellij sessions
       if [ -n "$ZELLIJ" ]; then
         return 0
       fi
+
+      # Use directory-based session names for better organization
+      local session_name="$(basename "$PWD")"
+
       if [ -f ".zellij.kdl" ]; then
-        exec zellij --layout .zellij.kdl attach -c "$(basename "$PWD")"
+        # Custom layout for this project
+        exec zellij --layout .zellij.kdl attach -c "$session_name"
       else
-        exec zellij attach -c "$(basename "$PWD")"
+        # Standard layout with named session
+        exec zellij attach -c "$session_name"
       fi
     }
   '';

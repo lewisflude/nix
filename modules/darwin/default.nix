@@ -6,5 +6,6 @@
     ./backup.nix
     ./yubikey.nix
     ./gaming.nix
+    ./karabiner.nix
   ];
 }

@@ -61,6 +61,9 @@ in {
             allowUnfree = true;
             allowUnfreePredicate = _: true;
             allowUnsupportedSystem = false;
+            permittedInsecurePackages = [
+              "mbedtls-2.28.10"
+            ];
           };
           overlays =
             [
