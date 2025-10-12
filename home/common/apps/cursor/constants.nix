@@ -1,10 +1,5 @@
-# Shared constants for Cursor/VSCode configuration
-# Comprehensive file ignore patterns for modern development environments
-# Organized by category for easy maintenance and understanding
 _: let
-  # ==== SYSTEM & OS FILES ====
   systemFiles = {
-    # macOS
     "**/.DS_Store" = true;
     "**/.AppleDouble" = true;
     "**/.LSOverride" = true;
@@ -16,19 +11,13 @@ _: let
     "**/.Trashes" = true;
     "**/.VolumeIcon.icns" = true;
     "**/.com.apple.timemachine.donotpresent" = true;
-
-    # Windows
     "**/Thumbs.db" = true;
     "**/ehthumbs.db" = true;
     "**/Desktop.ini" = true;
     "**/$RECYCLE.BIN/" = true;
-
-    # Linux
     "**/.directory" = true;
     "**/.Trash-*" = true;
   };
-
-  # ==== VERSION CONTROL ====
   vcsFiles = {
     "**/.git" = true;
     "**/.gitattributes" = true;
@@ -37,8 +26,6 @@ _: let
     "**/.bzr" = true;
     "**/CVS" = true;
   };
-
-  # ==== DEVELOPMENT ENVIRONMENT ====
   devEnvFiles = {
     "**/.direnv" = true;
     "**/.envrc" = true;
@@ -46,8 +33,6 @@ _: let
     "**/.env.*.local" = true;
     "**/.vscode-test" = true;
   };
-
-  # ==== NODE.JS & JAVASCRIPT ECOSYSTEM ====
   nodeFiles = {
     "**/node_modules" = true;
     "**/.npm" = true;
@@ -63,8 +48,6 @@ _: let
     "**/coverage" = true;
     "**/.nyc_output" = true;
   };
-
-  # ==== BUILD OUTPUTS & ARTIFACTS ====
   buildFiles = {
     "**/dist" = true;
     "**/build" = true;
@@ -80,8 +63,6 @@ _: let
     "**/public/build" = true;
     "**/static/build" = true;
   };
-
-  # ==== CACHE & TEMPORARY FILES ====
   cacheFiles = {
     "**/.cache" = true;
     "**/tmp" = true;
@@ -96,10 +77,7 @@ _: let
     "**/*.seed" = true;
     "**/*.pid.lock" = true;
   };
-
-  # ==== LANGUAGE-SPECIFIC PATTERNS ====
   languageFiles = {
-    # Python
     "**/__pycache__" = true;
     "**/*.py[cod]" = true;
     "**/*$py.class" = true;
@@ -123,109 +101,63 @@ _: let
     "**/venv/" = true;
     "**/env/" = true;
     "**/ENV/" = true;
-
-    # Java
     "**/*.class" = true;
     "**/*.jar" = true;
     "**/*.war" = true;
     "**/*.ear" = true;
     "**/*.nar" = true;
     "**/hs_err_pid*" = true;
-
-    # .NET
     "**/bin/" = true;
     "**/obj/" = true;
     "**/*.user" = true;
     "**/*.suo" = true;
     "**/*.cache" = true;
-
-    # Go
     "**/vendor/" = true;
     "**/*.test" = true;
     "**/*.out" = true;
-
-    # Rust
     "**/target/" = true;
     "**/*.pdb" = true;
-
-    # C/C++
     "**/*.o" = true;
     "**/*.a" = true;
     "**/*.so" = true;
     "**/*.dll" = true;
     "**/*.exe" = true;
   };
-
-  # ==== FRAMEWORK & TOOL SPECIFIC ====
   frameworkFiles = {
-    # React/Next.js
     "**/.next/" = true;
     "**/out/" = true;
-
-    # Vue/Nuxt
     "**/.nuxt/" = true;
-
-    # Angular
     "**/.angular/" = true;
-
-    # Svelte/SvelteKit
     "**/.svelte-kit/" = true;
-
-    # Gatsby
     "**/.cache/" = true;
     "**/public/" = true;
-
-    # Webpack
     "**/webpack-stats.json" = true;
-
-    # Tailwind
     "**/tailwind.config.js.map" = true;
-
-    # Storybook
     "**/storybook-static/" = true;
-
-    # Testing
     "**/coverage/" = true;
     "**/.nyc_output/" = true;
     "**/test-results/" = true;
     "**/playwright-report/" = true;
-
-    # Databases
     "**/*.sqlite" = true;
     "**/*.db" = true;
     "**/*.sqlite3" = true;
-
-    # Docker
     "**/.dockerignore" = true;
   };
-
-  # ==== IDE & EDITOR FILES ====
   ideFiles = {
-    # JetBrains
     "**/.idea/" = true;
     "**/*.iml" = true;
     "**/*.ipr" = true;
     "**/*.iws" = true;
-
-    # Visual Studio
     "**/.vs/" = true;
     "**/*.vscode/" = true;
-
-    # Sublime Text
     "**/*.sublime-project" = true;
     "**/*.sublime-workspace" = true;
-
-    # Vim
     "**/*.swp" = true;
     "**/*.swo" = true;
-
-    # Emacs
     "**/*~" = true;
-    "**/#*#" = true;
-    "**/.#*" = true;
+    "**/.DS_Store" = true;
+    "**/Thumbs.db" = true;
   };
-
-  # ==== LARGE FILES & MEDIA ====
   largeFiles = {
     "**/*.mov" = true;
     "**/*.mp4" = true;
@@ -243,13 +175,7 @@ _: let
     "**/*.dmg" = true;
     "**/*.iso" = true;
   };
-
-  # ==== BASE IGNORE PATTERNS ====
-  # Essential files that should always be ignored
   commonIgnores = systemFiles // vcsFiles // devEnvFiles;
-
-  # ==== COMPREHENSIVE IGNORE PATTERNS ====
-  # Extended ignore patterns for search operations
   searchIgnores =
     commonIgnores
     // nodeFiles
@@ -258,14 +184,10 @@ _: let
     // languageFiles
     // frameworkFiles
     // ideFiles;
-
-  # ==== FILE WATCHER EXCLUSIONS ====
-  # Files to exclude from file watching (performance critical)
   watcherIgnores =
     searchIgnores
     // largeFiles
     // {
-      # Additional watcher-specific exclusions for performance
       "**/.git/objects/**" = true;
       "**/.git/subtree-cache/**" = true;
       "**/.git/index.lock" = true;
@@ -275,22 +197,15 @@ _: let
       "**/.cache/**" = true;
       "**/tmp/**" = true;
       "**/temp/**" = true;
-
-      # Large directories that change frequently
       "**/coverage/**" = true;
       "**/dist/**" = true;
       "**/build/**" = true;
       "**/target/**" = true;
       "**/__pycache__/**" = true;
-
-      # Package manager caches
       "**/.npm/**" = true;
       "**/.yarn/**" = true;
       "**/.pnpm-store/**" = true;
     };
-
-  # ==== MINIMAL IGNORE PATTERNS ====
-  # For contexts where we want minimal exclusions
   minimalIgnores = {
     "**/.DS_Store" = true;
     "**/.git" = true;

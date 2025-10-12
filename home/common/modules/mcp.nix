@@ -5,31 +5,26 @@
 }:
 with lib; let
   cfg = config.services.mcp;
-
   mcpServerType = types.submodule {
     options = {
       command = mkOption {
         type = types.str;
         description = "The command to run the MCP server";
       };
-
       args = mkOption {
         type = types.listOf types.str;
         default = [];
         description = "Additional arguments to pass to the MCP server";
       };
-
       port = mkOption {
         type = types.port;
         description = "Port for the MCP server";
       };
-
       env = mkOption {
         type = types.attrsOf types.str;
         default = {};
         description = "Environment variables to set for the MCP server";
       };
-
       extraArgs = mkOption {
         type = types.listOf types.str;
         default = [];
@@ -37,7 +32,6 @@ with lib; let
       };
     };
   };
-
   mcpTargetType = types.submodule {
     options = {
       name = mkOption {
@@ -54,20 +48,17 @@ with lib; let
       };
     };
   };
-
   mkMcpConfig = _name: serverCfg: {
     inherit (serverCfg) command;
     inherit (serverCfg) args;
     inherit (serverCfg) env;
   };
-
   mcpConfigJson = {
     mcpServers = mapAttrs mkMcpConfig cfg.servers;
   };
 in {
   options.services.mcp = {
     enable = mkEnableOption "MCP (Model Context Protocol) servers";
-
     targets = mkOption {
       type = types.attrsOf mcpTargetType;
       default = {};
@@ -83,7 +74,6 @@ in {
         };
       };
     };
-
     servers = mkOption {
       type = types.attrsOf mcpServerType;
       default = {};
@@ -106,7 +96,6 @@ in {
       };
     };
   };
-
   config = mkIf cfg.enable {
     home.file = builtins.listToAttrs (
       map

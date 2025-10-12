@@ -3,7 +3,6 @@
     enable = true;
     enableDefaultConfig = false;
     package = pkgs.openssh.override {withSecurityKey = true;};
-
     matchBlocks = {
       "*" = {
         addKeysToAgent = "yes";
@@ -14,8 +13,12 @@
         identityFile = "~/.ssh/id_ed25519";
         serverAliveInterval = 60;
         serverAliveCountMax = 3;
+        extraOptions = {
+          PasswordAuthentication = "no";
+          PubkeyAuthentication = "yes";
+          PKCS11Provider = "none";
+        };
       };
-
       "github.com" = {
         identitiesOnly = true;
         forwardAgent = false;

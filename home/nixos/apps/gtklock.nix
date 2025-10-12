@@ -2,7 +2,6 @@
   home.packages = with pkgs; [
     gtklock
   ];
-
   xdg.configFile."gtklock/config".text = ''
     gtk-theme = "Adwaita-dark"
     time-format = "%H:%M:%S"

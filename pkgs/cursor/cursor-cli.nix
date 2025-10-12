@@ -6,12 +6,11 @@
   cursorInfo,
 }: let
   cursorCliInfo = cursorInfo.cursorCli;
-  version = cursorCliInfo.version;
+  inherit (cursorCliInfo) version;
   pname = "cursor-cli";
 in
   stdenvNoCC.mkDerivation rec {
     inherit pname version;
-
     src =
       if pkgs.stdenv.isDarwin
       then
@@ -19,15 +18,15 @@ in
         then
           fetchurl
           {
-            url = cursorCliInfo.darwin.aarch64.url;
-            sha256 = cursorCliInfo.darwin.aarch64.sha256;
+            inherit (cursorCliInfo.darwin.aarch64) url;
+            inherit (cursorCliInfo.darwin.aarch64) sha256;
           }
         else if pkgs.stdenv.hostPlatform.system == "x86_64-darwin"
         then
           fetchurl
           {
-            url = cursorCliInfo.darwin.x86_64.url;
-            sha256 = cursorCliInfo.darwin.x86_64.sha256;
+            inherit (cursorCliInfo.darwin.x86_64) url;
+            inherit (cursorCliInfo.darwin.x86_64) sha256;
           }
         else throw "Unsupported Darwin architecture for cursor-cli"
       else if pkgs.stdenv.isLinux
@@ -36,27 +35,24 @@ in
         then
           fetchurl
           {
-            url = cursorCliInfo.linux.aarch64.url;
-            sha256 = cursorCliInfo.linux.aarch64.sha256;
+            inherit (cursorCliInfo.linux.aarch64) url;
+            inherit (cursorCliInfo.linux.aarch64) sha256;
           }
         else if pkgs.stdenv.hostPlatform.system == "x86_64-linux"
         then
           fetchurl
           {
-            url = cursorCliInfo.linux.x86_64.url;
-            sha256 = cursorCliInfo.linux.x86_64.sha256;
+            inherit (cursorCliInfo.linux.x86_64) url;
+            inherit (cursorCliInfo.linux.x86_64) sha256;
           }
         else throw "Unsupported Linux architecture for cursor-cli"
       else throw "Unsupported OS for cursor-cli";
-
     dontUnpack = false;
-
     installPhase = ''
       mkdir -p $out/bin
       tar -xzf $src --strip-components=1
       mv cursor-agent $out/bin/cursor-agent
     '';
-
     meta = with lib; {
       description = "Cursor CLI - AI-first code editor command line interface";
       homepage = "https://www.cursor.com/";

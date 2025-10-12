@@ -1,51 +1,28 @@
 {
-  pkgs,
   hostname,
   username,
   lib,
   ...
 }: {
-  environment.systemPackages = with pkgs; [
-    libiconv
-    pkg-config
-    openssl
-    pcsctools
-    sops
-  ];
-
   environment.etc."sudoers.d/timeout".text = ''
-    Defaults timestamp_timeout=30  # Set sudo timeout to 30 minutes
+    Defaults timestamp_timeout=30
   '';
-
   power = {
     sleep = {
       display = 30;
       computer = 60;
     };
   };
-
   networking = {
     hostName = hostname;
     computerName = hostname;
     localHostName = hostname;
   };
-
   services.openssh = {
     enable = true;
   };
-
-  programs.ssh = {
-    extraConfig = ''
-      Host *
-        PasswordAuthentication no
-        PubkeyAuthentication yes
-        PKCS11Provider none
-    '';
-  };
-
   system = {
     primaryUser = username;
-
     defaults = lib.mkMerge [
       {
         dock.persistent-apps = let
@@ -62,7 +39,6 @@
             "/Applications/ChatGPT.app"
             "/Applications/Steam.app"
           ];
-
           systemApps = [
             "/System/Applications/System Settings.app"
           ];
@@ -76,13 +52,10 @@
             "/Users/${username}/Documents"
           ];
         };
-
-        # Control Center Settings
         controlcenter = {
           NowPlaying = true;
           Sound = true;
         };
-
         CustomUserPreferences = {
           "com.apple.screensaver" = {
             askForPassword = 0;
@@ -99,7 +72,7 @@
             WebKitDeveloperExtras = true;
             ShowPathbar = true;
             ShowStatusBar = true;
-            FXPreferredViewStyle = "Nlsv"; # List view
+            FXPreferredViewStyle = "Nlsv";
             ShowTabView = true;
             ShowSidebar = true;
           };
@@ -113,36 +86,21 @@
             ShowPercent = true;
           };
         };
-
-        # Global Domain Settings
         NSGlobalDomain = {
-          # Text Input
           NSAutomaticCapitalizationEnabled = false;
           NSAutomaticPeriodSubstitutionEnabled = false;
           NSAutomaticQuoteSubstitutionEnabled = false;
           NSAutomaticDashSubstitutionEnabled = false;
-
-          # Keyboard
           KeyRepeat = 5;
           InitialKeyRepeat = 15;
-
-          # Trackpad
           "com.apple.trackpad.scaling" = 0.5;
           "com.apple.trackpad.trackpadCornerClickBehavior" = 1;
-
-          # Mouse and Trackpad
-          "com.apple.swipescrolldirection" = false; # Natural scrolling
-          "com.apple.mouse.tapBehavior" = 1; # Tap to click
-
-          # Sound
-          "com.apple.sound.beep.feedback" = 0; # Disable system sound effects
-          "com.apple.sound.beep.volume" = 0.0; # Mute system sound
-
-          # Function Keys
-          "com.apple.keyboard.fnState" = true; # Use F1-F12 keys as standard function keys
+          "com.apple.swipescrolldirection" = false;
+          "com.apple.mouse.tapBehavior" = 1;
+          "com.apple.sound.beep.feedback" = 0;
+          "com.apple.sound.beep.volume" = 0.0;
+          "com.apple.keyboard.fnState" = true;
         };
-
-        # Trackpad Settings
         trackpad = {
           Clicking = true;
           TrackpadRightClick = true;

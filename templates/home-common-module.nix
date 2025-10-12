@@ -1,4 +1,3 @@
-# Template for home/common/ - Cross-platform Home Manager modules only
 {
   pkgs,
   lib,
@@ -8,39 +7,27 @@
 }: let
   platformLib = import ../../lib/functions.nix {inherit lib system;};
 in {
-  # Cross-platform Home Manager configuration only
-  # Platform-specific logic should be moved to home/darwin/ or home/nixos/
-
   home = {
-    # Cross-platform user packages
     packages = with pkgs;
       [
-        # Packages that work identically on all platforms
         git
         curl
         jq
       ]
       ++ platformLib.platformPackages
       [
-        # Linux-specific packages
         linux-specific-package
       ]
       [
-        # Darwin-specific packages
         darwin-specific-package
       ];
-
     file = {
-      # Cross-platform file configuration
       ".example-config" = {
         text = ''
-          # Cross-platform configuration file
           setting1=value1
           setting2=value2
         '';
       };
-
-      # Use dynamic paths instead of hardcoded ones
       "${platformLib.configDir config.home.username}/example/config.toml" = {
         text = ''
           config_dir = "${platformLib.configDir config.home.username}"
@@ -50,23 +37,17 @@ in {
       };
     };
   };
-
-  # Cross-platform program configuration
   programs.example = {
     enable = true;
-
     settings =
       {
-        # Cross-platform settings
         theme = "dark";
         editor = "vim";
       }
       // lib.optionalAttrs platformLib.isDarwin {
-        # Darwin-specific settings (only when necessary)
         integration = "macos";
       }
       // lib.optionalAttrs platformLib.isLinux {
-        # Linux-specific settings (only when necessary)
         integration = "systemd";
       };
   };

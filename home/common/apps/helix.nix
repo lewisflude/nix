@@ -1,6 +1,5 @@
 {lib, ...}: let
   standards = import ../development/language-standards.nix;
-
   makeIndentString = n: builtins.concatStringsSep "" (builtins.genList (_x: " ") n);
 in {
   programs.helix = {
@@ -34,7 +33,6 @@ in {
         )
         standards.languages;
     };
-
     settings = {
       editor = {
         line-number = "relative";
@@ -54,29 +52,24 @@ in {
         end-of-line-diagnostics = "hint";
         soft-wrap.enable = true;
       };
-
       editor.cursor-shape = {
         insert = "bar";
         normal = "block";
         select = "underline";
       };
-
       editor.indent-guides = {
         render = true;
         character = "╎";
       };
-
       editor.inline-diagnostics = {
         cursor-line = "error";
         other-lines = "disable";
       };
-
       editor.lsp = {
         display-messages = true;
         display-inlay-hints = true;
         auto-signature-help = false;
       };
-
       editor.statusline = {
         left = [
           "mode"
@@ -98,7 +91,6 @@ in {
           select = "SELECT";
         };
       };
-
       editor.whitespace = {
         render = {
           space = "none";
@@ -110,14 +102,12 @@ in {
           tabpad = " ";
         };
       };
-
       editor.file-picker = {
         hidden = false;
         parents = true;
         ignore = true;
         git-ignore = true;
       };
-
       keys.normal = {
         space = {
           space = "file_picker";
@@ -134,7 +124,6 @@ in {
           "keep_primary_selection"
         ];
       };
-
       keys.insert = {
         j = {
           k = "normal_mode";

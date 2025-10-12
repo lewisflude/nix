@@ -6,17 +6,12 @@
     ./ssh.nix
     ./theme.nix
     ./gpg.nix
+    ./sops.nix
     ./development
     ./system
     ./lib
     ./modules.nix
     ./terminal.nix
     ./nh.nix
-    ./apps/atuin.nix
-    ./apps/lazygit.nix
-    ./apps/lazydocker.nix
-    ./apps/micro.nix
-    ./apps/eza.nix
-    ./apps/jq.nix
   ];
 }

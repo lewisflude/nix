@@ -13,6 +13,5 @@
     };
     enableAllFirmware = true;
   };
-
   services.blueman.enable = true;
 }

@@ -16,16 +16,14 @@
     extraArgs = [
       "--avoid"
       "^(niri|wireplumber|pipewire|Xwayland|gdm|sddm)$"
-      # Optional preferences (examples):
-      # "--prefer" "^(chromium|google-chrome|firefox|code(-oss)?)$"
     ];
   };
   boot.kernel.sysctl = {
     "vm.swappiness" = lib.mkForce 60;
     "vm.dirty_background_ratio" = 5;
     "vm.dirty_ratio" = 20;
-    "vm.max_map_count" = 262144; # helps large games & dev tools
-    "vm.page-cluster" = 0; # reduce swap-in/out burst size
-    "fs.inotify.max_user_watches" = 1048576; # large repos & IDEs
+    "vm.max_map_count" = 262144;
+    "vm.page-cluster" = 0;
+    "fs.inotify.max_user_watches" = 1048576;
   };
 }

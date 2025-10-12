@@ -6,7 +6,6 @@
 }: let
   platformLib = import ../../lib/functions.nix {inherit lib system;};
 in {
-  # Base theme configuration (Catppuccin Mocha)
   catppuccin = {
     flavor = "mocha";
     accent = "mauve";
@@ -24,8 +23,6 @@ in {
       };
     };
   };
-
-  # Linux-specific theme configuration
   home = lib.optionalAttrs platformLib.isLinux {
     packages = with pkgs; [
       magnetic-catppuccin-gtk
@@ -34,7 +31,6 @@ in {
       nerd-fonts.iosevka
       gtk4
     ];
-
     pointerCursor = {
       name = "catppuccin-mocha-mauve-cursors";
       package = pkgs.catppuccin-cursors.mochaMauve;
@@ -46,8 +42,6 @@ in {
       };
     };
   };
-
-  # GTK configuration (Linux only)
   gtk = lib.mkIf platformLib.isLinux {
     enable = true;
     font = {
@@ -65,7 +59,5 @@ in {
       size = 24;
     };
   };
-
-  # Font configuration (Linux only)
   fonts.fontconfig.enable = lib.mkIf platformLib.isLinux true;
 }

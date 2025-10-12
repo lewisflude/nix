@@ -3,14 +3,13 @@
   config,
   ...
 }: let
-  # Workspace icons mapping for maintainability (Iosevka Nerd Font)
   workspaceIcons = {
-    "1" = ""; # Browser
-    "2" = ""; # Terminal
-    "3" = ""; # Code
-    "4" = ""; # Music
-    "5" = ""; # Chat
-    default = ""; # Unknown
+    "1" = "";
+    "2" = "";
+    "3" = "";
+    "4" = "";
+    "5" = "";
+    default = "";
   };
   uwsm = "${pkgs.uwsm}/bin/uwsm";
   ghostty = "${pkgs.ghostty}/bin/ghostty";
@@ -20,20 +19,16 @@ in {
     systemd.enable = true;
     package = pkgs.waybar-git;
     style = ./style.css;
-
     settings = {
       mainBar = {
         log-level = 3;
         layer = "top";
         position = "top";
         output = ["DP-1"];
-
         modules-left = [
           "niri/workspaces"
           "niri/window"
         ];
-
-        # Right-aligned modules (with custom progress & alerts)
         modules-right = [
           "network"
           "cpu"
@@ -47,8 +42,6 @@ in {
           "tray"
           "custom/notifications"
         ];
-
-        # Workspace icons
         "niri/workspaces" = {
           format = "{icon}";
           format-icons = workspaceIcons;
@@ -57,13 +50,9 @@ in {
             "*" = 5;
           };
         };
-
-        # Active window title
         "niri/window" = {
           format = "{title}";
         };
-
-        # Network status
         network = {
           format = " {ifname} {ipaddr}/{cidr}";
           format-wifi = " {essid} ({signalStrength}%)";
@@ -72,8 +61,6 @@ in {
           interval = 5;
           on-click = "${uwsm} app -- nm-connection-editor";
         };
-
-        # CPU usage (with CSS alert support)
         cpu = {
           format = " {usage}%";
           tooltip-format = "CPU: {usage}%\nLoad: {load}";
@@ -81,8 +68,6 @@ in {
           on-click = "${uwsm} app -- ${ghostty} -e btop";
           format-alt = "{usage}";
         };
-
-        # Memory usage (with CSS alert support)
         memory = {
           format = " {used:0.1f}G/{total:0.1f}G";
           tooltip-format = "Memory: {used:0.1f}G / {total:0.1f}G\nAvailable: {avail:0.1f}G";
@@ -90,8 +75,6 @@ in {
           on-click = "${uwsm} app -- ${ghostty} -e btop";
           format-alt = "{used_percent}";
         };
-
-        # Backup progress module
         "custom/backup" = {
           exec = "${config.home.homeDirectory}/bin/backup-status";
           return-type = "json";
@@ -99,21 +82,18 @@ in {
           format = " {percentage}%";
           tooltip-format = "Backup: {percentage}% complete";
         };
-
-        # Load-sparkline alerts
         "custom/alerts" = {
           exec = "${config.home.homeDirectory}/bin/system-spark-percentage";
           return-type = "json";
           interval = 10;
           format = "{icon}";
           format-icons = {
-            "default" = "▁▁▁"; # 0-25%
-            "low" = "▂▂▂"; # 25-50%
-            "medium" = "▅▅▅"; # 50-80%
-            "high" = "▇▇▇"; # 80%+
+            "default" = "▁▁▁";
+            "low" = "▂▂▂";
+            "medium" = "▅▅▅";
+            "high" = "▇▇▇";
           };
         };
-        # Brightness control
         "custom/brightness" = {
           exec = "${config.home.homeDirectory}/bin/brightness get";
           format = " {}%";
@@ -124,8 +104,6 @@ in {
           on-scroll-up = "${config.home.homeDirectory}/bin/brightness up";
           on-scroll-down = "${config.home.homeDirectory}/bin/brightness down";
         };
-
-        # Idle inhibitor (prevents screen sleep)
         idle_inhibitor = {
           format = "{icon}";
           format-icons = {
@@ -135,13 +113,10 @@ in {
           tooltip-format-activated = "Staying awake - screen won't sleep (click to disable)";
           tooltip-format-deactivated = "Screen can sleep (click to keep awake)";
         };
-
         tray = {
           icon-size = 24;
           spacing = 10;
         };
-
-        # Audio volume
         pulseaudio = {
           format = "{icon} {volume}%";
           format-icons = [
@@ -154,8 +129,6 @@ in {
           scroll-step = 5;
           on-click = "pwvucontrol";
         };
-
-        # SwayNC notification center integration
         "custom/notifications" = {
           tooltip = false;
           format = "{icon}";
@@ -176,8 +149,6 @@ in {
           on-click-right = "swaync-client -d -sw";
           escape = true;
         };
-
-        # Clock and calendar
         clock = {
           format = "  {:%a %d %b %H:%M}";
           tooltip-format = "{:%A, %d %B %Y | %H:%M:%S}";
@@ -187,12 +158,9 @@ in {
       };
     };
   };
-
   home.file = {
-    # Brightness helper script that stores the last set value
     "bin/brightness" = {
       text = ''
-        #!/usr/bin/env bash
         CACHE_FILE="$HOME/.config/niri/last_brightness"
         mkdir -p "$(dirname "$CACHE_FILE")"
         case "$1" in
@@ -224,11 +192,8 @@ in {
       '';
       executable = true;
     };
-
-    # Backup-status helper script
     "bin/backup-status" = {
       text = ''
-        #!/usr/bin/env bash
         HOME_DIR="$HOME"
         stats=$(rsync --dry-run --stats "$HOME_DIR/data/" /backup/ 2>/dev/null)
         transferred=$(awk '/Number of files transferred/ {print $NF}' <<<"$stats")
@@ -238,18 +203,11 @@ in {
       '';
       executable = true;
     };
-
-    # Script that converts load to percentage and uses 'alt' for icon selection
     "bin/system-spark-percentage" = {
       text = ''
-        #!/usr/bin/env bash
         IFS=',' read -r load1 load5 load15 _ < <(uptime | sed -E 's/.*load average: //')
-
-        # Convert 1-minute load to percentage (load of 2.0 = 100%)
         load_pct=$(echo "$load1" | awk '{printf "%d", ($1/2.0)*100}')
         if [ $load_pct -gt 100 ]; then load_pct=100; fi
-
-        # Determine icon category based on load percentage
         if [ $load_pct -ge 80 ]; then
           alt="high"
         elif [ $load_pct -ge 50 ]; then
@@ -259,8 +217,6 @@ in {
         else
           alt="low"
         fi
-
-        # Output JSON with percentage and alt for icon selection
         printf '{"percentage":%d,"alt":"%s"}' "$load_pct" "$alt" | jq --unbuffered --compact-output
       '';
       executable = true;

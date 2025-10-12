@@ -1,24 +1,4 @@
-{pkgs, ...}: let
-  steam_run_url = pkgs.writeShellApplication {
-    name = "steam-run-url";
-    text = ''
-      echo "$1" > "/run/user/$(id --user)/steam-run-url.fifo"
-    '';
-    runtimeInputs = [
-      pkgs.coreutils # For `id` command
-    ];
-  };
-in {
-  environment.systemPackages = with pkgs; [
-    lutris
-    mangohud
-    protonup-qt
-    (sunshine.override {cudaSupport = true;})
-    moonlight-qt
-    steam_run_url
-    dwarf-fortress
-  ];
-
+{pkgs, ...}: {
   programs = {
     steam = {
       enable = true;
@@ -43,7 +23,6 @@ in {
       };
     };
   };
-
   services = {
     sunshine = {
       enable = true;
@@ -58,6 +37,5 @@ in {
       ];
     };
   };
-
   hardware.uinput.enable = true;
 }

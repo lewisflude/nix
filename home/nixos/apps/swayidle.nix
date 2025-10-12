@@ -3,7 +3,6 @@
   pkgs,
   ...
 }: let
-  # Access Catppuccin color palette
   palette = (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors;
 in {
   services.swayidle = {

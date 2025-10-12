@@ -8,7 +8,6 @@
 in {
   home.packages = with pkgs;
     [
-      # Development tools (cross-platform)
       claude-code
       pkgs.gemini-cli-bin
       pkgs.cursor-cli
@@ -21,27 +20,29 @@ in {
       libnotify
       pgcli
       rustup
-      # solana-cli  # Temporarily disabled due to compilation errors
+      pkg-config
+      openssl
+      libsecret
+      libiconv
+      cmake
+      gnumake
+      git-lfs
+      cachix
+      nix-tree
+      nix-du
       tree
       yaml-language-server
       zellij
-
-      # Note: Language servers moved to development/language-tools.nix:
-      # - nil (Nix LSP)
-      # - nixfmt-rfc-style (Nix formatter)
-      # - biome (JS/TS formatter)
-      # - marksman (Markdown LSP)
-      # - pyright (Python LSP)
     ]
     ++ platformLib.platformPackages
     [
-      # Linux-only packages
       musescore
     ]
     [
-      # macOS-only packages (MuseScore installed via Homebrew)
+      xcodebuild
+      gnutar
+      gzip
     ];
-
   imports = [
     ./apps/cursor
     ./apps/bat.nix
@@ -51,5 +52,13 @@ in {
     ./apps/helix.nix
     ./apps/obsidian.nix
     ./apps/aws.nix
+    ./apps/docker.nix
+    ./apps/atuin.nix
+    ./apps/lazygit.nix
+    ./apps/lazydocker.nix
+    ./apps/micro.nix
+    ./apps/eza.nix
+    ./apps/jq.nix
+    ./apps/zellij.nix
   ];
 }

@@ -11,7 +11,6 @@
       Service = {
         Type = "oneshot";
         ExecStart = "${pkgs.writeShellScript "nix-update-script" ''
-          #!/bin/sh
           set -e
           ${pkgs.sudo}/bin/sudo -E ${config.home.homeDirectory}/.dotfiles/home-manager/modules/scripts/bin/system-update --inputs
         ''}";

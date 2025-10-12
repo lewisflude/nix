@@ -5,13 +5,10 @@ pkgs.mkShell {
     bat
     fd
   ];
-
   shellHook = ''
-    # Interactive shell selector
     select_dev_shell() {
       echo "🚀 Available development environments:"
       echo ""
-
       local shells=(
         "nextjs:⚡ Next.js React framework"
         "react-native:📱 React Native mobile apps"
@@ -24,17 +21,13 @@ pkgs.mkShell {
         "solana:⚡ Blockchain/Solana development"
         "devops:🛠️  DevOps/Infrastructure"
       )
-
       local choice=$(printf '%s\n' "''${shells[@]}" | fzf --ansi --preview 'echo {}' --preview-window=right:50% --prompt="Select environment: ")
-
       if [[ -n "$choice" ]]; then
         local shell_name=$(echo "$choice" | cut -d':' -f1)
         echo "Loading $shell_name environment..."
-        nix develop ~/.config/nix#$shell_name
+        nix develop ~/.config/nix
       fi
     }
-
-    # Quick project setup
     setup_project() {
       echo "🎯 Project Setup Wizard"
       echo ""
@@ -45,7 +38,6 @@ pkgs.mkShell {
       echo "5. Rust Project"
       echo ""
       read -p "Select project type (1-5): " choice
-
       case $choice in
         1)
           echo "Setting up Next.js project..."
@@ -76,18 +68,14 @@ pkgs.mkShell {
           echo "Invalid selection"
           ;;
       esac
-
       if [[ -f ".envrc" ]]; then
         echo ""
         echo "🎉 Project setup complete!"
         echo "Run 'direnv allow' to activate the environment"
       fi
     }
-
-    # Export functions
     export -f select_dev_shell
     export -f setup_project
-
     echo "🛠️  Development utilities loaded"
     echo "Commands available:"
     echo "  select_dev_shell - Interactive shell selector"

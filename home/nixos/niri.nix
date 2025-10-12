@@ -4,7 +4,6 @@
   lib,
   ...
 }: let
-  # Import theme constants
   themeConstants = import ./theme-constants.nix {inherit config pkgs;};
 in {
   home.packages = with pkgs; [
@@ -12,17 +11,19 @@ in {
     grim
     slurp
     wl-clipboard
+    wlr-randr
+    wayland-utils
+    brightnessctl
+    xdg-utils
+    polkit_gnome
     xwayland-satellite-unstable
-    # Color management
-    argyllcms # For ICC profile tools (iccdump, colprof, etc.)
-    colord-gtk # GUI for managing color profiles
-    wl-gammactl # Wayland gamma/brightness/contrast control
+    argyllcms
+    colord-gtk
+    wl-gammactl
   ];
-
   imports = [
     ./niri/keybinds.nix
   ];
-
   programs.niri = {
     package = pkgs.niri-unstable;
     settings = {
@@ -54,7 +55,6 @@ in {
           variable-refresh-rate = "on-demand";
         };
       };
-
       layout = {
         gaps = 16;
         always-center-single-column = true;
@@ -114,12 +114,8 @@ in {
           };
         };
       };
-
       prefer-no-csd = true;
-
-      # KVM display reliability improvements
       hotkey-overlay.skip-at-startup = true;
-
       window-rules = [
         {
           matches = [
@@ -131,7 +127,6 @@ in {
           open-floating = true;
         }
       ];
-
       animations = {
         enable = true;
         slowdown = 1.0;
@@ -156,43 +151,24 @@ in {
           };
         };
       };
-
       environment = {
-        # Optimized Wayland environment for RTX 4090 + high-performance workflow
-
-        # Electron/Chromium apps - force Wayland for best performance
         ELECTRON_OZONE_PLATFORM_HINT = "auto";
         NIXOS_OZONE_WL = "1";
-
-        # Firefox Wayland optimization
         MOZ_ENABLE_WAYLAND = "1";
         MOZ_WEBRENDER = "1";
-
-        # Session identity
         XDG_CURRENT_DESKTOP = "niri";
         XDG_SESSION_DESKTOP = "niri";
         XDG_SESSION_TYPE = "wayland";
-
-        # Qt Wayland optimizations
         QT_QPA_PLATFORM = "wayland";
         QT_QPA_PLATFORMTHEME = "gtk3";
         QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
         QT_AUTO_SCREEN_SCALE_FACTOR = "1";
         QT_WAYLAND_FORCE_DPI = "physical";
-
-        # Java AWT compatibility
         _JAVA_AWT_WM_NONREPARENTING = "1";
-
-        # SDL2 Wayland preference (for games)
         SDL_VIDEODRIVER = "wayland,x11";
-
-        # GTK prefer dark theme (optional but common)
         GTK_THEME = "Adwaita:dark";
-
-        # Font rendering enhancement for sharper text
         FREETYPE_PROPERTIES = "cff:no-stem-darkening=0 autofitter:no-stem-darkening=0";
       };
-
       spawn-at-startup = [
         {
           command = [
@@ -202,13 +178,11 @@ in {
             "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
           ];
         }
-
         {
           command = [
             "${lib.getExe pkgs.xwayland-satellite-unstable}"
           ];
         }
-
         {
           command = [
             "${pkgs.uwsm}/bin/uwsm"
@@ -217,7 +191,6 @@ in {
             "${pkgs.swww}/bin/swww-daemon"
           ];
         }
-
         {
           command = [
             "${pkgs.uwsm}/bin/uwsm"
@@ -228,7 +201,6 @@ in {
             "${config.home.homeDirectory}/wallpapers/nix-wallpaper-nineish-catppuccin-mocha.png"
           ];
         }
-
         {
           command = [
             "${pkgs.argyllcms}/bin/dispwin"

@@ -6,8 +6,6 @@
   ...
 }: let
   platformLib = import ../../lib/functions.nix {inherit lib system;};
-
-  # Catppuccin palette (assumes catppuccin HM module is enabled in your config)
   palette =
     if lib.hasAttrByPath ["catppuccin" "sources" "palette"] config
     then (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors
@@ -19,18 +17,14 @@
         hex = "3b4252";
       };
     };
-
-  # Cross-platform secret lookup helpers
   secretAvailable = name:
     if pkgs.stdenv.isDarwin
     then true
     else lib.hasAttrByPath ["sops" "secrets" name] config;
-
   secretPath = name:
     if pkgs.stdenv.isDarwin
     then "${platformLib.dataDir config.home.username}/sops-nix/secrets/${name}"
     else config.sops.secrets.${name}.path;
-
   secretExportSnippet = name: var: let
     path = secretPath name;
   in
@@ -41,7 +35,6 @@
     '';
 in {
   xdg.enable = true;
-
   programs = {
     fzf = {
       enable = true;
@@ -64,30 +57,23 @@ in {
         else null
       );
     };
-
     direnv = {
       enable = true;
       nix-direnv.enable = true;
       enableZshIntegration = true;
     };
-
     atuin = {
       enable = true;
       enableZshIntegration = true;
       flags = ["--disable-up-arrow"];
     };
-
     zsh = {
       enable = true;
       enableCompletion = true;
       dotDir = "${config.xdg.configHome}/zsh";
-
-      # Zsh autosuggestion plugin
       autosuggestion.enable = true;
-
       syntaxHighlighting.enable = true;
       historySubstringSearch.enable = true;
-
       plugins = [
         {
           name = "zsh-defer";
@@ -150,25 +136,18 @@ in {
           file = "bd.zsh";
         }
       ];
-
       completionInit = ''
         setopt EXTENDED_GLOB
         autoload -Uz compinit
-
-        # Handle insecure directories gracefully
-        # Check for insecure directories and fix them if possible
         if ! compaudit 2>/dev/null; then
           echo "Warning: Insecure zsh completion directories detected."
           echo "Attempting to fix ownership issues..."
-          # Try to fix common ownership issues
           if [[ -d "/usr/local/share/zsh" ]] && [[ -O "/usr/local/share/zsh" ]]; then
             echo "Fixing /usr/local/share/zsh ownership..."
             sudo chown -R root:wheel /usr/local/share/zsh 2>/dev/null || true
           fi
         fi
-
-        # Initialize completion system
-        if [[ -n ${config.xdg.cacheHome}/zsh/.zcompdump(#qN.mh+24) ]]; then
+        if [[ -n ${config.xdg.cacheHome}/zsh/.zcompdump(
           compinit
         else
           compinit -C
@@ -199,7 +178,6 @@ in {
         npm() { _lazy_load_npm_completion; unfunction npm; npm "$@"; }
         mkdir -p ${config.xdg.cacheHome}/zsh
       '';
-
       setOptions = [
         "AUTO_MENU"
         "COMPLETE_IN_WORD"
@@ -235,7 +213,6 @@ in {
         "AUTO_LIST"
         "AUTO_PARAM_SLASH"
       ];
-
       shellAliases = lib.mkMerge [
         {
           switch = platformLib.systemRebuildCommand;
@@ -275,7 +252,7 @@ in {
           nh-home = "nh home";
           nh-darwin = "nh darwin";
           nh-clean = "nh clean all";
-          dev = "nix develop ~/.config/nix#shell-selector";
+          dev = "nix develop ~/.config/nix";
           abbr-list = "abbr list";
           abbr-add = "abbr add";
           abbr-erase = "abbr erase";
@@ -288,7 +265,6 @@ in {
           lock = "saylock --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --ring-color cba6f7 --key-hl-color b4befe --line-color 00000000 --inside-color 1e1e2e88 --separator-color 00000000 --text-color cdd6f4 --grace 2 --fade-in 0.2";
         })
       ];
-
       history = {
         save = 50000;
         size = 50000;
@@ -311,30 +287,21 @@ in {
         ignoreDups = true;
         ignoreSpace = true;
       };
-
       initContent = ''
         ${secretExportSnippet "KAGI_API_KEY" "KAGI_API_KEY"}
         ${secretExportSnippet "GITHUB_TOKEN" "GITHUB_TOKEN"}
-
         export SSH_AUTH_SOCK="$(${pkgs.gnupg}/bin/gpgconf --list-dirs agent-ssh-socket)"
-
-        # Autosuggestions tuning
         typeset -ga ZSH_AUTOSUGGEST_STRATEGY
         ZSH_AUTOSUGGEST_STRATEGY=(history completion)
         export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=${palette.mauve.hex},bg=${palette.surface1.hex},bold,underline"
-
         export SOPS_GPG_EXEC="${lib.getExe pkgs.gnupg}"
         export SOPS_GPG_ARGS="--pinentry-mode=loopback"
-
         export NIX_FLAKE="${config.home.homeDirectory}/.config/nix"
         export NH_CLEAN_ARGS="--keep-since 4d --keep 3"
-
         source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
         [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-
         zsh-defer -c 'export YSU_MESSAGE_POSITION="after"'
         zsh-defer -c 'export YSU_HARDCORE=1'
-
         export AUTO_NOTIFY_THRESHOLD=10
         export AUTO_NOTIFY_TITLE="Command finished"
         export AUTO_NOTIFY_BODY="Completed in %elapsed seconds"
@@ -342,11 +309,9 @@ in {
           "man" "less" "more" "vim" "nano" "htop" "top" "ssh" "scp" "rsync"
           "watch" "tail" "sleep" "ping" "curl" "wget" "git log" "git diff"
         )
-
-        export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
+        export WORDCHARS='*?_-.[]~=&;!
         export ATUIN_NOBIND="true"
         zsh-defer -c 'bindkey "^r" _atuin_search_widget'
-
         bindkey '^[[1;5C' forward-word
         bindkey '^[[1;5D' backward-word
         bindkey '^H' backward-kill-word
@@ -355,21 +320,16 @@ in {
         bindkey '^[[B' history-substring-search-down
         bindkey '^P' history-substring-search-up
         bindkey '^N' history-substring-search-down
-
-        # Shift+Enter: insert literal newline in ZLE
-        # Support both our prior custom seq (\e[99997u) and ESC+CR (\e\r)
         function _ghostty_insert_newline() { LBUFFER+=$'\n' }
         zle -N ghostty-insert-newline _ghostty_insert_newline
         bindkey -M emacs $'\e[99997u' ghostty-insert-newline
         bindkey -M viins $'\e[99997u' ghostty-insert-newline
         bindkey -M emacs $'\e\r'     ghostty-insert-newline
         bindkey -M viins $'\e\r'     ghostty-insert-newline
-
         zstyle ':completion:*' matcher-list \
           'm:{a-zA-Z}={A-Za-z}' \
           'r:|[._-]=* r:|=*' \
           'l:|=* r:|=*'
-
         zstyle ':completion:*' special-dirs true
         zstyle ':completion:*' squeeze-slashes true
         zstyle ':completion:*' list-colors '${"\${(s.:.)LS_COLORS}"}'
@@ -379,29 +339,22 @@ in {
         zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
         zstyle ':completion:*:warnings' format '%F{red}No matches found%f'
         zstyle ':completion:*:corrections' format '%F{green}%d (errors: %e)%f'
-
-        zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+        zstyle ':completion:*:*:kill:*:processes' list-colors '=(
         zstyle ':completion:*:*:kill:*' menu yes select
         zstyle ':completion:*:cd:*' tag-order local-directories directory-stack path-directories
         zstyle ':completion:*:cd:*' ignore-parents parent pwd
         zstyle ':completion:*' file-patterns '%p:globbed-files *(-/):directories' '*:all-files'
-
         unsetopt FLOW_CONTROL
-
         if [[ ! -o interactive || ! -t 1 || "$TERM_PROGRAM" == "vscode" || "$TERM_PROGRAM" == "cursor" ]]; then
           unsetopt CORRECT CORRECT_ALL
         else
           setopt CORRECT
           unsetopt CORRECT_ALL
         fi
-
         zsh-defer -c 'if [[ ~/.zshrc -nt ~/.zshrc.zwc ]]; then zcompile ~/.zshrc; fi'
-
-        # Source project functions from your repo at runtime to avoid flake source requirements
         if [[ -f "${config.home.homeDirectory}/.config/nix/home/common/lib/zsh/functions.zsh" ]]; then
           source "${config.home.homeDirectory}/.config/nix/home/common/lib/zsh/functions.zsh"
         fi
-
         ${
           let
             zsh_codex = pkgs.fetchFromGitHub {
@@ -418,23 +371,18 @@ in {
           ''
         }
         eval "$(zoxide init zsh)"
-
-
       '';
     };
   };
-
   home = {
     sessionVariables = {
       EDITOR = "hx";
       DIRSTACKSIZE = "20";
       NH_FLAKE = "${config.home.homeDirectory}/.config/nix";
     };
-
     file = {
       ".p10k.zsh".source = ./lib/p10k.zsh;
     };
-
     packages = with pkgs; [
       zoxide
       (writeShellApplication {
@@ -447,16 +395,12 @@ in {
         text = ''
           set -Eeuo pipefail
           IFS=$'\n\t'
-
           FLAKE_PATH="''${NH_FLAKE:-${config.home.homeDirectory}/.config/nix}"
           NH_TARGET="${
             if pkgs.stdenv.isDarwin
             then "darwin"
             else "os"
           }"
-
-          # If this shell has NoNewPrivs=1 (e.g., launched from a sandboxed user service),
-          # re-exec this command via systemd-run with NoNewPrivileges disabled so sudo works.
           if [ "$(awk '/NoNewPrivs/ {print $2}' /proc/self/status 2>/dev/null || echo 0)" = "1" ]; then
             if command -v systemd-run >/dev/null 2>&1; then
               echo "Detected NoNewPrivs=1; re-executing via systemd-run to allow sudo…"
@@ -466,7 +410,6 @@ in {
               exit 1
             fi
           fi
-
           UPDATE_INPUTS=0
           RUN_GC=0
           BUILD_ONLY=0
@@ -483,12 +426,10 @@ in {
                 exit 0 ;;
             esac
           done
-
           if [[ $UPDATE_INPUTS -eq 1 ]]; then
             echo "Updating inputs…"
             nix flake update --flake "$FLAKE_PATH"
           fi
-
           if [[ $DRY_RUN -eq 1 ]]; then
             echo "Checking switch…"
             nh "$NH_TARGET" switch -- --dry-run "$FLAKE_PATH"
@@ -501,17 +442,13 @@ in {
               nh "$NH_TARGET" switch "$FLAKE_PATH"
             fi
           fi
-
           if [[ $RUN_GC -eq 1 ]]; then
             echo "Cleaning…"
             nh clean all
           fi
-
           echo "Done."
         '';
       })
-
-      # Development CLI - Unified interface for Nix development tools
       (writeShellApplication {
         name = "dev";
         runtimeInputs = with pkgs; [
@@ -530,15 +467,11 @@ in {
       })
     ];
   };
-
   home.file.".config/direnv/lib/layout_zellij.sh".text = ''
     layout_zellij() {
-      # Avoid recursion
       if [ -n "$ZELLIJ" ]; then
         return 0
       fi
-
-      # Use repo-local layout if present, else default
       if [ -f ".zellij.kdl" ]; then
         exec zellij --layout .zellij.kdl attach -c "$(basename "$PWD")"
       else

@@ -3,21 +3,17 @@
 in
   pkgs.testers.runNixOSTest {
     name = "home-manager-hello";
-
     nodes.machine = {pkgs, ...}: {
       imports = [home-manager.nixosModules.home-manager];
-
       users.users.alice = {
         isNormalUser = true;
         initialPassword = "password";
       };
-
       home-manager.users.alice = {
         home.packages = [pkgs.hello];
         home.stateVersion = "23.11";
       };
     };
-
     testScript = ''
       start_all()
       machine.wait_for_unit("default.target")
