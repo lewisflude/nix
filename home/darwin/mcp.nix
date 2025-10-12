@@ -133,12 +133,12 @@ in {
           "-i"
           "--rm"
           "-e"
-          "GITHUB_PERSONAL_ACCESS_TOKEN"
+          "GITHUB_TOKEN"
           "ghcr.io/github/github-mcp-server"
         ];
         port = 11434;
         env = {
-          GITHUB_PERSONAL_ACCESS_TOKEN = config.sops.secrets.GITHUB_PERSONAL_ACCESS_TOKEN.path or "";
+          GITHUB_TOKEN = config.sops.secrets.GITHUB_TOKEN.path or "";
         };
       };
       filesystem = {

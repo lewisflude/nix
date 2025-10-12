@@ -18,8 +18,7 @@ in {
       CIRCLECI_TOKEN = {};
       OBSIDIAN_API_KEY = {};
       OPENAI_API_KEY = {};
-      GITHUB_TOKEN = {};
-      GITHUB_PERSONAL_ACCESS_TOKEN = {
+      GITHUB_TOKEN = {
         sopsFile = ../../secrets/secrets.yaml;
       };
     };
