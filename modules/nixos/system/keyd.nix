@@ -34,6 +34,14 @@ _: {
           # Note: Using 'leftmeta' directly as recommended by keyd
           f13 = "leftmeta";
 
+          # SCREENSHOT: F14 produces Print Screen
+          # This allows firmware layer (Right Shift + F14) to work
+          f14 = "print";
+
+          # KVM SWITCHING: F15 produces Scroll Lock
+          # For KVM: Double-tap F15 + number to switch computers
+          f15 = "scrolllock";
+
           # NAVIGATION: Right Alt activates the 'nav' layer
           rightalt = "layer(nav)";
         };
