@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   lib,
   system,
@@ -7,28 +8,15 @@
   platformLib = import ../../../lib/functions.nix {inherit lib system;};
 in
   {
-    # Nix Store Optimization and Garbage Collection Configuration
-
     nix.settings = {
-      # Store optimization
       auto-optimise-store = true;
-
-      # Build optimization
       max-jobs = 24;
-      cores = 0; # Use all available cores
-
-      # Cache optimization
-      keep-outputs = false; # Don't keep build outputs for GC roots
-      keep-derivations = false; # Don't keep derivations for GC roots
-
-      # Reduce store size
-      min-free = 1073741824; # 1GB - start GC when free space is below this
-      max-free = 3221225472; # 3GB - stop GC when free space reaches this
-
-      # Download buffer size
+      cores = 0;
+      keep-outputs = false;
+      keep-derivations = false;
+      min-free = 1073741824;
+      max-free = 3221225472;
       download-buffer-size = 524288000;
-
-      # Binary cache settings for faster builds
       substituters = [
         "https://lewisflude.cachix.org"
         "https://cache.nixos.org"
@@ -42,7 +30,6 @@ in
         "https://niri.cachix.org"
         "https://install.determinate.systems"
       ];
-
       trusted-substituters = [
         "https://lewisflude.cachix.org"
         "https://cache.nixos.org"
@@ -69,114 +56,63 @@ in
         "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
         "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM="
       ];
-
-      # Experimental features for performance
       experimental-features = [
         "nix-command"
         "flakes"
-        "ca-derivations" # Content-addressed derivations
+        "ca-derivations"
       ];
+      access-tokens = "github.com=${config.sops.secrets.GITHUB_PERSONAL_ACCESS_TOKEN.path}";
     };
-
     environment = {
-      # Store optimization scripts
       etc = {
         "nix-optimization/optimize-store.sh" = {
           text = ''
-            #!/usr/bin/env bash
-            # Comprehensive Nix store optimization script
-
             set -euo pipefail
-
             echo "🧹 Starting Nix store optimization..."
-
-            # 1. Show current store size
             echo "📊 Current store size:"
             du -sh /nix/store
-
-            # 2. Garbage collect old generations
             echo "🗑️ Collecting garbage (older than 7 days)..."
             nix-collect-garbage --delete-older-than 7d
-
-            # 3. Optimize store (deduplicate)
             echo "🔧 Optimizing store (deduplicating)..."
             nix store optimise
-
-            # 4. Clean up user profiles
             echo "👤 Cleaning user profiles..."
             nix profile wipe-history --older-than 7d || true
-
-            # 5. Show final store size
             echo "📊 Final store size:"
             du -sh /nix/store
-
             echo "✅ Store optimization complete!"
           '';
           mode = "0755";
         };
-
-        # Quick cleanup script for manual use
         "nix-optimization/quick-clean.sh" = {
           text = ''
-            #!/usr/bin/env bash
-            # Quick cleanup for immediate space recovery
-
             set -euo pipefail
-
             echo "⚡ Quick Nix cleanup..."
-
-            # Show current size
             echo "Before: $(du -sh /nix/store | cut -f1)"
-
-            # Quick garbage collection
             nix-collect-garbage -d
-
-            # Show final size
             echo "After: $(du -sh /nix/store | cut -f1)"
-
             echo "✅ Quick cleanup complete!"
           '';
           mode = "0755";
         };
-
-        # Store analysis script
         "nix-optimization/analyze-store.sh" = {
           text = ''
-            #!/usr/bin/env bash
-            # Analyze Nix store usage and find large packages
-
             set -euo pipefail
-
             echo "🔍 Analyzing Nix store..."
-
-            # Store statistics
             echo "📊 Store Statistics:"
             nix store info
             echo
-
-            # Largest store paths
             echo "📦 Largest store paths:"
             nix path-info --recursive --size /run/current-system | sort -nk2 | tail -20
             echo
-
-            # Show roots keeping things alive
             echo "🌳 Current GC roots:"
             nix-store --gc --print-roots | head -10
             echo
-
-            # Show profile generations
             echo "👤 Profile generations:"
             sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
           '';
         };
       };
-
-      # Create system-wide symlinks using environment.systemPackages approach
       systemPackages = with pkgs; [
-        nix-tree # Visualize Nix store dependencies
-        nix-du # Analyze store disk usage
-
-        # Create wrapper scripts for easy access
         (writeShellScriptBin "nix-optimize" ''
           exec /etc/nix-optimization/optimize-store.sh "$@"
         '')
@@ -190,7 +126,6 @@ in
     };
   }
   // lib.optionalAttrs platformLib.isLinux {
-    # Systemd timer for store optimization (Linux only)
     systemd = {
       timers.nix-store-optimization = {
         wantedBy = ["timers.target"];
@@ -199,7 +134,6 @@ in
           Persistent = true;
         };
       };
-
       services.nix-store-optimization = {
         serviceConfig = {
           Type = "oneshot";
@@ -209,7 +143,6 @@ in
     };
   }
   // lib.optionalAttrs platformLib.isDarwin {
-    # Darwin-specific launchd configuration
     launchd = {
       daemons.nix-garbage-collection = {
         serviceConfig = {
@@ -222,7 +155,7 @@ in
             {
               Hour = 3;
               Minute = 15;
-              Weekday = 1; # Monday at 3:15 AM
+              Weekday = 1;
             }
           ];
           StandardOutPath = "/var/log/nix-gc.log";
@@ -230,7 +163,6 @@ in
           RunAtLoad = false;
         };
       };
-
       daemons.nix-store-optimization = {
         serviceConfig = {
           ProgramArguments = [
@@ -240,7 +172,7 @@ in
             {
               Hour = 3;
               Minute = 30;
-              Weekday = 1; # Monday at 3:30 AM
+              Weekday = 1;
             }
           ];
           StandardOutPath = "/var/log/nix-optimization.log";

@@ -10,13 +10,9 @@ in {
   home.packages = with pkgs; [
     sops
   ];
-
   sops = {
     defaultSopsFile = ../../secrets/user.yaml;
-
-    # Use age for user secrets (no prompts)
     age.keyFile = "${platformLib.configDir config.home.username}/sops/age/keys.txt";
-
     secrets = {
       KAGI_API_KEY = {};
       CIRCLECI_TOKEN = {};
@@ -28,7 +24,6 @@ in {
       };
     };
   };
-
   systemd.user.services.sops-nix = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
       After = ["gpg-agent.service"];

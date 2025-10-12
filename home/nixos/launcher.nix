@@ -3,7 +3,6 @@
   config,
   ...
 }: let
-  # Dynamic Catppuccin color palette access
   palette =
     (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors;
 in {
@@ -26,17 +25,13 @@ in {
         prompt = "> ";
         tabs = 4;
         icons-enabled = true;
-        # "fuzzy" is not a valid option, this is the correct way
         match-mode = "fuzzy";
       };
-
       border = {
         width = 2;
         radius = 10;
       };
-
       colors = {
-        # Fuzzel expects RGBA hex without the '#'. Append 'ff' for full opacity.
         background = palette.base.hex + "ff";
         text = palette.text.hex + "ff";
         match = palette.mauve.hex + "ff";
@@ -45,11 +40,9 @@ in {
         selection-match = palette.mauve.hex + "ff";
         border = palette.lavender.hex + "ff";
       };
-
       dmenu = {
         exit-immediately-if-empty = true;
       };
-
       key-bindings = {
         cancel = "Escape Control+g";
         execute = "Return KP_Enter Control+y";
@@ -60,14 +53,11 @@ in {
         cursor-end = "End Control+e";
         delete-prev = "BackSpace";
         delete-next = "Delete";
-        # Corrected action name
         delete-to-end-of-line = "Control+k";
         prev = "Up Control+p";
         next = "Down Control+n";
-        # Corrected action names
         prev-page = "Page_Up";
         next-page = "Page_Down";
-        # Removed redundant/conflicting bindings for "Home" and "End"
       };
     };
   };

@@ -22,7 +22,6 @@
       key = "48B34CF9C735A6AE";
       signByDefault = true;
     };
-
     delta = {
       enable = true;
     };

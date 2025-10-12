@@ -12,7 +12,6 @@ in {
       source = ../lib/p10k.zsh;
     };
   };
-
   programs.zsh = {
     enable = true;
     enableCompletion = true;
@@ -20,6 +19,7 @@ in {
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     initContent = ''
+      ${lib.optionalString platformLib.isLinux ''export SHELL=${pkgs.zsh}/bin/zsh\n''}
       eval "$(zoxide init zsh)"
       eval "$(direnv hook zsh)"
       source "${pkgs.fzf}/share/fzf/key-bindings.zsh"
@@ -30,7 +30,6 @@ in {
         source ${config.home.homeDirectory}/.p10k.zsh
       fi
     '';
-
     shellAliases = {
       ls = "eza";
       l = "eza -l";
@@ -52,10 +51,8 @@ in {
         "cp *"
       ];
     };
-
     plugins = [
       {
-        # will source zsh-autosuggestions.plugin.zsh
         name = "zsh-autosuggestions";
         src = pkgs.fetchFromGitHub {
           owner = "zsh-users";

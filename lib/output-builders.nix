@@ -1,16 +1,12 @@
-# Output builder functions to simplify flake outputs generation
 {
   inputs,
   hosts,
 }: let
   inherit (inputs) nixpkgs pre-commit-hooks home-manager;
-
+  virtualisationLib = import ./virtualisation.nix {inherit (nixpkgs) lib;};
   systems = builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
 in {
-  # Generate formatter outputs for all systems
   mkFormatters = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.alejandra);
-
-  # Generate pre-commit checks for all systems
   mkChecks = nixpkgs.lib.genAttrs systems (system: {
     pre-commit-check = pre-commit-hooks.lib.${system}.run {
       src = ./.;
@@ -21,8 +17,6 @@ in {
       };
     };
   });
-
-  # Generate development shells for all host systems
   mkDevShells = builtins.listToAttrs (
     builtins.map
     (hostConfig: {
@@ -57,22 +51,19 @@ in {
     })
     (builtins.attrValues hosts)
   );
-
-  # Generate Home Manager configurations
   mkHomeConfigurations =
     builtins.mapAttrs
     (
       _name: hostConfig: let
-        # Import nixpkgs with the same overlays as the system configuration
         pkgs = import nixpkgs {
           inherit (hostConfig) system;
           config = {
             allowUnfree = true;
+            allowUnfreePredicate = _: true;
             allowUnsupportedSystem = false;
           };
           overlays =
             [
-              # Apply the same overlays as the system configuration
               (import ../overlays/cursor.nix)
               (import ../overlays/npm-packages.nix)
               inputs.yazi.overlays.default
@@ -87,7 +78,6 @@ in {
             ++ (
               if hostConfig.system == "aarch64-darwin" || hostConfig.system == "x86_64-darwin"
               then [
-                # Darwin-specific overlays
                 (_: _: {
                   ghostty = inputs.ghostty.packages.${hostConfig.system}.default.override {
                     optimize = "ReleaseFast";
@@ -109,10 +99,18 @@ in {
       in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs = inputs // hostConfig;
+          extraSpecialArgs =
+            inputs
+            // hostConfig
+            // {
+              modulesVirtualisation = virtualisationLib.mkModulesVirtualisationArgs {
+                hostVirtualisation = hostConfig.virtualisation or {};
+              };
+            };
           modules = [
             ../home
             inputs.catppuccin.homeModules.catppuccin
+            inputs.niri.homeModules.niri
             inputs.sops-nix.homeManagerModules.sops
             {_module.args = {inherit inputs;};}
           ];

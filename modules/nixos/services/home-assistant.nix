@@ -6,12 +6,6 @@
   home-llm = pkgs.callPackage ./home-assistant/custom-components/home-llm.nix {inherit pkgs;};
   intent_script_yaml = ./home-assistant/intent-scripts/intent_script.yaml;
 in {
-  environment.systemPackages = with pkgs; [
-    gnumake
-    cmake
-    extra-cmake-modules
-  ];
-
   sops.templates."hass-secrets.yaml" = {
     content = ''
       latitude: ${config.sops.placeholder.LATITUDE}
@@ -22,11 +16,9 @@ in {
     group = "hass";
     mode = "0400";
   };
-
   services.home-assistant = {
     enable = true;
     configDir = "/var/lib/hass";
-
     blueprints = {
       script = [
         (pkgs.fetchurl {
@@ -40,7 +32,6 @@ in {
         pychromecast
       ];
     extraComponents = [
-      # Components required to complete the onboarding
       "analytics"
       "google_translate"
       "met"
@@ -74,9 +65,6 @@ in {
       "upnp"
       "wled"
       "zha"
-
-      # Recommended for fast zlib compression
-      # https://www.home-assistant.io/integrations/isal
       "isal"
     ];
     customComponents = with pkgs; [
@@ -84,7 +72,6 @@ in {
       home-llm
     ];
     openFirewall = true;
-
     config = {
       lovelace.mode = "yaml";
       homeassistant = {
@@ -106,6 +93,11 @@ in {
               };
             };
           };
+          systemd.services.home-assistant.path = [
+            pkgs.gnumake
+            pkgs.cmake
+            pkgs.extra-cmake-modules
+          ];
         }
         {
           play_music = {
@@ -117,7 +109,6 @@ in {
                   media_player = ''
                     {% set media_players = integration_entities('music_assistant') %}
                     {% set area_entities = area_entities(area) %}
-
                     {% for player in media_players %}
                       {% if player in area_entities %}
                         {{ player }}
@@ -316,12 +307,9 @@ in {
         use_x_forwarded_for = true;
         trusted_proxies = ["192.168.1.0/24"];
       };
-      # Includes dependencies for a basic setup
-      # https://www.home-assistant.io/integrations/default_config/
       default_config = {};
     };
   };
-
   systemd.services.hass-secrets-link = {
     description = "Link Home Assistant secrets file";
     wantedBy = ["home-assistant.service"];
@@ -336,7 +324,6 @@ in {
       Group = "hass";
     };
   };
-
   systemd.services.hass-intent-script-link = {
     description = "Link intent_script.yaml for Home Assistant";
     wantedBy = ["home-assistant.service"];
@@ -349,6 +336,5 @@ in {
       Group = "hass";
     };
   };
-
   networking.firewall.allowedTCPPorts = [8123];
 }

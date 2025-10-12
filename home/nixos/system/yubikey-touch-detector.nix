@@ -9,7 +9,6 @@ with lib; let
 in {
   options.services.yubikey-touch-detector = {
     enable = mkEnableOption "a tool to detect when your YubiKey is waiting for a touch";
-
     package = mkOption {
       type = types.package;
       default = pkgs.yubikey-touch-detector;
@@ -18,9 +17,7 @@ in {
         Package to use. Binary is expected to be called "yubikey-touch-detector".
       '';
     };
-
     socket.enable = mkEnableOption "starting the process only when the socket is used";
-
     extraArgs = mkOption {
       type = types.listOf types.str;
       default = ["--libnotify"];
@@ -30,13 +27,8 @@ in {
       '';
     };
   };
-
   config = mkIf cfg.enable {
     home.packages = [cfg.package];
-
-    # Service description licensed under ISC
-    # See https://github.com/maximbaz/yubikey-touch-detector/blob/c9fdff7163361d6323e2de0449026710cacbc08a/LICENSE
-    # Author: Maxim Baz
     systemd.user.sockets.yubikey-touch-detector = mkIf cfg.socket.enable {
       Unit.Description = "Unix socket activation for YubiKey touch detector service";
       Socket = {
@@ -46,8 +38,6 @@ in {
       };
       Install.WantedBy = ["sockets.target"];
     };
-
-    # Same license thing for the description here
     systemd.user.services.yubikey-touch-detector = {
       Unit = {
         Description = "Detects when your YubiKey is waiting for a touch";

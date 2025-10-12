@@ -1,23 +1,9 @@
-{
-  pkgs,
-  username,
-  ...
-}: {
-  # System-level backup configuration
-  environment.systemPackages = with pkgs; [
-    rsync
-    gnutar
-    gzip
-  ];
-
-  # Create backup directories
+{username, ...}: {
   system.activationScripts.backup.text = ''
     mkdir -p /Users/${username}/Backups/nix-config
     chown ${username}:staff /Users/${username}/Backups/nix-config
     chmod 755 /Users/${username}/Backups/nix-config
   '';
-
-  # LaunchAgent for automated backups
   launchd.user.agents.nix-config-backup = {
     serviceConfig = {
       ProgramArguments = [
@@ -27,20 +13,18 @@
         {
           Hour = 12;
           Minute = 0;
-          Weekday = 1; # Monday
+          Weekday = 1;
         }
         {
           Hour = 12;
           Minute = 0;
-          Weekday = 4; # Thursday
+          Weekday = 4;
         }
       ];
       StandardOutPath = "/Users/${username}/Library/Logs/nix-backup.log";
       StandardErrorPath = "/Users/${username}/Library/Logs/nix-backup-error.log";
     };
   };
-
-  # Git auto-commit for configuration changes
   launchd.user.agents.nix-config-git-backup = {
     serviceConfig = {
       ProgramArguments = [
@@ -65,11 +49,9 @@
       StandardErrorPath = "/Users/${username}/Library/Logs/nix-git-backup-error.log";
     };
   };
-
-  # Configure system backup exclusions for better performance
   system.defaults.CustomUserPreferences = {
     "com.apple.TimeMachine" = {
-      DoNotOfferNewDisksForBackup = false; # Enable Time Machine prompts
+      DoNotOfferNewDisksForBackup = false;
       SkipPaths = [
         "/Users/${username}/.cache"
         "/Users/${username}/.npm"

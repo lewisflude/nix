@@ -1,4 +1,3 @@
-# System builder functions for Darwin and NixOS configurations
 {inputs}: let
   inherit
     (inputs)
@@ -16,7 +15,6 @@
     determinate
     ;
 in {
-  # Darwin system builder
   mkDarwinSystem = hostName: hostConfig: {homebrew-j178}:
     darwin.lib.darwinSystem {
       inherit (hostConfig) system;
@@ -34,10 +32,9 @@ in {
           nix-homebrew = {
             enable = true;
             enableRosetta = true;
-            user = "lewisflude"; # Use the actual user for a user-specific Homebrew installation
+            user = "lewisflude";
             autoMigrate = true;
             taps = {
-              # homebrew-cask and homebrew-core are managed automatically by Homebrew
               "j178/homebrew-tap" = homebrew-j178;
             };
             mutableTaps = false;
@@ -52,14 +49,17 @@ in {
               mac-app-util.homeManagerModules.default
               catppuccin.homeModules.catppuccin
             ];
-            extraSpecialArgs = inputs // hostConfig;
+            extraSpecialArgs =
+              inputs
+              // hostConfig
+              // {
+                inherit inputs;
+              };
             users.${hostConfig.username} = import ../home;
           };
         }
       ];
     };
-
-  # NixOS system builder
   mkNixosSystem = hostName: hostConfig: {self}:
     nixpkgs.lib.nixosSystem {
       inherit (hostConfig) system;
@@ -92,6 +92,7 @@ in {
             sharedModules = [
               catppuccin.homeModules.catppuccin
               inputs.sops-nix.homeManagerModules.sops
+              {_module.args = {inherit inputs;};}
             ];
             users.${hostConfig.username} = import ../home;
           };

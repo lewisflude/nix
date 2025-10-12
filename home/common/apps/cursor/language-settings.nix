@@ -8,10 +8,8 @@
     goimports = "golang.go";
     yamlfmt = "redhat.vscode-yaml";
     taplo = "tamasfe.even-better-toml";
-    clang-format = "ms-vscode.cpptools"; # C++ formatter for Unreal Engine development
+    clang-format = "ms-vscode.cpptools";
   };
-
-  # Get all languages from standards, plus React variants
   baseLanguages = builtins.attrNames standards.languages;
   reactVariants = [
     "javascriptreact"
@@ -19,7 +17,6 @@
   ];
   jsonVariants = ["jsonc"];
   languages = baseLanguages ++ reactVariants ++ jsonVariants;
-
   entries = lib.filter (e: e != null) (
     lib.map
     (
@@ -52,7 +49,6 @@
     )
     languages
   );
-
   perLanguageFormatters = builtins.listToAttrs entries;
 in {
   userSettings = lib.mkMerge [

@@ -5,8 +5,6 @@
   ...
 }: let
   brightness = "${config.home.homeDirectory}/bin/brightness";
-
-  # Use lib.getExe for robust executable paths
   uwsm = lib.getExe pkgs.uwsm;
   terminal = lib.getExe pkgs.ghostty;
   launcher = [
@@ -17,28 +15,18 @@
   ];
   screenLocker = lib.getExe pkgs.swaylock-effects;
 in {
-  # Packages for utilities used in keybindings
   home.packages = with pkgs; [
-    hyprpicker # Wayland-native color picker
-    jq # Needed for processing wcolor output
+    hyprpicker
+    jq
   ];
-
   programs.niri.settings.binds = {
-    # -----------------------------------------------------------------------------
-    # -- Session, Meta & Power Controls
-    # -----------------------------------------------------------------------------
     "Mod+Shift+Slash".action.show-hotkey-overlay = {};
-
     "Mod+Escape" = {
       allow-inhibiting = false;
       action.toggle-keyboard-shortcuts-inhibit = {};
     };
-
     "Super+Alt+L".action.spawn = [screenLocker];
-
     "Mod+Shift+P".action.power-off-monitors = {};
-
-    # KVM display recovery - force display reset
     "Mod+Shift+D" = {
       action.spawn = [
         "sh"
@@ -46,17 +34,14 @@ in {
         "niri msg action power-off-monitors && sleep 2 && niri msg action power-on-monitors"
       ];
     };
-
     "Mod+Shift+E".action.quit = {};
     "Ctrl+Alt+Delete".action.quit = {};
-
     "Mod+Ctrl+Shift+R".action.spawn = [
       "niri"
       "msg"
       "action"
       "reload-config"
     ];
-
     "Mod+X" = {
       action.spawn = [
         "sh"
@@ -74,27 +59,20 @@ in {
         ''
       ];
     };
-
     "Mod+Alt+S" = {
       action.spawn = [
         "systemctl"
         "suspend"
       ];
     };
-
     "Mod+Alt+H" = {
       action.spawn = [
         "systemctl"
         "hibernate"
       ];
     };
-
-    # -----------------------------------------------------------------------------
-    # -- Application Launchers
-    # -----------------------------------------------------------------------------
     "Mod+T".action.spawn = terminal;
     "Mod+D".action.spawn = launcher;
-
     "Mod+V" = {
       action.spawn = [
         "sh"
@@ -102,7 +80,6 @@ in {
         "cliphist list | fuzzel --dmenu | cliphist decode"
       ];
     };
-
     "Mod+B" = {
       action.spawn = [
         uwsm
@@ -111,13 +88,11 @@ in {
         (lib.getExe pkgs.chromium)
       ];
     };
-
     "Mod+E".action.spawn = [
       "${pkgs.ghostty}/bin/ghostty"
       "-e"
       "yazi"
     ];
-
     "Mod+Ctrl+O" = {
       action.spawn = [
         uwsm
@@ -126,16 +101,14 @@ in {
         (lib.getExe pkgs.obsidian)
       ];
     };
-
     "Mod+Shift+O" = {
       action.spawn = [
-        terminal # Use your defined terminal
+        terminal
         "-e"
         (lib.getExe pkgs.helix)
         "${config.home.homeDirectory}/.config/nix"
       ];
     };
-
     "Mod+Shift+B" = {
       action.spawn = [
         uwsm
@@ -144,7 +117,6 @@ in {
         (lib.getExe pkgs.firefox)
       ];
     };
-
     "Mod+M" = {
       action.spawn = [
         uwsm
@@ -153,10 +125,6 @@ in {
         (lib.getExe pkgs.thunderbird)
       ];
     };
-
-    # -----------------------------------------------------------------------------
-    # -- Utility Bindings (Screenshots, Color Picker, Notifications)
-    # -----------------------------------------------------------------------------
     "Print" = {
       allow-inhibiting = false;
       action.spawn = [
@@ -165,7 +133,6 @@ in {
         ''grim -g "$(slurp)" - | ${config.home.homeDirectory}/bin/swappy-fixed -f -''
       ];
     };
-
     "Shift+Print" = {
       allow-inhibiting = false;
       action.spawn = [
@@ -174,7 +141,6 @@ in {
         ''grim -g "$(slurp -w)" - | ${config.home.homeDirectory}/bin/swappy-fixed -f -''
       ];
     };
-
     "Ctrl+Print" = {
       allow-inhibiting = false;
       action.spawn = [
@@ -183,7 +149,6 @@ in {
         ''grim - | ${config.home.homeDirectory}/bin/swappy-fixed -f -''
       ];
     };
-
     "Alt+Print" = {
       allow-inhibiting = false;
       action.spawn = [
@@ -192,7 +157,6 @@ in {
         ''grim -g "$(slurp)" - | wl-copy''
       ];
     };
-
     "Mod+Print" = {
       allow-inhibiting = false;
       action.spawn = [
@@ -201,11 +165,10 @@ in {
         ''grim -g "$(slurp)" ~/Pictures/Screenshots/screenshot-$(date +%Y%m%d-%H%M%S).png''
       ];
     };
-
     "Mod+Shift+C" = {
       action.spawn = [
         (lib.getExe pkgs.hyprpicker)
-        "-a" # Automatically copy the color to the clipboard
+        "-a"
       ];
     };
     "Mod+N" = {
@@ -214,7 +177,6 @@ in {
         "dismiss"
       ];
     };
-
     "Mod+Shift+N" = {
       action.spawn = [
         "makoctl"
@@ -222,17 +184,12 @@ in {
         "--all"
       ];
     };
-
     "Mod+Ctrl+N" = {
       action.spawn = [
         "makoctl"
         "invoke"
       ];
     };
-
-    # -----------------------------------------------------------------------------
-    # -- Window & Column Management
-    # -----------------------------------------------------------------------------
     "Mod+Q".action.close-window = {};
     "Mod+Shift+Q".action.close-window = {};
     "Mod+Alt+Q".action.spawn = [
@@ -240,40 +197,26 @@ in {
       "-c"
       "PID=$(${pkgs.niri}/bin/niri msg focused-window | ${pkgs.jq}/bin/jq -r '.pid // empty'); [ -n \"$PID\" ] && kill -9 \"$PID\""
     ];
-
     "Mod+Shift+V".action.toggle-window-floating = {};
-
     "Mod+F".action.maximize-column = {};
     "Mod+Shift+F".action.fullscreen-window = {};
     "Mod+Ctrl+Shift+F".action.toggle-windowed-fullscreen = {};
     "Mod+Ctrl+F".action.expand-column-to-available-width = {};
-
     "Mod+R".action.switch-preset-column-width = {};
     "Mod+Shift+R".action.switch-preset-window-height = {};
     "Mod+Ctrl+R".action.reset-window-height = {};
-
     "Mod+Minus".action.set-column-width = "-10%";
     "Mod+Equal".action.set-column-width = "+10%";
-
     "Mod+Shift+Minus".action.set-window-height = "-10%";
     "Mod+Shift+Equal".action.set-window-height = "+10%";
-
     "Mod+C".action.center-column = {};
     "Mod+Ctrl+C".action.center-visible-columns = {};
-
     "Mod+BracketLeft".action.consume-or-expel-window-left = {};
     "Mod+BracketRight".action.consume-or-expel-window-right = {};
     "Mod+Comma".action.consume-window-into-column = {};
     "Mod+Period".action.expel-window-from-column = {};
-
     "Mod+W".action.toggle-column-tabbed-display = {};
-
-    # Quick floating window toggle (tilde key)
     "Mod+Grave".action.toggle-window-floating = {};
-
-    # -----------------------------------------------------------------------------
-    # -- Focus & Movement (within a workspace)
-    # -----------------------------------------------------------------------------
     "Mod+Left".action.focus-column-left = {};
     "Mod+Down".action.focus-window-down = {};
     "Mod+Up".action.focus-window-up = {};
@@ -286,31 +229,21 @@ in {
     "Mod+End".action.focus-column-last = {};
     "Mod+Ctrl+Home".action.move-column-to-first = {};
     "Mod+Ctrl+End".action.move-column-to-last = {};
-
-    # Alt+Tab window switching
     "Alt+Tab".action.focus-window-or-workspace-down = {};
     "Alt+Shift+Tab".action.focus-window-or-workspace-up = {};
-
-    # -----------------------------------------------------------------------------
-    # -- Workspace & Monitor Management
-    # -----------------------------------------------------------------------------
     "Mod+O".action.toggle-overview = {};
-
     "Mod+Page_Down".action.focus-workspace-down = {};
     "Mod+Page_Up".action.focus-workspace-up = {};
     "Mod+U".action.focus-workspace-down = {};
     "Mod+I".action.focus-workspace-up = {};
-
     "Mod+Ctrl+Page_Down".action.move-column-to-workspace-down = {};
     "Mod+Ctrl+Page_Up".action.move-column-to-workspace-up = {};
     "Mod+Ctrl+U".action.move-column-to-workspace-down = {};
     "Mod+Ctrl+I".action.move-column-to-workspace-up = {};
-
     "Mod+Shift+Page_Down".action.move-workspace-down = {};
     "Mod+Shift+Page_Up".action.move-workspace-up = {};
     "Mod+Shift+U".action.move-workspace-down = {};
     "Mod+Shift+I".action.move-workspace-up = {};
-
     "Mod+1".action.focus-workspace = 1;
     "Mod+2".action.focus-workspace = 2;
     "Mod+3".action.focus-workspace = 3;
@@ -321,7 +254,6 @@ in {
     "Mod+8".action.focus-workspace = 8;
     "Mod+9".action.focus-workspace = 9;
     "Mod+0".action.focus-workspace = 10;
-
     "Mod+Ctrl+1".action.move-column-to-workspace = 1;
     "Mod+Ctrl+2".action.move-column-to-workspace = 2;
     "Mod+Ctrl+3".action.move-column-to-workspace = 3;
@@ -332,7 +264,6 @@ in {
     "Mod+Ctrl+8".action.move-column-to-workspace = 8;
     "Mod+Ctrl+9".action.move-column-to-workspace = 9;
     "Mod+Ctrl+0".action.move-column-to-workspace = 10;
-
     "Mod+Shift+Left".action.focus-monitor-left = {};
     "Mod+Shift+Down".action.focus-monitor-down = {};
     "Mod+Shift+Up".action.focus-monitor-up = {};
@@ -341,11 +272,8 @@ in {
     "Mod+Shift+J".action.focus-monitor-down = {};
     "Mod+Shift+K".action.focus-monitor-up = {};
     "Mod+Shift+L".action.focus-monitor-right = {};
-
-    # Column movement
     "Mod+Ctrl+Left".action.move-column-left = {};
     "Mod+Ctrl+Right".action.move-column-right = {};
-
     "Mod+Shift+Ctrl+Left".action.move-column-to-monitor-left = {};
     "Mod+Shift+Ctrl+Down".action.move-column-to-monitor-down = {};
     "Mod+Shift+Ctrl+Up".action.move-column-to-monitor-up = {};
@@ -354,10 +282,6 @@ in {
     "Mod+Shift+Ctrl+J".action.move-column-to-monitor-down = {};
     "Mod+Shift+Ctrl+K".action.move-column-to-monitor-up = {};
     "Mod+Shift+Ctrl+L".action.move-column-to-monitor-right = {};
-
-    # -----------------------------------------------------------------------------
-    # -- Hardware & System Controls
-    # -----------------------------------------------------------------------------
     "XF86AudioPlay" = {
       allow-when-locked = true;
       action.spawn = [
@@ -379,7 +303,6 @@ in {
         "previous"
       ];
     };
-
     "XF86MonBrightnessUp" = {
       allow-when-locked = true;
       action.spawn = [
@@ -394,7 +317,6 @@ in {
         "down"
       ];
     };
-
     "XF86AudioRaiseVolume" = {
       allow-when-locked = true;
       action.spawn = [
@@ -433,17 +355,12 @@ in {
         "toggle"
       ];
     };
-
     "Mod+Alt+V".action.spawn = [(lib.getExe pkgs.pwvucontrol)];
     "Mod+Ctrl+V".action.spawn = [
       terminal
       "-e"
       "pulsemixer"
     ];
-
-    # -----------------------------------------------------------------------------
-    # -- Mouse & Wheel Bindings
-    # -----------------------------------------------------------------------------
     "Mod+WheelScrollDown" = {
       cooldown-ms = 150;
       action.focus-workspace-down = {};
@@ -460,12 +377,10 @@ in {
       cooldown-ms = 150;
       action.move-column-to-workspace-up = {};
     };
-
     "Mod+WheelScrollRight".action.focus-column-right = {};
     "Mod+WheelScrollLeft".action.focus-column-left = {};
     "Mod+Ctrl+WheelScrollRight".action.move-column-right = {};
     "Mod+Ctrl+WheelScrollLeft".action.move-column-left = {};
-
     "Mod+Shift+WheelScrollDown".action.focus-column-right = {};
     "Mod+Shift+WheelScrollUp".action.focus-column-left = {};
     "Mod+Ctrl+Shift+WheelScrollDown".action.move-column-right = {};

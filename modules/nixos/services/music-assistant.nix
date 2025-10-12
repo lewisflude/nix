@@ -28,11 +28,9 @@ in {
       };
     };
   };
-
   systemd.tmpfiles.rules = [
     "d /var/lib/music-assistant 0755 root root -"
   ];
-
   networking.firewall.allowedTCPPorts = [
     musicAssistantPort
     musicAssistantStreamPort
@@ -42,7 +40,6 @@ in {
     multicastDnsPort
     airplayPort
   ];
-
   networking.firewall.allowedUDPPorts = [
     dlnaDiscoveryPort
     multicastDnsPort

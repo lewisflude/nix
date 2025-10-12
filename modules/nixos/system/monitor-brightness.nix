@@ -4,7 +4,6 @@
   ...
 }: let
   restoreBrightness = pkgs.writeShellScript "restore-external-brightness" ''
-    #!/usr/bin/env bash
     sleep 2
     CACHE_FILE="/home/${username}/.config/niri/last_brightness"
     if [ -f "$CACHE_FILE" ]; then
@@ -13,7 +12,6 @@
     fi
   '';
 in {
-  environment.systemPackages = with pkgs; [ddcutil];
   services.udev.extraRules = ''
     SUBSYSTEM=="drm", KERNEL=="card0-DP-1", ACTION=="change", RUN+="${restoreBrightness}"
   '';

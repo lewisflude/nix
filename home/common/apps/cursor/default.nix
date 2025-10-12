@@ -9,11 +9,9 @@
   aiSettings = import ./ai-settings.nix {};
   extensions = import ./extensions.nix {inherit pkgs lib;};
 in {
-  # Essential crash prevention through environment
   home.sessionVariables = {
-    NODE_OPTIONS = "--max-old-space-size=4096"; # Prevent JS memory crashes
+    NODE_OPTIONS = "--max-old-space-size=4096";
   };
-
   programs.vscode = {
     enable = true;
     package = pkgs.cursor.cursor or pkgs.vscode;

@@ -6,8 +6,6 @@
   ...
 }: let
   platformLib = import ../../lib/functions.nix {inherit lib system;};
-
-  # Dynamic paths
   claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
   codeDirectory = "${config.home.homeDirectory}/Code";
   dexWebProject = "${codeDirectory}/dex-web";
@@ -17,11 +15,9 @@ in {
       uv
       python3
     ];
-
     file = {
       "bin/kagi-mcp-wrapper" = {
         text = ''
-          #!/usr/bin/env bash
           if [ -r "${config.sops.secrets.KAGI_API_KEY.path or ""}" ]; then
             export KAGI_API_KEY="$(cat "${config.sops.secrets.KAGI_API_KEY.path or ""}")"
           fi
@@ -30,13 +26,9 @@ in {
         executable = true;
       };
     };
-
-    # Activation script to register MCP servers with Claude Code
     activation.setupClaudeMcp = lib.hm.dag.entryAfter ["writeBoundary"] (
       let
         cfg = config.services.mcp;
-
-        # Generate claude mcp add commands for each configured server
         mcpAddCommands = lib.concatStringsSep "\n        " (
           lib.mapAttrsToList
           (
@@ -58,14 +50,9 @@ in {
       in ''
         if command -v claude >/dev/null 2>&1; then
           echo "Registering MCP servers with Claude Code..."
-
-          # Remove existing servers first (ignore errors)
           ${pkgs.findutils}/bin/find ~/.config/claude -name "*.json" -delete 2>/dev/null || true
-
-          # Add each configured server
           $DRY_RUN_CMD ${pkgs.writeShellScript "setup-claude-mcp" ''
           echo "Removing existing MCP servers..."
-          # Remove existing servers in all scopes (ignore errors)
           for server in ${
             lib.concatStringsSep " " (lib.mapAttrsToList (name: _: lib.escapeShellArg name) cfg.servers)
           }; do
@@ -73,10 +60,8 @@ in {
             claude mcp remove "$server" -s project 2>/dev/null || true
             claude mcp remove "$server" 2>/dev/null || true
           done
-
           echo "Running MCP server registration commands..."
           ${mcpAddCommands}
-
           echo "Claude MCP server registration complete"
         ''}
         else
@@ -85,7 +70,6 @@ in {
       ''
     );
   };
-
   services.mcp = {
     enable = true;
     targets = {
@@ -98,7 +82,6 @@ in {
         fileName = "claude_desktop_config.json";
       };
     };
-
     servers = {
       kagi = {
         command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
@@ -227,15 +210,6 @@ in {
         ];
         port = 11444;
       };
-      # figma = {
-      #   command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-      #   args = [
-      #     "-y"
-      #     "mcp-remote"
-      #     "http://127.0.0.1:3845/mcp"
-      #   ];
-      #   port = 11445;
-      # };
     };
   };
 }

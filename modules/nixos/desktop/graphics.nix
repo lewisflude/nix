@@ -5,114 +5,40 @@
 }: let
   package = config.boot.kernelPackages.nvidiaPackages.beta;
 in {
-  ########################################
-  # Packages and tools
-  ########################################
-  environment.systemPackages = with pkgs; [
-    vulkan-tools
-    mesa-demos # glxinfo / eglinfo
-    libva # VA-API loader
-    libva-utils # vainfo
-    egl-wayland
-    nv-codec-headers
-    # cudaPackages.cuda_nvcc # keep only if you actually build CUDA locally
-  ];
-
-  ########################################
-  # Session environment (optimized for RTX 4090 + Wayland gaming/work)
-  ########################################
   environment.sessionVariables = {
-    # NVIDIA optimization for Wayland
-    # LIBVA_DRIVER_NAME = "nvidia";
-
-    # WORKING: EGL configuration for NVIDIA + Xwayland
-    # Use Mesa EGL for libepoxy compatibility, NVIDIA GLX for rendering
-    # __EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
-    # __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-    # MESA_LOADER_DRIVER_OVERRIDE = "nvidia";
-    # DRI_PRIME = "1";
-    # __EGL_EXTERNAL_PLATFORM_CONFIG_DIRS = "/run/opengl-driver/share/egl/egl_external_platform.d";
-
-    # VRR/G-SYNC support for RTX 4090 (excellent support)
-    # __GL_VRR_ALLOWED = "1";
-    # __GL_GSYNC_ALLOWED = "1";
-
-    # Gaming performance optimizations
-    # __GL_SHADER_DISK_CACHE = "1";
-    # __GL_THREADED_OPTIMIZATIONS = "1";
-
-    # RTX 4090 specific optimizations
-    # __GL_SYNC_TO_VBLANK = "0"; # Let VRR/compositor handle this
-    # __GL_ALLOW_UNOFFICIAL_PROTOCOL = "1";
-
-    # Xwayland compatibility (uncomment if still having issues)
-    # WLR_XWAYLAND_FORCE_GLAMOR = "0";
-    # XWAYLAND_NO_GLAMOR = "1";
-
-    # NVIDIA cursor fix (uncomment if you see cursor trails)
-    # WLR_NO_HARDWARE_CURSORS = "1";
-
-    # KVM display reliability improvements
     __GL_SYNC_DISPLAY_DEVICE = "DP-1";
     __GL_SYNC_TO_VBLANK = "1";
   };
-
-  ########################################
-  # Graphics stack
-  ########################################
   hardware = {
     graphics = {
       enable = true;
-      enable32Bit = true; # set false unless you need 32-bit (Steam/Proton, some games)
-      # Keep this clean: mesa drivers come via hardware.graphics; avoid extra shim layers
+      enable32Bit = true;
       extraPackages = with pkgs; [
         nvidia-vaapi-driver
       ];
     };
-
     nvidia = {
-      modesetting.enable = true; # required for Wayland/GBM
-      open = false; # RTX 4090 works well with proprietary drivers
+      modesetting.enable = true;
+      open = false;
       nvidiaSettings = true;
       inherit package;
-
-      # Power management optimizations for RTX 4090
       powerManagement = {
         enable = true;
-        finegrained = false; # RTX 4090 doesn't need fine-grained power management
+        finegrained = false;
       };
-
-      # Keep GPU state persistent for better performance and display reliability
-      nvidiaPersistenced = false; # Disabled due to RPC build issues - not essential for most users
-
-      # RTX 4090 performance optimizations
-      forceFullCompositionPipeline = false; # Let VRR handle frame pacing
-      prime.offload.enableOffloadCmd = false; # RTX 4090 is primary GPU
+      nvidiaPersistenced = false;
+      forceFullCompositionPipeline = false;
+      prime.offload.enableOffloadCmd = false;
     };
-
     nvidia-container-toolkit.enable = true;
   };
-
-  ########################################
-  # X11 / XWayland
-  ########################################
   services.xserver = {
-    enable = false; # don't start a full X server on Wayland
+    enable = false;
     videoDrivers = ["nvidia"];
   };
-
-  ########################################
-  # Udev helper for nvidia-container-toolkit
-  ########################################
   services.udev.extraRules = ''
     ACTION=="add", DEVPATH=="/bus/pci/drivers/nvidia", RUN+="${pkgs.nvidia-container-toolkit}/bin/nvidia-ctk system create-dev-char-symlinks --create-all"
-
-    # KVM display detection reliability
     KERNEL=="card[0-9]*", SUBSYSTEM=="drm", ACTION=="change", RUN+="${pkgs.bash}/bin/bash -c 'echo detect > /sys/class/drm/card1-DP-1/status'"
   '';
-
-  ########################################
-  # Kernel module blacklist
-  ########################################
   boot.blacklistedKernelModules = ["nouveau"];
 }

@@ -1,43 +1,29 @@
 {
-  pkgs,
   hostname,
+  pkgs,
   ...
 }: {
-  environment.systemPackages = with pkgs; [
-    networkmanagerapplet
-  ];
-
   networking = {
     hostName = hostname;
     enableIPv6 = true;
     networkmanager.enable = true;
     networkmanager.dns = "systemd-resolved";
-
     firewall = {
       enable = true;
       allowedTCPPorts = [
-        # System services
         22
         80
         443
-
-        # Email services
         21
         25
         465
         587
-
-        # Media and entertainment
         8096
         5000
         8123
         6600
-
-        # Gaming services
         27015
         27036
-
-        # Development and tools
         8080
         9090
         5555
@@ -45,13 +31,9 @@
         3030
         7000
         11434
-
-        # Torrent/P2P
         6969
         6881
         7575
-
-        # Media streaming/casting
         8008
         8009
         1900
@@ -59,13 +41,9 @@
         554
         3689
         5228
-
-        # Remote access
         5900
         3283
         47990
-
-        # Application specific
         563
         5353
         3456
@@ -88,7 +66,6 @@
         5656
         3001
       ];
-
       allowedUDPPorts = [
         5353
         1900
@@ -103,7 +80,6 @@
         5900
         3283
       ];
-
       allowedUDPPortRanges = [
         {
           from = 6000;
@@ -122,7 +98,6 @@
           to = 65535;
         }
       ];
-
       allowedTCPPortRanges = [
         {
           from = 49152;
@@ -131,10 +106,8 @@
       ];
     };
   };
-
   services = {
     resolved.enable = true;
-
     avahi = {
       enable = true;
       nssmdns4 = true;
@@ -148,13 +121,11 @@
         workstation = true;
       };
     };
-
     dbus = {
       implementation = "broker";
       packages = [pkgs.avahi];
     };
   };
-
   boot.kernel.sysctl = {
     "net.ipv4.conf.all.forwarding" = 1;
     "net.ipv6.conf.all.forwarding" = 1;

@@ -8,7 +8,7 @@
       AllowUsers = null;
       UseDns = true;
       X11Forwarding = false;
-      PermitRootLogin = "no"; # More secure than "prohibit-password"
+      PermitRootLogin = "no";
     };
   };
 }

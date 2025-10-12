@@ -4,7 +4,6 @@
   ...
 }: let
   userSecretsFile = ../../secrets/user.yaml;
-
   userSecrets =
     lib.genAttrs [
       "KAGI_API_KEY"
@@ -22,10 +21,7 @@
       sopsFile = userSecretsFile;
     });
 in {
-  # Darwin-specific SOPS configuration
   sops.secrets = userSecrets;
-
-  # Ensure host-managed key directory exists on macOS.
   system.activationScripts.setupSOPSAge = {
     text = ''
       install -d -m 700 -o root -g wheel /var/lib/sops-nix

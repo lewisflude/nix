@@ -19,17 +19,14 @@
         };
       };
     };
-
     samba-wsdd = {
       enable = true;
       openFirewall = true;
     };
-
     avahi = {
       enable = true;
       nssmdns4 = true;
       openFirewall = true;
-
       publish = {
         enable = true;
         addresses = true;
@@ -53,8 +50,5 @@
       };
     };
   };
-
-  environment.systemPackages = with pkgs; [
-    cifs-utils
-  ];
+  systemd.services.samba.path = [pkgs.cifs-utils];
 }

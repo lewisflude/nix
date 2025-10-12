@@ -1,7 +1,5 @@
-# power.nix
 {pkgs, ...}: {
   services.power-profiles-daemon.enable = true;
-
   programs.gamemode = {
     enable = true;
     settings = {

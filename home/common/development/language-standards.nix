@@ -1,13 +1,10 @@
 {
   languages = {
-    # Nix
     nix = {
       lsp = "nil";
       formatter = "nixfmt";
       indent = 2;
     };
-
-    # Web (Biome)
     typescript = {
       lsp = "typescript-language-server";
       formatter = "biome";
@@ -47,11 +44,9 @@
         "gql"
       ];
     };
-
-    # Other
     yaml = {
       lsp = "yaml-language-server";
-      formatter = "yamlfmt"; # Use yamlfmt for YAML formatting
+      formatter = "yamlfmt";
       indent = 2;
       fileTypes = [
         "yaml"
@@ -60,21 +55,19 @@
     };
     toml = {
       lsp = "taplo";
-      formatter = "taplo"; # Use taplo for TOML formatting
+      formatter = "taplo";
       indent = 2;
       fileTypes = ["toml"];
     };
     markdown = {
       lsp = "marksman";
-      formatter = null; # Biome doesn't support Markdown formatting
+      formatter = null;
       indent = 2;
       fileTypes = [
         "md"
         "markdown"
       ];
     };
-
-    # Systems
     go = {
       lsp = "gopls";
       formatter = "goimports";
@@ -96,8 +89,6 @@
       unit = "    ";
       fileTypes = ["py"];
     };
-
-    # C++ for Unreal Engine development
     cpp = {
       lsp = "clangd";
       formatter = "clang-format";

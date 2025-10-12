@@ -1,7 +1,5 @@
-{...}: {
-  # Fix /usr/local ownership issues that can cause zsh compinit security warnings
+_: {
   system.activationScripts.fixUsrLocalOwnership = ''
-    # Fix ownership of /usr/local directories that should be owned by root
     if [ -d "/usr/local/share/zsh" ]; then
       chown -R root:wheel /usr/local/share/zsh
     fi
@@ -12,11 +10,8 @@
       chown -R root:wheel /usr/local/share/info
     fi
   '';
-
-  # Configure Homebrew
   homebrew = {
     enable = true;
-
     onActivation = {
       cleanup = "zap";
       autoUpdate = true;
@@ -32,7 +27,6 @@
       "circleci"
       "mas"
     ];
-    # GUI applications
     casks = [
       "1password@beta"
       "ableton-live-suite"
@@ -61,8 +55,6 @@
       "moonlight"
       "whatsapp"
     ];
-
-    # Mac App Store applications
     masApps = {
       "1Password for Safari" = 1569813296;
       "Kagi Search" = 1622835804;

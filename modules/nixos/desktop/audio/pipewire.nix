@@ -4,11 +4,9 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    jack.enable = true; # from baseline
+    jack.enable = true;
     raopOpenFirewall = true;
-
     wireplumber = {
-      # Low-latency ALSA configuration
       configPackages = [
         (pkgs.writeTextDir "share/wireplumber/main.lua.d/99-alsa-lowlatency.lua" ''
           alsa_monitor.rules = {
@@ -24,8 +22,6 @@
           }
         '')
       ];
-
-      # Bluetooth audio configuration
       extraConfig."10-bluez" = {
         "monitor.bluez.properties" = {
           "bluez5.enable-sbc-xq" = true;
@@ -40,9 +36,7 @@
         };
       };
     };
-
     extraConfig = {
-      # PulseAudio compatibility layer
       pipewire-pulse = {
         "context.properties" = {
           "log.level" = 2;
@@ -61,16 +55,12 @@
           }
         ];
       };
-
-      # Core PipeWire configuration
       pipewire = {
         "99-silent-bell.conf" = {
           "context.properties" = {
             "module.x11.bell" = false;
           };
         };
-
-        # AirPlay support
         "10-airplay" = {
           "context.modules" = [
             {
@@ -81,8 +71,6 @@
             }
           ];
         };
-
-        # Base configuration
         "context.properties" = {
           "link.max-buffers" = 16;
           "log.level" = 2;
@@ -98,8 +86,6 @@
           "core.daemon" = true;
           "core.realtime" = true;
         };
-
-        # Low-latency optimization
         "92-low-latency" = {
           "context.properties" = {
             "default.clock.rate" = 48000;
@@ -108,8 +94,6 @@
             "default.clock.max-quantum" = 256;
           };
         };
-
-        # ALSA compatibility
         "99-alsa-compat.conf" = {
           "context.properties" = {
             "alsa.support-audio-fallback" = true;

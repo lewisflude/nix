@@ -5,32 +5,26 @@
   ...
 }: let
   platformLib = import ../lib/functions.nix {inherit lib system;};
-
   commonTools = with pkgs; [
     pre-commit
     git
   ];
-
   devShellsCommon = {
     nextjs = import ./projects/nextjs.nix {inherit pkgs lib system;};
-
     react-native = import ./projects/react-native.nix {
       inherit pkgs lib system;
     };
-
     api-backend = import ./projects/api-backend.nix {inherit pkgs lib system;};
-
     shell-selector = import ./utils/shell-selector.nix {inherit pkgs;};
-
     node = pkgs.mkShell {
-      buildInputs = with pkgs; [(platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)] ++ commonTools;
+      buildInputs = with pkgs;
+        [(platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)] ++ commonTools;
       shellHook = ''
         echo "🚀 Node.js development environment loaded"
         echo "Node version: $(node --version)"
         echo "TypeScript version: $(tsc --version)"
       '';
     };
-
     python = pkgs.mkShell {
       buildInputs = with pkgs;
         [
@@ -45,14 +39,12 @@
           poetry
         ]
         ++ commonTools;
-
       shellHook = ''
         echo "🐍 Python development environment loaded"
         echo "Python version: $(python --version)"
         export PYTHONPATH="$PWD:$PYTHONPATH"
       '';
     };
-
     rust = pkgs.mkShell {
       buildInputs = with pkgs;
         [
@@ -65,14 +57,12 @@
           cargo-audit
         ]
         ++ commonTools;
-
       shellHook = ''
         echo "🦀 Rust development environment loaded"
         echo "Rust version: $(rustc --version)"
         echo "Cargo version: $(cargo --version)"
       '';
     };
-
     go = pkgs.mkShell {
       buildInputs = with pkgs;
         [
@@ -83,7 +73,6 @@
           delve
         ]
         ++ commonTools;
-
       shellHook = ''
         echo "🐹 Go development environment loaded"
         echo "Go version: $(go version)"
@@ -91,7 +80,6 @@
         export PATH="$GOPATH/bin:$PATH"
       '';
     };
-
     web = pkgs.mkShell {
       buildInputs = with pkgs;
         [
@@ -101,30 +89,25 @@
           sass
         ]
         ++ commonTools;
-
       shellHook = ''
         echo "🌐 Web development environment loaded"
         echo "Node version: $(node --version)"
         echo "TypeScript version: $(tsc --version)"
       '';
     };
-
     solana = pkgs.mkShell {
       buildInputs = with pkgs;
         [
-          # solana-cli  # Temporarily disabled due to compilation errors
           rustc
           cargo
           (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
         ]
         ++ commonTools;
-
       shellHook = ''
         echo "⚡ Solana development environment loaded"
         echo "Solana version: $(solana --version)"
       '';
     };
-
     devops = pkgs.mkShell {
       buildInputs = with pkgs;
         [
@@ -133,12 +116,11 @@
           terragrunt
           docker-compose
           k9s
-          awscli2
           google-cloud-sdk
           azure-cli
         ]
         ++ (lib.optionals pkgs.stdenv.isLinux [
-          helm # helm is not available on macOS
+          helm
         ]);
       shellHook = ''
         echo "🛠️  DevOps environment loaded"
@@ -147,7 +129,6 @@
       '';
     };
   };
-
   devShellsLinuxOnly = platformLib.ifLinux {
     love2d = pkgs.mkShell {
       buildInputs = with pkgs;
@@ -160,7 +141,6 @@
           luaPackages.luacheck
         ]
         ++ commonTools;
-
       shellHook = ''
         echo "🎮 Love2D game development environment loaded"
         echo "Love2D version: $(love --version 2>/dev/null || echo 'not available')"

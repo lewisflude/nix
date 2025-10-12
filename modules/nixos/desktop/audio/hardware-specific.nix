@@ -1,8 +1,6 @@
 _: {
-  # Hardware-specific audio configuration
   services = {
     pipewire.extraConfig.pipewire = {
-      # Apogee Symphony Desktop specific configuration
       "20-playbook-split.conf" = {
         "context.modules" = [
           {
@@ -36,10 +34,7 @@ _: {
         ];
       };
     };
-
-    # Apogee Symphony Desktop USB permissions
     udev.extraRules = ''
-      # Apogee Symphony Desktop (USB Vendor ID: 0c60, Product ID: 002a)
       SUBSYSTEM=="usb", ATTRS{idVendor}=="0c60", ATTRS{idProduct}=="002a", TAG+="uaccess", TAG+="udev-acl"
       KERNEL=="hw:*", SUBSYSTEM=="sound", ATTRS{idVendor}=="0c60", ATTRS{idProduct}=="002a", TAG+="uaccess", GROUP="audio", MODE="0660"
     '';
