@@ -1074,7 +1074,7 @@ Alt+1  # Back to editing
 ## Related Documentation
 
 - [Quick Start Guide](quick-start.md) - Getting started with the config
-- [Niri Keyboard Config](keyboard-niri.md) - Window manager keybindings
+- [Keyboard Reference](keyboard-reference.md) - Complete keyboard shortcuts including window management
 - [Directory Structure](../reference/directory-structure.md) - Where configs live
 
 ---

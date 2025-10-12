@@ -1,15 +1,8 @@
 {pkgs, ...}: {
   # Keyboard firmware tools for macOS
-  # VIA/VIAL for configuring QMK keyboards
+  # VIA is installed via modules/darwin/keyboard.nix (homebrew)
   #
-  # Note: On macOS, VIA/VIAL are installed via Homebrew Casks
-  # as the native applications work better than wrapped versions
-
-  # Install via Homebrew for native macOS integration
-  homebrew.casks = [
-    "via" # VIA keyboard configurator
-    # "vial" is not available via homebrew, use VIA instead or download from vial.rocks
-  ];
+  # This file is for Home Manager specific keyboard configurations
 
   # Additional packages that might be useful for keyboard development
   home.packages = with pkgs; [

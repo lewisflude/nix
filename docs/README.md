@@ -16,34 +16,17 @@ A modern, cross-platform Nix setup for both macOS (nix-darwin) and Linux (NixOS)
 - [**Cross-Platform Usage**](guides/cross-platform.md) - macOS vs Linux differences
 - [**Zellij Workflow**](guides/zellij-workflow.md) - Terminal multiplexer usage and patterns
 
-### **🎹 Keyboard Configuration (NEW v2.0 - Cross-Platform Ergonomic Hybrid)**
+### **🎹 Keyboard Configuration (v2.0 - Cross-Platform Ergonomic Hybrid)**
 
-**Quick Start:**
-- [**⭐ Keyboard Quick Start**](guides/keyboard-quickstart.md) - **START HERE!** 5-minute setup (both platforms)
-- [**📋 Cheat Sheet**](guides/keyboard-cheatsheet.md) - **Print this!** Quick reference card
+**Essential Guides:**
+- [**⭐ Getting Started**](guides/keyboard-getting-started.md) - **START HERE!** Setup for both platforms
+- [**📚 Complete Reference**](guides/keyboard-reference.md) - All shortcuts with printable cheat sheet
 
-**Platform-Specific:**
-- [**🍎 macOS Guide**](guides/keyboard-macos.md) - **NEW!** Complete macOS setup with Karabiner
-- [**🌍 Cross-Platform Guide**](guides/keyboard-cross-platform.md) - **NEW!** NixOS vs macOS comparison
-- [**🪟 Niri Keybinds**](guides/keyboard-niri.md) - Window manager details (NixOS)
-
-**Complete Documentation:**
-- [**📚 Keyboard Reference**](guides/keyboard-reference.md) - Complete shortcut reference
-- [**📖 Master README**](guides/KEYBOARD-README.md) - Complete documentation index
-- [**🔄 Migration Guide**](guides/keyboard-migration.md) - Transition from old setup
-- [**📈 Learning Curve**](guides/keyboard-learning-curve.md) - Skill acquisition timeline
-- [**♿ Accessibility Guide**](guides/keyboard-accessibility.md) - Alternative configurations
-- [**🚀 Deployment Guide**](KEYBOARD-DEPLOYMENT.md) - Production deployment instructions
-
-**Technical:**
-- [**🔧 Firmware Update**](guides/keyboard-firmware-update.md) - Update your keyboard (works on both!)
-- [**📊 Firmware Status**](reference/mnk88-firmware-status.md) - Firmware verification & changelog
-- [**📋 Update Summary**](KEYBOARD-UPDATE-SUMMARY.md) - What changed in v2.0
-
-**Legacy Documentation:**
-- [**📜 Legacy: Setup**](guides/keyboard-setup.md) - Original F13-only configuration
-- [**📜 Legacy: Usage**](guides/keyboard-usage.md) - Original usage patterns
-- [**📜 Legacy: Winkeyless**](guides/keyboard-winkeyless-true.md) - Original WKL guide
+**Specialized Guides:**
+- [**🍎 macOS Setup**](guides/keyboard-macos.md) - macOS-specific configuration with Karabiner
+- [**📈 Learning Guide**](guides/keyboard-learning.md) - Skill acquisition and practice strategies
+- [**♿ Accessibility**](guides/keyboard-accessibility.md) - Accommodations for disabilities
+- [**🔧 Firmware Update**](guides/keyboard-firmware-update.md) - Keyboard firmware configuration
 
 ### **📋 Reference**
 - [**Directory Structure**](reference/directory-structure.md) - Complete project layout
@@ -78,7 +61,7 @@ A modern, cross-platform Nix setup for both macOS (nix-darwin) and Linux (NixOS)
 | **Add a new host** | [Configuration Guide](guides/configuration.md#adding-hosts) |
 | **Work with secrets** | [Secrets Management](guides/secrets.md) |
 || **Use terminal multiplexing** | [Zellij Workflow](guides/zellij-workflow.md) |
-| **Setup my keyboard** | [Keyboard Setup](guides/keyboard-setup.md) |
+| **Setup my keyboard** | [Keyboard Getting Started](guides/keyboard-getting-started.md) |
 
 ---
 

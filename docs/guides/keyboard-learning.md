@@ -525,7 +525,6 @@ A: 10-15 hours learning → 60-90 hours saved per year + reduced RSI risk. You d
 **You got this!** The frustration is temporary. The benefits are permanent. 💪
 
 See also:
-- [Migration Guide](keyboard-migration.md) - Week-by-week transition plan
-- [Quick Start](keyboard-quickstart.md) - Get started now
-- [Accessibility Guide](keyboard-accessibility.md) - Accommodations for disabilities
+- [Getting Started](keyboard-getting-started.md) - Get started now
 - [Reference Guide](keyboard-reference.md) - Complete shortcut list
+- [Accessibility Guide](keyboard-accessibility.md) - Accommodations for disabilities
