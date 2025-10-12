@@ -44,7 +44,8 @@ in {
       font-size = 12;
       font-synthetic-style = true;
       scrollback-limit = 100000;
-      initial-command = "zellij attach -c default";
+      # Removed initial-command to prevent session proliferation
+      # Use 'zj' command or direnv layout_zellij instead
       keybind = ["shift+enter=text:\n"];
     };
   };

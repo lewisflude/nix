@@ -18,6 +18,11 @@
       scroll_rebuffer_on_resize = true;
       pane_frames = true;
       copy_on_select = true;
+
+      # Session management settings
+      session_serialization = true; # Auto-save sessions
+      simplified_ui = false; # Show useful session info
+      on_force_close = "quit"; # Clean exit behavior
     };
 
     # Keybindings from KDL configuration file
@@ -28,10 +33,6 @@
     layouts.default = ''
       layout {
         pane focus=true {
-          cwd "~"
-          command "zsh"
-        }
-        pane split_direction="vertical" {
           cwd "~"
           command "zsh"
         }

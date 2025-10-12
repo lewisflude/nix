@@ -3,5 +3,6 @@
     ./apps.nix
     ./yubikey.nix
     ./mcp.nix
+    ./keyboard.nix
   ];
 }
