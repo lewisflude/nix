@@ -28,6 +28,7 @@
         "docker"
         "git"
         "networkmanager"
+        "input"
       ];
       shell = pkgs.zsh;
     };

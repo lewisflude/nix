@@ -1,5 +1,4 @@
 {
-  config,
   pkgs,
   lib,
   system,
@@ -61,7 +60,6 @@ in
         "flakes"
         "ca-derivations"
       ];
-      access-tokens = "github.com=${config.sops.secrets.GITHUB_PERSONAL_ACCESS_TOKEN.path}";
     };
     environment = {
       etc = {

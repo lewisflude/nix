@@ -7,6 +7,7 @@
     ./theme.nix
     ./gpg.nix
     ./sops.nix
+    ./nix-config.nix
     ./development
     ./system
     ./lib

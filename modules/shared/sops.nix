@@ -17,6 +17,7 @@
       else mode;
     owner = "root";
     group = secretsGroup;
+    neededForUsers = allowUserRead;
   };
 in {
   sops = {
@@ -30,7 +31,7 @@ in {
       LATITUDE = mkSecret {};
       LONGITUDE = mkSecret {};
       HOME_ASSISTANT_BASE_URL = mkSecret {};
-      GITHUB_PERSONAL_ACCESS_TOKEN = mkSecret {allowUserRead = true;};
+      GITHUB_TOKEN = mkSecret {allowUserRead = true;};
     };
   };
 }

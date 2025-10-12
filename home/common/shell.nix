@@ -147,7 +147,7 @@ in {
             sudo chown -R root:wheel /usr/local/share/zsh 2>/dev/null || true
           fi
         fi
-        if [[ -n ${config.xdg.cacheHome}/zsh/.zcompdump(
+        if [[ -n ${config.xdg.cacheHome}/zsh/.zcompdump ]]; then
           compinit
         else
           compinit -C
@@ -248,6 +248,7 @@ in {
           nix-search = "nh search";
           nix-info = "nix-shell -p nix-info --run 'nix-info -m'";
           nix-size = "du -sh /nix/store";
+          nix-update-flake = "nix flake update --flake ~/.config/nix";
           nh-os = "nh os";
           nh-home = "nh home";
           nh-darwin = "nh darwin";
@@ -309,7 +310,7 @@ in {
           "man" "less" "more" "vim" "nano" "htop" "top" "ssh" "scp" "rsync"
           "watch" "tail" "sleep" "ping" "curl" "wget" "git log" "git diff"
         )
-        export WORDCHARS='*?_-.[]~=&;!
+        export WORDCHARS='*?_-.[]~=&;!#'
         export ATUIN_NOBIND="true"
         zsh-defer -c 'bindkey "^r" _atuin_search_widget'
         bindkey '^[[1;5C' forward-word
@@ -339,7 +340,7 @@ in {
         zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
         zstyle ':completion:*:warnings' format '%F{red}No matches found%f'
         zstyle ':completion:*:corrections' format '%F{green}%d (errors: %e)%f'
-        zstyle ':completion:*:*:kill:*:processes' list-colors '=(
+        zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
         zstyle ':completion:*:*:kill:*' menu yes select
         zstyle ':completion:*:cd:*' tag-order local-directories directory-stack path-directories
         zstyle ':completion:*:cd:*' ignore-parents parent pwd

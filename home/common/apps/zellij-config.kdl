@@ -1,0 +1,28 @@
+// Zellij KDL Configuration
+// Note: KDL syntax requires semicolons (;) after each child node statement
+// See: https://zellij.dev/documentation/configuration.html
+
+// Keybindings configuration
+keybinds {
+  normal {
+    // Focus navigation with Alt + hjkl
+    bind "Alt h" { MoveFocus "Left"; }
+    bind "Alt j" { MoveFocus "Down"; }
+    bind "Alt k" { MoveFocus "Up"; }
+    bind "Alt l" { MoveFocus "Right"; }
+    
+    // Pane resizing with Alt + HJKL (shift)
+    bind "Alt H" { Resize "Increase Left"; }
+    bind "Alt J" { Resize "Increase Down"; }
+    bind "Alt K" { Resize "Increase Up"; }
+    bind "Alt L" { Resize "Increase Right"; }
+    
+    // Pane management
+    bind "Alt d" { NewPane "Right"; }
+    bind "Alt s" { NewPane "Down"; }
+    bind "Alt n" { NewPane; }
+    
+    // Tab management
+    bind "Alt t" { NewTab; }
+  }
+}
