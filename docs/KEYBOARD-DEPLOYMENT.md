@@ -5,6 +5,12 @@
 **Platforms:** 🐧 NixOS + 🍎 macOS  
 **Status:** ✅ Ready for Production
 
+> **📋 Firmware Update (2025-10-12):** The reference layout file (`docs/reference/mnk88.layout.json`) has been corrected to include:
+> - ✅ Right Shift key (position 81)
+> - ✅ Left and Right GUI/Super keys (positions 87, 92)
+> - ✅ Corrected screenshot layer mapping (RShift + F13/F14/F15 → PrtSc/ScrLk/Pause)
+> - ✅ 102 keys per layer (documentation previously incorrectly stated 91 keys)
+
 ---
 
 ## 🚀 Quick Deployment
@@ -85,7 +91,7 @@ ps aux | grep karabiner
 ### Both Platforms
 
 - [ ] Git repository is up to date: `git pull origin main`
-- [ ] Firmware file exists: `docs/reference/mnk88-universal.json`
+- [ ] Firmware file exists: `docs/reference/mnk88.layout.json`
 - [ ] Read quick start guide: `docs/guides/keyboard-quickstart.md`
 - [ ] Printed cheat sheet: `docs/guides/keyboard-cheatsheet.md` (optional)
 
@@ -185,7 +191,20 @@ Test with:
 - Music playing (Spotify, Apple Music, etc.)
 ```
 
-#### Test 4: F13 Backup Modifier
+#### Test 4: Screenshot Keys (Firmware Layer 2)
+```
+Expected behavior:
+✓ RShift (hold) + F13 → Print Screen
+✓ RShift (hold) + F14 → Scroll Lock
+✓ RShift (hold) + F15 → Pause
+✓ RShift (hold) + F16 → F16 (passthrough)
+
+Test in:
+- Linux screenshot tools
+- System utilities
+```
+
+#### Test 5: F13 Backup Modifier
 ```
 Expected behavior:
 ✓ F13 acts same as Caps Hold
@@ -465,6 +484,7 @@ darwin-rebuild switch --flake ~/.config/nix
 - [Update Summary](KEYBOARD-UPDATE-SUMMARY.md) - What changed
 - [NixOS keyd.nix](../modules/nixos/system/keyd.nix) - Configuration
 - [macOS karabiner.nix](../modules/darwin/karabiner.nix) - Configuration
+- [Firmware Status](reference/mnk88-firmware-status.md) - Current firmware details
 
 ---
 
@@ -551,7 +571,7 @@ darwin-rebuild switch --flake ~/.config/nix
 ### Common Questions
 
 **Q: Do I need to update firmware?**  
-A: Recommended but not required. See [Firmware Update Guide](guides/keyboard-firmware-update.md).
+A: The reference firmware (`docs/reference/mnk88.layout.json`) has been corrected with proper Right Shift, GUI keys, and screenshot layer mapping. If your keyboard has older firmware, see [Firmware Update Guide](guides/keyboard-firmware-update.md).
 
 **Q: Can I use this with other keyboards?**  
 A: Yes! The OS-level remapping works with any keyboard.

@@ -6,7 +6,7 @@
   programs.zellij = {
     enable = true;
     package = pkgs.zellij;
-    enableZshIntegration = true;
+    enableZshIntegration = false; # Disable auto-start to prevent session proliferation
 
     # Core settings managed by Nix
     # Note: Using lib.mkForce to override defaults

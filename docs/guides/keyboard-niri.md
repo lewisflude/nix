@@ -2,7 +2,7 @@
 
 ## Current Situation
 
-Looking at your `keybinds.nix`, you're using **`Mod`** as your primary modifier. 
+Looking at your `keybinds.nix`, you're using **`Mod`** as your primary modifier.
 
 On your winkeyless keyboard, you have **three options** for what `Mod` should be:
 
@@ -10,7 +10,7 @@ On your winkeyless keyboard, you have **three options** for what `Mod` should be
 
 ## Option 1: Use Physical GUI Key (Best if accessible)
 
-**Check positions 86 & 90 on your keyboard** - these are mapped to `KC_LGUI` and `KC_RGUI`.
+**Check positions 110 & 116 on your keyboard** - these are mapped to `KC_LGUI` and `KC_RGUI`.
 
 If you can reach these comfortably:
 
@@ -66,7 +66,7 @@ Actually, Niri doesn't have a way to remap keys directly. You'd need to do this 
       # Can't directly map F13 to Super via XKB options
     ];
   };
-  
+
   # Better approach: Use keyd or evremap
   services.keyd = {
     enable = true;
@@ -114,8 +114,8 @@ Make Caps Lock act as Super/Meta at the **OS level**:
 **Solution:** If you want Caps = Super:
 
 1. **Remove Layer Tap from firmware:**
-   - Change position 51: `LT(1,KC_CAPS)` → `KC_CAPS`
-   
+   - Change position 75: `LT(1,KC_CAPS)` → `KC_CAPS`
+
 2. **Add OS-level remap:**
    ```nix
    services.xserver.xkb.options = [ "caps:super" ];
@@ -194,7 +194,7 @@ Then your existing Niri config works as-is! Just press **F13** instead of a Supe
 
 **Step 1:** Change firmware
 ```json
-// Position 51 in Layer 0
+// Position 75 in Layer 0
 "KC_CAPS"  // Instead of "LT(1,KC_CAPS)"
 ```
 
@@ -213,7 +213,7 @@ Then your existing Niri config works as-is! Just press **F13** instead of a Supe
 **Step 3:** Move Layer 1 access to another key in firmware
 ```json
 // Example: Make Right Shift tap = RShift, hold = Layer 1
-// Position 79
+// Position 104
 "LT(1,KC_RSFT)"  // Instead of just "KC_RSFT"
 ```
 
@@ -229,13 +229,13 @@ Keep Mod as-is, but add F13-F16 shortcuts alongside:
     "Mod+T".action.spawn = terminal;
     "Mod+D".action.spawn = launcher;
     # etc...
-    
+
     # Add F13-F16 as quick actions
     "F13".action.spawn = launcher;  # Same as Mod+D
     "F14".action.spawn = terminal;  # Same as Mod+T
     "F15".action.spawn = [screenLocker];
     "F16".action.toggle-window-floating = {};
-    
+
     # Shift + F-keys for more actions
     "Shift+F13".action.spawn = ["hyprpicker"];
     "Shift+F14".action.screenshot;
@@ -255,7 +255,7 @@ Your firmware already has this! Practice:
 
 ```
 Caps + Left  = Home (start of line)
-Caps + Right = End (end of line)  
+Caps + Right = End (end of line)
 Caps + Up    = Page Up
 Caps + Down  = Page Down
 ```
@@ -281,7 +281,7 @@ Since F13 doesn't conflict with anything:
 
 ```
 Base:       Mod + Key        = Primary action
-Enhanced:   Mod + Shift + Key = Secondary action  
+Enhanced:   Mod + Shift + Key = Secondary action
 Advanced:   Mod + Alt + Key   = Tertiary action
 Quick:      F13-F16          = Most-used actions
 ```
@@ -362,7 +362,7 @@ Based on your current setup:
 
 This gives you:
 - ✅ All your existing keybinds work
-- ✅ F13-F16 for one-key quick actions  
+- ✅ F13-F16 for one-key quick actions
 - ✅ Caps Hold for navigation/media
 - ✅ No need to relearn everything
 

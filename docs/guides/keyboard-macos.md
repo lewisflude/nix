@@ -8,7 +8,7 @@
 
 This guide covers the **macOS-specific** implementation of the ergonomic hybrid keyboard configuration. It provides the same benefits as the NixOS setup but uses Karabiner-Elements instead of keyd.
 
-**For platform comparison:** See [Cross-Platform Guide](keyboard-cross-platform.md)  
+**For platform comparison:** See [Cross-Platform Guide](keyboard-cross-platform.md)
 **For NixOS setup:** Configuration is automatic via `modules/nixos/system/keyd.nix`
 
 ---
@@ -259,10 +259,10 @@ brew install --cask raycast
 open /Applications/VIA.app
 
 # Load firmware file
-# File: ~/.config/nix/docs/reference/mnk88-universal.json
+# File: ~/.config/nix/docs/reference/mnk88.layout.json
 
 # Make changes (optional)
-# For optimal ergonomics: Change Position 51 from LT(1,KC_CAPS) to KC_CAPS
+# For optimal ergonomics: Change Position 75 from LT(1,KC_CAPS) to KC_CAPS
 ```
 
 **See:** [Firmware Update Guide](keyboard-firmware-update.md)
@@ -339,7 +339,7 @@ F13 + Tab             → Should switch applications
    ```bash
    # Quit Karabiner
    killall Karabiner-Elements
-   
+
    # Relaunch
    open /Applications/Karabiner-Elements.app
    ```
@@ -348,7 +348,7 @@ F13 + Tab             → Should switch applications
    ```bash
    # View config
    cat ~/.config/karabiner/karabiner.json
-   
+
    # If missing or corrupt, rebuild:
    darwin-rebuild switch --flake ~/.config/nix
    ```

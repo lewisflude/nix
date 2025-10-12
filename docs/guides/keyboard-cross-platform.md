@@ -17,7 +17,7 @@ This guide explains how the **same keyboard firmware** provides the **same ergon
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ Hardware Layer: MNK88 Keyboard (QMK Firmware)          │
-│ - Position 51: KC_CAPS (let OS handle it)              │
+│ - Position 75: KC_CAPS (let OS handle it)             │
 │ - F13-F16: Available function keys                      │
 │ - Standard ANSI TKL layout                              │
 │ └─────────────────┬───────────────────────────────────┘
@@ -65,7 +65,7 @@ modules/nixos/system/keyd.nix         ← Key remapping (system-wide)
 modules/nixos/hardware/keyboard.nix   ← QMK/VIA udev rules
 home/nixos/system/keyboard.nix        ← VIA/VIAL packages
 home/nixos/niri/keybinds.nix          ← Window manager shortcuts
-docs/reference/mnk88-universal.json   ← Firmware layout
+docs/reference/mnk88.layout.json   ← Firmware layout
 ```
 
 ### macOS Implementation
@@ -73,7 +73,7 @@ docs/reference/mnk88-universal.json   ← Firmware layout
 ```
 modules/darwin/karabiner.nix          ← Key remapping (Karabiner)
 home/darwin/keyboard.nix              ← VIA (homebrew cask)
-docs/reference/mnk88-universal.json   ← Firmware layout (same!)
+docs/reference/mnk88.layout.json   ← Firmware layout (same!)
 ```
 
 **Notice:** Firmware is **identical** across platforms! 🎉
@@ -97,7 +97,7 @@ These work **exactly the same** on both platforms:
 └─────────────────────────────────────────┘
 ```
 
-**NixOS:** `capslock = "overload(super, esc)"`  
+**NixOS:** `capslock = "overload(super, esc)"`
 **macOS:** `to_if_alone = [{key_code = "escape";}]`
 
 #### 2. Navigation Layer
@@ -294,9 +294,9 @@ open /Applications/VIA.app
 **Steps:**
 1. Open VIA/VIAL
 2. Keyboard should be detected automatically
-3. Load `docs/reference/mnk88-universal.json` (optional)
+3. Load `docs/reference/mnk88.layout.json` (optional)
 4. Make changes:
-   - **Recommended:** Position 51: `LT(1,KC_CAPS)` → `KC_CAPS`
+   - **Recommended:** Position 75: `LT(1,KC_CAPS)` → `KC_CAPS`
 5. Save to keyboard
 
 **See:** [Firmware Update Guide](keyboard-firmware-update.md)
@@ -554,7 +554,7 @@ sudo nixos-rebuild switch --flake ~/.config/nix
 git pull origin main
 
 # Apply same firmware on both platforms
-# Use VIA/VIAL to load: docs/reference/mnk88-universal.json
+# Use VIA/VIAL to load: docs/reference/mnk88.layout.json
 ```
 
 ### 2. Document Platform-Specific Customizations
@@ -592,27 +592,27 @@ home/common/git.nix                  ← Git config
 
 ## FAQ
 
-**Q: Do I need separate keyboards for each platform?**  
+**Q: Do I need separate keyboards for each platform?**
 A: No! One keyboard, same firmware, works on both.
 
-**Q: Can I use the same keybinds on both platforms?**  
+**Q: Can I use the same keybinds on both platforms?**
 A: Yes! Navigation layer and Caps behavior are identical.
 
-**Q: What if I want different configs on each platform?**  
+**Q: What if I want different configs on each platform?**
 A: Edit platform-specific files:
 - NixOS: `modules/nixos/system/keyd.nix`
 - macOS: `modules/darwin/karabiner.nix`
 
-**Q: Which platform is better for this setup?**  
+**Q: Which platform is better for this setup?**
 A: Both work great! Choose based on your OS preference, not keyboard setup.
 
-**Q: Can I use this with multiple computers?**  
+**Q: Can I use this with multiple computers?**
 A: Yes! Your muscle memory transfers across all devices with this config.
 
-**Q: What about Windows?**  
+**Q: What about Windows?**
 A: Not covered by this config, but you could use AutoHotkey or similar tools with the same mappings.
 
-**Q: Will this work with other keyboards?**  
+**Q: Will this work with other keyboards?**
 A: Yes! Most mappings work with any keyboard. Firmware-specific parts need QMK support.
 
 ---
@@ -671,10 +671,10 @@ cat ~/.config/karabiner/karabiner.json
 ### Both Platforms
 ```bash
 # Update firmware
-# Open VIA/VIAL → Load docs/reference/mnk88-universal.json
+# Open VIA/VIAL → Load docs/reference/mnk88.layout.json
 
 # View firmware reference
-cat ~/.config/nix/docs/reference/mnk88-universal.json
+cat ~/.config/nix/docs/reference/mnk88.layout.json
 
 # Git sync
 git pull && git status
@@ -685,7 +685,7 @@ git pull && git status
 ## Related Documentation
 
 - [**NixOS Setup**](keyboard-reference.md) - NixOS-specific details
-- [**macOS Setup**](keyboard-macos.md) - macOS-specific details  
+- [**macOS Setup**](keyboard-macos.md) - macOS-specific details
 - [**Quick Start**](keyboard-quickstart.md) - Get started in 5 minutes
 - [**Firmware Update**](keyboard-firmware-update.md) - Update keyboard firmware
 - [**Migration Guide**](keyboard-migration.md) - Transition from old setup
