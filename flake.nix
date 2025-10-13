@@ -3,7 +3,27 @@
   
   nixConfig = {
     experimental-features = ["nix-command" "flakes"];
+    
+    # Enable evaluation caching for faster rebuilds
+    eval-cache = true;
+    
+    # Use lazy tree evaluation for better performance
     lazy-trees = true;
+    
+    # Binary caches for faster builds
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+      "https://nixpkgs-wayland.cachix.org"
+      # Add your custom cache here:
+      # "https://your-cache.cachix.org"
+    ];
+    
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
+      # Add your custom cache key here:
+      # "your-cache.cachix.org-1:YourPublicKey"
+    ];
   };
   
   inputs = {

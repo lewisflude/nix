@@ -9,6 +9,7 @@
     ./overlays.nix
     ./cachix.nix
     ./sops.nix
+    ./telemetry.nix
     
     # Cross-platform feature modules
     ./features/development.nix

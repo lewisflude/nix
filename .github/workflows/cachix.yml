@@ -1,0 +1,142 @@
+name: "Build and Cache"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+# Cancel previous runs of this workflow when a new one is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Build and cache NixOS configuration
+  build-and-cache-nixos:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' # Only cache on main branch
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            accept-flake-config = true
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v14
+        with:
+          name: ${{ secrets.CACHIX_CACHE_NAME }}
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          pushFilter: "(-source$|nixpkgs-unstable-)"
+
+      - name: Build NixOS configuration (jupiter)
+        run: |
+          nix build .#nixosConfigurations.jupiter.config.system.build.toplevel \
+            --print-build-logs \
+            --fallback
+
+      - name: Push to Cachix
+        if: success()
+        run: |
+          nix build .#nixosConfigurations.jupiter.config.system.build.toplevel --json \
+            | jq -r '.[].outputs | to_entries[].value' \
+            | cachix push ${{ secrets.CACHIX_CACHE_NAME }}
+
+  # Build and cache Darwin configuration
+  build-and-cache-darwin:
+    runs-on: macos-latest
+    if: github.ref == 'refs/heads/main' # Only cache on main branch
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            accept-flake-config = true
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v14
+        with:
+          name: ${{ secrets.CACHIX_CACHE_NAME }}
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          pushFilter: "(-source$|nixpkgs-unstable-)"
+
+      - name: Build Darwin configuration
+        run: |
+          nix build .#darwinConfigurations.Lewiss-MacBook-Pro.system \
+            --print-build-logs \
+            --fallback
+
+      - name: Push to Cachix
+        if: success()
+        run: |
+          nix build .#darwinConfigurations.Lewiss-MacBook-Pro.system --json \
+            | jq -r '.[].outputs | to_entries[].value' \
+            | cachix push ${{ secrets.CACHIX_CACHE_NAME }}
+
+  # Cache development shells
+  cache-dev-shells:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    strategy:
+      matrix:
+        shell:
+          - default
+          - node
+          - python
+          - rust
+          - go
+          - web
+          - devops
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            accept-flake-config = true
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v14
+        with:
+          name: ${{ secrets.CACHIX_CACHE_NAME }}
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build and cache dev shell (${{ matrix.shell }})
+        run: |
+          nix build .#devShells.x86_64-linux.${{ matrix.shell }} \
+            --print-build-logs \
+            --fallback \
+            --json \
+            | jq -r '.[].outputs | to_entries[].value' \
+            | cachix push ${{ secrets.CACHIX_CACHE_NAME }}
+
+  # Summary job
+  cachix-success:
+    runs-on: ubuntu-latest
+    needs: [build-and-cache-nixos, build-and-cache-darwin, cache-dev-shells]
+    if: always()
+    
+    steps:
+      - name: Check build results
+        run: |
+          if [ "${{ needs.build-and-cache-nixos.result }}" == "failure" ] || \
+             [ "${{ needs.build-and-cache-darwin.result }}" == "failure" ] || \
+             [ "${{ needs.cache-dev-shells.result }}" == "failure" ]; then
+            echo "❌ One or more cache jobs failed"
+            exit 1
+          fi
+          echo "✅ All configurations cached successfully"
