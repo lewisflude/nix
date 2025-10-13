@@ -102,7 +102,7 @@ in {
         "media.rdd-ffmpeg.enabled" = true;
       };
       userChrome = ''
-        /* Hide tab bar only in fullscreen mode for cleaner experience */
+        
         :root[inFullscreen]
       '';
     };

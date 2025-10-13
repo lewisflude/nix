@@ -26,7 +26,7 @@ in
       mkdir -p "$out/Applications"
       undmg "$src"
       selected=""
-      for candidate in "./Cursor.app" ./*/Cursor.app ./*/*/Cursor.app; do
+      for candidate in "./Cursor.app" .*/Cursor.app; do
         if [ -d "$candidate" ]; then
           selected="$candidate"
           break
