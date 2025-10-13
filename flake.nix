@@ -1,15 +1,15 @@
 {
   description = "Lewiss NixOS and Nix-Darwin configuration";
-  
+
   nixConfig = {
     experimental-features = ["nix-command" "flakes"];
-    
+
     # Enable evaluation caching for faster rebuilds
     eval-cache = true;
-    
+
     # Use lazy tree evaluation for better performance
     lazy-trees = true;
-    
+
     # Binary caches for faster builds
     extra-substituters = [
       "https://nix-community.cachix.org"
@@ -17,7 +17,7 @@
       # Add your custom cache here:
       # "https://your-cache.cachix.org"
     ];
-    
+
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
@@ -25,10 +25,10 @@
       # "your-cache.cachix.org-1:YourPublicKey"
     ];
   };
-  
+
   inputs = {
     # === Core Infrastructure ===
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     # System configuration frameworks
@@ -38,11 +38,14 @@
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.11";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
+    determinate = {
+      url = "https://flakehub.com/f/DeterminateSystems/determinate/*.tar.gz";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # === System Management ===
     sops-nix = {
@@ -121,7 +124,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-  
+
   outputs = inputs @ {self, ...}:
     import ./lib {inherit inputs self;};
 }

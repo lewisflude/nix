@@ -102,7 +102,7 @@ in {
         "media.rdd-ffmpeg.enabled" = true;
       };
       userChrome = ''
-        
+
         :root[inFullscreen]
       '';
     };

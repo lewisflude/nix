@@ -11,7 +11,7 @@
     ../nix-config.nix
     ../terminal.nix
     ../nh.nix
-    
+
     # Essential apps that are lightweight and universally useful
     ../apps/bat.nix
     ../apps/direnv.nix
@@ -24,16 +24,16 @@
     ../apps/atuin.nix
     ../apps/micro.nix
     ../apps/zellij.nix
-    
+
     # Additional packages
     ../apps/packages.nix
-    
+
     # SOPS secrets
     ../sops.nix
-    
+
     # Library functions
     ../lib
-    
+
     # Custom modules
     ../modules.nix
   ];

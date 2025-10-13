@@ -144,12 +144,12 @@ _: let
     "***.rar" = true;
     "***.dmg" = true;
     "**.git/objects.git/subtree-cache.git/index.lock" = true;
-      "**/node_modules*.log" = true;
-      "**/logs.cachetmptempcoveragedistbuildtarget__pycache__.npm.yarn.pnpm-store.DS_Store" = true;
+    "**/node_modules*.log" = true;
+    "**/logs.cachetmptempcoveragedistbuildtarget__pycache__.npm.yarn.pnpm-store.DS_Store" = true;
     "**/.git" = true;
     "**/node_modules" = true;
   };
-  
+
   # Combined ignore sets
   commonIgnores = systemFiles // vcsFiles // devEnvFiles;
   searchIgnores =

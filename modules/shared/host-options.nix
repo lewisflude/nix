@@ -25,6 +25,12 @@ with lib; {
       example = "jupiter";
     };
 
+    system = mkOption {
+      type = types.str;
+      description = "System architecture (e.g., x86_64-linux, aarch64-darwin)";
+      example = "x86_64-linux";
+    };
+
     features = {
       development = {
         enable = mkEnableOption "development tools and environments";

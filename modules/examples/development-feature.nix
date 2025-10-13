@@ -1,6 +1,5 @@
 # Example: Development Feature Module
 # Demonstrates a more complex feature with language sub-features.
-
 {
   config,
   lib,
@@ -12,20 +11,20 @@
 in {
   options.features.development = {
     enable = mkEnableOption "development tools and environments";
-    
+
     # Core development tools (always enabled with feature)
     git = mkOption {
       type = types.bool;
       default = true;
       description = "Enable Git and related tools";
     };
-    
+
     docker = mkOption {
       type = types.bool;
       default = true;
       description = "Enable Docker for containerization";
     };
-    
+
     # Language-specific sub-features
     languages = {
       python = mkOption {
@@ -33,26 +32,26 @@ in {
         default = true;
         description = "Enable Python development environment";
       };
-      
+
       javascript = mkOption {
         type = types.bool;
         default = true;
         description = "Enable JavaScript/Node.js development";
       };
-      
+
       rust = mkOption {
         type = types.bool;
         default = false;
         description = "Enable Rust development environment";
       };
-      
+
       go = mkOption {
         type = types.bool;
         default = false;
         description = "Enable Go development environment";
       };
     };
-    
+
     # IDE/Editor options
     editors = {
       vscode = mkOption {
@@ -60,7 +59,7 @@ in {
         default = false;
         description = "Install VS Code";
       };
-      
+
       neovim = mkOption {
         type = types.bool;
         default = false;
@@ -68,7 +67,7 @@ in {
       };
     };
   };
-  
+
   config = mkIf cfg.enable {
     # Core development packages
     environment.systemPackages = with pkgs;
@@ -103,12 +102,12 @@ in {
       ]
       # JavaScript/Node.js
       ++ optionals cfg.languages.javascript [
-        nodejs
-        nodePackages.npm
-        nodePackages.yarn
-        nodePackages.pnpm
-        nodePackages.typescript
-        nodePackages.typescript-language-server
+        nodejs_24
+        nodejs_24.pkgs.npm
+        nodejs_24.pkgs.yarn
+        nodejs_24.pkgs.pnpm
+        nodejs_24.pkgs.typescript
+        nodejs_24.pkgs.typescript-language-server
       ]
       # Rust
       ++ optionals cfg.languages.rust [
@@ -125,28 +124,28 @@ in {
         golangci-lint
       ]
       # Editors
-      ++ optionals cfg.editors.vscode [ vscode ]
-      ++ optionals cfg.editors.neovim [ neovim ];
-    
+      ++ optionals cfg.editors.vscode [vscode]
+      ++ optionals cfg.editors.neovim [neovim];
+
     # Enable Docker service if Docker is enabled
     virtualisation.docker.enable = mkIf cfg.docker true;
-    
+
     # Git configuration
     programs.git = mkIf cfg.git {
       enable = true;
       lfs.enable = true;
     };
-    
+
     # Development-friendly shell configuration
     programs.direnv = {
       enable = true;
       nix-direnv.enable = true;
     };
-    
+
     # Assertions
     assertions = [
       {
-        assertion = cfg.languages.rust -> (cfg.git);
+        assertion = cfg.languages.rust -> cfg.git;
         message = "Rust development requires Git to be enabled";
       }
     ];

@@ -28,7 +28,7 @@
     python = pkgs.mkShell {
       buildInputs = with pkgs;
         [
-          python312  # Python 3.13 is too new for some packages
+          python312 # Python 3.13 is too new for some packages
           python312Packages.pip
           python312Packages.virtualenv
           python312Packages.pytest
@@ -220,10 +220,10 @@
       echo "  • templates/README.md          - Module templates"
       echo ""
       echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-      
+
       # Add scripts to PATH
       export PATH="$PWD/scripts/utils:$PWD/scripts/maintenance:$PATH"
-      
+
       # Set helpful aliases
       alias fmt='alejandra .'
       alias lint='statix check .'

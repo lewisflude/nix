@@ -60,8 +60,7 @@ in {
 
     # Install gaming-related packages
     environment.systemPackages = with pkgs;
-      []
-      ++ optionals cfg.steam [
+      optionals cfg.steam [
         steamcmd
         steam-run
       ]

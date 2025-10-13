@@ -3,8 +3,10 @@
   config,
   lib,
   system,
+  hostSystem,
   ...
 }: let
+  isLinux = lib.strings.hasSuffix "linux" hostSystem;
   platformLib = import ../../lib/functions.nix {inherit lib system;};
   inherit
     (lib)
@@ -179,8 +181,9 @@ in {
       kagiWrapper
       openaiWrapper
       lua-language-server
-      nodePackages.typescript-language-server
-      nodePackages.typescript
+      # Use explicitly versioned nodejs packages to avoid cache misses
+      (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs).pkgs.typescript-language-server
+      (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs).pkgs.typescript
     ];
     activation.mcpWarm = lib.hm.dag.entryAfter ["writeBoundary"] ''
       ${warmScript}
@@ -201,10 +204,7 @@ in {
         fileName = "claude_desktop_config.json";
       };
     };
-    servers = let
-      inherit (pkgs.nodePackages) typescript-language-server;
-      tsls = "${typescript-language-server}/bin/typescript-language-server";
-    in {
+    servers = {
       github = {
         command = "${githubWrapper}/bin/github-mcp-wrapper";
         args = [];
@@ -296,7 +296,7 @@ in {
       };
     };
   };
-  systemd.user.services.mcp-claude-register = lib.mkIf pkgs.stdenv.isLinux {
+  systemd.user.services.mcp-claude-register = lib.mkIf isLinux {
     Unit = {
       Description = "Register MCP servers for Claude CLI (idempotent)";
       After = ["graphical-session.target"];
@@ -316,7 +316,7 @@ in {
       WantedBy = ["default.target"];
     };
   };
-  systemd.user.services.mcp-warm = lib.mkIf pkgs.stdenv.isLinux {
+  systemd.user.services.mcp-warm = lib.mkIf isLinux {
     Unit = {
       Description = "Warm MCP servers (build binaries, prefetch packages)";
       After = ["network-online.target"];

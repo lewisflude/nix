@@ -2,7 +2,6 @@
 # Tests that Home Manager configurations can activate successfully
 {
   pkgs,
-  lib,
   inputs,
   ...
 }: let
@@ -12,7 +11,7 @@
       # Create a minimal home-manager configuration
       export HOME=$(mktemp -d)
       export USER=${username}
-      
+
       # Test that the configuration evaluates
       ${pkgs.nix}/bin/nix eval --impure --expr '
         let
@@ -31,19 +30,19 @@
             ];
           }).activationPackage
       ' || exit 1
-      
+
       touch $out
     '';
 in {
   # Test minimal profile
   home-minimal = mkHomeTest "minimal" "testuser";
-  
+
   # Test development profile
   home-development = mkHomeTest "development" "testuser";
-  
+
   # Test desktop profile
   home-desktop = mkHomeTest "desktop" "testuser";
-  
+
   # Test full profile
   home-full = mkHomeTest "full" "testuser";
 }

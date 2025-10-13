@@ -22,19 +22,20 @@ in {
       };
       rtirq.enable = cfg.realtime;
     };
-    
+
     # Enable rtkit for real-time scheduling
     security.rtkit.enable = true;
-    
+
     # Audio production packages
-    environment.systemPackages = with pkgs; mkIf cfg.production [
-      ardour
-      audacity
-      helm
-      lsp-plugins
-      zyn-fusion
-    ];
-    
+    environment.systemPackages = with pkgs;
+      mkIf cfg.production [
+        ardour
+        audacity
+        helm
+        lsp-plugins
+        zyn-fusion
+      ];
+
     # Ensure user is in audio group
     users.users.${config.host.username}.extraGroups =
       optional cfg.enable "audio";

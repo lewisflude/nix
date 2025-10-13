@@ -23,17 +23,19 @@ in {
           yq
         ]
         # Language-specific tools
-        ++ optionals cfg.rust [
-          rustc
-          cargo
-          rustfmt
-          clippy
-          rust-analyzer
-        ]
+        # Note: Rust toolchain is managed by rustup (installed in packages.nix)
+        # ++ optionals cfg.rust [
+        #   rustc
+        #   cargo
+        #   rustfmt
+        #   clippy
+        #   rust-analyzer
+        # ]
         ++ optionals cfg.python [
-          python3
-          python3Packages.pip
-          python3Packages.virtualenv
+          python313
+          python313Packages.pip
+          python313Packages.virtualenv
+          python313Packages.uv
           ruff
           pyright
         ]
@@ -44,12 +46,9 @@ in {
           go-tools
         ]
         ++ optionals cfg.node [
-          nodejs
-          nodePackages.npm
-          nodePackages.pnpm
-          nodePackages.yarn
-          nodePackages.typescript
-          nodePackages.typescript-language-server
+          nodejs_24 # Latest LTS version with full binary cache support
+          # Note: npm, npx, and corepack (for pnpm/yarn) are included
+          # Install typescript and language servers via npm/npx as needed
         ]
         ++ optionals cfg.lua [
           lua
@@ -63,7 +62,7 @@ in {
     environment.variables = mkMerge [
       (mkIf cfg.rust {
         RUST_BACKTRACE = "1";
-        CARGO_HOME = "$HOME/.cargo";
+        # CARGO_HOME is managed by rustup
       })
       (mkIf cfg.go {
         GOPATH = "$HOME/go";

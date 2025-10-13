@@ -6,41 +6,44 @@
 }: let
   isDarwin = system == "aarch64-darwin" || system == "x86_64-darwin";
   isLinux = system == "x86_64-linux" || system == "aarch64-linux";
-  
+
   # Helper to make conditional overlays
   mkConditional = condition: overlay:
-    if condition then overlay else (final: prev: {});
+    if condition
+    then overlay
+    else (_final: _prev: {});
 in rec {
   # === Core Overlays (always applied) ===
-  
+
   # Unstable packages namespace
-  unstable = final: prev: {
+  unstable = _final: prev: {
     unstable = import inputs.nixpkgs-unstable {
       inherit system;
-      config = prev.config;
+      inherit (prev) config;
     };
   };
-  
+
   # === Application Overlays (always applied) ===
-  
+
   # Custom packages
   cursor = import ./cursor.nix;
   npm-packages = import ./npm-packages.nix;
-  
+
   # Essential tools
   yazi = inputs.yazi.overlays.default;
   nh = inputs.nh.overlays.default;
   nur = inputs.nur.overlays.default;
-  
+
   # === Platform-Specific Overlays ===
-  
+
   # Darwin-only
   ghostty = mkConditional isDarwin (import ./ghostty.nix {inherit inputs;});
-  
+
   # Linux-only
   niri = mkConditional isLinux inputs.niri.overlays.niri;
   waybar = mkConditional isLinux (import ./waybar.nix {inherit inputs;});
   swww = mkConditional isLinux (import ./swww.nix {inherit inputs;});
-  nvidia-patch = mkConditional (isLinux && inputs ? nvidia-patch)
+  nvidia-patch =
+    mkConditional (isLinux && inputs ? nvidia-patch)
     inputs.nvidia-patch.overlays.default;
 }

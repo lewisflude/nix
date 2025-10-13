@@ -1,14 +1,16 @@
 {
-  config,
   inputs,
   lib,
+  hostSystem,
   ...
 }: let
-  system = config.nixpkgs.hostPlatform.system;
+  # Use hostSystem from specialArgs which is passed in at the top level
+  # This avoids infinite recursion by not depending on config or pkgs
   overlaySet = import ../../overlays {
-    inherit inputs system;
+    inherit inputs;
+    system = hostSystem;
   };
-  
+
   # Get list of overlays to apply (filter out no-ops)
   overlaysToApply = lib.attrValues overlaySet;
 in {

@@ -21,17 +21,15 @@ in
             inherit (cursorCliInfo.darwin.aarch64) url;
             inherit (cursorCliInfo.darwin.aarch64) sha256;
           }
-        else
-          if pkgs.stdenv.hostPlatform.system == "x86_64-darwin"
-          then
-            fetchurl
-            {
-              inherit (cursorCliInfo.darwin.x86_64) url;
-              inherit (cursorCliInfo.darwin.x86_64) sha256;
-            }
-          else throw "Unsupported Darwin architecture for cursor-cli"
-      else
-        if pkgs.stdenv.isLinux
+        else if pkgs.stdenv.hostPlatform.system == "x86_64-darwin"
+        then
+          fetchurl
+          {
+            inherit (cursorCliInfo.darwin.x86_64) url;
+            inherit (cursorCliInfo.darwin.x86_64) sha256;
+          }
+        else throw "Unsupported Darwin architecture for cursor-cli"
+      else if pkgs.stdenv.isLinux
       then
         if pkgs.stdenv.hostPlatform.system == "aarch64-linux"
         then
@@ -40,16 +38,15 @@ in
             inherit (cursorCliInfo.linux.aarch64) url;
             inherit (cursorCliInfo.linux.aarch64) sha256;
           }
-        else
-          if pkgs.stdenv.hostPlatform.system == "x86_64-linux"
-          then
-            fetchurl
-            {
-              inherit (cursorCliInfo.linux.x86_64) url;
-              inherit (cursorCliInfo.linux.x86_64) sha256;
-            }
-          else throw "Unsupported Linux architecture for cursor-cli"
-        else throw "Unsupported OS for cursor-cli";
+        else if pkgs.stdenv.hostPlatform.system == "x86_64-linux"
+        then
+          fetchurl
+          {
+            inherit (cursorCliInfo.linux.x86_64) url;
+            inherit (cursorCliInfo.linux.x86_64) sha256;
+          }
+        else throw "Unsupported Linux architecture for cursor-cli"
+      else throw "Unsupported OS for cursor-cli";
     dontUnpack = false;
     installPhase = ''
       mkdir -p $out/bin

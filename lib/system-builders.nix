@@ -28,7 +28,14 @@
     useGlobalPkgs = true;
     verbose = true;
     backupFileExtension = "backup";
-    extraSpecialArgs = {inherit inputs;};
+    extraSpecialArgs = {
+      inherit inputs;
+      inherit (hostConfig) system;
+      hostSystem = hostConfig.system;
+      inherit (hostConfig) username;
+      inherit (hostConfig) useremail;
+      inherit (hostConfig) hostname;
+    };
     sharedModules =
       [
         catppuccin.homeModules.catppuccin
@@ -42,28 +49,36 @@ in {
   mkDarwinSystem = hostName: hostConfig: {homebrew-j178}:
     darwin.lib.darwinSystem {
       inherit (hostConfig) system;
-      
-      specialArgs = {inherit inputs;};
-      
+
+      specialArgs = {
+        inherit inputs;
+        inherit (hostConfig) system; # For modules that expect 'system' arg
+        hostSystem = hostConfig.system;
+        inherit (hostConfig) username;
+        inherit (hostConfig) useremail;
+        inherit (hostConfig) hostname;
+      };
+
       modules =
         [
           # Host-specific configuration
           ../hosts/${hostName}/configuration.nix
-          
+
           # Set host options from host config
           {
             config.host = hostConfig;
           }
-          
+
           # Platform modules
           ../modules/darwin
-          
+
           # Integration modules
+          determinate.darwinModules.default
           home-manager.darwinModules.home-manager
           mac-app-util.darwinModules.default
           nix-homebrew.darwinModules.nix-homebrew
           sops-nix.darwinModules.sops
-          
+
           # Homebrew configuration
           {
             nix-homebrew = {
@@ -75,7 +90,7 @@ in {
               mutableTaps = false;
             };
           }
-          
+
           # Home Manager configuration
           {
             home-manager = mkHomeManagerConfig {
@@ -91,26 +106,31 @@ in {
   mkNixosSystem = hostName: hostConfig: {self}:
     nixpkgs.lib.nixosSystem {
       inherit (hostConfig) system;
-      
+
       specialArgs = {
         inherit inputs;
+        inherit (hostConfig) system; # For modules that expect 'system' arg
+        hostSystem = hostConfig.system;
+        inherit (hostConfig) username;
+        inherit (hostConfig) useremail;
+        inherit (hostConfig) hostname;
         keysDirectory = "${self}/keys";
       };
-      
+
       modules =
         [
           # Host-specific configuration
           ../hosts/${hostName}/configuration.nix
-          
+
           # Set host options from host config
           {
             config.host = hostConfig;
           }
-          
+
           # Platform modules
           ../modules/nixos
           determinate.nixosModules.default
-          
+
           # Integration modules
           sops-nix.nixosModules.sops
           catppuccin.nixosModules.catppuccin
@@ -119,12 +139,14 @@ in {
           nur.modules.nixos.default
           solaar.nixosModules.default
           home-manager.nixosModules.home-manager
-          
+
           # Home Manager configuration
           {
-            home-manager = mkHomeManagerConfig {inherit hostConfig;} // {
-              useUserPackages = true;
-            };
+            home-manager =
+              mkHomeManagerConfig {inherit hostConfig;}
+              // {
+                useUserPackages = true;
+              };
           }
         ]
         ++ commonModules;

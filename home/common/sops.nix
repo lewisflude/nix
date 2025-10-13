@@ -3,9 +3,11 @@
   lib,
   config,
   system,
+  hostSystem,
   ...
 }: let
   platformLib = import ../../lib/functions.nix {inherit lib system;};
+  isLinux = lib.strings.hasSuffix "linux" hostSystem;
 in {
   home.packages = with pkgs; [
     sops
@@ -23,7 +25,7 @@ in {
       };
     };
   };
-  systemd.user.services.sops-nix = lib.mkIf pkgs.stdenv.isLinux {
+  systemd.user.services.sops-nix = lib.mkIf isLinux {
     Unit = {
       After = ["gpg-agent.service"];
       Wants = ["gpg-agent.service"];

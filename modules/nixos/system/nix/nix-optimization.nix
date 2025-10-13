@@ -1,8 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}: {
+{pkgs, ...}: {
   config = {
     nix.settings = {
       auto-optimise-store = true;
@@ -119,9 +115,9 @@
         '')
       ];
     };
-    
+
     # NixOS-specific systemd services
-    systemd = lib.mkIf pkgs.stdenv.isLinux {
+    systemd = {
       timers.nix-store-optimization = {
         wantedBy = ["timers.target"];
         timerConfig = {
@@ -136,45 +132,8 @@
         };
       };
     };
-    
-    # Darwin-specific launchd services
-    launchd = lib.mkIf pkgs.stdenv.isDarwin {
-      daemons.nix-garbage-collection = {
-        serviceConfig = {
-          ProgramArguments = [
-            "/nix/var/nix/profiles/default/bin/nix-collect-garbage"
-            "--delete-older-than"
-            "7d"
-          ];
-          StartCalendarInterval = [
-            {
-              Hour = 3;
-              Minute = 15;
-              Weekday = 1;
-            }
-          ];
-          StandardOutPath = "/var/log/nix-gc.log";
-          StandardErrorPath = "/var/log/nix-gc-error.log";
-          RunAtLoad = false;
-        };
-      };
-      daemons.nix-store-optimization = {
-        serviceConfig = {
-          ProgramArguments = [
-            "/etc/nix-optimization/optimize-store.sh"
-          ];
-          StartCalendarInterval = [
-            {
-              Hour = 3;
-              Minute = 30;
-              Weekday = 1;
-            }
-          ];
-          StandardOutPath = "/var/log/nix-optimization.log";
-          StandardErrorPath = "/var/log/nix-optimization-error.log";
-          RunAtLoad = false;
-        };
-      };
-    };
+
+    # Note: Darwin-specific launchd services should be in modules/darwin, not here
+    # This is a NixOS-only module, so launchd configuration doesn't make sense here
   };
 }
