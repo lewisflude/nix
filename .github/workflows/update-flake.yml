@@ -1,0 +1,99 @@
+name: Update Flake Inputs
+
+on:
+  # Run weekly on Monday at 9am UTC
+  schedule:
+    - cron: '0 9 * * 1'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      create_pr:
+        description: 'Create PR instead of direct commit'
+        required: false
+        default: 'true'
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Update flake inputs
+        id: update
+        run: |
+          nix flake update
+          
+          # Check if anything changed
+          if git diff --quiet flake.lock; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No updates available"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Updates found"
+          fi
+
+      - name: Validate flake
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          nix flake check --no-build
+
+      - name: Generate update summary
+        if: steps.update.outputs.changed == 'true'
+        id: summary
+        run: |
+          # Extract updated inputs from git diff
+          echo "## Updated Inputs" > summary.md
+          echo "" >> summary.md
+          
+          # Parse flake.lock diff for updated packages
+          git diff flake.lock | grep -E '^\+.*"rev"|^\+.*"lastModified"' | head -n 20 >> summary.md || echo "See diff for details" >> summary.md
+          
+          # Save for PR body
+          echo "SUMMARY<<EOF" >> $GITHUB_OUTPUT
+          cat summary.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        if: steps.update.outputs.changed == 'true' && (github.event.inputs.create_pr == 'true' || github.event_name == 'schedule')
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update flake inputs'
+          title: 'chore: update flake inputs'
+          body: |
+            Automated flake input update
+            
+            ${{ steps.summary.outputs.SUMMARY }}
+            
+            ## Testing
+            - [ ] Test build on Darwin
+            - [ ] Test build on NixOS
+            
+            Please review the changes and test the configuration before merging.
+          branch: chore/update-flake-inputs
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
+
+      - name: Commit directly
+        if: steps.update.outputs.changed == 'true' && github.event.inputs.create_pr == 'false' && github.event_name != 'schedule'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add flake.lock
+          git commit -m "chore: update flake inputs"
+          git push

@@ -1,5 +1,9 @@
 # Nix Configuration
 
+[![CI](https://github.com/lewisflude/nix-config/workflows/CI/badge.svg)](https://github.com/lewisflude/nix-config/actions/workflows/ci.yml)
+[![Nix Flake](https://img.shields.io/badge/nix-flake-blue.svg)](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake.html)
+[![NixOS 24.11](https://img.shields.io/badge/NixOS-24.11-blue.svg)](https://nixos.org)
+
 A modern, cross-platform Nix setup for both macOS (nix-darwin) and Linux (NixOS), with shared Home Manager and development environments.
 
 > **📚 Full Documentation:** [`docs/`](docs/) - Comprehensive guides, references, and examples

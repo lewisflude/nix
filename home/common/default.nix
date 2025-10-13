@@ -1,18 +1,7 @@
 {...}: {
+  # Import the full profile by default
+  # For a lighter setup, import a different profile in your host configuration
   imports = [
-    ./apps
-    ./git.nix
-    ./shell.nix
-    ./ssh.nix
-    ./theme.nix
-    ./gpg.nix
-    ./sops.nix
-    ./nix-config.nix
-    ./development
-    ./system
-    ./lib
-    ./modules.nix
-    ./terminal.nix
-    ./nh.nix
+    ./profiles/full.nix
   ];
 }

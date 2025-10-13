@@ -28,14 +28,14 @@
     python = pkgs.mkShell {
       buildInputs = with pkgs;
         [
-          python313
-          python313Packages.pip
-          python313Packages.virtualenv
-          python313Packages.pytest
-          python313Packages.black
-          python313Packages.isort
-          python313Packages.mypy
-          python313Packages.ruff
+          python312  # Python 3.13 is too new for some packages
+          python312Packages.pip
+          python312Packages.virtualenv
+          python312Packages.pytest
+          python312Packages.black
+          python312Packages.isort
+          python312Packages.mypy
+          python312Packages.ruff
           poetry
         ]
         ++ commonTools;

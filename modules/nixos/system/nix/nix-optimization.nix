@@ -1,12 +1,9 @@
 {
   pkgs,
   lib,
-  system,
   ...
-}: let
-  platformLib = import ../../../lib/functions.nix {inherit lib system;};
-in
-  {
+}: {
+  config = {
     nix.settings = {
       auto-optimise-store = true;
       max-jobs = 24;
@@ -122,9 +119,9 @@ in
         '')
       ];
     };
-  }
-  // lib.optionalAttrs platformLib.isLinux {
-    systemd = {
+    
+    # NixOS-specific systemd services
+    systemd = lib.mkIf pkgs.stdenv.isLinux {
       timers.nix-store-optimization = {
         wantedBy = ["timers.target"];
         timerConfig = {
@@ -139,9 +136,9 @@ in
         };
       };
     };
-  }
-  // lib.optionalAttrs platformLib.isDarwin {
-    launchd = {
+    
+    # Darwin-specific launchd services
+    launchd = lib.mkIf pkgs.stdenv.isDarwin {
       daemons.nix-garbage-collection = {
         serviceConfig = {
           ProgramArguments = [
@@ -179,4 +176,5 @@ in
         };
       };
     };
-  }
+  };
+}

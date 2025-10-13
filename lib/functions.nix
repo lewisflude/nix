@@ -4,7 +4,7 @@
   ...
 }: rec {
   versions = {
-    nodejs = "nodejs_24";
+    nodejs = "nodejs_22";  # Latest LTS version available in nixpkgs
     python = "python313";
     go = "go";
     rust = {
@@ -69,18 +69,4 @@
     then "sudo darwin-rebuild switch --flake ~/.config/nix"
     else "sudo nixos-rebuild switch --flake ~/.config/nix#jupiter";
 
-  getVirtualisationFlag = {
-    modulesVirtualisation ? {},
-    virtualisation ? {},
-    flagName,
-    default ? true,
-  }: let
-    fromModules = lib.attrByPath [flagName] null modulesVirtualisation;
-    fromHost = lib.attrByPath [flagName] null virtualisation;
-  in
-    if fromModules != null
-    then fromModules
-    else if fromHost != null
-    then fromHost
-    else default;
 }

@@ -1,18 +1,20 @@
 {
-  self,
-  username,
-  system,
+  config,
+  inputs,
   lib,
   ...
 }: let
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
+  platformLib = import ../../lib/functions.nix {
+    inherit lib;
+    system = config.nixpkgs.hostPlatform.system;
+  };
 in {
   nix = {
     settings = {
       warn-dirty = false;
       trusted-users = [
         "root"
-        username
+        config.host.username
       ];
       experimental-features = [
         "nix-command"
@@ -20,13 +22,12 @@ in {
       ];
     };
   };
-  system.configurationRevision = self.rev or self.dirtyRev or null;
+  
+  system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
   system.stateVersion = lib.mkDefault platformLib.platformStateVersion;
-  nixpkgs = {
-    hostPlatform = system;
-    config = {
-      allowUnfree = true;
-      allowUnsupportedSystem = false;
-    };
+  
+  nixpkgs.config = {
+    allowUnfree = true;
+    allowUnsupportedSystem = false;
   };
 }
