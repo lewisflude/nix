@@ -1,0 +1,48 @@
+{
+  "mcpServers": {
+    "nix-config-filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem@latest",
+        "/Users/lewisflude/.config/nix"
+      ]
+    },
+    "nix-config-git": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "mcp-server-git",
+        "mcp-server-git",
+        "--repository",
+        "/Users/lewisflude/.config/nix"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github@latest"
+      ],
+      "env": {
+        "GITHUB_TOKEN": ""
+      }
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "mcp-server-fetch",
+        "mcp-server-fetch"
+      ]
+    },
+    "time": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "mcp-server-time",
+        "mcp-server-time"
+      ]
+    }
+  }
+}

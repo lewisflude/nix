@@ -205,14 +205,6 @@ in {
       inherit (pkgs.nodePackages) typescript-language-server;
       tsls = "${typescript-language-server}/bin/typescript-language-server";
     in {
-      everything = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-everything@latest"
-        ];
-        port = 11446;
-      };
       github = {
         command = "${githubWrapper}/bin/github-mcp-wrapper";
         args = [];
@@ -293,24 +285,6 @@ in {
         args = [];
         port = 11439;
       };
-      cli = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--from"
-          "cli-mcp-server"
-          "cli-mcp-server"
-        ];
-        port = 11438;
-        env = {
-          ALLOWED_DIR = "${config.home.homeDirectory}/Code";
-          ALLOWED_COMMANDS = "git,ls,cat,pwd,rg,nix,just";
-          ALLOWED_FLAGS = "-l,-a,--help,--version";
-          COMMAND_TIMEOUT = "10";
-          MAX_COMMAND_LENGTH = "2048";
-          ALLOW_SHELL_OPERATORS = "0";
-          UV_PYTHON = "${pkgs.python3}/bin/python3";
-        };
-      };
       rust-docs-bevy = {
         command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
         args = [
@@ -319,47 +293,6 @@ in {
           "default"
         ];
         port = 11440;
-      };
-      rust-docs-bevy-lunex = {
-        command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
-        args = [
-          "bevy_lunex@0.4.2"
-        ];
-        port = 11441;
-      };
-      rust-docs-hexx = {
-        command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
-        args = [
-          "hexx@0.20.0"
-          "-F"
-          "serde,mesh"
-        ];
-        port = 11442;
-      };
-      rust-docs-ron = {
-        command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
-        args = [
-          "ron@0.8.1"
-        ];
-        port = 11443;
-      };
-      lsp-ts = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "tritlo/lsp-mcp"
-          "ts"
-          "${tsls}"
-          "--stdio"
-        ];
-        port = 11447;
-      };
-      rust-docs = {
-        command = "${rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
-        args = [
-          "reqwest@0.12"
-        ];
-        port = 11450;
       };
     };
   };

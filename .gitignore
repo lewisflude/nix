@@ -78,3 +78,6 @@ devenv.local.nix
 # nx
 .nx/
 nix.conf
+
+# Cursor MCP (managed by home-manager, project-specific is committed)
+# .cursor/mcp.json - DO NOT ignore, this is project-specific
