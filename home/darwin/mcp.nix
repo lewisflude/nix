@@ -102,14 +102,6 @@ in {
         ];
         port = 11433;
       };
-      nx = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "nx-mcp@latest"
-          dexWebProject
-        ];
-        port = 11437;
-      };
       memory = {
         command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
@@ -141,51 +133,6 @@ in {
           GITHUB_TOKEN = config.sops.secrets.GITHUB_TOKEN.path or "";
         };
       };
-      filesystem = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-filesystem"
-          "${config.home.homeDirectory}"
-          "${config.home.homeDirectory}/.config"
-        ];
-        port = 11439;
-      };
-      mcp-obsidian = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "mcp-obsidian"
-        ];
-        env = {
-          OBSIDIAN_API_KEY = config.sops.secrets.OBSIDIAN_API_KEY.path or "";
-          OBSIDIAN_HOST = "127.0.0.1";
-          OBSIDIAN_PORT = "27124";
-        };
-      };
-      love2d-api = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--python"
-          "${pkgs.python3}/bin/python3"
-          "--with"
-          "mcp"
-          "--with"
-          "requests"
-          "python"
-          "${config.home.homeDirectory}/.config/nix/mcp-servers/love2d-api.py"
-        ];
-        port = 11440;
-      };
-      love2d-filesystem = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-filesystem"
-          "${codeDirectory}/love2d-projects"
-          "${config.home.homeDirectory}/.local/share/love"
-        ];
-        port = 11441;
-      };
       general-filesystem = {
         command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
         args = [
@@ -201,14 +148,6 @@ in {
         command = "${pkgs.uv}/bin/uvx";
         args = ["mcp-server-time"];
         port = 11443;
-      };
-      everything = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-everything"
-        ];
-        port = 11444;
       };
     };
   };

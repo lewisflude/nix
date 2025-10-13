@@ -65,39 +65,10 @@ in {
               "mbedtls-2.28.10"
             ];
           };
-          overlays =
-            [
-              (import ../overlays/cursor.nix)
-              (import ../overlays/npm-packages.nix)
-              inputs.yazi.overlays.default
-              inputs.niri.overlays.niri
-              (_: _: {waybar-git = inputs.waybar.packages.${hostConfig.system}.waybar;})
-              inputs.nur.overlays.default
-              inputs.nh.overlays.default
-              (final: _prev: {
-                inherit (inputs.swww.packages.${final.system}) swww;
-              })
-            ]
-            ++ (
-              if hostConfig.system == "aarch64-darwin" || hostConfig.system == "x86_64-darwin"
-              then [
-                (_: _: {
-                  ghostty = inputs.ghostty.packages.${hostConfig.system}.default.override {
-                    optimize = "ReleaseFast";
-                    enableX11 = true;
-                    enableWayland = true;
-                  };
-                })
-              ]
-              else []
-            )
-            ++ (
-              if inputs ? nvidia-patch
-              then [
-                inputs.nvidia-patch.overlays.default
-              ]
-              else []
-            );
+          overlays = import ../overlays {
+            inherit inputs;
+            system = hostConfig.system;
+          };
         };
       in
         home-manager.lib.homeManagerConfiguration {
