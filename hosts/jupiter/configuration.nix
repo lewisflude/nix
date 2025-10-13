@@ -1,16 +1,19 @@
 {
   lib,
   pkgs,
-  username,
+  config,
   ...
 }: {
+  # Host configuration using the new options system
+  host = import ./default.nix;
+
   imports = [
     ./hardware-configuration.nix
   ];
   users = {
     mutableUsers = false;
-    users.${username} = {
-      home = "/home/${username}";
+    users.${config.host.username} = {
+      home = "/home/${config.host.username}";
       isNormalUser = true;
       hashedPassword = null;
       openssh.authorizedKeys.keys = [

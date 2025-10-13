@@ -1,10 +1,11 @@
 {
+  config,
   lib,
-  system,
   ...
 }: let
+  isDarwin = lib.strings.hasSuffix "darwin" config.host.system;
   secretsGroup =
-    if (lib.strings.hasSuffix "darwin" system)
+    if isDarwin
     then "wheel"
     else "sops-secrets";
   mkSecret = {
@@ -34,4 +35,22 @@ in {
       GITHUB_TOKEN = mkSecret {allowUserRead = true;};
     };
   };
+
+  # Validation assertions for SOPS configuration
+  assertions = [
+    {
+      assertion = config.sops.secrets != {} -> config.sops.age.keyFile != null;
+      message = "SOPS secrets are defined but no age key file is specified";
+    }
+    {
+      assertion = config.sops.secrets != {} -> config.sops.defaultSopsFile != null;
+      message = "SOPS secrets are defined but no default SOPS file is specified";
+    }
+    {
+      assertion =
+        config.sops.secrets != {}
+        -> builtins.pathExists (toString config.sops.defaultSopsFile);
+      message = "SOPS default file does not exist: ${toString config.sops.defaultSopsFile}";
+    }
+  ];
 }
