@@ -1,6 +1,6 @@
 {...}: {
   imports = [
-    ./apps.nix
+    ./apps
     ./git.nix
     ./shell.nix
     ./ssh.nix
