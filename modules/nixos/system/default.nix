@@ -1,1 +1,26 @@
-{...}: {imports = [./file-management.nix ./home-manager-cleanup.nix ./keyd.nix ./monitor-brightness.nix ./nix.nix ./nix-optimization.nix ./nixpkgs.nix ./xdg.nix ./zfs.nix ./sops.nix];}
+{...}: {
+  imports = [
+    # Nix configuration and optimization
+    ./nix
+
+    # System integration (XDG portals, etc.)
+    ./integration
+
+    # System maintenance (cleanup, etc.)
+    ./maintenance
+
+    # Hardware and device management
+    ./keyd.nix
+    ./monitor-brightness.nix
+
+    # Storage
+    ./zfs.nix
+
+    # Secrets management
+    ./sops.nix
+
+    # Deprecated/empty modules (to be removed)
+    # ./file-management.nix - Empty file
+  ];
+}
+
