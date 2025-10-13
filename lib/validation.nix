@@ -1,7 +1,4 @@
-{
-  lib,
-  pkgs,
-}: {
+{lib}: {
   # Validate that import patterns follow the standard
   # Directories without .nix, files with .nix
   validateImportPatterns = imports: let
@@ -29,8 +26,7 @@
   in {
     valid = hasOptions || hasConfig || hasImports;
     warnings =
-      []
-      ++ lib.optional (!hasOptions && !hasConfig && !hasImports) "Module appears to be empty";
+      lib.optional (!hasOptions && !hasConfig && !hasImports) "Module appears to be empty";
   };
 
   # Validate feature flag usage
@@ -51,8 +47,7 @@
   }:
     assert lib.assertMsg
     (lib.elem system supported)
-    "Module '${moduleName}' is not supported on ${system}. Supported platforms: ${lib.concatStringsSep ", " supported}";
-      true;
+    "Module '${moduleName}' is not supported on ${system}. Supported platforms: ${lib.concatStringsSep ", " supported}"; true;
 
   # Check for circular dependencies (basic check)
   checkCircularDeps = imports: let
@@ -75,21 +70,22 @@
 
   # Create a validation report
   mkValidationReport = {
-    system,
     config,
     checks ? [],
   }: let
     featureValidation = validateFeatures config;
-    allChecks = checks ++ [
-      {
-        name = "Feature Configuration";
-        status =
-          if featureValidation.total > 0
-          then "pass"
-          else "info";
-        message = "Total features: ${toString featureValidation.total}, Enabled: ${toString featureValidation.enabled}, Disabled: ${toString featureValidation.disabled}";
-      }
-    ];
+    allChecks =
+      checks
+      ++ [
+        {
+          name = "Feature Configuration";
+          status =
+            if featureValidation.total > 0
+            then "pass"
+            else "info";
+          message = "Total features: ${toString featureValidation.total}, Enabled: ${toString featureValidation.enabled}, Disabled: ${toString featureValidation.disabled}";
+        }
+      ];
     passed = lib.filter (c: c.status == "pass") allChecks;
     failed = lib.filter (c: c.status == "fail") allChecks;
     warnings = lib.filter (c: c.status == "warn") allChecks;

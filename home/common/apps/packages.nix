@@ -7,7 +7,7 @@
   platformLib = import ../../../lib/functions.nix {inherit lib system;};
 in {
   home.packages = with pkgs;
-    # Core development tools
+  # Core development tools
     [
       claude-code
       pkgs.gemini-cli-bin
@@ -55,14 +55,14 @@ in {
     ]
     # Platform-specific packages
     ++ platformLib.platformPackages
-      # Linux-specific
-      [
-        musescore
-      ]
-      # Darwin-specific
-      [
-        xcodebuild
-        gnutar
-        gzip
-      ];
+    # Linux-specific
+    [
+      musescore
+    ]
+    # Darwin-specific
+    [
+      xcodebuild
+      gnutar
+      gzip
+    ];
 }

@@ -4,16 +4,14 @@
   config,
   lib,
   pkgs,
+  hostSystem,
   ...
 }:
 with lib; let
   cfg = config.host.features.security;
-  isLinux = pkgs.stdenv.isLinux;
+  isLinux = lib.strings.hasSuffix "linux" hostSystem;
 in {
   config = mkIf cfg.enable {
-    # YubiKey support
-    services.pcscd.enable = mkIf (cfg.yubikey && isLinux) true;
-    
     # Install security packages
     home-manager.users.${config.host.username} = {
       home.packages = with pkgs;
@@ -32,12 +30,12 @@ in {
         ++ optionals cfg.vpn [
           wireguard-tools
         ];
-      
+
       # GPG configuration
       programs.gpg = mkIf cfg.gpg {
         enable = true;
       };
-      
+
       services.gpg-agent = mkIf (cfg.gpg && isLinux) {
         enable = true;
         enableSshSupport = true;

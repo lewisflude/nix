@@ -12,8 +12,7 @@ in {
   config = mkIf cfg.enable {
     home-manager.users.${config.host.username} = {
       home.packages = with pkgs;
-        []
-        ++ optionals cfg.office [
+        optionals cfg.office [
           libreoffice-fresh
         ]
         ++ optionals cfg.notes [

@@ -23,7 +23,7 @@ with lib; let
         default = {};
         description = "Environment variables to set for the MCP server (for CLI servers)";
       };
-      
+
       # Remote server options
       url = mkOption {
         type = types.nullOr types.str;
@@ -35,7 +35,7 @@ with lib; let
         default = {};
         description = "HTTP headers to send to the remote MCP server (for remote servers)";
       };
-      
+
       # Optional metadata
       port = mkOption {
         type = types.nullOr types.port;
@@ -62,7 +62,7 @@ with lib; let
     };
   };
   mkMcpConfig = _name: serverCfg:
-    # Remote server configuration (url-based)
+  # Remote server configuration (url-based)
     if serverCfg.url != null
     then
       {
@@ -141,7 +141,7 @@ in {
       })
       cfg.targets
     );
-    
+
     # Copy to final location (not symlinked) because cursor-agent can't read symlinks
     home.activation.copyMcpConfig = lib.hm.dag.entryAfter ["writeBoundary"] (
       let

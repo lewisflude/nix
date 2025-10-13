@@ -4,7 +4,7 @@
   ...
 }: rec {
   versions = {
-    nodejs = "nodejs_22";  # Latest LTS version available in nixpkgs
+    nodejs = "nodejs_24"; # Latest LTS version with full binary cache support
     python = "python313";
     go = "go";
     rust = {
@@ -68,5 +68,4 @@
     if isDarwin
     then "sudo darwin-rebuild switch --flake ~/.config/nix"
     else "sudo nixos-rebuild switch --flake ~/.config/nix#jupiter";
-
 }

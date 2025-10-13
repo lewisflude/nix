@@ -1,9 +1,10 @@
 {
   config,
   lib,
+  hostSystem,
   ...
 }: let
-  isDarwin = lib.strings.hasSuffix "darwin" config.host.system;
+  isDarwin = lib.strings.hasSuffix "darwin" hostSystem;
   secretsGroup =
     if isDarwin
     then "wheel"
@@ -48,7 +49,8 @@ in {
     }
     {
       assertion =
-        config.sops.secrets != {}
+        config.sops.secrets
+        != {}
         -> builtins.pathExists (toString config.sops.defaultSopsFile);
       message = "SOPS default file does not exist: ${toString config.sops.defaultSopsFile}";
     }

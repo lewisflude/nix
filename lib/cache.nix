@@ -3,7 +3,7 @@
 {lib}: let
   # Cache expensive attribute computations
   # Usage: cached = cacheAttr "myKey" expensiveComputation;
-  cacheAttr = key: value: let
+  cacheAttr = _key: value: let
     # In Nix, we can't actually cache between evaluations
     # But we can memoize within a single evaluation
     # Real caching happens via:
@@ -20,19 +20,25 @@
     # Extract and cache common paths
     systems = outputs.nixosConfigurations or {};
     darwinSystems = outputs.darwinConfigurations or {};
-    
+
     # Create pre-computed versions
     cached = {
       inherit systems darwinSystems;
-      
+
       # Cache system derivations
-      systemDerivations = lib.mapAttrs (name: cfg:
-        cfg.config.system.build.toplevel or null
-      ) systems;
-      
-      darwinDerivations = lib.mapAttrs (name: cfg:
-        cfg.system or null
-      ) darwinSystems;
+      systemDerivations =
+        lib.mapAttrs (
+          _name: cfg:
+            cfg.config.system.build.toplevel or null
+        )
+        systems;
+
+      darwinDerivations =
+        lib.mapAttrs (
+          _name: cfg:
+            cfg.system or null
+        )
+        darwinSystems;
     };
   in
     cached;
@@ -46,26 +52,32 @@
   }: {
     version = "1.0.0";
     timestamp = builtins.currentTime or 0;
-    
+
     systems = {
-      nixos = lib.mapAttrs (name: cfg: {
-        inherit name;
-        system = cfg.config.nixpkgs.system or "unknown";
-        hostname = cfg.config.networking.hostName or name;
-        features = cfg.config.host.features or {};
-      }) nixosConfigurations;
-      
-      darwin = lib.mapAttrs (name: cfg: {
-        inherit name;
-        system = cfg.system.system or "unknown";
-        hostname = name;
-        features = cfg.config.host.features or {};
-      }) darwinConfigurations;
-      
-      home = lib.mapAttrs (name: cfg: {
-        inherit name;
-        system = cfg.pkgs.system or "unknown";
-      }) homeConfigurations;
+      nixos =
+        lib.mapAttrs (name: cfg: {
+          inherit name;
+          system = cfg.config.nixpkgs.system or "unknown";
+          hostname = cfg.config.networking.hostName or name;
+          features = cfg.config.host.features or {};
+        })
+        nixosConfigurations;
+
+      darwin =
+        lib.mapAttrs (name: cfg: {
+          inherit name;
+          system = cfg.system.system or "unknown";
+          hostname = name;
+          features = cfg.config.host.features or {};
+        })
+        darwinConfigurations;
+
+      home =
+        lib.mapAttrs (name: cfg: {
+          inherit name;
+          system = cfg.pkgs.system or "unknown";
+        })
+        homeConfigurations;
     };
   };
 
@@ -90,7 +102,7 @@
 
   # Function to check if a cached build exists
   # This is a placeholder - actual implementation would check Cachix or local cache
-  cachedBuildExists = cacheKey: false; # Would check actual cache
+  cachedBuildExists = _cacheKey: false; # Would check actual cache
 
   # Pre-compute package lists for faster queries
   # This is useful for tools that need to inspect installed packages
@@ -103,15 +115,17 @@
       # Don't store full list - too expensive
       # Use: nix-env -qa to get actual list
     };
-    users = lib.mapAttrs (user: cfg: {
-      count = builtins.length (cfg.home.packages or []);
-    }) userPackages;
+    users =
+      lib.mapAttrs (_user: cfg: {
+        count = builtins.length (cfg.home.packages or []);
+      })
+      userPackages;
   };
 
   # Helper for lazy evaluation - only compute when needed
-  lazyAttr = name: value: 
-    # This ensures the attribute is only evaluated if accessed
-    # Nix already does this by default, but we make it explicit
+  lazyAttr = _name: value:
+  # This ensures the attribute is only evaluated if accessed
+  # Nix already does this by default, but we make it explicit
     value;
 
   # Create evaluation cache metadata
@@ -120,9 +134,12 @@
     inputs ? {},
   }: {
     inherit description;
-    inputRevisions = lib.mapAttrs (name: input:
-      input.rev or input.lastModified or "unknown"
-    ) inputs;
+    inputRevisions =
+      lib.mapAttrs (
+        _name: input:
+          input.rev or input.lastModified or "unknown"
+      )
+      inputs;
     cacheVersion = "1.0.0";
     nixVersion = builtins.nixVersion or "unknown";
   };
@@ -133,23 +150,24 @@
     publicKey ? null,
     priority ? 40,
   }: {
-    "${cacheName}" = {
-      enable = true;
-      inherit priority;
-    } // lib.optionalAttrs (publicKey != null) {
-      inherit publicKey;
-    };
+    "${cacheName}" =
+      {
+        enable = true;
+        inherit priority;
+      }
+      // lib.optionalAttrs (publicKey != null) {
+        inherit publicKey;
+      };
   };
 
   # Helper to create a cached version of all flake outputs
   # This can be used in CI to pre-build common configurations
   prebuildManifest = outputs: let
-    configs = [
-      # NixOS configurations
-    ] ++ (lib.mapAttrsToList (name: _: "nixosConfigurations.${name}") 
-           (outputs.nixosConfigurations or {}))
-    ++ (lib.mapAttrsToList (name: _: "darwinConfigurations.${name}")
-           (outputs.darwinConfigurations or {}));
+    configs =
+      (lib.mapAttrsToList (name: _: "nixosConfigurations.${name}")
+        (outputs.nixosConfigurations or {}))
+      ++ (lib.mapAttrsToList (name: _: "darwinConfigurations.${name}")
+        (outputs.darwinConfigurations or {}));
   in {
     configurations = configs;
     buildCommand = name: "nix build .#${name}";
@@ -164,7 +182,6 @@
     warningCount = builtins.length (config.warnings or []);
     assertionCount = builtins.length (config.assertions or []);
   };
-
 in {
   inherit
     cacheAttr
@@ -178,7 +195,7 @@ in {
     cachixConfig
     prebuildManifest
     evalStats
-  ;
+    ;
 
   # Export a summary of caching utilities
   cachingInfo = {
@@ -193,14 +210,14 @@ in {
     ];
     usage = ''
       Import this module to use caching utilities:
-      
+
       cache = import ./lib/cache.nix { inherit lib; };
-      
+
       # Create a manifest
       manifest = cache.createManifest {
         inherit nixosConfigurations darwinConfigurations;
       };
-      
+
       # Generate cache keys
       key = cache.generateCacheKey {
         name = "jupiter";

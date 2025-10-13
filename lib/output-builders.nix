@@ -67,7 +67,7 @@ in {
           };
           overlays = import ../overlays {
             inherit inputs;
-            system = hostConfig.system;
+            inherit (hostConfig) system;
           };
         };
       in

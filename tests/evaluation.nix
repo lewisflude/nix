@@ -2,7 +2,6 @@
 # Ensures all configurations evaluate without errors
 {
   pkgs,
-  lib,
   inputs,
   ...
 }: let
@@ -23,7 +22,7 @@ in {
       modules = [ ../hosts/Lewiss-MacBook-Pro/configuration.nix ];
     }.system
   '';
-  
+
   nixos-config = mkEvalTest "nixos" ''
     (import ${inputs.nixpkgs} {
       system = "x86_64-linux";
@@ -32,7 +31,7 @@ in {
       modules = [ ../hosts/jupiter/configuration.nix ];
     }.config.system.build.toplevel
   '';
-  
+
   # Test that options are properly typed
   host-options = mkEvalTest "host-options" ''
     let
@@ -41,7 +40,7 @@ in {
     in
       module.options.host.username.type
   '';
-  
+
   # Test that overlays evaluate
   overlays = mkEvalTest "overlays" ''
     let
@@ -52,7 +51,7 @@ in {
     in
       builtins.attrNames overlaySet
   '';
-  
+
   # Test feature system
   features = mkEvalTest "features" ''
     let

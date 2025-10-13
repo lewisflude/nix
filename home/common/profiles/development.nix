@@ -4,7 +4,7 @@
 {...}: {
   imports = [
     ./base.nix
-    
+
     # Development tools (but not IDEs)
     ../development
   ];

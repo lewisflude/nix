@@ -8,7 +8,7 @@
     ../ssh.nix
     ../gpg.nix
     ../nix-config.nix
-    
+
     # Essential apps only (lightweight CLI tools)
     ../apps/bat.nix
     ../apps/direnv.nix
@@ -16,13 +16,13 @@
     ../apps/ripgrep.nix
     ../apps/eza.nix
     ../apps/jq.nix
-    
+
     # SOPS secrets
     ../sops.nix
-    
+
     # Library functions
     ../lib
-    
+
     # Custom modules
     ../modules.nix
   ];

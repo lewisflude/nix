@@ -12,7 +12,7 @@ with lib; let
 in {
   # Note: Options are defined centrally in modules/shared/host-options.nix
   # You need to add your feature options there first
-  
+
   config = mkIf cfg.enable {
     # Assertions to validate configuration
     assertions = [
@@ -21,11 +21,10 @@ in {
         message = "FEATURE_NAME requires REQUIRED_FEATURE to be enabled";
       }
     ];
-    
+
     # Platform-specific package installation
     environment.systemPackages = with pkgs;
-      []
-      ++ optionals pkgs.stdenv.isLinux [
+      optionals pkgs.stdenv.isLinux [
         # Linux-specific packages
         # example-linux-package
       ]
@@ -37,7 +36,7 @@ in {
         # Conditionally installed packages
         # example-optional-package
       ];
-    
+
     # System services (NixOS/Linux only)
     systemd.services = mkIf pkgs.stdenv.isLinux {
       example-service = {
@@ -50,11 +49,11 @@ in {
         };
       };
     };
-    
+
     # User groups
     users.users.${config.host.username}.extraGroups =
       optional cfg.enable "example-group";
-    
+
     # Home Manager integration
     home-manager.users.${config.host.username} = {
       # User-level configuration
@@ -62,13 +61,13 @@ in {
         enable = true;
         # Additional config...
       };
-      
+
       # User packages (installed in user profile)
       home.packages = with pkgs; [
         # User-specific tools
       ];
     };
-    
+
     # Additional system configuration
     # networking.firewall.allowedTCPPorts = [ 8080 ];
     # environment.sessionVariables.EXAMPLE_VAR = "value";

@@ -2,10 +2,13 @@
   pkgs,
   config,
   system,
+  hostSystem,
   lib,
   ...
 }: let
   platformLib = import ../../lib/functions.nix {inherit lib system;};
+  isDarwin = lib.strings.hasSuffix "darwin" hostSystem;
+  isLinux = lib.strings.hasSuffix "linux" hostSystem;
   palette =
     if lib.hasAttrByPath ["catppuccin" "sources" "palette"] config
     then (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors
@@ -18,11 +21,11 @@
       };
     };
   secretAvailable = name:
-    if pkgs.stdenv.isDarwin
+    if isDarwin
     then true
     else lib.hasAttrByPath ["sops" "secrets" name] config;
   secretPath = name:
-    if pkgs.stdenv.isDarwin
+    if isDarwin
     then "${platformLib.dataDir config.home.username}/sops-nix/secrets/${name}"
     else config.sops.secrets.${name}.path;
   secretExportSnippet = name: var: let
@@ -265,7 +268,7 @@ in {
           zja = "zellij attach";
           zjd = "zellij delete-session";
         }
-        (lib.mkIf pkgs.stdenv.isLinux {
+        (lib.mkIf isLinux {
           lock = "saylock --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --ring-color cba6f7 --key-hl-color b4befe --line-color 00000000 --inside-color 1e1e2e88 --separator-color 00000000 --text-color cdd6f4 --grace 2 --fade-in 0.2";
         })
       ];
@@ -401,7 +404,7 @@ in {
           IFS=$'\n\t'
           FLAKE_PATH="''${NH_FLAKE:-${config.home.homeDirectory}/.config/nix}"
           NH_TARGET="${
-            if pkgs.stdenv.isDarwin
+            if isDarwin
             then "darwin"
             else "os"
           }"

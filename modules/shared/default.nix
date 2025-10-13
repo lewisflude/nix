@@ -10,7 +10,7 @@
     ./cachix.nix
     ./sops.nix
     ./telemetry.nix
-    
+
     # Cross-platform feature modules
     ./features/development.nix
     ./features/security.nix

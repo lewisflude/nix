@@ -2,11 +2,12 @@
   config,
   inputs,
   lib,
+  hostSystem,
   ...
 }: let
   platformLib = import ../../lib/functions.nix {
     inherit lib;
-    system = config.nixpkgs.hostPlatform.system;
+    system = hostSystem;
   };
 in {
   nix = {
@@ -22,10 +23,10 @@ in {
       ];
     };
   };
-  
+
   system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
   system.stateVersion = lib.mkDefault platformLib.platformStateVersion;
-  
+
   nixpkgs.config = {
     allowUnfree = true;
     allowUnsupportedSystem = false;
