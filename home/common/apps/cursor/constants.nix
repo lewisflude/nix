@@ -70,17 +70,11 @@ _: let
     "**/.tmp" = true;
     "**/.temp" = true;
     "**/logs" = true;
-    "**/*.log" = true;
-    "**/.log" = true;
+    "**.log" = true;
     "**/pid" = true;
-    "**/*.pid" = true;
-    "**/*.seed" = true;
-    "**/*.pid.lock" = true;
-  };
-  languageFiles = {
-    "**/__pycache__" = true;
-    "**/*.py[cod]" = true;
-    "**/*$py.class" = true;
+    "***.seed" = true;
+    "**__pycache__" = true;
+    "***$py.class" = true;
     "**/.Python" = true;
     "**/build/" = true;
     "**/develop-eggs/" = true;
@@ -92,8 +86,7 @@ _: let
     "**/sdist/" = true;
     "**/var/" = true;
     "**/wheels/" = true;
-    "**/*.egg-info/" = true;
-    "**/.pytest_cache/" = true;
+    "**.pytest_cache/" = true;
     "**/.coverage" = true;
     "**/htmlcov/" = true;
     "**/.tox/" = true;
@@ -101,27 +94,18 @@ _: let
     "**/venv/" = true;
     "**/env/" = true;
     "**/ENV/" = true;
-    "**/*.class" = true;
-    "**/*.jar" = true;
-    "**/*.war" = true;
-    "**/*.ear" = true;
-    "**/*.nar" = true;
-    "**/hs_err_pid*" = true;
+    "***.jar" = true;
+    "***.ear" = true;
+    "**hs_err_pid*" = true;
     "**/bin/" = true;
     "**/obj/" = true;
-    "**/*.user" = true;
-    "**/*.suo" = true;
-    "**/*.cache" = true;
-    "**/vendor/" = true;
-    "**/*.test" = true;
-    "**/*.out" = true;
+    "***.suo" = true;
+    "**vendor/" = true;
+    "***.out" = true;
     "**/target/" = true;
-    "**/*.pdb" = true;
-    "**/*.o" = true;
-    "**/*.a" = true;
-    "**/*.so" = true;
-    "**/*.dll" = true;
-    "**/*.exe" = true;
+    "***.o" = true;
+    "***.so" = true;
+    "***.exe" = true;
   };
   frameworkFiles = {
     "**/.next/" = true;
@@ -138,50 +122,41 @@ _: let
     "**/.nyc_output/" = true;
     "**/test-results/" = true;
     "**/playwright-report/" = true;
-    "**/*.sqlite" = true;
-    "**/*.db" = true;
-    "**/*.sqlite3" = true;
-    "**/.dockerignore" = true;
+    "***.db" = true;
+    "**.dockerignore" = true;
   };
   ideFiles = {
     "**/.idea/" = true;
-    "**/*.iml" = true;
-    "**/*.ipr" = true;
-    "**/*.iws" = true;
-    "**/.vs/" = true;
-    "**/*.vscode/" = true;
-    "**/*.sublime-project" = true;
-    "**/*.sublime-workspace" = true;
-    "**/*.swp" = true;
-    "**/*.swo" = true;
-    "**/*~" = true;
+    "***.ipr" = true;
+    "**.vs/" = true;
+    "***.sublime-project" = true;
+    "***.swp" = true;
+    "***~" = true;
     "**/.DS_Store" = true;
     "**/Thumbs.db" = true;
   };
   largeFiles = {
-    "**/*.mov" = true;
-    "**/*.mp4" = true;
-    "**/*.avi" = true;
-    "**/*.mkv" = true;
-    "**/*.wmv" = true;
-    "**/*.mp3" = true;
-    "**/*.wav" = true;
-    "**/*.flac" = true;
-    "**/*.zip" = true;
-    "**/*.tar" = true;
-    "**/*.tar.gz" = true;
-    "**/*.rar" = true;
-    "**/*.7z" = true;
-    "**/*.dmg" = true;
-    "**/*.iso" = true;
+    "***.mp4" = true;
+    "***.mkv" = true;
+    "***.mp3" = true;
+    "***.flac" = true;
+    "***.tar" = true;
+    "***.rar" = true;
+    "***.dmg" = true;
+    "**.git/objects.git/subtree-cache.git/index.lock" = true;
+      "**/node_modules*.log" = true;
+      "**/logs.cachetmptempcoveragedistbuildtarget__pycache__.npm.yarn.pnpm-store.DS_Store" = true;
+    "**/.git" = true;
+    "**/node_modules" = true;
   };
+  
+  # Combined ignore sets
   commonIgnores = systemFiles // vcsFiles // devEnvFiles;
   searchIgnores =
     commonIgnores
     // nodeFiles
     // buildFiles
     // cacheFiles
-    // languageFiles
     // frameworkFiles
     // ideFiles;
   watcherIgnores =
@@ -223,7 +198,6 @@ in {
     nodeFiles
     buildFiles
     cacheFiles
-    languageFiles
     frameworkFiles
     ideFiles
     largeFiles

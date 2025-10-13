@@ -258,8 +258,7 @@ in {
           abbr-add = "abbr add";
           abbr-erase = "abbr erase";
           lsh = "eza -la .*";
-          lsz = "eza -la **/*.{zip,tar,gz,bz2,xz,7z}";
-          lscode = "eza -la **/*.{js,ts,jsx,tsx,py,go,rs,c,cpp,h,hpp}";
+          lsz = "eza -la ***.{js,ts,jsx,tsx,py,go,rs,c,cpp,h,hpp}";
           lsconfig = "eza -la **/*.{json,yaml,yml,toml,ini,conf,cfg}";
           zjls = "zellij list-sessions";
           zjk = "zellij kill-session";
