@@ -56,5 +56,12 @@ in {
     inherit (import ./validation.nix {inherit lib; pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;})
       validateHostConfig
       mkCheck;
+    
+    inherit (import ./cache.nix {inherit lib;})
+      createManifest
+      generateCacheKey
+      evalCache
+      cachixConfig
+      prebuildManifest;
   };
 }

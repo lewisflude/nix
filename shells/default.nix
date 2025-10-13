@@ -160,6 +160,79 @@
       '';
     };
   };
+  # Default shell for nix-config development
+  defaultShell = pkgs.mkShell {
+    buildInputs = with pkgs; [
+      # Nix tooling
+      alejandra # Nix formatter
+      deadnix # Find dead Nix code
+      statix # Lints and suggestions for Nix
+      nixpkgs-fmt # Alternative formatter
+      nix-tree # Visualize dependencies
+      nix-diff # Compare derivations
+      nvd # Nix version diff
+
+      # Documentation
+      mdbook # Build documentation
+      graphviz # Module visualization
+
+      # Git and utilities
+      git
+      pre-commit
+      gh # GitHub CLI
+      jq # JSON processing
+
+      # Shell utilities
+      ripgrep # Fast search
+      fd # Fast find
+      bat # Better cat
+      eza # Better ls
+      direnv # Auto-load environments
+    ];
+
+    shellHook = ''
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      echo "🏗️  Nix Configuration Development Environment"
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      echo ""
+      echo "📦 Available Tools:"
+      echo "  • alejandra        - Format Nix files"
+      echo "  • deadnix          - Find unused code"
+      echo "  • statix           - Lint Nix files"
+      echo "  • nix-tree         - Visualize dependencies"
+      echo "  • nvd              - Compare configurations"
+      echo ""
+      echo "🛠️  Custom Scripts:"
+      echo "  • benchmark-rebuild.sh  - Performance monitoring"
+      echo "  • diff-config.sh        - Preview changes"
+      echo "  • new-module.sh         - Scaffold new modules"
+      echo "  • update-flake.sh       - Update dependencies"
+      echo ""
+      echo "🚀 Quick Commands:"
+      echo "  • nix flake check             - Run all checks"
+      echo "  • nix flake update            - Update all inputs"
+      echo "  • alejandra .                 - Format all files"
+      echo "  • pre-commit run --all-files  - Run linters"
+      echo ""
+      echo "📚 Documentation:"
+      echo "  • docs/ARCHITECTURE.md         - Architecture overview"
+      echo "  • CONTRIBUTING.md              - Contributing guide"
+      echo "  • templates/README.md          - Module templates"
+      echo ""
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      
+      # Add scripts to PATH
+      export PATH="$PWD/scripts/utils:$PWD/scripts/maintenance:$PATH"
+      
+      # Set helpful aliases
+      alias fmt='alejandra .'
+      alias lint='statix check .'
+      alias check='nix flake check'
+      alias update='nix flake update'
+      alias build-darwin='nix build .#darwinConfigurations.Lewiss-MacBook-Pro.system'
+      alias build-nixos='nix build .#nixosConfigurations.jupiter.config.system.build.toplevel'
+    '';
+  };
 in {
-  devShells = devShellsCommon // devShellsLinuxOnly;
+  devShells = devShellsCommon // devShellsLinuxOnly // {default = defaultShell;};
 }
