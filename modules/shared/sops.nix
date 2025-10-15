@@ -19,15 +19,21 @@
     then "wheel"
     else "sops-secrets";
   mkSecret = {
-    mode ? "0400",
+    mode ? (if isDarwin then "0640" else "0400"),
     allowUserRead ? false,
-  }: {
-    mode =
-      if allowUserRead
+  }: let
+    resolvedMode =
+      if isDarwin
+      then mode
+      else if allowUserRead
       then "0440"
       else mode;
-    owner = "root";
-    group = secretsGroup;
+    resolvedOwner = if isDarwin then config.host.username else "root";
+    resolvedGroup = if isDarwin then "staff" else secretsGroup;
+  in {
+    mode = resolvedMode;
+    owner = resolvedOwner;
+    group = resolvedGroup;
     neededForUsers = allowUserRead;
   };
 in {
