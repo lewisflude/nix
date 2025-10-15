@@ -27,6 +27,20 @@
   archPackages = x86Pkgs: aarch64Pkgs: (lib.optionals isX86_64 x86Pkgs) ++ (lib.optionals isAarch64 aarch64Pkgs);
   platformModules = linuxModules: darwinModules:
     (lib.optionals isLinux linuxModules) ++ (lib.optionals isDarwin darwinModules);
+  getVirtualisationFlag = {
+    virtualisation ? {},
+    modulesVirtualisation ? {},
+    flagName,
+    default ? false,
+  }: let
+    flagPath =
+      if builtins.isList flagName
+      then flagName
+      else lib.splitString "." flagName;
+    mergedVirtualisation =
+      lib.recursiveUpdate modulesVirtualisation virtualisation;
+  in
+    lib.attrByPath flagPath default mergedVirtualisation;
   homeDir = username:
     if isDarwin
     then "/Users/${username}"
