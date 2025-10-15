@@ -1,8 +1,7 @@
 {lib ? (import <nixpkgs> {}).lib}: let
-  hosts = {
-    "Lewiss-MacBook-Pro" = import ../hosts/Lewiss-MacBook-Pro;
-    jupiter = import ../hosts/jupiter;
-  };
+  hostDirectories =
+    lib.filterAttrs (_name: type: type == "directory") (builtins.readDir ../hosts);
+  hosts = builtins.mapAttrs (name: _: import (../hosts + "/${name}")) hostDirectories;
 in {
   inherit hosts;
   getSystems = hosts: builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
