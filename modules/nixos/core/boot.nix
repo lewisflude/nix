@@ -5,8 +5,7 @@
   ...
 }: let
   zfsCompatibleKernelPackages =
-    lib.filterAttrs
-    (
+    lib.filterAttrs (
       name: kernelPackages:
         (builtins.match "linux_[0-9]+_[0-9]+" name)
         != null
@@ -21,7 +20,7 @@
   );
 in {
   boot = {
-    kernelPackages = latestKernelPackage;
+    kernelPackages = lib.mkDefault latestKernelPackage;
     loader.grub = {
       enable = true;
       efiSupport = true;

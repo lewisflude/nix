@@ -18,7 +18,7 @@ in {
       # Real-time kernel and optimizations (only if realtime flag is set)
       kernel = mkIf cfg.realtime {
         realtime = true;
-        packages = pkgs.linuxPackages_rt_latest;
+        packages = pkgs.linuxPackages-rt_latest;
       };
       rtirq.enable = cfg.realtime;
     };
@@ -37,7 +37,6 @@ in {
       ];
 
     # Ensure user is in audio group
-    users.users.${config.host.username}.extraGroups =
-      optional cfg.enable "audio";
+    users.users.${config.host.username}.extraGroups = optional cfg.enable "audio";
   };
 }
