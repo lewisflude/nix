@@ -20,9 +20,7 @@ in {
       CIRCLECI_TOKEN = {};
       OBSIDIAN_API_KEY = {};
       OPENAI_API_KEY = {};
-      GITHUB_TOKEN = {
-        sopsFile = ../../secrets/secrets.yaml;
-      };
+      GITHUB_TOKEN = {}; # Now available in user.yaml for all platforms
     };
   };
   systemd.user.services.sops-nix = lib.mkIf isLinux {
