@@ -13,8 +13,9 @@ in {
       accent = "mauve";
     };
 
-    home.packages = with pkgs; lib.optionals cfg.utilities [
-      xdg-utils
-    ];
+    home.packages = with pkgs;
+      lib.optionals cfg.utilities [
+        xdg-utils
+      ];
   };
 }
