@@ -78,8 +78,17 @@
     if isDarwin
     then 6
     else "25.05";
-  systemRebuildCommand =
+  systemRebuildCommand = {
+    flakePath ? "~/.config/nix",
+    hostName ? null,
+    ...
+  }:
     if isDarwin
-    then "sudo darwin-rebuild switch --flake ~/.config/nix"
-    else "sudo nixos-rebuild switch --flake ~/.config/nix#jupiter";
+    then "sudo darwin-rebuild switch --flake ${flakePath}"
+    else let
+      hostSuffix =
+        if hostName == null || hostName == ""
+        then ""
+        else "#${hostName}";
+    in "sudo nixos-rebuild switch --flake ${flakePath}${hostSuffix}";
 }

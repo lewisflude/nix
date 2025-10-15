@@ -147,7 +147,8 @@ in
 - `platformModules` - Conditional module imports
 - `homeDir`, `configDir`, `dataDir`, `cacheDir` - Dynamic path helpers
 - `rootGroup` - Platform-specific root group (`wheel` vs `root`)
-- `systemRebuildCommand` - Platform-specific rebuild commands
+- `systemRebuildCommand { flakePath ? "~/.config/nix", hostName ? null }` - Platform-specific rebuild
+  commands that append the host suffix on Linux when `hostName` is provided
 
 ## 🎯 Best Practices for AI Assistants
 
