@@ -17,7 +17,7 @@ in rec {
 
   # Unstable packages namespace
   unstable = _final: prev: {
-    unstable = import inputs.nixpkgs-unstable {
+    unstable = import inputs.nixpkgs {
       inherit system;
       inherit (prev) config;
     };
