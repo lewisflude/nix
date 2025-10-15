@@ -1,6 +1,6 @@
-{inputs}: let
-  inherit
-    (inputs)
+{ inputs }:
+let
+  inherit (inputs)
     darwin
     nixpkgs
     home-manager
@@ -16,7 +16,7 @@
     ;
 
   # Import virtualisation library
-  virtualisationLib = import ./virtualisation.nix {inherit (nixpkgs) lib;};
+  virtualisationLib = import ./virtualisation.nix { inherit (nixpkgs) lib; };
 
   # Common modules shared between Darwin and NixOS
   commonModules = [
@@ -24,35 +24,42 @@
   ];
 
   # Common Home Manager configuration
-  mkHomeManagerConfig = {
-    hostConfig,
-    extraSharedModules ? [],
-  }: {
-    useGlobalPkgs = true;
-    verbose = true;
-    backupFileExtension = "backup";
-    extraSpecialArgs =
-      inputs
-      // hostConfig
-      // {
-        inherit (hostConfig) system;
-        hostSystem = hostConfig.system;
-        virtualisation = hostConfig.features.virtualisation or {};
-        modulesVirtualisation = virtualisationLib.mkModulesVirtualisationArgs {
-          hostVirtualisation = hostConfig.features.virtualisation or {};
+  mkHomeManagerConfig =
+    {
+      hostConfig,
+      extraSharedModules ? [ ],
+    }:
+    {
+      useGlobalPkgs = true;
+      verbose = true;
+      backupFileExtension = "backup";
+      extraSpecialArgs =
+        inputs
+        // hostConfig
+        // {
+          inherit inputs;
+          inherit (hostConfig) system;
+          hostSystem = hostConfig.system;
+          host = hostConfig;
+          inherit (hostConfig) username useremail hostname;
+          virtualisation = hostConfig.features.virtualisation or { };
+          modulesVirtualisation = virtualisationLib.mkModulesVirtualisationArgs {
+            hostVirtualisation = hostConfig.features.virtualisation or { };
+          };
         };
-      };
-    sharedModules =
-      [
+      sharedModules = [
         catppuccin.homeModules.catppuccin
         sops-nix.homeManagerModules.sops
       ]
       ++ extraSharedModules;
-    users.${hostConfig.username} = import ../home;
-  };
-in {
+      users.${hostConfig.username} = import ../home;
+    };
+in
+{
   # Build a Darwin (macOS) system configuration
-  mkDarwinSystem = hostName: hostConfig: {homebrew-j178}:
+  mkDarwinSystem =
+    hostName: hostConfig:
+    { homebrew-j178 }:
     darwin.lib.darwinSystem {
       inherit (hostConfig) system;
 
@@ -65,51 +72,52 @@ in {
         inherit (hostConfig) hostname;
       };
 
-      modules =
-        [
-          # Host-specific configuration
-          ../hosts/${hostName}/configuration.nix
+      modules = [
+        # Host-specific configuration
+        ../hosts/${hostName}/configuration.nix
 
-          # Set host options from host config
-          {
-            config.host = hostConfig;
-          }
+        # Set host options from host config
+        {
+          config.host = hostConfig;
+        }
 
-          # Platform modules
-          ../modules/darwin
+        # Platform modules
+        ../modules/darwin
 
-          # Integration modules
-          determinate.darwinModules.default
-          home-manager.darwinModules.home-manager
-          mac-app-util.darwinModules.default
-          nix-homebrew.darwinModules.nix-homebrew
-          sops-nix.darwinModules.sops
+        # Integration modules
+        determinate.darwinModules.default
+        home-manager.darwinModules.home-manager
+        mac-app-util.darwinModules.default
+        nix-homebrew.darwinModules.nix-homebrew
+        sops-nix.darwinModules.sops
 
-          # Homebrew configuration
-          {
-            nix-homebrew = {
-              enable = true;
-              enableRosetta = true;
-              user = hostConfig.username;
-              autoMigrate = true;
-              taps."j178/homebrew-tap" = homebrew-j178;
-              mutableTaps = false;
-            };
-          }
+        # Homebrew configuration
+        {
+          nix-homebrew = {
+            enable = true;
+            enableRosetta = true;
+            user = hostConfig.username;
+            autoMigrate = true;
+            taps."j178/homebrew-tap" = homebrew-j178;
+            mutableTaps = false;
+          };
+        }
 
-          # Home Manager configuration
-          {
-            home-manager = mkHomeManagerConfig {
-              inherit hostConfig;
-              extraSharedModules = [mac-app-util.homeManagerModules.default];
-            };
-          }
-        ]
-        ++ commonModules;
+        # Home Manager configuration
+        {
+          home-manager = mkHomeManagerConfig {
+            inherit hostConfig;
+            extraSharedModules = [ mac-app-util.homeManagerModules.default ];
+          };
+        }
+      ]
+      ++ commonModules;
     };
 
   # Build a NixOS system configuration
-  mkNixosSystem = hostName: hostConfig: {self}:
+  mkNixosSystem =
+    hostName: hostConfig:
+    { self }:
     nixpkgs.lib.nixosSystem {
       inherit (hostConfig) system;
 
@@ -123,38 +131,35 @@ in {
         keysDirectory = "${self}/keys";
       };
 
-      modules =
-        [
-          # Host-specific configuration
-          ../hosts/${hostName}/configuration.nix
+      modules = [
+        # Host-specific configuration
+        ../hosts/${hostName}/configuration.nix
 
-          # Set host options from host config
-          {
-            config.host = hostConfig;
-          }
+        # Set host options from host config
+        {
+          config.host = hostConfig;
+        }
 
-          # Platform modules
-          ../modules/nixos
-          determinate.nixosModules.default
+        # Platform modules
+        ../modules/nixos
+        determinate.nixosModules.default
 
-          # Integration modules
-          sops-nix.nixosModules.sops
-          catppuccin.nixosModules.catppuccin
-          niri.nixosModules.niri
-          musnix.nixosModules.musnix
-          nur.modules.nixos.default
-          solaar.nixosModules.default
-          home-manager.nixosModules.home-manager
+        # Integration modules
+        sops-nix.nixosModules.sops
+        catppuccin.nixosModules.catppuccin
+        niri.nixosModules.niri
+        musnix.nixosModules.musnix
+        nur.modules.nixos.default
+        solaar.nixosModules.default
+        home-manager.nixosModules.home-manager
 
-          # Home Manager configuration
-          {
-            home-manager =
-              mkHomeManagerConfig {inherit hostConfig;}
-              // {
-                useUserPackages = true;
-              };
-          }
-        ]
-        ++ commonModules;
+        # Home Manager configuration
+        {
+          home-manager = mkHomeManagerConfig { inherit hostConfig; } // {
+            useUserPackages = true;
+          };
+        }
+      ]
+      ++ commonModules;
     };
 }
