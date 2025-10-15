@@ -3,6 +3,7 @@
   config,
   system,
   hostSystem,
+  host,
   lib,
   ...
 }: let
@@ -218,7 +219,7 @@ in {
       ];
       shellAliases = lib.mkMerge [
         {
-          switch = platformLib.systemRebuildCommand;
+          switch = platformLib.systemRebuildCommand {hostName = host.hostname;};
           update = "system-update";
           edit = "sudo -e";
           ls = "eza";
