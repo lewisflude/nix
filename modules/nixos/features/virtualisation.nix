@@ -16,6 +16,7 @@ in {
         docker = {
           enable = true;
           enableOnBoot = true;
+          storageDriver = "zfs";
           autoPrune = {
             enable = true;
             dates = "weekly";
