@@ -15,6 +15,9 @@
     determinate
     ;
 
+  # Import virtualisation library
+  virtualisationLib = import ./virtualisation.nix {inherit (nixpkgs) lib;};
+
   # Common modules shared between Darwin and NixOS
   commonModules = [
     ../modules/shared
@@ -28,14 +31,17 @@
     useGlobalPkgs = true;
     verbose = true;
     backupFileExtension = "backup";
-    extraSpecialArgs = {
-      inherit inputs;
-      inherit (hostConfig) system;
-      hostSystem = hostConfig.system;
-      inherit (hostConfig) username;
-      inherit (hostConfig) useremail;
-      inherit (hostConfig) hostname;
-    };
+    extraSpecialArgs =
+      inputs
+      // hostConfig
+      // {
+        inherit (hostConfig) system;
+        hostSystem = hostConfig.system;
+        virtualisation = hostConfig.features.virtualisation or {};
+        modulesVirtualisation = virtualisationLib.mkModulesVirtualisationArgs {
+          hostVirtualisation = hostConfig.features.virtualisation or {};
+        };
+      };
     sharedModules =
       [
         catppuccin.homeModules.catppuccin

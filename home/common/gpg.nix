@@ -22,7 +22,7 @@ in {
   services.gpg-agent = {
     enable = true;
     enableSshSupport = true;
-    pinentry.package = platformLib.platformPackage pkgs.pinentry-gnome3 pkgs.pinentry_mac;
+    pinentry.package = lib.mkForce (platformLib.platformPackage pkgs.pinentry-gnome3 pkgs.pinentry_mac);
     defaultCacheTtl = 86400;
     maxCacheTtl = 86400;
     extraConfig = ''

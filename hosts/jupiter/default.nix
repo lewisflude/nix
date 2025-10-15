@@ -12,34 +12,46 @@ in {
   features =
     defaultFeatures
     // {
-      development = defaultFeatures.development // {
-        docker = true;
-      };
+      development =
+        defaultFeatures.development
+        // {
+          docker = true;
+        };
 
-      gaming = defaultFeatures.gaming // {
-        enable = true;
-        steam = true;
-        performance = true;
-      };
+      gaming =
+        defaultFeatures.gaming
+        // {
+          enable = true;
+          steam = true;
+          performance = true;
+        };
 
-      virtualisation = defaultFeatures.virtualisation // {
-        enable = true;
-        docker = true;
-        podman = true;
-      };
+      virtualisation =
+        defaultFeatures.virtualisation
+        // {
+          enable = true;
+          docker = true;
+          podman = true;
+        };
 
-      homeServer = defaultFeatures.homeServer // {
-        enable = true;
-        fileSharing = true;
-      };
+      homeServer =
+        defaultFeatures.homeServer
+        // {
+          enable = true;
+          fileSharing = true;
+        };
 
-      desktop = defaultFeatures.desktop // {
-        niri = true;
-      };
+      desktop =
+        defaultFeatures.desktop
+        // {
+          niri = true;
+        };
 
-      audio = defaultFeatures.audio // {
-        enable = true;
-        realtime = true;
-      };
+      audio =
+        defaultFeatures.audio
+        // {
+          enable = true;
+          realtime = true;
+        };
     };
 }
