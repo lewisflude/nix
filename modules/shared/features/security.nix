@@ -39,7 +39,7 @@ in {
       services.gpg-agent = mkIf (cfg.gpg && isLinux) {
         enable = true;
         enableSshSupport = true;
-        pinentryPackage = pkgs.pinentry-curses;
+        pinentry.package = pkgs.pinentry-curses;
       };
     };
   };

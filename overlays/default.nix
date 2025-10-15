@@ -29,6 +29,9 @@ in rec {
   cursor = import ./cursor.nix;
   npm-packages = import ./npm-packages.nix;
 
+  # Package fixes
+  pamixer = import ./pamixer.nix;
+
   # Essential tools
   yazi = inputs.yazi.overlays.default;
   nh = inputs.nh.overlays.default;
@@ -44,6 +47,8 @@ in rec {
   waybar = mkConditional isLinux (import ./waybar.nix {inherit inputs;});
   swww = mkConditional isLinux (import ./swww.nix {inherit inputs;});
   nvidia-patch =
-    mkConditional (isLinux && inputs ? nvidia-patch)
+    mkConditional (
+      isLinux && inputs ? nvidia-patch
+    )
     inputs.nvidia-patch.overlays.default;
 }
