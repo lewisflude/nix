@@ -29,7 +29,10 @@
   inputs = {
     # === Core Infrastructure ===
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
 
     # System configuration frameworks
     darwin = {
@@ -126,5 +129,9 @@
   };
 
   outputs = inputs @ {self, ...}:
-    import ./lib {inherit inputs self;};
+    inputs.flake-parts.lib.mkFlake {inherit inputs self;} {
+      imports = [
+        ./flake-parts/core.nix
+      ];
+    };
 }
