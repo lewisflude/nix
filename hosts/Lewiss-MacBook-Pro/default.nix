@@ -12,9 +12,11 @@ in {
   features =
     defaultFeatures
     // {
-      productivity = defaultFeatures.productivity // {
-        enable = true;
-        notes = true;
-      };
+      productivity =
+        defaultFeatures.productivity
+        // {
+          enable = true;
+          notes = true;
+        };
     };
 }

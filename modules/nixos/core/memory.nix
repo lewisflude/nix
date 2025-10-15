@@ -22,7 +22,7 @@
     "vm.swappiness" = lib.mkForce 60;
     "vm.dirty_background_ratio" = 5;
     "vm.dirty_ratio" = 20;
-    "vm.max_map_count" = 262144;
+    "vm.max_map_count" = lib.mkDefault 262144;
     "vm.page-cluster" = 0;
     "fs.inotify.max_user_watches" = 1048576;
   };
