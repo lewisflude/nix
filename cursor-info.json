@@ -1,34 +1,11 @@
 {
-  "version": "1.7.38",
+  "version": "1.7.46",
   "linux": {
-    "url": "https://downloads.cursor.com/production/fe5d1728063e86edeeda5bebd2c8e14bf4d0f96a/linux/x64/Cursor-1.7.38-x86_64.AppImage",
-    "sha256": "sha256-52QJVbXO3CYeL4vVZ249xabS7AoYFDOxKCQ6m3vB+vE="
+    "url": "https://downloads.cursor.com/production/b9e5948c1ad20443a5cecba6b84a3c9b99d62582/linux/x64/Cursor-1.7.46-x86_64.AppImage",
+    "sha256": "sha256-XDKDZYCagr7bEL4HzQFkhdUhPiL5MaRzZTPNrLDPZDM="
   },
   "darwin": {
-    "url": "https://downloads.cursor.com/production/fe5d1728063e86edeeda5bebd2c8e14bf4d0f96a/darwin/universal/Cursor-darwin-universal.dmg",
-    "sha256": "sha256-cqPxor8fI8+7ZNRzyL9VJwY8OZ4y8b+0srCPgwHLSog="
-  },
-  "cursorCli": {
-    "version": "2025.09.18-7ae6800",
-    "darwin": {
-      "aarch64": {
-        "url": "https://downloads.cursor.com/lab/2025.09.18-7ae6800/darwin/arm64/agent-cli-package.tar.gz",
-        "sha256": "sha256-53gNQu6g83Grvg9da9Z/eqQVt9BL7QOBErglUcGZn58="
-      },
-      "x86_64": {
-        "url": "https://downloads.cursor.com/lab/2025.09.18-7ae6800/darwin/x64/agent-cli-package.tar.gz",
-        "sha256": "sha256-9fc346e9b84b37d7ed24fe44dcb6567aabd2328711200c5285ebcbb34dcc6b08"
-      }
-    },
-    "linux": {
-      "aarch64": {
-        "url": "https://downloads.cursor.com/lab/2025.09.18-7ae6800/linux/arm64/agent-cli-package.tar.gz",
-        "sha256": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-      },
-      "x86_64": {
-        "url": "https://downloads.cursor.com/lab/2025.09.18-7ae6800/linux/x64/agent-cli-package.tar.gz",
-        "sha256": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-      }
-    }
+    "url": "https://downloads.cursor.com/production/b9e5948c1ad20443a5cecba6b84a3c9b99d62582/darwin/universal/Cursor-darwin-universal.dmg",
+    "sha256": "sha256-Nx4rD41pyIgKYU8fBgHMuBnmaCg0TiH3KFYsVrvN9NQ="
   }
 }
