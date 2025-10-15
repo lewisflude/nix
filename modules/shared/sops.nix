@@ -5,6 +5,14 @@
   ...
 }: let
   isDarwin = lib.strings.hasSuffix "darwin" hostSystem;
+  platformLib = import ../../lib/functions.nix {
+    inherit lib;
+    system = hostSystem;
+  };
+  keyFilePath =
+    if isDarwin
+    then "${platformLib.dataDir config.host.username}/sops-nix/key.txt"
+    else "/var/lib/sops-nix/key.txt";
   secretsGroup =
     if isDarwin
     then "wheel"
@@ -24,9 +32,9 @@
 in {
   sops = {
     age = {
-      keyFile = "/var/lib/sops-nix/key.txt";
+      keyFile = keyFilePath;
       generateKey = true;
-      sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+      sshKeyPaths = lib.optionals (!isDarwin) ["/etc/ssh/ssh_host_ed25519_key"];
     };
     defaultSopsFile = ../../secrets/secrets.yaml;
     secrets = {
