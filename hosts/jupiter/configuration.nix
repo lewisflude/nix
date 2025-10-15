@@ -5,7 +5,6 @@
   ...
 }: {
   # Host configuration using the new options system
-  host = import ./default.nix;
 
   imports = [
     ./hardware-configuration.nix
