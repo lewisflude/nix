@@ -33,7 +33,6 @@ in rec {
   pamixer = import ./pamixer.nix;
 
   # Essential tools
-  yazi = inputs.yazi.overlays.default;
   nh = inputs.nh.overlays.default;
   nur = inputs.nur.overlays.default;
 
