@@ -1,4 +1,9 @@
-{pkgs, lib, hostSystem, ...}: let
+{
+  pkgs,
+  lib,
+  hostSystem,
+  ...
+}: let
   isDarwin = lib.strings.hasSuffix "darwin" hostSystem;
 in {
   environment.variables =
