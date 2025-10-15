@@ -1,14 +1,21 @@
-{ inputs, self, ... }:
-let
+{
+  inputs,
+  self,
+  ...
+}: let
   inherit (inputs.nixpkgs) lib;
 
-  hostsConfig = import ../lib/hosts.nix { inherit lib; };
+  hostsConfig = import ../lib/hosts.nix {inherit lib;};
   inherit (hostsConfig) hosts;
 
-  systemBuilders = import ../lib/system-builders.nix { inherit inputs; };
+  systemBuilders = import ../lib/system-builders.nix {inherit inputs;};
 
   outputBuilders = import ../lib/output-builders.nix {
-    inputs = inputs // { inherit self; };
+    inputs =
+      inputs
+      // {
+        inherit self;
+      };
     inherit hosts;
   };
 
@@ -17,19 +24,29 @@ let
       inherit (inputs) homebrew-j178;
     };
 
-  mkNixosSystem = hostName: hostConfig:
-    systemBuilders.mkNixosSystem hostName hostConfig { inherit self; };
+  mkNixosSystem = hostName: hostConfig: systemBuilders.mkNixosSystem hostName hostConfig {inherit self;};
 in {
+  # Define supported systems for flake-parts
+  systems = [
+    "x86_64-linux"
+    "aarch64-linux"
+    "x86_64-darwin"
+    "aarch64-darwin"
+  ];
+
   _module.args = {
-    inherit hosts hostsConfig systemBuilders outputBuilders;
+    inherit
+      hosts
+      hostsConfig
+      systemBuilders
+      outputBuilders
+      ;
   };
 
   flake = {
-    darwinConfigurations =
-      builtins.mapAttrs mkDarwinSystem (hostsConfig.getDarwinHosts hosts);
+    darwinConfigurations = builtins.mapAttrs mkDarwinSystem (hostsConfig.getDarwinHosts hosts);
 
-    nixosConfigurations =
-      builtins.mapAttrs mkNixosSystem (hostsConfig.getNixosHosts hosts);
+    nixosConfigurations = builtins.mapAttrs mkNixosSystem (hostsConfig.getNixosHosts hosts);
 
     homeConfigurations = outputBuilders.mkHomeConfigurations;
 
@@ -48,7 +65,8 @@ in {
         homeDir
         configDir
         dataDir
-        cacheDir;
+        cacheDir
+        ;
 
       inherit
         (import ../lib/validation.nix {
@@ -56,15 +74,17 @@ in {
           pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
         })
         validateHostConfig
-        mkCheck;
+        mkCheck
+        ;
 
       inherit
-        (import ../lib/cache.nix { inherit lib; })
+        (import ../lib/cache.nix {inherit lib;})
         createManifest
         generateCacheKey
         evalCache
         cachixConfig
-        prebuildManifest;
+        prebuildManifest
+        ;
     };
   };
 }

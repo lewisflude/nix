@@ -331,7 +331,7 @@ in {
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "/run/current-system/sw/bin/ln -sf ${toString intent_script_yaml} /var/lib/hass/intent_script.yaml";
+      ExecStart = "/run/current-system/sw/bin/ln -sf ${intent_script_yaml} /var/lib/hass/intent_script.yaml";
       User = "hass";
       Group = "hass";
     };
