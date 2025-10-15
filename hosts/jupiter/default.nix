@@ -1,5 +1,7 @@
 # NixOS host configuration for Jupiter workstation
-{
+let
+  defaultFeatures = import ../_common/features.nix;
+in {
   # System identification
   username = "lewis";
   useremail = "lewis@lewisflude.com";
@@ -7,49 +9,37 @@
   hostname = "jupiter";
 
   # Feature configuration
-  features = {
-    development = {
-      enable = true;
-      rust = true;
-      python = true;
-      go = true;
-      node = true;
-      docker = true;
-    };
+  features =
+    defaultFeatures
+    // {
+      development = defaultFeatures.development // {
+        docker = true;
+      };
 
-    gaming = {
-      enable = true;
-      steam = true;
-      performance = true;
-    };
+      gaming = defaultFeatures.gaming // {
+        enable = true;
+        steam = true;
+        performance = true;
+      };
 
-    virtualisation = {
-      enable = true;
-      docker = true;
-      podman = true;
-    };
+      virtualisation = defaultFeatures.virtualisation // {
+        enable = true;
+        docker = true;
+        podman = true;
+      };
 
-    homeServer = {
-      enable = true;
-      homeAssistant = false;
-      fileSharing = true;
-    };
+      homeServer = defaultFeatures.homeServer // {
+        enable = true;
+        fileSharing = true;
+      };
 
-    desktop = {
-      enable = true;
-      niri = true;
-      theming = true;
-    };
+      desktop = defaultFeatures.desktop // {
+        niri = true;
+      };
 
-    security = {
-      enable = true;
-      yubikey = true;
-      gpg = true;
+      audio = defaultFeatures.audio // {
+        enable = true;
+        realtime = true;
+      };
     };
-
-    audio = {
-      enable = true;
-      realtime = true;
-    };
-  };
 }

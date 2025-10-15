@@ -1,5 +1,7 @@
 # Darwin host configuration for Lewis's MacBook Pro
-{
+let
+  defaultFeatures = import ../_common/features.nix;
+in {
   # System identification
   username = "lewisflude";
   useremail = "lewis@lewisflude.com";
@@ -7,38 +9,12 @@
   hostname = "Lewiss-MacBook-Pro";
 
   # Feature configuration
-  features = {
-    development = {
-      enable = true;
-      rust = true;
-      python = true;
-      go = true;
-      node = true;
-      docker = false; # Docker Desktop managed separately on macOS
+  features =
+    defaultFeatures
+    // {
+      productivity = defaultFeatures.productivity // {
+        enable = true;
+        notes = true;
+      };
     };
-
-    gaming.enable = false; # Not applicable on macOS
-
-    virtualisation = {
-      enable = false;
-      docker = false;
-      podman = false;
-    };
-
-    desktop = {
-      enable = true;
-      theming = true;
-    };
-
-    security = {
-      enable = true;
-      yubikey = true;
-      gpg = true;
-    };
-
-    productivity = {
-      enable = true;
-      notes = true;
-    };
-  };
 }
