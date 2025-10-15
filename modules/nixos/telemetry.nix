@@ -10,43 +10,50 @@ with lib; let
 
   # Script to collect runtime telemetry
   collectTelemetryScript = pkgs.writeShellScript "collect-telemetry" ''
-        # Collect runtime telemetry data
-        TELEMETRY_DIR="${cfg.dataDir}"
-        mkdir -p "$TELEMETRY_DIR"
-        TELEMETRY_FILE="$TELEMETRY_DIR/telemetry.json"
+    # Collect runtime telemetry data
+    TELEMETRY_DIR="${cfg.dataDir}"
+    mkdir -p "$TELEMETRY_DIR"
+    TELEMETRY_FILE="$TELEMETRY_DIR/telemetry.json"
 
-        # Generate telemetry JSON
-        cat > "$TELEMETRY_FILE" << 'EOF'
-    {
-      "timestamp": "$(date -Iseconds)",
-      "hostname": "${config.host.hostname}",
-      "system": "${config.host.system}",
-      "features": {
-        "development": ${
+    # Bind dynamic values for interpolation
+    timestamp="$(date -Iseconds)"
+    development_flag=${
       if config.host.features.development.enable
       then "true"
       else "false"
-    },
-        "gaming": ${
+    }
+    gaming_flag=${
       if config.host.features.gaming.enable
       then "true"
       else "false"
-    },
-        "desktop": ${
+    }
+    desktop_flag=${
       if config.host.features.desktop.enable
       then "true"
       else "false"
-    },
-        "virtualisation": ${
+    }
+    virtualisation_flag=${
       if config.host.features.virtualisation.enable
       then "true"
       else "false"
     }
-      }
-    }
-    EOF
 
-        ${optionalString cfg.verbose ''
+    # Generate telemetry JSON
+    cat > "$TELEMETRY_FILE" <<EOF
+{
+  "timestamp": "${timestamp}",
+  "hostname": "${config.host.hostname}",
+  "system": "${config.host.system}",
+  "features": {
+    "development": ${development_flag},
+    "gaming": ${gaming_flag},
+    "desktop": ${desktop_flag},
+    "virtualisation": ${virtualisation_flag}
+  }
+}
+EOF
+
+    ${optionalString cfg.verbose ''
       echo "✅ Telemetry data collected at $TELEMETRY_FILE"
     ''}
   '';
