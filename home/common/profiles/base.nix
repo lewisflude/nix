@@ -28,9 +28,6 @@
     # Additional packages
     ../apps/packages.nix
 
-    # SOPS secrets
-    ../sops.nix
-
     # Library functions
     ../lib
 

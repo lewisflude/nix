@@ -1,6 +1,6 @@
 {
   pkgs,
-  cursorInfo ? builtins.fromJSON (builtins.readFile ../../cursor-info.json),
+  cursorInfo ? builtins.fromJSON (builtins.readFile ./cursor-info.json),
   cursorVersion ? cursorInfo.version,
 }: let
   inherit (pkgs) lib fetchurl stdenvNoCC;
@@ -15,7 +15,13 @@
     then (import ./darwin.nix {inherit pkgs cursorInfo cursorVersion;})
     else throw "Cursor is only packaged for Linux and Darwin.";
   cursorCli = import ./cursor-cli.nix {
-    inherit pkgs lib fetchurl stdenvNoCC cursorInfo;
+    inherit
+      pkgs
+      lib
+      fetchurl
+      stdenvNoCC
+      cursorInfo
+      ;
   };
 in {
   cursor = cursorApp;

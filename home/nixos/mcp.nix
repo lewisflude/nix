@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  systemConfig,
   lib,
   system,
   hostSystem,
@@ -23,7 +24,7 @@
     ];
     text = ''
       set -euo pipefail
-      OPENAI_API_KEY="$(cat ${config.sops.secrets.OPENAI_API_KEY.path})"
+      OPENAI_API_KEY="$(cat ${systemConfig.sops.secrets.OPENAI_API_KEY.path})"
       export OPENAI_API_KEY
       export DOCS_RS="''${DOCS_RS:-1}"
       if [ -z "''${RUSTDOCFLAGS:-}" ]; then
@@ -40,7 +41,7 @@
     ];
     text = ''
       set -euo pipefail
-      KAGI_API_KEY="$(cat ${config.sops.secrets.KAGI_API_KEY.path})"
+      KAGI_API_KEY="$(cat ${systemConfig.sops.secrets.KAGI_API_KEY.path})"
       export KAGI_API_KEY
       export UV_PYTHON="${pkgs.python3}/bin/python3"
       exec ${uvx} --from kagimcp kagimcp "$@"
@@ -54,7 +55,7 @@
     ];
     text = ''
       set -euo pipefail
-      GITHUB_TOKEN="$(cat ${config.sops.secrets.GITHUB_TOKEN.path})"
+      GITHUB_TOKEN="$(cat ${systemConfig.sops.secrets.GITHUB_TOKEN.path})"
       export GITHUB_TOKEN
       exec ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @modelcontextprotocol/server-github@latest "$@"
     '';
@@ -67,7 +68,7 @@
     ];
     text = ''
       set -euo pipefail
-      OPENAI_API_KEY="$(cat ${config.sops.secrets.OPENAI_API_KEY.path})"
+      OPENAI_API_KEY="$(cat ${systemConfig.sops.secrets.OPENAI_API_KEY.path})"
       export OPENAI_API_KEY
       CACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/mcp"
       OUT_LINK="$CACHE_DIR/rustdocs-mcp-server"

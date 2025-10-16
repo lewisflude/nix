@@ -16,12 +16,17 @@ in {
         statix.enable = true;
       };
     };
+
+    # nixosTests-mcp = import ../tests/integration/mcp.nix {
+    #   inherit pkgs;
+    #   lib = nixpkgs.lib;
+    #   inputs = inputs;
+    # };
   });
   mkDevShells = let
     hostsBySystem = nixpkgs.lib.groupBy (hostConfig: hostConfig.system) (builtins.attrValues hosts);
   in
-    builtins.mapAttrs
-    (
+    builtins.mapAttrs (
       system: _hostGroup: let
         pkgs = nixpkgs.legacyPackages.${system};
         shellsConfig = import ../shells {
@@ -50,8 +55,7 @@ in {
     )
     hostsBySystem;
   mkHomeConfigurations =
-    builtins.mapAttrs
-    (
+    builtins.mapAttrs (
       _name: hostConfig: let
         pkgs = import nixpkgs {
           inherit (hostConfig) system;
@@ -85,9 +89,9 @@ in {
             };
           modules = [
             ../home
-            inputs.catppuccin.homeModules.catppuccin
             inputs.niri.homeModules.niri
             inputs.sops-nix.homeManagerModules.sops
+            inputs.catppuccin.homeModules.catppuccin
             {_module.args = {inherit inputs;};}
           ];
         }

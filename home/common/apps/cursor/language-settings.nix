@@ -1,5 +1,5 @@
 {lib, ...}: let
-  standards = import ../../development/language-standards.nix;
+  standards = import ../../features/development/language-standards.nix;
   formatterMap = {
     biome = "biomejs.biome";
     black = "ms-python.black-formatter";
@@ -18,8 +18,7 @@
   jsonVariants = ["jsonc"];
   languages = baseLanguages ++ reactVariants ++ jsonVariants;
   entries = lib.filter (e: e != null) (
-    lib.map
-    (
+    lib.map (
       lang: let
         aliasMap = {
           javascriptreact = "javascript";

@@ -5,7 +5,7 @@
     ./development.nix
 
     # Desktop specific
-    ../desktop
+    ../features/desktop
     ../theme.nix
     ../apps/obsidian.nix
 

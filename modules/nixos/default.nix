@@ -1,7 +1,7 @@
 {
   imports = [
     # NixOS-specific feature modules
-    ./features/desktop.nix
+    ./features/desktop
     ./features/security.nix
     ./features/gaming.nix
     ./features/virtualisation.nix
@@ -10,7 +10,6 @@
 
     # System modules
     ./core
-    ./desktop
     ./hardware
     ./services
     ./development

@@ -6,6 +6,6 @@
     ./base.nix
 
     # Development tools (but not IDEs)
-    ../development
+    ../features/development
   ];
 }

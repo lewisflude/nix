@@ -1,4 +1,7 @@
-{inputs}: let
+{
+  inputs,
+  validationLib, # <-- Now correctly accepted as an argument
+}: let
   inherit
     (inputs)
     darwin
@@ -14,14 +17,61 @@
     solaar
     determinate
     ;
+  inherit (nixpkgs) lib;
 
   # Import virtualisation library
-  virtualisationLib = import ./virtualisation.nix {inherit (nixpkgs) lib;};
+  virtualisationLib = import ./virtualisation.nix {inherit lib;};
 
-  # Common modules shared between Darwin and NixOS
+  # Common modules shared between Darwin and NixOS systems
   commonModules = [
     ../modules/shared
   ];
+
+  # Helper function to create the validation module
+  # This eliminates all duplication
+  mkValidationModule = importPatterns: {
+    config,
+    lib,
+    ...
+  }: let
+    # Use the validationLib passed into this file
+    validation = validationLib;
+    checks = [
+      # Host config must include core fields
+      (validation.validateHostConfig (config.host or {}))
+
+      # If SOPS is enabled, secrets should be defined
+      (validation.validateSecretsConfig config)
+
+      # Import patterns for known path-based imports in this builder
+      (validation.mkCheck {
+        name = "Import Patterns";
+        assertion = validation.validateImportPatterns importPatterns;
+        message = "Imports follow standard patterns (directory imports flagged as warnings).";
+        severity = "warn";
+      })
+    ];
+    report = validation.mkValidationReport {inherit config checks;};
+    failedMessages = lib.concatStringsSep " | " (map (c: "${c.name}: ${c.message}") report.failed);
+  in {
+    assertions =
+      # One assertion per check so failures surface clearly
+      (map (c: {
+          assertion = c.status != "fail";
+          message = "[Validation] ${c.name}: ${c.message}";
+        })
+        report.allChecks)
+      # Aggregated assertion for a concise summary in CI logs
+      ++ [
+        {
+          assertion = report.success;
+          message =
+            if report.failed == []
+            then "[Validation] All checks passed"
+            else "[Validation] Failed checks: ${failedMessages}";
+        }
+      ];
+  };
 
   # Common Home Manager configuration
   mkHomeManagerConfig = {
@@ -47,8 +97,8 @@
       };
     sharedModules =
       [
-        catppuccin.homeModules.catppuccin
         sops-nix.homeManagerModules.sops
+        catppuccin.homeModules.catppuccin
       ]
       ++ extraSharedModules;
     users.${hostConfig.username} = import ../home;
@@ -107,6 +157,17 @@ in {
               extraSharedModules = [mac-app-util.homeManagerModules.default];
             };
           }
+          (
+            {config, ...}: {
+              home-manager.extraSpecialArgs.systemConfig = config;
+            }
+          )
+
+          # Validation assertions - now just a call to our helper
+          (mkValidationModule [
+            "../hosts/${hostName}/configuration.nix"
+            "../modules/darwin"
+          ])
         ]
         ++ commonModules;
     };
@@ -142,8 +203,13 @@ in {
 
           # Integration modules
           sops-nix.nixosModules.sops
-          catppuccin.nixosModules.catppuccin
           niri.nixosModules.niri
+        ]
+        ++ lib.optional (
+          hostConfig.system == "x86_64-linux" || hostConfig.system == "aarch64-linux"
+        )
+        catppuccin.nixosModules.catppuccin
+        ++ [
           musnix.nixosModules.musnix
           nur.modules.nixos.default
           solaar.nixosModules.default
@@ -157,6 +223,17 @@ in {
                 useUserPackages = true;
               };
           }
+          (
+            {config, ...}: {
+              home-manager.extraSpecialArgs.systemConfig = config;
+            }
+          )
+
+          # Validation assertions - now just a call to our helper
+          (mkValidationModule [
+            "../hosts/${hostName}/configuration.nix"
+            "../modules/nixos"
+          ])
         ]
         ++ commonModules;
     };

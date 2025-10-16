@@ -1,6 +1,5 @@
 {
   imports = [
-    # Core configuration
     ./host-options.nix
     ./core.nix
     ./shell.nix
@@ -11,10 +10,9 @@
     ./sops.nix
     ./telemetry.nix
 
-    # Cross-platform feature modules
-    ./features/development.nix
-    ./features/security.nix
-    ./features/productivity.nix
-    ./features/desktop.nix
+    ./features/development
+    ./features/security
+    ./features/productivity
+    ./features/desktop
   ];
 }

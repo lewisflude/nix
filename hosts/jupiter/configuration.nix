@@ -24,13 +24,7 @@
         "wheel"
         "staff"
         "_developer"
-        "audio"
-        "video"
-        "nvidia"
-        "docker"
         "git"
-        "networkmanager"
-        "input"
       ];
       shell = pkgs.zsh;
     };

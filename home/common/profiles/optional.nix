@@ -6,7 +6,7 @@
     # Development tools
     ../apps/cursor
     ../apps/lazydocker.nix
-    ../development
+    ../features/development
 
     # Docker tools
     ../apps/docker.nix

@@ -17,9 +17,6 @@
     ../apps/eza.nix
     ../apps/jq.nix
 
-    # SOPS secrets
-    ../sops.nix
-
     # Library functions
     ../lib
 

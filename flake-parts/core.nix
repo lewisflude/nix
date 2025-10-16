@@ -8,7 +8,13 @@
   hostsConfig = import ../lib/hosts.nix {inherit lib;};
   inherit (hostsConfig) hosts;
 
-  systemBuilders = import ../lib/system-builders.nix {inherit inputs;};
+  functionsLib = import ../lib/functions.nix {inherit lib;};
+  validationLib = import ../lib/validation.nix {inherit lib;};
+  cacheLib = import ../lib/cache.nix {inherit lib;};
+
+  systemBuilders = import ../lib/system-builders.nix {
+    inherit inputs validationLib;
+  };
 
   outputBuilders = import ../lib/output-builders.nix {
     inputs =
@@ -26,7 +32,6 @@
 
   mkNixosSystem = hostName: hostConfig: systemBuilders.mkNixosSystem hostName hostConfig {inherit self;};
 in {
-  # Define supported systems for flake-parts
   systems = [
     "x86_64-linux"
     "aarch64-linux"
@@ -54,37 +59,6 @@ in {
     checks = outputBuilders.mkChecks;
     devShells = outputBuilders.mkDevShells;
 
-    lib = {
-      inherit
-        (import ../lib/functions.nix {
-          inherit lib;
-          system = "x86_64-linux";
-        })
-        platformPackages
-        platformModules
-        homeDir
-        configDir
-        dataDir
-        cacheDir
-        ;
-
-      inherit
-        (import ../lib/validation.nix {
-          inherit lib;
-          pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
-        })
-        validateHostConfig
-        mkCheck
-        ;
-
-      inherit
-        (import ../lib/cache.nix {inherit lib;})
-        createManifest
-        generateCacheKey
-        evalCache
-        cachixConfig
-        prebuildManifest
-        ;
-    };
+    lib = functionsLib // validationLib // cacheLib;
   };
 }
