@@ -110,7 +110,7 @@ in {
         # (with submodules!) and copies your keymap into it.
         # This is built *once* and stored in the Nix store.
         qmkHomeWithKeymap = pkgs.stdenv.mkDerivation {
-          name = "vial-qmk-home-with-mnk88-lewis-keymap";
+          name = "vial-qmk-home-with-mnk88-vial-keymap";
 
           # Fetch VIAL QMK source (which includes MNK88 support).
           src = pkgs.fetchFromGitHub {
@@ -132,8 +132,8 @@ in {
             cp -r . $out
 
             # Define where our keymap files live
-            keymapSrcDir="${inputs.self}/docs/reference/qmk/mnk88/lewis"
-            keymapDestDir="$out/keyboards/kopibeng/mnk88/keymaps/lewis"
+            keymapSrcDir="${inputs.self}/docs/reference/qmk/mnk88/vial"
+            keymapDestDir="$out/keyboards/kopibeng/mnk88/keymaps/vial"
 
             # Create the destination and copy our files
             mkdir -p "$keymapDestDir"
@@ -189,7 +189,7 @@ in {
                                     set -euo pipefail
 
                                     # --- Simplified Argument Parsing ---
-                                    KEYMAP_NAME="lewis"
+                                    KEYMAP_NAME="vial"
                                     MAKE_DEFINES=()
                                     USER_SET_VIAL="no"
 
@@ -257,7 +257,7 @@ in {
                                     # --- No Keymap Installation Needed ---
                                     # The "Keymap Installation" block from your original script
                                     # is no longer needed because the `qmkHomeWithKeymap`
-                                    # derivation *already* copied the 'lewis' keymap.
+                                    # derivation *already* copied the 'vial' keymap.
 
                                     echo "Keymap '$KEYMAP_NAME' is ready in $QMK_HOME_DIR."
 
@@ -298,18 +298,18 @@ in {
 
                          # Try direct make command for VIAL
                          echo "Attempting direct make build..."
-                         make clean kopibeng/mnk88:lewis VIAL_ENABLE=yes
+                         make clean kopibeng/mnk88:vial VIAL_ENABLE=yes
 
                          echo "⚡ Flashing MNK88 (put board in DFU/bootloader mode)"
                          set +e
                          # Try to flash with dfu-util directly
-                         FIRMWARE_FILE="$QMK_HOME_DIR/.build/kopibeng_mnk88_lewis.bin"
+                         FIRMWARE_FILE="$QMK_HOME_DIR/.build/kopibeng_mnk88_vial.bin"
                          if [ ! -f "$FIRMWARE_FILE" ]; then
-                           FIRMWARE_FILE="$QMK_HOME_DIR/kopibeng_mnk88_lewis.bin"
+                           FIRMWARE_FILE="$QMK_HOME_DIR/kopibeng_mnk88_vial.bin"
                          fi
                          if [ ! -f "$FIRMWARE_FILE" ]; then
                            # Try with vial in the name
-                           FIRMWARE_FILE="$QMK_HOME_DIR/.build/kopibeng_mnk88_lewis_vial.bin"
+                           FIRMWARE_FILE="$QMK_HOME_DIR/.build/kopibeng_mnk88_vial_vial.bin"
                          fi
 
                          if [ -f "$FIRMWARE_FILE" ]; then
