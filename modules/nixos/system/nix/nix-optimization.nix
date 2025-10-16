@@ -20,7 +20,6 @@
         "https://cuda-maintainers.cachix.org"
         "https://ghostty.cachix.org"
         "https://niri.cachix.org"
-        "https://install.determinate.systems"
       ];
       trusted-substituters = [
         "https://lewisflude.cachix.org"
@@ -33,7 +32,6 @@
         "https://cuda-maintainers.cachix.org"
         "https://ghostty.cachix.org"
         "https://niri.cachix.org"
-        "https://install.determinate.systems"
       ];
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
@@ -46,7 +44,6 @@
         "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc="
         "ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns="
         "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
-        "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM="
       ];
       experimental-features = [
         "nix-command"
