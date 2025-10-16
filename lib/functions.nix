@@ -37,8 +37,7 @@
       if builtins.isList flagName
       then flagName
       else lib.splitString "." flagName;
-    mergedVirtualisation =
-      lib.recursiveUpdate modulesVirtualisation virtualisation;
+    mergedVirtualisation = lib.recursiveUpdate modulesVirtualisation virtualisation;
   in
     lib.attrByPath flagPath default mergedVirtualisation;
   homeDir = username:

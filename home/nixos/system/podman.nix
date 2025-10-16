@@ -10,7 +10,7 @@
   podmanEnabled = platformLib.getVirtualisationFlag {
     inherit modulesVirtualisation virtualisation;
     flagName = "enablePodman";
-    default = true;
+    default = false;
   };
 in {
   home.packages =

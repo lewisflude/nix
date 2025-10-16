@@ -17,40 +17,38 @@ in {
       };
     };
   });
-  mkDevShells = builtins.listToAttrs (
-    builtins.map
-    (hostConfig: {
-      name = hostConfig.system;
-      value = let
-        pkgs = nixpkgs.legacyPackages.${hostConfig.system};
+  mkDevShells = let
+    hostsBySystem = nixpkgs.lib.groupBy (hostConfig: hostConfig.system) (builtins.attrValues hosts);
+  in
+    builtins.mapAttrs
+    (
+      system: _hostGroup: let
+        pkgs = nixpkgs.legacyPackages.${system};
         shellsConfig = import ../shells {
           inherit pkgs;
           inherit (pkgs) lib;
-          inherit (hostConfig) system;
+          inherit system;
         };
+        preCommitCheck = inputs.self.checks.${system}.pre-commit-check or {};
       in
         shellsConfig.devShells
         // {
-          default = let
-            preCommitCheck = inputs.self.checks.${hostConfig.system}.pre-commit-check or {};
-          in
-            pkgs.mkShell {
-              shellHook = preCommitCheck.shellHook or "";
-              buildInputs =
-                (preCommitCheck.enabledPackages or [])
-                ++ (with pkgs; [
-                  jq
-                  yq
-                  git
-                  gh
-                  direnv
-                  nix-direnv
-                ]);
-            };
-        };
-    })
-    (builtins.attrValues hosts)
-  );
+          default = pkgs.mkShell {
+            shellHook = preCommitCheck.shellHook or "";
+            buildInputs =
+              (preCommitCheck.enabledPackages or [])
+              ++ (with pkgs; [
+                jq
+                yq
+                git
+                gh
+                direnv
+                nix-direnv
+              ]);
+          };
+        }
+    )
+    hostsBySystem;
   mkHomeConfigurations =
     builtins.mapAttrs
     (
@@ -65,10 +63,12 @@ in {
               "mbedtls-2.28.10"
             ];
           };
-          overlays = import ../overlays {
-            inherit inputs;
-            inherit (hostConfig) system;
-          };
+          overlays = nixpkgs.lib.attrValues (
+            import ../overlays {
+              inherit inputs;
+              inherit (hostConfig) system;
+            }
+          );
         };
       in
         home-manager.lib.homeManagerConfiguration {
@@ -77,6 +77,8 @@ in {
             inputs
             // hostConfig
             // {
+              host = hostConfig;
+              hostSystem = hostConfig.system;
               modulesVirtualisation = virtualisationLib.mkModulesVirtualisationArgs {
                 hostVirtualisation = hostConfig.virtualisation or {};
               };

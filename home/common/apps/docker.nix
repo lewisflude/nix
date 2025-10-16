@@ -10,7 +10,7 @@
   dockerEnabled = platformLib.getVirtualisationFlag {
     inherit modulesVirtualisation virtualisation;
     flagName = "enableDocker";
-    default = true;
+    default = false;
   };
   linuxPackages =
     if dockerEnabled
