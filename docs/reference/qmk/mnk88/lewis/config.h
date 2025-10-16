@@ -1,8 +1,5 @@
 #pragma once
 
-// Include the common config
-#include "config_common.h"
-
 // VIAL Configuration
 #define VIAL_KEYBOARD_UID {0x8F, 0x7D, 0x6C, 0x5B, 0x4A, 0x39, 0x28, 0x17}
 
