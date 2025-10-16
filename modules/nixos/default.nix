@@ -7,6 +7,7 @@
     ./features/virtualisation.nix
     ./features/audio.nix
     ./features/home-server.nix
+    ./features/restic.nix
 
     # System modules
     ./core

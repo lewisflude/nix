@@ -58,6 +58,7 @@ in {
     formatter = outputBuilders.mkFormatters;
     checks = outputBuilders.mkChecks;
     devShells = outputBuilders.mkDevShells;
+    apps = outputBuilders.mkApps;
 
     lib = functionsLib // validationLib // cacheLib;
   };

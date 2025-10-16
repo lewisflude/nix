@@ -10,6 +10,7 @@
     git
   ];
   devShellsCommon = {
+    qmk = import ./projects/qmk.nix {inherit pkgs lib system;};
     nextjs = import ./projects/nextjs.nix {inherit pkgs lib system;};
     react-native = import ./projects/react-native.nix {
       inherit pkgs lib system;
