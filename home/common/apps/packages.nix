@@ -43,6 +43,7 @@ in {
       cachix
       nix-tree
       nix-du
+      sops
     ]
     # Language servers
     ++ [

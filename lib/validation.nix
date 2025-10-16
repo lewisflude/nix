@@ -1,4 +1,4 @@
-{lib}: {
+{lib}: rec {
   # Validate that import patterns follow the standard
   # Directories without .nix, files with .nix
   validateImportPatterns = imports: let
@@ -117,8 +117,8 @@
   # Validate host configuration
   validateHostConfig = hostConfig: let
     requiredFields = ["username" "useremail" "system" "hostname"];
-    hasAllFields = lib.all (field: hostConfig ? ${field}) requiredFields;
-    missingFields = lib.filter (field: !(hostConfig ? ${field})) requiredFields;
+    hasAllFields = lib.all (field: lib.hasAttr field hostConfig) requiredFields;
+    missingFields = lib.filter (field: !(lib.hasAttr field hostConfig)) requiredFields;
   in
     mkCheck {
       name = "Host Configuration";

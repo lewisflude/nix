@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  systemConfig,
   lib,
   system,
   ...
@@ -18,8 +19,8 @@ in {
     file = {
       "bin/kagi-mcp-wrapper" = {
         text = ''
-          if [ -r "${config.sops.secrets.KAGI_API_KEY.path or ""}" ]; then
-            export KAGI_API_KEY="$(cat "${config.sops.secrets.KAGI_API_KEY.path or ""}")"
+          if [ -r "${systemConfig.sops.secrets.KAGI_API_KEY.path or ""}" ]; then
+            export KAGI_API_KEY="$(cat "${systemConfig.sops.secrets.KAGI_API_KEY.path or ""}")"
           fi
           exec ${pkgs.uv}/bin/uvx kagimcp "$@"
         '';
@@ -130,7 +131,7 @@ in {
         ];
         port = 11434;
         env = {
-          GITHUB_TOKEN = config.sops.secrets.GITHUB_TOKEN.path or "";
+          GITHUB_TOKEN = systemConfig.sops.secrets.GITHUB_TOKEN.path or "";
         };
       };
       general-filesystem = {

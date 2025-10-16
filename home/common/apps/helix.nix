@@ -1,13 +1,12 @@
 {lib, ...}: let
-  standards = import ../development/language-standards.nix;
+  standards = import ../features/development/language-standards.nix;
   makeIndentString = n: builtins.concatStringsSep "" (builtins.genList (_x: " ") n);
 in {
   programs.helix = {
     enable = true;
     languages = {
       language =
-        lib.mapAttrsToList
-        (
+        lib.mapAttrsToList (
           name: value: (
             {
               inherit name;

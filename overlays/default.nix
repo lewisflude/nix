@@ -4,7 +4,6 @@
   inputs,
   system,
 }: let
-  isDarwin = system == "aarch64-darwin" || system == "x86_64-darwin";
   isLinux = system == "x86_64-linux" || system == "aarch64-linux";
 
   # Helper to make conditional overlays
@@ -25,12 +24,27 @@ in rec {
 
   # === Application Overlays (always applied) ===
 
-  # Custom packages
-  cursor = import ./cursor.nix;
-  npm-packages = import ./npm-packages.nix;
+  # Auto-import all packages from ../pkgs (each subdirectory with a default.nix)
+  localPkgs = _final: prev: let
+    pkgsDir = ../pkgs;
+    # Read all entries in the pkgs directory
+    dirEntries = builtins.readDir pkgsDir;
+    # Filter for entries that are directories AND have a default.nix, all in one pass
+    validPkgs =
+      prev.lib.filterAttrs (
+        name: type: type == "directory" && builtins.pathExists (pkgsDir + "/${name}/default.nix")
+      )
+      dirEntries;
+    # Get the names of the valid packages
+    packageNames = builtins.attrNames validPkgs;
+  in
+    # Build only the valid packages
+    prev.lib.genAttrs packageNames (name: prev.callPackage (pkgsDir + "/${name}") {});
 
   # Package fixes
   pamixer = import ./pamixer.nix;
+  # Promote npm packages (e.g., nx-latest) to top-level pkgs attributes
+  npm-packages = import ./npm-packages.nix;
 
   # Essential tools
   nh = inputs.nh.overlays.default;
@@ -38,10 +52,7 @@ in rec {
 
   # === Platform-Specific Overlays ===
 
-  # Darwin-only
-  ghostty = mkConditional isDarwin (import ./ghostty.nix {inherit inputs;});
-
-  # Linux-only
+  # Linux-only (niri is an input, waybar/swww are modifications)
   niri = mkConditional isLinux inputs.niri.overlays.niri;
   waybar = mkConditional isLinux (import ./waybar.nix {inherit inputs;});
   swww = mkConditional isLinux (import ./swww.nix {inherit inputs;});

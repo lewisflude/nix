@@ -1,5 +1,6 @@
 {
   config,
+  systemConfig,
   pkgs,
   lib,
   ...
@@ -12,7 +13,7 @@
     mkdir -p "$NIX_CONF_DIR"
 
     # Read the secret if available
-    SECRET_PATH="${config.sops.secrets.GITHUB_TOKEN.path or ""}"
+    SECRET_PATH="${systemConfig.sops.secrets.GITHUB_TOKEN.path or ""}"
 
     if [ -n "$SECRET_PATH" ] && [ -r "$SECRET_PATH" ]; then
       GITHUB_TOKEN="$(cat "$SECRET_PATH")"

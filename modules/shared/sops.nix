@@ -19,7 +19,11 @@
     then "wheel"
     else "sops-secrets";
   mkSecret = {
-    mode ? (if isDarwin then "0640" else "0400"),
+    mode ? (
+      if isDarwin
+      then "0640"
+      else "0400"
+    ),
     allowUserRead ? false,
   }: let
     resolvedMode =
@@ -28,8 +32,14 @@
       else if allowUserRead
       then "0440"
       else mode;
-    resolvedOwner = if isDarwin then config.host.username else "root";
-    resolvedGroup = if isDarwin then "staff" else secretsGroup;
+    resolvedOwner =
+      if isDarwin
+      then config.host.username
+      else "root";
+    resolvedGroup =
+      if isDarwin
+      then "staff"
+      else secretsGroup;
   in {
     mode = resolvedMode;
     owner = resolvedOwner;
@@ -37,25 +47,30 @@
     neededForUsers = allowUserRead;
   };
 in {
-  # Only configure system-level sops on Linux (NixOS)
-  # Darwin uses home-manager sops for user-level secrets only
-  sops = lib.mkIf isLinux {
-    age = {
-      keyFile = keyFilePath;
-      generateKey = true;
-      sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
-    };
+  sops = lib.mkIf (isLinux || isDarwin) {
+    age =
+      {
+        keyFile = keyFilePath;
+        generateKey = true;
+      }
+      // lib.optionalAttrs isLinux {
+        sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+      };
     defaultSopsFile = ../../secrets/secrets.yaml;
     secrets = {
+      CIRCLECI_TOKEN = mkSecret {allowUserRead = true;};
+      GITHUB_TOKEN = mkSecret {allowUserRead = true;};
       LATITUDE = mkSecret {};
       LONGITUDE = mkSecret {};
       HOME_ASSISTANT_BASE_URL = mkSecret {};
-      GITHUB_TOKEN = mkSecret {allowUserRead = true;};
+      KAGI_API_KEY = mkSecret {allowUserRead = true;};
+      OBSIDIAN_API_KEY = mkSecret {allowUserRead = true;};
+      OPENAI_API_KEY = mkSecret {allowUserRead = true;};
     };
   };
 
   # Validation assertions for SOPS configuration
-  assertions = lib.optionals isLinux [
+  assertions = lib.optionals (isLinux || isDarwin) [
     {
       assertion = config.sops.secrets != {} -> config.sops.age.keyFile != null;
       message = "SOPS secrets are defined but no age key file is specified";

@@ -120,7 +120,7 @@ with lib; let
       TELEMETRY_FILE="${cfg.dataDir}/telemetry.json"
       HISTORY_FILE="${cfg.dataDir}/history.json"
 
-      if [ ! -f "$TELEMETRY_FILE" ]; then
+        if [ ! -f "$TELEMETRY_FILE" ]; then
         echo "❌ No telemetry data found. Run collect-telemetry first."
         exit 1
       fi

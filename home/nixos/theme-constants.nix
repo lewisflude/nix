@@ -1,24 +1,27 @@
 {
   config,
-  pkgs,
+  lib,
   ...
 }: let
-  palette = (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors;
-in {
-  niri.colors = {
-    focus-ring = {
-      active = palette.mauve.hex;
-      inactive = palette.overlay1.hex;
+  # The module already gives you the correct flavor's palette!
+  inherit (config.catppuccin) palette;
+in
+  lib.mkIf (lib.hasAttrByPath ["catppuccin" "palette"] config) {
+    niri.colors = {
+      focus-ring = {
+        # The structure is slightly different, but more direct
+        active = palette.mauve;
+        inactive = palette.overlay1;
+      };
+      border = {
+        active = palette.lavender;
+        inactive = palette.surface1;
+        urgent = palette.red;
+      };
+      shadow = "${palette.base}aa";
+      tab-indicator = {
+        active = palette.mauve;
+        inactive = palette.overlay1;
+      };
     };
-    border = {
-      active = palette.lavender.hex;
-      inactive = palette.surface1.hex;
-      urgent = palette.red.hex;
-    };
-    shadow = "${palette.base.hex}aa";
-    tab-indicator = {
-      active = palette.mauve.hex;
-      inactive = palette.overlay1.hex;
-    };
-  };
-}
+  }

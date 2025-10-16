@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  systemConfig,
   system,
   hostSystem,
   host,
@@ -21,14 +22,8 @@
         hex = "3b4252";
       };
     };
-  secretAvailable = name:
-    if isDarwin
-    then true
-    else lib.hasAttrByPath ["sops" "secrets" name] config;
-  secretPath = name:
-    if isDarwin
-    then "${platformLib.dataDir config.home.username}/sops-nix/secrets/${name}"
-    else config.sops.secrets.${name}.path;
+  secretAvailable = name: lib.hasAttrByPath ["sops" "secrets" name "path"] systemConfig;
+  secretPath = name: lib.attrByPath ["sops" "secrets" name "path"] "" systemConfig;
   secretExportSnippet = name: var: let
     path = secretPath name;
   in
