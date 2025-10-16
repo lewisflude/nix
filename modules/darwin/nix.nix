@@ -5,15 +5,13 @@
       warn-dirty = false
     '';
   };
-  nix = {
-    enable = false;
-    settings = {
-      sandbox = true;
-      trusted-users = [
-        "root"
-        "@admin"
-        username
-      ];
-    };
+  nix.enable = false;
+  nix.settings = {
+    sandbox = true;
+    trusted-users = [
+      "root"
+      "@admin"
+      username
+    ];
   };
 }

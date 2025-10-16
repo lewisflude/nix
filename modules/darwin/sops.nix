@@ -11,7 +11,6 @@
       "OBSIDIAN_API_KEY"
       "OPENAI_API_KEY"
       "GITHUB_TOKEN"
-      "FIGMA_ACCESS_TOKEN"
     ]
     (_: {
       owner = username;
@@ -20,7 +19,10 @@
       sopsFile = userSecretsFile;
     });
 in {
-  sops.secrets = userSecrets;
+  sops = {
+    age.keyFile = "/Users/${username}/.config/sops/age/keys.txt";
+    secrets = userSecrets;
+  };
   system.activationScripts.setupSOPSAge = {
     text = ''
       install -d -m 700 -o root -g wheel /var/lib/sops-nix
