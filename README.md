@@ -58,6 +58,7 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 | **⚙️ Configuration** | [`docs/guides/configuration.md`](docs/guides/configuration.md) | Adding packages, hosts, and modules |
 | **🔐 Secrets** | [`docs/guides/secrets.md`](docs/guides/secrets.md) | SOPS secrets management |
 | **🏗️ Architecture** | [`docs/reference/architecture.md`](docs/reference/architecture.md) | System design and patterns |
+| **⌨️ Keyboard Layout** | [`docs/reference/keyboard-keymap.md`](docs/reference/keyboard-keymap.md) | WKL F13 TKL ergonomic keymap for software engineers |
 | **🤖 AI Assistants** | [`docs/ai-assistants/`](docs/ai-assistants/) | Claude, ChatGPT, Cursor guidance |
 
 ## 🎯 Common Tasks

@@ -129,7 +129,7 @@ in {
           }
 
           # Platform modules
-          ../modules/darwin
+          ../modules/darwin/default.nix
 
           # Integration modules
           determinate.darwinModules.default
@@ -166,7 +166,7 @@ in {
           # Validation assertions - now just a call to our helper
           (mkValidationModule [
             "../hosts/${hostName}/configuration.nix"
-            "../modules/darwin"
+            "../modules/darwin/default.nix"
           ])
         ]
         ++ commonModules;
@@ -198,7 +198,7 @@ in {
           }
 
           # Platform modules
-          ../modules/nixos
+          ../modules/nixos/default.nix
           determinate.nixosModules.default
 
           # Integration modules
@@ -232,7 +232,7 @@ in {
           # Validation assertions - now just a call to our helper
           (mkValidationModule [
             "../hosts/${hostName}/configuration.nix"
-            "../modules/nixos"
+            "../modules/nixos/default.nix"
           ])
         ]
         ++ commonModules;

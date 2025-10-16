@@ -23,4 +23,19 @@
     };
   };
   time.timeZone = lib.mkForce "Europe/London";
+
+  # Remote Restic backup to Jupiter (NixOS host)
+  host.features.restic = {
+    enable = true;
+    backups.macbook-home = {
+      enable = true;
+      path = "/Users/${config.host.username}/.config/nix";
+      repository = "rest:http://jupiter.local:8000/macos-${config.host.hostname}";
+      passwordFile = "/Users/${config.host.username}/.config/restic/password";
+      timer = "daily";
+      user = config.host.username;
+      initialize = false;
+      createWrapper = false;
+    };
+  };
 }

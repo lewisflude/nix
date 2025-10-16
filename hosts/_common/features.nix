@@ -43,6 +43,17 @@
     utilities = false;
   };
 
+  restic = {
+    enable = false;
+    backups = {};
+    restServer = {
+      enable = false;
+      port = 8000;
+      extraFlags = [];
+      htpasswdFile = null;
+    };
+  };
+
   productivity = {
     enable = false;
     office = false;

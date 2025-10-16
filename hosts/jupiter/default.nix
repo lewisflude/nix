@@ -47,6 +47,18 @@ in {
           niri = true;
         };
 
+      restic =
+        defaultFeatures.restic
+        // {
+          enable = true;
+          restServer =
+            defaultFeatures.restic.restServer
+            // {
+              enable = true;
+              port = 8000;
+            };
+        };
+
       audio =
         defaultFeatures.audio
         // {
