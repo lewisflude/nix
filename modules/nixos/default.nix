@@ -1,8 +1,5 @@
 {
   imports = [
-    # NixOS-specific modules
-    ./telemetry.nix
-
     # NixOS-specific feature modules
     ./features/desktop.nix
     ./features/security.nix

@@ -194,11 +194,6 @@ with lib; let
       echo ""
   '';
 in {
-  _module.args.telemetryScripts = {
-    collect = collectTelemetryScript;
-    view = viewTelemetryScript;
-  };
-
   options.telemetry = {
     enable = mkEnableOption "local usage telemetry (privacy-first, nothing sent externally)";
 
@@ -221,12 +216,6 @@ in {
       type = types.int;
       default = 90;
       description = "Number of days of history to keep";
-    };
-
-    trackInputs = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Track flake input revisions";
     };
 
     verbose = mkOption {
