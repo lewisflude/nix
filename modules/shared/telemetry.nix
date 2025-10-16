@@ -194,6 +194,11 @@ with lib; let
       echo ""
   '';
 in {
+  _module.args.telemetryScripts = {
+    collect = collectTelemetryScript;
+    view = viewTelemetryScript;
+  };
+
   options.telemetry = {
     enable = mkEnableOption "local usage telemetry (privacy-first, nothing sent externally)";
 
