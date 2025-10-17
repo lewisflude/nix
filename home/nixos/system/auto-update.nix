@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   config,
   ...
 }: {
@@ -11,8 +12,13 @@
       Service = {
         Type = "oneshot";
         ExecStart = "${pkgs.writeShellScript "nix-update-script" ''
-          set -e
-          ${pkgs.sudo}/bin/sudo -E ${config.home.homeDirectory}/.dotfiles/home-manager/modules/scripts/bin/system-update --inputs
+          set -euo pipefail
+          SYSTEM_UPDATE_BIN=${lib.escapeShellArg "${config.home.profileDirectory}/bin/system-update"}
+          if [ ! -x "$SYSTEM_UPDATE_BIN" ]; then
+            echo "system-update not found at $SYSTEM_UPDATE_BIN" >&2
+            exit 1
+          fi
+          ${pkgs.sudo}/bin/sudo -E "$SYSTEM_UPDATE_BIN" --inputs
         ''}";
       };
     };
