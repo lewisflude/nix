@@ -28,26 +28,13 @@ in {
     enable = lib.mkEnableOption "Enable desktop environment";
   };
 
-  # --- AND ADD THIS SECTION ---
-  config = lib.mkIf cfg.enable (
-    let
-      # Define all hardware features this module enables
-      hardwareToEnable = ["bluetooth" "keyboard" "mouse" "usb" "yubikey"];
-
-      # Function to generate the { hardware.<name>.enable = true; } attrset
-      mkEnable = name: {hardware."${name}".enable = true;};
-    in
-      # Map over the list and merge all attrsets into one
-      lib.mergeAttrsOf (map mkEnable hardwareToEnable)
-      // {
-        # Automatically add the user to desktop-related groups
-        users.users.${config.host.username}.extraGroups = [
-          "audio"
-          "video"
-          "input"
-          "networkmanager"
-        ];
-      }
-  );
-  # ----------------------------
+  config = lib.mkIf cfg.enable {
+    # Automatically add the user to desktop-related groups
+    users.users.${config.host.username}.extraGroups = [
+      "audio"
+      "video"
+      "input"
+      "networkmanager"
+    ];
+  };
 }

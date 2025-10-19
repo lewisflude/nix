@@ -34,8 +34,13 @@ in {
     services.restic.server = lib.mkIf cfg.restServer.enable {
       enable = true;
       listenAddress = "0.0.0.0:${toString cfg.restServer.port}";
-      inherit (cfg.restServer) extraFlags;
-      inherit (cfg.restServer) htpasswdFile;
+      extraFlags =
+        cfg.restServer.extraFlags
+        ++ (
+          if cfg.restServer.htpasswdFile != null
+          then ["--htpasswd-file ${cfg.restServer.htpasswdFile}"]
+          else ["--no-auth"]
+        );
     };
 
     # Security wrapper for restic

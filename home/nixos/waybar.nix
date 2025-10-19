@@ -17,7 +17,7 @@ in {
   programs.waybar = {
     enable = true;
     systemd.enable = true;
-    package = pkgs.waybar-git;
+    package = pkgs.waybar;
     style = ./style.css;
     settings = {
       mainBar = {

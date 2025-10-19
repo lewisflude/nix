@@ -4,7 +4,7 @@
   lib,
   ...
 }: let
-  themeConstants = import ./theme-constants.nix {inherit config pkgs;};
+  themeConstants = import ./theme-constants.nix {inherit config lib;};
 in {
   home.packages = with pkgs; [
     swww

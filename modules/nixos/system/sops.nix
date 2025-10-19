@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   username,
   ...
@@ -12,7 +11,8 @@
     "OPENAI_API_KEY"
   ];
 in {
-  users.users.${username}.extraGroups = [config.sops.group];
+  # Add user to the sops-secrets group for secret access
+  users.users.${username}.extraGroups = ["sops-secrets"];
 
   sops.secrets = lib.genAttrs sharedSecrets (_: {
     neededForUsers = true;

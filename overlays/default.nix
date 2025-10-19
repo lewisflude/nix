@@ -39,7 +39,11 @@ in rec {
     packageNames = builtins.attrNames validPkgs;
   in
     # Build only the valid packages
-    prev.lib.genAttrs packageNames (name: prev.callPackage (pkgsDir + "/${name}") {});
+    # Pass inputs only to packages that explicitly need it (like ghostty)
+    prev.lib.genAttrs packageNames (name:
+      if name == "ghostty"
+      then prev.callPackage (pkgsDir + "/${name}") {inherit inputs;}
+      else prev.callPackage (pkgsDir + "/${name}") {});
 
   # Package fixes
   pamixer = import ./pamixer.nix;
@@ -54,8 +58,9 @@ in rec {
 
   # Linux-only (niri is an input, waybar/swww are modifications)
   niri = mkConditional isLinux inputs.niri.overlays.niri;
-  waybar = mkConditional isLinux (import ./waybar.nix {inherit inputs;});
-  swww = mkConditional isLinux (import ./swww.nix {inherit inputs;});
+  # waybar and swww overlays disabled - using stable versions from nixpkgs
+  # waybar = mkConditional isLinux (import ./waybar.nix {inherit inputs;});
+  # swww = mkConditional isLinux (import ./swww.nix {inherit inputs;});
   nvidia-patch =
     mkConditional (
       isLinux && inputs ? nvidia-patch
