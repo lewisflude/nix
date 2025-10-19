@@ -1,11 +1,13 @@
 # /home/lewis/.config/nix/modules/nixos/system/keyd.nix
 #
-# Ergonomic Hybrid Keyboard Configuration (v2.0)
+# WKL F13 TKL Keyboard Configuration for nixOS
 #
-# Combines the best ergonomic practices for a high-efficiency workflow:
-# 1. Caps Lock -> Primary Super (overloaded with Escape) for home row access.
-# 2. F13 -> Backup Super for complex, two-handed shortcuts.
-# 3. Right Alt -> Navigation layer for OS-wide, Vim-style text editing.
+# Matches the keyboard-keymap.md specification:
+# - Caps Lock: Control (from firmware, keyd passes through)
+# - Left/Right Alt: Super (for window manager)
+# - Left/Right Ctrl: Alt (for editor/terminal shortcuts)
+# - F13: Focus Terminal
+# - Print Screen: Focus Browser
 #
 _: {
   services.keyd = {
@@ -26,27 +28,23 @@ _: {
         };
 
         main = {
-          # PRIMARY: Caps as Super (most ergonomic)
-          # Hold for Super (meta), Tap for Escape.
-          capslock = "overload(meta, esc)";
+          # Caps Lock: Leave as Control (from firmware)
+          # The keyboard firmware already maps Caps Lock to Control,
+          # so we don't remap it here
+          # capslock = "leftcontrol";  # Uncomment only if firmware doesn't set it
 
-          # BACKUP: F13 also maps to Super
-          f13 = "leftmeta";
-
-          # SCREENSHOT: F14 produces Print Screen
-          f14 = "print";
-
-          # KVM SWITCHING: F15 produces Scroll Lock
-          f15 = "scrolllock";
-
-          # NAVIGATION: Right Alt activates the 'nav' layer
-          rightalt = "layer(nav)";
-
-          # WKL-style swap for Linux: map Left Alt -> Left Meta (Super)
-          # Keep Ctrl as Ctrl; keep Right Alt reserved for nav layer.
+          # WKL Modifier Swaps (matching macOS Karabiner config)
+          # Alt keys become Super (for window manager)
           leftalt = "leftmeta";
+          rightalt = "rightmeta";
+
+          # Ctrl keys become Alt (for editor/terminal shortcuts)
+          leftcontrol = "leftalt";
+          rightcontrol = "rightalt";
         };
 
+        # Optional: Navigation layer (can be removed if not needed)
+        # Access via a dedicated key if desired
         nav = {
           # Vim-style arrows
           h = "left";
