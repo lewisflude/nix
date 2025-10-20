@@ -135,6 +135,8 @@ in {
           calcom = {
             enable = true;
             useSops = true; # Use sops-nix for production secrets
+            port = 3000; # Internal port
+            webappUrl = "https://cal.blmt.io"; # Public domain
             # Secrets are stored in secrets/secrets.yaml:
             # - calcom-nextauth-secret
             # - calcom-encryption-key
