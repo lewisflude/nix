@@ -28,10 +28,9 @@ _: {
         };
 
         main = {
-          # Caps Lock: Leave as Control (from firmware)
-          # The keyboard firmware already maps Caps Lock to Control,
-          # so we don't remap it here
-          # capslock = "leftcontrol";  # Uncomment only if firmware doesn't set it
+          # Caps Lock: Map to Control (firmware now sends KC_CAPS)
+          # This allows keyd to distinguish between Caps Lock and physical Control keys
+          capslock = "leftcontrol";
 
           # WKL Modifier Swaps (matching macOS Karabiner config)
           # Alt keys become Super (for window manager)

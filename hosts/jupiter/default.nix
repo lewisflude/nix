@@ -65,5 +65,24 @@ in {
           enable = true;
           realtime = true;
         };
+
+      containers =
+        defaultFeatures.containers
+        // {
+          # TEST MODE: Enable this first to verify Podman works
+          # Once test passes, disable test mode and enable stacks below
+          enable = true;
+
+          mediaManagement = {
+            enable = true; # Enable for media stack (Radarr, Sonarr, etc.)
+            dataPath = "/mnt/storage";
+            configPath = "/var/lib/containers/media-management";
+          };
+
+          productivity = {
+            enable = false; # Enable for AI tools (Ollama, ComfyUI, etc.)
+            configPath = "/var/lib/containers/productivity";
+          };
+        };
     };
 }

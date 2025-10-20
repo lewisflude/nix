@@ -4,7 +4,7 @@
   lib,
   ...
 }: let
-  themeConstants = import ./theme-constants.nix {inherit config lib;};
+  themeConstants = import ./theme-constants.nix {inherit config lib pkgs;};
 in {
   home.packages = with pkgs; [
     swww
@@ -32,6 +32,16 @@ in {
         path = "${lib.getExe pkgs.xwayland-satellite-unstable}";
       };
       input = {
+        keyboard = {
+          xkb = {
+            layout = "us";
+            # WKL keyboard configuration handled by keyd at system level
+            # Keeping this section for future XKB customization if needed
+          };
+          # Disable repeat for modifier keys to prevent issues with layer switching
+          repeat-delay = 600;
+          repeat-rate = 25;
+        };
         mouse = {
           natural-scroll = true;
           accel-speed = 0.2;

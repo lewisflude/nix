@@ -8,6 +8,7 @@
     ./features/audio.nix
     ./features/home-server.nix
     ./features/restic.nix
+    ./features/containers.nix
 
     # System modules
     ./core

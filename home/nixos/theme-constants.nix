@@ -1,38 +1,35 @@
 {
+  pkgs,
   config,
   lib,
   ...
 }: let
-  # Check if catppuccin palette is available
-  hasCatppuccin = lib.hasAttrByPath ["catppuccin" "palette"] config;
+  # Assert that catppuccin is configured - fail fast with clear error
+  hasCatppuccin = lib.hasAttrByPath ["catppuccin" "sources" "palette"] config;
 
-  # Use catppuccin palette if available, otherwise use fallback colors
-  palette =
-    if hasCatppuccin
-    then config.catppuccin.palette
-    else {
-      mauve = "#cba6f7";
-      overlay1 = "#7f849c";
-      lavender = "#b4befe";
-      surface1 = "#45475a";
-      red = "#f38ba8";
-      base = "#1e1e2e";
-    };
+  palette = assert lib.assertMsg hasCatppuccin
+  ''
+    Catppuccin theme is not configured!
+    Make sure you have enabled catppuccin in your configuration:
+      catppuccin.enable = true;
+      catppuccin.flavor = "mocha"; # or your preferred flavor
+  '';
+    (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors;
 in {
   niri.colors = {
     focus-ring = {
-      active = palette.mauve;
-      inactive = palette.overlay1;
+      active = palette.mauve.hex;
+      inactive = palette.overlay1.hex;
     };
     border = {
-      active = palette.lavender;
-      inactive = palette.surface1;
-      urgent = palette.red;
+      active = palette.lavender.hex;
+      inactive = palette.surface1.hex;
+      urgent = palette.red.hex;
     };
-    shadow = "${palette.base}aa";
+    shadow = "${palette.base.hex}aa";
     tab-indicator = {
-      active = palette.mauve;
-      inactive = palette.overlay1;
+      active = palette.mauve.hex;
+      inactive = palette.overlay1.hex;
     };
   };
 }

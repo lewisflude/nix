@@ -10,6 +10,7 @@
     ./maintenance
 
     # Hardware and device management
+    ./keyboard.nix
     ./keyd.nix
     ./monitor-brightness.nix
 

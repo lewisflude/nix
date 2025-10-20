@@ -39,34 +39,6 @@ _: let
         complex_modifications = {
           rules = [
             # ============================================================
-            # CORE REMAPPING: Caps Lock → Command (hold) / Escape (tap)
-            # ============================================================
-            {
-              description = "Caps Lock → Command (hold) / Escape (tap)";
-              manipulators = [
-                {
-                  type = "basic";
-                  from = {
-                    key_code = "caps_lock";
-                    modifiers = {
-                      optional = ["any"];
-                    };
-                  };
-                  to = [
-                    {
-                      key_code = "left_command";
-                    }
-                  ];
-                  to_if_alone = [
-                    {
-                      key_code = "escape";
-                    }
-                  ];
-                }
-              ];
-            }
-
-            # ============================================================
             # BACKUP MODIFIER: F13 → Command
             # ============================================================
             {
@@ -590,6 +562,29 @@ in {
     text = builtins.toJSON {
       title = "MNK88 WKL swaps and launchers";
       rules = [
+        {
+          description = "MNK88: Caps Lock → Control (firmware now sends KC_CAPS)";
+          manipulators = [
+            {
+              type = "basic";
+              from = {
+                key_code = "caps_lock";
+              };
+              to = [{key_code = "left_control";}];
+              conditions = [
+                {
+                  type = "device_if";
+                  identifiers = [
+                    {
+                      vendor_id = 19280;
+                      product_id = 34816;
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+        }
         {
           description = "MNK88: Swap Left Option→Command, Left Control→Option, and mirror on right";
           manipulators = [

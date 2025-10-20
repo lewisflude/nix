@@ -35,6 +35,19 @@
     backups = false;
   };
 
+  containers = {
+    enable = false;
+    mediaManagement = {
+      enable = false;
+      dataPath = "/mnt/storage";
+      configPath = "/var/lib/containers/media-management";
+    };
+    productivity = {
+      enable = false;
+      configPath = "/var/lib/containers/productivity";
+    };
+  };
+
   desktop = {
     enable = true;
     niri = false;

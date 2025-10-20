@@ -13,15 +13,6 @@ in {
     ./niri.nix
     ./theme.nix
     ./xwayland.nix
-
-    # --- ADD THIS SECTION ---
-    # Hardware
-    ../../hardware/bluetooth.nix
-    ../../hardware/keyboard.nix
-    ../../hardware/mouse.nix
-    ../../hardware/usb.nix
-    ../../hardware/yubikey.nix
-    # ------------------------
   ];
 
   options.features.desktop = {
