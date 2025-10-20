@@ -1,12 +1,6 @@
-{
-  pkgs,
-  lib,
-  ...
-}: let
-  cockpit-apps = pkgs.callPackage ../../../pkgs/cockpit-extensions/default.nix {inherit pkgs;};
-in {
+{lib, ...}: {
   services.cockpit = {
-    enable = true;
+    enable = false; # TEMPORARILY DISABLED: cockpit depends on webkitgtk which was removed from nixpkgs
     port = 9090;
     settings = {
       WebService = {
@@ -25,8 +19,8 @@ in {
     };
   };
 
-  environment.systemPackages = with pkgs; [
-    cockpit
-    cockpit-apps.podman-containers
-  ];
+  # environment.systemPackages = with pkgs; [
+  #   cockpit
+  #   cockpit-apps.podman-containers
+  # ];
 }

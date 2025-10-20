@@ -47,14 +47,20 @@ in rec {
 
   # Package fixes
   pamixer = import ./pamixer.nix;
+  mpd-fix = import ./mpd-fix.nix;
   # Promote npm packages (e.g., nx-latest) to top-level pkgs attributes
   npm-packages = import ./npm-packages.nix;
+  # Compatibility overlay for removed webkitgtk package
+  webkitgtk-compat = import ./webkitgtk-compat.nix;
 
   # Essential tools
   nh = inputs.nh.overlays.default;
   nur = inputs.nur.overlays.default;
 
   # === Platform-Specific Overlays ===
+
+  # Audio production packages (Linux-only)
+  audio-nix = mkConditional isLinux inputs.audio-nix.overlays.default;
 
   # Linux-only (niri is an input, waybar/swww are modifications)
   niri = mkConditional isLinux inputs.niri.overlays.niri;

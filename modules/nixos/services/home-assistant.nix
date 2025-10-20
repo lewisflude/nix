@@ -27,10 +27,10 @@ in {
         })
       ];
     };
-    extraPackages = python3Packages:
-      with python3Packages; [
-        pychromecast
-      ];
+    # extraPackages = python3Packages:
+    #   with python3Packages; [
+    #     pychromecast
+    #   ];
     extraComponents = [
       "analytics"
       "google_translate"
@@ -53,9 +53,11 @@ in {
       "ollama"
       "ipp"
       "mjpeg"
-      "mpd"
+      # Temporarily disabled due to MPD build issue with io_uring on kernel 6.14.11
+      # Will be re-enabled once upstream fixes the issue
+      # "mpd"
+      # "snapcast"
       "brother"
-      "snapcast"
       "hue"
       "spotify"
       "media_player"

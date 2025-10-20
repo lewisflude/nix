@@ -9,6 +9,9 @@
     ./features/home-server.nix
     ./features/restic.nix
     ./features/containers.nix
+    ./features/media-management.nix
+    ./features/ai-tools.nix
+    ./features/containers-supplemental.nix
 
     # System modules
     ./core

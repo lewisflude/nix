@@ -48,8 +48,8 @@ in {
       nodejs_24
     ]
     ++ lib.optionals cfg.lua [
-      lua
-      luajit
+      luajit # Primary Lua interpreter (provides /bin/lua)
+      (pkgs.lowPrio lua) # Fallback Lua 5.2 (lower priority to avoid conflict)
       luajitPackages.luarocks
       lua-language-server
     ];

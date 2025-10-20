@@ -35,6 +35,7 @@
     backups = false;
   };
 
+  # Legacy container services (deprecated - use native modules instead)
   containers = {
     enable = false;
     mediaManagement = {
@@ -46,6 +47,50 @@
       enable = false;
       configPath = "/var/lib/containers/productivity";
     };
+  };
+
+  # Native media management services (preferred)
+  mediaManagement = {
+    enable = false;
+    dataPath = "/mnt/storage";
+    timezone = "Europe/London";
+    # Individual service toggles - all default to true when mediaManagement.enable = true
+    prowlarr = {enable = true;};
+    radarr = {enable = true;};
+    sonarr = {enable = true;};
+    lidarr = {enable = true;};
+    readarr = {enable = true;};
+    whisparr = {enable = false;};
+    qbittorrent = {enable = true;};
+    sabnzbd = {enable = true;};
+    jellyfin = {enable = true;};
+    jellyseerr = {enable = true;};
+    flaresolverr = {enable = true;};
+    unpackerr = {enable = true;};
+  };
+
+  # Native AI tools services (Ollama, Open WebUI)
+  aiTools = {
+    enable = false;
+    ollama = {
+      enable = true;
+      acceleration = null; # null, "cuda", or "rocm"
+      models = []; # e.g. ["llama2" "mistral"]
+    };
+    openWebui = {
+      enable = true;
+      port = 7000;
+    };
+  };
+
+  # Supplemental container services (no native modules available)
+  containersSupplemental = {
+    enable = false;
+    homarr = {enable = true;};
+    wizarr = {enable = true;};
+    doplarr = {enable = false;};
+    comfyui = {enable = false;};
+    calcom = {enable = false;};
   };
 
   desktop = {
@@ -80,6 +125,12 @@
     production = false;
     realtime = false;
     streaming = false;
+    # Audio.nix packages (polygon/audio.nix)
+    audioNix = {
+      enable = false;
+      bitwig = true; # Bitwig Studio (latest beta)
+      plugins = true; # Install all available plugins
+    };
   };
 
   security = {

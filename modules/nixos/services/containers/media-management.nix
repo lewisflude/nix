@@ -78,7 +78,7 @@ in {
           volumes = mkVolumes "radarr";
           ports = ["7878:7878"];
           extraOptions = ["--network=media"];
-          dependsOn = ["prowlarr" "qbittorrent" "sabnzbd"];
+          # dependsOn removed - using soft After= dependency instead via systemd overrides
         };
 
         # Sonarr - TV show management
@@ -88,7 +88,7 @@ in {
           volumes = mkVolumes "sonarr";
           ports = ["8989:8989"];
           extraOptions = ["--network=media"];
-          dependsOn = ["prowlarr" "qbittorrent" "sabnzbd"];
+          # dependsOn removed - using soft After= dependency instead via systemd overrides
         };
 
         # Lidarr - Music management
@@ -212,7 +212,7 @@ in {
             "${mmCfg.dataPath}:/mnt/storage"
           ];
           extraOptions = ["--network=media"];
-          dependsOn = ["radarr" "sonarr"];
+          # dependsOn removed - using soft After= dependency instead via systemd overrides
         };
 
         # Homarr - Dashboard
@@ -293,39 +293,106 @@ in {
             // mkSecretEnv "RADARR_API_KEY" secrets.radarrApiKey;
           volumes = ["${mmCfg.configPath}/doplarr:/config"];
           extraOptions = ["--network=media"];
-          dependsOn = ["radarr" "sonarr"];
-        };
-      };
-
-      # Create podman networks up-front to avoid race conditions
-      systemd.services.podman-network-media = {
-        description = "Create podman media network";
-        after = ["podman.service"];
-        wantedBy = ["multi-user.target"];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.podman}/bin/podman network exists media || ${pkgs.podman}/bin/podman network create media'";
-          ExecStop = "${pkgs.podman}/bin/podman network rm -f media";
-        };
-      };
-
-      systemd.services.podman-network-frontend = {
-        description = "Create podman frontend network";
-        after = ["podman.service"];
-        wantedBy = ["multi-user.target"];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.podman}/bin/podman network exists frontend || ${pkgs.podman}/bin/podman network create frontend'";
-          ExecStop = "${pkgs.podman}/bin/podman network rm -f frontend";
+          # dependsOn removed - using soft After= dependency instead via systemd overrides
         };
       };
     }
     {
       systemd.services = mkMerge [
+        # Ensure Podman storage and networks exist before containers start
+        {
+          podman-storage-check = {
+            description = "Check and repair Podman storage";
+            before = ["podman-network-media.service" "podman-network-frontend.service"];
+            wantedBy = ["multi-user.target"];
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+              ExecStart = "${pkgs.podman}/bin/podman system check";
+            };
+          };
+
+          podman-network-media = {
+            description = "Create podman media network";
+            after = ["podman.service" "podman-storage-check.service"];
+            requires = ["podman-storage-check.service"];
+            wantedBy = ["multi-user.target"];
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+              ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.podman}/bin/podman network exists media || ${pkgs.podman}/bin/podman network create media'";
+              ExecStop = "${pkgs.podman}/bin/podman network rm -f media";
+            };
+          };
+
+          podman-network-frontend = {
+            description = "Create podman frontend network";
+            after = ["podman.service" "podman-storage-check.service"];
+            requires = ["podman-storage-check.service"];
+            wantedBy = ["multi-user.target"];
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+              ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.podman}/bin/podman network exists frontend || ${pkgs.podman}/bin/podman network create frontend'";
+              ExecStop = "${pkgs.podman}/bin/podman network rm -f frontend";
+            };
+          };
+        }
         (mkNetworkDeps "media" mediaContainers)
         (mkNetworkDeps "frontend" frontendContainers)
+        # Override service dependencies to use soft After= instead of hard Requires=
+        # This prevents cascading failures on boot while maintaining startup order
+        {
+          podman-radarr = {
+            after = mkAfter ["podman-prowlarr.service" "podman-qbittorrent.service" "podman-sabnzbd.service"];
+            # Make restart more resilient
+            serviceConfig = {
+              RestartSec = "30s";
+              StartLimitBurst = 10;
+              StartLimitIntervalSec = 600;
+            };
+          };
+          podman-sonarr = {
+            after = mkAfter ["podman-prowlarr.service" "podman-qbittorrent.service" "podman-sabnzbd.service"];
+            serviceConfig = {
+              RestartSec = "30s";
+              StartLimitBurst = 10;
+              StartLimitIntervalSec = 600;
+            };
+          };
+          podman-doplarr = {
+            after = mkAfter ["podman-radarr.service" "podman-sonarr.service"];
+            serviceConfig = {
+              RestartSec = "30s";
+              StartLimitBurst = 10;
+              StartLimitIntervalSec = 600;
+            };
+          };
+          podman-unpackerr = {
+            after = mkAfter ["podman-radarr.service" "podman-sonarr.service"];
+            serviceConfig = {
+              RestartSec = "30s";
+              StartLimitBurst = 10;
+              StartLimitIntervalSec = 600;
+            };
+          };
+          # Add resilient restart for base services too
+          podman-prowlarr.serviceConfig = {
+            RestartSec = "10s";
+            StartLimitBurst = 10;
+            StartLimitIntervalSec = 600;
+          };
+          podman-qbittorrent.serviceConfig = {
+            RestartSec = "10s";
+            StartLimitBurst = 10;
+            StartLimitIntervalSec = 600;
+          };
+          podman-sabnzbd.serviceConfig = {
+            RestartSec = "10s";
+            StartLimitBurst = 10;
+            StartLimitIntervalSec = 600;
+          };
+        }
       ];
     }
   ]);

@@ -15,7 +15,7 @@ in {
     wayland-utils
     brightnessctl
     xdg-utils
-    polkit_gnome
+    lxqt.lxqt-policykit # Changed from polkit_gnome due to webkitgtk removal
     xwayland-satellite-unstable
     argyllcms
     colord-gtk
@@ -185,7 +185,7 @@ in {
             "${pkgs.uwsm}/bin/uwsm"
             "app"
             "--"
-            "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
+            "${pkgs.lxqt.lxqt-policykit}/bin/lxqt-policykit-agent" # Changed from polkit-gnome due to webkitgtk removal
           ];
         }
         {

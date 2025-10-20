@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{...}: {
   imports = [
     ./system
     ./browser.nix
@@ -16,7 +16,7 @@
     ./apps/wofi.nix
     ./apps/gaming.nix
   ];
-  home.sessionVariables = {
-    GIO_EXTRA_MODULES = "${pkgs.gnome.gvfs}/lib/gio/modules";
-  };
+  # home.sessionVariables = {
+  #   GIO_EXTRA_MODULES = "${pkgs.gnome.gvfs}/lib/gio/modules";  # TEMPORARILY DISABLED: gnome.gvfs uses webkitgtk which was removed
+  # };
 }

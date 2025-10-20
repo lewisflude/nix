@@ -88,6 +88,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    audio-nix = {
+      url = "github:polygon/audio.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     solaar = {
       url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
