@@ -27,15 +27,10 @@ in {
       ];
     };
 
-    # Hardware acceleration support
-    hardware.graphics = {
-      enable = true;
-      extraPackages = with config.boot.kernelPackages; [
-        # Add Intel/AMD media drivers if needed
-      ];
-    };
-
     # Grant access to GPU for hardware transcoding
-    users.users.${cfg.user}.extraGroups = ["render" "video"];
+    users.users.${cfg.user}.extraGroups = [
+      "render"
+      "video"
+    ];
   };
 }

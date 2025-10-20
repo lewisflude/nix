@@ -99,9 +99,10 @@ in {
           dataPath = "/mnt/storage";
           timezone = "Europe/London";
 
-          # All services enabled by default except whisparr
+          # All services enabled by default except whisparr and unpackerr
           # To disable specific services, set enable = false
-          # whisparr.enable = false; # Adult content - disabled by default
+          whisparr.enable = false; # Adult content - disabled by default
+          unpackerr.enable = false; # Disabled - config format issues
         };
 
       # Native AI tools services (Ollama, Open WebUI)

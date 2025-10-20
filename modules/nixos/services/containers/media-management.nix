@@ -31,7 +31,6 @@ with lib; let
     "lidarr"
     "whisparr"
     "readarr"
-    "qbittorrent"
     "sabnzbd"
     "jellyfin"
     "flaresolverr"
@@ -118,27 +117,6 @@ in {
           ports = ["8787:8787"];
           extraOptions = ["--network=media"];
           dependsOn = ["prowlarr"];
-        };
-
-        # qBittorrent - Torrent client
-        qbittorrent = {
-          image = "ghcr.io/hotio/qbittorrent:latest";
-          environment =
-            commonEnv
-            // {
-              WEBUI_PORTS = "8080/tcp,8080/udp";
-            };
-          volumes = [
-            "${mmCfg.configPath}/qbittorrent:/config"
-            "${mmCfg.dataPath}/torrents:/downloads"
-            "${mmCfg.dataPath}:/mnt/storage"
-          ];
-          ports = [
-            "8080:8080" # WebUI
-            "6881:6881" # Torrent port
-            "6881:6881/udp"
-          ];
-          extraOptions = ["--network=media"];
         };
 
         # SABnzbd - Usenet downloader
@@ -344,7 +322,7 @@ in {
         # This prevents cascading failures on boot while maintaining startup order
         {
           podman-radarr = {
-            after = mkAfter ["podman-prowlarr.service" "podman-qbittorrent.service" "podman-sabnzbd.service"];
+            after = mkAfter ["podman-prowlarr.service" "podman-sabnzbd.service"];
             # Make restart more resilient
             serviceConfig = {
               RestartSec = "30s";
@@ -353,7 +331,7 @@ in {
             };
           };
           podman-sonarr = {
-            after = mkAfter ["podman-prowlarr.service" "podman-qbittorrent.service" "podman-sabnzbd.service"];
+            after = mkAfter ["podman-prowlarr.service" "podman-sabnzbd.service"];
             serviceConfig = {
               RestartSec = "30s";
               StartLimitBurst = 10;
@@ -378,11 +356,6 @@ in {
           };
           # Add resilient restart for base services too
           podman-prowlarr.serviceConfig = {
-            RestartSec = "10s";
-            StartLimitBurst = 10;
-            StartLimitIntervalSec = 600;
-          };
-          podman-qbittorrent.serviceConfig = {
             RestartSec = "10s";
             StartLimitBurst = 10;
             StartLimitIntervalSec = 600;

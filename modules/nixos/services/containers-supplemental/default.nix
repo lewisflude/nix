@@ -263,6 +263,9 @@ in {
           DATABASE_URL=postgresql://calcom:${
             config.sops.placeholder."calcom-db-password"
           }@calcom-db:5432/calcom
+          DATABASE_DIRECT_URL=postgresql://calcom:${
+            config.sops.placeholder."calcom-db-password"
+          }@calcom-db:5432/calcom
           NEXTAUTH_SECRET=${config.sops.placeholder."calcom-nextauth-secret"}
           CALENDSO_ENCRYPTION_KEY=${config.sops.placeholder."calcom-encryption-key"}
         '';
@@ -377,8 +380,9 @@ in {
                 "--memory=${cfg.homarr.resources.memory}"
                 "--cpus=${cfg.homarr.resources.cpus}"
               ]
-              ++ optional (cfg.homarr.resources.memorySwap != null)
-              "--memory-swap=${cfg.homarr.resources.memorySwap}";
+              ++ optional (
+                cfg.homarr.resources.memorySwap != null
+              ) "--memory-swap=${cfg.homarr.resources.memorySwap}";
           };
 
           # Wizarr - Invitation system
@@ -405,8 +409,9 @@ in {
                 "--memory=${cfg.wizarr.resources.memory}"
                 "--cpus=${cfg.wizarr.resources.cpus}"
               ]
-              ++ optional (cfg.wizarr.resources.memorySwap != null)
-              "--memory-swap=${cfg.wizarr.resources.memorySwap}";
+              ++ optional (
+                cfg.wizarr.resources.memorySwap != null
+              ) "--memory-swap=${cfg.wizarr.resources.memorySwap}";
           };
 
           # Doplarr - Discord bot
@@ -436,8 +441,9 @@ in {
                 "--memory=${cfg.doplarr.resources.memory}"
                 "--cpus=${cfg.doplarr.resources.cpus}"
               ]
-              ++ optional (cfg.doplarr.resources.memorySwap != null)
-              "--memory-swap=${cfg.doplarr.resources.memorySwap}";
+              ++ optional (
+                cfg.doplarr.resources.memorySwap != null
+              ) "--memory-swap=${cfg.doplarr.resources.memorySwap}";
           };
 
           # ComfyUI - AI image generation with NVIDIA GPU
@@ -469,8 +475,9 @@ in {
                 "--memory=${cfg.comfyui.resources.memory}"
                 "--cpus=${cfg.comfyui.resources.cpus}"
               ]
-              ++ optional (cfg.comfyui.resources.memorySwap != null)
-              "--memory-swap=${cfg.comfyui.resources.memorySwap}";
+              ++ optional (
+                cfg.comfyui.resources.memorySwap != null
+              ) "--memory-swap=${cfg.comfyui.resources.memorySwap}";
           };
 
           # Cal.com PostgreSQL Database
@@ -498,7 +505,8 @@ in {
 
             extraOptions =
               [
-                "--restart=always"
+                # Note: Don't use --restart flag - systemd handles restarts
+                # Using --restart conflicts with NixOS's --rm flag
 
                 # Health check for database
                 "--health-cmd=pg_isready -U calcom"
@@ -511,8 +519,9 @@ in {
                 "--cpus=${cfg.calcom.resources.db.cpus}"
                 "--shm-size=256m" # Shared memory for postgres
               ]
-              ++ optional (cfg.calcom.resources.db.memorySwap != null)
-              "--memory-swap=${cfg.calcom.resources.db.memorySwap}";
+              ++ optional (
+                cfg.calcom.resources.db.memorySwap != null
+              ) "--memory-swap=${cfg.calcom.resources.db.memorySwap}";
           };
 
           # Cal.com Application
@@ -531,6 +540,7 @@ in {
               // optionalAttrs (!cfg.calcom.useSops) {
                 # Only set secrets directly if not using sops
                 DATABASE_URL = "postgresql://calcom:${cfg.calcom.dbPassword}@calcom-db:5432/calcom";
+                DATABASE_DIRECT_URL = "postgresql://calcom:${cfg.calcom.dbPassword}@calcom-db:5432/calcom";
                 NEXTAUTH_SECRET = cfg.calcom.nextauthSecret;
                 CALENDSO_ENCRYPTION_KEY = cfg.calcom.calendarEncryptionKey;
               };
@@ -546,20 +556,24 @@ in {
 
             extraOptions =
               [
-                "--restart=always"
+                # Note: Don't use --restart flag - systemd handles restarts
+                # Using --restart conflicts with NixOS's --rm flag
 
-                # Health check
-                "--health-cmd=wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"
+                # Health check - Cal.com takes time to initialize and run migrations
+                # Using curl as it's more commonly available in Node.js containers
+                "--health-cmd=curl -f http://localhost:3000/api/health || exit 1"
                 "--health-interval=30s"
                 "--health-timeout=10s"
-                "--health-retries=3"
+                "--health-retries=5"
+                "--health-start-period=120s" # Give 2 minutes for migrations and startup
 
                 # Resource limits (configurable)
                 "--memory=${cfg.calcom.resources.app.memory}"
                 "--cpus=${cfg.calcom.resources.app.cpus}"
               ]
-              ++ optional (cfg.calcom.resources.app.memorySwap != null)
-              "--memory-swap=${cfg.calcom.resources.app.memorySwap}";
+              ++ optional (
+                cfg.calcom.resources.app.memorySwap != null
+              ) "--memory-swap=${cfg.calcom.resources.app.memorySwap}";
 
             dependsOn = ["calcom-db"];
           };
