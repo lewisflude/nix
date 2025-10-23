@@ -7,6 +7,12 @@
 with lib; let
   cfg = config.host.services.mediaManagement;
 in {
+  options.host.services.mediaManagement.flaresolverr.enable =
+    mkEnableOption "FlareSolverr cloudflare bypass"
+    // {
+      default = true;
+    };
+
   config = mkIf (cfg.enable && cfg.flaresolverr.enable) {
     services.flaresolverr = {
       enable = true;

@@ -17,6 +17,7 @@ in {
         // {
           enable = true;
           notes = true;
+          resume = true;
         };
     };
 }

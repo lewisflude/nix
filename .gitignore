@@ -54,6 +54,8 @@ result-*
 # Log files
 *.log
 logs/
+# Explicitly ignore env dumps that may carry secrets
+env_terminal.log
 
 # Cache directories
 .cache/

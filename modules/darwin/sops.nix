@@ -4,7 +4,7 @@
   username,
   ...
 }: let
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
+  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
   secretsDir = "${platformLib.dataDir username}/sops-nix";
 in {
   system.activationScripts.setupSOPSAge = {

@@ -6,7 +6,7 @@
   system,
   ...
 }: let
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
+  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
   claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
   codeDirectory = "${config.home.homeDirectory}/Code";
   dexWebProject = "${codeDirectory}/dex-web";

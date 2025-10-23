@@ -61,6 +61,12 @@ with lib; let
     delete_delay = "5m"
   '';
 in {
+  options.host.services.mediaManagement.unpackerr.enable =
+    mkEnableOption "Unpackerr archive extractor"
+    // {
+      default = true;
+    };
+
   config = mkIf (cfg.enable && cfg.unpackerr.enable) {
     # Ensure unpackerr package is available
     environment.systemPackages = [pkgs.unpackerr];

@@ -1,6 +1,5 @@
 {
   imports = [
-    ./auto-update.nix
     ./keyboard.nix
     ./mangohud.nix
     ./usb.nix

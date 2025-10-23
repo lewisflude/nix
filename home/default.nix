@@ -4,7 +4,7 @@
   lib,
   ...
 }: let
-  platformLib = import ../lib/functions.nix {inherit lib system;};
+  platformLib = (import ../lib/functions.nix {inherit lib;}).withSystem system;
 in {
   home = {
     stateVersion = "24.05";

@@ -152,6 +152,7 @@ with lib; {
         notes = mkEnableOption "note-taking (Obsidian)";
         email = mkEnableOption "email clients";
         calendar = mkEnableOption "calendar applications";
+        resume = mkEnableOption "resume generation and management";
       };
 
       audio = {
@@ -261,6 +262,16 @@ with lib; {
             default = true;
             description = "Enable qBittorrent torrent client";
           };
+          webUiCredentialsSecret = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "Optional sops-nix secret name containing qBittorrent WebUI credentials.";
+          };
+          vpn = mkOption {
+            type = types.attrs;
+            default = {};
+            description = "Optional WireGuard and namespace configuration passed through to qBittorrent.";
+          };
         };
 
         sabnzbd = {
@@ -356,6 +367,18 @@ with lib; {
       containersSupplemental = {
         enable = mkEnableOption "supplemental container services";
 
+        uid = mkOption {
+          type = types.int;
+          default = 1000;
+          description = "User ID for container processes";
+        };
+
+        gid = mkOption {
+          type = types.int;
+          default = 100;
+          description = "Group ID for container processes";
+        };
+
         homarr = {
           enable = mkOption {
             type = types.bool;
@@ -370,6 +393,12 @@ with lib; {
             default = true;
             description = "Enable Wizarr invitation system";
           };
+        };
+
+        janitorr = mkOption {
+          type = types.attrsOf types.anything;
+          default = {enable = true;};
+          description = "Janitorr media cleanup automation configuration";
         };
 
         doplarr = {
@@ -395,6 +424,18 @@ with lib; {
             description = "Enable Cal.com scheduling platform";
           };
 
+          port = mkOption {
+            type = types.int;
+            default = 3000;
+            description = "Port to expose Cal.com on";
+          };
+
+          webappUrl = mkOption {
+            type = types.str;
+            default = "http://localhost:3000";
+            description = "Public URL for Cal.com (e.g., https://cal.example.com)";
+          };
+
           useSops = mkOption {
             type = types.bool;
             default = false;
@@ -417,6 +458,118 @@ with lib; {
             type = types.nullOr types.str;
             default = null;
             description = "PostgreSQL database password for Cal.com";
+          };
+
+          # Email configuration
+          email = {
+            host = mkOption {
+              type = types.str;
+              default = "localhost";
+              description = "SMTP server host for sending emails";
+            };
+
+            port = mkOption {
+              type = types.int;
+              default = 587;
+              description = "SMTP server port (587 for STARTTLS, 465 for SSL)";
+            };
+
+            from = mkOption {
+              type = types.str;
+              default = "noreply@localhost";
+              description = "Email address to send emails from";
+            };
+
+            fromName = mkOption {
+              type = types.str;
+              default = "Cal.com";
+              description = "Display name for outgoing emails";
+            };
+
+            username = mkOption {
+              type = types.str;
+              default = "";
+              description = "SMTP authentication username";
+            };
+
+            password = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "SMTP authentication password (only used if useSops is false)";
+            };
+          };
+
+          # Branding configuration
+          branding = {
+            appName = mkOption {
+              type = types.str;
+              default = "Cal.com";
+              description = "Application name shown in the interface";
+            };
+
+            companyName = mkOption {
+              type = types.str;
+              default = "Cal.com, Inc.";
+              description = "Company name for legal/footer information";
+            };
+
+            supportEmail = mkOption {
+              type = types.str;
+              default = "help@cal.com";
+              description = "Support email address for user assistance";
+            };
+          };
+
+          # General settings
+          disableSignup = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Disable public user registration (recommended for personal use)";
+          };
+
+          disableTelemetry = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Disable anonymous usage telemetry";
+          };
+
+          availabilityInterval = mkOption {
+            type = types.nullOr types.int;
+            default = 15;
+            description = "Time slot interval in minutes for availability scheduling";
+          };
+
+          logLevel = mkOption {
+            type = types.int;
+            default = 3;
+            description = "Logging level (0=silly, 1=trace, 2=debug, 3=info, 4=warn, 5=error, 6=fatal)";
+          };
+
+          cronApiKey = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "API key for cron jobs";
+          };
+
+          serviceAccountEncryptionKey = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "Encryption key for service account credentials";
+          };
+
+          # Google Calendar integration
+          googleCalendar = {
+            enabled = mkOption {
+              type = types.bool;
+              default = false;
+              description = "Enable Google Calendar integration and Login with Google";
+            };
+
+            credentials = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "Google API credentials JSON string";
+            };
           };
         };
       };

@@ -115,6 +115,11 @@ Configure via `dataPath` option (default: `/mnt/storage`):
 - ✅ systemd service ordering (Prowlarr starts before *arr apps)
 - ✅ Timezone configuration
 
+### qBittorrent VPN Isolation
+- Optional WireGuard tunnel with dedicated network namespace
+- Automatic tmpfiles, namespace setup, and firewall forwarding rules
+- Secrets integration via `host.services.mediaManagement.qbittorrent.webUiCredentialsSecret` and `qbittorrent.vpn.privateKeySecret`
+
 ### Hardware Acceleration
 - **Jellyfin**: Automatic GPU access for transcoding (`/dev/dri`)
 - Media user automatically added to `render` and `video` groups

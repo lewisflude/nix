@@ -8,7 +8,7 @@
   ...
 }: let
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
+  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
   inherit
     (lib)
     concatStringsSep

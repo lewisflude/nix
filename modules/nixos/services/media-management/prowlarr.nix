@@ -7,6 +7,12 @@
 with lib; let
   cfg = config.host.services.mediaManagement;
 in {
+  options.host.services.mediaManagement.prowlarr.enable =
+    mkEnableOption "Prowlarr indexer manager"
+    // {
+      default = true;
+    };
+
   config = mkIf (cfg.enable && cfg.prowlarr.enable) {
     services.prowlarr = {
       enable = true;

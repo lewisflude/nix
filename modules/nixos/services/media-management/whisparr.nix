@@ -7,6 +7,12 @@
 with lib; let
   cfg = config.host.services.mediaManagement;
 in {
+  options.host.services.mediaManagement.whisparr.enable =
+    mkEnableOption "Whisparr adult content management"
+    // {
+      default = false;
+    };
+
   config = mkIf (cfg.enable && cfg.whisparr.enable) {
     services.whisparr = {
       enable = true;

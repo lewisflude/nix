@@ -88,6 +88,7 @@
     enable = false;
     homarr = {enable = true;};
     wizarr = {enable = true;};
+    janitorr = {enable = true;};
     doplarr = {enable = false;};
     comfyui = {enable = false;};
     calcom = {enable = false;};
@@ -118,6 +119,7 @@
     notes = false;
     email = false;
     calendar = false;
+    resume = false;
   };
 
   audio = {

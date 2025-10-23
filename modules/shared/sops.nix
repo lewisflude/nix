@@ -6,10 +6,7 @@
 }: let
   isDarwin = lib.strings.hasSuffix "darwin" hostSystem;
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
-  platformLib = import ../../lib/functions.nix {
-    inherit lib;
-    system = hostSystem;
-  };
+  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
   keyFilePath =
     if isDarwin
     then "${platformLib.dataDir config.host.username}/sops-nix/key.txt"
@@ -66,6 +63,8 @@ in {
       KAGI_API_KEY = mkSecret {allowUserRead = true;};
       OBSIDIAN_API_KEY = mkSecret {allowUserRead = true;};
       OPENAI_API_KEY = mkSecret {allowUserRead = true;};
+      "qbittorrent/webui" = mkSecret {};
+      "qbittorrent/vpn/privateKey" = mkSecret {};
     };
   };
 

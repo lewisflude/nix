@@ -8,7 +8,7 @@
   lib,
   ...
 }: let
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
+  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
   isDarwin = lib.strings.hasSuffix "darwin" hostSystem;
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
   palette =

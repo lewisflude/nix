@@ -4,7 +4,7 @@
   system,
   ...
 }: let
-  platformLib = import ../lib/functions.nix {inherit lib system;};
+  platformLib = (import ../lib/functions.nix {inherit lib;}).withSystem system;
   commonTools = with pkgs; [
     pre-commit
     git

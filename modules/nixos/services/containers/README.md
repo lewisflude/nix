@@ -54,6 +54,9 @@ The media stack includes:
 - **Request Management**: Jellyseerr
 - **Tools**: Unpackerr, Homarr, Wizarr, Janitorr, Recommendarr
 
+See [`docs/reference/janitorr.md`](../../docs/reference/janitorr.md) for a detailed Janitorr feature and setup guide.
+The module renders `application.yml` via `sops-nix` and expects the `janitorr-*` secrets described in that guide.
+
 **Ports exposed:**
 - Prowlarr: 9696
 - Radarr: 7878

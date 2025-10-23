@@ -4,7 +4,7 @@
   system,
   ...
 }: let
-  platformLib = import ../../../lib/functions.nix {inherit lib system;};
+  platformLib = (import ../../../lib/functions.nix {inherit lib;}).withSystem system;
 in {
   home.packages = with pkgs;
   # Core development tools
@@ -18,15 +18,11 @@ in {
     # System utilities
     ++ [
       coreutils
-      delta
-      htop
-      btop
       libnotify
       tree
     ]
     # Development libraries and tools
     ++ [
-      rustup
       pkg-config
       openssl
       libsecret
@@ -49,11 +45,6 @@ in {
     ++ [
       yaml-language-server
     ]
-    # Terminal tools
-    ++ [
-      git-lfs
-      zellij
-    ]
     # Platform-specific packages
     ++ platformLib.platformPackages
     # Linux-specific
@@ -66,4 +57,8 @@ in {
       gnutar
       gzip
     ];
+
+  # programs.rustup.enable = true; # Not available in home-manager
+  programs.htop.enable = true;
+  programs.btop.enable = true;
 }

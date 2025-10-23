@@ -28,6 +28,7 @@
       services = {
         login.enableGnomeKeyring = true;
         greetd.enableGnomeKeyring = true;
+        niri.enableGnomeKeyring = true;
         sudo.enableGnomeKeyring = true;
         su.enableGnomeKeyring = true;
         swaylock = {};

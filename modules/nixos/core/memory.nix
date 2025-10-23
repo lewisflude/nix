@@ -16,10 +16,13 @@
     extraArgs = [
       "--avoid"
       "^(niri|wireplumber|pipewire|Xwayland|gdm|sddm)$"
+      "--prefer"
+      "^(chromium|chrome|firefox)"
     ];
   };
   boot.kernel.sysctl = {
-    "vm.swappiness" = lib.mkForce 60;
+    "vm.swappiness" = lib.mkForce 150;
+    "vm.watermark_scale_factor" = 125;
     "vm.dirty_background_ratio" = 5;
     "vm.dirty_ratio" = 20;
     "vm.max_map_count" = lib.mkDefault 262144;

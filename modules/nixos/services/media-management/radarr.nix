@@ -7,6 +7,12 @@
 with lib; let
   cfg = config.host.services.mediaManagement;
 in {
+  options.host.services.mediaManagement.radarr.enable =
+    mkEnableOption "Radarr movie management"
+    // {
+      default = true;
+    };
+
   config = mkIf (cfg.enable && cfg.radarr.enable) {
     services.radarr = {
       enable = true;

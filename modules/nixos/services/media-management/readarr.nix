@@ -7,6 +7,12 @@
 with lib; let
   cfg = config.host.services.mediaManagement;
 in {
+  options.host.services.mediaManagement.readarr.enable =
+    mkEnableOption "Readarr book management"
+    // {
+      default = true;
+    };
+
   config = mkIf (cfg.enable && cfg.readarr.enable) {
     services.readarr = {
       enable = true;

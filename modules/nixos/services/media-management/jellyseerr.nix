@@ -7,6 +7,12 @@
 with lib; let
   cfg = config.host.services.mediaManagement;
 in {
+  options.host.services.mediaManagement.jellyseerr.enable =
+    mkEnableOption "Jellyseerr request management"
+    // {
+      default = true;
+    };
+
   config = mkIf (cfg.enable && cfg.jellyseerr.enable) {
     services.jellyseerr = {
       enable = true;

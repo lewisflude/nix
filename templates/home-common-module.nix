@@ -5,7 +5,7 @@
   config,
   ...
 }: let
-  platformLib = import ../../lib/functions.nix {inherit lib system;};
+  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
 in {
   home = {
     packages = with pkgs;

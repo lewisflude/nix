@@ -114,6 +114,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # === Resume ===
+    jsonresume-nix = {
+      url = "github:TaserudConsulting/jsonresume-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # === Development Tools ===
     nur.url = "github:nix-community/NUR";
 

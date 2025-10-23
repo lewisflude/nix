@@ -5,10 +5,7 @@
   hostSystem,
   ...
 }: let
-  platformLib = import ../../lib/functions.nix {
-    inherit lib;
-    system = hostSystem;
-  };
+  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
 in {
   nix = {
     settings = lib.mkMerge [

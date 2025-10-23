@@ -144,6 +144,7 @@ podman ps
 | Jellyseerr | 5055 | Request management |
 | FlareSolverr | 8191 | Cloudflare bypass |
 | Homarr | 7575 | Dashboard |
+| Janitorr | n/a | Media cleanup automation |
 | Wizarr | 5690 | Invitation system |
 | Recommendarr | 3579 | Recommendations |
 | Kapowarr | 5656 | Comic manager |
