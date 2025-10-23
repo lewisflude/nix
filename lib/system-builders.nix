@@ -138,6 +138,25 @@ in {
           nix-homebrew.darwinModules.nix-homebrew
           sops-nix.darwinModules.sops
 
+          # Apply overlays from overlays/ directory
+          {
+            nixpkgs = {
+              overlays = nixpkgs.lib.attrValues (
+                import ../overlays {
+                  inherit inputs;
+                  inherit (hostConfig) system;
+                }
+              );
+              config = {
+                allowUnfree = true;
+                allowUnfreePredicate = _: true;
+                permittedInsecurePackages = [
+                  "mbedtls-2.28.10"
+                ];
+              };
+            };
+          }
+
           # Homebrew configuration
           {
             nix-homebrew = {

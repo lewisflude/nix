@@ -35,20 +35,6 @@
     backups = false;
   };
 
-  # Legacy container services (deprecated - use native modules instead)
-  containers = {
-    enable = false;
-    mediaManagement = {
-      enable = false;
-      dataPath = "/mnt/storage";
-      configPath = "/var/lib/containers/media-management";
-    };
-    productivity = {
-      enable = false;
-      configPath = "/var/lib/containers/productivity";
-    };
-  };
-
   # Native media management services (preferred)
   mediaManagement = {
     enable = false;
