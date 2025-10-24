@@ -67,7 +67,6 @@ in {
         "steam"
       ];
     masApps = {
-      "1Password for Safari" = 1569813296;
       "Kagi Search" = 1622835804;
       "Xcode" = 497799835;
       "Yubico Authenticator" = 1497506650;
