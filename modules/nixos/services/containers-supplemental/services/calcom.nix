@@ -23,14 +23,30 @@
   # Extract hostname from webappUrl for ALLOWED_HOSTNAMES
   # Cal.com expects hostnames without protocol (e.g., "cal.example.com")
   calcomHost = let
-    matches = builtins.match "https?://([^/]+)" calCfg.webappUrl;
+    matches = builtins.match "https?://([^/:]+)" calCfg.webappUrl;
   in
     if matches == null || matches == []
     then calCfg.webappUrl
     else lib.head matches;
 
-  # Format as comma-separated quoted hostnames for Cal.com's validation
-  calcomAllowedHostnames = "\"${calcomHost}\",\"localhost:${toString calCfg.port}\"";
+  # Extract domain for cookie settings (e.g., ".example.com" from "https://cal.example.com")
+  calcomCookieDomain = let
+    matches = builtins.match "https?://([^/:]+)" calCfg.webappUrl;
+    host =
+      if matches == null || matches == []
+      then calCfg.webappUrl
+      else lib.head matches;
+    # Split by dots and take the last two parts for the base domain
+    parts = lib.splitString "." host;
+    partsLen = lib.length parts;
+  in
+    if partsLen >= 2
+    then ".${lib.concatStringsSep "." (lib.drop (partsLen - 2) parts)}"
+    else host;
+
+  # Format as JSON array string for Cal.com's validation
+  # Cal.com expects a JSON-encoded array like: ["cal.example.com","localhost:3000"]
+  calcomAllowedHostnames = builtins.toJSON [calcomHost "localhost:${toString calCfg.port}"];
 in {
   options.host.services.containersSupplemental.calcom = {
     enable =
@@ -71,13 +87,21 @@ in {
     nextauthSecret = mkOption {
       type = types.nullOr types.str;
       default = null;
-      description = "NextAuth secret for session encryption. Generate with 'openssl rand -base64 32'.";
+      description = ''
+        NextAuth secret for session encryption (must be 32+ characters).
+        Generate with: openssl rand -base64 32
+        This produces a 44-character base64 string that Cal.com uses directly.
+      '';
     };
 
     calendarEncryptionKey = mkOption {
       type = types.nullOr types.str;
       default = null;
-      description = "Calendar encryption key for sensitive data. Generate with 'openssl rand -base64 32'.";
+      description = ''
+        Calendar encryption key for sensitive data (must be exactly 32 bytes when base64-decoded).
+        Generate with: openssl rand -base64 32
+        IMPORTANT: Ensure this is exactly 44 characters (32 bytes base64-encoded).
+      '';
     };
 
     dbPassword = mkOption {
@@ -180,7 +204,11 @@ in {
     serviceAccountEncryptionKey = mkOption {
       type = types.nullOr types.str;
       default = null;
-      description = "Encryption key for service account credentials. Generate with 'openssl rand -base64 24'.";
+      description = ''
+        Encryption key for service account credentials (must be exactly 32 bytes when base64-decoded).
+        Generate with: openssl rand -base64 32
+        IMPORTANT: Ensure this is exactly 44 characters (32 bytes base64-encoded).
+      '';
     };
 
     # Google Calendar integration
@@ -235,14 +263,14 @@ in {
         };
 
         calcom = {
-          image = "docker.io/calcom/cal.com:v4.0.8";
+          image = "docker.io/calcom/cal.com:v5.8.4";
           autoStart = true;
           environment =
             {
               NEXT_PUBLIC_WEBAPP_URL = calCfg.webappUrl;
               NEXT_PUBLIC_WEBSITE_URL = calCfg.webappUrl;
               NEXTAUTH_URL = calCfg.webappUrl;
-              NEXTAUTH_COOKIE_DOMAIN = ".blmt.io";
+              NEXTAUTH_COOKIE_DOMAIN = calcomCookieDomain;
               NEXT_PUBLIC_LICENSE_CONSENT = "true";
               CALCOM_TIMEZONE = cfg.timezone;
               TZ = cfg.timezone;
@@ -302,7 +330,10 @@ in {
           extraOptions =
             mkHealthFlags {
               cmd = "curl -fsS http://localhost:3000/api/health || curl -fsS http://localhost:3000 || exit 1";
-              startPeriod = "120s";
+              interval = "30s";
+              timeout = "10s";
+              startPeriod = "180s";
+              retries = "3";
             }
             ++ mkResourceFlags calCfg.resources.app;
           dependsOn = ["calcom-db"];

@@ -9,11 +9,15 @@
 # - F13: Focus Terminal
 # - Print Screen: Focus Browser
 #
+# Device-specific configuration: Only applies to MNK88 keyboard
+# This prevents remapping from affecting other keyboards
+#
 _: {
   services.keyd = {
     enable = true;
-    keyboards.default = {
-      ids = ["*"];
+    keyboards.mnk88 = {
+      # MNK88 keyboard IDs: vendor=19280 (0x4b50), product=34816 (0x8800)
+      ids = ["4b50:8800"];
       settings = {
         # Global timing configuration
         # Based on research: 200ms balances false positives/negatives

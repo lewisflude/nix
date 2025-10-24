@@ -85,13 +85,6 @@ in {
           resume = true;
         };
 
-      # DEPRECATED: Legacy container services - migrate to native modules
-      containers =
-        defaultFeatures.containers
-        // {
-          enable = false; # Disabled - using native modules instead
-        };
-
       # Native media management services (preferred approach)
       mediaManagement =
         defaultFeatures.mediaManagement
