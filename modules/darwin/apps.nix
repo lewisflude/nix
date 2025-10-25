@@ -40,6 +40,7 @@ in {
         "1password@beta"
         "ableton-live-suite"
         "adobe-creative-cloud"
+        "aws-vpn-client"
         "beekeeper-studio"
         "betterdisplay"
         "chatgpt"
