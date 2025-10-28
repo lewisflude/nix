@@ -29,6 +29,7 @@ in {
       cachix
       nix-tree
       nix-du
+      inputs.flakehub.packages.${system}.default
 
       # Development helpers
       rustup

@@ -28,7 +28,7 @@
         dock.persistent-apps = let
           homebrewApps = lib.filter (app: builtins.pathExists app) [
             "/Applications/Docker.app"
-            "/Applications/Google Chrome Canary.app"
+            "/Applications/Google Chrome.app"
             "/Applications/Figma.app"
             "/Applications/Notion.app"
             "/Applications/Obsidian.app"
@@ -52,38 +52,30 @@
             "/Users/${username}/Documents"
           ];
         };
+        # Control Center preferences
         controlcenter = {
           NowPlaying = true;
           Sound = true;
         };
+
         CustomUserPreferences = {
-          "com.apple.screensaver" = {
-            askForPassword = 0;
-            askForPasswordDelay = 0;
-          };
+          # Screenshot settings
           "com.apple.screencapture" = {
             location = "~/Desktop";
             type = "png";
             disable-shadow = true;
+            include-date = true;
+            show-thumbnail = true;
           };
-          "com.apple.finder" = {
-            AppleShowAllExtensions = true;
-            AppleShowAllFiles = true;
-            WebKitDeveloperExtras = true;
-            ShowPathbar = true;
-            ShowStatusBar = true;
-            FXPreferredViewStyle = "Nlsv";
-            ShowTabView = true;
-            ShowSidebar = true;
-          };
-          "com.apple.Safari" = {
-            "com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled" = true;
-          };
-          "com.apple.TimeMachine" = {
-            DoNotOfferNewDisksForBackup = false;
-          };
+
+          # Battery menu bar settings
           "com.apple.menuextra.battery" = {
             ShowPercent = true;
+          };
+
+          # Time Machine settings (moved from backup.nix to avoid duplication)
+          "com.apple.TimeMachine" = {
+            DoNotOfferNewDisksForBackup = false;
           };
         };
         NSGlobalDomain = {

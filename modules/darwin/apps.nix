@@ -47,7 +47,7 @@ in {
         "discord"
         "docker-desktop"
         "figma"
-        "google-chrome@canary"
+        "google-chrome"
         "gpg-suite"
         "imageoptim"
         "linear-linear"

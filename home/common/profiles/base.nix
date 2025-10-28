@@ -20,6 +20,7 @@
     ../apps/eza.nix
     ../apps/jq.nix
     ../apps/helix.nix
+    ../apps/zed-editor.nix
     ../apps/lazygit.nix
     ../apps/atuin.nix
     ../apps/micro.nix

@@ -10,6 +10,7 @@
     ./fzf.nix
     ./ripgrep.nix
     ./helix.nix
+    ./zed-editor.nix
     ./obsidian.nix
     ./aws.nix
     ./docker.nix

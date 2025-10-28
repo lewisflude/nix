@@ -40,10 +40,12 @@ in rec {
   in
     # Build only the valid packages
     # Pass inputs only to packages that explicitly need it (like ghostty)
-    prev.lib.genAttrs packageNames (name:
-      if name == "ghostty"
-      then prev.callPackage (pkgsDir + "/${name}") {inherit inputs;}
-      else prev.callPackage (pkgsDir + "/${name}") {});
+    prev.lib.genAttrs packageNames (
+      name:
+        if name == "ghostty"
+        then prev.callPackage (pkgsDir + "/${name}") {inherit inputs;}
+        else prev.callPackage (pkgsDir + "/${name}") {}
+    );
 
   # Package fixes
   pamixer = import ./pamixer.nix;
@@ -56,6 +58,27 @@ in rec {
   # Essential tools
   nh = inputs.nh.overlays.default;
   nur = inputs.nur.overlays.default;
+
+  # === Latest Flake Packages ===
+  # Code editors with bleeding-edge features
+  flake-editors = _final: prev: {
+    helix = inputs.helix.packages.${system}.default or prev.helix;
+    # Using stable zed-editor from nixpkgs instead (for cached binaries)
+    # zed-editor = inputs.zed-editor.packages.${system}.default or prev.zed-editor;
+  };
+
+  # Rust toolchain overlay (provides latest Rust, rust-analyzer, etc.)
+  rust-overlay = inputs.rust-overlay.overlays.default;
+
+  # Git tools with latest features
+  flake-git-tools = _final: prev: {
+    lazygit = inputs.lazygit.packages.${system}.default or prev.lazygit;
+  };
+
+  # CLI tools with latest improvements
+  flake-cli-tools = _final: prev: {
+    atuin = inputs.atuin.packages.${system}.default or prev.atuin;
+  };
 
   # === Platform-Specific Overlays ===
 
