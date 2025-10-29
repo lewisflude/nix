@@ -237,6 +237,7 @@ Current system: 'aarch64-darwin' with features {...}
 **Solution:** The update scripts have been fixed to only check your current system's configuration.
 
 If you need to check a specific configuration:
+
 ```bash
 # Check darwin config
 ./scripts/maintenance/check-config.sh Lewiss-MacBook-Pro darwin

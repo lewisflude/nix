@@ -5,6 +5,7 @@ This module provides declarative configuration for a complete media management s
 ## Services Included
 
 ### Indexers & Management
+
 - **Prowlarr** (port 9696) - Indexer manager for Usenet and torrents
 - **Radarr** (port 7878) - Movie collection manager
 - **Sonarr** (port 8989) - TV show collection manager
@@ -13,14 +14,17 @@ This module provides declarative configuration for a complete media management s
 - **Whisparr** (port 6969) - Adult content manager (disabled by default)
 
 ### Download Clients
+
 - **qBittorrent** (port 8080) - BitTorrent client with web UI
 - **SABnzbd** (port 8082) - Usenet binary newsreader
 
 ### Media Server & Frontend
+
 - **Jellyfin** (port 8096) - Open source media server
 - **Jellyseerr** (port 5055) - Media request and discovery platform
 
 ### Utilities
+
 - **FlareSolverr** (port 8191) - Proxy server to bypass Cloudflare protection
 - **Unpackerr** - Automatic archive extractor for downloaded media
 
@@ -49,7 +53,7 @@ This enables all services with default settings.
   host.services.mediaManagement = {
     enable = true;
     dataPath = "/mnt/storage";
-    
+
     # Disable services you don't need
     whisparr.enable = false;
     lidarr.enable = false;
@@ -65,12 +69,12 @@ Individual service options can be configured via the underlying NixOS modules:
 ```nix
 {
   host.services.mediaManagement.enable = true;
-  
+
   # Additional Radarr configuration
   services.radarr = {
     dataDir = "/custom/path";  # Override default
   };
-  
+
   # Additional Jellyfin configuration
   services.jellyfin = {
     # Custom options here
@@ -81,7 +85,9 @@ Individual service options can be configured via the underlying NixOS modules:
 ## Directory Structure
 
 ### Service State
+
 Native services store their data in standard NixOS locations:
+
 - `/var/lib/prowlarr`
 - `/var/lib/radarr`
 - `/var/lib/sonarr`
@@ -94,7 +100,9 @@ Native services store their data in standard NixOS locations:
 - `/var/lib/jellyseerr`
 
 ### Media Storage
+
 Configure via `dataPath` option (default: `/mnt/storage`):
+
 ```
 /mnt/storage/
 ├── media/
@@ -109,6 +117,7 @@ Configure via `dataPath` option (default: `/mnt/storage`):
 ## Features
 
 ### Automatic Setup
+
 - ✅ User and group creation (`media` by default)
 - ✅ Directory creation with proper permissions
 - ✅ Firewall rules automatically configured
@@ -116,16 +125,20 @@ Configure via `dataPath` option (default: `/mnt/storage`):
 - ✅ Timezone configuration
 
 ### qBittorrent VPN Isolation
+
 - Optional WireGuard tunnel with dedicated network namespace
 - Automatic tmpfiles, namespace setup, and firewall forwarding rules
 - Secrets integration via `host.services.mediaManagement.qbittorrent.webUiCredentialsSecret` and `qbittorrent.vpn.privateKeySecret`
 
 ### Hardware Acceleration
+
 - **Jellyfin**: Automatic GPU access for transcoding (`/dev/dri`)
 - Media user automatically added to `render` and `video` groups
 
 ### Service Dependencies
+
 Services have soft dependencies to prevent cascading failures:
+
 - Radarr/Sonarr wait for Prowlarr (but don't fail if it's down)
 - Jellyseerr waits for Jellyfin
 - Unpackerr waits for *arr services
@@ -148,6 +161,7 @@ Services have soft dependencies to prevent cascading failures:
 See the [Migration Guide](../../../../docs/NATIVE-SERVICES-MIGRATION.md) for detailed instructions.
 
 Quick migration:
+
 1. Stop container services
 2. Set `containers.enable = false`
 3. Set `mediaManagement.enable = true`
@@ -157,27 +171,32 @@ Quick migration:
 ## Troubleshooting
 
 ### Check Service Status
+
 ```bash
 systemctl status prowlarr radarr sonarr jellyfin
 ```
 
 ### View Logs
+
 ```bash
 sudo journalctl -u radarr -f
 ```
 
 ### Restart Service
+
 ```bash
 sudo systemctl restart radarr
 ```
 
 ### Check Permissions
+
 ```bash
 ls -la /var/lib/radarr
 sudo chown -R media:media /var/lib/radarr
 ```
 
 ### Port Conflicts
+
 ```bash
 sudo ss -tlnp | grep :7878
 ```

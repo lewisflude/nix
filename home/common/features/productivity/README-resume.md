@@ -45,13 +45,15 @@ generate-resume
 ```
 
 This will create:
+
 - `~/Documents/resume/resume.pdf` - PDF version
-- `~/Documents/resume/resume.html` - HTML version  
+- `~/Documents/resume/resume.html` - HTML version
 - `~/Documents/resume/resume.json` - JSON source
 
 ### 4. Customize the generation script
 
 The generation script is located at `~/.local/bin/generate-resume`. You can modify it to:
+
 - Change output directory
 - Add custom themes
 - Generate additional formats

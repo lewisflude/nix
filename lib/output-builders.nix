@@ -11,9 +11,45 @@ in {
     pre-commit-check = pre-commit-hooks.lib.${system}.run {
       src = ./.;
       hooks = {
+        # Nix formatting and linting
         alejandra.enable = true;
         deadnix.enable = true;
         statix.enable = true;
+
+        # Conventional commits enforcement
+        commitizen.enable = true;
+
+        # General code quality
+        trailing-whitespace = {
+          enable = true;
+          entry = "${nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks}/bin/trailing-whitespace-fixer";
+          types = ["text"];
+        };
+        end-of-file-fixer = {
+          enable = true;
+          entry = "${nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks}/bin/end-of-file-fixer";
+          types = ["text"];
+        };
+        mixed-line-ending = {
+          enable = true;
+          entry = "${nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks}/bin/mixed-line-ending";
+          types = ["text"];
+        };
+
+        # YAML validation
+        check-yaml = {
+          enable = true;
+          entry = "${nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks}/bin/check-yaml";
+          types = ["yaml"];
+          excludes = ["secrets/.*\\.yaml$"];
+        };
+
+        # Markdown formatting
+        markdownlint = {
+          enable = true;
+          entry = "${nixpkgs.legacyPackages.${system}.markdownlint-cli}/bin/markdownlint --fix";
+          types = ["markdown"];
+        };
       };
     };
 

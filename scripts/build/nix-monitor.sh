@@ -66,7 +66,7 @@ get_disk_usage() {
   if [[ ! -d "$path" ]]; then
     return
   fi
-  
+
   df -h "$path" 2>/dev/null | tail -n 1 | awk '{print $5 "\t" $3 "/" $2 "\t" $9}'
 }
 
@@ -85,12 +85,12 @@ system_overview() {
   if ! is_macos; then
     paths+=("/home")
   fi
-  
+
   for path in "${paths[@]}"; do
     if [[ ! -d "$path" ]]; then
       continue
     fi
-    
+
     local line=$(df -h "$path" 2>/dev/null | tail -n 1)
     local usage=$(echo "$line" | awk '{print $5}' | sed 's/%//')
     local mount=$(echo "$line" | awk '{print $9}')

@@ -15,13 +15,13 @@ This module provides declarative configuration for AI-powered productivity tools
 {
   host.services.productivity = {
     enable = true;
-    
+
     ollama = {
       enable = true;
       acceleration = "cuda"; # or "rocm" or null
       models = ["llama2" "mistral"];
     };
-    
+
     openWebui = {
       enable = true;
       port = 7000;
@@ -36,7 +36,7 @@ This module provides declarative configuration for AI-powered productivity tools
 {
   host.services.productivity = {
     enable = true;
-    
+
     ollama = {
       enable = true;
       acceleration = null; # CPU-only
@@ -52,7 +52,7 @@ This module provides declarative configuration for AI-powered productivity tools
 {
   host.services.productivity = {
     enable = true;
-    
+
     ollama = {
       enable = true;
       acceleration = "cuda";
@@ -67,6 +67,7 @@ This module provides declarative configuration for AI-powered productivity tools
 ```
 
 Ensure NVIDIA drivers are enabled:
+
 ```nix
 {
   hardware.nvidia.modesetting.enable = true;
@@ -80,7 +81,7 @@ Ensure NVIDIA drivers are enabled:
 {
   host.services.productivity = {
     enable = true;
-    
+
     ollama = {
       enable = true;
       acceleration = "rocm";
@@ -93,26 +94,28 @@ Ensure NVIDIA drivers are enabled:
 
 ### Ollama
 
-**Port**: 11434 (localhost only)  
-**State Directory**: `/var/lib/ollama`  
+**Port**: 11434 (localhost only)
+**State Directory**: `/var/lib/ollama`
 **User**: `productivity` (configurable)
 
 Ollama runs as a background service and provides an API for LLM inference.
 
 **Environment Variables**:
+
 - `OLLAMA_KEEP_ALIVE=24h` - Keep models in memory for 24 hours
 
 **API Endpoint**: `http://127.0.0.1:11434`
 
 ### Open WebUI
 
-**Port**: 7000 (configurable)  
-**State Directory**: `/var/lib/open-webui`  
+**Port**: 7000 (configurable)
+**State Directory**: `/var/lib/open-webui`
 **User**: `productivity` (configurable)
 
 Open WebUI provides a ChatGPT-like interface for interacting with Ollama.
 
 **Features**:
+
 - Chat interface
 - Model management
 - Conversation history
@@ -160,6 +163,7 @@ ollama run llama2
 ### NVIDIA (CUDA)
 
 Requirements:
+
 - NVIDIA GPU with compute capability 3.5+
 - Proprietary NVIDIA drivers enabled
 - `cuda` acceleration mode
@@ -169,15 +173,17 @@ The module automatically enables `hardware.nvidia-container-toolkit` when using 
 ### AMD (ROCm)
 
 Requirements:
+
 - AMD GPU with ROCm support
 - ROCm drivers installed
 - `rocm` acceleration mode
 
-Check compatibility: https://rocm.docs.amd.com/en/latest/release/gpu_os_support.html
+Check compatibility: <https://rocm.docs.amd.com/en/latest/release/gpu_os_support.html>
 
 ### CPU-Only
 
 Set `acceleration = null` to use CPU inference. Recommended for:
+
 - Systems without compatible GPUs
 - Testing and development
 - Small models (7B parameters or less)
@@ -197,13 +203,14 @@ Open WebUI connects to Ollama via the configured URL (default: `http://127.0.0.1
 Open WebUI listens on `0.0.0.0:7000` and is accessible from the network. The firewall port is automatically opened.
 
 To restrict access:
+
 ```nix
 {
   host.services.productivity.openWebui.enable = true;
-  
+
   # Override to localhost only
   systemd.services.open-webui.environment.WEBUI_HOST = "127.0.0.1";
-  
+
   # Disable automatic firewall rule
   networking.firewall.allowedTCPPorts = mkForce [];
 }
@@ -236,6 +243,7 @@ Then use a reverse proxy (nginx, caddy) for authentication and TLS.
 ### Context Length
 
 Larger context = more memory usage:
+
 ```bash
 ollama run llama2 --context-length 4096
 ```
@@ -243,6 +251,7 @@ ollama run llama2 --context-length 4096
 ### Concurrent Requests
 
 Ollama handles one request at a time by default. For multiple users, consider:
+
 - Using smaller models
 - Increasing `OLLAMA_MAX_LOADED_MODELS`
 - Running multiple Ollama instances
@@ -250,23 +259,27 @@ Ollama handles one request at a time by default. For multiple users, consider:
 ## Troubleshooting
 
 ### Check Service Status
+
 ```bash
 systemctl status ollama
 systemctl status open-webui
 ```
 
 ### View Logs
+
 ```bash
 sudo journalctl -u ollama -f
 sudo journalctl -u open-webui -f
 ```
 
 ### Test Ollama API
+
 ```bash
 curl http://localhost:11434/api/tags
 ```
 
 ### GPU Not Detected
+
 ```bash
 # Check NVIDIA GPU
 nvidia-smi
@@ -276,6 +289,7 @@ journalctl -u ollama | grep -i gpu
 ```
 
 ### Model Download Issues
+
 ```bash
 # Check disk space
 df -h /var/lib/ollama
@@ -285,6 +299,7 @@ sudo -u productivity ollama pull llama2
 ```
 
 ### Performance Issues
+
 - Reduce model size (use 7B instead of 13B)
 - Lower context length
 - Enable GPU acceleration
@@ -304,12 +319,14 @@ sudo -u productivity ollama pull llama2
 ## Migration from Containers
 
 1. Stop container services:
+
    ```bash
    sudo systemctl stop podman-ollama
    sudo systemctl stop podman-openwebui
    ```
 
 2. (Optional) Migrate data:
+
    ```bash
    # Ollama models
    sudo cp -r /var/lib/containers/productivity/ollama/* /var/lib/ollama/
@@ -317,11 +334,13 @@ sudo -u productivity ollama pull llama2
    ```
 
 3. Enable native services:
+
    ```nix
    host.services.productivity.enable = true;
    ```
 
 4. Rebuild:
+
    ```bash
    sudo nixos-rebuild switch
    ```

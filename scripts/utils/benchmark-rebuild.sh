@@ -46,7 +46,7 @@ echo ""
 # Function to measure evaluation time
 measure_evaluation() {
   echo -e "${YELLOW}⏱️  Measuring evaluation time...${NC}"
-  
+
   # macOS date doesn't support nanoseconds, use gdate if available or fall back to seconds
   if [[ "$OSTYPE" == "darwin"* ]]; then
     if command -v gdate &> /dev/null; then
@@ -66,7 +66,7 @@ measure_evaluation() {
     local end=$(date +%s%N)
     local duration=$(( (end - start) / 1000000 ))
   fi
-  
+
   echo -e "${GREEN}✓ Evaluation time: ${duration}ms${NC}"
   echo "$duration"
 }
@@ -74,7 +74,7 @@ measure_evaluation() {
 # Function to measure build time (dry-run)
 measure_build_dryrun() {
   echo -e "${YELLOW}⏱️  Measuring build time (dry-run)...${NC}"
-  
+
   # macOS date doesn't support nanoseconds, use gdate if available or fall back to seconds
   if [[ "$OSTYPE" == "darwin"* ]]; then
     if command -v gdate &> /dev/null; then
@@ -94,7 +94,7 @@ measure_build_dryrun() {
     local end=$(date +%s%N)
     local duration=$(( (end - start) / 1000000 ))
   fi
-  
+
   echo -e "${GREEN}✓ Build planning time: ${duration}ms${NC}"
   echo "$duration"
 }
@@ -102,10 +102,10 @@ measure_build_dryrun() {
 # Count derivations and packages
 count_derivations() {
   echo -e "${YELLOW}📦 Counting packages...${NC}"
-  
+
   # Try to get package count from the build output
   local pkg_count=$(nix eval ".#$CONFIG.config.environment.systemPackages" --apply 'x: builtins.length x' 2>/dev/null || echo "0")
-  
+
   echo -e "${GREEN}✓ System packages: $pkg_count${NC}"
   echo "$pkg_count"
 }
@@ -158,7 +158,7 @@ echo ""
 if [ $(ls -1 "$BENCHMARK_DIR"/*.json 2>/dev/null | wc -l) -gt 1 ]; then
   echo -e "${BLUE}📈 Historical trend (last 5 benchmarks):${NC}"
   echo ""
-  
+
   # Simple trend analysis using jq if available
   if command -v jq &> /dev/null; then
     for file in $(ls -t "$BENCHMARK_DIR"/*.json | head -5); do
@@ -168,7 +168,7 @@ if [ $(ls -1 "$BENCHMARK_DIR"/*.json 2>/dev/null | wc -l) -gt 1 ]; then
       echo -e "  ${date} (${commit}): ${YELLOW}${total}ms${NC}"
     done
     echo ""
-    
+
     # Calculate average
     local avg=$(jq -s 'map(.metrics.total_ms) | add / length | floor' $(ls -t "$BENCHMARK_DIR"/*.json | head -5))
     echo -e "${BLUE}Average (last 5): ${GREEN}${avg}ms${NC}"

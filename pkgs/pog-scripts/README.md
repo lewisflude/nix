@@ -5,6 +5,7 @@ This directory contains CLI tools built with [pog](https://github.com/jpetruccia
 ## Features
 
 All scripts built with pog get these features automatically:
+
 - 🚀 Rich flag parsing (short & long flags)
 - 📖 Auto-generated help text (`--help`)
 - 🔄 Tab completion
@@ -21,6 +22,7 @@ All scripts built with pog get these features automatically:
 Update all dependencies in your Nix configuration: flake inputs, custom packages, and ZSH plugins.
 
 **Usage:**
+
 ```bash
 # Update everything
 nix run .#update-all
@@ -38,6 +40,7 @@ nix run .#update-all -- --help
 ```
 
 **What it updates:**
+
 1. **Flake inputs** (`flake.lock`) - All your flake dependencies
 2. **Custom packages** - Packages with `fetchFromGitHub` using `nix-update`
    - Home Assistant home-llm component
@@ -45,6 +48,7 @@ nix run .#update-all -- --help
 3. **ZSH plugins** - Managed by nvfetcher
 
 **Flags:**
+
 - `-d, --dry_run` - Show what would be updated without making changes
 - `-f, --skip_flake` - Skip flake.lock update
 - `-k, --skip_packages` - Skip custom package updates
@@ -53,6 +57,7 @@ nix run .#update-all -- --help
 - `-h, --help` - Show help
 
 **Examples:**
+
 ```bash
 # Safe dry-run to preview changes
 nix run .#update-all -- --dry_run
@@ -69,6 +74,7 @@ nix run .#update-all -- -v
 Create new Nix modules from templates with interactive prompts and validation.
 
 **Usage:**
+
 ```bash
 # Run directly
 nix run .#new-module
@@ -87,6 +93,7 @@ nix run .#new-module -- --help
 ```
 
 **Flags:**
+
 - `-t, --type` - Module type (feature, service, overlay, test) [required]
 - `-n, --name` - Module name [required]
 - `-f, --force` - Overwrite existing module
@@ -95,6 +102,7 @@ nix run .#new-module -- --help
 - `-h, --help` - Show help
 
 **Examples:**
+
 ```bash
 # Create a new feature module
 nix run .#new-module -- -t feature -n kubernetes
@@ -111,6 +119,7 @@ nix run .#new-module
 
 **Tab Completion:**
 The `--type` flag has tab completion for valid types:
+
 ```bash
 nix run .#new-module -- --type <TAB>
 # Shows: feature service overlay test
@@ -119,6 +128,7 @@ nix run .#new-module -- --type <TAB>
 ## Architecture
 
 ### File Structure
+
 ```
 pkgs/pog-scripts/
 ├── README.md              # This file
@@ -144,7 +154,7 @@ pog.lib.pog {
   name = "my-tool";
   version = "1.0.0";
   description = "Does something useful";
-  
+
   flags = [
     {
       name = "option";
@@ -153,13 +163,13 @@ pog.lib.pog {
       completion = ''echo "choice1 choice2"'';
     }
   ];
-  
+
   runtimeInputs = with pkgs; [ coreutils jq ];
-  
+
   script = helpers: with helpers; ''
     # Access flags as variables
     echo "Option value: $option"
-    
+
     # Use helpers
     ${flag "verbose"} && debug "Verbose mode!"
     green "Success!"
@@ -172,44 +182,50 @@ pog.lib.pog {
 Pog provides many helpers in the `script` function:
 
 ### Colors
+
 - `red`, `green`, `yellow`, `blue`, `purple`, `cyan`, `grey`
 - Background: `red_bg`, `green_bg`, etc.
 - Styles: `bold`, `dim`, `italic`, `underlined`
 
 ### Functions
+
 - `debug` - Print debug message (only if `-v`)
 - `die` - Exit with error message and code
 - `confirm` - Interactive confirmation prompt
 - `spinner` - Show spinner while running command
 
 ### File Checks
+
 - `${file.exists "VAR"}` - Check if file exists
 - `${file.notExists "VAR"}` - Check if file doesn't exist
 - `${file.empty "VAR"}` - Check if file is empty
 
 ### Flag Checks
+
 - `${flag "name"}` - Check if boolean flag is set
 - `${var.empty "name"}` - Check if variable is empty
 
 ## Adding New Scripts
 
 1. **Create the Nix file:**
+
 ```bash
 touch pkgs/pog-scripts/my-tool.nix
 ```
 
 2. **Define the script:**
+
 ```nix
 { pkgs, pog, config-root }:
 
 pog.lib.pog {
   name = "my-tool";
   description = "Brief description";
-  
+
   flags = [
     # Define your flags
   ];
-  
+
   script = helpers: with helpers; ''
     # Your script logic
   '';
@@ -217,6 +233,7 @@ pog.lib.pog {
 ```
 
 3. **Add to flake outputs** (`lib/output-builders.nix`):
+
 ```nix
 mkApps = builtins.mapAttrs (system: _hostGroup: let
   pkgs = nixpkgs.legacyPackages.${system};
@@ -236,6 +253,7 @@ in {
 ```
 
 4. **Test it:**
+
 ```bash
 nix run .#my-tool -- --help
 ```
@@ -243,6 +261,7 @@ nix run .#my-tool -- --help
 ## Migrating Bash Scripts to Pog
 
 ### Before (Bash)
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -257,18 +276,19 @@ echo "Processing $NAME..."
 ```
 
 ### After (Pog)
+
 ```nix
 { pkgs, pog, ... }:
 
 pog.lib.pog {
   name = "my-tool";
-  
+
   flags = [{
     name = "name";
     required = true;
     description = "Name to process";
   }];
-  
+
   script = ''
     echo "Processing $name..."
   '';
@@ -276,6 +296,7 @@ pog.lib.pog {
 ```
 
 **Benefits:**
+
 - ✅ Auto-generated help text
 - ✅ Flag validation
 - ✅ Tab completion
@@ -302,6 +323,7 @@ pog.lib.pog {
 ## Troubleshooting
 
 ### Script doesn't run
+
 ```bash
 # Check if the app is available
 nix flake show | grep -A5 apps
@@ -311,16 +333,19 @@ nix build .#new-module
 ```
 
 ### Flag not working
+
 - Check flag definition has `name` field
 - Ensure flag name doesn't conflict with built-ins (`verbose`, `help`, `color`)
 - Use `debug` helper to print flag values
 
 ### Completion not working
+
 - Completion command must output space-separated values
 - Test completion command independently first
 - Make sure runtime inputs include necessary tools
 
 ### Interactive prompt fails
+
 - Ensure `gum` is in `runtimeInputs`
 - Test prompt command independently
 - Provide `promptError` message for debugging

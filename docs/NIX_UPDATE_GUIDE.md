@@ -20,6 +20,7 @@ nix-update package-name --version=1.2.3 --flake
 ## Common Use Cases
 
 ### Update GitHub Package
+
 ```bash
 # Our old way: update-git-hash romkatv zsh-defer
 # New way:
@@ -27,12 +28,14 @@ nix-update zsh-defer --flake --commit
 ```
 
 ### Update to Latest Branch
+
 ```bash
 nix-update package-name --version=branch --flake
 nix-update package-name --version=branch=develop --flake
 ```
 
 ### Update and Test
+
 ```bash
 nix-update package-name --flake --build
 nix-update package-name --flake --test
@@ -55,11 +58,12 @@ nix-update package-name --flake --test
 
 ## Full Documentation
 
-See: https://github.com/Mic92/nix-update
+See: <https://github.com/Mic92/nix-update>
 
 ## Installation
 
 Already in nixpkgs:
+
 ```bash
 # Run without installing
 nix-shell -p nix-update

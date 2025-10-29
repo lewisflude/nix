@@ -24,10 +24,10 @@ Add to `hosts/jupiter/configuration.nix`:
 {
   # Enable bleeding-edge Mesa drivers (better gaming performance)
   chaotic.mesa-git.enable = true;
-  
+
   # Use CachyOS kernel for gaming performance
   boot.kernelPackages = pkgs.linuxPackages_cachyos;
-  
+
   # Install specific bleeding-edge packages
   environment.systemPackages = with pkgs; [
     firefox_nightly  # Latest Firefox
@@ -44,19 +44,19 @@ Add to `hosts/jupiter/configuration.nix`:
     # Browsers
     firefox_nightly
     chromium_git
-    
+
     # Gaming
     gamescope_git
     mangohud_git
-    
+
     # Desktop/Wayland
     wlroots_git
     sway_git
-    
+
     # Media
     mpv_git
     ffmpeg_git
-    
+
     # Development
     neovim_git
   ];
@@ -81,7 +81,7 @@ Perfect for your gaming setup on Jupiter:
 {
   # === Gaming Kernel ===
   boot.kernelPackages = pkgs.linuxPackages_cachyos;
-  
+
   # === Optional: CachyOS with sched-ext schedulers ===
   # From kernel 6.12+, sched-ext provides better game scheduling
   services.scx = {
@@ -89,10 +89,10 @@ Perfect for your gaming setup on Jupiter:
     scheduler = "scx_rusty"; # or scx_lavd for gaming
     package = pkgs.scx_git.full; # Latest schedulers
   };
-  
+
   # === Bleeding-edge Graphics ===
   chaotic.mesa-git.enable = true;
-  
+
   # === Gaming Tools ===
   environment.systemPackages = with pkgs; [
     gamescope_git       # Latest Gamescope
@@ -103,6 +103,7 @@ Perfect for your gaming setup on Jupiter:
 ```
 
 **Performance Benefits:**
+
 - CachyOS kernel: Optimized for gaming/desktop workloads
 - sched-ext schedulers: Better CPU scheduling for games
 - mesa_git: Latest graphics optimizations
@@ -125,6 +126,7 @@ You have audio production enabled - consider:
 ## 📋 Popular Packages Available
 
 ### Desktop/Wayland
+
 - `sway_git` - Tiling Wayland compositor
 - `wlroots_git` - Wayland compositor library
 - `waybar_git` - Status bar
@@ -132,23 +134,28 @@ You have audio production enabled - consider:
 - `hyprland_git` - Dynamic tiling compositor
 
 ### Gaming
+
 - `gamescope_git` - Gaming micro-compositor
 - `mangohud_git` - Performance overlay
 - `obs-studio_git` - Streaming/recording
 
 ### Browsers
+
 - `firefox_nightly` - Firefox bleeding-edge
 - `chromium_git` - Chromium latest
 
 ### Media
+
 - `mpv_git` - Media player
 - `ffmpeg_git` - Video processing
 
 ### Development
+
 - `neovim_git` - Latest Neovim
 - `zellij_git` - Terminal multiplexer
 
 ### System
+
 - `linux_cachyos` - Gaming-optimized kernel
 - `linux_cachyos-lto` - LTO-optimized kernel
 - `linux_cachyos-hardened` - Hardened kernel
@@ -160,13 +167,13 @@ You have audio production enabled - consider:
 {
   # Standard CachyOS kernel (recommended)
   boot.kernelPackages = pkgs.linuxPackages_cachyos;
-  
+
   # OR: Hardened variant
   boot.kernelPackages = pkgs.linuxPackages_cachyos-hardened;
-  
+
   # OR: LTO-optimized (LLVM/Clang, may have issues with some modules)
   boot.kernelPackages = pkgs.linuxPackages_cachyos-lto;
-  
+
   # OR: Release candidate (not cached, will build locally)
   boot.kernelPackages = pkgs.linuxPackages_cachyos-rc;
 }
@@ -213,6 +220,7 @@ chaotic = {
 ### Binary Cache
 
 The cache is automatically configured in `flake.nix`:
+
 - URL: `https://chaotic-nyx.cachix.org`
 - Key: `chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8=`
 
@@ -231,14 +239,14 @@ nix eval github:chaotic-cx/nyx/nyxpkgs-unstable#firefox_nightly.meta.description
 
 ## 📚 Resources
 
-- **Official Docs**: https://www.nyx.chaotic.cx/
-- **GitHub**: https://github.com/chaotic-cx/nyx
-- **Package List**: https://www.nyx.chaotic.cx/#lists-of-options-and-packages
-- **Telegram News**: https://t.me/s/chaotic_nyx
-- **Support**: 
-  - GitHub Issues: https://github.com/chaotic-cx/nyx/issues
+- **Official Docs**: <https://www.nyx.chaotic.cx/>
+- **GitHub**: <https://github.com/chaotic-cx/nyx>
+- **Package List**: <https://www.nyx.chaotic.cx/#lists-of-options-and-packages>
+- **Telegram News**: <https://t.me/s/chaotic_nyx>
+- **Support**:
+  - GitHub Issues: <https://github.com/chaotic-cx/nyx/issues>
   - Matrix: `#chaotic-nyx:ubiquelambda.dev`
-  - Telegram: https://t.me/chaotic_nyx_sac
+  - Telegram: <https://t.me/chaotic_nyx_sac>
 
 ## 🚀 Next Steps
 
@@ -255,16 +263,16 @@ Based on your configuration (gaming + audio + media server):
 {
   # Gaming-optimized kernel
   boot.kernelPackages = pkgs.linuxPackages_cachyos;
-  
+
   # Better game scheduling (6.12+ kernels)
   services.scx = {
     enable = true;
     scheduler = "scx_rusty";
   };
-  
+
   # Bleeding-edge graphics for gaming
   chaotic.mesa-git.enable = true;
-  
+
   # Optional: Latest gaming tools
   environment.systemPackages = with pkgs; [
     gamescope_git
@@ -274,6 +282,7 @@ Based on your configuration (gaming + audio + media server):
 ```
 
 This gives you:
+
 - ✅ Better gaming performance
 - ✅ Latest graphics drivers
 - ✅ Pre-built binaries (no waiting)

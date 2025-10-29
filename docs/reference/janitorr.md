@@ -17,7 +17,7 @@ Unless you disable dry-run mode, nothing will be deleted.
 Refer to the logging section to see what actions Janitorr will take.
 
 If you still don't trust Janitorr, you may enable Recycle Bin in the *arrs and disable Jellyfin/Emby.
-This way, no deletes will be triggered on Jellyfin and everthing triggered in the *arrs will only go to the Recycle Bin.
+This way, no deletes will be triggered on Jellyfin and everthing triggered in the*arrs will only go to the Recycle Bin.
 
 ### Introduction
 
@@ -71,6 +71,7 @@ You can further customise the generated YAML via `host.services.containers.media
 - Jellyfin/Emby and Jellyseerr are not required, but if you don't supply them, you may end up with orphaned folders,  metadata, etc
 
 ### Logging
+
 You may check the container logs for Janitorr to observe what the application wants to do.
 Janitorr logs to stdout, so you can view your logs in Docker. However, it is recommended to enable file logging in your config instead.
 If file logging is enabled, please make sure the location you've chosen for the log file is mapped into the container, so that Janitorr can write log files to the host and not inside the container.
@@ -82,6 +83,7 @@ To enable debug logging, change `INFO` in the following line in `application.yml
 ```
 
 ### Troubleshooting
+
 Before you create a new issue, please check previous issues to make sure nobody has faced the same problem before.
 [The Wiki](https://github.com/Schaka/janitorr/wiki) also contains a troubleshooting section with commons errors.
 
@@ -107,7 +109,7 @@ Janitorr looks for can be adjusted in your config file.
 
 If using Jellyfin with **filesystem access**, ensure that Janitorr has access to the exact directory structure for the leaving-soon-dir as Jellyfin.
 Additionally, make sure the *arrs directories are mapped into your container the same way for Janitorr as well.
-Janitorr receives info about where files are located by the *arrs - so the path needs to be available to both.
+Janitorr receives info about where files are located by the*arrs - so the path needs to be available to both.
 
 Janitorr creates symlinks from whatever directory it receives from the arrs' API into the `leaving-soon-dir`.
 If Radarr finds movies at `/data/media/movies` Janitorr needs to find them at `/data/media/movies` too.
@@ -116,7 +118,6 @@ You need to ensure links can be created from the source (in the *arrs' library) 
 The only exception is your `leaving-soon-dir`. If Jellyfin and Janitorr know this directory under different paths, you can just this.
 By default, both `media-server-leaving-soon-dir` and `leaving-soon-dir` should be identical if your volume mappings are identical.
 
-
 If Janitorr's mapping looks like this:
 `/share_media/media/leaving-soon:/data/media/leaving-soon`
 
@@ -124,6 +125,7 @@ And Jellyfin's like this:
 `/share_media/media/leaving-soon:/library/leaving-soon`
 
 Then your `application.yml` should look like:
+
 ```
 leaving-soon-dir: "/data/media/leaving-soon"
 media-server-leaving-soon-dir: "/library/leaving-soon"
@@ -198,10 +200,10 @@ services:
 To get the latest build as found in the development branch, grab the following image: `ghcr.io/schaka/janitorr:jvm-develop`.
 The development version of the native image is available as `ghcr.io/schaka/janitorr:native-develop`.
 
-
 ## JetBrains
+
 Thank you to [<img src="images/logos/jetbrains.svg" alt="JetBrains" width="32"> JetBrains](http://www.jetbrains.com/) for providing us with free licenses to their great tools.
 
-* [<img src="images/logos/idea.svg" alt="Idea" width="32"> IntelliJ Idea](https://www.jetbrains.com/idea/)
-* [<img src="images/logos/webstorm.svg" alt="WebStorm" width="32"> WebStorm](http://www.jetbrains.com/webstorm/)
-* [<img src="images/logos/rider.svg" alt="Rider" width="32"> Rider](http://www.jetbrains.com/rider/)
+- [<img src="images/logos/idea.svg" alt="Idea" width="32"> IntelliJ Idea](https://www.jetbrains.com/idea/)
+- [<img src="images/logos/webstorm.svg" alt="WebStorm" width="32"> WebStorm](http://www.jetbrains.com/webstorm/)
+- [<img src="images/logos/rider.svg" alt="Rider" width="32"> Rider](http://www.jetbrains.com/rider/)
