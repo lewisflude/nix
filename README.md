@@ -57,6 +57,7 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 | Topic | Link | Description |
 |-------|------|-------------|
 | **🚀 Quick Start** | [`docs/guides/quick-start.md`](docs/guides/quick-start.md) | Get up and running in 5 minutes |
+| **🗄️ Cachix & FlakeHub** | [`docs/CACHIX_FLAKEHUB_SETUP.md`](docs/CACHIX_FLAKEHUB_SETUP.md) | Set up binary cache and flake publishing |
 | **🎨 Developer Experience** | [`docs/DX_GUIDE.md`](docs/DX_GUIDE.md) | DX tooling, commits, and best practices |
 | **💻 Development** | [`docs/guides/development.md`](docs/guides/development.md) | Development environments and shells |
 | **⚙️ Configuration** | [`docs/guides/configuration.md`](docs/guides/configuration.md) | Adding packages, hosts, and modules |
@@ -105,6 +106,34 @@ This repository includes comprehensive DX tooling:
 **Get started:** `nix develop` (auto-configures everything!)
 
 **Learn more:** See [DX Guide](docs/DX_GUIDE.md) and [Contributing Guide](CONTRIBUTING.md)
+
+## 🚀 Binary Cache & Publishing
+
+### Cachix - Fast Binary Cache
+
+Speed up your builds by using pre-built packages:
+
+```bash
+# Use the personal cache (setup required)
+cachix use lewisflude-nix
+```
+
+Rebuilds will be **10-30 seconds** instead of 10-20 minutes!
+
+**Setup guide:** [`docs/CACHIX_FLAKEHUB_SETUP.md`](docs/CACHIX_FLAKEHUB_SETUP.md)
+
+### FlakeHub - Flake Publishing
+
+This configuration can be published to FlakeHub for easy discovery and versioned releases.
+
+**Use this config:**
+```nix
+{
+  inputs.lewisflude-nix.url = "https://flakehub.com/f/lewisflude/nix/*";
+}
+```
+
+**Setup guide:** [`docs/CACHIX_FLAKEHUB_SETUP.md`](docs/CACHIX_FLAKEHUB_SETUP.md)
 
 ---
 
