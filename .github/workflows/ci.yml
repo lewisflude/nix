@@ -32,7 +32,7 @@ jobs:
           # Run flake check but allow it to continue even if system checks fail
           # This is a known issue with NixOS configuration checks in some versions
           nix flake check --accept-flake-config --show-trace || echo "⚠️  Some checks failed, but continuing..."
-          
+
           # Verify the flake structure is valid
           nix flake show --accept-flake-config > /dev/null
           echo "✅ Flake structure is valid"
@@ -194,8 +194,9 @@ jobs:
       - name: Check secrets files are encrypted
         run: |
           if [ -f secrets/secrets.yaml ]; then
-            if head -n 1 secrets/secrets.yaml | grep -q "sops"; then
-              echo "✅ Secrets file is encrypted"
+            # Check for SOPS encryption markers (ENC[ or sops: metadata)
+            if grep -q "ENC\[" secrets/secrets.yaml || grep -q "^sops:" secrets/secrets.yaml; then
+              echo "✅ Secrets file is encrypted with SOPS"
             else
               echo "❌ Secrets file is not encrypted!"
               exit 1
