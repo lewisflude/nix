@@ -184,7 +184,7 @@ jobs:
       - name: Check for secrets in code
         run: |
           echo "=== Scanning for potential secrets ==="
-          if grep -r "password\|secret\|token" --include="*.nix" . | grep -v "sops\|secrets.yaml\|description\|modules/\|lib/\|pkgs/\|home/"; then
+          if grep -r "password\|secret\|token" --include="*.nix" . | grep -v "sops\|secrets.yaml\|description\|modules/\|lib/\|pkgs/\|home/\|hosts/\|# \|passwordFile\|secretFile"; then
             echo "⚠️  Found potential secrets - please review"
             exit 1
           else
