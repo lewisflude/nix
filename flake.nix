@@ -26,8 +26,7 @@
       "https://zed.cachix.org"
       "https://cache.garnix.io"
       "https://chaotic-nyx.cachix.org" # Bleeding-edge packages (NixOS only)
-      # Add your custom cache here:
-      # "https://your-cache.cachix.org"
+      "https://lewisflude.cachix.org" # Personal binary cache
     ];
 
     extra-trusted-public-keys = [
@@ -44,8 +43,7 @@
       "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
       "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8=" # Bleeding-edge packages
-      # Add your custom cache key here:
-      # "your-cache.cachix.org-1:YourPublicKey"
+      "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc=" # Personal cache
     ];
   };
 
