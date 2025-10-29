@@ -1,0 +1,32 @@
+# treefmt - unified code formatter configuration
+# https://github.com/numtide/treefmt
+
+[formatter.nix]
+command = "alejandra"
+options = ["--quiet"]
+includes = ["*.nix"]
+excludes = [
+  "result",
+  "result-*",
+  ".direnv",
+  "node_modules",
+  "flake.lock",
+]
+
+[formatter.yaml]
+command = "prettier"
+options = ["--write"]
+includes = ["*.yaml", "*.yml"]
+excludes = [
+  "secrets/*.yaml",  # Don't format encrypted secrets
+]
+
+[formatter.markdown]
+command = "prettier"
+options = ["--write", "--prose-wrap", "always"]
+includes = ["*.md"]
+
+[formatter.shell]
+command = "shfmt"
+options = ["-i", "2", "-s", "-w"]
+includes = ["*.sh", "*.bash", "*.zsh"]
