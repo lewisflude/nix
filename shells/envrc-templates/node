@@ -1,0 +1,24 @@
+# Node.js project environment
+use flake .#node
+
+# Project-specific environment variables
+export NODE_ENV=development
+export DEBUG=*
+
+# Enable pnpm if package-lock.json doesn't exist but pnpm-lock.yaml does
+if [[ -f "pnpm-lock.yaml" && ! -f "package-lock.json" ]]; then
+  export npm_config_user_config="$PWD/.npmrc"
+fi
+
+# Auto-install dependencies if package.json changed
+if [[ package.json -nt node_modules/.updated ]]; then
+  echo "📦 Installing dependencies..."
+  if [[ -f "pnpm-lock.yaml" ]]; then
+    pnpm install
+  elif [[ -f "yarn.lock" ]]; then
+    yarn install
+  else
+    npm install
+  fi
+  touch node_modules/.updated
+fi
