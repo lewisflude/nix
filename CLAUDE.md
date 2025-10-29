@@ -1,0 +1,1 @@
+- Never rebuild my nixos or nix-darwin system for me, always ask me to build instead as you do not have permissions to run nh os switch or other similar commands
