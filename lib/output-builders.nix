@@ -60,7 +60,7 @@ in {
     # };
   });
   mkDevShells = let
-    hostsBySystem = nixpkgs.lib.groupBy (hostConfig: hostConfig.system) (builtins.attrValues hosts);
+    hostsBySystem = builtins.groupBy (hostConfig: hostConfig.system) (builtins.attrValues hosts);
   in
     builtins.mapAttrs (
       system: _hostGroup: let
@@ -139,7 +139,7 @@ in {
 
   # Expose runnable apps via `nix run .#<app-name>` per system
   mkApps = let
-    hostsBySystem = nixpkgs.lib.groupBy (hostConfig: hostConfig.system) (builtins.attrValues hosts);
+    hostsBySystem = builtins.groupBy (hostConfig: hostConfig.system) (builtins.attrValues hosts);
   in
     builtins.mapAttrs (system: _hostGroup: let
       pkgs = import nixpkgs {
