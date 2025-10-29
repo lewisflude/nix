@@ -5,11 +5,13 @@ This directory contains utility scripts for managing your cross-platform Nix con
 ## 🚀 Quick Start
 
 **Load convenient aliases:**
+
 ```bash
 source ~/.config/nix/scripts/ALIASES.sh
 ```
 
 Add to your `~/.zshrc` to make permanent:
+
 ```bash
 echo 'source ~/.config/nix/scripts/ALIASES.sh' >> ~/.zshrc
 ```
@@ -47,6 +49,7 @@ Community Tools (use these):
 ## 🔧 Common Tasks
 
 ### Update Everything
+
 ```bash
 # Update flake.lock and ZSH plugins (POG app)
 nix run .#update-all
@@ -60,6 +63,7 @@ nix flake update  # Just flake.lock
 ```
 
 ### Build & Switch
+
 ```bash
 # macOS (nix-darwin)
 darwin-rebuild switch --flake ~/.config/nix
@@ -74,6 +78,7 @@ nix-test     # Test build
 ```
 
 ### Check Configuration
+
 ```bash
 # Direct commands (best practice)
 nix flake check
@@ -85,6 +90,7 @@ nix-build  # Validates during build
 ```
 
 ### View Differences
+
 ```bash
 # Install nvd first if not available
 nix profile install nixpkgs#nvd
@@ -97,6 +103,7 @@ nix-diff  # Requires nvd
 ```
 
 ### System Monitoring
+
 ```bash
 # Cross-platform monitoring tool
 ~/.config/nix/scripts/build/nix-monitor.sh
@@ -115,6 +122,7 @@ nix-monitor-full  # Complete analysis
 ```
 
 ### Maintenance
+
 ```bash
 # Garbage collection
 nix-collect-garbage -d           # Delete all old generations
@@ -130,6 +138,7 @@ nix-optimize    # Deduplicate
 ```
 
 ### Module Scaffolding
+
 ```bash
 # Create new module from template
 ~/.config/nix/scripts/utils/new-module.sh feature kubernetes
@@ -139,6 +148,7 @@ nix-optimize    # Deduplicate
 ## 📊 Useful Tools
 
 ### `update-all` - Master Update Tool (POG)
+
 Updates all dependencies in one command.
 
 ```bash
@@ -153,6 +163,7 @@ nix run .#update-all -- -k              # Skip custom packages
 ```
 
 ### `nix-update` - Package Updates (Community Tool)
+
 Use instead of custom update-git-hash script.
 
 ```bash
@@ -166,9 +177,11 @@ nix-update package-name --flake --commit
 ```
 
 ### `nix-monitor.sh` - System Monitoring
+
 Cross-platform system and Nix store monitoring.
 
 **Features:**
+
 - System overview (CPU, memory, disk)
 - Nix store analysis (size, dead paths)
 - Build performance tracking
@@ -177,10 +190,12 @@ Cross-platform system and Nix store monitoring.
 - Interactive cleanup
 
 **Platform Support:**
+
 - ✅ macOS (nix-darwin)
 - ✅ NixOS
 
 ### `benchmark-rebuild.sh` - Performance Tracking
+
 Track rebuild performance over time.
 
 ```bash
@@ -189,6 +204,7 @@ Track rebuild performance over time.
 ```
 
 ### `visualize-modules.sh` - Dependency Graph
+
 Generate module dependency visualizations.
 
 ```bash
@@ -209,6 +225,7 @@ The following wrapper scripts were removed in favor of direct commands and alias
 | `build/dev.sh` | Use direct commands or aliases from `ALIASES.sh` |
 
 **Why removed?**
+
 - Reduced complexity and maintenance burden
 - Improved transparency (see actual commands being run)
 - Better integration with standard Nix tooling
@@ -219,6 +236,7 @@ The following wrapper scripts were removed in favor of direct commands and alias
 If you were using the old wrapper scripts:
 
 ### Before
+
 ```bash
 ./scripts/fix-file-limits.sh
 ./scripts/maintenance/update-flake.sh
@@ -228,6 +246,7 @@ If you were using the old wrapper scripts:
 ```
 
 ### After
+
 ```bash
 # File limits now declarative (already configured)
 # Just rebuild to apply
@@ -272,6 +291,7 @@ When adding new scripts:
 6. ❌ **DON'T** - Meta-wrappers that just route to other scripts
 
 Always prefer:
+
 - Declarative configuration over imperative scripts
 - Direct commands over wrappers
 - Aliases over wrapper scripts

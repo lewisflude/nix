@@ -10,20 +10,20 @@ keybinds {
     bind "Alt j" { MoveFocus "Down"; }
     bind "Alt k" { MoveFocus "Up"; }
     bind "Alt l" { MoveFocus "Right"; }
-    
+
     // Pane resizing with Alt + HJKL (shift)
     bind "Alt H" { Resize "Increase Left"; }
     bind "Alt J" { Resize "Increase Down"; }
     bind "Alt K" { Resize "Increase Up"; }
     bind "Alt L" { Resize "Increase Right"; }
-    
+
     // Pane management
     bind "Alt d" { NewPane "Right"; }
     bind "Alt s" { NewPane "Down"; }
     bind "Alt n" { NewPane; }
     bind "Alt w" { CloseFocus; }
     bind "Alt f" { ToggleFocusFullscreen; }
-    
+
     // Tab management
     bind "Alt t" { NewTab; }
     bind "Alt 1" { GoToTab 1; }
@@ -37,24 +37,24 @@ keybinds {
     bind "Alt 9" { GoToTab 9; }
     bind "Alt [" { GoToPreviousTab; }
     bind "Alt ]" { GoToNextTab; }
-    
+
     // Session management
     bind "Alt o" { SwitchToMode "session"; }
     bind "Alt q" { Quit; }
-    
+
     // Search/Scroll mode
     bind "Alt /" { SwitchToMode "scroll"; }
-    
+
     // Rename tab
     bind "Alt r" { SwitchToMode "renametab"; }
   }
-  
+
   // Locked mode - minimal interference with terminal applications
   locked {
     // Only unlock binding in locked mode
     bind "Ctrl g" { SwitchToMode "normal"; }
   }
-  
+
   // Scroll mode enhancements
   scroll {
     bind "j" "Down" { ScrollDown; }

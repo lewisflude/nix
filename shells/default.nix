@@ -223,11 +223,16 @@
       echo "  • pre-commit run --all-files  - Run linters"
       echo ""
       echo "📚 Documentation:"
+      echo "  • docs/DX_GUIDE.md             - Developer experience guide"
+      echo "  • docs/CONVENTIONAL_COMMENTS.md - Code review standards"
       echo "  • docs/ARCHITECTURE.md         - Architecture overview"
       echo "  • CONTRIBUTING.md              - Contributing guide"
       echo "  • templates/README.md          - Module templates"
       echo ""
       echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      # Configure git to use conventional commit template
+      git config commit.template "$PWD/.gitmessage"
 
       # Add scripts to PATH
       export PATH="$PWD/scripts/utils:$PWD/scripts/maintenance:$PATH"

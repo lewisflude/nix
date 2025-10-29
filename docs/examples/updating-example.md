@@ -17,15 +17,15 @@ git checkout -b updates/2025-10-28
 # Output:
 # === 🚀 Starting Full Update Process ===
 # [INFO] Flake directory: /Users/lewisflude/.config/nix
-# 
+#
 # === 1️⃣  Updating Flake Inputs ===
 # [INFO] Updating flake inputs...
 # • Updated 'nixpkgs': 'github:NixOS/nixpkgs/6a08e6bb...' -> 'github:NixOS/nixpkgs/8f3c9fa...'
 # • Updated 'home-manager': ...
-# 
+#
 # === 2️⃣  Updating ZSH Plugins ===
 # [INFO] ZSH plugins updated
-# 
+#
 # === ✨ Done! ===
 
 # 3. Review what changed
@@ -85,10 +85,10 @@ cd ~/.config/nix
 #   Repo:   zsh-defer
 #   Rev:    a1b2c3d4e5f6...
 #   SHA256: sha256-ABC123...
-# 
+#
 # Found in:
 #   - home/common/shell.nix
-# 
+#
 # Update these files? (y/N) y
 # [INFO] ✅ Updated home/common/shell.nix
 # [INFO] Done! Review changes with: git diff
@@ -202,12 +202,14 @@ Your config already has automated updates set up:
 ```
 
 When the action runs:
+
 1. Updates flake inputs
 2. Creates a branch `automated-updates/YYYY-MM-DD`
 3. Commits changes
 4. (Optionally) Creates a PR
 
 You can then:
+
 - Review the PR
 - Test locally: `git fetch && git checkout automated-updates/2025-10-28`
 - Merge if good

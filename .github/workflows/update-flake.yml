@@ -4,7 +4,7 @@ on:
   # Run weekly on Monday at 9am UTC
   schedule:
     - cron: '0 9 * * 1'
-  
+
   # Allow manual trigger
   workflow_dispatch:
     inputs:
@@ -35,7 +35,7 @@ jobs:
         id: update
         run: |
           nix flake update
-          
+
           # Check if anything changed
           if git diff --quiet flake.lock; then
             echo "changed=false" >> $GITHUB_OUTPUT
@@ -57,10 +57,10 @@ jobs:
           # Extract updated inputs from git diff
           echo "## Updated Inputs" > summary.md
           echo "" >> summary.md
-          
+
           # Parse flake.lock diff for updated packages
           git diff flake.lock | grep -E '^\+.*"rev"|^\+.*"lastModified"' | head -n 20 >> summary.md || echo "See diff for details" >> summary.md
-          
+
           # Save for PR body
           echo "SUMMARY<<EOF" >> $GITHUB_OUTPUT
           cat summary.md >> $GITHUB_OUTPUT
@@ -75,13 +75,13 @@ jobs:
           title: 'chore: update flake inputs'
           body: |
             Automated flake input update
-            
+
             ${{ steps.summary.outputs.SUMMARY }}
-            
+
             ## Testing
             - [ ] Test build on Darwin
             - [ ] Test build on NixOS
-            
+
             Please review the changes and test the configuration before merging.
           branch: chore/update-flake-inputs
           delete-branch: true

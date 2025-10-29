@@ -11,17 +11,20 @@ A modern, cross-platform Nix setup for both macOS (nix-darwin) and Linux (NixOS)
 ## 🚀 Quick Start
 
 ### 1. Install Nix
+
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
 ### 2. Clone This Configuration
+
 ```bash
 git clone <your-repo-url> ~/.config/nix
 cd ~/.config/nix
 ```
 
 ### 3. Build Your System
+
 Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewiss-MacBook-Pro` for macOS):
 
 - **macOS:** `sudo darwin-rebuild switch --flake ~/.config/nix#<hostname>`
@@ -54,6 +57,7 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 | Topic | Link | Description |
 |-------|------|-------------|
 | **🚀 Quick Start** | [`docs/guides/quick-start.md`](docs/guides/quick-start.md) | Get up and running in 5 minutes |
+| **🎨 Developer Experience** | [`docs/DX_GUIDE.md`](docs/DX_GUIDE.md) | DX tooling, commits, and best practices |
 | **💻 Development** | [`docs/guides/development.md`](docs/guides/development.md) | Development environments and shells |
 | **⚙️ Configuration** | [`docs/guides/configuration.md`](docs/guides/configuration.md) | Adding packages, hosts, and modules |
 | **🔐 Secrets** | [`docs/guides/secrets.md`](docs/guides/secrets.md) | SOPS secrets management |
@@ -61,12 +65,16 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 | **⌨️ Keyboard Layout** | [`docs/reference/keyboard-keymap.md`](docs/reference/keyboard-keymap.md) | WKL F13 TKL ergonomic keymap for software engineers |
 | **🤖 AI Assistants** | [`docs/ai-assistants/`](docs/ai-assistants/) | Claude, ChatGPT, Cursor guidance |
 | **🔄 Updating** | [`docs/UPDATING.md`](docs/UPDATING.md) | How to update dependencies and inputs |
+| **💬 Code Review** | [`docs/CONVENTIONAL_COMMENTS.md`](docs/CONVENTIONAL_COMMENTS.md) | Conventional comments for reviews |
+| **🤝 Contributing** | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to contribute to this repo |
 
 ## 🎯 Common Tasks
 
 - **Add a package:** See [Configuration Guide → Adding Packages](docs/guides/configuration.md#adding-packages)
-- **Set up dev environment:** See [Development Guide → Getting Started](docs/guides/development.md#getting-started)
+- **Set up dev environment:** `nix develop` - includes pre-commit hooks, formatters, and linters
 - **Update dependencies:** See [Updating Guide](docs/UPDATING.md) or run `nix run .#update-all`
+- **Format code:** `alejandra .` for Nix, automatic via pre-commit hooks
+- **Write good commits:** See [DX Guide → Conventional Commits](docs/DX_GUIDE.md#conventional-commits)
 - **Troubleshoot issues:** See [Troubleshooting Guide](docs/guides/troubleshooting.md)
 
 ## 🛠️ Maintenance
@@ -83,6 +91,20 @@ sudo darwin-rebuild switch --flake ~/.config/nix#<hostname> # macOS
 # Cleanup
 nix-collect-garbage -d && nix store optimise
 ```
+
+## 🎨 Developer Experience
+
+This repository includes comprehensive DX tooling:
+
+- **✅ Pre-commit Hooks**: Automatic formatting, linting, and validation
+- **📝 Conventional Commits**: Standardized commit messages with enforcement
+- **💬 Conventional Comments**: Structured code review feedback
+- **⚙️ EditorConfig**: Consistent code style across editors
+- **🔧 Development Shells**: Language-specific environments with all tools
+
+**Get started:** `nix develop` (auto-configures everything!)
+
+**Learn more:** See [DX Guide](docs/DX_GUIDE.md) and [Contributing Guide](CONTRIBUTING.md)
 
 ---
 

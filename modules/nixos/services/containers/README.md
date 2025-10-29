@@ -58,6 +58,7 @@ See [`docs/reference/janitorr.md`](../../docs/reference/janitorr.md) for a detai
 The module renders `application.yml` via `sops-nix` and expects the `janitorr-*` secrets described in that guide.
 
 **Ports exposed:**
+
 - Prowlarr: 9696
 - Radarr: 7878
 - Sonarr: 8989
@@ -80,6 +81,7 @@ The productivity stack includes:
 - **CUP**: Container update proxy (port 1188)
 
 **GPU Requirements:**
+
 - NVIDIA GPU with Container Toolkit enabled
 - CDI (Container Device Interface) support
 
@@ -130,6 +132,7 @@ This module replaces the Docker Compose configurations in `/opt/stacks`. The con
 - Same environment variables
 
 **Benefits over Docker Compose:**
+
 - Declarative configuration
 - Automatic dependency management
 - System-level integration

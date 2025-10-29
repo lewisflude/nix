@@ -153,7 +153,7 @@ function zj() {
     echo "Already in a Zellij session: $ZELLIJ_SESSION_NAME"
     return 1
   fi
-  
+
   if [ -n "$1" ]; then
     # Attach to named session or create it
     zellij attach -c "$1"
@@ -177,7 +177,7 @@ function zjk() {
     zellij list-sessions 2>/dev/null
     return 1
   fi
-  
+
   if [ "$1" = "all" ]; then
     echo "Killing all Zellij sessions..."
     zellij list-sessions 2>/dev/null | awk '{print $1}' | while read -r session; do

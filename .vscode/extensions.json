@@ -22,4 +22,3 @@ Available commands:
     search         EXPERIMENTAL: Searches for Grit patterns across a project.
     explain        Shows documentation of various aspects of the CLI.
     clean          Cleans the logs emitted by the daemon.
-
