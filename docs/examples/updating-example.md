@@ -12,7 +12,7 @@ cd ~/.config/nix
 git checkout -b updates/2025-10-28
 
 # 2. Run the master update script
-./scripts/maintenance/update-all.sh
+nix run .#update-all
 
 # Output:
 # === 🚀 Starting Full Update Process ===
@@ -118,7 +118,7 @@ git commit -m "feat: update zsh-defer plugin"
 
 ```bash
 # You ran update-all and something broke
-./scripts/maintenance/update-all.sh
+nix run .#update-all
 
 # After testing, the build fails
 nh os build --dry
@@ -186,7 +186,7 @@ nh os build --dry
 
 ```bash
 # See what would change without actually changing anything
-./scripts/maintenance/update-all.sh --dry-run
+nix run .#update-all -- --dry_run
 
 # Output shows what WOULD be updated
 # No files are modified
@@ -325,8 +325,8 @@ nix-shell -p nix-prefetch-github --run \
 
 | Task | Command |
 |------|---------|
-| Update everything | `./scripts/maintenance/update-all.sh` |
-| Preview updates | `./scripts/maintenance/update-all.sh --dry-run` |
+| Update everything | `nix run .#update-all` |
+| Preview updates | `nix run .#update-all -- --dry_run` |
 | Update flake only | `nix flake update` |
 | Update one input | `nix flake update <input>` |
 | Update one plugin | `./scripts/maintenance/update-git-hash.sh owner repo` |

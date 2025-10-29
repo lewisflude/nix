@@ -15,13 +15,13 @@ Your Nix configuration has **two types** of git references:
 
 ```bash
 # Update all dependencies
-./scripts/maintenance/update-all.sh
+nix run .#update-all
 
 # Preview what would be updated
-./scripts/maintenance/update-all.sh --dry-run
+nix run .#update-all -- --dry_run
 
 # Update only flake inputs
-./scripts/maintenance/update-all.sh --skip-plugins
+nix run .#update-all -- --skip_plugins
 ```
 
 ### 2. Update Flake Inputs Only
