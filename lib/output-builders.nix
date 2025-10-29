@@ -161,6 +161,7 @@ in {
       # POG-powered CLI tools
       new-module = mkPogApp "new-module";
       setup-cachix = mkPogApp "setup-cachix";
+      update-all = mkPogApp "update-all";
     })
     hostsBySystem;
 }
