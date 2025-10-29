@@ -1,0 +1,36 @@
+keys:
+  - &lewis_gpg 7369D9C25A365E6C926ADBAB48B34CF9C735A6AE
+  - &user_age_key age1lzf4exwy6guezs2wqftd5hf5ftkcjmcvd7lyukvud66py9pk4aeqwx2p9h
+  - &darwin_age_key age1vt6ma2r3kgmn2av7xucpxazxxnnh3futk4r76c8wy4ald2enyqsqp2tzkh
+  - &age1 age1dn3panz9kx6g6petqm8lyund72gslwt29p6grlq9cf5t3cd68gcqxlv289
+  - &age2 age15q885zhzw0x5kk75upc30cql3nhkj7ugrxr0gs80tds988acgetszzd4px
+
+creation_rules:
+  # System secrets - keep GPG for security
+  - path_regex: secrets/secrets\.yaml$
+    pgp: *lewis_gpg
+    age:
+      - "age1dn3panz9kx6g6petqm8lyund72gslwt29p6grlq9cf5t3cd68gcqxlv289"
+      - "age15q885zhzw0x5kk75upc30cql3nhkj7ugrxr0gs80tds988acgetszzd4px"
+  # User secrets - prioritize age for convenience, include Darwin key
+  - path_regex: secrets/user\.yaml$
+    age:
+      - "age1lzf4exwy6guezs2wqftd5hf5ftkcjmcvd7lyukvud66py9pk4aeqwx2p9h"
+      - "age1vt6ma2r3kgmn2av7xucpxazxxnnh3futk4r76c8wy4ald2enyqsqp2tzkh"
+    pgp: *lewis_gpg
+  # Other secrets
+  - path_regex: secrets/.*\.yaml$
+    pgp: *lewis_gpg
+    age:
+      - "age1dn3panz9kx6g6petqm8lyund72gslwt29p6grlq9cf5t3cd68gcqxlv289"
+      - "age15q885zhzw0x5kk75upc30cql3nhkj7ugrxr0gs80tds988acgetszzd4px"
+  - path_regex: secrets/.*\.json$
+    pgp: *lewis_gpg
+    age:
+      - "age1dn3panz9kx6g6petqm8lyund72gslwt29p6grlq9cf5t3cd68gcqxlv289"
+      - "age15q885zhzw0x5kk75upc30cql3nhkj7ugrxr0gs80tds988acgetszzd4px"
+  - path_regex: hosts/.*/secrets\.yaml$
+    pgp: *lewis_gpg
+    age:
+      - "age1dn3panz9kx6g6petqm8lyund72gslwt29p6grlq9cf5t3cd68gcqxlv289"
+      - "age15q885zhzw0x5kk75upc30cql3nhkj7ugrxr0gs80tds988acgetszzd4px"
