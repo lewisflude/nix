@@ -1,0 +1,25 @@
+Biome official CLI. Use it to check the health of your project or run it to check single files.
+
+Usage: biome COMMAND ...
+
+Available options:
+    -h, --help     Prints help information
+    -V, --version  Prints version information
+
+Available commands:
+    version        Shows the Biome version information and quit.
+    rage           Prints information for debugging.
+    start          Starts the Biome daemon server process.
+    stop           Stops the Biome daemon server process.
+    check          Runs formatter, linter and import sorting to the requested files.
+    lint           Run various checks on a set of files.
+    format         Run the formatter on a set of files.
+    ci             Command to use in CI environments. Runs formatter, linter and import sorting to
+                   the requested files.
+    init           Bootstraps a new biome project. Creates a configuration file with some defaults.
+    lsp-proxy      Acts as a server for the Language Server Protocol over stdin/stdout.
+    migrate        Updates the configuration when there are breaking changes.
+    search         EXPERIMENTAL: Searches for Grit patterns across a project.
+    explain        Shows documentation of various aspects of the CLI.
+    clean          Cleans the logs emitted by the daemon.
+
