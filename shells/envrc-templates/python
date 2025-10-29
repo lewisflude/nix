@@ -1,0 +1,33 @@
+# Python project environment
+use flake .#python
+
+# Create virtual environment if it doesn't exist
+if [[ ! -d ".venv" ]]; then
+  echo "🐍 Creating Python virtual environment..."
+  python -m venv .venv
+fi
+
+# Activate virtual environment
+source .venv/bin/activate
+
+# Install dependencies if requirements files exist
+if [[ -f "requirements.txt" && requirements.txt -nt .venv/.updated ]]; then
+  echo "📦 Installing requirements.txt..."
+  pip install -r requirements.txt
+  touch .venv/.updated
+fi
+
+if [[ -f "requirements-dev.txt" && requirements-dev.txt -nt .venv/.updated-dev ]]; then
+  echo "📦 Installing requirements-dev.txt..."
+  pip install -r requirements-dev.txt
+  touch .venv/.updated-dev
+fi
+
+if [[ -f "pyproject.toml" && pyproject.toml -nt .venv/.updated-poetry ]]; then
+  echo "📦 Installing poetry dependencies..."
+  poetry install
+  touch .venv/.updated-poetry
+fi
+
+# Set PYTHONPATH
+export PYTHONPATH="$PWD:$PYTHONPATH"
