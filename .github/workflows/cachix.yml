@@ -36,18 +36,54 @@ jobs:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           pushFilter: "(-source$|nixpkgs-unstable-)"
 
+      - name: Cleanup disk space before build
+        run: |
+          echo "📊 Disk space before cleanup:"
+          df -h
+          echo ""
+          echo "🧹 Cleaning up Nix store and caches..."
+          # Remove eval cache to free space (SQLite databases)
+          rm -rf ~/.cache/nix/eval-cache-v* || true
+          rm -rf ~/.cache/nix-shells/temp-* || true
+          rm -rf ~/.cache/nix-builds/temp-* || true
+          # Garbage collect Nix store
+          nix-collect-garbage -d || true
+          # Clean up any temporary result symlinks
+          find . -name "result*" -type l -delete 2>/dev/null || true
+          echo ""
+          echo "📊 Disk space after cleanup:"
+          df -h
+
       - name: Build NixOS configuration (jupiter)
         run: |
           nix build .#nixosConfigurations.jupiter.config.system.build.toplevel \
+            --accept-flake-config \
             --print-build-logs \
-            --fallback
+            --fallback \
+            --no-link
 
       - name: Push to Cachix
         if: success()
         run: |
           nix build .#nixosConfigurations.jupiter.config.system.build.toplevel --json \
+            --accept-flake-config \
+            --no-link \
             | jq -r '.[].outputs | to_entries[].value' \
             | cachix push ${{ secrets.CACHIX_CACHE_NAME }}
+
+      - name: Cleanup after build
+        if: always()
+        run: |
+          echo "📊 Disk space after build:"
+          df -h
+          echo ""
+          echo "🧹 Final cleanup..."
+          nix-collect-garbage -d || true
+          rm -rf ~/.cache/nix/eval-cache-v* || true
+          rm -rf result* || true
+          echo ""
+          echo "📊 Final disk space:"
+          df -h
 
   # Build and cache Darwin configuration
   build-and-cache-darwin:
@@ -70,18 +106,54 @@ jobs:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           pushFilter: "(-source$|nixpkgs-unstable-)"
 
+      - name: Cleanup disk space before build
+        run: |
+          echo "📊 Disk space before cleanup:"
+          df -h
+          echo ""
+          echo "🧹 Cleaning up Nix store and caches..."
+          # Remove eval cache to free space (SQLite databases)
+          rm -rf ~/.cache/nix/eval-cache-v* || true
+          rm -rf ~/.cache/nix-shells/temp-* || true
+          rm -rf ~/.cache/nix-builds/temp-* || true
+          # Garbage collect Nix store
+          nix-collect-garbage -d || true
+          # Clean up any temporary result symlinks
+          find . -name "result*" -type l -delete 2>/dev/null || true
+          echo ""
+          echo "📊 Disk space after cleanup:"
+          df -h
+
       - name: Build Darwin configuration
         run: |
           nix build .#darwinConfigurations.Lewiss-MacBook-Pro.system \
+            --accept-flake-config \
             --print-build-logs \
-            --fallback
+            --fallback \
+            --no-link
 
       - name: Push to Cachix
         if: success()
         run: |
           nix build .#darwinConfigurations.Lewiss-MacBook-Pro.system --json \
+            --accept-flake-config \
+            --no-link \
             | jq -r '.[].outputs | to_entries[].value' \
             | cachix push ${{ secrets.CACHIX_CACHE_NAME }}
+
+      - name: Cleanup after build
+        if: always()
+        run: |
+          echo "📊 Disk space after build:"
+          df -h
+          echo ""
+          echo "🧹 Final cleanup..."
+          nix-collect-garbage -d || true
+          rm -rf ~/.cache/nix/eval-cache-v* || true
+          rm -rf result* || true
+          echo ""
+          echo "📊 Final disk space:"
+          df -h
 
   # Cache development shells
   cache-dev-shells:
@@ -114,14 +186,48 @@ jobs:
           name: ${{ secrets.CACHIX_CACHE_NAME }}
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
+      - name: Cleanup disk space before build
+        run: |
+          echo "📊 Disk space before cleanup:"
+          df -h
+          echo ""
+          echo "🧹 Cleaning up Nix store and caches..."
+          # Remove eval cache to free space (SQLite databases)
+          rm -rf ~/.cache/nix/eval-cache-v* || true
+          rm -rf ~/.cache/nix-shells/temp-* || true
+          rm -rf ~/.cache/nix-builds/temp-* || true
+          # Garbage collect Nix store
+          nix-collect-garbage -d || true
+          # Clean up any temporary result symlinks
+          find . -name "result*" -type l -delete 2>/dev/null || true
+          echo ""
+          echo "📊 Disk space after cleanup:"
+          df -h
+
       - name: Build and cache dev shell (${{ matrix.shell }})
         run: |
           nix build .#devShells.x86_64-linux.${{ matrix.shell }} \
+            --accept-flake-config \
             --print-build-logs \
             --fallback \
+            --no-link \
             --json \
             | jq -r '.[].outputs | to_entries[].value' \
             | cachix push ${{ secrets.CACHIX_CACHE_NAME }}
+
+      - name: Cleanup after build
+        if: always()
+        run: |
+          echo "📊 Disk space after build:"
+          df -h
+          echo ""
+          echo "🧹 Final cleanup..."
+          nix-collect-garbage -d || true
+          rm -rf ~/.cache/nix/eval-cache-v* || true
+          rm -rf result* || true
+          echo ""
+          echo "📊 Final disk space:"
+          df -h
 
   # Summary job
   cachix-success:
