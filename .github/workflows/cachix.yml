@@ -1,9 +1,13 @@
 name: "Build and Cache"
 
 on:
-  # Only run on workflow_dispatch (manual trigger) or when explicitly needed
-  # Requires CACHIX_CACHE_NAME and CACHIX_AUTH_TOKEN secrets to be configured
-  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "**.nix"
+      - "flake.lock"
+      - ".github/workflows/cachix.yml"
+  workflow_dispatch:  # Keep manual trigger option
 
 # Cancel previous runs of this workflow when a new one is triggered
 concurrency:
