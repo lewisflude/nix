@@ -1,10 +1,8 @@
 name: "Build and Cache"
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
+  # Only run on workflow_dispatch (manual trigger) or when explicitly needed
+  # Requires CACHIX_CACHE_NAME and CACHIX_AUTH_TOKEN secrets to be configured
   workflow_dispatch:
 
 # Cancel previous runs of this workflow when a new one is triggered
@@ -16,7 +14,6 @@ jobs:
   # Build and cache NixOS configuration
   build-and-cache-nixos:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.repository_owner == 'lewisflude' # Only cache on main branch and if secrets are available
 
     steps:
       - name: Checkout repository
@@ -51,7 +48,6 @@ jobs:
   # Build and cache Darwin configuration
   build-and-cache-darwin:
     runs-on: macos-latest
-    if: github.ref == 'refs/heads/main' && github.repository_owner == 'lewisflude' # Only cache on main branch and if secrets are available
 
     steps:
       - name: Checkout repository
@@ -86,7 +82,6 @@ jobs:
   # Cache development shells
   cache-dev-shells:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.repository_owner == 'lewisflude'
 
     strategy:
       matrix:
