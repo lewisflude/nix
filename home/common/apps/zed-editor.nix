@@ -71,6 +71,15 @@ _: {
         "**/build"
         "**/.turbo"
       ];
+
+      # External Agent Servers
+      agent_servers = {
+        "Cursor Agent" = {
+          command = "npx";
+          args = ["-y" "cursor-agent-acp"];
+          env = {};
+        };
+      };
     };
 
     extensions = [
