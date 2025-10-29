@@ -1,0 +1,35 @@
+# nvfetcher configuration for ZSH plugins
+# Run: nvfetcher build
+# This generates _sources/generated.nix with updated hashes
+
+[zsh-defer]
+src.git = "https://github.com/romkatv/zsh-defer.git"
+fetch.git = "https://github.com/romkatv/zsh-defer.git"
+
+[zsh-autopair]
+src.github = "hlissner/zsh-autopair"
+fetch.github = "hlissner/zsh-autopair"
+
+[zsh-bd]
+src.github = "Tarrasch/zsh-bd"
+fetch.github = "Tarrasch/zsh-bd"
+
+[zsh-codex]
+src.github = "tom-doerr/zsh_codex"
+fetch.github = "tom-doerr/zsh_codex"
+git.branch = "main"
+
+[zsh-you-should-use]
+src.github = "MichaelAquilina/zsh-you-should-use"
+fetch.github = "MichaelAquilina/zsh-you-should-use"
+git.tag = "1.7.3"
+
+[zsh-abbr]
+src.github = "olets/zsh-abbr"
+fetch.github = "olets/zsh-abbr"
+git.tag = "v5.8.0"
+
+[zsh-auto-notify]
+src.github = "MichaelAquilina/zsh-auto-notify"
+fetch.github = "MichaelAquilina/zsh-auto-notify"
+git.branch = "master"

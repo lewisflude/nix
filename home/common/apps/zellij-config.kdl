@@ -1,0 +1,69 @@
+// Zellij KDL Configuration
+// Note: KDL syntax requires semicolons (;) after each child node statement
+// See: https://zellij.dev/documentation/configuration.html
+
+// Keybindings configuration
+keybinds {
+  normal {
+    // Focus navigation with Alt + hjkl (vim-style)
+    bind "Alt h" { MoveFocus "Left"; }
+    bind "Alt j" { MoveFocus "Down"; }
+    bind "Alt k" { MoveFocus "Up"; }
+    bind "Alt l" { MoveFocus "Right"; }
+    
+    // Pane resizing with Alt + HJKL (shift)
+    bind "Alt H" { Resize "Increase Left"; }
+    bind "Alt J" { Resize "Increase Down"; }
+    bind "Alt K" { Resize "Increase Up"; }
+    bind "Alt L" { Resize "Increase Right"; }
+    
+    // Pane management
+    bind "Alt d" { NewPane "Right"; }
+    bind "Alt s" { NewPane "Down"; }
+    bind "Alt n" { NewPane; }
+    bind "Alt w" { CloseFocus; }
+    bind "Alt f" { ToggleFocusFullscreen; }
+    
+    // Tab management
+    bind "Alt t" { NewTab; }
+    bind "Alt 1" { GoToTab 1; }
+    bind "Alt 2" { GoToTab 2; }
+    bind "Alt 3" { GoToTab 3; }
+    bind "Alt 4" { GoToTab 4; }
+    bind "Alt 5" { GoToTab 5; }
+    bind "Alt 6" { GoToTab 6; }
+    bind "Alt 7" { GoToTab 7; }
+    bind "Alt 8" { GoToTab 8; }
+    bind "Alt 9" { GoToTab 9; }
+    bind "Alt [" { GoToPreviousTab; }
+    bind "Alt ]" { GoToNextTab; }
+    
+    // Session management
+    bind "Alt o" { SwitchToMode "session"; }
+    bind "Alt q" { Quit; }
+    
+    // Search/Scroll mode
+    bind "Alt /" { SwitchToMode "scroll"; }
+    
+    // Rename tab
+    bind "Alt r" { SwitchToMode "renametab"; }
+  }
+  
+  // Locked mode - minimal interference with terminal applications
+  locked {
+    // Only unlock binding in locked mode
+    bind "Ctrl g" { SwitchToMode "normal"; }
+  }
+  
+  // Scroll mode enhancements
+  scroll {
+    bind "j" "Down" { ScrollDown; }
+    bind "k" "Up" { ScrollUp; }
+    bind "d" { HalfPageScrollDown; }
+    bind "u" { HalfPageScrollUp; }
+    bind "g" { ScrollToTop; }
+    bind "G" { ScrollToBottom; }
+    bind "/" { SwitchToMode "entersearch"; SearchToggleOption "Wrap"; }
+    bind "Esc" { SwitchToMode "normal"; }
+  }
+}

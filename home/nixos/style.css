@@ -1,0 +1,117 @@
+@import "./catppuccin.css";
+/* Bar container */
+window#waybar {
+  border-radius: 0;
+  font-family: "Iosevka Nerd Font", Iosevka, "JetBrains Mono", "Fira Code",
+    monospace;
+  background-color: transparent;
+}
+
+window#waybar > box {
+  margin: 8px;
+  margin-bottom: 0;
+}
+/* Module spacing */
+#window,
+#cpu,
+#memory,
+#network,
+#pulseaudio,
+#custom-brightness,
+#idle_inhibitor,
+#custom-notifications,
+#custom-alerts,
+#custom-backup,
+#tray,
+#clock, #workspaces button {
+  background-color: @surface0;
+  opacity: 0.8;
+  border-radius: 8px;
+  padding-left: 8px;
+  min-height: 24px;
+  min-width: 48px;
+  padding-right: 8px;
+  padding-top: 4px;
+  padding-bottom: 0;
+  margin: 4px;
+  margin-bottom: 0;
+}
+#workspaces {
+  background-color: transparent;
+}
+/* Workspace buttons */
+#workspaces button {
+  color: @text;
+  border: 1px solid transparent;
+}
+
+#workspaces button.empty {
+  color: @text;
+}
+
+#workspaces button.visible {
+  color: @text;
+}
+
+#workspaces button.active {
+  color: @text;
+  background-color: @mauve;
+  box-shadow: none;
+  border-color: @mauve;
+}
+
+#workspaces button.urgent {
+  color: @text;
+  border: none;
+  background-color: @red;
+  border-color: @red;
+}
+
+#workspaces button:hover {
+  opacity: 0.5;
+  box-shadow: none;
+  border-color: @surface0;
+}
+
+/* Font and icon size */
+* {
+  font-family: "Iosevka Nerd Font", Iosevka, "JetBrains Mono", "Fira Code",
+    monospace;
+  font-size: 14px;
+}
+#window {
+  color: @text;
+}
+/* Existing color and module rules remain below */
+
+#clock {
+  font-weight: bold;
+  color: @rosewater;
+}
+#cpu {
+  color: @peach;
+}
+#memory {
+  color: @yellow;
+}
+#network {
+  color: @red;
+}
+#pulseaudio {
+  color: @lavender;
+}
+#custom-brightness {
+  color: @blue;
+}
+#idle_inhibitor {
+  color: @sapphire;
+}
+#custom-alerts {
+  color: @sky;
+}
+#custom-backup {
+  color: @green;
+}
+#tray {
+  color: @pink;
+}
