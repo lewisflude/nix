@@ -11,6 +11,10 @@
   platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
   isDarwin = lib.strings.hasSuffix "darwin" hostSystem;
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
+  # Import nvfetcher-generated sources for ZSH plugins
+  sources = import ./_sources/generated.nix {
+    inherit (pkgs) fetchgit fetchFromGitHub fetchurl dockerTools;
+  };
   palette =
     if lib.hasAttrByPath ["catppuccin" "sources" "palette"] config
     then (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors
@@ -76,62 +80,32 @@ in {
       plugins = [
         {
           name = "zsh-defer";
-          src = pkgs.fetchFromGitHub {
-            owner = "romkatv";
-            repo = "zsh-defer";
-            rev = "53a26e287fbbe2dcebb3aa1801546c6de32416fa";
-            sha256 = "sha256-MFlvAnPCknSgkW3RFA8pfxMZZS/JbyF3aMsJj9uHHVU=";
-          };
+          inherit (sources.zsh-defer) src;
           file = "zsh-defer.plugin.zsh";
         }
         {
           name = "zsh-you-should-use";
-          src = pkgs.fetchFromGitHub {
-            owner = "MichaelAquilina";
-            repo = "zsh-you-should-use";
-            rev = "1.7.3";
-            sha256 = "sha256-/uVFyplnlg9mETMi7myIndO6IG7Wr9M7xDFfY1pG5Lc=";
-          };
+          inherit (sources.zsh-you-should-use) src;
           file = "you-should-use.plugin.zsh";
         }
         {
           name = "zsh-autopair";
-          src = pkgs.fetchFromGitHub {
-            owner = "hlissner";
-            repo = "zsh-autopair";
-            rev = "396c38a7468458ba29011f2ad4112e4fd35f78e6";
-            sha256 = "sha256-PXHxPxFeoYXYMOC29YQKDdMnqTO0toyA7eJTSCV6PGE=";
-          };
+          inherit (sources.zsh-autopair) src;
           file = "autopair.zsh";
         }
         {
           name = "zsh-auto-notify";
-          src = pkgs.fetchFromGitHub {
-            owner = "MichaelAquilina";
-            repo = "zsh-auto-notify";
-            rev = "master";
-            sha256 = "sha256-s3TBAsXOpmiXMAQkbaS5de0t0hNC1EzUUb0ZG+p9keE=";
-          };
+          inherit (sources.zsh-auto-notify) src;
           file = "auto-notify.plugin.zsh";
         }
         {
           name = "zsh-abbr";
-          src = pkgs.fetchFromGitHub {
-            owner = "olets";
-            repo = "zsh-abbr";
-            rev = "v5.8.0";
-            sha256 = "sha256-bsacP1f1daSYfgMvXduWQ64JJXnrFiLYURENKSMA9LM=";
-          };
+          inherit (sources.zsh-abbr) src;
           file = "zsh-abbr.zsh";
         }
         {
           name = "zsh-bd";
-          src = pkgs.fetchFromGitHub {
-            owner = "Tarrasch";
-            repo = "zsh-bd";
-            rev = "d4a55e661b4c9ef6ae4568c6abeff48bdf1b1af7";
-            sha256 = "sha256-iznyTYDvFr1wuDZVwd1VTcB179SZQ2L0ZSY9g7BFDgg=";
-          };
+          inherit (sources.zsh-bd) src;
           file = "bd.zsh";
         }
       ];
@@ -360,12 +334,7 @@ in {
         fi
         ${
           let
-            zsh_codex = pkgs.fetchFromGitHub {
-              owner = "tom-doerr";
-              repo = "zsh_codex";
-              rev = "6ede649f1260abc5ffe91ef050d00549281dc461";
-              sha256 = "sha256-m3m+ErBakBMrBsoiYgI8AdJZwXgcpz4C9hIM5Q+6lO4=";
-            };
+            zsh_codex = sources.zsh_codex.src;
           in ''
             if [[ -f "${zsh_codex}/zsh_codex.plugin.zsh" ]]; then
               source "${zsh_codex}/zsh_codex.plugin.zsh"

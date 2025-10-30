@@ -1,0 +1,489 @@
+name: Update fetchFromGitHub Dependencies
+
+on:
+  # Run weekly on Thursday at 9am UTC (different day from flake updates)
+  schedule:
+    - cron: '0 9 * * 4'
+
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      create_pr:
+        description: 'Create PR instead of direct commit'
+        required: false
+        default: 'true'
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for git operations
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Install update tools
+        run: |
+          nix profile install nixpkgs#nix-update nixpkgs#nix-prefetch-github nixpkgs#nvfetcher nixpkgs#jq
+
+      - name: Update custom packages with nix-update
+        id: update_packages
+        run: |
+          set -euo pipefail
+
+          echo "## Updating Custom Packages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          UPDATED_PACKAGES=()
+
+          # Update home-llm component
+          if [ -f "modules/nixos/services/home-assistant/custom-components/home-llm.nix" ]; then
+            echo "Updating home-llm..."
+            if nix-update --override-filename modules/nixos/services/home-assistant/custom-components/home-llm.nix 2>&1 | tee /tmp/nix-update-home-llm.log; then
+              if git diff --quiet modules/nixos/services/home-assistant/custom-components/home-llm.nix 2>/dev/null; then
+                echo "✅ home-llm: Already up to date" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "✅ home-llm: Updated" >> $GITHUB_STEP_SUMMARY
+                UPDATED_PACKAGES+=("home-llm")
+              fi
+            else
+              echo "⚠️ home-llm: Update failed (check logs)" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          # Track if any packages were updated
+          if [ ${#UPDATED_PACKAGES[@]} -gt 0 ]; then
+            echo "packages_changed=true" >> $GITHUB_OUTPUT
+            echo "Updated packages: ${UPDATED_PACKAGES[*]}" >> $GITHUB_OUTPUT
+          else
+            echo "packages_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update ZSH plugins with nix-prefetch-github
+        id: update_zsh_plugins
+        run: |
+          set -euo pipefail
+
+          echo "## Updating ZSH Plugins" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          UPDATED_PLUGINS=()
+
+          # Function to update a plugin by repo name
+          update_plugin_by_repo() {
+            local file=$1
+            local owner=$2
+            local repo=$3
+            local current_rev=$4
+
+            echo "Checking $owner/$repo..."
+
+            # Get latest commit hash (try main, then master)
+            latest_rev=$(curl -s "https://api.github.com/repos/$owner/$repo/commits/main" 2>/dev/null | jq -r '.sha // empty')
+            if [ -z "$latest_rev" ] || [ "$latest_rev" == "null" ]; then
+              latest_rev=$(curl -s "https://api.github.com/repos/$owner/$repo/commits/master" 2>/dev/null | jq -r '.sha // empty')
+            fi
+
+            if [ -z "$latest_rev" ] || [ "$latest_rev" == "null" ] || [ "$latest_rev" == "$current_rev" ]; then
+              echo "  $repo: Already up to date or no update available"
+              return 0
+            fi
+
+            # Get new hash
+            prefetch_output=$(nix-prefetch-github "$owner" "$repo" --rev "$latest_rev" 2>/dev/null)
+            new_hash=$(echo "$prefetch_output" | jq -r '.sha256 // empty')
+
+            if [ -z "$new_hash" ] || [ "$new_hash" == "null" ]; then
+              echo "  $repo: Failed to get hash"
+              return 0
+            fi
+
+            # Update the file using Python for better parsing
+            python3 <<EOF
+          import re
+          import sys
+
+          file_path = "$file"
+          owner = "$owner"
+          repo = "$repo"
+          current_rev = "$current_rev"
+          latest_rev = "$latest_rev"
+          new_hash = "$new_hash"
+
+          try:
+              with open(file_path, 'r') as f:
+                  content = f.read()
+
+              # Find the plugin block
+              pattern = rf'repo\s*=\s*"{re.escape(repo)}";[\s\S]*?rev\s*=\s*"{re.escape(current_rev)}";[\s\S]*?sha256\s*=\s*"sha256-[^"]*";'
+
+              replacement = f'repo = "{repo}";\n            rev = "{latest_rev}";\n            sha256 = "sha256-{new_hash}";'
+
+              # More precise pattern matching - match repo, then rev, then sha256
+              # Need to match across lines with [\s\S]*?
+              pattern = rf'repo\s*=\s*"{re.escape(repo)}";[\s\S]*?rev\s*=\s*"{re.escape(current_rev)}";[\s\S]*?sha256\s*=\s*"sha256-[^"]*";'
+
+              # Build replacement with proper escaping
+              replacement = rf'repo = "{repo}";\n            rev = "{latest_rev}";\n            sha256 = "sha256-{new_hash}";'
+
+              # Use simpler approach: find and replace rev and sha256 separately
+              # First replace rev
+              new_content = re.sub(
+                  rf'(repo\s*=\s*"{re.escape(repo)}";[\s\S]*?rev\s*=\s*)"{re.escape(current_rev)}";',
+                  rf'\1"{latest_rev}";',
+                  content
+              )
+
+              # Then replace sha256 in the same block
+              new_content = re.sub(
+                  rf'(repo\s*=\s*"{re.escape(repo)}";[\s\S]*?rev\s*=\s*"[^"]*";[\s\S]*?sha256\s*=\s*"sha256-)[^"]*";',
+                  rf'\1{new_hash}";',
+                  new_content
+              )
+
+              if new_content != content:
+                  with open(file_path, 'w') as f:
+                      f.write(new_content)
+                  print(f"✅ Updated {repo} to {latest_rev}")
+                  sys.exit(0)
+              else:
+                  print(f"⚠️  Could not find pattern for {repo}")
+                  sys.exit(1)
+          except Exception as e:
+              print(f"❌ Error updating {repo}: {e}")
+              sys.exit(1)
+          EOF
+
+            if [ $? -eq 0 ]; then
+              echo "✅ $repo: Updated to $latest_rev" >> $GITHUB_STEP_SUMMARY
+              UPDATED_PLUGINS+=("$repo")
+            fi
+          }
+
+          # Function to update plugin by tag
+          update_plugin_by_tag() {
+            local file=$1
+            local owner=$2
+            local repo=$3
+            local current_tag=$4
+
+            echo "Checking $owner/$repo (tag-based)..."
+
+            # Get latest release tag
+            latest_tag=$(curl -s "https://api.github.com/repos/$owner/$repo/releases/latest" 2>/dev/null | jq -r '.tag_name // empty')
+            if [ -z "$latest_tag" ] || [ "$latest_tag" == "null" ]; then
+              # Try tags endpoint
+              latest_tag=$(curl -s "https://api.github.com/repos/$owner/$repo/tags" 2>/dev/null | jq -r '.[0].name // empty')
+            fi
+
+            if [ -z "$latest_tag" ] || [ "$latest_tag" == "null" ] || [ "$latest_tag" == "$current_tag" ]; then
+              echo "  $repo: Already up to date (current: $current_tag)"
+              return 0
+            fi
+
+            # Get commit hash for tag
+            tag_rev=$(curl -s "https://api.github.com/repos/$owner/$repo/commits/$latest_tag" 2>/dev/null | jq -r '.sha // empty')
+            if [ -z "$tag_rev" ] || [ "$tag_rev" == "null" ]; then
+              echo "  $repo: Failed to get tag commit"
+              return 0
+            fi
+
+            # Get new hash
+            prefetch_output=$(nix-prefetch-github "$owner" "$repo" --rev "$tag_rev" 2>/dev/null)
+            new_hash=$(echo "$prefetch_output" | jq -r '.sha256 // empty')
+
+            if [ -z "$new_hash" ] || [ "$new_hash" == "null" ]; then
+              echo "  $repo: Failed to get hash"
+              return 0
+            fi
+
+            # Update using Python
+            python3 <<EOF
+          import re
+          import sys
+
+          file_path = "$file"
+          repo = "$repo"
+          current_tag = "$current_tag"
+          latest_tag = "$latest_tag"
+          new_hash = "$new_hash"
+
+          try:
+              with open(file_path, 'r') as f:
+                  content = f.read()
+
+              # Find and replace rev and sha256 separately for better reliability
+              # First replace rev/tag
+              new_content = re.sub(
+                  rf'(repo\s*=\s*"{re.escape(repo)}";[\s\S]*?rev\s*=\s*)"{re.escape(current_tag)}";',
+                  rf'\1"{latest_tag}";',
+                  content
+              )
+
+              # Then replace sha256 in the same block
+              new_content = re.sub(
+                  rf'(repo\s*=\s*"{re.escape(repo)}";[\s\S]*?rev\s*=\s*"[^"]*";[\s\S]*?sha256\s*=\s*"sha256-)[^"]*";',
+                  rf'\1{new_hash}";',
+                  new_content
+              )
+
+              if new_content != content:
+                  with open(file_path, 'w') as f:
+                      f.write(new_content)
+                  print(f"✅ Updated {repo} to {latest_tag}")
+                  sys.exit(0)
+              else:
+                  print(f"⚠️  Could not find pattern for {repo}")
+                  sys.exit(1)
+          except Exception as e:
+              print(f"❌ Error updating {repo}: {e}")
+              sys.exit(1)
+          EOF
+
+            if [ $? -eq 0 ]; then
+              echo "✅ $repo: Updated to $latest_tag" >> $GITHUB_STEP_SUMMARY
+              UPDATED_PLUGINS+=("$repo")
+            fi
+          }
+
+          # Update plugins in home/common/shell.nix
+          if [ -f "home/common/shell.nix" ]; then
+            # zsh-defer (commit-based)
+            update_plugin_by_repo "home/common/shell.nix" "romkatv" "zsh-defer" "53a26e287fbbe2dcebb3aa1801546c6de32416fa" || true
+
+            # zsh-you-should-use (tag-based)
+            update_plugin_by_tag "home/common/shell.nix" "MichaelAquilina" "zsh-you-should-use" "1.7.3" || true
+
+            # zsh-autopair (commit-based)
+            update_plugin_by_repo "home/common/shell.nix" "hlissner" "zsh-autopair" "396c38a7468458ba29011f2ad4112e4fd35f78e6" || true
+
+            # zsh-auto-notify (master branch - check for new commits)
+            echo "Checking MichaelAquilina/zsh-auto-notify (master branch)..."
+            latest_rev=$(curl -s "https://api.github.com/repos/MichaelAquilina/zsh-auto-notify/commits/master" 2>/dev/null | jq -r '.sha // empty')
+            if [ -n "$latest_rev" ] && [ "$latest_rev" != "null" ]; then
+              # Get current hash from file
+              current_hash_line=$(grep -A4 "zsh-auto-notify" home/common/shell.nix | grep "sha256" | head -1)
+              current_hash=$(echo "$current_hash_line" | sed -n 's/.*sha256-\([^"]*\).*/\1/p')
+
+              new_hash=$(nix-prefetch-github "MichaelAquilina" "zsh-auto-notify" --rev "$latest_rev" 2>/dev/null | jq -r '.sha256 // empty')
+
+              if [ -n "$new_hash" ] && [ "$new_hash" != "null" ] && [ "$new_hash" != "$current_hash" ]; then
+                python3 <<EOF
+          import re
+          import sys
+
+          file_path = "home/common/shell.nix"
+          latest_rev = "$latest_rev"
+          new_hash = "$new_hash"
+
+          with open(file_path, 'r') as f:
+              content = f.read()
+
+          # Update zsh-auto-notify block - replace rev and sha256 separately
+          # First replace rev
+          new_content = re.sub(
+              r'(repo\s*=\s*"zsh-auto-notify";[\s\S]*?rev\s*=\s*")master";',
+              rf'\1{latest_rev}";',
+              content
+          )
+
+          # Then replace sha256 in the same block
+          new_content = re.sub(
+              r'(repo\s*=\s*"zsh-auto-notify";[\s\S]*?rev\s*=\s*"[^"]*";[\s\S]*?sha256\s*=\s*"sha256-)[^"]*";',
+              rf'\1{new_hash}";',
+              new_content
+          )
+
+          if new_content != content:
+              with open(file_path, 'w') as f:
+                  f.write(new_content)
+              print(f"✅ Updated zsh-auto-notify to {latest_rev}")
+              sys.exit(0)
+          else:
+              print("⚠️  Could not find pattern for zsh-auto-notify")
+              sys.exit(1)
+          EOF
+                if [ $? -eq 0 ]; then
+                  echo "✅ zsh-auto-notify: Updated to $latest_rev" >> $GITHUB_STEP_SUMMARY
+                  UPDATED_PLUGINS+=("zsh-auto-notify")
+                fi
+              fi
+            fi
+
+            # zsh-abbr (tag-based)
+            update_plugin_by_tag "home/common/shell.nix" "olets" "zsh-abbr" "v5.8.0" || true
+
+            # zsh-bd (commit-based)
+            update_plugin_by_repo "home/common/shell.nix" "Tarrasch" "zsh-bd" "d4a55e661b4c9ef6ae4568c6abeff48bdf1b1af7" || true
+
+            # zsh_codex (commit-based)
+            update_plugin_by_repo "home/common/shell.nix" "tom-doerr" "zsh_codex" "6ede649f1260abc5ffe91ef050d00549281dc461" || true
+          fi
+
+          # Update plugins in home/common/shell/sh.nix
+          if [ -f "home/common/shell/sh.nix" ]; then
+            # zsh-autosuggestions (tag-based)
+            update_plugin_by_tag "home/common/shell/sh.nix" "zsh-users" "zsh-autosuggestions" "v0.7.1" || true
+          fi
+
+          # Track if any plugins were updated
+          if [ ${#UPDATED_PLUGINS[@]} -gt 0 ]; then
+            echo "plugins_changed=true" >> $GITHUB_OUTPUT
+            echo "Updated plugins: ${UPDATED_PLUGINS[*]}" >> $GITHUB_OUTPUT
+          else
+            echo "plugins_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update ZSH plugins via nvfetcher
+        id: update_nvfetcher
+        run: |
+          set -euo pipefail
+
+          echo "## Updating ZSH Plugins (nvfetcher)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "home/common/zsh-plugins.toml" ]; then
+            cd home/common || exit 1
+            if nvfetcher -c zsh-plugins.toml -o _sources 2>&1 | grep -v "trace:"; then
+              cd ../..
+              if git diff --quiet home/common/_sources/ 2>/dev/null; then
+                echo "✅ nvfetcher plugins: Already up to date" >> $GITHUB_STEP_SUMMARY
+                echo "nvfetcher_changed=false" >> $GITHUB_OUTPUT
+              else
+                echo "✅ nvfetcher plugins: Updated" >> $GITHUB_STEP_SUMMARY
+                echo "nvfetcher_changed=true" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "nvfetcher_changed=false" >> $GITHUB_OUTPUT
+            fi
+            cd ../..
+          else
+            echo "No zsh-plugins.toml found, skipping" >> $GITHUB_STEP_SUMMARY
+            echo "nvfetcher_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          # Check if any files changed
+          if git diff --quiet 2>/dev/null; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No updates available"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Updates found"
+            echo "## Changed Files" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            git diff --name-only >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Validate changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          nix flake check --no-build || echo "⚠️ Flake check failed but continuing..."
+
+      - name: Generate update summary
+        if: steps.check_changes.outputs.changed == 'true'
+        id: summary
+        run: |
+          echo "## Update Summary" > summary.md
+          echo "" >> summary.md
+
+          if [ "${{ steps.update_packages.outputs.packages_changed }}" == "true" ]; then
+            echo "### Custom Packages Updated" >> summary.md
+            echo "${{ steps.update_packages.outputs.Updated packages }}" >> summary.md
+            echo "" >> summary.md
+          fi
+
+          if [ "${{ steps.update_zsh_plugins.outputs.plugins_changed }}" == "true" ]; then
+            echo "### ZSH Plugins Updated" >> summary.md
+            echo "${{ steps.update_zsh_plugins.outputs.Updated plugins }}" >> summary.md
+            echo "" >> summary.md
+          fi
+
+          if [ "${{ steps.update_nvfetcher.outputs.nvfetcher_changed }}" == "true" ]; then
+            echo "### nvfetcher Plugins Updated" >> summary.md
+            echo "Updated via nvfetcher configuration" >> summary.md
+            echo "" >> summary.md
+          fi
+
+          echo "### Changed Files" >> summary.md
+          echo '```' >> summary.md
+          git diff --name-only >> summary.md
+          echo '```' >> summary.md
+          echo "" >> summary.md
+
+          echo "### Diff Preview" >> summary.md
+          echo '<details>' >> summary.md
+          echo '<summary>View diff</summary>' >> summary.md
+          echo "" >> summary.md
+          echo '```diff' >> summary.md
+          git diff --no-color | head -n 200 >> summary.md
+          echo '```' >> summary.md
+          echo '</details>' >> summary.md
+
+          # Save for PR body
+          echo "SUMMARY<<EOF" >> $GITHUB_OUTPUT
+          cat summary.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        if: steps.check_changes.outputs.changed == 'true' && (github.event.inputs.create_pr == 'true' || github.event_name == 'schedule')
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            chore: update fetchFromGitHub dependencies
+
+            - Updated custom packages
+            - Updated ZSH plugins
+            - Updated nvfetcher sources
+          title: 'chore: update fetchFromGitHub dependencies'
+          body: |
+            Automated update of `fetchFromGitHub` dependencies
+
+            ${{ steps.summary.outputs.SUMMARY }}
+
+            ## Testing Checklist
+            - [ ] Test build on Darwin
+            - [ ] Test build on NixOS (if applicable)
+            - [ ] Verify ZSH plugins work correctly
+            - [ ] Test Home Assistant component (if updated)
+
+            Please review the changes and test the configuration before merging.
+
+            🔍 **Review Tips:**
+            - Check that version updates are reasonable (no major version jumps)
+            - Verify that plugin hashes match the new revisions
+            - Test that updated plugins still work as expected
+          branch: chore/update-fetchfromgithub-deps
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
+            maintenance
+
+      - name: Commit directly
+        if: steps.check_changes.outputs.changed == 'true' && github.event.inputs.create_pr == 'false' && github.event_name != 'schedule'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: update fetchFromGitHub dependencies
+
+          - Updated custom packages
+          - Updated ZSH plugins
+          - Updated nvfetcher sources"
+          git push
