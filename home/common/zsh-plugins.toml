@@ -7,29 +7,29 @@ src.git = "https://github.com/romkatv/zsh-defer.git"
 fetch.git = "https://github.com/romkatv/zsh-defer.git"
 
 [zsh-autopair]
-src.github = "hlissner/zsh-autopair"
-fetch.github = "hlissner/zsh-autopair"
+src.git = "https://github.com/hlissner/zsh-autopair.git"
+fetch.git = "https://github.com/hlissner/zsh-autopair.git"
 
 [zsh-bd]
-src.github = "Tarrasch/zsh-bd"
-fetch.github = "Tarrasch/zsh-bd"
+src.git = "https://github.com/Tarrasch/zsh-bd.git"
+fetch.git = "https://github.com/Tarrasch/zsh-bd.git"
 
-[zsh-codex]
-src.github = "tom-doerr/zsh_codex"
-fetch.github = "tom-doerr/zsh_codex"
+[zsh_codex]
+src.git = "https://github.com/tom-doerr/zsh_codex.git"
+fetch.git = "https://github.com/tom-doerr/zsh_codex.git"
 git.branch = "main"
 
 [zsh-you-should-use]
-src.github = "MichaelAquilina/zsh-you-should-use"
-fetch.github = "MichaelAquilina/zsh-you-should-use"
+src.git = "https://github.com/MichaelAquilina/zsh-you-should-use.git"
+fetch.git = "https://github.com/MichaelAquilina/zsh-you-should-use.git"
 git.tag = "1.7.3"
 
 [zsh-abbr]
-src.github = "olets/zsh-abbr"
-fetch.github = "olets/zsh-abbr"
+src.git = "https://github.com/olets/zsh-abbr.git"
+fetch.git = "https://github.com/olets/zsh-abbr.git"
 git.tag = "v5.8.0"
 
 [zsh-auto-notify]
-src.github = "MichaelAquilina/zsh-auto-notify"
-fetch.github = "MichaelAquilina/zsh-auto-notify"
+src.git = "https://github.com/MichaelAquilina/zsh-auto-notify.git"
+fetch.git = "https://github.com/MichaelAquilina/zsh-auto-notify.git"
 git.branch = "master"

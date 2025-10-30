@@ -28,6 +28,9 @@ in {
       cachix
       nix-tree
       nix-du
+      nix-update # Update package versions automatically
+      nix-prefetch-github # Fetch GitHub hashes
+      nvfetcher # Batch update sources from TOML
       inputs.flakehub.packages.${system}.default
 
       # Development helpers

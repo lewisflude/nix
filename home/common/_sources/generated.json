@@ -1,0 +1,142 @@
+{
+    "zsh-abbr": {
+        "cargoLocks": null,
+        "date": "2025-08-19",
+        "extract": null,
+        "name": "zsh-abbr",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "rev": "13b34cdc29d8b22323fa2079193ea1529723747c",
+            "sha256": "sha256-F1IIvSzXDuneqE5tYJPP6JmiAFEGqZu5lFzevQLsRrQ=",
+            "sparseCheckout": [],
+            "type": "git",
+            "url": "https://github.com/olets/zsh-abbr.git"
+        },
+        "version": "13b34cdc29d8b22323fa2079193ea1529723747c"
+    },
+    "zsh-auto-notify": {
+        "cargoLocks": null,
+        "date": "2025-06-23",
+        "extract": null,
+        "name": "zsh-auto-notify",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "rev": "b51c934d88868e56c1d55d0a2a36d559f21cb2ee",
+            "sha256": "sha256-s3TBAsXOpmiXMAQkbaS5de0t0hNC1EzUUb0ZG+p9keE=",
+            "sparseCheckout": [],
+            "type": "git",
+            "url": "https://github.com/MichaelAquilina/zsh-auto-notify.git"
+        },
+        "version": "b51c934d88868e56c1d55d0a2a36d559f21cb2ee"
+    },
+    "zsh-autopair": {
+        "cargoLocks": null,
+        "date": "2024-07-14",
+        "extract": null,
+        "name": "zsh-autopair",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "rev": "449a7c3d095bc8f3d78cf37b9549f8bb4c383f3d",
+            "sha256": "sha256-3zvOgIi+q7+sTXrT+r/4v98qjeiEL4Wh64rxBYnwJvQ=",
+            "sparseCheckout": [],
+            "type": "git",
+            "url": "https://github.com/hlissner/zsh-autopair.git"
+        },
+        "version": "449a7c3d095bc8f3d78cf37b9549f8bb4c383f3d"
+    },
+    "zsh-bd": {
+        "cargoLocks": null,
+        "date": "2025-01-09",
+        "extract": null,
+        "name": "zsh-bd",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "rev": "646f06d9b6a840926a671fdc2da196d4eecfc305",
+            "sha256": "sha256-JAC9u7IzkW0b7J43w4c+yLuPGdvMtxBlobrQwlyvVcM=",
+            "sparseCheckout": [],
+            "type": "git",
+            "url": "https://github.com/Tarrasch/zsh-bd.git"
+        },
+        "version": "646f06d9b6a840926a671fdc2da196d4eecfc305"
+    },
+    "zsh-defer": {
+        "cargoLocks": null,
+        "date": "2024-02-10",
+        "extract": null,
+        "name": "zsh-defer",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "rev": "53a26e287fbbe2dcebb3aa1801546c6de32416fa",
+            "sha256": "sha256-MFlvAnPCknSgkW3RFA8pfxMZZS/JbyF3aMsJj9uHHVU=",
+            "sparseCheckout": [],
+            "type": "git",
+            "url": "https://github.com/romkatv/zsh-defer.git"
+        },
+        "version": "53a26e287fbbe2dcebb3aa1801546c6de32416fa"
+    },
+    "zsh-you-should-use": {
+        "cargoLocks": null,
+        "date": "2025-07-10",
+        "extract": null,
+        "name": "zsh-you-should-use",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "rev": "64dd9e3ff977e4ae7d024602b2d9a7a4f05fd8f6",
+            "sha256": "sha256-u3abhv9ewq3m4QsnsxT017xdlPm3dYq5dqHNmQhhcpI=",
+            "sparseCheckout": [],
+            "type": "git",
+            "url": "https://github.com/MichaelAquilina/zsh-you-should-use.git"
+        },
+        "version": "64dd9e3ff977e4ae7d024602b2d9a7a4f05fd8f6"
+    },
+    "zsh_codex": {
+        "cargoLocks": null,
+        "date": "2025-03-23",
+        "extract": null,
+        "name": "zsh_codex",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "rev": "6ede649f1260abc5ffe91ef050d00549281dc461",
+            "sha256": "sha256-m3m+ErBakBMrBsoiYgI8AdJZwXgcpz4C9hIM5Q+6lO4=",
+            "sparseCheckout": [],
+            "type": "git",
+            "url": "https://github.com/tom-doerr/zsh_codex.git"
+        },
+        "version": "6ede649f1260abc5ffe91ef050d00549281dc461"
+    }
+}
