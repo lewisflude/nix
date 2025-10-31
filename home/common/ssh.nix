@@ -25,4 +25,6 @@
       };
     };
   };
+
+  home.file.".ssh/config".force = true;
 }
