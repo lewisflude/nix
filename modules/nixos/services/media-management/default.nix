@@ -10,7 +10,6 @@
     ./sonarr.nix
     ./lidarr.nix
     ./readarr.nix
-    ./whisparr.nix
     ./sabnzbd.nix
     ./jellyfin.nix
     ./jellyseerr.nix

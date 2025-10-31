@@ -35,7 +35,6 @@
     sonarr = {enable = true;};
     lidarr = {enable = true;};
     readarr = {enable = true;};
-    whisparr = {enable = false;};
     qbittorrent = {enable = true;};
     sabnzbd = {enable = true;};
     jellyfin = {enable = true;};

@@ -21,13 +21,11 @@ in {
       inherit (cfg) group;
     };
 
-    # Set timezone
-    systemd.services.readarr.environment = {
-      TZ = cfg.timezone;
-    };
-
-    # Soft dependency on prowlarr for startup order
+    # Set timezone and add soft dependency on prowlarr
     systemd.services.readarr = {
+      environment = {
+        TZ = cfg.timezone;
+      };
       after = mkAfter (optional cfg.prowlarr.enable "prowlarr.service");
     };
   };

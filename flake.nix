@@ -122,6 +122,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # === Hardware Configuration ===
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware";
+    };
+
     # === Cross-Platform Applications ===
     catppuccin = {
       url = "github:catppuccin/nix";
@@ -187,12 +192,19 @@
       url = "github:jpetrucciani/pog";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # === Infrastructure Visualization ===
+    nix-topology = {
+      url = "github:oddlama/nix-topology";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {self, ...}:
     inputs.flake-parts.lib.mkFlake {inherit inputs self;} {
       imports = [
         ./flake-parts/core.nix
+        inputs.nix-topology.flakeModule
       ];
     };
 }

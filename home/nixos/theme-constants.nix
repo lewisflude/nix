@@ -1,35 +1,31 @@
 {
   pkgs,
-  config,
-  lib,
+  inputs,
+  system,
   ...
 }: let
-  # Assert that catppuccin is configured - fail fast with clear error
-  hasCatppuccin = lib.hasAttrByPath ["catppuccin" "sources" "palette"] config;
-
-  palette = assert lib.assertMsg hasCatppuccin
-  ''
-    Catppuccin theme is not configured!
-    Make sure you have enabled catppuccin in your configuration:
-      catppuccin.enable = true;
-      catppuccin.flavor = "mocha"; # or your preferred flavor
-  '';
-    (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors;
+  # Use FULL Catppuccin palette - not base16 subset
+  # This gives us access to all semantic colors: mauve, lavender, sky, overlay1, surface1, etc.
+  catppuccinPalette =
+    pkgs.lib.importJSON
+    (
+      inputs.catppuccin.packages.${system}.catppuccin-gtk-theme.src + "/palette.json"
+    ).mocha.colors;
 in {
   niri.colors = {
     focus-ring = {
-      active = palette.mauve.hex;
-      inactive = palette.overlay1.hex;
+      active = catppuccinPalette.mauve.hex; # Mauve (accent color)
+      inactive = catppuccinPalette.overlay1.hex; # Overlay 1 (more accurate than base16 base03)
     };
     border = {
-      active = palette.lavender.hex;
-      inactive = palette.surface1.hex;
-      urgent = palette.red.hex;
+      active = catppuccinPalette.lavender.hex; # Lavender (more accurate than sky)
+      inactive = catppuccinPalette.surface1.hex; # Surface 1 (semantic naming)
+      urgent = catppuccinPalette.red.hex; # Red
     };
-    shadow = "${palette.base.hex}aa";
+    shadow = "${catppuccinPalette.base.hex}aa"; # Base with transparency
     tab-indicator = {
-      active = palette.mauve.hex;
-      inactive = palette.overlay1.hex;
+      active = catppuccinPalette.mauve.hex; # Mauve
+      inactive = catppuccinPalette.overlay1.hex; # Overlay 1
     };
   };
 }

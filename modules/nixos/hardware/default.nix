@@ -5,5 +5,6 @@
     ./mouse.nix
     ./usb.nix
     ./yubikey.nix
+    ./nixos-hardware.nix
   ];
 }

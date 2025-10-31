@@ -1,6 +1,6 @@
 {
   pkgs,
-  config,
+  lib,
   ...
 }: let
   workspaceIcons = {
@@ -13,6 +13,72 @@
   };
   uwsm = "${pkgs.uwsm}/bin/uwsm";
   ghostty = "${pkgs.ghostty}/bin/ghostty";
+  # Scripts for waybar custom modules
+  brightnessScript = pkgs.writeShellApplication {
+    name = "brightness";
+    runtimeInputs = with pkgs; [coreutils ddcutil];
+    text = ''
+      CACHE_FILE="$HOME/.config/niri/last_brightness"
+      mkdir -p "$(dirname "$CACHE_FILE")"
+      case "$1" in
+        get)
+          if [ -f "$CACHE_FILE" ]; then
+            cat "$CACHE_FILE"
+          else
+            brightness=$(timeout 2 ddcutil getvcp 10 --brief 2>/dev/null | awk '{print $4}' || echo "50")
+            echo "$brightness" | tee "$CACHE_FILE"
+          fi
+          ;;
+        up)
+          current=$(cat "$CACHE_FILE" 2>/dev/null || echo "50")
+          new=$((current + 5)); [ $new -gt 100 ] && new=100
+          echo "$new" | tee "$CACHE_FILE"
+          nohup timeout 3 ddcutil setvcp 10 "$new" --brief >/dev/null 2>&1 &
+          ;;
+        down)
+          current=$(cat "$CACHE_FILE" 2>/dev/null || echo "50")
+          new=$((current - 5)); [ $new -lt 0 ] && new=0
+          echo "$new" | tee "$CACHE_FILE"
+          nohup timeout 3 ddcutil setvcp 10 "$new" --brief >/dev/null 2>&1 &
+          ;;
+        set)
+          echo "$2" | tee "$CACHE_FILE"
+          nohup timeout 3 ddcutil setvcp 10 "$2" --brief >/dev/null 2>&1 &
+          ;;
+      esac
+    '';
+  };
+  backupStatusScript = pkgs.writeShellApplication {
+    name = "backup-status";
+    runtimeInputs = with pkgs; [coreutils rsync gawk];
+    text = ''
+      HOME_DIR="$HOME"
+      stats=$(rsync --dry-run --stats "$HOME_DIR/data/" /backup/ 2>/dev/null)
+      transferred=$(awk '/Number of files transferred/ {print $NF}' <<<"$stats")
+      total=$(awk '/Total file size/ {print $NF}' <<<"$stats")
+      if (( total > 0 )); then pct=$((100 * transferred / total)); else pct=100; fi
+      echo "{\"percentage\":$pct}"
+    '';
+  };
+  systemSparkScript = pkgs.writeShellApplication {
+    name = "system-spark-percentage";
+    runtimeInputs = with pkgs; [coreutils jq];
+    text = ''
+      IFS=',' read -r load1 load5 load15 _ < <(uptime | sed -E 's/.*load average: //')
+      load_pct=$(echo "$load1" | awk '{printf "%d", ($1/2.0)*100}')
+      if [ $load_pct -gt 100 ]; then load_pct=100; fi
+      if [ $load_pct -ge 80 ]; then
+        alt="high"
+      elif [ $load_pct -ge 50 ]; then
+        alt="medium"
+      elif [ $load_pct -ge 25 ]; then
+        alt="med-low"
+      else
+        alt="low"
+      fi
+      printf '{"percentage":%d,"alt":"%s"}' "$load_pct" "$alt" | jq --unbuffered --compact-output
+    '';
+  };
 in {
   programs.waybar = {
     enable = true;
@@ -76,14 +142,14 @@ in {
           format-alt = "{used_percent}";
         };
         "custom/backup" = {
-          exec = "${config.home.homeDirectory}/bin/backup-status";
+          exec = "${lib.getExe backupStatusScript}";
           return-type = "json";
           interval = 30;
           format = " {percentage}%";
           tooltip-format = "Backup: {percentage}% complete";
         };
         "custom/alerts" = {
-          exec = "${config.home.homeDirectory}/bin/system-spark-percentage";
+          exec = "${lib.getExe systemSparkScript}";
           return-type = "json";
           interval = 10;
           format = "{icon}";
@@ -95,14 +161,14 @@ in {
           };
         };
         "custom/brightness" = {
-          exec = "${config.home.homeDirectory}/bin/brightness get";
+          exec = "${lib.getExe brightnessScript} get";
           format = " {}%";
           tooltip = false;
           interval = 30;
-          on-click = "${config.home.homeDirectory}/bin/brightness set 100";
-          on-click-right = "${config.home.homeDirectory}/bin/brightness set 0";
-          on-scroll-up = "${config.home.homeDirectory}/bin/brightness up";
-          on-scroll-down = "${config.home.homeDirectory}/bin/brightness down";
+          on-click = "${lib.getExe brightnessScript} set 100";
+          on-click-right = "${lib.getExe brightnessScript} set 0";
+          on-scroll-up = "${lib.getExe brightnessScript} up";
+          on-scroll-down = "${lib.getExe brightnessScript} down";
         };
         idle_inhibitor = {
           format = "{icon}";
@@ -158,68 +224,9 @@ in {
       };
     };
   };
-  home.file = {
-    "bin/brightness" = {
-      text = ''
-        CACHE_FILE="$HOME/.config/niri/last_brightness"
-        mkdir -p "$(dirname "$CACHE_FILE")"
-        case "$1" in
-          get)
-            if [ -f "$CACHE_FILE" ]; then
-              cat "$CACHE_FILE"
-            else
-              brightness=$(timeout 2 ddcutil getvcp 10 --brief 2>/dev/null | awk '{print $4}' || echo "50")
-              echo "$brightness" | tee "$CACHE_FILE"
-            fi
-            ;;
-          up)
-            current=$(cat "$CACHE_FILE" 2>/dev/null || echo "50")
-            new=$((current + 5)); [ $new -gt 100 ] && new=100
-            echo "$new" | tee "$CACHE_FILE"
-            nohup timeout 3 ddcutil setvcp 10 "$new" --brief >/dev/null 2>&1 &
-            ;;
-          down)
-            current=$(cat "$CACHE_FILE" 2>/dev/null || echo "50")
-            new=$((current - 5)); [ $new -lt 0 ] && new=0
-            echo "$new" | tee "$CACHE_FILE"
-            nohup timeout 3 ddcutil setvcp 10 "$new" --brief >/dev/null 2>&1 &
-            ;;
-          set)
-            echo "$2" | tee "$CACHE_FILE"
-            nohup timeout 3 ddcutil setvcp 10 "$2" --brief >/dev/null 2>&1 &
-            ;;
-        esac
-      '';
-      executable = true;
-    };
-    "bin/backup-status" = {
-      text = ''
-        HOME_DIR="$HOME"
-        stats=$(rsync --dry-run --stats "$HOME_DIR/data/" /backup/ 2>/dev/null)
-        transferred=$(awk '/Number of files transferred/ {print $NF}' <<<"$stats")
-        total=$(awk '/Total file size/ {print $NF}' <<<"$stats")
-        if (( total > 0 )); then pct=$((100 * transferred / total)); else pct=100; fi
-        echo "{\"percentage\":$pct}"
-      '';
-      executable = true;
-    };
-    "bin/system-spark-percentage" = {
-      text = ''
-        IFS=',' read -r load1 load5 load15 _ < <(uptime | sed -E 's/.*load average: //')
-        load_pct=$(echo "$load1" | awk '{printf "%d", ($1/2.0)*100}')
-        if [ $load_pct -gt 100 ]; then load_pct=100; fi
-        if [ $load_pct -ge 80 ]; then
-          alt="high"
-        elif [ $load_pct -ge 50 ]; then
-          alt="medium"
-        elif [ $load_pct -ge 25 ]; then
-          alt="med-low"
-        else
-          alt="low"
-        fi
-        printf '{"percentage":%d,"alt":"%s"}' "$load_pct" "$alt" | jq --unbuffered --compact-output
-      '';
-      executable = true;
-    };
-  };
+  home.packages = with pkgs; [
+    brightnessScript
+    backupStatusScript
+    systemSparkScript
+  ];
 }

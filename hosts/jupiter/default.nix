@@ -111,9 +111,8 @@ in {
             ];
           };
 
-          # All services enabled by default except whisparr and unpackerr
+          # All services enabled by default except unpackerr
           # To disable specific services, set enable = false
-          whisparr.enable = false; # Adult content - disabled by default
           unpackerr.enable = false; # Disabled - config format issues
         };
 
