@@ -12,6 +12,11 @@
     text = ''
       trusted-users = root ${username}
       warn-dirty = false
+
+      # Note: Determinate Nix sets 'eval-cores' and 'lazy-trees' in /etc/nix/nix.conf
+      # which may cause warnings if these settings aren't recognized by your Nix version.
+      # These warnings are harmless and can be safely ignored.
+      # To silence them, update Determinate Nix or wait for Determinate Systems to fix their config.
     '';
   };
 
