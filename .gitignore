@@ -50,6 +50,7 @@ result-*
 *.swp
 *.swo
 *~
+secrets/secrets.yaml.temp
 
 # Log files
 *.log

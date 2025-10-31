@@ -47,7 +47,10 @@ with lib; let
           "${ipCommand} link set dev ${vpnCfg.interfaceName} netns ${vpnCfg.namespace}"
           "${ipCommand} -n ${vpnCfg.namespace} link set dev ${vpnCfg.interfaceName} up"
         ]
-        ++ map (addr: "${ipCommand} -n ${vpnCfg.namespace} addr add ${addr} dev ${vpnCfg.interfaceName} 2>/dev/null || true") vpnCfg.addresses
+        ++ map (
+          addr: "${ipCommand} -n ${vpnCfg.namespace} addr add ${addr} dev ${vpnCfg.interfaceName} 2>/dev/null || true"
+        )
+        vpnCfg.addresses
         ++ [
           "${ipCommand} -n ${vpnCfg.namespace} route replace default dev ${vpnCfg.interfaceName}"
         ]
@@ -107,9 +110,66 @@ with lib; let
           // optionalAttrs (peer.presharedKeyFile != null) {inherit (peer) presharedKeyFile;}
       )
       vpnCfg.peers;
+
+  # Script to setup qBittorrent credentials from sops secret
+  qbSetupScript =
+    if !qbtEnabled || qbCfg.webUiCredentialsSecret == null
+    then null
+    else
+      pkgs.writeShellScript "qbittorrent-setup-creds" ''
+        set -euo pipefail
+        CREDS_FILE="${config.sops.secrets."${qbCfg.webUiCredentialsSecret}".path}"
+
+        # Extract username and password from the credentials file
+        USERNAME=$(head -n1 "''${CREDS_FILE}")
+        PASSWORD=$(tail -n1 "''${CREDS_FILE}")
+
+        # Generate PBKDF2 hash
+        PASSWORD_HASH=$(echo "''${PASSWORD}" | ${pkgs.python3}/bin/python3 << 'PYSCRIPT'
+        import hashlib, base64, sys, os
+        password = sys.stdin.read().strip().encode('utf-8')
+        salt = os.urandom(16)
+        hash_obj = hashlib.pbkdf2_hmac('sha256', password, salt, 32000)
+        salt_b64 = base64.b64encode(salt).decode('utf-8')
+        hash_b64 = base64.b64encode(hash_obj).decode('utf-8')
+        print(f"@ByteArray({salt_b64}:{hash_b64})")
+        PYSCRIPT
+        )
+
+        # Update qBittorrent config file with credentials
+        CONFIG_FILE="${qbProfileDir}/qBittorrent/config/qBittorrent.conf"
+
+        # Create config backup if it doesn't exist
+        if [ ! -f "''${CONFIG_FILE}" ]; then
+          mkdir -p "$(dirname "''${CONFIG_FILE}")"
+          touch "''${CONFIG_FILE}"
+        fi
+
+        # Use sed to update credentials (or add them if missing)
+        ${pkgs.gnused}/bin/sed -i "/^\[WebUI\]/,/^\[/ {
+          /^Username=/c\Username=''${USERNAME}
+          T
+          :a
+          /^Password_PBKDF2=/c\Password_PBKDF2=''${PASSWORD_HASH}
+          T
+        }" "''${CONFIG_FILE}" || true
+
+        # If credentials weren't found, add them to the WebUI section
+        if ! grep -q "^Username=" "''${CONFIG_FILE}"; then
+          ${pkgs.gnused}/bin/sed -i "/^\[WebUI\]/a\\Username=''${USERNAME}\nPassword_PBKDF2=''${PASSWORD_HASH}" "''${CONFIG_FILE}" || true
+        fi
+
+        # Ensure correct ownership
+        chown "${cfg.user}:${cfg.group}" "''${CONFIG_FILE}"
+        chmod 600 "''${CONFIG_FILE}"
+      '';
 in {
   options.host.services.mediaManagement.qbittorrent = {
-    enable = mkEnableOption "qBittorrent torrent client" // {default = true;};
+    enable =
+      mkEnableOption "qBittorrent torrent client"
+      // {
+        default = true;
+      };
 
     webUiCredentialsSecret = mkOption {
       type = types.nullOr types.str;
@@ -121,7 +181,11 @@ in {
     vpn = mkOption {
       type = types.submodule (_: {
         options = {
-          enable = mkEnableOption "WireGuard-backed VPN isolation for qBittorrent" // {default = false;};
+          enable =
+            mkEnableOption "WireGuard-backed VPN isolation for qBittorrent"
+            // {
+              default = false;
+            };
 
           namespace = mkOption {
             type = types.str;
@@ -225,7 +289,9 @@ in {
           };
         };
       });
-      default = {enable = false;};
+      default = {
+        enable = false;
+      };
       description = "VPN and network namespace settings for qBittorrent.";
     };
   };
@@ -261,9 +327,7 @@ in {
             optionals (qbCfg.enable && qbCfg.webUiCredentialsSecret != null) [
               {
                 assertion =
-                  config ? sops
-                  && config.sops ? secrets
-                  && config.sops.secrets ? "${qbCfg.webUiCredentialsSecret}";
+                  config ? sops && config.sops ? secrets && config.sops.secrets ? "${qbCfg.webUiCredentialsSecret}";
                 message = ''
                   host.services.mediaManagement.qbittorrent.webUiCredentialsSecret is set to "${qbCfg.webUiCredentialsSecret}" but the secret is not defined under config.sops.secrets.
                 '';
@@ -288,28 +352,18 @@ in {
               webuiPort = 8080;
               torrentingPort = 6881;
               openFirewall = true;
-              serverConfig = mkMerge [
-                {
-                  LegalNotice.Accepted = true;
-                  Preferences = {
-                    WebUI = {
-                      Address = "0.0.0.0";
-                      Port = 8080;
-                    };
-                    General = {
-                      Locale = "en";
-                    };
+              serverConfig = {
+                LegalNotice.Accepted = true;
+                Preferences = {
+                  WebUI = {
+                    Address = "0.0.0.0";
+                    Port = 8080;
                   };
-                }
-                (mkIf (qbCfg.webUiCredentialsSecret != null) {
-                  Preferences = {
-                    WebUI = {
-                      Username = "lewis";
-                      Password_PBKDF2 = "@ByteArray(5p49BPXdfIaw8aqX27Kb9w==:qnjQXfflrs0C/yGn54GMZNf0djpFXjRfSbZHXWEuxvNDRYAc9yNBhe7rnaF52xEIGtjTtF8RVxCYg4mkrf8iLg==)";
-                    };
+                  General = {
+                    Locale = "en";
                   };
-                })
-              ];
+                };
+              };
             }
             (mkIf qbtVpnEnabled {
               openFirewall = mkForce false;
@@ -321,11 +375,25 @@ in {
               qbittorrent = mkMerge [
                 {
                   environment.TZ = cfg.timezone;
+                  serviceConfig = mkMerge [
+                    (mkIf (qbCfg.webUiCredentialsSecret != null) {
+                      ExecPreStart = [qbSetupScript];
+                    })
+                  ];
                 }
                 (mkIf qbtVpnEnabled {
-                  wants = ["${netnsUnitName}.service" "${wgUnitName}.service"];
-                  after = ["${netnsUnitName}.service" "${wgUnitName}.service"];
-                  requires = ["${netnsUnitName}.service" "${wgUnitName}.service"];
+                  wants = [
+                    "${netnsUnitName}.service"
+                    "${wgUnitName}.service"
+                  ];
+                  after = [
+                    "${netnsUnitName}.service"
+                    "${wgUnitName}.service"
+                  ];
+                  requires = [
+                    "${netnsUnitName}.service"
+                    "${wgUnitName}.service"
+                  ];
                   serviceConfig = {
                     NetworkNamespacePath = namespacePath;
                   };
@@ -335,7 +403,10 @@ in {
               ${netnsUnitName} = mkIf qbtVpnEnabled {
                 description = "qBittorrent network namespace";
                 wantedBy = ["multi-user.target"];
-                before = ["${wgUnitName}.service" "qbittorrent.service"];
+                before = [
+                  "${wgUnitName}.service"
+                  "qbittorrent.service"
+                ];
                 serviceConfig = {
                   Type = "oneshot";
                   RemainAfterExit = true;
@@ -383,7 +454,12 @@ in {
 
           networking = {
             firewall = {
-              allowedTCPPorts = mkAfter (optionals (!qbtVpnEnabled) [8080 6881]);
+              allowedTCPPorts = mkAfter (
+                optionals (!qbtVpnEnabled) [
+                  8080
+                  6881
+                ]
+              );
               allowedUDPPorts = mkAfter (optionals (!qbtVpnEnabled) [6881]);
 
               extraCommands = mkIf qbtVpnEnabled ''
