@@ -5,14 +5,14 @@
     experimental-features = [
       "nix-command"
       "flakes"
+      "ca-derivations"
+      "eval-cache" # Cache evaluation results for faster flake evaluation
     ];
 
-    # Enable evaluation caching for faster rebuilds
-
-    # Use lazy tree evaluation for better performance
-
     # Binary caches for faster builds
+    # Note: Order matters - personal cache first for fastest access
     extra-substituters = [
+      "https://lewisflude.cachix.org" # Personal cache - highest priority
       "https://nix-community.cachix.org"
       "https://nixpkgs-wayland.cachix.org"
       "https://helix.cachix.org"
