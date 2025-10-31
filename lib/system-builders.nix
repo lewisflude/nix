@@ -151,6 +151,7 @@ in {
               config = {
                 allowUnfree = true;
                 allowUnfreePredicate = _: true;
+                allowBroken = true; # Allow broken packages (e.g., CUDA packages)
                 # Insecure packages removed - test if builds still work
                 # If something breaks, add back: permittedInsecurePackages = ["mbedtls-2.28.10"];
               };
@@ -228,6 +229,7 @@ in {
               config = {
                 allowUnfree = true;
                 allowUnfreePredicate = _: true;
+                allowBroken = true; # Allow broken packages (e.g., CUDA packages)
                 # Insecure packages removed - test if builds still work
                 # If something breaks, add back: permittedInsecurePackages = ["mbedtls-2.28.10"];
               };

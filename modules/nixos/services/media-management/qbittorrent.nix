@@ -111,58 +111,100 @@ with lib; let
       )
       vpnCfg.peers;
 
-  # Script to setup qBittorrent credentials from sops secret
-  qbSetupScript =
-    if !qbtEnabled || qbCfg.webUiCredentialsSecret == null
+  # Password hash (always use direct hash if provided)
+  inherit (qbCfg) webUiPasswordHash;
+
+  # Script to update qBittorrent credentials (only needed if username comes from secret)
+  qbCredsUpdateScript =
+    if
+      !qbtEnabled
+      || (qbCfg.webUiUsername == null && qbCfg.webUiUsernameSecret == null)
+      || webUiPasswordHash == null
     then null
-    else
-      pkgs.writeShellScript "qbittorrent-setup-creds" ''
+    else if qbCfg.webUiUsernameSecret != null
+    then
+      pkgs.writeShellScript "qbittorrent-update-creds" ''
         set -euo pipefail
-        CREDS_FILE="${config.sops.secrets."${qbCfg.webUiCredentialsSecret}".path}"
-
-        # Extract username and password from the credentials file
-        USERNAME=$(head -n1 "''${CREDS_FILE}")
-        PASSWORD=$(tail -n1 "''${CREDS_FILE}")
-
-        # Generate PBKDF2 hash
-        PASSWORD_HASH=$(echo "''${PASSWORD}" | ${pkgs.python3}/bin/python3 << 'PYSCRIPT'
-        import hashlib, base64, sys, os
-        password = sys.stdin.read().strip().encode('utf-8')
-        salt = os.urandom(16)
-        hash_obj = hashlib.pbkdf2_hmac('sha256', password, salt, 32000)
-        salt_b64 = base64.b64encode(salt).decode('utf-8')
-        hash_b64 = base64.b64encode(hash_obj).decode('utf-8')
-        print(f"@ByteArray({salt_b64}:{hash_b64})")
-        PYSCRIPT
-        )
-
-        # Update qBittorrent config file with credentials
         CONFIG_FILE="${qbProfileDir}/qBittorrent/config/qBittorrent.conf"
 
-        # Create config backup if it doesn't exist
+        # Read username from secret
+        USERNAME=$(cat "${config.sops.secrets."${qbCfg.webUiUsernameSecret}".path}")
+        PASSWORD_HASH="${webUiPasswordHash}"
+
+        # Ensure config file exists (created by NixOS module)
         if [ ! -f "''${CONFIG_FILE}" ]; then
-          mkdir -p "$(dirname "''${CONFIG_FILE}")"
-          touch "''${CONFIG_FILE}"
+          echo "Error: qBittorrent config file not found at ''${CONFIG_FILE}" >&2
+          exit 1
         fi
 
-        # Use sed to update credentials (or add them if missing)
-        ${pkgs.gnused}/bin/sed -i "/^\[WebUI\]/,/^\[/ {
-          /^Username=/c\Username=''${USERNAME}
-          T
-          :a
-          /^Password_PBKDF2=/c\Password_PBKDF2=''${PASSWORD_HASH}
-          T
-        }" "''${CONFIG_FILE}" || true
+        # Use a temporary file approach to avoid sed escaping issues
+        TMP_FILE=$(mktemp)
+        IN_SECTION=false
+        USERNAME_SET=false
+        PASSWORD_SET=false
 
-        # If credentials weren't found, add them to the WebUI section
-        if ! grep -q "^Username=" "''${CONFIG_FILE}"; then
-          ${pkgs.gnused}/bin/sed -i "/^\[WebUI\]/a\\Username=''${USERNAME}\nPassword_PBKDF2=''${PASSWORD_HASH}" "''${CONFIG_FILE}" || true
+        # Process the config file line by line
+        while IFS= read -r line || [ -n "$line" ]; do
+          # Check if we're entering the [WebUI] section
+          if [[ "$line" =~ ^\[WebUI\] ]]; then
+            echo "[WebUI]" >> "$TMP_FILE"
+            IN_SECTION=true
+            USERNAME_SET=false
+            PASSWORD_SET=false
+            continue
+          fi
+
+          # Check if we're leaving the section (next [section])
+          if [[ "$line" =~ ^\[ ]] && [[ ! "$line" =~ ^\[WebUI\] ]]; then
+            # Add credentials before leaving section if they weren't set
+            if [ "$IN_SECTION" = true ] && [ "$USERNAME_SET" = false ]; then
+              echo "Username=''${USERNAME}" >> "$TMP_FILE"
+              echo "Password_PBKDF2=''${PASSWORD_HASH}" >> "$TMP_FILE"
+              USERNAME_SET=true
+              PASSWORD_SET=true
+            fi
+            IN_SECTION=false
+          fi
+
+          # In [WebUI] section, replace existing credentials
+          if [ "$IN_SECTION" = true ]; then
+            if [[ "$line" =~ ^Username= ]]; then
+              echo "Username=''${USERNAME}" >> "$TMP_FILE"
+              USERNAME_SET=true
+              continue
+            elif [[ "$line" =~ ^Password_PBKDF2= ]]; then
+              echo "Password_PBKDF2=''${PASSWORD_HASH}" >> "$TMP_FILE"
+              PASSWORD_SET=true
+              continue
+            fi
+          fi
+
+          # Write other lines as-is
+          echo "$line" >> "$TMP_FILE"
+        done < "''${CONFIG_FILE}"
+
+        # If credentials weren't set in [WebUI] section, add them before closing
+        if [ "$IN_SECTION" = true ] && [ "$USERNAME_SET" = false ]; then
+          echo "Username=''${USERNAME}" >> "$TMP_FILE"
+          echo "Password_PBKDF2=''${PASSWORD_HASH}" >> "$TMP_FILE"
         fi
+
+        # If [WebUI] section doesn't exist at all, add it at the end
+        if ! grep -q "^\[WebUI\]" "''${CONFIG_FILE}" 2>/dev/null; then
+          echo "" >> "$TMP_FILE"
+          echo "[WebUI]" >> "$TMP_FILE"
+          echo "Username=''${USERNAME}" >> "$TMP_FILE"
+          echo "Password_PBKDF2=''${PASSWORD_HASH}" >> "$TMP_FILE"
+        fi
+
+        # Replace original file with updated version
+        mv "$TMP_FILE" "''${CONFIG_FILE}"
 
         # Ensure correct ownership
         chown "${cfg.user}:${cfg.group}" "''${CONFIG_FILE}"
         chmod 600 "''${CONFIG_FILE}"
-      '';
+      ''
+    else null;
 in {
   options.host.services.mediaManagement.qbittorrent = {
     enable =
@@ -171,11 +213,52 @@ in {
         default = true;
       };
 
-    webUiCredentialsSecret = mkOption {
+    webUiUsername = mkOption {
       type = types.nullOr types.str;
       default = null;
-      description = "Name of the sops secret containing WebUI credentials (username on line 1, password on line 2).";
-      example = "qbittorrent/webui";
+      description = "WebUI username. Can be set directly or via webUiUsernameSecret.";
+      example = "admin";
+    };
+
+    webUiPasswordHash = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "WebUI password PBKDF2 hash (safe to store in Nix store since it's hashed). The hash must be in the format: @ByteArray(salt_base64:hash_base64). Generate using: python3 -c 'import hashlib, base64, os; password = b\"your_password\"; salt = os.urandom(16); hash_obj = hashlib.pbkdf2_hmac(\"sha512\", password, salt, 100000); print(f\"@ByteArray({base64.b64encode(salt).decode()}:{base64.b64encode(hash_obj).decode()})\")'";
+      example = "@ByteArray(...)";
+    };
+
+    webUiUsernameSecret = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "Name of the sops secret containing the WebUI username. Used if webUiUsername is not set.";
+      example = "qbittorrent/webui/username";
+    };
+
+    webUiPasswordHashSecret = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "DEPRECATED: Name of the sops secret containing the WebUI password PBKDF2 hash. Use webUiPasswordHash directly instead (hashes are safe to store in Nix store).";
+      example = "qbittorrent/webui/password_hash";
+    };
+
+    webUiAuthSubnetWhitelist = mkOption {
+      type = types.listOf types.str;
+      default = [];
+      description = "List of IP subnets (CIDR notation) that bypass WebUI authentication. Common examples: [\"127.0.0.1/32\"] for localhost, [\"192.168.1.0/24\"] for local network.";
+      example = [
+        "127.0.0.1/32"
+        "192.168.1.0/24"
+      ];
+    };
+
+    categoryPaths = mkOption {
+      type = types.attrsOf types.str;
+      default = {};
+      description = "Map of category names to their save paths. Used for organizing downloads (e.g., movies -> /mnt/storage/torrents/movies for Radarr, tv -> /mnt/storage/torrents/tv for Sonarr).";
+      example = {
+        movies = "/mnt/storage/torrents/movies";
+        tv = "/mnt/storage/torrents/tv";
+      };
     };
 
     vpn = mkOption {
@@ -324,13 +407,31 @@ in {
       mkMerge [
         {
           assertions =
-            optionals (qbCfg.enable && qbCfg.webUiCredentialsSecret != null) [
+            optionals (qbCfg.enable && qbCfg.webUiUsernameSecret != null) [
               {
                 assertion =
-                  config ? sops && config.sops ? secrets && config.sops.secrets ? "${qbCfg.webUiCredentialsSecret}";
+                  config ? sops && config.sops ? secrets && config.sops.secrets ? "${qbCfg.webUiUsernameSecret}";
                 message = ''
-                  host.services.mediaManagement.qbittorrent.webUiCredentialsSecret is set to "${qbCfg.webUiCredentialsSecret}" but the secret is not defined under config.sops.secrets.
+                  host.services.mediaManagement.qbittorrent.webUiUsernameSecret is set to "${qbCfg.webUiUsernameSecret}" but the secret is not defined under config.sops.secrets.
                 '';
+              }
+            ]
+            ++ optionals (qbCfg.enable && qbCfg.webUiPasswordHashSecret != null) [
+              {
+                assertion = false;
+                message = "webUiPasswordHashSecret is deprecated. Use webUiPasswordHash directly instead (hashes are safe to store in Nix store).";
+              }
+            ]
+            ++ optionals
+            (
+              qbCfg.enable
+              && webUiPasswordHash != null
+              && (qbCfg.webUiUsername == null && qbCfg.webUiUsernameSecret == null)
+            )
+            [
+              {
+                assertion = false;
+                message = "webUiPasswordHash is set but neither webUiUsername nor webUiUsernameSecret is set. Set one of them.";
               }
             ]
             ++ vpnEnabledAssertions
@@ -352,18 +453,41 @@ in {
               webuiPort = 8080;
               torrentingPort = 6881;
               openFirewall = true;
-              serverConfig = {
-                LegalNotice.Accepted = true;
-                Preferences = {
-                  WebUI = {
-                    Address = "0.0.0.0";
-                    Port = 8080;
+              serverConfig = mkMerge [
+                {
+                  LegalNotice.Accepted = true;
+                  Preferences = {
+                    WebUI = {
+                      Address = "0.0.0.0";
+                      Port = 8080;
+                      AlternativeUIEnabled = true;
+                      RootFolder = "${pkgs.vuetorrent}/share/vuetorrent";
+                    };
+                    General.Locale = "en";
                   };
-                  General = {
-                    Locale = "en";
+                }
+                # Set credentials directly if username and password hash are provided directly
+                # According to NixOS qbittorrent module docs, Username and Password_PBKDF2 go under Preferences.WebUI
+                (mkIf (qbCfg.webUiUsername != null && webUiPasswordHash != null) {
+                  Preferences.WebUI = {
+                    Username = qbCfg.webUiUsername;
+                    Password_PBKDF2 = webUiPasswordHash;
                   };
-                };
-              };
+                })
+                # Set authentication bypass subnets if provided
+                (mkIf (qbCfg.webUiAuthSubnetWhitelist != []) {
+                  Preferences.WebUI.AuthSubnetWhitelist = concatStringsSep "," qbCfg.webUiAuthSubnetWhitelist;
+                })
+                # Set category paths if provided
+                (mkIf (qbCfg.categoryPaths != {}) {
+                  Preferences.Category =
+                    mapAttrs' (
+                      name: path: nameValuePair "Category\\${name}\\SavePath" path
+                    )
+                    qbCfg.categoryPaths;
+                })
+                # Note: If webUiUsernameSecret is used, credentials are set at runtime via ExecStartPre script
+              ];
             }
             (mkIf qbtVpnEnabled {
               openFirewall = mkForce false;
@@ -375,28 +499,42 @@ in {
               qbittorrent = mkMerge [
                 {
                   environment.TZ = cfg.timezone;
-                  serviceConfig = mkMerge [
-                    (mkIf (qbCfg.webUiCredentialsSecret != null) {
-                      ExecPreStart = [qbSetupScript];
-                    })
-                  ];
                 }
+                (mkIf (qbCfg.webUiUsernameSecret != null && webUiPasswordHash != null) {
+                  after = ["sops-nix.service"];
+                  serviceConfig = {
+                    ExecStartPre = [
+                      "+${qbCredsUpdateScript}"
+                    ];
+                  };
+                })
                 (mkIf qbtVpnEnabled {
                   wants = [
                     "${netnsUnitName}.service"
                     "${wgUnitName}.service"
                   ];
-                  after = [
-                    "${netnsUnitName}.service"
-                    "${wgUnitName}.service"
-                  ];
+                  after =
+                    [
+                      "${netnsUnitName}.service"
+                      "${wgUnitName}.service"
+                    ]
+                    ++ optionals (qbCfg.webUiUsernameSecret != null) [
+                      "sops-nix.service"
+                    ];
                   requires = [
                     "${netnsUnitName}.service"
                     "${wgUnitName}.service"
                   ];
-                  serviceConfig = {
-                    NetworkNamespacePath = namespacePath;
-                  };
+                  serviceConfig = mkMerge [
+                    {
+                      NetworkNamespacePath = namespacePath;
+                    }
+                    (mkIf (qbCfg.webUiUsernameSecret != null && webUiPasswordHash != null) {
+                      ExecStartPre = [
+                        "+${qbCredsUpdateScript}"
+                      ];
+                    })
+                  ];
                 })
               ];
 
@@ -418,6 +556,25 @@ in {
               ${wgUnitName} = mkIf qbtVpnEnabled {
                 after = ["${netnsUnitName}.service"];
                 requires = ["${netnsUnitName}.service"];
+              };
+
+              privoxy-qbvpn = mkIf qbtVpnEnabled {
+                description = "Privoxy HTTP proxy via qBittorrent VPN";
+                after = [
+                  "${netnsUnitName}.service"
+                  "${wgUnitName}.service"
+                ];
+                requires = ["${netnsUnitName}.service"];
+                wantedBy = ["multi-user.target"];
+                serviceConfig = {
+                  Type = "simple";
+                  NetworkNamespacePath = namespacePath;
+                  ExecStart = "${pkgs.privoxy}/bin/privoxy --no-daemon /etc/privoxy/config";
+                  Restart = "on-failure";
+                  RestartSec = 5;
+                  User = "privoxy";
+                  Group = "privoxy";
+                };
               };
             };
 
@@ -469,6 +626,13 @@ in {
                 iptables -A FORWARD -d 10.200.0.1 -p tcp --dport 8080 -j ACCEPT
                 iptables -A FORWARD -s 10.200.0.1 -p tcp --sport 8080 -j ACCEPT
                 iptables -t nat -A POSTROUTING -d 10.200.0.1 -p tcp --dport 8080 -j MASQUERADE
+
+                # Forward Privoxy port from host to namespace
+                iptables -t nat -A PREROUTING -p tcp --dport 8118 -j DNAT --to-destination 10.200.0.1:8118
+                iptables -t nat -A OUTPUT -p tcp --dport 8118 ! -d 10.200.0.0/30 -j DNAT --to-destination 10.200.0.1:8118
+                iptables -A FORWARD -d 10.200.0.1 -p tcp --dport 8118 -j ACCEPT
+                iptables -A FORWARD -s 10.200.0.1 -p tcp --sport 8118 -j ACCEPT
+                iptables -t nat -A POSTROUTING -d 10.200.0.1 -p tcp --dport 8118 -j MASQUERADE
               '';
 
               extraStopCommands = mkIf qbtVpnEnabled ''
@@ -477,6 +641,12 @@ in {
                 iptables -D FORWARD -d 10.200.0.1 -p tcp --dport 8080 -j ACCEPT 2>/dev/null || true
                 iptables -D FORWARD -s 10.200.0.1 -p tcp --sport 8080 -j ACCEPT 2>/dev/null || true
                 iptables -t nat -D POSTROUTING -d 10.200.0.1 -p tcp --dport 8080 -j MASQUERADE 2>/dev/null || true
+
+                iptables -t nat -D PREROUTING -p tcp --dport 8118 -j DNAT --to-destination 10.200.0.1:8118 2>/dev/null || true
+                iptables -t nat -D OUTPUT -p tcp --dport 8118 ! -d 10.200.0.0/30 -j DNAT --to-destination 10.200.0.1:8118 2>/dev/null || true
+                iptables -D FORWARD -d 10.200.0.1 -p tcp --dport 8118 -j ACCEPT 2>/dev/null || true
+                iptables -D FORWARD -s 10.200.0.1 -p tcp --sport 8118 -j ACCEPT 2>/dev/null || true
+                iptables -t nat -D POSTROUTING -d 10.200.0.1 -p tcp --dport 8118 -j MASQUERADE 2>/dev/null || true
               '';
             };
 
@@ -492,17 +662,17 @@ in {
           };
 
           sops.secrets =
-            mkIf (qbCfg.webUiCredentialsSecret != null && config ? sops) (
+            mkIf (qbCfg.webUiUsernameSecret != null && config ? sops) (
               let
-                secretName = qbCfg.webUiCredentialsSecret;
+                usernameSecretName = qbCfg.webUiUsernameSecret;
               in {
-                "${secretName}" = mkMerge [
+                "${usernameSecretName}" = mkMerge [
                   {
                     restartUnits = mkBefore ["qbittorrent.service"];
                   }
                   {
-                    owner = mkForce cfg.user;
-                    group = mkForce cfg.group;
+                    owner = mkForce "root";
+                    group = mkForce "root";
                     mode = mkForce "0400";
                   }
                 ];

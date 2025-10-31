@@ -57,6 +57,7 @@ in {
       config = {
         allowUnfree = true;
         allowUnfreePredicate = _: true;
+        allowBroken = true; # Allow broken packages (e.g., CUDA packages)
       };
     };
 

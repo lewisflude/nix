@@ -31,12 +31,12 @@
       .${config.catppuccin.flavor}.colors
     else
       # Try to get palette directly from catppuccin input
+      # catppuccin/nix repository has palette.json at the root
       let
-        catppuccinPalette =
-          pkgs.lib.importJSON
-          (inputs.catppuccin.packages.${system}.catppuccin-gtk-theme.src + "/palette.json").mocha.colors;
+        catppuccinSrc =
+          inputs.catppuccin.src or inputs.catppuccin.outPath or (throw "Cannot find catppuccin source");
       in
-        catppuccinPalette;
+        (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors;
   secretAvailable = name: lib.hasAttrByPath ["sops" "secrets" name "path"] systemConfig;
   secretPath = name: lib.attrByPath ["sops" "secrets" name "path"] "" systemConfig;
   secretExportSnippet = name: var: let
@@ -56,12 +56,12 @@
   };
   # Generate zsh-abbr configuration file content
   # Format: abbr-name=expansion (one per line)
-  zshAbbrConfigFile = lib.concatMapStringsSep "\n" ({
-    abbr,
-    expansion,
-  }: "${abbr}=${expansion}") (
-    lib.mapAttrsToList (abbr: expansion: {inherit abbr expansion;}) zshAbbreviations
-  );
+  zshAbbrConfigFile = lib.concatMapStringsSep "\n" (
+    {
+      abbr,
+      expansion,
+    }: "${abbr}=${expansion}"
+  ) (lib.mapAttrsToList (abbr: expansion: {inherit abbr expansion;}) zshAbbreviations);
 in {
   xdg.enable = true;
   programs = {

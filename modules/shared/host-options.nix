@@ -255,10 +255,39 @@ with lib; {
             default = true;
             description = "Enable qBittorrent torrent client";
           };
-          webUiCredentialsSecret = mkOption {
+          webUiUsername = mkOption {
             type = types.nullOr types.str;
             default = null;
-            description = "Optional sops-nix secret name containing qBittorrent WebUI credentials.";
+            description = "WebUI username (can be set directly or via webUiUsernameSecret).";
+          };
+          webUiPasswordHash = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "WebUI password PBKDF2 hash (safe to store in Nix store since it's hashed). Generate using: python3 -c 'import hashlib, base64, os; password = b\"your_password\"; salt = os.urandom(16); hash_obj = hashlib.pbkdf2_hmac(\"sha512\", password, salt, 100000); print(f\"@ByteArray({base64.b64encode(salt).decode()}:{base64.b64encode(hash_obj).decode()})\")'";
+          };
+          webUiUsernameSecret = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "Optional sops-nix secret name containing the qBittorrent WebUI username. Used if webUiUsername is not set.";
+          };
+          webUiAuthSubnetWhitelist = mkOption {
+            type = types.listOf types.str;
+            default = [];
+            description = "List of IP subnets (CIDR notation) that bypass WebUI authentication.";
+            example = [
+              "127.0.0.1/32"
+              "192.168.1.0/24"
+              "10.0.0.0/8"
+            ];
+          };
+          categoryPaths = mkOption {
+            type = types.attrsOf types.str;
+            default = {};
+            description = "Map of category names to their save paths. Used for organizing downloads (e.g., movies -> /mnt/storage/torrents/movies for Radarr, tv -> /mnt/storage/torrents/tv for Sonarr).";
+            example = {
+              movies = "/mnt/storage/torrents/movies";
+              tv = "/mnt/storage/torrents/tv";
+            };
           };
           vpn = mkOption {
             type = types.attrs;
@@ -390,7 +419,9 @@ with lib; {
 
         janitorr = mkOption {
           type = types.attrsOf types.anything;
-          default = {enable = true;};
+          default = {
+            enable = true;
+          };
           description = "Janitorr media cleanup automation configuration";
         };
 
