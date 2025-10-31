@@ -63,7 +63,6 @@ in {
       KAGI_API_KEY = mkSecret {allowUserRead = true;};
       OBSIDIAN_API_KEY = mkSecret {allowUserRead = true;};
       OPENAI_API_KEY = mkSecret {allowUserRead = true;};
-      "qbittorrent/webui" = mkSecret {};
       "qbittorrent/vpn/privateKey" = mkSecret {};
     };
   };

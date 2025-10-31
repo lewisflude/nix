@@ -22,17 +22,23 @@ in {
         # General code quality
         trailing-whitespace = {
           enable = true;
-          entry = "${nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks}/bin/trailing-whitespace-fixer";
+          entry = "${
+            nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks
+          }/bin/trailing-whitespace-fixer";
           types = ["text"];
         };
         end-of-file-fixer = {
           enable = true;
-          entry = "${nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks}/bin/end-of-file-fixer";
+          entry = "${
+            nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks
+          }/bin/end-of-file-fixer";
           types = ["text"];
         };
         mixed-line-ending = {
           enable = true;
-          entry = "${nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks}/bin/mixed-line-ending";
+          entry = "${
+            nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks
+          }/bin/mixed-line-ending";
           types = ["text"];
         };
 
@@ -102,6 +108,7 @@ in {
           config = {
             allowUnfree = true;
             allowUnfreePredicate = _: true;
+            allowBroken = true; # Allow broken packages (e.g., CUDA packages)
             allowUnsupportedSystem = false;
             # Insecure packages removed - test if dev shells still work
             # If something breaks, add back: permittedInsecurePackages = ["mbedtls-2.28.10"];
@@ -141,27 +148,29 @@ in {
   mkApps = let
     hostsBySystem = builtins.groupBy (hostConfig: hostConfig.system) (builtins.attrValues hosts);
   in
-    builtins.mapAttrs (system: _hostGroup: let
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [inputs.pog.overlays.${system}.default];
-      };
-      # Helper to create pog app
-      mkPogApp = script-name: {
-        type = "app";
-        program = "${
-          import ../pkgs/pog-scripts/${script-name}.nix {
-            inherit pkgs;
-            inherit (pkgs) pog;
-            config-root = toString ../.;
-          }
-        }/bin/${script-name}";
-      };
-    in {
-      # POG-powered CLI tools
-      new-module = mkPogApp "new-module";
-      setup-cachix = mkPogApp "setup-cachix";
-      update-all = mkPogApp "update-all";
-    })
+    builtins.mapAttrs (
+      system: _hostGroup: let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [inputs.pog.overlays.${system}.default];
+        };
+        # Helper to create pog app
+        mkPogApp = script-name: {
+          type = "app";
+          program = "${
+            import ../pkgs/pog-scripts/${script-name}.nix {
+              inherit pkgs;
+              inherit (pkgs) pog;
+              config-root = toString ../.;
+            }
+          }/bin/${script-name}";
+        };
+      in {
+        # POG-powered CLI tools
+        new-module = mkPogApp "new-module";
+        setup-cachix = mkPogApp "setup-cachix";
+        update-all = mkPogApp "update-all";
+      }
+    )
     hostsBySystem;
 }

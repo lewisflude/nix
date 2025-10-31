@@ -92,23 +92,35 @@ in {
           enable = true;
           dataPath = "/mnt/storage";
           timezone = "Europe/London";
-          qbittorrent.webUiCredentialsSecret = "qbittorrent/webui";
-          qbittorrent.vpn = {
-            enable = true;
-            addresses = ["10.2.0.2/32"];
-            dns = ["10.2.0.1"];
-            privateKeySecret = "qbittorrent/vpn/privateKey";
-            peers = [
-              {
-                publicKey = "YgGdHIXeCQgBc4nXKJ4vct8S0fPqBpTgk4I8gh3uMEg=";
-                endpoint = "185.107.44.110:51820";
-                allowedIPs = [
-                  "0.0.0.0/0"
-                  "::/0"
-                ];
-                persistentKeepalive = 25;
-              }
+          qbittorrent = {
+            webUiUsername = "lewisflude";
+            webUiPasswordHash = "@ByteArray(Cd0EXFF7l5z/Gc30XXcOQQ==:tv4EeaZuKRcqdPssL85j2T1+JGT1ac45CUVysbBrGA2vKRvjR7gECffEgPb5uxHdc4B6Un2CaBAOj4pSA4JH3w==)";
+            webUiAuthSubnetWhitelist = [
+              "127.0.0.1/32" # localhost
+              "192.168.1.0/24" # local network (adjust if your subnet differs)
+              "10.0.0.0/8" # private network range
             ];
+            categoryPaths = {
+              movies = "/mnt/storage/torrents/movies";
+              tv = "/mnt/storage/torrents/tv";
+            };
+            vpn = {
+              enable = true;
+              addresses = ["10.2.0.2/32"];
+              dns = ["10.2.0.1"];
+              privateKeySecret = "qbittorrent/vpn/privateKey";
+              peers = [
+                {
+                  publicKey = "YgGdHIXeCQgBc4nXKJ4vct8S0fPqBpTgk4I8gh3uMEg=";
+                  endpoint = "185.107.44.110:51820";
+                  allowedIPs = [
+                    "0.0.0.0/0"
+                    "::/0"
+                  ];
+                  persistentKeepalive = 25;
+                }
+              ];
+            };
           };
 
           # All services enabled by default except unpackerr

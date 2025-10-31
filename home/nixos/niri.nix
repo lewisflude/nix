@@ -2,9 +2,19 @@
   pkgs,
   config,
   lib,
+  inputs,
+  system,
   ...
 }: let
-  themeConstants = import ./theme-constants.nix {inherit config lib pkgs;};
+  themeConstants = import ./theme-constants.nix {
+    inherit
+      pkgs
+      inputs
+      system
+      config
+      lib
+      ;
+  };
 in {
   home.packages = with pkgs; [
     swww
