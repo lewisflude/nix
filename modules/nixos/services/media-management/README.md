@@ -11,7 +11,6 @@ This module provides declarative configuration for a complete media management s
 - **Sonarr** (port 8989) - TV show collection manager
 - **Lidarr** (port 8686) - Music collection manager
 - **Readarr** (port 8787) - Book/ebook collection manager
-- **Whisparr** (port 6969) - Adult content manager (disabled by default)
 
 ### Download Clients
 
@@ -55,7 +54,6 @@ This enables all services with default settings.
     dataPath = "/mnt/storage";
 
     # Disable services you don't need
-    whisparr.enable = false;
     lidarr.enable = false;
     readarr.enable = false;
   };
@@ -93,7 +91,6 @@ Native services store their data in standard NixOS locations:
 - `/var/lib/sonarr`
 - `/var/lib/lidarr`
 - `/var/lib/readarr`
-- `/var/lib/whisparr`
 - `/var/lib/qbittorrent`
 - `/var/lib/sabnzbd`
 - `/var/lib/jellyfin`
@@ -211,7 +208,6 @@ media-management/
 ├── sonarr.nix          # Sonarr configuration
 ├── lidarr.nix          # Lidarr configuration
 ├── readarr.nix         # Readarr configuration
-├── whisparr.nix        # Whisparr configuration
 ├── qbittorrent.nix     # qBittorrent configuration
 ├── sabnzbd.nix         # SABnzbd configuration
 ├── jellyfin.nix        # Jellyfin configuration

@@ -242,6 +242,7 @@ in {
           sops-nix.nixosModules.sops
           niri.nixosModules.niri
           chaotic.nixosModules.default
+          inputs.nix-topology.nixosModules.default
         ]
         ++ lib.optional (
           hostConfig.system == "x86_64-linux" || hostConfig.system == "aarch64-linux"

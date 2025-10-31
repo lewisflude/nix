@@ -6,6 +6,7 @@
 }: let
   platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
 in {
+  # Catppuccin configuration - full palette fidelity
   catppuccin = {
     flavor = "mocha";
     accent = "mauve";
@@ -23,6 +24,8 @@ in {
       };
     };
   };
+
+  # Keep your custom GTK and cursor theme configuration
   home = lib.optionalAttrs platformLib.isLinux {
     packages = with pkgs; [
       magnetic-catppuccin-gtk
@@ -42,6 +45,7 @@ in {
       };
     };
   };
+
   gtk = lib.mkIf platformLib.isLinux {
     enable = true;
     font = {
@@ -59,5 +63,6 @@ in {
       size = 24;
     };
   };
+
   fonts.fontconfig.enable = lib.mkIf platformLib.isLinux true;
 }

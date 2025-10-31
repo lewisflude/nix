@@ -23,16 +23,17 @@
       };
     };
   };
-  home.file = {
-    "Pictures/Screenshots/.keep".text = "";
-    "bin/swappy-fixed" = {
+  home.file."Pictures/Screenshots/.keep".text = "";
+  home.packages = with pkgs; [
+    (writeShellApplication {
+      name = "swappy-fixed";
+      runtimeInputs = [pkgs.swappy pkgs.gnugrep];
       text = ''
         export GDK_SCALE=1
         export GDK_DPI_SCALE=1
         export GTK_THEME=Catppuccin-GTK-Dark
         exec ${pkgs.swappy}/bin/swappy "$@" 2> >(grep -v "Theme parsing error: gtk.css" >&2)
       '';
-      executable = true;
-    };
-  };
+    })
+  ];
 }

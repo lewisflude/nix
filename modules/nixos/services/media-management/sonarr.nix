@@ -19,12 +19,13 @@ in {
       openFirewall = true;
       inherit (cfg) user;
       inherit (cfg) group;
+      dataDir = "/var/lib/sonarr";
     };
 
-    # Override the systemd service to use the correct data directory
+    # Override ExecStart to add -nobrowser flag and ensure correct data directory
     systemd.services.sonarr = {
       serviceConfig = {
-        ExecStart = lib.mkForce "/nix/store/1k260qq28mzdzm576k33y2kdlxcqbkki-sonarr-4.0.15.2941/bin/Sonarr -nobrowser -data=/var/lib/sonarr";
+        ExecStart = lib.mkForce "${config.services.sonarr.package}/bin/Sonarr -nobrowser -data=${config.services.sonarr.dataDir}";
       };
 
       # Set timezone

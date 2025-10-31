@@ -1,10 +1,18 @@
 {
   pkgs,
-  config,
+  inputs,
+  system,
   ...
 }: let
-  palette =
-    (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors;
+  # Use FULL Catppuccin palette - access all semantic colors
+  catppuccinPalette =
+    pkgs.lib.importJSON
+    (
+      inputs.catppuccin.packages.${system}.catppuccin-gtk-theme.src + "/palette.json"
+    ).mocha.colors;
+
+  # Use Catppuccin colors directly for accurate theming
+  palette = catppuccinPalette;
 in {
   programs.fuzzel = {
     enable = true;

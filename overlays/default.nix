@@ -59,6 +59,9 @@ in rec {
   nh = inputs.nh.overlays.default;
   nur = inputs.nur.overlays.default;
 
+  # Infrastructure visualization
+  nix-topology = inputs.nix-topology.overlays.default;
+
   # === Latest Flake Packages ===
   # Code editors with bleeding-edge features
   flake-editors = _final: prev: {

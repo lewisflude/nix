@@ -249,14 +249,6 @@ with lib; {
           };
         };
 
-        whisparr = {
-          enable = mkOption {
-            type = types.bool;
-            default = false;
-            description = "Enable Whisparr adult content management";
-          };
-        };
-
         qbittorrent = {
           enable = mkOption {
             type = types.bool;

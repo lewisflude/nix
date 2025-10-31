@@ -6,6 +6,7 @@
   hostSystem,
   host,
   lib,
+  inputs,
   ...
 }: let
   platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
@@ -20,18 +21,22 @@
       dockerTools
       ;
   };
+  # Use FULL Catppuccin palette - access all semantic colors directly
+  # Uses catppuccin.nix module palette when available, falls back to direct input access
   palette =
     if lib.hasAttrByPath ["catppuccin" "sources" "palette"] config
-    then (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
+    then
+      # Use catppuccin.nix module palette if available
+      (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
       .${config.catppuccin.flavor}.colors
-    else {
-      mauve = {
-        hex = "b48ead";
-      };
-      surface1 = {
-        hex = "3b4252";
-      };
-    };
+    else
+      # Try to get palette directly from catppuccin input
+      let
+        catppuccinPalette =
+          pkgs.lib.importJSON
+          (inputs.catppuccin.packages.${system}.catppuccin-gtk-theme.src + "/palette.json").mocha.colors;
+      in
+        catppuccinPalette;
   secretAvailable = name: lib.hasAttrByPath ["sops" "secrets" name "path"] systemConfig;
   secretPath = name: lib.attrByPath ["sops" "secrets" name "path"] "" systemConfig;
   secretExportSnippet = name: var: let
@@ -42,6 +47,21 @@
         export ${var}="$(cat ${lib.escapeShellArg path})"
       fi
     '';
+  # Zsh abbreviations configuration (declarative file-based approach)
+  # Format: { abbreviation = "expansion"; }
+  # zsh-abbr reads from a file in format: abbreviation=expansion
+  zshAbbreviations = {
+    "fid" = "Finished installing dependencies";
+    "tpfd" = "There was a problem finishing installing dependencies";
+  };
+  # Generate zsh-abbr configuration file content
+  # Format: abbr-name=expansion (one per line)
+  zshAbbrConfigFile = lib.concatMapStringsSep "\n" ({
+    abbr,
+    expansion,
+  }: "${abbr}=${expansion}") (
+    lib.mapAttrsToList (abbr: expansion: {inherit abbr expansion;}) zshAbbreviations
+  );
 in {
   xdg.enable = true;
   programs = {
@@ -126,7 +146,7 @@ in {
             sudo chown -R root:wheel /usr/local/share/zsh 2>/dev/null || true
           fi
         fi
-        if [[ -n ${config.xdg.cacheHome}/zsh/.zcompdump ]]; then
+        if [[ -f ${config.xdg.cacheHome}/zsh/.zcompdump ]]; then
           compinit
         else
           compinit -C
@@ -157,6 +177,8 @@ in {
         npm() { _lazy_load_npm_completion; unfunction npm; npm "$@"; }
         mkdir -p ${config.xdg.cacheHome}/zsh
       '';
+      # Use dedicated autocd option instead of AUTO_CD in setOptions
+      autocd = true;
       setOptions = [
         "AUTO_MENU"
         "COMPLETE_IN_WORD"
@@ -175,7 +197,6 @@ in {
         "PUSHD_SILENT"
         "PUSHD_TO_HOME"
         "CDABLE_VARS"
-        "AUTO_CD"
         "MULTIOS"
         "EXTENDED_GLOB"
         "GLOB_DOTS"
@@ -192,6 +213,15 @@ in {
         "AUTO_LIST"
         "AUTO_PARAM_SLASH"
       ];
+      # Set environment variables before plugins load (goes in .zshenv)
+      envExtra = ''
+        # Configure zsh-abbr to use our declarative abbreviations file
+        export ABBR_USER_ABBREVIATIONS_FILE="${config.xdg.configHome}/zsh/abbreviations"
+      '';
+      # Zsh-specific session variables (better than home.sessionVariables)
+      sessionVariables = {
+        DIRSTACKSIZE = "20";
+      };
       shellAliases = lib.mkMerge [
         {
           switch = platformLib.systemRebuildCommand {hostName = host.hostname;};
@@ -270,10 +300,12 @@ in {
         ignoreDups = true;
         ignoreSpace = true;
       };
-      initContent = ''
+      # Use initContent with mkAfter to append after home-manager's defaults
+      initContent = lib.mkAfter ''
         ${secretExportSnippet "KAGI_API_KEY" "KAGI_API_KEY"}
         ${secretExportSnippet "GITHUB_TOKEN" "GITHUB_TOKEN"}
         export SSH_AUTH_SOCK="$(${pkgs.gnupg}/bin/gpgconf --list-dirs agent-ssh-socket)"
+        # Arrays must be set in initContent, not localVariables
         typeset -ga ZSH_AUTOSUGGEST_STRATEGY
         ZSH_AUTOSUGGEST_STRATEGY=(history completion)
         export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=${palette.mauve.hex},bg=${palette.surface1.hex},bold,underline"
@@ -349,17 +381,23 @@ in {
           ''
         }
         eval "$(zoxide init zsh)"
+        # zsh-abbr storage file is configured via ABBR_USER_ABBREVIATIONS_FILE
+        # which is set before the plugin loads (see plugins section)
+        # The plugin will automatically load from that file
       '';
     };
   };
   home = {
+    # Global session variables (affect all shells, not just zsh)
     sessionVariables = {
       EDITOR = "hx";
-      DIRSTACKSIZE = "20";
       NH_FLAKE = "${config.home.homeDirectory}/.config/nix";
     };
     file = {
       ".p10k.zsh".source = ./lib/p10k.zsh;
+      # Declarative zsh-abbr configuration file
+      # zsh-abbr will automatically load this file on initialization
+      ".config/zsh/abbreviations".text = zshAbbrConfigFile;
     };
     packages = with pkgs; [
       zoxide
