@@ -6,7 +6,6 @@
       "nix-command"
       "flakes"
       "ca-derivations"
-      "eval-cache" # Cache evaluation results for faster flake evaluation
     ];
 
     # Binary caches for faster builds

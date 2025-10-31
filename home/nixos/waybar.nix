@@ -16,7 +16,10 @@
   # Scripts for waybar custom modules
   brightnessScript = pkgs.writeShellApplication {
     name = "brightness";
-    runtimeInputs = with pkgs; [coreutils ddcutil];
+    runtimeInputs = with pkgs; [
+      coreutils
+      ddcutil
+    ];
     text = ''
       CACHE_FILE="$HOME/.config/niri/last_brightness"
       mkdir -p "$(dirname "$CACHE_FILE")"
@@ -50,7 +53,11 @@
   };
   backupStatusScript = pkgs.writeShellApplication {
     name = "backup-status";
-    runtimeInputs = with pkgs; [coreutils rsync gawk];
+    runtimeInputs = with pkgs; [
+      coreutils
+      rsync
+      gawk
+    ];
     text = ''
       HOME_DIR="$HOME"
       stats=$(rsync --dry-run --stats "$HOME_DIR/data/" /backup/ 2>/dev/null)
@@ -62,16 +69,19 @@
   };
   systemSparkScript = pkgs.writeShellApplication {
     name = "system-spark-percentage";
-    runtimeInputs = with pkgs; [coreutils jq];
+    runtimeInputs = with pkgs; [
+      coreutils
+      jq
+    ];
     text = ''
-      IFS=',' read -r load1 load5 load15 _ < <(uptime | sed -E 's/.*load average: //')
+      IFS=',' read -r load1 _ _ < <(uptime | sed -E 's/.*load average: //')
       load_pct=$(echo "$load1" | awk '{printf "%d", ($1/2.0)*100}')
-      if [ $load_pct -gt 100 ]; then load_pct=100; fi
-      if [ $load_pct -ge 80 ]; then
+      if [ "$load_pct" -gt 100 ]; then load_pct=100; fi
+      if [ "$load_pct" -ge 80 ]; then
         alt="high"
-      elif [ $load_pct -ge 50 ]; then
+      elif [ "$load_pct" -ge 50 ]; then
         alt="medium"
-      elif [ $load_pct -ge 25 ]; then
+      elif [ "$load_pct" -ge 25 ]; then
         alt="med-low"
       else
         alt="low"
