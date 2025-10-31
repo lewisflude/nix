@@ -9,15 +9,21 @@
   ...
 }: let
   platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
-  isDarwin = lib.strings.hasSuffix "darwin" hostSystem;
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
   # Import nvfetcher-generated sources for ZSH plugins
   sources = import ./_sources/generated.nix {
-    inherit (pkgs) fetchgit fetchFromGitHub fetchurl dockerTools;
+    inherit
+      (pkgs)
+      fetchgit
+      fetchFromGitHub
+      fetchurl
+      dockerTools
+      ;
   };
   palette =
     if lib.hasAttrByPath ["catppuccin" "sources" "palette"] config
-    then (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json")).${config.catppuccin.flavor}.colors
+    then (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
+      .${config.catppuccin.flavor}.colors
     else {
       mauve = {
         hex = "b48ead";
@@ -365,60 +371,80 @@ in {
           coreutils
         ];
         text = ''
-          set -Eeuo pipefail
-          IFS=$'\n\t'
-          FLAKE_PATH="''${NH_FLAKE:-${config.home.homeDirectory}/.config/nix}"
-          NH_TARGET="${
-            if isDarwin
-            then "darwin"
-            else "os"
-          }"
-          if [ "$(awk '/NoNewPrivs/ {print $2}' /proc/self/status 2>/dev/null || echo 0)" = "1" ]; then
-            if command -v systemd-run >/dev/null 2>&1; then
-              echo "Detected NoNewPrivs=1; re-executing via systemd-run to allow sudo…"
-              exec systemd-run --user --pty --same-dir --wait --collect -p NoNewPrivileges=no system-update "$@"
-            else
-              echo "NoNewPrivs=1 and systemd-run not found. Run from a non-sandboxed terminal or a VT."
-              exit 1
-            fi
-          fi
-          UPDATE_INPUTS=0
-          RUN_GC=0
-          BUILD_ONLY=0
-          DRY_RUN=0
-          for arg in "$@"; do
-            case "$arg" in
-              --full) UPDATE_INPUTS=1; RUN_GC=1 ;;
-              --inputs) UPDATE_INPUTS=1 ;;
-              --gc) RUN_GC=1 ;;
-              --build-only) BUILD_ONLY=1 ;;
-              --check|--dry-run) DRY_RUN=1 ;;
-              --help)
-                echo "Usage: system-update [--full|--inputs|--gc|--build-only|--check|--help]"
-                exit 0 ;;
-            esac
-          done
-          if [[ $UPDATE_INPUTS -eq 1 ]]; then
-            echo "Updating inputs…"
-            nix flake update --flake "$FLAKE_PATH"
-          fi
-          if [[ $DRY_RUN -eq 1 ]]; then
-            echo "Checking switch…"
-            nh "$NH_TARGET" switch -- --dry-run "$FLAKE_PATH"
-          else
-            if [[ $BUILD_ONLY -eq 1 ]]; then
-              echo "Building…"
-              nh "$NH_TARGET" build "$FLAKE_PATH"
-            else
-              echo "Switching…"
-              nh "$NH_TARGET" switch "$FLAKE_PATH"
-            fi
-          fi
-          if [[ $RUN_GC -eq 1 ]]; then
-            echo "Cleaning…"
-            nh clean all
-          fi
-          echo "Done."
+                    set -Eeuo pipefail
+
+                    FLAKE_PATH="''${NH_FLAKE:-${config.home.homeDirectory}/.config/nix}"
+                    NH_TARGET=$([[ "$(uname)" == "Darwin" ]] && echo "darwin" || echo "os")
+
+                    # Handle NoNewPrivs on Linux only
+                    if [[ -r /proc/self/status ]] && [[ "$(awk '/NoNewPrivs/ {print $2}' /proc/self/status 2>/dev/null || echo 0)" == "1" ]]; then
+                      if command -v systemd-run >/dev/null 2>&1; then
+                        exec systemd-run --user --pty --same-dir --wait --collect -p NoNewPrivileges=no system-update "$@"
+                      else
+                        echo "NoNewPrivs=1 and systemd-run not found. Run from a non-sandboxed terminal or a VT." >&2
+                        exit 1
+                      fi
+                    fi
+
+                    # Parse flags
+                    UPDATE_INPUTS=0 RUN_GC=0 BUILD_ONLY=0 DRY_RUN=0
+                    for arg in "$@"; do
+                      case "$arg" in
+                        --full) UPDATE_INPUTS=1; RUN_GC=1 ;;
+                        --inputs) UPDATE_INPUTS=1 ;;
+                        --gc) RUN_GC=1 ;;
+                        --build-only) BUILD_ONLY=1 ;;
+                        --check|--dry-run) DRY_RUN=1 ;;
+                        --help)
+                          cat <<EOF
+          Usage: system-update [OPTIONS]
+
+          Options:
+            --full          Update inputs, build/switch, and run garbage collection
+            --inputs        Update flake inputs before building/switching
+            --gc            Run garbage collection after build/switch
+            --build-only    Build without switching (does not activate changes)
+            --check, --dry-run  Validate configuration without building
+            --help          Show this help message
+
+          Examples:
+            system-update              # Switch to current configuration
+            system-update --full        # Update inputs, switch, and cleanup
+            system-update --inputs     # Update inputs then switch
+            system-update --build-only # Build without switching
+          EOF
+                          exit 0 ;;
+                        *)
+                          echo "Unknown option: $arg" >&2
+                          echo "Run 'system-update --help' for usage information." >&2
+                          exit 1 ;;
+                      esac
+                    done
+
+                    # Validate mutually exclusive flags
+                    if [[ $BUILD_ONLY -eq 1 ]] && [[ $DRY_RUN -eq 1 ]]; then
+                      echo "Error: --build-only and --dry-run are mutually exclusive." >&2
+                      exit 1
+                    fi
+
+                    # Execute operations
+                    [[ $UPDATE_INPUTS -eq 1 ]] && echo "Updating inputs…" && nix flake update --flake "$FLAKE_PATH"
+
+                    if [[ $DRY_RUN -eq 1 ]]; then
+                      echo "Checking switch…"
+                      nh "$NH_TARGET" switch -- --dry-run "$FLAKE_PATH"
+                    elif [[ $BUILD_ONLY -eq 1 ]]; then
+                      echo "Building…"
+                      nh "$NH_TARGET" build "$FLAKE_PATH"
+                    else
+                      echo "Switching…"
+                      nh "$NH_TARGET" switch "$FLAKE_PATH"
+                    fi
+
+                    # Skip GC on dry-run
+                    [[ $RUN_GC -eq 1 ]] && [[ $DRY_RUN -eq 0 ]] && echo "Cleaning…" && nh clean all
+
+                    echo "Done."
         '';
       })
       (writeShellApplication {
