@@ -2,15 +2,20 @@
   config = {
     nix.settings = {
       auto-optimise-store = true;
-      max-jobs = 24;
-      cores = 0;
-      keep-outputs = false;
-      keep-derivations = false;
+      max-jobs = "auto"; # Use all available CPU cores
+      cores = 0; # Use all cores per build job (0 = auto)
+      # Keep outputs/derivations for faster rebuilds and better caching
+      keep-outputs = true; # Keep build outputs for better caching
+      keep-derivations = true; # Keep .drv files for better rebuilds
       min-free = 1073741824;
       max-free = 3221225472;
-      download-buffer-size = 524288000;
+      # Increased download buffer for faster binary cache downloads
+      download-buffer-size = 524288000; # 500MB
+      # Build reliability settings
+      fallback = true; # Build from source if binary cache fails
+      # Optimize substituter priority: personal cache first for fastest access
       substituters = [
-        "https://lewisflude.cachix.org"
+        "https://lewisflude.cachix.org" # Personal cache - highest priority
         "https://cache.nixos.org"
         "https://nix-community.cachix.org"
         "https://ags.cachix.org"
@@ -49,6 +54,7 @@
         "nix-command"
         "flakes"
         "ca-derivations"
+        "eval-cache" # Cache evaluation results for faster flake evaluation
       ];
     };
     environment = {
@@ -111,6 +117,13 @@
           exec /etc/nix-optimization/analyze-store.sh "$@"
         '')
       ];
+    };
+
+    # Automatic garbage collection
+    nix.gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 7d";
     };
 
     # NixOS-specific systemd services

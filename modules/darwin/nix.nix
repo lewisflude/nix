@@ -41,6 +41,9 @@
       keep-outputs = true; # Keep build outputs for better caching
       keep-derivations = true; # Keep .drv files for better rebuilds
       fallback = true; # Build from source if binary cache fails
+
+      # Cache and download optimizations
+      download-buffer-size = 524288000; # 500MB buffer for faster downloads
     };
 
     # Garbage collection is not configured because nix.enable = false

@@ -432,7 +432,7 @@ in {
 
                     if [[ $DRY_RUN -eq 1 ]]; then
                       echo "Checking switch…"
-                      nh "$NH_TARGET" switch -- --dry-run "$FLAKE_PATH"
+                      nh "$NH_TARGET" switch --dry "$FLAKE_PATH"
                     elif [[ $BUILD_ONLY -eq 1 ]]; then
                       echo "Building…"
                       nh "$NH_TARGET" build "$FLAKE_PATH"
