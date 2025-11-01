@@ -25,7 +25,6 @@
       "https://zed.cachix.org"
       "https://cache.garnix.io"
       "https://chaotic-nyx.cachix.org" # Bleeding-edge packages (NixOS only)
-      "https://lewisflude.cachix.org" # Personal binary cache
     ];
 
     extra-trusted-public-keys = [
@@ -96,9 +95,6 @@
       url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
       # Do NOT follow nixpkgs - this breaks their cache
     };
-
-    # waybar and swww removed - using nixpkgs versions instead
-    # The flake inputs were not being used, overlays already deleted
 
     # === NixOS Audio ===
     musnix = {

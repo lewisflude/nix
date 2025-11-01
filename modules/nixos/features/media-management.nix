@@ -25,6 +25,7 @@ in {
       jellyseerr = cfg.jellyseerr or {};
       flaresolverr = cfg.flaresolverr or {};
       unpackerr = cfg.unpackerr or {};
+      navidrome = cfg.navidrome or {};
     };
   };
 }

@@ -489,9 +489,11 @@ in {
             default = [
               "127.0.0.1/32"
               "192.168.0.0/16"
-              "10.0.0.0/8"
+              # Note: 10.0.0.0/8 removed from default to avoid conflict with VPN addresses (10.2.0.0/16)
+              # If you need access from 10.x.x.x networks, add specific subnets excluding VPN range
+              # Example: "10.0.0.0/9" and "10.128.0.0/9" (excluding 10.2.0.0/16)
             ];
-            description = "IP subnets that can access services in the VPN namespace.";
+            description = "IP subnets that can access services in the VPN namespace. Avoid VPN address ranges (e.g., 10.2.0.0/16 for ProtonVPN) to prevent routing conflicts.";
           };
 
           proxy = mkOption {
@@ -760,7 +762,7 @@ in {
           # Allow transient UDP socket binding failures; qBittorrent will retry
           serviceConfig.Restart = "on-failure";
           serviceConfig.RestartSec = "5s";
-          serviceConfig.StartLimitIntervalSec = "60s";
+          serviceConfig.StartLimitInterval = "60s";
           serviceConfig.StartLimitBurst = 3;
         })
       ];

@@ -28,10 +28,4 @@ in {
 
   system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
   system.stateVersion = lib.mkDefault platformLib.platformStateVersion;
-
-  # nixpkgs.config is now handled in flake.nix
-  # nixpkgs.config = {
-  #   allowUnfree = true;
-  #   allowUnsupportedSystem = false;
-  # };
 }

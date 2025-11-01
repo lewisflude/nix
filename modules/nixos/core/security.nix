@@ -52,23 +52,14 @@
     polkit.enable = true;
   };
   services.gnome.gnome-keyring.enable = true;
+  # Note: gnome-keyring-daemon user service is now managed by Home Manager's
+  # services.gnome-keyring module (see home/nixos/system/gnome-keyring.nix)
+  # This replaces the custom systemd.user.services.gnome-keyring-daemon configuration
   systemd = {
     settings.Manager.DefaultLimitNOFILE = "524288";
     user.services = {
-      gnome-keyring-daemon = {
-        description = "GNOME Keyring daemon";
-        enable = true;
-        serviceConfig = {
-          Type = "dbus";
-          BusName = "org.gnome.keyring";
-          ExecStart = "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --foreground --components=secrets,ssh";
-          Restart = "on-failure";
-          Environment = [
-            "XDG_RUNTIME_DIR=/run/user/%i"
-          ];
-        };
-        wantedBy = ["default.target"];
-      };
+      # Auto-unlock service for login keyring in auto-login scenarios
+      # This complements Home Manager's gnome-keyring service which handles the daemon
       unlock-login-keyring = {
         description = "Unlock GNOME login keyring for auto-login sessions";
         after = ["gnome-keyring-daemon.service"];
