@@ -65,60 +65,17 @@ in {
     #   inputs = inputs;
     # };
   });
-  mkDevShells = let
-    hostsBySystem = builtins.groupBy (hostConfig: hostConfig.system) (builtins.attrValues hosts);
-  in
-    builtins.mapAttrs (
-      system: _hostGroup: let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [inputs.pog.overlays.${system}.default];
-        };
-        shellsConfig = import ../shells {
-          inherit pkgs;
-          inherit (pkgs) lib;
-          inherit system;
-        };
-        preCommitCheck = inputs.self.checks.${system}.pre-commit-check or {};
-      in
-        shellsConfig.devShells
-        // {
-          default = pkgs.mkShell {
-            shellHook = preCommitCheck.shellHook or "";
-            buildInputs =
-              (preCommitCheck.enabledPackages or [])
-              ++ (with pkgs; [
-                jq
-                yq
-                git
-                gh
-                direnv
-                nix-direnv
-                nix-update # Tool for updating package versions/hashes
-              ]);
-          };
-        }
-    )
-    hostsBySystem;
   mkHomeConfigurations =
     builtins.mapAttrs (
       _name: hostConfig: let
+        functionsLib = import ./functions.nix {inherit (nixpkgs) lib;};
         pkgs = import nixpkgs {
           inherit (hostConfig) system;
-          config = {
-            allowUnfree = true;
-            allowUnfreePredicate = _: true;
-            allowBroken = true; # Allow broken packages (e.g., CUDA packages)
-            allowUnsupportedSystem = false;
-            # Insecure packages removed - test if dev shells still work
-            # If something breaks, add back: permittedInsecurePackages = ["mbedtls-2.28.10"];
+          config = functionsLib.mkPkgsConfig;
+          overlays = functionsLib.mkOverlays {
+            inherit inputs;
+            system = hostConfig.system;
           };
-          overlays = nixpkgs.lib.attrValues (
-            import ../overlays {
-              inherit inputs;
-              inherit (hostConfig) system;
-            }
-          );
         };
       in
         home-manager.lib.homeManagerConfiguration {
@@ -143,34 +100,4 @@ in {
         }
     )
     hosts;
-
-  # Expose runnable apps via `nix run .#<app-name>` per system
-  mkApps = let
-    hostsBySystem = builtins.groupBy (hostConfig: hostConfig.system) (builtins.attrValues hosts);
-  in
-    builtins.mapAttrs (
-      system: _hostGroup: let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [inputs.pog.overlays.${system}.default];
-        };
-        # Helper to create pog app
-        mkPogApp = script-name: {
-          type = "app";
-          program = "${
-            import ../pkgs/pog-scripts/${script-name}.nix {
-              inherit pkgs;
-              inherit (pkgs) pog;
-              config-root = toString ../.;
-            }
-          }/bin/${script-name}";
-        };
-      in {
-        # POG-powered CLI tools
-        new-module = mkPogApp "new-module";
-        setup-cachix = mkPogApp "setup-cachix";
-        update-all = mkPogApp "update-all";
-      }
-    )
-    hostsBySystem;
 }

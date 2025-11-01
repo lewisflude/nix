@@ -12,20 +12,43 @@
 
   getVersionedPackage = pkgs: packageName: lib.getAttr packageName pkgs;
 
+  # Shared nixpkgs configuration
+  # Use this instead of duplicating config blocks
+  mkPkgsConfig = {
+    allowUnfree = true;
+    allowUnfreePredicate = _: true;
+    allowBroken = true; # Allow broken packages (e.g., CUDA packages)
+    allowUnsupportedSystem = false;
+  };
+
+  # Helper to get overlays list for a system
+  # Consolidates overlay import pattern
+  mkOverlays = {
+    inputs,
+    system,
+  }:
+    lib.attrValues (
+      import ../overlays {
+        inherit inputs;
+        inherit system;
+      }
+    );
+
   # Helper to create a system-bound version of all platform functions
   # Usage: platformLib = (import ./lib/functions.nix {inherit lib;}).withSystem system;
   withSystem = system: {
-    inherit system versions getVersionedPackage getVirtualisationFlag;
+    inherit
+      system
+      versions
+      getVersionedPackage
+      getVirtualisationFlag
+      ;
 
     # System detection
     isLinux = isLinux system;
     isDarwin = isDarwin system;
     isAarch64 = isAarch64 system;
     isX86_64 = isX86_64 system;
-    isLinuxX86_64 = isLinuxX86_64 system;
-    isLinuxAarch64 = isLinuxAarch64 system;
-    isDarwinX86_64 = isDarwinX86_64 system;
-    isDarwinAarch64 = isDarwinAarch64 system;
 
     # Platform selectors (already bound to system)
     ifLinux = ifLinux system;
@@ -57,12 +80,6 @@
   isDarwin = system: lib.hasInfix "darwin" system;
   isAarch64 = system: lib.hasInfix "aarch64" system;
   isX86_64 = system: lib.hasInfix "x86_64" system;
-
-  # Composite system checks
-  isLinuxX86_64 = system: isLinux system && isX86_64 system;
-  isLinuxAarch64 = system: isLinux system && isAarch64 system;
-  isDarwinX86_64 = system: isDarwin system && isX86_64 system;
-  isDarwinAarch64 = system: isDarwin system && isAarch64 system;
 
   # Platform-specific value selectors
   ifLinux = system: value: lib.optionalAttrs (isLinux system) value;

@@ -10,8 +10,8 @@
 
     # Core settings managed by Nix
     # Note: Using lib.mkForce to override defaults
+    # Theme is handled by catppuccin module (catppuccin.enable = true)
     settings = lib.mkForce {
-      theme = "default";
       default_mode = "locked";
       mouse_mode = true;
       scroll_buffer_size = 100000;

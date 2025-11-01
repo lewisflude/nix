@@ -16,6 +16,7 @@
       inherit pkgs lib system;
     };
     api-backend = import ./projects/api-backend.nix {inherit pkgs lib system;};
+    development = import ./projects/development.nix {inherit pkgs lib system;};
     shell-selector = import ./utils/shell-selector.nix {inherit pkgs;};
     node = pkgs.mkShell {
       buildInputs = with pkgs;

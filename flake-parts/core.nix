@@ -10,7 +10,6 @@
 
   functionsLib = import ../lib/functions.nix {inherit lib;};
   validationLib = import ../lib/validation.nix {inherit lib;};
-  cacheLib = import ../lib/cache.nix {inherit lib;};
 
   systemBuilders = import ../lib/system-builders.nix {
     inherit inputs validationLib;
@@ -48,17 +47,8 @@ in {
     # Override pkgs via _module.args to apply overlays
     pkgsWithOverlays = import inputs.nixpkgs {
       inherit system;
-      overlays = lib.attrValues (
-        import ../overlays {
-          inherit inputs;
-          inherit system;
-        }
-      );
-      config = {
-        allowUnfree = true;
-        allowUnfreePredicate = _: true;
-        allowBroken = true; # Allow broken packages (e.g., CUDA packages)
-      };
+      overlays = functionsLib.mkOverlays {inherit inputs system;};
+      config = functionsLib.mkPkgsConfig;
     };
 
     # Import shells configuration
@@ -75,58 +65,7 @@ in {
     formatter = pkgsWithOverlays.alejandra;
 
     # Per-system checks
-    checks = {
-      pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
-        src = ./.;
-        hooks = {
-          # Nix formatting and linting
-          alejandra.enable = true;
-          deadnix.enable = true;
-          statix.enable = true;
-
-          # Conventional commits enforcement
-          commitizen.enable = true;
-
-          # General code quality
-          trailing-whitespace = {
-            enable = true;
-            entry = "${pkgsWithOverlays.python3Packages.pre-commit-hooks}/bin/trailing-whitespace-fixer";
-            types = ["text"];
-          };
-          end-of-file-fixer = {
-            enable = true;
-            entry = "${pkgsWithOverlays.python3Packages.pre-commit-hooks}/bin/end-of-file-fixer";
-            types = ["text"];
-          };
-          mixed-line-ending = {
-            enable = true;
-            entry = "${pkgsWithOverlays.python3Packages.pre-commit-hooks}/bin/mixed-line-ending";
-            types = ["text"];
-          };
-
-          # YAML validation
-          check-yaml = {
-            enable = true;
-            entry = "${pkgsWithOverlays.python3Packages.pre-commit-hooks}/bin/check-yaml";
-            types = ["yaml"];
-            excludes = ["secrets/.*\\.yaml$"];
-          };
-
-          # Markdown formatting
-          markdownlint = {
-            enable = true;
-            entry = "${pkgsWithOverlays.markdownlint-cli}/bin/markdownlint --fix";
-            types = ["markdown"];
-          };
-        };
-      };
-
-      # nixosTests-mcp = import ../tests/integration/mcp.nix {
-      #   inherit pkgs;
-      #   lib = lib;
-      #   inputs = inputs;
-      # };
-    };
+    checks = outputBuilders.mkChecks.${system} or {};
 
     # Per-system dev shells
     devShells =
@@ -201,6 +140,6 @@ in {
 
     homeConfigurations = outputBuilders.mkHomeConfigurations;
 
-    lib = functionsLib // validationLib // cacheLib;
+    lib = functionsLib // validationLib;
   };
 }

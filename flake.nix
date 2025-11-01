@@ -197,6 +197,11 @@
       url = "github:oddlama/nix-topology";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # === VPN Isolation ===
+    vpn-confinement = {
+      url = "github:Maroka-chan/VPN-Confinement";
+    };
   };
 
   outputs = inputs @ {self, ...}:

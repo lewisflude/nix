@@ -76,6 +76,31 @@
           '';
           mode = "0755";
         };
+        "nix-optimization/cleanup-duplicates.sh" = {
+          text = ''
+            set -euo pipefail
+            # Lightweight duplicate cleanup - only runs first Monday of month
+            # Full cleanup script available at: ~/.config/nix/scripts/cleanup-duplicates.sh
+
+            CURRENT_DAY=$(date +%d)
+            # Only run on first Monday (days 1-7)
+            if [ "$CURRENT_DAY" -gt 7 ]; then
+              echo "⏭️ Skipping duplicate cleanup (run on first Monday of month)"
+              exit 0
+            fi
+
+            echo "🧹 Running monthly duplicate cleanup..."
+            # Run non-interactive version (skip confirmations)
+            CLEANUP_SCRIPT="/home/lewis/.config/nix/scripts/cleanup-duplicates.sh"
+            if [ -f "$CLEANUP_SCRIPT" ]; then
+              # Run in non-interactive mode (stdin not a terminal)
+              NON_INTERACTIVE=1 bash "$CLEANUP_SCRIPT" </dev/null || true
+            else
+              echo "⚠️ Cleanup script not found at $CLEANUP_SCRIPT"
+            fi
+          '';
+          mode = "0755";
+        };
         "nix-optimization/quick-clean.sh" = {
           text = ''
             set -euo pipefail
@@ -122,7 +147,7 @@
     nix.gc = {
       automatic = true;
       dates = "weekly";
-      options = "--delete-older-than 7d";
+      options = "--delete-older-than 3d"; # More aggressive: keep only 3 days instead of 7
     };
 
     # NixOS-specific systemd services
@@ -138,6 +163,19 @@
         serviceConfig = {
           Type = "oneshot";
           ExecStart = "/etc/nix-optimization/optimize-store.sh";
+        };
+      };
+      timers.nix-duplicate-cleanup = {
+        wantedBy = ["timers.target"];
+        timerConfig = {
+          OnCalendar = "Mon 04:00:00"; # Run after optimization
+          Persistent = true;
+        };
+      };
+      services.nix-duplicate-cleanup = {
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "/etc/nix-optimization/cleanup-duplicates.sh";
         };
       };
     };

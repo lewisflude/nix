@@ -34,4 +34,7 @@
     enable = true;
     wheelNeedsPassword = false;
   };
+
+  # Limit system generations to save space
+  boot.loader.systemd-boot.configurationLimit = 5;
 }

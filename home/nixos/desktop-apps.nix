@@ -10,7 +10,7 @@ in {
       displaycal
       mpv
       swayimg
-      libreoffice
+      # libreoffice - Installed via productivity feature (home/common/features/productivity/default.nix)
       # evince # TEMPORARILY DISABLED: likely uses webkitgtk which was removed from nixpkgs
       # kicad # TEMPORARILY DISABLED: testing for webkitgtk dependency
       gimp

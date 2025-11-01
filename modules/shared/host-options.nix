@@ -215,6 +215,60 @@ with lib; {
             default = true;
             description = "Enable Prowlarr indexer manager";
           };
+
+          useVpnProxy = mkOption {
+            type = types.bool;
+            default = false;
+            description = ''
+              Use the qBittorrent VPN proxy (HTTP or SOCKS5). Requires qBittorrent VPN to be enabled.
+              When enabled, automatically uses the VPN proxy at 127.0.0.1:8118 (HTTP) or 127.0.0.1:1080 (SOCKS5).
+              This routes Prowlarr traffic through the same VPN as qBittorrent.
+            '';
+            example = true;
+          };
+
+          proxyType = mkOption {
+            type = types.enum [
+              "http"
+              "socks5"
+            ];
+            default = "http";
+            description = "Proxy type: 'http' for HTTP proxy (Privoxy) or 'socks5' for SOCKS5 proxy (Dante).";
+            example = "socks5";
+          };
+
+          proxyHost = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "Proxy hostname or IP address. Ignored if useVpnProxy is true.";
+            example = "127.0.0.1";
+          };
+
+          proxyPort = mkOption {
+            type = types.nullOr types.port;
+            default = null;
+            description = "Proxy port. Ignored if useVpnProxy is true.";
+            example = 8118;
+          };
+
+          proxyUsername = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "Proxy username (if authentication is required).";
+          };
+
+          proxyPassword = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "Proxy password (if authentication is required).";
+          };
+
+          proxyPasswordSecret = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "Name of the sops secret containing the proxy password. Used if proxyPassword is not set.";
+            example = "prowlarr/proxy/password";
+          };
         };
 
         radarr = {
@@ -289,6 +343,87 @@ with lib; {
               tv = "/mnt/storage/torrents/tv";
             };
           };
+          torrentingPort = mkOption {
+            type = types.port;
+            default = 6881;
+            description = "Port used for incoming torrent connections. Should match VPN provider's port forwarding rules when using VPN.";
+          };
+
+          randomizePort = mkOption {
+            type = types.bool;
+            default = false;
+            description = "Whether to randomize the torrent port on each startup. MUST be disabled when using VPN namespace (iptables rules require fixed port).";
+          };
+
+          downloadPath = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "Default download/save path for torrents.";
+            example = "/mnt/storage/torrents";
+          };
+
+          globalUploadLimit = mkOption {
+            type = types.nullOr types.int;
+            default = null;
+            description = "Global upload speed limit in KiB/s (null = unlimited). Recommended to set for VPN connections to avoid ISP throttling.";
+            example = 800;
+          };
+
+          globalDownloadLimit = mkOption {
+            type = types.nullOr types.int;
+            default = null;
+            description = "Global download speed limit in KiB/s (null = unlimited). Recommended for VPN connections.";
+            example = 3000;
+          };
+
+          maxActiveTorrents = mkOption {
+            type = types.nullOr types.int;
+            default = null;
+            description = "Maximum number of simultaneously active torrents (null = unlimited).";
+            example = 10;
+          };
+
+          useIncompleteFolder = mkOption {
+            type = types.bool;
+            default = false;
+            description = "Whether to use a separate folder for incomplete downloads.";
+          };
+
+          incompletePath = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "Path for incomplete downloads (only used if useIncompleteFolder is true).";
+            example = "/mnt/cache/torrents-incomplete";
+          };
+
+          preallocateDiskSpace = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Pre-allocate disk space for added torrents to limit fragmentation.";
+          };
+
+          deleteTorrentFile = mkOption {
+            type = types.bool;
+            default = false;
+            description = "Delete the .torrent file after it has been added to qBittorrent.";
+          };
+
+          anonymousMode = mkOption {
+            type = types.bool;
+            default = false;
+            description = "When enabled, hides qBittorrent fingerprint. NOT recommended with VPN as it reduces peer discovery.";
+          };
+
+          encryptionPolicy = mkOption {
+            type = types.enum [
+              "Disabled"
+              "Enabled"
+              "Forced"
+            ];
+            default = "Enabled";
+            description = "BitTorrent encryption policy. 'Enabled' allows unencrypted, 'Forced' requires encryption.";
+          };
+
           vpn = mkOption {
             type = types.attrs;
             default = {};

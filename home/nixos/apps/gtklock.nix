@@ -3,7 +3,7 @@
     gtklock
   ];
   xdg.configFile."gtklock/config".text = ''
-    gtk-theme = "Adwaita-dark"
+    gtk-theme = "Catppuccin-GTK-Dark"
     time-format = "%H:%M:%S"
     date-format = "%A, %B %d"
     idle-hide = true
