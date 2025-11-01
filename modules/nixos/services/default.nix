@@ -13,6 +13,6 @@
     ./music-assistant.nix
     ./samba.nix
     ./ssh.nix
-    # ./cockpit.nix # TEMPORARILY DISABLED: cockpit depends on webkitgtk which was removed
+    ./cockpit.nix
   ];
 }

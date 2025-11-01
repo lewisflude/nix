@@ -15,5 +15,6 @@
     ./jellyseerr.nix
     ./flaresolverr.nix
     ./unpackerr.nix
+    ./navidrome.nix
   ];
 }
