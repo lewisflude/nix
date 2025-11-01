@@ -470,6 +470,14 @@ with lib; {
             description = "Enable Unpackerr archive extractor";
           };
         };
+
+        navidrome = {
+          enable = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Enable Navidrome music server";
+          };
+        };
       };
 
       # Native AI tools services

@@ -23,7 +23,6 @@
     ../apps/zed-editor.nix
     ../apps/lazygit.nix
     ../apps/atuin.nix
-    ../apps/micro.nix
     ../apps/zellij.nix
     ../apps/core-tooling.nix
 

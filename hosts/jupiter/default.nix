@@ -68,7 +68,7 @@ in {
           realtime = true;
           production = true;
           audioNix = {
-            enable = false; # TODO: Temporarily disabled due to webkitgtk dependency issue
+            enable = false; # Disabled - webkitgtk dependency issue (see docs for details)
             bitwig = true;
             plugins = true;
           };
@@ -112,7 +112,7 @@ in {
               peers = [
                 {
                   publicKey = "YgGdHIXeCQgBc4nXKJ4vct8S0fPqBpTgk4I8gh3uMEg=";
-                  # TODO: Update to Netherlands ProtonVPN server
+                  # Note: Update endpoint to Netherlands ProtonVPN server if needed
                   # Get from: ProtonVPN Dashboard → WireGuard → Generate config for Netherlands
                   # Format: nl-*.protonvpn.net:51820 or specific IP:51820
                   endpoint = "185.107.44.110:51820";
