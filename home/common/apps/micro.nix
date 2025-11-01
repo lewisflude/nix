@@ -1,4 +1,4 @@
-{ _ }: {
+{...}: {
   programs.micro = {
     enable = true;
     settings = {
