@@ -26,6 +26,7 @@ in {
       else (virtualisation.enablePodman or virtualisation.podman or false);
   in
     recursiveUpdate virtualisation {
-      inherit enable enableDocker enablePodman;
+      enable = globalEnable;
+      inherit enableDocker enablePodman;
     };
 }
