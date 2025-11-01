@@ -1,4 +1,4 @@
-{lib, ...}: {
+{ _ }: {
   programs.micro = {
     enable = true;
     settings = {
@@ -10,7 +10,7 @@
       ignorecase = true;
       smartcase = true;
       syntax = true;
-      colorscheme = lib.mkForce "default";
+      # colorscheme is handled by catppuccin module (catppuccin.enable = true)
     };
   };
 }

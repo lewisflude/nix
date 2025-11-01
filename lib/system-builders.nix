@@ -23,55 +23,33 @@
   # Import virtualisation library
   virtualisationLib = import ./virtualisation.nix {inherit lib;};
 
+  # Import functions library for shared config
+  functionsLib = import ./functions.nix {inherit lib;};
+
   # Common modules shared between Darwin and NixOS systems
   commonModules = [
     ../modules/shared
   ];
 
   # Helper function to create the validation module
-  # This eliminates all duplication
-  mkValidationModule = importPatterns: {
-    config,
-    lib,
-    ...
-  }: let
-    # Use the validationLib passed into this file
+  # Creates assertions for host config and secrets validation
+  mkValidationModule = {config, ...}: let
     validation = validationLib;
-    checks = [
-      # Host config must include core fields
-      (validation.validateHostConfig (config.host or {}))
-
-      # If SOPS is enabled, secrets should be defined
-      (validation.validateSecretsConfig config)
-
-      # Import patterns for known path-based imports in this builder
-      (validation.mkCheck {
-        name = "Import Patterns";
-        assertion = validation.validateImportPatterns importPatterns;
-        message = "Imports follow standard patterns (directory imports flagged as warnings).";
-        severity = "warn";
-      })
-    ];
-    report = validation.mkValidationReport {inherit config checks;};
-    failedMessages = lib.concatStringsSep " | " (map (c: "${c.name}: ${c.message}") report.failed);
+    hostCheck = validation.validateHostConfig (config.host or {});
+    secretsCheck = validation.validateSecretsConfig config;
   in {
-    assertions =
-      # One assertion per check so failures surface clearly
-      (map (c: {
-          assertion = c.status != "fail";
-          message = "[Validation] ${c.name}: ${c.message}";
-        })
-        report.allChecks)
-      # Aggregated assertion for a concise summary in CI logs
-      ++ [
-        {
-          assertion = report.success;
-          message =
-            if report.failed == []
-            then "[Validation] All checks passed"
-            else "[Validation] Failed checks: ${failedMessages}";
-        }
-      ];
+    assertions = [
+      # Host config validation
+      {
+        assertion = hostCheck.status != "fail";
+        message = "[Validation] ${hostCheck.name}: ${hostCheck.message}";
+      }
+      # Secrets validation (warning only)
+      {
+        assertion = secretsCheck.status != "fail";
+        message = "[Validation] ${secretsCheck.name}: ${secretsCheck.message}";
+      }
+    ];
   };
 
   # Common Home Manager configuration
@@ -142,19 +120,11 @@ in {
           # Apply overlays from overlays/ directory
           {
             nixpkgs = {
-              overlays = nixpkgs.lib.attrValues (
-                import ../overlays {
-                  inherit inputs;
-                  inherit (hostConfig) system;
-                }
-              );
-              config = {
-                allowUnfree = true;
-                allowUnfreePredicate = _: true;
-                allowBroken = true; # Allow broken packages (e.g., CUDA packages)
-                # Insecure packages removed - test if builds still work
-                # If something breaks, add back: permittedInsecurePackages = ["mbedtls-2.28.10"];
+              overlays = functionsLib.mkOverlays {
+                inherit inputs;
+                system = hostConfig.system;
               };
+              config = functionsLib.mkPkgsConfig;
             };
           }
 
@@ -184,10 +154,7 @@ in {
           )
 
           # Validation assertions - now just a call to our helper
-          (mkValidationModule [
-            "../hosts/${hostName}/configuration.nix"
-            "../modules/darwin/default.nix"
-          ])
+          mkValidationModule
         ]
         ++ commonModules;
     };
@@ -220,19 +187,11 @@ in {
           # Apply overlays from overlays/ directory
           {
             nixpkgs = {
-              overlays = nixpkgs.lib.attrValues (
-                import ../overlays {
-                  inherit inputs;
-                  inherit (hostConfig) system;
-                }
-              );
-              config = {
-                allowUnfree = true;
-                allowUnfreePredicate = _: true;
-                allowBroken = true; # Allow broken packages (e.g., CUDA packages)
-                # Insecure packages removed - test if builds still work
-                # If something breaks, add back: permittedInsecurePackages = ["mbedtls-2.28.10"];
+              overlays = functionsLib.mkOverlays {
+                inherit inputs;
+                system = hostConfig.system;
               };
+              config = functionsLib.mkPkgsConfig;
             };
           }
 
@@ -245,6 +204,7 @@ in {
           niri.nixosModules.niri
           chaotic.nixosModules.default
           inputs.nix-topology.nixosModules.default
+          inputs.vpn-confinement.nixosModules.default
         ]
         ++ lib.optional (
           hostConfig.system == "x86_64-linux" || hostConfig.system == "aarch64-linux"
@@ -271,10 +231,7 @@ in {
           )
 
           # Validation assertions - now just a call to our helper
-          (mkValidationModule [
-            "../hosts/${hostName}/configuration.nix"
-            "../modules/nixos/default.nix"
-          ])
+          mkValidationModule
         ]
         ++ commonModules;
     };

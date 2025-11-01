@@ -34,13 +34,8 @@ in {
       inputs.flakehub.packages.${system}.default
 
       # Development helpers
-      rustup
-      pkg-config
-      openssl
-      libsecret
-      libiconv
-      cmake
-      gnumake
+      # Note: rustup and build tools are now in devShells.
+      # Use: nix develop .#devShells.development or nix develop .#devShells.rust
 
       # AI / workflow helpers
       claude-code

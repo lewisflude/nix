@@ -107,11 +107,14 @@ in {
             vpn = {
               enable = true;
               addresses = ["10.2.0.2/32"];
-              dns = ["10.2.0.1"];
+              dns = ["10.2.0.1"]; # ProtonVPN DNS
               privateKeySecret = "qbittorrent/vpn/privateKey";
               peers = [
                 {
                   publicKey = "YgGdHIXeCQgBc4nXKJ4vct8S0fPqBpTgk4I8gh3uMEg=";
+                  # TODO: Update to Netherlands ProtonVPN server
+                  # Get from: ProtonVPN Dashboard → WireGuard → Generate config for Netherlands
+                  # Format: nl-*.protonvpn.net:51820 or specific IP:51820
                   endpoint = "185.107.44.110:51820";
                   allowedIPs = [
                     "0.0.0.0/0"
@@ -121,11 +124,17 @@ in {
                 }
               ];
             };
+            randomizePort = false; # MUST be disabled for VPN namespace - iptables rules require fixed port
           };
 
           # All services enabled by default except unpackerr
           # To disable specific services, set enable = false
           unpackerr.enable = false; # Disabled - config format issues
+
+          prowlarr = {
+            useVpnProxy = true;
+            proxyType = "socks5"; # Use SOCKS5 proxy (Dante) - alternative: "http" for Privoxy
+          };
         };
 
       # Native AI tools services (Ollama, Open WebUI)

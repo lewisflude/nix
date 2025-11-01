@@ -30,7 +30,8 @@ in {
     packages = with pkgs; [
       magnetic-catppuccin-gtk
       nwg-look
-      iosevka
+      # Use binary font instead of building from source to save space
+      iosevka-bin
       nerd-fonts.iosevka
       gtk4
     ];
@@ -50,7 +51,7 @@ in {
     enable = true;
     font = {
       name = "Iosevka";
-      package = pkgs.iosevka;
+      package = pkgs.iosevka-bin; # Use binary font instead of building from source
       size = 12;
     };
     theme = {

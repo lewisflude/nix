@@ -21,15 +21,8 @@ in {
       libnotify
       tree
     ]
-    # Development libraries and tools
-    ++ [
-      pkg-config
-      openssl
-      libsecret
-      libiconv
-      cmake
-      gnumake
-    ]
+    # Note: Development tools (cmake, gnumake, pkg-config, openssl, etc.)
+    # are now available in devShells. Use: nix develop .#devShells.development
     # Database tools
     ++ [
       pgcli

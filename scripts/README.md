@@ -131,11 +131,43 @@ nix-collect-garbage --delete-older-than 30d
 # Store optimization (deduplication)
 nix store optimise
 
+# Clean up duplicate package versions
+sudo bash scripts/cleanup-duplicates.sh
+
 # Or use aliases
 nix-gc          # Delete all old
 nix-gc-old      # Delete > 30 days
 nix-optimize    # Deduplicate
 ```
+
+### Cleanup Duplicate Packages
+
+Remove old/unused package versions to free up space:
+
+```bash
+sudo bash scripts/cleanup-duplicates.sh
+```
+
+This script will:
+
+- Run garbage collection to remove dead paths
+- Identify and remove old versions of packages
+- Keep only the latest versions currently in use
+- Show estimated space savings before proceeding
+
+**What gets cleaned:**
+
+- Old LibreOffice versions (keeps latest)
+- Old Ollama versions (keeps latest)
+- Old NVIDIA drivers (keeps current kernel version)
+- Old LLVM/Clang versions (keeps latest)
+- Old OpenJDK versions (keeps latest)
+- Old Iosevka fonts (keeps latest)
+- Old Zoom versions (keeps latest)
+- Debug packages (cmake debug)
+- Old Rust toolchains (if not referenced)
+
+**Expected savings:** ~7-8GB after cleanup
 
 ### Module Scaffolding
 

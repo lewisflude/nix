@@ -53,4 +53,10 @@ in {
     consoleLogLevel = 0;
     initrd.verbose = false;
   };
+
+  # Catppuccin system-level theming (requires catppuccin.nixosModules.catppuccin)
+  # Note: These are optional and can be enabled if desired
+  # catppuccin.grub.enable = true;  # Uncomment to enable GRUB bootloader theme
+  # catppuccin.tty.enable = true;   # Uncomment to enable TTY console colors
+  # catppuccin.plymouth.enable = lib.mkIf config.boot.plymouth.enable true;  # Uncomment if Plymouth is enabled
 }
