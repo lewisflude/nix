@@ -17,7 +17,6 @@
     ./atuin.nix
     ./lazygit.nix
     ./lazydocker.nix
-    ./micro.nix
     ./eza.nix
     ./jq.nix
     ./zellij.nix

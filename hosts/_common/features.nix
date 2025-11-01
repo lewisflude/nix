@@ -30,17 +30,42 @@
     dataPath = "/mnt/storage";
     timezone = "Europe/London";
     # Individual service toggles - all default to true when mediaManagement.enable = true
-    prowlarr = {enable = true;};
-    radarr = {enable = true;};
-    sonarr = {enable = true;};
-    lidarr = {enable = true;};
-    readarr = {enable = true;};
-    qbittorrent = {enable = true;};
-    sabnzbd = {enable = true;};
-    jellyfin = {enable = true;};
-    jellyseerr = {enable = true;};
-    flaresolverr = {enable = true;};
-    unpackerr = {enable = true;};
+    prowlarr = {
+      enable = true;
+    };
+    radarr = {
+      enable = true;
+    };
+    sonarr = {
+      enable = true;
+    };
+    lidarr = {
+      enable = true;
+    };
+    readarr = {
+      enable = true;
+    };
+    qbittorrent = {
+      enable = true;
+    };
+    sabnzbd = {
+      enable = true;
+    };
+    jellyfin = {
+      enable = true;
+    };
+    jellyseerr = {
+      enable = true;
+    };
+    flaresolverr = {
+      enable = true;
+    };
+    unpackerr = {
+      enable = true;
+    };
+    navidrome = {
+      enable = true;
+    };
   };
 
   # Native AI tools services (Ollama, Open WebUI)
@@ -60,12 +85,24 @@
   # Supplemental container services (no native modules available)
   containersSupplemental = {
     enable = false;
-    homarr = {enable = true;};
-    wizarr = {enable = true;};
-    janitorr = {enable = true;};
-    doplarr = {enable = false;};
-    comfyui = {enable = false;};
-    calcom = {enable = false;};
+    homarr = {
+      enable = true;
+    };
+    wizarr = {
+      enable = true;
+    };
+    janitorr = {
+      enable = true;
+    };
+    doplarr = {
+      enable = false;
+    };
+    comfyui = {
+      enable = false;
+    };
+    calcom = {
+      enable = false;
+    };
   };
 
   desktop = {
