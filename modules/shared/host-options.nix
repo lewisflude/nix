@@ -269,6 +269,29 @@ with lib; {
               default = null;
               description = "WebUI bind address. Use '*' or '0.0.0.0' to bind to all interfaces. Defaults to '*' when VPN is enabled.";
             };
+
+            username = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "WebUI username.";
+            };
+
+            password = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "WebUI password (PBKDF2 hash in @ByteArray format).";
+            };
+          };
+
+          categories = mkOption {
+            type = types.attrsOf types.str;
+            default = {};
+            description = "Category path mappings. Maps category names to their save paths. Example: { movies = \"/mnt/storage/movies\"; tv = \"/mnt/storage/tv\"; }";
+            example = {
+              movies = "/mnt/storage/movies";
+              tv = "/mnt/storage/tv";
+              music = "/mnt/storage/music";
+            };
           };
 
           vpn = {
