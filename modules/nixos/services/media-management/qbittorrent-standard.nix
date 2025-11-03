@@ -254,6 +254,9 @@ in {
             chown -R qbittorrent:qbittorrent /var/lib/qBittorrent || true
           fi
         '';
+
+        # Add media group as supplementary group so qbittorrent can write to media-owned directories
+        serviceConfig.SupplementaryGroups = [cfg.group];
       }
       // optionalAttrs vpnEnabled {
         after = ["network.target"] ++ ["${vpnNamespace}.service"];
