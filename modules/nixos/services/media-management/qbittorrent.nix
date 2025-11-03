@@ -80,6 +80,8 @@ with lib; let
       "PortForwardingEnabled" = cfg.qbittorrent.network.portForwardingEnabled;
     };
     Preferences = filterAttrs (_: v: v != null) {
+      # WebUI must be explicitly enabled for the WebUI server to start
+      "WebUI\\Enabled" = true;
       "WebUI\\LocalHostAuth" = cfg.qbittorrent.webUI.localHostAuth;
       "WebUI\\AuthSubnetWhitelist" = cfg.qbittorrent.webUI.authSubnetWhitelist;
       "WebUI\\AuthSubnetWhitelistEnabled" = cfg.qbittorrent.webUI.authSubnetWhitelistEnabled;
