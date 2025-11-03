@@ -116,11 +116,12 @@ in {
     users.users.qbittorrent.extraGroups = [cfg.group];
 
     # Ensure profile directory and subdirectories exist with correct permissions
+    # Use media group so qbittorrent can write when running with Group=media
     systemd.tmpfiles.rules = [
-      "d /var/lib/qBittorrent 0755 qbittorrent qbittorrent -"
-      "d /var/lib/qBittorrent/config 0755 qbittorrent qbittorrent -"
-      "d /var/lib/qBittorrent/data 0755 qbittorrent qbittorrent -"
-      "d /var/lib/qBittorrent/logs 0755 qbittorrent qbittorrent -"
+      "d /var/lib/qBittorrent 0755 qbittorrent ${cfg.group} -"
+      "d /var/lib/qBittorrent/config 0755 qbittorrent ${cfg.group} -"
+      "d /var/lib/qBittorrent/data 0755 qbittorrent ${cfg.group} -"
+      "d /var/lib/qBittorrent/logs 0755 qbittorrent ${cfg.group} -"
     ];
 
     # Enable standard NixOS qBittorrent service
@@ -250,13 +251,16 @@ in {
         # Ensure directories have correct ownership before starting
         preStart = ''
           # Fix ownership if directories exist with wrong permissions
+          # Use media group so qbittorrent can write when running with Group=media
           if [ -d /var/lib/qBittorrent ]; then
-            chown -R qbittorrent:qbittorrent /var/lib/qBittorrent || true
+            chown -R qbittorrent:${cfg.group} /var/lib/qBittorrent || true
           fi
         '';
 
-        # Add media group as supplementary group so qbittorrent can write to media-owned directories
-        serviceConfig.SupplementaryGroups = [cfg.group];
+        # Use media as primary group so qbittorrent can write to media-owned directories
+        # This is necessary because mergerfs with default_permissions checks primary group
+        # Use mkOverride to ensure this takes precedence over the standard module's Group setting
+        serviceConfig.Group = mkOverride 1000 cfg.group;
       }
       // optionalAttrs vpnEnabled {
         after = ["network.target"] ++ ["${vpnNamespace}.service"];
