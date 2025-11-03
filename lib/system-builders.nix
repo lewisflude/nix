@@ -122,7 +122,7 @@ in {
             nixpkgs = {
               overlays = functionsLib.mkOverlays {
                 inherit inputs;
-                system = hostConfig.system;
+                inherit (hostConfig) system;
               };
               config = functionsLib.mkPkgsConfig;
             };
@@ -189,7 +189,7 @@ in {
             nixpkgs = {
               overlays = functionsLib.mkOverlays {
                 inherit inputs;
-                system = hostConfig.system;
+                inherit (hostConfig) system;
               };
               config = functionsLib.mkPkgsConfig;
             };
@@ -204,7 +204,6 @@ in {
           niri.nixosModules.niri
           chaotic.nixosModules.default
           inputs.nix-topology.nixosModules.default
-          inputs.vpn-confinement.nixosModules.default
         ]
         ++ lib.optional (
           hostConfig.system == "x86_64-linux" || hostConfig.system == "aarch64-linux"

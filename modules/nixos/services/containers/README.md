@@ -49,7 +49,7 @@ The media stack includes:
 
 - **Indexers**: Prowlarr, FlareSolverr
 - **Download Managers**: Radarr, Sonarr, Lidarr, Whisparr, Readarr
-- **Downloaders**: qBittorrent, SABnzbd
+- **Downloaders**: SABnzbd
 - **Media Server**: Jellyfin
 - **Request Management**: Jellyseerr
 - **Tools**: Unpackerr, Homarr, Wizarr, Janitorr, Recommendarr
@@ -65,7 +65,6 @@ The module renders `application.yml` via `sops-nix` and expects the `janitorr-*`
 - Lidarr: 8686
 - Whisparr: 6969
 - Readarr: 8787
-- qBittorrent: 8080
 - SABnzbd: 8082
 - Jellyfin: 8096
 - Jellyseerr: 5055

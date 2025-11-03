@@ -22,26 +22,26 @@ WHAT TO DO WITH THESE VALUES
 
 1. ADD TO GITHUB SECRETS:
    Go to: https://github.com/lewisflude/nix/settings/secrets/actions
-   
+
    Secret 1:
    - Name: CACHIX_CACHE_NAME
    - Value: (your cache name from above)
-   
+
    Secret 2:
    - Name: CACHIX_AUTH_TOKEN
    - Value: (your auth token from above)
 
 2. UPDATE flake.nix:
-   
+
    Find line ~29-30 and replace:
    # "https://your-cache.cachix.org"
-   
+
    With:
    "https://YOUR_CACHE_NAME.cachix.org"
-   
+
    Find line ~47-48 and replace:
    # "your-cache.cachix.org-1:YourPublicKey"
-   
+
    With:
    "YOUR_PUBLIC_KEY"
 
@@ -59,7 +59,7 @@ VERIFICATION
 ====================================
 
 After setup, test with:
-  
+
   nh os switch  # or: darwin-rebuild switch --flake .
 
 You should see:

@@ -5,6 +5,7 @@ This guide will help you set up both Cachix (binary cache) and FlakeHub (flake p
 ## 🗄️ Part 1: Cachix Setup
 
 ### What You'll Gain
+
 - **Faster local rebuilds**: Download pre-built packages instead of compiling (10-30 seconds vs 10-20 minutes)
 - **Faster CI**: GitHub Actions will use cached builds
 - **Multi-machine sync**: Share builds between jupiter and MacBook
@@ -43,12 +44,14 @@ Public Key: lewisflude-nix.cachix.org-1:XXXX... (for verifying downloads)
 3. Add two secrets:
 
 **Secret 1:**
+
 ```
 Name: CACHIX_CACHE_NAME
 Secret: lewisflude-nix
 ```
 
 **Secret 2:**
+
 ```
 Name: CACHIX_AUTH_TOKEN
 Secret: (paste your auth token from Cachix)
@@ -73,6 +76,7 @@ extra-trusted-public-keys = [
 ```
 
 Replace:
+
 - `lewisflude-nix` with your cache name
 - `YOUR_PUBLIC_KEY_HERE` with the public key from Cachix settings
 
@@ -109,6 +113,7 @@ nh os switch  # or: darwin-rebuild switch --flake .
 ## 📦 Part 2: FlakeHub Setup
 
 ### What You'll Gain
+
 - **Discoverable config**: Others can find and use your config as a template
 - **Versioned releases**: Semantic versioning for your NixOS config
 - **Better URLs**: Use `flakehub.com/f/lewisflude/nix/*` instead of GitHub URLs
@@ -123,6 +128,7 @@ FlakeHub uses GitHub's OIDC tokens (no extra secrets needed!). Your workflow is 
 Check your workflow file: `.github/workflows/flakehub-publish-tagged.yml`
 
 It should have:
+
 ```yaml
 permissions:
   id-token: "write"
@@ -178,7 +184,8 @@ Add to your README.md:
 
 ### Available Versions
 
-See all versions at: https://flakehub.com/flake/lewisflude/nix
+See all versions at: <https://flakehub.com/flake/lewisflude/nix>
+
 ```
 
 ---
@@ -193,11 +200,13 @@ cachix use lewisflude-nix
 ```
 
 **Manual cache update:**
+
 ```bash
 # Go to GitHub Actions → "Build and Cache" → Run workflow
 ```
 
 **Check cache status:**
+
 ```bash
 # Visit: https://app.cachix.org/cache/lewisflude-nix
 ```
@@ -205,18 +214,21 @@ cachix use lewisflude-nix
 ### FlakeHub: Publishing New Versions
 
 **Patch release (bug fixes):**
+
 ```bash
 git tag v1.0.1
 git push origin v1.0.1
 ```
 
 **Minor release (new features):**
+
 ```bash
 git tag v1.1.0
 git push origin v1.1.0
 ```
 
 **Major release (breaking changes):**
+
 ```bash
 git tag v2.0.0
 git push origin v2.0.0
@@ -244,10 +256,12 @@ on:
 ## 📊 Monitoring
 
 ### Cachix Dashboard
+
 - View cache size, hit rates, downloads
 - URL: `https://app.cachix.org/cache/lewisflude-nix`
 
 ### FlakeHub Dashboard
+
 - View downloads, versions, stars
 - URL: `https://flakehub.com/flake/lewisflude/nix`
 
@@ -256,19 +270,23 @@ on:
 ## 🐛 Troubleshooting
 
 ### Cachix: "Failed to push"
+
 - Check your `CACHIX_AUTH_TOKEN` is correct in GitHub secrets
 - Verify cache name matches exactly
 
 ### Cachix: Not downloading from cache
+
 - Check public key is correct in `flake.nix`
 - Run `nix flake metadata` to verify cache is listed
 
 ### FlakeHub: Workflow fails
+
 - Check the workflow run logs
 - Ensure tag follows format: `v1.2.3` (v prefix + semver)
 - Verify repo visibility is Public (required for FlakeHub)
 
 ### FlakeHub: Can't find published flake
+
 - Wait 2-5 minutes after workflow completes
 - Check: `https://flakehub.com/flake/lewisflude/nix`
 - Ensure workflow completed successfully
@@ -301,11 +319,13 @@ After setup:
 You'll know everything is working when:
 
 ✅ **Cachix**:
+
 - Rebuilds take seconds instead of minutes
-- You see "copying path from 'https://lewisflude-nix.cachix.org'"
+- You see "copying path from '<https://lewisflude-nix.cachix.org>'"
 - CI runs complete in 2-5 minutes
 
 ✅ **FlakeHub**:
+
 - Your flake appears at flakehub.com/flake/lewisflude/nix
 - Others can use your config as a template
 - You can use cleaner URLs in documentation
@@ -313,5 +333,6 @@ You'll know everything is working when:
 ---
 
 Need help? Check the official docs:
-- Cachix: https://docs.cachix.org/
-- FlakeHub: https://flakehub.com/docs
+
+- Cachix: <https://docs.cachix.org/>
+- FlakeHub: <https://flakehub.com/docs>

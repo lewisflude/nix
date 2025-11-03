@@ -23,7 +23,6 @@ in {
       swaylock-effects
       dragon-drop
       # seahorse # TEMPORARILY DISABLED: uses webkitgtk which was removed from nixpkgs
-      # protonvpn-gui # TEMPORARILY DISABLED: testing for webkitgtk dependency
       # nautilus # TEMPORARILY DISABLED: likely uses webkitgtk which was removed from nixpkgs
       # sushi # TEMPORARILY DISABLED: likely uses webkitgtk which was removed from nixpkgs
       ffmpegthumbnailer

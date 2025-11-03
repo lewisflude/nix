@@ -89,15 +89,24 @@ in {
 
     # Per-system apps
     apps = let
+      pkgsWithPog = pkgsWithOverlays.extend inputs.pog.overlays.${system}.default;
       # Helper to create pog app
-      mkPogApp = script-name: {
+      # Scripts that need config-root: new-module, update-all
+      # Scripts that don't: setup-cachix
+      mkPogApp = script-name: let
+        needsConfigRoot = lib.elem script-name ["new-module" "update-all"];
+        scriptArgs =
+          if needsConfigRoot
+          then {
+            config-root = toString ../..;
+          }
+          else {
+            # setup-cachix and others don't need config-root
+          };
+      in {
         type = "app";
         program = "${
-          import ../pkgs/pog-scripts/${script-name}.nix {
-            pkgs = pkgsWithOverlays.extend inputs.pog.overlays.${system}.default;
-            inherit (pkgsWithOverlays.extend inputs.pog.overlays.${system}.default) pog;
-            config-root = toString ../.;
-          }
+          pkgsWithPog.callPackage ../pkgs/pog-scripts/${script-name}.nix scriptArgs
         }/bin/${script-name}";
       };
     in {

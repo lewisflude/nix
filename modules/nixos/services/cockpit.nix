@@ -1,4 +1,5 @@
-{...}: {
+# deadnix-disable-next-line
+{_}: {
   services.cockpit = {
     enable = true;
     port = 9090;

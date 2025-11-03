@@ -127,6 +127,7 @@ Rebuilds will be **10-30 seconds** instead of 10-20 minutes!
 This configuration can be published to FlakeHub for easy discovery and versioned releases.
 
 **Use this config:**
+
 ```nix
 {
   inputs.lewisflude-nix.url = "https://flakehub.com/f/lewisflude/nix/*";

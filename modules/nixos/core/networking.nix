@@ -129,6 +129,6 @@
   };
   boot.kernel.sysctl = {
     "net.ipv4.conf.all.forwarding" = 1;
-    "net.ipv6.conf.all.forwarding" = lib.mkDefault 1; # Allow VPN-Confinement to override if needed
+    "net.ipv6.conf.all.forwarding" = lib.mkDefault 1;
   };
 }
