@@ -66,6 +66,18 @@ in {
         inherit (cfg) user;
         inherit (cfg) group;
       })
+      (mkDirRule {
+        path = "${cfg.dataPath}/usenet/complete";
+        mode = "0775";
+        inherit (cfg) user;
+        inherit (cfg) group;
+      })
+      (mkDirRule {
+        path = "${cfg.dataPath}/usenet/incomplete";
+        mode = "0775";
+        inherit (cfg) user;
+        inherit (cfg) group;
+      })
     ];
   };
 }

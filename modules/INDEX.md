@@ -44,6 +44,7 @@ nix run .#new-module
 ## Documentation
 
 For more details on module structure and conventions, see:
+
 - `../docs/DX_GUIDE.md` - Development experience guide
 - `../CONTRIBUTING.md` - Contributing guidelines
 - `../templates/` - Module templates

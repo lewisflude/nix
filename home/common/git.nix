@@ -20,6 +20,10 @@
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
       pull.rebase = true;
+      # Automatically use SSH for GitHub URLs
+      url."git@github.com:" = {
+        insteadOf = "https://github.com/";
+      };
       gpg = {
         program = "${pkgs.gnupg}/bin/gpg";
         format = "openpgp";

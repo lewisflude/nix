@@ -19,7 +19,6 @@ in {
       sonarr = cfg.sonarr or {};
       lidarr = cfg.lidarr or {};
       readarr = cfg.readarr or {};
-      qbittorrent = cfg.qbittorrent or {};
       sabnzbd = cfg.sabnzbd or {};
       jellyfin = cfg.jellyfin or {};
       jellyseerr = cfg.jellyseerr or {};

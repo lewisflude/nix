@@ -45,9 +45,6 @@
     readarr = {
       enable = true;
     };
-    qbittorrent = {
-      enable = true;
-    };
     sabnzbd = {
       enable = true;
     };
@@ -142,6 +139,6 @@
     enable = true;
     yubikey = true;
     gpg = true;
-    # vpn and firewall default to false
+    # firewall defaults to false
   };
 }

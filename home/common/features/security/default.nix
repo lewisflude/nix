@@ -18,9 +18,6 @@ in {
       ]
       ++ lib.optionals cfg.gpg [
         # gnupg and pinentry provided by gpg.nix
-      ]
-      ++ lib.optionals cfg.vpn [
-        wireguard-tools
       ];
 
     programs.gpg = lib.mkIf cfg.gpg {

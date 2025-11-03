@@ -33,18 +33,6 @@ in {
       description = "Whisparr API key (use sops for production)";
     };
 
-    qbittorrentUsername = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-      description = "qBittorrent username";
-    };
-
-    qbittorrentPassword = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-      description = "qBittorrent password (use sops for production)";
-    };
-
     discordToken = mkOption {
       type = types.nullOr types.str;
       default = null;

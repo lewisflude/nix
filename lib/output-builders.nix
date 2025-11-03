@@ -74,7 +74,7 @@ in {
           config = functionsLib.mkPkgsConfig;
           overlays = functionsLib.mkOverlays {
             inherit inputs;
-            system = hostConfig.system;
+            inherit (hostConfig) system;
           };
         };
       in
@@ -86,8 +86,9 @@ in {
             // {
               host = hostConfig;
               hostSystem = hostConfig.system;
+              virtualisation = hostConfig.features.virtualisation or {};
               modulesVirtualisation = virtualisationLib.mkModulesVirtualisationArgs {
-                hostVirtualisation = hostConfig.virtualisation or {};
+                hostVirtualisation = hostConfig.features.virtualisation or {};
               };
             };
           modules = [

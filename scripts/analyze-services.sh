@@ -31,7 +31,6 @@ declare -A SERVICES=(
     ["readarr"]="~100MB"
     ["prowlarr"]="~100MB"
     ["sabnzbd"]="~100MB"
-    ["qbittorrent"]="~50MB"
 )
 
 # Check each service

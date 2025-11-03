@@ -171,7 +171,6 @@ test_service_endpoints() {
         "radarr:7878"
         "sonarr:8989"
         "lidarr:8686"
-        "qbittorrent:8080"
         "sabnzbd:8082"
         "jellyfin:8096"
         "jellyseerr:5055"

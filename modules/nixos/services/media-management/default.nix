@@ -4,7 +4,6 @@
   imports = [
     ./options.nix
     ./common.nix
-    ./qbittorrent.nix
     ./prowlarr.nix
     ./radarr.nix
     ./sonarr.nix

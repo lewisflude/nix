@@ -13,18 +13,26 @@
         identityFile = "~/.ssh/id_ed25519";
         serverAliveInterval = 60;
         serverAliveCountMax = 3;
+        compression = false;
+        hashKnownHosts = true;
         extraOptions = {
-          PasswordAuthentication = "no";
-          PubkeyAuthentication = "yes";
           PKCS11Provider = "none";
+          StrictHostKeyChecking = "accept-new";
+          UserKnownHostsFile = "~/.ssh/known_hosts";
+          ConnectTimeout = "10";
+          ConnectionAttempts = "3";
+          VisualHostKey = "yes";
         };
       };
       "github.com" = {
         identitiesOnly = true;
         forwardAgent = false;
+        user = "git";
+        # GitHub's SSH fingerprints - these are well-known and safe to verify
+        extraOptions = {
+          StrictHostKeyChecking = "yes";
+        };
       };
     };
   };
-
-  home.file.".ssh/config".force = true;
 }

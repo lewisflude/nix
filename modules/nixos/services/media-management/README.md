@@ -6,7 +6,7 @@ This module provides declarative configuration for a complete media management s
 
 ### Indexers & Management
 
-- **Prowlarr** (port 9696) - Indexer manager for Usenet and torrents
+- **Prowlarr** (port 9696) - Indexer manager for Usenet
 - **Radarr** (port 7878) - Movie collection manager
 - **Sonarr** (port 8989) - TV show collection manager
 - **Lidarr** (port 8686) - Music collection manager
@@ -14,7 +14,6 @@ This module provides declarative configuration for a complete media management s
 
 ### Download Clients
 
-- **qBittorrent** (port 8080) - BitTorrent client with web UI
 - **SABnzbd** (port 8082) - Usenet binary newsreader
 
 ### Media Server & Frontend
@@ -91,7 +90,6 @@ Native services store their data in standard NixOS locations:
 - `/var/lib/sonarr`
 - `/var/lib/lidarr`
 - `/var/lib/readarr`
-- `/var/lib/qbittorrent`
 - `/var/lib/sabnzbd`
 - `/var/lib/jellyfin`
 - `/var/lib/jellyseerr`
@@ -107,7 +105,6 @@ Configure via `dataPath` option (default: `/mnt/storage`):
 │   ├── tv/
 │   ├── music/
 │   └── books/
-├── torrents/
 └── usenet/
 ```
 
@@ -120,12 +117,6 @@ Configure via `dataPath` option (default: `/mnt/storage`):
 - ✅ Firewall rules automatically configured
 - ✅ systemd service ordering (Prowlarr starts before *arr apps)
 - ✅ Timezone configuration
-
-### qBittorrent VPN Isolation
-
-- Optional WireGuard tunnel with dedicated network namespace
-- Automatic tmpfiles, namespace setup, and firewall forwarding rules
-- Secrets integration via `host.services.mediaManagement.qbittorrent.webUiCredentialsSecret` and `qbittorrent.vpn.privateKeySecret`
 
 ### Hardware Acceleration
 
@@ -208,7 +199,6 @@ media-management/
 ├── sonarr.nix          # Sonarr configuration
 ├── lidarr.nix          # Lidarr configuration
 ├── readarr.nix         # Readarr configuration
-├── qbittorrent.nix     # qBittorrent configuration
 ├── sabnzbd.nix         # SABnzbd configuration
 ├── jellyfin.nix        # Jellyfin configuration
 ├── jellyseerr.nix      # Jellyseerr configuration
