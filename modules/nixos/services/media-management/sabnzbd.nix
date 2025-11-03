@@ -29,12 +29,16 @@ in {
 
       # Ensure directories have correct permissions before starting
       # Fix any permission issues that might prevent writes
+      # Note: If directories already exist, we still fix permissions
+      # If mkdir fails due to no space, chown/chmod will still run on existing dirs
       preStart = ''
         # Ensure usenet directories exist with correct ownership and permissions
-        mkdir -p ${cfg.dataPath}/usenet/complete
-        mkdir -p ${cfg.dataPath}/usenet/incomplete
-        chown -R ${cfg.user}:${cfg.group} ${cfg.dataPath}/usenet
-        chmod -R 775 ${cfg.dataPath}/usenet
+        # mkdir -p will succeed if directories already exist, or fail if no space
+        mkdir -p ${cfg.dataPath}/usenet/complete || true
+        mkdir -p ${cfg.dataPath}/usenet/incomplete || true
+        # Fix permissions on existing directories (ignore errors if dirs don't exist)
+        chown -R ${cfg.user}:${cfg.group} ${cfg.dataPath}/usenet 2>/dev/null || true
+        chmod -R 775 ${cfg.dataPath}/usenet 2>/dev/null || true
       '';
 
       # Allow write access to data path (required for downloads)
