@@ -112,6 +112,9 @@ in {
   };
 
   config = mkIf (cfg.enable && cfg.qbittorrent.enable) {
+    # Add qbittorrent user to media group to allow writing to media-owned directories
+    users.users.qbittorrent.extraGroups = [cfg.group];
+
     # Ensure profile directory and subdirectories exist with correct permissions
     systemd.tmpfiles.rules = [
       "d /var/lib/qBittorrent 0755 qbittorrent qbittorrent -"
