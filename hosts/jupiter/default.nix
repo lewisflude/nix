@@ -102,6 +102,18 @@ in {
             enable = true;
             webUI = {
               address = "*"; # Bind to all interfaces (required for VPN-Confinement)
+              username = "lewis";
+              # Password format: @ByteArray(salt:hash)
+              # The NixOS module expects the full @ByteArray(...) format
+              password = "@ByteArray(J5lri+TddZR2AJqNVPndng==:no5T50n4CD9peISk6jZQ+Cb8qzv6DoV2MtOxE2oErywXVFngVDq/eySGpoNjUCFOHFdbifjwwHI4jlV2LH4ocQ==)";
+            };
+            # Category path mappings for Arr stack integration
+            # Categories match what Radarr/Sonarr/Lidarr/Readarr expect
+            categories = {
+              radarr = "/mnt/storage/movies"; # Movies (Radarr)
+              sonarr = "/mnt/storage/tv"; # TV Shows (Sonarr)
+              lidarr = "/mnt/storage/music"; # Music (Lidarr)
+              readarr = "/mnt/storage/books"; # Books (Readarr)
             };
             vpn = {
               enable = true;
