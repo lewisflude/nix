@@ -263,6 +263,14 @@ with lib; {
             description = "Enable qBittorrent BitTorrent client";
           };
 
+          webUI = {
+            address = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "WebUI bind address. Use '*' or '0.0.0.0' to bind to all interfaces. Defaults to '*' when VPN is enabled.";
+            };
+          };
+
           vpn = {
             enable = mkOption {
               type = types.bool;

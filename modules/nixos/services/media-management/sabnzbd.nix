@@ -20,18 +20,41 @@ in {
       inherit (cfg) group;
     };
 
-    # Set timezone
-    systemd.services.sabnzbd.environment = {
-      TZ = cfg.timezone;
-    };
+    # Configure systemd service for sabnzbd
+    systemd.services.sabnzbd = {
+      # Set timezone
+      environment = {
+        TZ = cfg.timezone;
+      };
 
-    # Allow write access to data path (required for downloads)
-    # The NixOS sabnzbd module applies ProtectSystem=strict by default,
-    # which prevents writes outside /var/lib/sabnzbd
-    systemd.services.sabnzbd.serviceConfig = {
-      ReadWritePaths = [cfg.dataPath];
-      # Also allow access to user home directory
-      ProtectHome = false;
+      # Ensure directories have correct permissions before starting
+      # Fix any permission issues that might prevent writes
+      preStart = ''
+        # Ensure usenet directories exist with correct ownership and permissions
+        mkdir -p ${cfg.dataPath}/usenet/complete
+        mkdir -p ${cfg.dataPath}/usenet/incomplete
+        chown -R ${cfg.user}:${cfg.group} ${cfg.dataPath}/usenet
+        chmod -R 775 ${cfg.dataPath}/usenet
+      '';
+
+      # Allow write access to data path (required for downloads)
+      # The NixOS sabnzbd module applies ProtectSystem=strict by default,
+      # which prevents writes outside /var/lib/sabnzbd
+      # For FUSE mounts like mergerfs, ProtectSystem=strict interferes with writes
+      # even when ReadWritePaths is set, so we disable it and rely on other
+      # security measures (non-root user, proper permissions, etc.)
+      serviceConfig = {
+        # Disable ProtectSystem for FUSE mount compatibility
+        # FUSE mounts (like mergerfs) don't work well with ProtectSystem=strict
+        # even with ReadWritePaths, so we disable it entirely
+        # Security is still maintained via:
+        # - Running as non-root user (media)
+        # - Proper file/directory permissions
+        # - Other systemd protections (NoNewPrivileges, etc.)
+        ProtectSystem = false;
+        # Also allow access to user home directory
+        ProtectHome = false;
+      };
     };
 
     # Note: Download directories are created by systemd-tmpfiles (see common.nix)

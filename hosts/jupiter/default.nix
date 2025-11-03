@@ -100,6 +100,9 @@ in {
           # Enable qBittorrent with VPN routing via VPN-Confinement
           qbittorrent = {
             enable = true;
+            webUI = {
+              address = "*"; # Bind to all interfaces (required for VPN-Confinement)
+            };
             vpn = {
               enable = true;
               # VPN-Confinement handles WireGuard interface management
