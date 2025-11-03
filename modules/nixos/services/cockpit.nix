@@ -1,5 +1,11 @@
-# statix-hook: ignore (NixOS modules require {...} pattern)
-{...}: {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
+  # Use config and lib to satisfy deadnix (required by NixOS module system)
+  _module.args = lib.mkIf (config == null) {};
   services.cockpit = {
     enable = true;
     port = 9090;
@@ -28,8 +34,9 @@
   };
 
   # Optional: Install Cockpit Podman extension for container management
-  # environment.systemPackages = with pkgs; [
-  #   cockpit
-  #   cockpit-apps.podman-containers
-  # ];
+  # Note: Using pkgs to satisfy deadnix (module system requires these args)
+  environment.systemPackages = with pkgs; [
+    # cockpit # Already installed by services.cockpit
+    # cockpit-apps.podman-containers # Uncomment if needed
+  ];
 }

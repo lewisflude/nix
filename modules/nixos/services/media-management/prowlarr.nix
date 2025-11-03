@@ -21,14 +21,14 @@ in {
       openFirewall = true;
     };
 
-    # Run as common media user and set timezone
+    # Set timezone, user, and group via systemd
     systemd.services.prowlarr = {
+      environment = {
+        TZ = config.host.services.mediaManagement.timezone;
+      };
       serviceConfig = {
         User = config.host.services.mediaManagement.user;
         Group = config.host.services.mediaManagement.group;
-      };
-      environment = {
-        TZ = config.host.services.mediaManagement.timezone;
       };
     };
   };

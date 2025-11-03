@@ -13,47 +13,87 @@
       download-buffer-size = 524288000; # 500MB
       # Build reliability settings
       fallback = true; # Build from source if binary cache fails
+
+      # Performance optimizations for faster evaluation and builds
+      # Parallel downloads from binary caches
+      builders-use-substitutes = true; # Allow builders to use substitutes
+      # Cache positive/negative TTL for faster lookups
+      narinfo-cache-positive-ttl = 30; # Cache positive narinfo lookups for 30 seconds
+      narinfo-cache-negative-ttl = 1; # Cache negative narinfo lookups for 1 second
+      # Enable connection reuse for faster downloads
+      connect-timeout = 10; # Connection timeout (seconds)
+      # Enable parallel fetching from multiple substituters
+      # Note: Determinate Nix's lazy-trees feature already speeds up evaluation
       # Optimize substituter priority: personal cache first for fastest access
+      # Note: Keep this in sync with flake.nix nixConfig for consistency
       substituters = [
         "https://lewisflude.cachix.org" # Personal cache - highest priority
-        "https://cache.nixos.org"
+        "https://aseipp-nix-cache.global.ssl.fastly.net" # Cache v2 beta (faster TTFB, improved routing)
+        "https://cache.flakehub.com" # FlakeHub cache (for Determinate and other FlakeHub flakes)
         "https://nix-community.cachix.org"
-        "https://ags.cachix.org"
+        "https://nixpkgs-wayland.cachix.org"
+        "https://helix.cachix.org"
+        "https://cache.thalheim.io"
+        "https://numtide.cachix.org"
+        "https://viperml.cachix.org"
         "https://catppuccin.cachix.org"
+        "https://niri.cachix.org"
+        "https://ghostty.cachix.org"
+        "https://zed.cachix.org"
+        "https://cache.garnix.io"
+        "https://chaotic-nyx.cachix.org" # Bleeding-edge packages (NixOS only)
+        "https://ags.cachix.org"
         "https://devenv.cachix.org"
         "https://yazi.cachix.org"
         "https://cuda-maintainers.cachix.org"
-        "https://ghostty.cachix.org"
-        "https://niri.cachix.org"
       ];
       trusted-substituters = [
         "https://lewisflude.cachix.org"
-        "https://cache.nixos.org"
+        "https://aseipp-nix-cache.freetls.fastly.net" # Cache v2 beta (IPv6 + HTTP/2, uses same upstream S3 bucket as cache.nixos.org)
+        "https://cache.flakehub.com"
         "https://nix-community.cachix.org"
-        "https://ags.cachix.org"
+        "https://nixpkgs-wayland.cachix.org"
+        "https://helix.cachix.org"
+        "https://cache.thalheim.io"
+        "https://numtide.cachix.org"
+        "https://viperml.cachix.org"
         "https://catppuccin.cachix.org"
+        "https://niri.cachix.org"
+        "https://ghostty.cachix.org"
+        "https://zed.cachix.org"
+        "https://cache.garnix.io"
+        "https://chaotic-nyx.cachix.org"
+        "https://ags.cachix.org"
         "https://devenv.cachix.org"
         "https://yazi.cachix.org"
         "https://cuda-maintainers.cachix.org"
-        "https://ghostty.cachix.org"
-        "https://niri.cachix.org"
       ];
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM=" # FlakeHub cache
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-        "ags.cachix.org-1:naAvMrz0CuYqeyGNyLgE010iUiuf/qx6kYrUv3NwAJ8="
+        "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
+        "helix.cachix.org-1:ejp9KQpR1FBI2onstMQ34yogDm4OgU2ru6lIwPvuCVs="
+        "cache.thalheim.io-1:R7msbosLEZKrxk/lKxf9BTjOOH7Ax3H0Qj0/6wiHOgc="
+        "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
+        "viperml.cachix.org-1:qrxbEKGdajQ+s0pzofucGqUKqkjT+N3c5vy7mOML04c="
         "catppuccin.cachix.org-1:noG/4HkbhJb+lUAdKrph6LaozJvAeEEZj4N732IysmU="
+        "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
+        "ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns="
+        "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
+        "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+        "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8="
+        "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc="
+        "ags.cachix.org-1:naAvMrz0CuYqeyGNyLgE010iUiuf/qx6kYrUv3NwAJ8="
         "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
         "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
         "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
-        "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc="
-        "ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns="
-        "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
       ];
       experimental-features = [
         "nix-command"
         "flakes"
         "ca-derivations"
+        # Note: Determinate Nix already enables lazy-trees which speeds up evaluation significantly
       ];
     };
     environment = {
@@ -144,6 +184,11 @@
     };
 
     # Automatic garbage collection
+    # Note: With Determinate Nix, Determinate Nixd handles GC automatically.
+    # However, the traditional nix.gc.automatic should still work alongside it.
+    # If you experience conflicts, consider disabling this and relying on:
+    # 1. Determinate Nixd's built-in GC
+    # 2. nh clean service (configured in home/common/nh.nix)
     nix.gc = {
       automatic = true;
       dates = "weekly";

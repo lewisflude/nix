@@ -204,6 +204,7 @@ in {
           niri.nixosModules.niri
           chaotic.nixosModules.default
           inputs.nix-topology.nixosModules.default
+          inputs.vpn-confinement.nixosModules.default
         ]
         ++ lib.optional (
           hostConfig.system == "x86_64-linux" || hostConfig.system == "aarch64-linux"

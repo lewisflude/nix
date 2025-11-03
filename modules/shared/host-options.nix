@@ -256,6 +256,46 @@ with lib; {
           };
         };
 
+        qbittorrent = {
+          enable = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Enable qBittorrent BitTorrent client";
+          };
+
+          vpn = {
+            enable = mkOption {
+              type = types.bool;
+              default = false;
+              description = "Enable VPN routing via network namespace";
+            };
+
+            interfaceName = mkOption {
+              type = types.str;
+              default = "wg-mullvad";
+              description = "WireGuard interface name for VPN routing";
+            };
+
+            namespace = mkOption {
+              type = types.str;
+              default = "wg-qbittorrent";
+              description = "Network namespace name for VPN isolation";
+            };
+
+            vethHostIP = mkOption {
+              type = types.str;
+              default = "10.200.200.1/24";
+              description = "IP address for veth-host interface";
+            };
+
+            vethVPNIP = mkOption {
+              type = types.str;
+              default = "10.200.200.2/24";
+              description = "IP address for veth-vpn interface";
+            };
+          };
+        };
+
         jellyfin = {
           enable = mkOption {
             type = types.bool;

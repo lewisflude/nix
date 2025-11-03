@@ -30,7 +30,8 @@ scripts/
 │   ├── mcp_love2d_docs.py # Love2D MCP server
 │   └── mcp_lua_docs.py    # Lua MCP server
 ├── utils/
-│   └── benchmark-rebuild.sh # Performance benchmarking
+│   ├── benchmark-rebuild.sh # Performance benchmarking
+│   └── profile-build.sh     # Build profiling (NEW) ⭐
 └── visualize-modules.sh    # Module visualization
 
 POG Apps (nix run .#<name>):

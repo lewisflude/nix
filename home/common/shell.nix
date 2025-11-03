@@ -49,18 +49,18 @@
     '';
   # Zsh abbreviations configuration (declarative file-based approach)
   # Format: { abbreviation = "expansion"; }
-  # zsh-abbr reads from a file in format: abbreviation=expansion
+  # zsh-abbr reads from a file in format: abbr abbreviation=expansion
   zshAbbreviations = {
     "fid" = "Finished installing dependencies";
     "tpfd" = "There was a problem finishing installing dependencies";
   };
   # Generate zsh-abbr configuration file content
-  # Format: abbr-name=expansion (one per line)
+  # Format: abbr abbreviation=expansion (one per line)
   zshAbbrConfigFile = lib.concatMapStringsSep "\n" (
     {
       abbr,
       expansion,
-    }: "${abbr}=${expansion}"
+    }: "abbr ${abbr}=${expansion}"
   ) (lib.mapAttrsToList (abbr: expansion: {inherit abbr expansion;}) zshAbbreviations);
 in {
   xdg.enable = true;
@@ -138,44 +138,58 @@ in {
       completionInit = ''
         setopt EXTENDED_GLOB
         autoload -Uz compinit
+
+        # Ensure cache directory exists before compinit uses it
+        mkdir -p ${config.xdg.cacheHome}/zsh
+
+        # Add zsh-completions to fpath before compinit
+        # This ensures community completions are available during initialization
+        fpath=(${pkgs.zsh-completions}/share/zsh/site-functions $fpath)
+
+        # Check for insecure completion directories (informational only)
         if ! compaudit 2>/dev/null; then
-          echo "Warning: Insecure zsh completion directories detected."
-          echo "Attempting to fix ownership issues..."
-          if [[ -d "/usr/local/share/zsh" ]] && [[ -O "/usr/local/share/zsh" ]]; then
-            echo "Fixing /usr/local/share/zsh ownership..."
-            sudo chown -R root:wheel /usr/local/share/zsh 2>/dev/null || true
-          fi
+          echo "Warning: Insecure zsh completion directories detected." >&2
         fi
+
+        # Initialize completion system
+        # Use -C flag on first run to skip verification for faster startup
         if [[ -f ${config.xdg.cacheHome}/zsh/.zcompdump ]]; then
           compinit
         else
           compinit -C
         fi
-        fpath=(${pkgs.zsh-completions}/share/zsh/site-functions $fpath)
+
+        # Configure completion caching
         zstyle ':completion:*' use-cache yes
         zstyle ':completion:*' cache-path ${config.xdg.cacheHome}/zsh
-        _lazy_load_docker_completion() {
-          if command -v docker &> /dev/null && [[ ! -f ${config.xdg.cacheHome}/zsh/docker_completion_loaded ]]; then
-            source <(docker completion zsh) 2>/dev/null || true
-            touch ${config.xdg.cacheHome}/zsh/docker_completion_loaded
+
+        # Lazy load completion functions
+        _lazy_load_completion() {
+          local cmd=$1
+          local loader=$2
+          local marker_file="${config.xdg.cacheHome}/zsh/''${cmd}_completion_loaded"
+
+          if command -v "$cmd" &> /dev/null && [[ ! -f "$marker_file" ]]; then
+            eval "$loader" 2>/dev/null || true
+            touch "$marker_file"
           fi
         }
-        _lazy_load_kubectl_completion() {
-          if command -v kubectl &> /dev/null && [[ ! -f ${config.xdg.cacheHome}/zsh/kubectl_completion_loaded ]]; then
-            source <(kubectl completion zsh) 2>/dev/null || true
-            touch ${config.xdg.cacheHome}/zsh/kubectl_completion_loaded
-          fi
+
+        # Define lazy-loaded command wrappers
+        docker() {
+          _lazy_load_completion docker 'source <(docker completion zsh)'
+          command docker "$@"
         }
-        _lazy_load_npm_completion() {
-          if command -v npm &> /dev/null && [[ ! -f ${config.xdg.cacheHome}/zsh/npm_completion_loaded ]]; then
-            source <(npm completion) 2>/dev/null || true
-            touch ${config.xdg.cacheHome}/zsh/npm_completion_loaded
-          fi
+
+        kubectl() {
+          _lazy_load_completion kubectl 'source <(kubectl completion zsh)'
+          command kubectl "$@"
         }
-        docker() { _lazy_load_docker_completion; unfunction docker; docker "$@"; }
-        kubectl() { _lazy_load_kubectl_completion; unfunction kubectl; kubectl "$@"; }
-        npm() { _lazy_load_npm_completion; unfunction npm; npm "$@"; }
-        mkdir -p ${config.xdg.cacheHome}/zsh
+
+        npm() {
+          _lazy_load_completion npm 'source <(npm completion)'
+          command npm "$@"
+        }
       '';
       # Use dedicated autocd option instead of AUTO_CD in setOptions
       autocd = true;
@@ -225,7 +239,6 @@ in {
       shellAliases = lib.mkMerge [
         {
           switch = platformLib.systemRebuildCommand {hostName = host.hostname;};
-          update = "system-update";
           edit = "sudo -e";
           ls = "eza";
           l = "eza -l";
@@ -258,10 +271,22 @@ in {
           nix-info = "nix-shell -p nix-info --run 'nix-info -m'";
           nix-size = "du -sh /nix/store";
           nix-update-lock = "nix flake update --flake ~/.config/nix";
+          # nh command aliases
           nh-os = "nh os";
           nh-home = "nh home";
           nh-darwin = "nh darwin";
-          nh-clean = "nh clean all";
+          # nh clean with configured args (uses NH_CLEAN_ARGS env var)
+          nh-clean = "nh clean all $NH_CLEAN_ARGS";
+          nh-clean-old = "nh clean all --keep-since 7d --keep 5";
+          nh-clean-aggressive = "nh clean all --keep-since 1d --keep 1";
+          # nh generation management (NixOS only)
+          nh-list = "nh os list";
+          nh-rollback = "nh os rollback";
+          nh-diff = "nh os diff";
+          # nh build shortcuts
+          nh-build = "nh os build";
+          nh-build-dry = "nh os build --dry";
+          nh-switch-dry = "nh os switch --dry";
           dev = "nix develop ~/.config/nix";
           abbr-list = "abbr list";
           abbr-add = "abbr add";
@@ -312,7 +337,9 @@ in {
         export SOPS_GPG_EXEC="${lib.getExe pkgs.gnupg}"
         export SOPS_GPG_ARGS="--pinentry-mode=loopback"
         export NIX_FLAKE="${config.home.homeDirectory}/.config/nix"
-        export NH_CLEAN_ARGS="--keep-since 4d --keep 3"
+        # NH_CLEAN_ARGS is now set via home.sessionVariables in nh.nix
+        # Keep this as fallback if nh.nix isn't loaded
+        export NH_CLEAN_ARGS="''${NH_CLEAN_ARGS:---keep-since 4d --keep 3}"
         source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
         [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
         zsh-defer -c 'export YSU_MESSAGE_POSITION="after"'
@@ -366,7 +393,7 @@ in {
           setopt CORRECT
           unsetopt CORRECT_ALL
         fi
-        zsh-defer -c 'if [[ ~/.zshrc -nt ~/.zshrc.zwc ]]; then zcompile ~/.zshrc; fi'
+        zsh-defer -c 'if [[ "${config.xdg.configHome}/zsh/.zshrc" -nt "${config.xdg.configHome}/zsh/.zshrc.zwc" ]]; then zcompile "${config.xdg.configHome}/zsh/.zshrc"; fi'
         if [[ -f "${config.home.homeDirectory}/.config/nix/home/common/lib/zsh/functions.zsh" ]]; then
           source "${config.home.homeDirectory}/.config/nix/home/common/lib/zsh/functions.zsh"
         fi
@@ -389,9 +416,11 @@ in {
   };
   home = {
     # Global session variables (affect all shells, not just zsh)
+    # Note: NH_* variables are also set in home/common/nh.nix for consistency
     sessionVariables = {
       EDITOR = "hx";
       NH_FLAKE = "${config.home.homeDirectory}/.config/nix";
+      # NH_CLEAN_ARGS is set in nh.nix via sessionVariables
     };
     file = {
       ".p10k.zsh".source = ./lib/p10k.zsh;
@@ -401,90 +430,6 @@ in {
     };
     packages = with pkgs; [
       zoxide
-      (writeShellApplication {
-        name = "system-update";
-        runtimeInputs = [
-          nh
-          nix
-          coreutils
-        ];
-        text = ''
-                    set -Eeuo pipefail
-
-                    FLAKE_PATH="''${NH_FLAKE:-${config.home.homeDirectory}/.config/nix}"
-                    NH_TARGET=$([[ "$(uname)" == "Darwin" ]] && echo "darwin" || echo "os")
-
-                    # Handle NoNewPrivs on Linux only
-                    if [[ -r /proc/self/status ]] && [[ "$(awk '/NoNewPrivs/ {print $2}' /proc/self/status 2>/dev/null || echo 0)" == "1" ]]; then
-                      if command -v systemd-run >/dev/null 2>&1; then
-                        exec systemd-run --user --pty --same-dir --wait --collect -p NoNewPrivileges=no system-update "$@"
-                      else
-                        echo "NoNewPrivs=1 and systemd-run not found. Run from a non-sandboxed terminal or a VT." >&2
-                        exit 1
-                      fi
-                    fi
-
-                    # Parse flags
-                    UPDATE_INPUTS=0 RUN_GC=0 BUILD_ONLY=0 DRY_RUN=0
-                    for arg in "$@"; do
-                      case "$arg" in
-                        --full) UPDATE_INPUTS=1; RUN_GC=1 ;;
-                        --inputs) UPDATE_INPUTS=1 ;;
-                        --gc) RUN_GC=1 ;;
-                        --build-only) BUILD_ONLY=1 ;;
-                        --check|--dry-run) DRY_RUN=1 ;;
-                        --help)
-                          cat <<EOF
-          Usage: system-update [OPTIONS]
-
-          Options:
-            --full          Update inputs, build/switch, and run garbage collection
-            --inputs        Update flake inputs before building/switching
-            --gc            Run garbage collection after build/switch
-            --build-only    Build without switching (does not activate changes)
-            --check, --dry-run  Validate configuration without building
-            --help          Show this help message
-
-          Examples:
-            system-update              # Switch to current configuration
-            system-update --full        # Update inputs, switch, and cleanup
-            system-update --inputs     # Update inputs then switch
-            system-update --build-only # Build without switching
-          EOF
-                          exit 0 ;;
-                        *)
-                          echo "Unknown option: $arg" >&2
-                          echo "Run 'system-update --help' for usage information." >&2
-                          exit 1 ;;
-                      esac
-                    done
-
-                    # Validate mutually exclusive flags
-                    if [[ $BUILD_ONLY -eq 1 ]] && [[ $DRY_RUN -eq 1 ]]; then
-                      echo "Error: --build-only and --dry-run are mutually exclusive." >&2
-                      exit 1
-                    fi
-
-                    # Execute operations
-                    [[ $UPDATE_INPUTS -eq 1 ]] && echo "Updating inputs…" && nix flake update --flake "$FLAKE_PATH"
-
-                    if [[ $DRY_RUN -eq 1 ]]; then
-                      echo "Checking switch…"
-                      nh "$NH_TARGET" switch --dry "$FLAKE_PATH"
-                    elif [[ $BUILD_ONLY -eq 1 ]]; then
-                      echo "Building…"
-                      nh "$NH_TARGET" build "$FLAKE_PATH"
-                    else
-                      echo "Switching…"
-                      nh "$NH_TARGET" switch "$FLAKE_PATH"
-                    fi
-
-                    # Skip GC on dry-run
-                    [[ $RUN_GC -eq 1 ]] && [[ $DRY_RUN -eq 0 ]] && echo "Cleaning…" && nh clean all
-
-                    echo "Done."
-        '';
-      })
       (writeShellApplication {
         name = "dev";
         runtimeInputs = with pkgs; [
