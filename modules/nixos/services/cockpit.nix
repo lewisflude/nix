@@ -1,5 +1,5 @@
-# deadnix-disable-next-line
-{_}: {
+# statix-hook: ignore (NixOS modules require {...} pattern)
+{...}: {
   services.cockpit = {
     enable = true;
     port = 9090;
