@@ -19,20 +19,13 @@ in {
       openFirewall = true;
       inherit (cfg) user;
       inherit (cfg) group;
-      dataDir = "/var/lib/sonarr";
     };
 
-    # Override ExecStart to add -nobrowser flag and ensure correct data directory
+    # Set timezone and add soft dependency on prowlarr
     systemd.services.sonarr = {
-      serviceConfig = {
-        ExecStart = lib.mkForce "${config.services.sonarr.package}/bin/Sonarr -nobrowser -data=${config.services.sonarr.dataDir}";
-      };
-
-      # Set timezone
       environment = {
         TZ = cfg.timezone;
       };
-
       # Soft dependency on prowlarr for startup order
       after = mkAfter (optional cfg.prowlarr.enable "prowlarr.service");
     };

@@ -96,6 +96,16 @@ in {
           # All services enabled by default except unpackerr
           # To disable specific services, set enable = false
           unpackerr.enable = false; # Disabled - config format issues
+
+          # Enable qBittorrent with VPN routing via VPN-Confinement
+          qbittorrent = {
+            enable = true;
+            vpn = {
+              enable = true;
+              # VPN-Confinement handles WireGuard interface management
+              # WireGuard config is stored in sops as "vpn-confinement/qbittorrent"
+            };
+          };
         };
 
       # Native AI tools services (Ollama, Open WebUI)

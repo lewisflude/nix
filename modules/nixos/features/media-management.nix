@@ -20,6 +20,7 @@ in {
       lidarr = cfg.lidarr or {};
       readarr = cfg.readarr or {};
       sabnzbd = cfg.sabnzbd or {};
+      qbittorrent = cfg.qbittorrent or {};
       jellyfin = cfg.jellyfin or {};
       jellyseerr = cfg.jellyseerr or {};
       flaresolverr = cfg.flaresolverr or {};

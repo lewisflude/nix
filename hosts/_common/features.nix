@@ -48,6 +48,9 @@
     sabnzbd = {
       enable = true;
     };
+    qbittorrent = {
+      enable = true;
+    };
     jellyfin = {
       enable = true;
     };

@@ -38,7 +38,6 @@ in {
       cd = "z";
       lt = "eza --tree";
       edit = "sudo -e";
-      update = "system-update";
     };
     history = {
       save = 10000;

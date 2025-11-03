@@ -10,13 +10,16 @@
 
     # Binary caches for faster builds
     # Note: Order matters - personal cache first for fastest access
+    # Note: Determinate Nix v3.6.0+ doesn't require install.determinate.systems cache
+    #       (you're on v3.12.0, so this is optional but included for FlakeHub flakes)
     extra-substituters = [
       "https://lewisflude.cachix.org" # Personal cache - highest priority
+      "https://aseipp-nix-cache.freetls.fastly.net" # Cache v2 beta (IPv6 + HTTP/2 support, faster TTFB, improved routing)
+      "https://cache.flakehub.com" # FlakeHub cache (for Determinate and other FlakeHub flakes)
       "https://nix-community.cachix.org"
       "https://nixpkgs-wayland.cachix.org"
       "https://helix.cachix.org"
       "https://cache.thalheim.io"
-      # "https://pre-commit-hooks.cachix.org" # Removed - pre-commit-hooks input not actively used
       "https://numtide.cachix.org"
       "https://viperml.cachix.org"
       "https://catppuccin.cachix.org"
@@ -25,14 +28,18 @@
       "https://zed.cachix.org"
       "https://cache.garnix.io"
       "https://chaotic-nyx.cachix.org" # Bleeding-edge packages (NixOS only)
+      "https://ags.cachix.org"
+      "https://devenv.cachix.org"
+      "https://yazi.cachix.org"
+      "https://cuda-maintainers.cachix.org"
     ];
 
     extra-trusted-public-keys = [
+      "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM=" # FlakeHub cache (for Determinate Nix and other FlakeHub flakes)
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
       "helix.cachix.org-1:ejp9KQpR1FBI2onstMQ34yogDm4OgU2ru6lIwPvuCVs="
       "cache.thalheim.io-1:R7msbosLEZKrxk/lKxf9BTjOOH7Ax3H0Qj0/6wiHOgc="
-      # "pre-commit-hooks.cachix.org-1:Pkk3Panw5AW24TOv6kz3PvLhlH8puAsJTBbOPmVO9Jg=" # Removed with cache
       "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
       "viperml.cachix.org-1:qrxbEKGdajQ+s0pzofucGqUKqkjT+N3c5vy7mOML04c="
       "catppuccin.cachix.org-1:noG/4HkbhJb+lUAdKrph6LaozJvAeEEZj4N732IysmU="
@@ -42,6 +49,10 @@
       "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8=" # Bleeding-edge packages
       "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc=" # Personal cache
+      "ags.cachix.org-1:naAvMrz0CuYqeyGNyLgE010iUiuf/qx6kYrUv3NwAJ8="
+      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+      "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
+      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
     ];
   };
 
@@ -193,6 +204,9 @@
       url = "github:oddlama/nix-topology";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # === VPN Confinement ===
+    vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
   };
 
   outputs = inputs @ {self, ...}:

@@ -67,6 +67,7 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 | **🤖 AI Assistants** | [`docs/ai-assistants/`](docs/ai-assistants/) | Claude, ChatGPT, Cursor guidance |
 | **🔄 Updating** | [`docs/UPDATING.md`](docs/UPDATING.md) | How to update dependencies and inputs |
 | **💬 Code Review** | [`docs/CONVENTIONAL_COMMENTS.md`](docs/CONVENTIONAL_COMMENTS.md) | Conventional comments for reviews |
+| **🔍 Build Profiling** | [`docs/BUILD_PROFILING.md`](docs/BUILD_PROFILING.md) | Debug and optimize build times |
 | **🤝 Contributing** | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to contribute to this repo |
 
 ## 🎯 Common Tasks

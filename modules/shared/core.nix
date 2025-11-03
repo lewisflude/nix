@@ -6,6 +6,17 @@
   ...
 }: let
   platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
+  # Extract revision as string to avoid store path references in option documentation
+  # We extract the value first to break any direct store path references
+  revision = let
+    revVal = inputs.self.rev or null;
+    dirtyRevVal = inputs.self.dirtyRev or null;
+  in
+    if revVal != null
+    then toString revVal
+    else if dirtyRevVal != null
+    then toString dirtyRevVal
+    else null;
 in {
   nix = {
     settings = lib.mkMerge [
@@ -26,6 +37,6 @@ in {
     ];
   };
 
-  system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
+  system.configurationRevision = lib.mkDefault revision;
   system.stateVersion = lib.mkDefault platformLib.platformStateVersion;
 }

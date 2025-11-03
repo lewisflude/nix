@@ -160,6 +160,7 @@
     lib.attrByPath flagPath default mergedVirtualisation;
 
   # System rebuild command generator
+  # Uses nh for NixOS (recommended with Determinate Nix) and darwin-rebuild for macOS
   systemRebuildCommand = system: {
     flakePath ? "~/.config/nix",
     hostName ? null,
@@ -172,5 +173,7 @@
         if hostName == null || hostName == ""
         then ""
         else "#${hostName}";
-    in "sudo nixos-rebuild switch --flake ${flakePath}${hostSuffix}";
+      # nh handles sudo elevation internally, so no sudo prefix needed
+      # Falls back to nixos-rebuild if nh is not available (though unlikely with programs.nh.enable)
+    in "nh os switch ${flakePath}${hostSuffix}";
 }
