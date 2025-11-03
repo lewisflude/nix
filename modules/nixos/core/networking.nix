@@ -66,6 +66,7 @@
         8888
         5656
         3001
+        8083 # qBittorrent WebUI (VPN-Confinement)
       ];
       allowedUDPPorts = [
         5353

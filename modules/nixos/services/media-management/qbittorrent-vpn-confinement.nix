@@ -20,7 +20,8 @@ in {
       # Use sops secret path directly for WireGuard config file
       wireguardConfigFile = config.sops.secrets."vpn-confinement-qbittorrent".path;
       accessibleFrom = [
-        "192.168.0.0/24" # Local network - adjust as needed
+        "192.168.1.0/24" # Local network
+        "192.168.0.0/24" # Additional local network
         "10.0.0.0/8" # Private networks
       ];
       portMappings = [

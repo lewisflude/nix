@@ -43,6 +43,9 @@ with lib; let
     # VPN-Confinement handles routing via namespace, so no need to set interfaceName
     else null;
 
+  # Check if VPN is enabled (needed for config generation)
+  vpnEnabled = cfg.qbittorrent.vpn.enable;
+
   # Create the qBittorrent configuration file
   qbittorrentConf = pkgs.writeText "qBittorrent.conf" (generateConfig {
     BitTorrent = filterAttrs (_: v: v != null) {
@@ -82,6 +85,15 @@ with lib; let
       "WebUI\\AuthSubnetWhitelistEnabled" = cfg.qbittorrent.webUI.authSubnetWhitelistEnabled;
       "WebUI\\Username" = cfg.qbittorrent.webUI.username;
       "WebUI\\Port" = cfg.qbittorrent.webUI.port;
+      "WebUI\\Address" =
+        if cfg.qbittorrent.webUI.address != null
+        then cfg.qbittorrent.webUI.address
+        else
+          (
+            if vpnEnabled
+            then "*"
+            else null
+          );
       "WebUI\\Password_PBKDF2" = cfg.qbittorrent.webUI.password;
       "WebUI\\CSRFProtection" = cfg.qbittorrent.webUI.csrfProtection;
       "WebUI\\ClickjackingProtection" = cfg.qbittorrent.webUI.clickjackingProtection;
@@ -89,7 +101,6 @@ with lib; let
   });
 
   inherit (cfg.qbittorrent) configDir;
-  vpnEnabled = cfg.qbittorrent.vpn.enable;
   # VPN namespace name (must match qbittorrent-vpn-confinement.nix)
   vpnNamespace = "qbittor"; # Max 7 chars for VPN-Confinement
 in {
@@ -279,6 +290,12 @@ in {
         type = types.port;
         default = 8083;
         description = "WebUI port.";
+      };
+
+      address = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "WebUI bind address. Use '*' or '0.0.0.0' to bind to all interfaces. Defaults to '*' when VPN is enabled.";
       };
 
       password = mkOption {
