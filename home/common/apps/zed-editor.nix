@@ -411,6 +411,12 @@
           # Keep trailing whitespace for Markdown <br /> conversion
           remove_trailing_whitespace_on_save = false;
         };
+        Nix = {
+          tab_size = 2;
+          # Explicitly use nixd instead of nil
+          language_servers = ["nixd"];
+          format_on_save = "on";
+        };
         Python = {
           tab_size = 4; # Python standard indentation
           # Use Ruff for formatting and linting (fast and modern)
