@@ -15,7 +15,7 @@
       # Test that the configuration evaluates
       ${pkgs.nix}/bin/nix eval --impure --expr '
         let
-          pkgs = import ${inputs.nixpkgs} { system = "${pkgs.system}"; };
+          pkgs = import ${inputs.nixpkgs} { system = "${pkgs.stdenv.hostPlatform.system}"; };
           home-manager = import ${inputs.home-manager} { inherit pkgs; };
         in
           (home-manager.lib.homeManagerConfiguration {
