@@ -47,21 +47,6 @@
         export ${var}="$(cat ${lib.escapeShellArg path})"
       fi
     '';
-  # Zsh abbreviations configuration (declarative file-based approach)
-  # Format: { abbreviation = "expansion"; }
-  # zsh-abbr reads from a file in format: abbr abbreviation=expansion
-  zshAbbreviations = {
-    "fid" = "Finished installing dependencies";
-    "tpfd" = "There was a problem finishing installing dependencies";
-  };
-  # Generate zsh-abbr configuration file content
-  # Format: abbr abbreviation=expansion (one per line)
-  zshAbbrConfigFile = lib.concatMapStringsSep "\n" (
-    {
-      abbr,
-      expansion,
-    }: "abbr ${abbr}=${expansion}"
-  ) (lib.mapAttrsToList (abbr: expansion: {inherit abbr expansion;}) zshAbbreviations);
 in {
   xdg.enable = true;
   programs = {
@@ -125,11 +110,6 @@ in {
           file = "auto-notify.plugin.zsh";
         }
         {
-          name = "zsh-abbr";
-          inherit (sources.zsh-abbr) src;
-          file = "zsh-abbr.zsh";
-        }
-        {
           name = "zsh-bd";
           inherit (sources.zsh-bd) src;
           file = "bd.zsh";
@@ -146,72 +126,43 @@ in {
         # This ensures community completions are available during initialization
         fpath=(${pkgs.zsh-completions}/share/zsh/site-functions $fpath)
 
-        # Check for insecure completion directories (informational only)
-        if ! compaudit 2>/dev/null; then
-          echo "Warning: Insecure zsh completion directories detected." >&2
-        fi
-
-        # Initialize completion system
-        # Use -C flag on first run to skip verification for faster startup
-        if [[ -f ${config.xdg.cacheHome}/zsh/.zcompdump ]]; then
-          compinit
+        # Initialize completion system with smart caching
+        # Only regenerate compdump once per day for faster startup
+        setopt EXTENDEDGLOB
+        local zcompdump="${config.xdg.cacheHome}/zsh/.zcompdump"
+        if [[ -n $zcompdump(#qNmh-20) ]]; then
+          # Compdump is less than 20 hours old, use fast loading
+          compinit -C -d "$zcompdump"
         else
-          compinit -C
+          # Regenerate compdump
+          compinit -i -d "$zcompdump"
         fi
+        unsetopt EXTENDEDGLOB
 
         # Configure completion caching
         zstyle ':completion:*' use-cache yes
         zstyle ':completion:*' cache-path ${config.xdg.cacheHome}/zsh
 
-        # Lazy load completion functions
-        _lazy_load_completion() {
-          local cmd=$1
-          local loader=$2
-          local marker_file="${config.xdg.cacheHome}/zsh/''${cmd}_completion_loaded"
-
-          if command -v "$cmd" &> /dev/null && [[ ! -f "$marker_file" ]]; then
-            eval "$loader" 2>/dev/null || true
-            touch "$marker_file"
-          fi
-        }
-
-        # Define lazy-loaded command wrappers
-        docker() {
-          _lazy_load_completion docker 'source <(docker completion zsh)'
-          command docker "$@"
-        }
-
-        kubectl() {
-          _lazy_load_completion kubectl 'source <(kubectl completion zsh)'
-          command kubectl "$@"
-        }
-
-        npm() {
-          _lazy_load_completion npm 'source <(npm completion)'
-          command npm "$@"
-        }
+        # Note: Removed lazy-loading completion wrappers. Modern Zsh already handles
+        # completion loading efficiently via compinit. If you need specific completions,
+        # add them to your shell config directly without the wrapper complexity.
       '';
       # Use dedicated autocd option instead of AUTO_CD in setOptions
       autocd = true;
       setOptions = [
+        # Completion options
         "AUTO_MENU"
         "COMPLETE_IN_WORD"
         "ALWAYS_TO_END"
-        "HIST_VERIFY"
-        "HIST_REDUCE_BLANKS"
-        "HIST_IGNORE_SPACE"
-        "HIST_NO_FUNCTIONS"
-        "HIST_EXPIRE_DUPS_FIRST"
-        "HIST_FIND_NO_DUPS"
-        "HIST_SAVE_NO_DUPS"
-        "HIST_BEEP"
-        "BANG_HIST"
+        "AUTO_LIST"
+        "AUTO_PARAM_SLASH"
+        # Directory navigation
         "AUTO_PUSHD"
         "PUSHD_IGNORE_DUPS"
         "PUSHD_SILENT"
         "PUSHD_TO_HOME"
         "CDABLE_VARS"
-        "MULTIOS"
+        # Globbing
         "EXTENDED_GLOB"
         "GLOB_DOTS"
         "GLOBSTARSHORT"
@@ -220,18 +171,15 @@ in {
         "NOMATCH"
         "CASE_GLOB"
         "BAD_PATTERN"
+        # Misc
+        "MULTIOS"
         "INTERACTIVE_COMMENTS"
         "LONG_LIST_JOBS"
         "NOTIFY"
         "HASH_LIST_ALL"
-        "AUTO_LIST"
-        "AUTO_PARAM_SLASH"
+        # Note: HIST_* and BANG_HIST options are set via programs.zsh.history
+        # HIST_VERIFY can cause issues with instant prompt, removed
       ];
-      # Set environment variables before plugins load (goes in .zshenv)
-      envExtra = ''
-        # Configure zsh-abbr to use our declarative abbreviations file
-        export ABBR_USER_ABBREVIATIONS_FILE="${config.xdg.configHome}/zsh/abbreviations"
-      '';
       # Zsh-specific session variables (better than home.sessionVariables)
       sessionVariables = {
         DIRSTACKSIZE = "20";
@@ -287,10 +235,6 @@ in {
           nh-build = "nh os build";
           nh-build-dry = "nh os build --dry";
           nh-switch-dry = "nh os switch --dry";
-          dev = "nix develop ~/.config/nix";
-          abbr-list = "abbr list";
-          abbr-add = "abbr add";
-          abbr-erase = "abbr erase";
           lsh = "eza -la .*";
           lsz = "eza -la ***.{js,ts,jsx,tsx,py,go,rs,c,cpp,h,hpp}";
           lsconfig = "eza -la **/*.{json,yaml,yml,toml,ini,conf,cfg}";
@@ -325,93 +269,102 @@ in {
         ignoreDups = true;
         ignoreSpace = true;
       };
-      # Use initContent with mkAfter to append after home-manager's defaults
-      initContent = lib.mkAfter ''
-        ${secretExportSnippet "KAGI_API_KEY" "KAGI_API_KEY"}
-        ${secretExportSnippet "GITHUB_TOKEN" "GITHUB_TOKEN"}
-        export SSH_AUTH_SOCK="$(${pkgs.gnupg}/bin/gpgconf --list-dirs agent-ssh-socket)"
-        # Arrays must be set in initContent, not localVariables
-        typeset -ga ZSH_AUTOSUGGEST_STRATEGY
-        ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-        export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=${palette.mauve.hex},bg=${palette.surface1.hex},bold,underline"
-        export SOPS_GPG_EXEC="${lib.getExe pkgs.gnupg}"
-        export SOPS_GPG_ARGS="--pinentry-mode=loopback"
-        export NIX_FLAKE="${config.home.homeDirectory}/.config/nix"
-        # NH_CLEAN_ARGS is now set via home.sessionVariables in nh.nix
-        # Keep this as fallback if nh.nix isn't loaded
-        export NH_CLEAN_ARGS="''${NH_CLEAN_ARGS:---keep-since 4d --keep 3}"
-        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-        [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-        zsh-defer -c 'export YSU_MESSAGE_POSITION="after"'
-        zsh-defer -c 'export YSU_HARDCORE=1'
-        export AUTO_NOTIFY_THRESHOLD=10
-        export AUTO_NOTIFY_TITLE="Command finished"
-        export AUTO_NOTIFY_BODY="Completed in %elapsed seconds"
-        export AUTO_NOTIFY_IGNORE=(
-          "man" "less" "more" "vim" "nano" "htop" "top" "ssh" "scp" "rsync"
-          "watch" "tail" "sleep" "ping" "curl" "wget" "git log" "git diff"
-        )
-        export WORDCHARS='*?_-.[]~=&;!#'
-        export ATUIN_NOBIND="true"
-        zsh-defer -c 'bindkey "^r" _atuin_search_widget'
-        bindkey '^[[1;5C' forward-word
-        bindkey '^[[1;5D' backward-word
-        bindkey '^H' backward-kill-word
-        bindkey '^[[3;5~' kill-word
-        bindkey '^[[A' history-substring-search-up
-        bindkey '^[[B' history-substring-search-down
-        bindkey '^P' history-substring-search-up
-        bindkey '^N' history-substring-search-down
-        function _ghostty_insert_newline() { LBUFFER+=$'\n' }
-        zle -N ghostty-insert-newline _ghostty_insert_newline
-        bindkey -M emacs $'\e[99997u' ghostty-insert-newline
-        bindkey -M viins $'\e[99997u' ghostty-insert-newline
-        bindkey -M emacs $'\e\r'     ghostty-insert-newline
-        bindkey -M viins $'\e\r'     ghostty-insert-newline
-        zstyle ':completion:*' matcher-list \
-          'm:{a-zA-Z}={A-Za-z}' \
-          'r:|[._-]=* r:|=*' \
-          'l:|=* r:|=*'
-        zstyle ':completion:*' special-dirs true
-        zstyle ':completion:*' squeeze-slashes true
-        zstyle ':completion:*' list-colors '${"\${(s.:.)LS_COLORS}"}'
-        zstyle ':completion:*' menu select
-        zstyle ':completion:*' group-name ""
-        zstyle ':completion:*' verbose true
-        zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
-        zstyle ':completion:*:warnings' format '%F{red}No matches found%f'
-        zstyle ':completion:*:corrections' format '%F{green}%d (errors: %e)%f'
-        zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
-        zstyle ':completion:*:*:kill:*' menu yes select
-        zstyle ':completion:*:cd:*' tag-order local-directories directory-stack path-directories
-        zstyle ':completion:*:cd:*' ignore-parents parent pwd
-        zstyle ':completion:*' file-patterns '%p:globbed-files *(-/):directories' '*:all-files'
-        unsetopt FLOW_CONTROL
-        if [[ ! -o interactive || ! -t 1 || "$TERM_PROGRAM" == "vscode" || "$TERM_PROGRAM" == "cursor" ]]; then
-          unsetopt CORRECT CORRECT_ALL
-        else
-          setopt CORRECT
-          unsetopt CORRECT_ALL
-        fi
-        zsh-defer -c 'if [[ "${config.xdg.configHome}/zsh/.zshrc" -nt "${config.xdg.configHome}/zsh/.zshrc.zwc" ]]; then zcompile "${config.xdg.configHome}/zsh/.zshrc"; fi'
-        if [[ -f "${config.home.homeDirectory}/.config/nix/home/common/lib/zsh/functions.zsh" ]]; then
-          source "${config.home.homeDirectory}/.config/nix/home/common/lib/zsh/functions.zsh"
-        fi
-        ${
-          let
-            zsh_codex = sources.zsh_codex.src;
-          in ''
-            if [[ -f "${zsh_codex}/zsh_codex.plugin.zsh" ]]; then
-              source "${zsh_codex}/zsh_codex.plugin.zsh"
-              bindkey '^X' create_completion
-            fi
-          ''
-        }
-        eval "$(zoxide init zsh)"
-        # zsh-abbr storage file is configured via ABBR_USER_ABBREVIATIONS_FILE
-        # which is set before the plugin loads (see plugins section)
-        # The plugin will automatically load from that file
-      '';
+      # Enable Powerlevel10k instant prompt (must be at the top)
+      # Using mkBefore to ensure this runs before everything else
+      initContent = lib.mkMerge [
+        (lib.mkBefore ''
+          # Instant prompt initialization - DO NOT move this down!
+          if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
+            source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
+          fi
+        '')
+        # Main shell configuration comes after home-manager's defaults
+        (lib.mkAfter ''
+          ${secretExportSnippet "KAGI_API_KEY" "KAGI_API_KEY"}
+          ${secretExportSnippet "GITHUB_TOKEN" "GITHUB_TOKEN"}
+          export SSH_AUTH_SOCK="$(${pkgs.gnupg}/bin/gpgconf --list-dirs agent-ssh-socket)"
+          # Arrays must be set in initContent, not localVariables
+          typeset -ga ZSH_AUTOSUGGEST_STRATEGY
+          ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+          export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=${palette.mauve.hex},bg=${palette.surface1.hex},bold,underline"
+          export SOPS_GPG_EXEC="${lib.getExe pkgs.gnupg}"
+          export SOPS_GPG_ARGS="--pinentry-mode=loopback"
+          export NIX_FLAKE="${config.home.homeDirectory}/.config/nix"
+          # NH_CLEAN_ARGS is now set via home.sessionVariables in nh.nix
+          # Keep this as fallback if nh.nix isn't loaded
+          export NH_CLEAN_ARGS="''${NH_CLEAN_ARGS:---keep-since 4d --keep 3}"
+          source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+          [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+          zsh-defer -c 'export YSU_MESSAGE_POSITION="after"'
+          zsh-defer -c 'export YSU_HARDCORE=1'
+          # Auto-notify settings can be deferred since they're not needed immediately
+          zsh-defer -c 'export AUTO_NOTIFY_THRESHOLD=10'
+          zsh-defer -c 'export AUTO_NOTIFY_TITLE="Command finished"'
+          zsh-defer -c 'export AUTO_NOTIFY_BODY="Completed in %elapsed seconds"'
+          zsh-defer -c 'export AUTO_NOTIFY_IGNORE=(
+            "man" "less" "more" "vim" "nano" "htop" "top" "ssh" "scp" "rsync"
+            "watch" "tail" "sleep" "ping" "curl" "wget" "git log" "git diff"
+          )'
+          export WORDCHARS='*?_-.[]~=&;!#'
+          export ATUIN_NOBIND="true"
+          zsh-defer -c 'bindkey "^r" _atuin_search_widget'
+          bindkey '^[[1;5C' forward-word
+          bindkey '^[[1;5D' backward-word
+          bindkey '^H' backward-kill-word
+          bindkey '^[[3;5~' kill-word
+          # Note: '^[[A' and '^[[B' (arrow keys) are already bound by historySubstringSearch.enable
+          # Adding ^P/^N as alternative keybindings for history substring search
+          bindkey '^P' history-substring-search-up
+          bindkey '^N' history-substring-search-down
+          function _ghostty_insert_newline() { LBUFFER+=$'\n' }
+          zle -N ghostty-insert-newline _ghostty_insert_newline
+          bindkey -M emacs $'\e[99997u' ghostty-insert-newline
+          bindkey -M viins $'\e[99997u' ghostty-insert-newline
+          bindkey -M emacs $'\e\r'     ghostty-insert-newline
+          bindkey -M viins $'\e\r'     ghostty-insert-newline
+          # Fuzzy matching of completions for when you mistype them
+          zstyle ':completion:*' completer _complete _match _approximate
+          zstyle ':completion:*:match:*' original only
+          zstyle ':completion:*:approximate:*' max-errors 1 numeric
+          # Case-insensitive (all), partial-word, and then substring completion
+          zstyle ':completion:*' matcher-list \
+            'm:{a-zA-Z}={A-Za-z}' \
+            'r:|[._-]=* r:|=*' \
+            'l:|=* r:|=*'
+          zstyle ':completion:*' special-dirs true
+          zstyle ':completion:*' squeeze-slashes true
+          zstyle ':completion:*' list-colors '${"\${(s.:.)LS_COLORS}"}'
+          zstyle ':completion:*' menu select
+          zstyle ':completion:*' group-name ""
+          zstyle ':completion:*' verbose true
+          zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
+          zstyle ':completion:*:warnings' format '%F{red}No matches found%f'
+          zstyle ':completion:*:corrections' format '%F{green}%d (errors: %e)%f'
+          zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+          zstyle ':completion:*:*:kill:*' menu yes select
+          zstyle ':completion:*:cd:*' tag-order local-directories directory-stack path-directories
+          zstyle ':completion:*:cd:*' ignore-parents parent pwd
+          zstyle ':completion:*' file-patterns '%p:globbed-files *(-/):directories' '*:all-files'
+          unsetopt FLOW_CONTROL
+          if [[ ! -o interactive || ! -t 1 || "$TERM_PROGRAM" == "vscode" || "$TERM_PROGRAM" == "cursor" ]]; then
+            unsetopt CORRECT CORRECT_ALL
+          else
+            setopt CORRECT
+            unsetopt CORRECT_ALL
+          fi
+          # Note: Removed auto-compilation of .zshrc. Instant prompt already masks startup time.
+          # If you want .zwc compilation, run: zcompile ~/.config/zsh/.zshrc manually when needed.
+          # Source custom functions if they exist
+          if [[ -f "${config.home.homeDirectory}/.config/nix/home/common/lib/zsh/functions.zsh" ]]; then
+            source "${config.home.homeDirectory}/.config/nix/home/common/lib/zsh/functions.zsh"
+          fi
+          # Load zsh_codex for AI code completion (Ctrl-X)
+          source ${sources.zsh_codex.src}/zsh_codex.plugin.zsh
+          bindkey '^X' create_completion
+
+          eval "$(zoxide init zsh)"
+        '')
+      ];
     };
   };
   home = {
@@ -424,37 +377,9 @@ in {
     };
     file = {
       ".p10k.zsh".source = ./lib/p10k.zsh;
-      # Declarative zsh-abbr configuration file
-      # zsh-abbr will automatically load this file on initialization
-      ".config/zsh/abbreviations".text = zshAbbrConfigFile;
     };
     packages = with pkgs; [
       zoxide
-      (writeShellApplication {
-        name = "dev";
-        runtimeInputs = with pkgs; [
-          bash
-          coreutils
-          findutils
-          git
-          nix
-          fzf
-          jq
-        ];
-        text = ''
-          CONFIG_ROOT="${config.home.homeDirectory}/.config/nix"
-          echo "The 'dev' wrapper has been removed for simplicity."
-          echo "Use direct commands or source $CONFIG_ROOT/scripts/ALIASES.sh for convenience aliases."
-          echo ""
-          echo "Common commands:"
-          echo "  nix flake update              - Update flake.lock"
-          echo "  darwin-rebuild switch         - Build & activate (macOS)"
-          echo "  nh os switch                  - Build & activate (NixOS)"
-          echo "  nix-collect-garbage -d        - Clean up old generations"
-          echo ""
-          echo "See: $CONFIG_ROOT/scripts/README.md"
-        '';
-      })
     ];
   };
   home.file.".config/direnv/lib/layout_zellij.sh".text = ''

@@ -24,11 +24,6 @@ src.git = "https://github.com/MichaelAquilina/zsh-you-should-use.git"
 fetch.git = "https://github.com/MichaelAquilina/zsh-you-should-use.git"
 git.tag = "1.7.3"
 
-[zsh-abbr]
-src.git = "https://github.com/olets/zsh-abbr.git"
-fetch.git = "https://github.com/olets/zsh-abbr.git"
-git.tag = "v5.8.0"
-
 [zsh-auto-notify]
 src.git = "https://github.com/MichaelAquilina/zsh-auto-notify.git"
 fetch.git = "https://github.com/MichaelAquilina/zsh-auto-notify.git"
