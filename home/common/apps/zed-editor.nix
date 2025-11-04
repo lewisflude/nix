@@ -39,9 +39,8 @@
       soft_wrap = "editor_width";
 
       # File Finder
-      file_finder = {
-        modal_width = "medium";
-      };
+      # Note: modal_width is not a valid setting in Zed
+      file_finder = {};
 
       # Tabs (show only errors to reduce noise)
       tabs = {
@@ -66,7 +65,10 @@
 
       # Gutter settings
       gutter = {
-        code_actions = false; # Hide code action buttons (use keyboard shortcuts instead)
+        line_numbers = true;
+        runnables = true;
+        breakpoints = true;
+        folds = true;
       };
 
       # Vertical scroll margin (keeps code from touching edges)
@@ -261,13 +263,8 @@
       ];
 
       # AI/Assistant Configuration
-      assistant = {
-        default_model = {
-          provider = "copilot_chat";
-          model = "claude-sonnet-4.5";
-        };
-        version = "2";
-      };
+      # Note: Direct assistant configuration is not supported in current Zed versions.
+      # AI features are configured through language_models and features.edit_prediction_provider
 
       # Language Model Providers (Ollama for local AI)
       language_models = {
@@ -313,7 +310,7 @@
       # Language-specific settings
       languages = {
         JavaScript = {
-          indent_size = 2; # Consistent indentation
+          tab_size = 2; # Consistent indentation
           code_actions_on_format = {
             "source.fixAll.biome" = true; # Biome for linting and fixing
           };
@@ -325,7 +322,7 @@
           };
         };
         TypeScript = {
-          indent_size = 2; # Consistent indentation
+          tab_size = 2; # Consistent indentation
           code_actions_on_format = {
             "source.fixAll.biome" = true; # Biome for linting and fixing
           };
@@ -344,7 +341,7 @@
           };
         };
         TSX = {
-          indent_size = 2; # Consistent indentation
+          tab_size = 2; # Consistent indentation
           code_actions_on_format = {
             "source.fixAll.biome" = true; # Biome for linting and fixing
           };
@@ -356,7 +353,7 @@
           };
         };
         CSS = {
-          indent_size = 2; # Consistent indentation
+          tab_size = 2; # Consistent indentation
           code_actions_on_format = {
             "source.fixAll.biome" = true; # Biome for CSS formatting/linting
           };
@@ -367,11 +364,10 @@
             };
           };
         };
-        SCSS = {
-          indent_size = 2; # Consistent indentation
-        };
+        # SCSS requires an extension to be installed
+        # Install the SCSS extension first, or remove this configuration
         HTML = {
-          indent_size = 2; # Consistent indentation
+          tab_size = 2; # Consistent indentation
           # Use Biome for HTML formatting
           formatter = {
             language_server = {
@@ -381,7 +377,7 @@
           format_on_save = "on";
         };
         JSON = {
-          indent_size = 2; # Consistent indentation
+          tab_size = 2; # Consistent indentation
           code_actions_on_format = {
             "source.fixAll.biome" = true; # Biome for JSON formatting/linting
           };
@@ -393,7 +389,7 @@
           };
         };
         JSONC = {
-          indent_size = 2; # Consistent indentation
+          tab_size = 2; # Consistent indentation
           code_actions_on_format = {
             "source.fixAll.biome" = true; # Biome for JSONC formatting/linting
           };
@@ -410,7 +406,7 @@
           remove_trailing_whitespace_on_save = false;
         };
         Python = {
-          indent_size = 4; # Python standard indentation
+          tab_size = 4; # Python standard indentation
           # Use Ruff for formatting and linting (fast and modern)
           format_on_save = "on";
           formatter = {
