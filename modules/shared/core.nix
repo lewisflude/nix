@@ -29,6 +29,10 @@ in {
         experimental-features = [
           "nix-command"
           "flakes"
+          "ca-derivations"
+          "repl-flake"
+          "fetch-closure"
+          "parse-toml-timestamps"
         ];
       }
       (lib.mkIf (hostSystem == "aarch64-darwin") {

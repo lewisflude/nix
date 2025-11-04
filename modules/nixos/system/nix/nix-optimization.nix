@@ -93,6 +93,9 @@
         "nix-command"
         "flakes"
         "ca-derivations"
+        "repl-flake"
+        "fetch-closure"
+        "parse-toml-timestamps"
         # Note: Determinate Nix already enables lazy-trees which speeds up evaluation significantly
       ];
     };
