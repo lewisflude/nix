@@ -81,6 +81,12 @@
 
       # LSP Settings
       lsp = {
+        nixd = {
+          binary = {
+            path_lookup = true;
+          };
+        };
+
         rust-analyzer = {
           initialization_options = {
             inlayHints = {

@@ -10,7 +10,7 @@ in {
     [
       # Nix tools
       nixfmt-rfc-style
-      nil
+      nixd
 
       # General formatters/linters
       biome

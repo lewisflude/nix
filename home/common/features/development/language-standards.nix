@@ -1,7 +1,7 @@
 {
   languages = {
     nix = {
-      lsp = "nil";
+      lsp = "nixd";
       formatter = "nixfmt";
       indent = 2;
     };
