@@ -39,7 +39,8 @@ in {
         NSScrollAnimationEnabled = true; # Smooth scrolling
 
         # Dark mode and appearance
-        AppleInterfaceStyleSwitchesAutomatically = true; # Auto dark/light mode
+        AppleInterfaceStyle = "Dark"; # Force dark mode
+        AppleInterfaceStyleSwitchesAutomatically = false; # Disable auto switching
 
         # Better text input (beyond what you already have)
         ApplePressAndHoldEnabled = false; # Enable key repeat vs special chars
