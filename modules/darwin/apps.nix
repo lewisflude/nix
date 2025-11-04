@@ -52,6 +52,7 @@ in {
         "linear-linear"
         "logi-options+"
         "logitune"
+        "loom"
         "musescore"
         "notion"
         "philips-hue-sync"
