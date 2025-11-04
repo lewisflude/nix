@@ -46,6 +46,19 @@ with lib; let
   # Check if VPN is enabled (needed for config generation)
   vpnEnabled = cfg.qbittorrent.vpn.enable;
 
+  # Helper to get Connection\NetworkInterface value
+  # When VPN-Confinement is enabled, bind to WireGuard interface name inside the namespace
+  # (typically wg0). This creates a kill switch at the application level - if VPN disconnects,
+  # qBittorrent can't access the internet because it's bound to the VPN interface.
+  # VPN-Confinement provides network isolation at the system level, while this setting
+  # provides an additional application-level kill switch.
+  connectionNetworkInterfaceValue =
+    if cfg.qbittorrent.connection.networkInterface != null
+    then cfg.qbittorrent.connection.networkInterface
+    else if vpnEnabled
+    then cfg.qbittorrent.vpn.wireGuardInterfaceName
+    else null;
+
   # Create the qBittorrent configuration file
   qbittorrentConf = pkgs.writeText "qBittorrent.conf" (generateConfig {
     BitTorrent = filterAttrs (_: v: v != null) {
@@ -99,6 +112,16 @@ with lib; let
       "WebUI\\Password_PBKDF2" = cfg.qbittorrent.webUI.password;
       "WebUI\\CSRFProtection" = cfg.qbittorrent.webUI.csrfProtection;
       "WebUI\\ClickjackingProtection" = cfg.qbittorrent.webUI.clickjackingProtection;
+      # Connection settings for VPN kill switch and network configuration
+      "Connection\\NetworkInterface" = connectionNetworkInterfaceValue;
+      "Connection\\NetworkInterfaceAddress" = cfg.qbittorrent.connection.networkInterfaceAddress;
+      "Connection\\IPFilter\\Enabled" = cfg.qbittorrent.connection.ipFilterEnabled;
+      "Connection\\PortRangeMin" = cfg.qbittorrent.connection.portRangeMin;
+      "Connection\\UPnP" = cfg.qbittorrent.connection.upnp;
+      "Connection\\DHTEnabled" = cfg.qbittorrent.connection.dhtEnabled;
+      "Connection\\LSDEnabled" = cfg.qbittorrent.connection.lsdEnabled;
+      "Connection\\PEXEnabled" = cfg.qbittorrent.connection.pexEnabled;
+      "Bittorrent\\EnableAutoTMM" = cfg.qbittorrent.connection.enableAutoTMM;
     };
   });
 
@@ -319,6 +342,62 @@ in {
       };
     };
 
+    connection = {
+      networkInterface = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Network interface name to bind all torrent traffic to (e.g., 'wg0'). Creates a kill switch - if VPN disconnects, qBittorrent can't access the internet. Automatically set to WireGuard interface name when VPN is enabled.";
+      };
+
+      networkInterfaceAddress = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Network interface IP address to bind to (e.g., '10.x.x.x/32'). Optional - binding to interface name is generally safer as IP might change upon reconnection.";
+      };
+
+      ipFilterEnabled = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        description = "Enable built-in IP filtering. Requires manual management of blocklist in GUI or via another tool.";
+      };
+
+      portRangeMin = mkOption {
+        type = types.nullOr types.port;
+        default = null;
+        description = "Minimum port for BitTorrent connections. Recommended to set to specific port from VPN provider if port forwarding is enabled.";
+      };
+
+      upnp = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        description = "Enable UPnP/NAT-PMP port forwarding. Recommended to disable when using VPN provider's port forwarding feature.";
+      };
+
+      dhtEnabled = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        description = "Enable DHT (Distributed Hash Table). Disabling can improve privacy but may slow down finding peers on older/less popular torrents.";
+      };
+
+      lsdEnabled = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        description = "Enable LSD (Local Service Discovery). Disabling can improve privacy but may reduce peer discovery.";
+      };
+
+      pexEnabled = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        description = "Enable PEX (Peer Exchange). Disabling can improve privacy but may reduce peer discovery.";
+      };
+
+      enableAutoTMM = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        description = "Enable automatic torrent management. Disable if using a specific directory structure for downloads.";
+      };
+    };
+
     vpn = {
       enable = mkOption {
         type = types.bool;
@@ -326,10 +405,10 @@ in {
         description = "Enable VPN routing via network namespace.";
       };
 
-      interfaceName = mkOption {
+      wireGuardInterfaceName = mkOption {
         type = types.str;
-        default = "wg-mullvad";
-        description = "WireGuard interface name for VPN routing.";
+        default = "wg0";
+        description = "WireGuard interface name inside the VPN namespace (e.g., 'wg0'). This is the interface that qBittorrent will bind to for the kill switch. Defaults to 'wg0' which is typical for VPN-Confinement.";
       };
 
       namespace = mkOption {
@@ -353,12 +432,13 @@ in {
   };
 
   config = mkIf (cfg.enable && cfg.qbittorrent.enable) {
-    # Create config directory and qBittorrent directories in user home
+    # Create config directory and qBittorrent directories
+    # qBittorrent expects its config at $XDG_CONFIG_HOME/qBittorrent/qBittorrent.conf
+    # With XDG_CONFIG_HOME=${configDir}, that's ${configDir}/qBittorrent/qBittorrent.conf
     systemd.tmpfiles.rules =
       [
         "d '${configDir}' 0700 ${cfg.user} ${cfg.group} -"
         "d '${configDir}/qBittorrent' 0700 ${cfg.user} ${cfg.group} -"
-        "d '${configDir}/qBittorrent/config' 0700 ${cfg.user} ${cfg.group} -"
         # Create qBittorrent directory in user home (qBittorrent expects this)
         "d '/var/lib/${cfg.user}/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
         "d '/var/lib/${cfg.user}/.config/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
@@ -390,25 +470,14 @@ in {
       };
 
       preStart = ''
-        # Copy configuration file to config directory
-        # Note: This will overwrite any manual changes on each rebuild
-        # To customize, modify the Nix configuration instead
-        cp ${qbittorrentConf} "${configDir}/qBittorrent/config/qBittorrent.conf"
-        chown ${cfg.user}:${cfg.group} "${configDir}/qBittorrent/config/qBittorrent.conf"
-
-        # Create directory structure that qBittorrent expects
-        # qBittorrent checks HOME first, so create directories in the user's home
-        mkdir -p /var/lib/${cfg.user}/qBittorrent
-        mkdir -p /var/lib/${cfg.user}/.config/qBittorrent
-        mkdir -p /var/lib/${cfg.user}/.cache/qBittorrent
-        mkdir -p /var/lib/${cfg.user}/.local/share/qBittorrent
-        chown -R ${cfg.user}:${cfg.group} /var/lib/${cfg.user}
-
-        # Also create cache directory structure
-        mkdir -p /var/cache/qbittorrent/.config/qBittorrent
-        mkdir -p /var/cache/qbittorrent/.cache/qBittorrent
-        mkdir -p /var/cache/qbittorrent/.local/share/qBittorrent
-        chown -R ${cfg.user}:${cfg.group} /var/cache/qbittorrent
+        # Copy configuration file only if it doesn't exist
+        # This allows qBittorrent to manage the config file after initial setup
+        # (saving WebUI preferences, session state, etc.)
+        CONFIG_FILE="${configDir}/qBittorrent/qBittorrent.conf"
+        if [ ! -f "$CONFIG_FILE" ]; then
+          cp ${qbittorrentConf} "$CONFIG_FILE"
+          chown ${cfg.user}:${cfg.group} "$CONFIG_FILE"
+        fi
       '';
 
       serviceConfig = {
@@ -444,9 +513,10 @@ in {
         # Prevent Qt from trying to initialize GUI components
         QT_QPA_PLATFORM = "offscreen";
         DISPLAY = "";
-        # Use the user's actual home directory (now set to /var/lib/media)
         # Set XDG directories to use proper locations
-        XDG_CONFIG_HOME = "${configDir}/qBittorrent";
+        # qBittorrent expects config at $XDG_CONFIG_HOME/qBittorrent/qBittorrent.conf
+        # So with XDG_CONFIG_HOME=${configDir}, config is at ${configDir}/qBittorrent/qBittorrent.conf
+        XDG_CONFIG_HOME = "${configDir}";
         XDG_CACHE_HOME = "/var/cache/qbittorrent";
         XDG_DATA_HOME = "/var/lib/${cfg.user}";
       };

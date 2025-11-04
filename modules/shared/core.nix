@@ -30,7 +30,6 @@ in {
           "nix-command"
           "flakes"
           "ca-derivations"
-          "repl-flake"
           "fetch-closure"
           "parse-toml-timestamps"
         ];

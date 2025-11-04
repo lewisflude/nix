@@ -11,7 +11,7 @@ in {
     home = {
       packages = with pkgs; [
         # jsonresume-nix provides resume generation tools
-        inputs.jsonresume-nix.packages.${pkgs.system}.default
+        inputs.jsonresume-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
       ];
 
       # Resume data configuration
@@ -255,11 +255,15 @@ in {
           echo "Generating resume in various formats..."
 
           # Generate PDF
-          ${inputs.jsonresume-nix.packages.${pkgs.system}.default}/bin/resume-pdf "$RESUME_DIR/resume.json" "$OUTPUT_DIR/resume.pdf"
+          ${
+            inputs.jsonresume-nix.packages.${pkgs.system}.default
+          }/bin/resume-pdf "$RESUME_DIR/resume.json" "$OUTPUT_DIR/resume.pdf"
           echo "✓ PDF generated: $OUTPUT_DIR/resume.pdf"
 
           # Generate HTML
-          ${inputs.jsonresume-nix.packages.${pkgs.system}.default}/bin/resume-html "$RESUME_DIR/resume.json" "$OUTPUT_DIR/resume.html"
+          ${
+            inputs.jsonresume-nix.packages.${pkgs.system}.default
+          }/bin/resume-html "$RESUME_DIR/resume.json" "$OUTPUT_DIR/resume.html"
           echo "✓ HTML generated: $OUTPUT_DIR/resume.html"
 
           # Generate JSON (copy the source)

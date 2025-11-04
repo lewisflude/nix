@@ -49,7 +49,7 @@ in {
     ]
     ++ lib.optionals cfg.lua [
       luajit # Primary Lua interpreter (provides /bin/lua)
-      (pkgs.lowPrio lua) # Fallback Lua 5.2 (lower priority to avoid conflict)
+      (lib.lowPrio lua) # Fallback Lua 5.2 (lower priority to avoid conflict)
       luajitPackages.luarocks
       lua-language-server
     ];

@@ -146,8 +146,9 @@ in {
 
         # Network settings
         Network = {
-          # Disable UPnP/NAT-PMP port forwarding (security recommendation from guide)
-          PortForwardingEnabled = false;
+          # Enable UPnP/NAT-PMP port forwarding
+          # This allows qBittorrent to automatically configure port forwarding on supported routers/VPNs
+          PortForwardingEnabled = true;
         };
 
         Preferences = {
@@ -224,16 +225,28 @@ in {
 
         # BitTorrent session settings
         BitTorrent = {
-          Session = {
-            DefaultSavePath = "${cfg.dataPath}/torrents";
-            TempPath = "${cfg.dataPath}/torrents/incomplete";
-            FinishedTorrentExportDirectory = "${cfg.dataPath}/torrents/complete";
-            BTProtocol = (cfg.qbittorrent.bittorrent or {}).protocol or "TCP";
-            # Pre-allocate disk space (from guide: recommended)
-            Preallocation = true;
-            # Use subcategories (from guide: recommended)
-            SubcategoriesEnabled = true;
-          };
+          Session =
+            {
+              DefaultSavePath = "${cfg.dataPath}/torrents";
+              TempPath = "${cfg.dataPath}/torrents/incomplete";
+              FinishedTorrentExportDirectory = "${cfg.dataPath}/torrents/complete";
+              BTProtocol = (cfg.qbittorrent.bittorrent or {}).protocol or "TCP";
+              # Pre-allocate disk space (from guide: recommended)
+              Preallocation = true;
+              # Use subcategories (from guide: recommended)
+              SubcategoriesEnabled = true;
+            }
+            // (
+              # Bind to VPN interface when VPN is enabled
+              # This ensures all traffic (including UDP tracker announces) goes through the VPN
+              # VPN-Confinement creates the WireGuard interface as "qbittor0" in the namespace
+              # This corresponds to Options > Advanced > Network Interface in qBittorrent WebUI
+              if vpnEnabled
+              then {
+                InterfaceName = "qbittor0";
+              }
+              else {}
+            );
         };
 
         # Category path mappings
