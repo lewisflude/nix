@@ -27,6 +27,7 @@
       keep-outputs = true
       keep-derivations = true
       fallback = true
+      keep-going = true
 
       # Download optimization (500MB buffer)
       download-buffer-size = 524288000
@@ -43,6 +44,12 @@
 
       # Build sandbox (security)
       sandbox = true
+
+      # Connection settings
+      connect-timeout = 5
+
+      # Logging
+      log-lines = 25
 
       # Note: Binary caches and experimental features are configured in flake.nix nixConfig
       # Those settings apply to both Darwin and NixOS systems via the flake

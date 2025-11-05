@@ -1,48 +1,74 @@
 {pkgs, ...}: {
   config = {
-    nix.settings = {
-      # Performance optimizations
-      auto-optimise-store = true;
-      max-jobs = "auto"; # Use all available CPU cores
-      cores = 0; # Use all cores per build job (0 = auto)
+    nix = {
+      settings = {
+        # Performance optimizations
+        auto-optimise-store = true;
+        max-jobs = "auto"; # Use all available CPU cores
+        cores = 0; # Use all cores per build job (0 = auto)
 
-      # Keep outputs/derivations for faster rebuilds and better caching
-      keep-outputs = true; # Keep build outputs for better caching
-      keep-derivations = true; # Keep .drv files for better rebuilds
+        # Keep outputs/derivations for faster rebuilds and better caching
+        keep-outputs = true; # Keep build outputs for better caching
+        keep-derivations = true; # Keep .drv files for better rebuilds
 
-      # Free space management
-      min-free = 1073741824; # 1GB minimum free space
-      max-free = 3221225472; # 3GB maximum free space
+        # Free space management
+        min-free = 1073741824; # 1GB minimum free space
+        max-free = 3221225472; # 3GB maximum free space
 
-      # Download optimization (500MB buffer)
-      download-buffer-size = 524288000;
+        # Download optimization (500MB buffer)
+        download-buffer-size = 524288000;
 
-      # Build reliability settings
-      fallback = true; # Build from source if binary cache fails
+        # Build reliability settings
+        fallback = true; # Build from source if binary cache fails
+        keep-going = true; # Continue building other derivations on failure
 
-      # Performance optimizations for faster evaluation and builds
-      builders-use-substitutes = true; # Allow builders to use substitutes
+        # Performance optimizations for faster evaluation and builds
+        builders-use-substitutes = true; # Allow builders to use substitutes
 
-      # High-throughput substitution parallelism (Tip 5)
-      # Maximizes parallel TCP connections and substitution jobs for faster binary cache fetching
-      http-connections = 64; # Parallel TCP connections (default: ~2-5, recommended: 64-128)
-      max-substitution-jobs = 64; # Concurrent substitution jobs (default: low, recommended: 64-128)
+        # High-throughput substitution parallelism (Tip 5)
+        # Maximizes parallel TCP connections and substitution jobs for faster binary cache fetching
+        http-connections = 64; # Parallel TCP connections (default: ~2-5, recommended: 64-128)
+        max-substitution-jobs = 64; # Concurrent substitution jobs (default: low, recommended: 64-128)
 
-      # Allow substitution for aggregator derivations (Tip 7)
-      # Forces Nix to use binary cache even for derivations marked allowSubstitutes = false
-      # Speeds up symlinkJoin and other lightweight aggregator builds
-      always-allow-substitutes = true;
+        # Allow substitution for aggregator derivations (Tip 7)
+        # Forces Nix to use binary cache even for derivations marked allowSubstitutes = false
+        # Speeds up symlinkJoin and other lightweight aggregator builds
+        always-allow-substitutes = true;
 
-      # Cache TTL for faster lookups
-      narinfo-cache-positive-ttl = 30; # Cache positive narinfo lookups for 30 seconds
-      narinfo-cache-negative-ttl = 1; # Cache negative narinfo lookups for 1 second
+        # Cache TTL for faster lookups
+        narinfo-cache-positive-ttl = 30; # Cache positive narinfo lookups for 30 seconds
+        narinfo-cache-negative-ttl = 1; # Cache negative narinfo lookups for 1 second
 
-      # Connection settings
-      connect-timeout = 10; # Connection timeout (seconds)
+        # Connection settings
+        connect-timeout = 5; # Connection timeout (seconds) - faster failure detection
 
-      # Note: Binary caches, trusted-public-keys, and experimental-features are configured
-      # in flake.nix nixConfig section. Those settings apply to both Darwin and NixOS.
-      # Determinate Nix's lazy-trees feature already speeds up evaluation significantly.
+        # Logging
+        log-lines = 25; # Lines of build output to show on failure
+
+        # Note: Binary caches, trusted-public-keys, and experimental-features are configured
+        # in flake.nix nixConfig section. Those settings apply to both Darwin and NixOS.
+        # Determinate Nix's lazy-trees feature already speeds up evaluation significantly.
+      };
+
+      # Automatic garbage collection
+      # Note: With Determinate Nix, Determinate Nixd handles GC automatically.
+      # However, the traditional nix.gc.automatic should still work alongside it.
+      # If you experience conflicts, consider disabling this and relying on:
+      # 1. Determinate Nixd's built-in GC
+      # 2. nh clean service (configured in home/common/nh.nix)
+      gc = {
+        automatic = true;
+        dates = "weekly";
+        options = "--delete-older-than 3d"; # More aggressive: keep only 3 days instead of 7
+      };
+
+      # Automatic store optimization
+      # Automatically hardlinks duplicate files in the store, recovering 20-40% space
+      # Runs daily at 3:45 AM, after GC completes
+      optimise = {
+        automatic = true;
+        dates = ["03:45"];
+      };
     };
     environment = {
       etc = {
@@ -129,18 +155,6 @@
           exec /etc/nix-optimization/analyze-store.sh "$@"
         '')
       ];
-    };
-
-    # Automatic garbage collection
-    # Note: With Determinate Nix, Determinate Nixd handles GC automatically.
-    # However, the traditional nix.gc.automatic should still work alongside it.
-    # If you experience conflicts, consider disabling this and relying on:
-    # 1. Determinate Nixd's built-in GC
-    # 2. nh clean service (configured in home/common/nh.nix)
-    nix.gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 3d"; # More aggressive: keep only 3 days instead of 7
     };
 
     # NixOS-specific systemd services
