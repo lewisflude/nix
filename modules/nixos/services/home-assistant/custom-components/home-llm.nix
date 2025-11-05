@@ -35,13 +35,17 @@ let
 in
 # Override to add ninja as native build input and create dummy build.ninja
 # Also add missing Python dependencies required by manifest.json
+# buildHomeAssistantComponent uses Python 3.13, so we must use Python 3.13 packages
+# Following NixOS wiki guidelines: https://nixos.wiki/wiki/Home_Assistant
 component.overrideAttrs (oldAttrs: {
   nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.ninja ];
   # Add missing Python dependencies required by manifest.json
   # These are checked during manifestCheckPhase
+  # Using Python 3.13 packages to match Home Assistant's Python version
   propagatedBuildInputs = (oldAttrs.propagatedBuildInputs or [ ]) ++ [
-    pkgs.python3Packages.huggingface-hub
-    pkgs.python3Packages.webcolors
+    pkgs.python313Packages.huggingface-hub
+    pkgs.python313Packages.webcolors
+    pkgs.python313Packages.mcp
   ];
   preBuild = ''
     # Create a dummy build.ninja to satisfy the ninja setup hook

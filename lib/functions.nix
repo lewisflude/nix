@@ -146,7 +146,7 @@ let
   # Version management (defined at top level for use in withSystem)
   versions = {
     nodejs = "nodejs"; # Default Node.js version from nixpkgs
-    python = "python312"; # Python 3.12 from nixpkgs-python (via overlay) - better cache coverage
+    python = "python3";
     go = "go";
     rust = {
       package = "rustc";
