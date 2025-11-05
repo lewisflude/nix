@@ -3,12 +3,11 @@
   config,
   lib,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkIf;
+  inherit (lib.strings) concatMapStringsSep;
   cfg = config.host.services.aiTools;
-in
-{
+in {
   config = mkIf (cfg.enable && cfg.ollama.enable) {
     services.ollama = {
       enable = true;
@@ -25,11 +24,11 @@ in
     hardware.nvidia-container-toolkit.enable = mkIf (cfg.ollama.acceleration == "cuda") true;
 
     # Pre-download models if specified
-    systemd.services.ollama-models = mkIf (cfg.ollama.models != [ ]) {
+    systemd.services.ollama-models = mkIf (cfg.ollama.models != []) {
       description = "Pre-download Ollama models";
-      after = [ "ollama.service" ];
-      wants = [ "ollama.service" ];
-      wantedBy = [ "multi-user.target" ];
+      after = ["ollama.service"];
+      wants = ["ollama.service"];
+      wantedBy = ["multi-user.target"];
 
       serviceConfig = {
         Type = "oneshot";
@@ -38,22 +37,20 @@ in
         Group = cfg.group;
       };
 
-      script =
-        let
-          modelPulls = concatMapStringsSep "\n" (model: "ollama pull ${model} || true") cfg.ollama.models;
-        in
-        ''
-          # Wait for Ollama to be ready
-          for i in {1..30}; do
-            if curl -s http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
-              break
-            fi
-            sleep 2
-          done
+      script = let
+        modelPulls = concatMapStringsSep "\n" (model: "ollama pull ${model} || true") cfg.ollama.models;
+      in ''
+        # Wait for Ollama to be ready
+        for i in {1..30}; do
+          if curl -s http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
+            break
+          fi
+          sleep 2
+        done
 
-          # Pull models
-          ${modelPulls}
-        '';
+        # Pull models
+        ${modelPulls}
+      '';
     };
   };
 }

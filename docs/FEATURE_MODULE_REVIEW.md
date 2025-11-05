@@ -2,6 +2,8 @@
 
 This document tracks the review and refinement of feature module boundaries (Task 4.6).
 
+> **Related Documentation:** See [`FEATURES.md`](./FEATURES.md) for the feature system user guide and available features.
+
 ## Purpose
 
 After living with the feature system for several months, identify pain points and determine if feature granularity is appropriate or needs adjustment. Refactor feature modules based on actual usage patterns.

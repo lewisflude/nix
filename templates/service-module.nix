@@ -6,12 +6,10 @@
   lib,
   pkgs,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkEnableOption mkOption mkIf types;
   cfg = config.services.SERVICE_NAME;
-in
-{
+in {
   options.services.SERVICE_NAME = {
     enable = mkEnableOption "SERVICE_NAME service";
 
@@ -41,7 +39,7 @@ in
 
     extraConfig = mkOption {
       type = types.attrs;
-      default = { };
+      default = {};
       description = "Additional configuration options";
     };
   };
@@ -55,7 +53,7 @@ in
       description = "SERVICE_NAME service user";
     };
 
-    users.groups.${cfg.group} = { };
+    users.groups.${cfg.group} = {};
 
     # Create data directory
     systemd.tmpfiles.rules = [
@@ -65,8 +63,8 @@ in
     # Systemd service
     systemd.services.SERVICE_NAME = {
       description = "SERVICE_NAME Service";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      wantedBy = ["multi-user.target"];
+      after = ["network.target"];
 
       serviceConfig = {
         Type = "simple";
@@ -82,12 +80,12 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.dataDir ];
+        ReadWritePaths = [cfg.dataDir];
       };
     };
 
     # Firewall configuration
-    networking.firewall.allowedTCPPorts = [ cfg.port ];
+    networking.firewall.allowedTCPPorts = [cfg.port];
 
     # Backup configuration (optional)
     # services.restic.backups.SERVICE_NAME = mkIf config.services.restic.server.enable {

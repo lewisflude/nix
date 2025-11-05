@@ -1,46 +1,48 @@
-# qBittorrent - BitTorrent client with optional VPN routing
+# qBittorrent - BitTorrent client
 {
   config,
   lib,
   pkgs,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkEnableOption mkOption mkIf types concatStringsSep mapAttrsToList isBool isList toString map filterAttrs;
+  inherit (lib.lists) optional;
   cfg = config.host.services.mediaManagement;
 
   # Generate qBittorrent configuration file from Nix options
   # Following the pattern from the article
-  generateConfig =
-    attrs:
+  generateConfig = attrs:
     concatStringsSep "\n\n" (
       mapAttrsToList (
-        section: keys:
-        let
+        section: keys: let
           lines = mapAttrsToList (
-            key: value:
-            "${key}=${
-              if isBool value then
-                (if value then "true" else "false")
-              else if isList value then
-                concatStringsSep ", " (map toString value)
-              else
-                toString value
+            key: value: "${key}=${
+              if isBool value
+              then
+                (
+                  if value
+                  then "true"
+                  else "false"
+                )
+              else if isList value
+              then concatStringsSep ", " (map toString value)
+              else toString value
             }"
           ) (filterAttrs (_: v: v != null) keys);
         in
-        if lines == [ ] then "" else "[${section}]\n" + concatStringsSep "\n" lines
-      ) (filterAttrs (_: v: v != { }) attrs)
+          if lines == []
+          then ""
+          else "[${section}]\n" + concatStringsSep "\n" lines
+      ) (filterAttrs (_: v: v != {}) attrs)
     );
 
   # Helper to get interfaceName
   # When VPN-Confinement is enabled, it handles routing automatically, so we don't need to set interfaceName
   interfaceNameValue =
-    if cfg.qbittorrent.bittorrent.interfaceName != null then
-      cfg.qbittorrent.bittorrent.interfaceName
+    if cfg.qbittorrent.bittorrent.interfaceName != null
+    then cfg.qbittorrent.bittorrent.interfaceName
     # VPN-Confinement handles routing via namespace, so no need to set interfaceName
-    else
-      null;
+    else null;
 
   # Check if VPN is enabled (needed for config generation)
   vpnEnabled = cfg.qbittorrent.vpn.enable;
@@ -52,12 +54,11 @@ let
   # VPN-Confinement provides network isolation at the system level, while this setting
   # provides an additional application-level kill switch.
   connectionNetworkInterfaceValue =
-    if cfg.qbittorrent.connection.networkInterface != null then
-      cfg.qbittorrent.connection.networkInterface
-    else if vpnEnabled then
-      cfg.qbittorrent.vpn.wireGuardInterfaceName
-    else
-      null;
+    if cfg.qbittorrent.connection.networkInterface != null
+    then cfg.qbittorrent.connection.networkInterface
+    else if vpnEnabled
+    then cfg.qbittorrent.vpn.wireGuardInterfaceName
+    else null;
 
   # Create the qBittorrent configuration file
   qbittorrentConf = pkgs.writeText "qBittorrent.conf" (generateConfig {
@@ -101,10 +102,14 @@ let
       "WebUI\\Username" = cfg.qbittorrent.webUI.username;
       "WebUI\\Port" = cfg.qbittorrent.webUI.port;
       "WebUI\\Address" =
-        if cfg.qbittorrent.webUI.address != null then
-          cfg.qbittorrent.webUI.address
+        if cfg.qbittorrent.webUI.address != null
+        then cfg.qbittorrent.webUI.address
         else
-          (if vpnEnabled then "*" else null);
+          (
+            if vpnEnabled
+            then "*"
+            else null
+          );
       "WebUI\\Password_PBKDF2" = cfg.qbittorrent.webUI.password;
       "WebUI\\CSRFProtection" = cfg.qbittorrent.webUI.csrfProtection;
       "WebUI\\ClickjackingProtection" = cfg.qbittorrent.webUI.clickjackingProtection;
@@ -124,12 +129,13 @@ let
   inherit (cfg.qbittorrent) configDir;
   # VPN namespace name (must match qbittorrent-vpn-confinement.nix)
   vpnNamespace = "qbittor"; # Max 7 chars for VPN-Confinement
-in
-{
+in {
   options.host.services.mediaManagement.qbittorrent = {
-    enable = mkEnableOption "qBittorrent BitTorrent client" // {
-      default = true;
-    };
+    enable =
+      mkEnableOption "qBittorrent BitTorrent client"
+      // {
+        default = true;
+      };
 
     configDir = mkOption {
       type = types.str;
@@ -137,7 +143,7 @@ in
       description = "Directory where qBittorrent stores its configuration.";
     };
 
-    package = mkPackageOption pkgs "qbittorrent" { };
+    package = mkPackageOption pkgs "qbittorrent" {};
 
     bittorrent = {
       protocol = mkOption {
@@ -430,28 +436,28 @@ in
     # Create config directory and qBittorrent directories
     # qBittorrent expects its config at $XDG_CONFIG_HOME/qBittorrent/qBittorrent.conf
     # With XDG_CONFIG_HOME=${configDir}, that's ${configDir}/qBittorrent/qBittorrent.conf
-    systemd.tmpfiles.rules = [
-      "d '${configDir}' 0700 ${cfg.user} ${cfg.group} -"
-      "d '${configDir}/qBittorrent' 0700 ${cfg.user} ${cfg.group} -"
-      # Create qBittorrent directory in user home (qBittorrent expects this)
-      "d '/var/lib/${cfg.user}/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
-      "d '/var/lib/${cfg.user}/.config/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
-      "d '/var/lib/${cfg.user}/.cache/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
-      "d '/var/lib/${cfg.user}/.local/share/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
-    ]
-    # Create download directories if they have defaults
-    ++ optional (
-      cfg.qbittorrent.bittorrent.tempPath != null
-    ) "d '${cfg.qbittorrent.bittorrent.tempPath}' 0775 ${cfg.user} ${cfg.group} -"
-    ++
-      optional (cfg.qbittorrent.bittorrent.finishedTorrentExportDirectory != null)
-        "d '${cfg.qbittorrent.bittorrent.finishedTorrentExportDirectory}' 0775 ${cfg.user} ${cfg.group} -";
+    systemd.tmpfiles.rules =
+      [
+        "d '${configDir}' 0700 ${cfg.user} ${cfg.group} -"
+        "d '${configDir}/qBittorrent' 0700 ${cfg.user} ${cfg.group} -"
+        # Create qBittorrent directory in user home (qBittorrent expects this)
+        "d '/var/lib/${cfg.user}/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
+        "d '/var/lib/${cfg.user}/.config/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
+        "d '/var/lib/${cfg.user}/.cache/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
+        "d '/var/lib/${cfg.user}/.local/share/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
+      ]
+      # Create download directories if they have defaults
+      ++ optional (
+        cfg.qbittorrent.bittorrent.tempPath != null
+      ) "d '${cfg.qbittorrent.bittorrent.tempPath}' 0775 ${cfg.user} ${cfg.group} -"
+      ++ optional (cfg.qbittorrent.bittorrent.finishedTorrentExportDirectory != null)
+      "d '${cfg.qbittorrent.bittorrent.finishedTorrentExportDirectory}' 0775 ${cfg.user} ${cfg.group} -";
 
     # Systemd service for qBittorrent
     systemd.services.qbittorrent = {
       description = "qBittorrent BitTorrent client";
-      after = [ "network.target" ];
-      wantedBy = [ "multi-user.target" ];
+      after = ["network.target"];
+      wantedBy = ["multi-user.target"];
 
       # VPN-Confinement integration
       # VPN-Confinement handles namespace setup automatically - no need to manually depend on a service
@@ -515,6 +521,6 @@ in
 
     # Open firewall port only when VPN is disabled
     # When VPN is enabled, VPN-Confinement handles port mappings via veth interface
-    networking.firewall.allowedTCPPorts = mkIf (!vpnEnabled) [ cfg.qbittorrent.webUI.port ];
+    networking.firewall.allowedTCPPorts = mkIf (!vpnEnabled) [cfg.qbittorrent.webUI.port];
   };
 }

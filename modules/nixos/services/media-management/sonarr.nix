@@ -3,12 +3,11 @@
   config,
   lib,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkEnableOption mkIf mkAfter;
+  inherit (lib.lists) optional;
   cfg = config.host.services.mediaManagement;
-in
-{
+in {
   options.host.services.mediaManagement.sonarr.enable =
     mkEnableOption "Sonarr TV show management"
     // {

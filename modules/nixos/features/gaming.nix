@@ -6,12 +6,11 @@
   lib,
   pkgs,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkIf mkForce;
+  inherit (lib.lists) optionals;
   cfg = config.host.features.gaming;
-in
-{
+in {
   config = mkIf cfg.enable {
     # Steam configuration with enhanced features
     programs.steam = mkIf cfg.steam {
@@ -21,8 +20,8 @@ in
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
       package = pkgs.steam.override {
-        extraPkgs =
-          pkgs: with pkgs; [
+        extraPkgs = pkgs:
+          with pkgs; [
             xorg.libXcursor
             xorg.libXi
             xorg.libXinerama
@@ -40,7 +39,7 @@ in
     # Sunshine game streaming service
     services.sunshine = mkIf cfg.steam {
       enable = true;
-      package = pkgs.sunshine.override { cudaSupport = true; };
+      package = pkgs.sunshine.override {cudaSupport = true;};
       autoStart = true;
       capSysAdmin = true;
       openFirewall = true;
@@ -70,8 +69,7 @@ in
     chaotic.mesa-git.enable = mkIf cfg.performance true;
 
     # Install gaming-related packages
-    environment.systemPackages =
-      with pkgs;
+    environment.systemPackages = with pkgs;
       [
         # Core gaming tools
         protonup-qt # Proton version manager

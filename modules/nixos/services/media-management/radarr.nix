@@ -3,15 +3,15 @@
   config,
   lib,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkEnableOption mkIf mkAfter optional;
   cfg = config.host.services.mediaManagement;
-in
-{
-  options.host.services.mediaManagement.radarr.enable = mkEnableOption "Radarr movie management" // {
-    default = true;
-  };
+in {
+  options.host.services.mediaManagement.radarr.enable =
+    mkEnableOption "Radarr movie management"
+    // {
+      default = true;
+    };
 
   config = mkIf (cfg.enable && cfg.radarr.enable) {
     services.radarr = {

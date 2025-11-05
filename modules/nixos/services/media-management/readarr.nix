@@ -3,15 +3,16 @@
   config,
   lib,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkEnableOption mkIf mkAfter;
+  inherit (lib.lists) optional;
   cfg = config.host.services.mediaManagement;
-in
-{
-  options.host.services.mediaManagement.readarr.enable = mkEnableOption "Readarr book management" // {
-    default = true;
-  };
+in {
+  options.host.services.mediaManagement.readarr.enable =
+    mkEnableOption "Readarr book management"
+    // {
+      default = true;
+    };
 
   config = mkIf (cfg.enable && cfg.readarr.enable) {
     services.readarr = {

@@ -23,12 +23,11 @@
   lib,
   pkgs,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkIf;
+  inherit (lib.lists) optional optionals;
   cfg = config.host.features.FEATURE_NAME;
-in
-{
+in {
   # Note: Options are defined centrally in modules/shared/host-options.nix
   # You need to add your feature options there first:
   #
@@ -58,8 +57,7 @@ in
 
     # Platform-specific package installation
     # Use optionals to conditionally include packages based on platform or feature flags
-    environment.systemPackages =
-      with pkgs;
+    environment.systemPackages = with pkgs;
       optionals pkgs.stdenv.isLinux [
         # Linux-specific packages
         # example-linux-package
@@ -78,7 +76,7 @@ in
     systemd.services = mkIf pkgs.stdenv.isLinux {
       example-service = {
         description = "Example service for FEATURE_NAME";
-        wantedBy = [ "multi-user.target" ];
+        wantedBy = ["multi-user.target"];
         serviceConfig = {
           Type = "simple";
           ExecStart = "${pkgs.example}/bin/example-daemon";

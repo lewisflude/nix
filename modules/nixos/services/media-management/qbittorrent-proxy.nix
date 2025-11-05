@@ -1,18 +1,14 @@
-# Reverse proxy for qBittorrent WebUI to enable external network access
-# VPN-Confinement's NAT rules only apply to bridge traffic, not external network traffic
-# This proxy listens on the external interface (192.168.1.210:8080) and forwards to the bridge gateway (192.168.15.1:8080)
+# qBittorrent Proxy - Reverse proxy for VPN-configured qBittorrent
 {
   config,
   lib,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkIf;
   cfg = config.host.services.mediaManagement;
   vpnEnabled = cfg.enable && cfg.qbittorrent.enable && cfg.qbittorrent.vpn.enable;
   webUIPort = cfg.qbittorrent.webUI.port or 8080;
-in
-{
+in {
   config = mkIf (vpnEnabled && cfg.qbittorrent.enable) {
     # Simple reverse proxy using nginx
     services.nginx = {
@@ -44,7 +40,7 @@ in
     # VPN-Confinement namespace is created automatically when vpnNamespaces is configured
     # No need to manually depend on a non-existent service
     systemd.services.nginx = {
-      after = [ "network.target" ];
+      after = ["network.target"];
     };
   };
 }

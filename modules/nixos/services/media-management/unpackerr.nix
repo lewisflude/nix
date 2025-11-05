@@ -1,13 +1,12 @@
-# Unpackerr - Archive extractor
-# Note: No official NixOS module yet, creating custom systemd service
+# Unpackerr - Extraction automation
 {
   config,
   lib,
   pkgs,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkEnableOption mkIf;
+  inherit (lib.lists) optional;
   cfg = config.host.services.mediaManagement;
 
   # Configuration file for Unpackerr
@@ -61,8 +60,7 @@ let
     delete_orig = false
     delete_delay = "5m"
   '';
-in
-{
+in {
   options.host.services.mediaManagement.unpackerr.enable =
     mkEnableOption "Unpackerr archive extractor"
     // {
@@ -71,19 +69,20 @@ in
 
   config = mkIf (cfg.enable && cfg.unpackerr.enable) {
     # Ensure unpackerr package is available
-    environment.systemPackages = [ pkgs.unpackerr ];
+    environment.systemPackages = [pkgs.unpackerr];
 
     # Create systemd service for unpackerr
     systemd.services.unpackerr = {
       description = "Unpackerr - Archive extractor for *arr apps";
-      after = [
-        "network.target"
-      ]
-      ++ optional cfg.radarr.enable "radarr.service"
-      ++ optional cfg.sonarr.enable "sonarr.service"
-      ++ optional cfg.lidarr.enable "lidarr.service"
-      ++ optional cfg.readarr.enable "readarr.service";
-      wantedBy = [ "multi-user.target" ];
+      after =
+        [
+          "network.target"
+        ]
+        ++ optional cfg.radarr.enable "radarr.service"
+        ++ optional cfg.sonarr.enable "sonarr.service"
+        ++ optional cfg.lidarr.enable "lidarr.service"
+        ++ optional cfg.readarr.enable "readarr.service";
+      wantedBy = ["multi-user.target"];
 
       serviceConfig = {
         Type = "simple";
@@ -98,7 +97,7 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.dataPath ];
+        ReadWritePaths = [cfg.dataPath];
       };
 
       environment = {

@@ -284,7 +284,7 @@ yamllint .
 ### Module Development
 
 1. **Use templates**: `nix run .#new-module`
-2. **Follow naming conventions**: See `docs/ARCHITECTURE.md`
+2. **Follow naming conventions**: See `docs/reference/architecture.md`
 3. **Add documentation**: Update relevant docs
 4. **Write tests**: Use NixOS tests when appropriate
 5. **Check evaluation**: `nix flake check`
