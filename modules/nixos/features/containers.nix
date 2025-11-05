@@ -4,12 +4,17 @@
   config,
   lib,
   ...
-}:
-with lib;
-let
+}: let
+  inherit
+    (lib)
+    mkEnableOption
+    mkOption
+    mkIf
+    mkDefault
+    types
+    ;
   cfg = config.host.features.containers;
-in
-{
+in {
   options.host.features.containers = {
     enable = mkEnableOption "container services";
 

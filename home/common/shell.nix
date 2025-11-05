@@ -8,9 +8,8 @@
   lib,
   inputs,
   ...
-}:
-let
-  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+}: let
+  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
   # Import nvfetcher-generated sources for ZSH plugins
   sources = import ./_sources/generated.nix {
@@ -19,37 +18,35 @@ let
   # Use FULL Catppuccin palette - access all semantic colors directly
   # Uses catppuccin.nix module palette when available, falls back to direct input access
   palette =
-    if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
+    if lib.hasAttrByPath ["catppuccin" "sources" "palette"] config
+    then
       # Use catppuccin.nix module palette if available
       (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
       .${config.catppuccin.flavor}.colors
-    else if inputs ? catppuccin then
+    else if inputs ? catppuccin
+    then
       # Try to get palette directly from catppuccin input
       # catppuccin/nix repository has palette.json at the root
       let
         catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
       in
-      if catppuccinSrc != null then
-        (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
-      else
-        throw "Cannot find catppuccin source (input exists but src/outPath not found)"
+        if catppuccinSrc != null
+        then (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
+        else throw "Cannot find catppuccin source (input exists but src/outPath not found)"
     else
       # Fallback to a default palette if catppuccin input is not available
       throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
-  secretAvailable = name: lib.hasAttrByPath [ "sops" "secrets" name "path" ] systemConfig;
-  secretPath = name: lib.attrByPath [ "sops" "secrets" name "path" ] "" systemConfig;
-  secretExportSnippet =
-    name: var:
-    let
-      path = secretPath name;
-    in
+  secretAvailable = name: lib.hasAttrByPath ["sops" "secrets" name "path"] systemConfig;
+  secretPath = name: lib.attrByPath ["sops" "secrets" name "path"] "" systemConfig;
+  secretExportSnippet = name: var: let
+    path = secretPath name;
+  in
     lib.optionalString (secretAvailable name) ''
       if [ -r ${lib.escapeShellArg path} ]; then
         export ${var}="$(cat ${lib.escapeShellArg path})"
       fi
     '';
-in
-{
+in {
   xdg.enable = true;
   programs = {
     fzf = {
@@ -61,18 +58,16 @@ in
         "--border"
       ];
       defaultCommand = lib.mkDefault (
-        if pkgs ? fd then
-          "${lib.getExe pkgs.fd} --hidden --strip-cwd-prefix --exclude .git"
-        else if pkgs ? ripgrep then
-          "${lib.getExe pkgs.ripgrep} --files --hidden --follow --glob '!.git'"
-        else
-          null
+        if pkgs ? fd
+        then "${lib.getExe pkgs.fd} --hidden --strip-cwd-prefix --exclude .git"
+        else if pkgs ? ripgrep
+        then "${lib.getExe pkgs.ripgrep} --files --hidden --follow --glob '!.git'"
+        else null
       );
       fileWidgetCommand = lib.mkDefault (
-        if pkgs ? fd then
-          "${lib.getExe pkgs.fd} --type f --hidden --strip-cwd-prefix --exclude .git"
-        else
-          null
+        if pkgs ? fd
+        then "${lib.getExe pkgs.fd} --type f --hidden --strip-cwd-prefix --exclude .git"
+        else null
       );
     };
     direnv = {
@@ -83,7 +78,7 @@ in
     atuin = {
       enable = true;
       enableZshIntegration = true;
-      flags = [ "--disable-up-arrow" ];
+      flags = ["--disable-up-arrow"];
     };
     zsh = {
       enable = true;
@@ -190,7 +185,7 @@ in
       };
       shellAliases = lib.mkMerge [
         {
-          switch = platformLib.systemRebuildCommand { hostName = host.hostname; };
+          switch = platformLib.systemRebuildCommand {hostName = host.hostname;};
           edit = "sudo -e";
           ls = "eza";
           l = "eza -l";
@@ -239,6 +234,11 @@ in
           nh-build = "nh os build";
           nh-build-dry = "nh os build --dry";
           nh-switch-dry = "nh os switch --dry";
+          # Check all errors in flake (evaluates all outputs, shows more errors than single evaluation)
+          nh-check-all = "nix flake check --show-trace ~/.config/nix";
+          # Evaluate system config with full trace (similar to nh os switch but shows detailed errors)
+          # Note: Nix evaluation is lazy and stops at first error, but this shows better trace info
+          nh-eval-system = "sudo nixos-rebuild build --show-trace --flake ~/.config/nix";
           lsh = "eza -la .*";
           lsz = "eza -la ***.{js,ts,jsx,tsx,py,go,rs,c,cpp,h,hpp}";
           lsconfig = "eza -la **/*.{json,yaml,yml,toml,ini,conf,cfg}";

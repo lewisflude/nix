@@ -303,7 +303,7 @@ nix build .#checks.x86_64-linux.nixosTests-<testname>
 
 1. **Module options** - Use `description` field
 2. **Complex configurations** - Add inline comments
-3. **Architecture decisions** - Update docs/ARCHITECTURE.md
+3. **Architecture decisions** - Update docs/reference/architecture.md
 4. **Usage examples** - Add to relevant docs
 5. **Breaking changes** - Update CHANGELOG and migration guides
 
@@ -319,15 +319,15 @@ nix build .#checks.x86_64-linux.nixosTests-<testname>
 
 ```
 docs/
-├── ARCHITECTURE.md          # System architecture
 ├── DX_GUIDE.md             # Developer experience guide
 ├── CONVENTIONAL_COMMENTS.md # Code review guidelines
-├── NIX_UPDATE_GUIDE.md     # Update procedures
+├── UPDATING.md             # Update procedures
 ├── examples/
 │   ├── conventional-commit-examples.md
 │   └── updating-example.md
 └── reference/
-    └── ...                 # Reference documentation
+    ├── architecture.md     # System architecture
+    └── ...                 # Other reference documentation
 ```
 
 ## Pull Request Guidelines

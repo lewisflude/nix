@@ -2,6 +2,11 @@
 
 This guide covers tools and techniques for analyzing what takes the most time when building your NixOS/nix-darwin configuration.
 
+> **Related Documentation:**
+>
+> - [`docs/reference/performance-monitoring.md`](reference/performance-monitoring.md) - Performance monitoring and tracking
+> - [`docs/PERFORMANCE_TUNING.md`](PERFORMANCE_TUNING.md) - Performance optimizations and configurations
+
 ## Quick Start
 
 **Profile your current build:**
@@ -106,6 +111,39 @@ Shows:
 ```bash
 ./scripts/utils/profile-modules.sh nixosConfigurations.jupiter
 ```
+
+### 3b. `profile-evaluation.sh` - Evaluation Time Profiling ⭐
+
+Comprehensive evaluation time profiling to identify slow modules and features.
+
+```bash
+./scripts/utils/profile-evaluation.sh [config-name]
+```
+
+Shows:
+
+- Baseline evaluation time with performance context
+- Most complex modules (by import count and file size)
+- Expensive operations (fetchGit, builtins.fetch, etc.)
+- Large option definition files
+- Specific optimization recommendations
+
+**Example:**
+
+```bash
+# Full profile
+./scripts/utils/profile-evaluation.sh nixosConfigurations.jupiter
+
+# Show comparison instructions
+./scripts/utils/profile-evaluation.sh --compare
+```
+
+**Use this to:**
+
+- Identify which modules are causing slow evaluation
+- Find expensive operations that run during evaluation
+- Get specific recommendations based on your config
+- Compare evaluation times with features disabled
 
 ### 4. `nix-monitor.sh` - System Monitoring
 
@@ -334,6 +372,10 @@ time nix eval --raw .#nixosConfigurations.jupiter.config.services.nginx.enable
 **Find which modules take the most time:**
 
 ```bash
+# Comprehensive evaluation profiling
+./scripts/utils/profile-evaluation.sh [config-name]
+
+# Or use module-level profiling
 ./scripts/utils/profile-modules.sh [config-name]
 ```
 
@@ -431,8 +473,57 @@ nix-tree .#nixosConfigurations.jupiter
 4. **Clean periodically** - Remove dead paths and optimize store
 5. **Monitor module count** - Too many modules can slow evaluation
 
+## System Update Script Performance
+
+The `system-update` script has been optimized for better performance and user experience.
+
+### Implemented Improvements
+
+1. **Timing Information** ✅
+   - Added `log_time()` function to track elapsed time for each operation
+   - Shows progress with timestamps: `[5s] Validating configuration…`
+   - Final summary: `✅ Done in 120s`
+
+2. **Early Validation** ✅
+   - Runs `nh os switch --dry` before building to catch errors early
+   - Saves time by failing fast instead of building then failing
+   - Can be disabled with `--no-validate` for faster runs
+
+3. **Fast Mode** ✅
+   - New `--fast` flag that:
+     - Skips validation (`--no-validate`)
+     - Disables nom (`--no-nom`) for faster builds
+   - Use when you're confident in your changes
+
+4. **Better nh Flag Usage** ✅
+   - Uses `NH_CLEAN_ARGS` environment variable for cleanup
+   - Adds `--no-nom` flag when `--fast` is used
+   - Respects environment variable configuration
+
+### Usage Examples
+
+```bash
+# Standard update (with validation)
+system-update
+
+# Fast update (skip validation, no nom)
+system-update --fast
+
+# Update without validation
+system-update --no-validate
+```
+
+### Expected Performance Gains
+
+- **Early validation**: Saves 30-60s by catching errors before building
+- **--no-nom flag**: Saves 5-15s per build (nom overhead)
+- **Better feedback**: Improves perceived performance with clear progress
+- **Total**: Can save 35-75s per update cycle
+
 ## Related Documentation
 
 - [Nix Manual - Performance](https://nixos.org/manual/nix/stable/advanced-topics/performance-tuning.html)
 - [NixOS Manual - Optimization](https://nixos.org/manual/nixos/stable/index.html#sec-optimise-store)
 - [Cachix Setup Guide](../CACHIX_FLAKEHUB_SETUP.md)
+- [Performance Monitoring](../reference/performance-monitoring.md) - Monitoring and tracking performance metrics
+- [Performance Tuning](../PERFORMANCE_TUNING.md) - Performance optimizations and configurations

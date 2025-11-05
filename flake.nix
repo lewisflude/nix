@@ -9,6 +9,11 @@
       "fetch-closure"
       "parse-toml-timestamps"
       "build-time-fetch-tree" # Enables build-time input fetching for inputs marked with buildTime = true
+      "blake3-hashes" # Faster hashing algorithm (BLAKE3)
+      "verified-fetches" # Verify git commit signatures via fetchGit
+      "pipe-operators" # |> and <| operators for cleaner Nix code
+      "no-url-literals" # Disallow unquoted URLs (prevents deprecated syntax)
+      "git-hashing" # Git hashing for content-addressed store objects
     ];
 
     # Binary caches for faster builds
@@ -18,7 +23,8 @@
     extra-substituters = [
       "https://lewisflude.cachix.org" # Personal cache - highest priority
       "https://aseipp-nix-cache.freetls.fastly.net" # Cache v2 beta (IPv6 + HTTP/2 support, faster TTFB, improved routing)
-      "https://cache.flakehub.com" # FlakeHub cache (for Determinate and other FlakeHub flakes)
+      # Note: FlakeHub cache removed - requires authentication and isn't needed
+      # FlakeHub flakes are downloaded from the API, not the binary cache
       "https://nix-community.cachix.org"
       "https://nixpkgs-wayland.cachix.org"
       "https://helix.cachix.org"
@@ -38,7 +44,7 @@
     ];
 
     extra-trusted-public-keys = [
-      "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM=" # FlakeHub cache (for Determinate Nix and other FlakeHub flakes)
+      # Note: FlakeHub cache key removed - cache requires authentication
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
       "helix.cachix.org-1:ejp9KQpR1FBI2onstMQ34yogDm4OgU2ru6lIwPvuCVs="
@@ -246,9 +252,8 @@
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
   };
 
-  outputs =
-    inputs@{ self, ... }:
-    inputs.flake-parts.lib.mkFlake { inherit inputs self; } {
+  outputs = inputs @ {self, ...}:
+    inputs.flake-parts.lib.mkFlake {inherit inputs self;} {
       imports = [
         ./flake-parts/core.nix
         inputs.nix-topology.flakeModule

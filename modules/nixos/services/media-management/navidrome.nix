@@ -1,14 +1,12 @@
-# Navidrome - Music server and streamer compatible with Subsonic/Airsonic
+# Navidrome - Music server
 {
   config,
   lib,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkEnableOption mkIf;
   cfg = config.host.services.mediaManagement;
-in
-{
+in {
   options.host.services.mediaManagement.navidrome.enable =
     mkEnableOption "Navidrome music server"
     // {

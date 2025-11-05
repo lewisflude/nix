@@ -81,7 +81,7 @@ nix-update --override-filename path/to/package.nix
 nix-update --build --override-filename path/to/package.nix
 ```
 
-See `docs/NIX_UPDATE_GUIDE.md` for full documentation.
+See the [nix-update section](#using-nix-update) below for full documentation.
 
 ## 📋 Current Manual References
 
@@ -190,6 +190,75 @@ Then update all plugins with:
 ./scripts/maintenance/update-zsh-plugins.sh
 ```
 
+## Using nix-update
+
+`nix-update` is the community standard for updating package versions and hashes in Nix. This is the recommended tool for updating `fetchFromGitHub` references and other package sources.
+
+### Quick Start
+
+```bash
+# Update a package to latest version
+nix-update package-name --flake
+
+# Update and commit
+nix-update package-name --flake --commit
+
+# Update to specific version
+nix-update package-name --version=1.2.3 --flake
+```
+
+### Common Use Cases
+
+**Update GitHub Package:**
+
+```bash
+# Update a GitHub package
+nix-update zsh-defer --flake --commit
+```
+
+**Update to Latest Branch:**
+
+```bash
+nix-update package-name --version=branch --flake
+nix-update package-name --version=branch=develop --flake
+```
+
+**Update and Test:**
+
+```bash
+nix-update package-name --flake --build
+nix-update package-name --flake --test
+```
+
+### Supported Sources
+
+- GitHub, GitLab, Codeberg, Sourcehut, BitBucket, Gitea
+- PyPI, crates.io, RubyGems.org
+- And more!
+
+### Supported Hash Types
+
+- `sha256`, `hash` - Regular source hashes
+- `vendorHash` - Go modules
+- `cargoHash`, `cargoSha256` - Rust packages
+- `npmDepsHash` - Node packages
+- `mvnHash` - Maven packages
+- And more!
+
+### Installation
+
+Already in nixpkgs:
+
+```bash
+# Run without installing
+nix-shell -p nix-update
+
+# Or add to your packages
+home.packages = [ pkgs.nix-update ];
+```
+
+**Full Documentation:** <https://github.com/Mic92/nix-update>
+
 ## 📚 Tool Reference
 
 ### Built-in Nix Commands
@@ -206,14 +275,11 @@ nix-prefetch-url <url>             # Get hash for URL
 nix-prefetch-git <repo>            # Get hash for git repo
 ```
 
-### Third-party Tools
+### Other Third-party Tools
 
 ```bash
 # nix-prefetch-github - Easy GitHub fetching
 nix-shell -p nix-prefetch-github --run "nix-prefetch-github owner repo"
-
-# nix-update - Automated package updates
-nix-shell -p nix-update --run "nix-update package-name"
 
 # nvfetcher - Batch source updates
 nix-shell -p nvfetcher --run "nvfetcher build"

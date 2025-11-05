@@ -56,28 +56,27 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 
 | Topic | Link | Description |
 |-------|------|-------------|
-| **🚀 Quick Start** | [`docs/guides/quick-start.md`](docs/guides/quick-start.md) | Get up and running in 5 minutes |
+| **🚀 Quick Start** | See [Quick Start](#-quick-start) above | Get up and running in 5 minutes |
 | **🗄️ Cachix & FlakeHub** | [`docs/CACHIX_FLAKEHUB_SETUP.md`](docs/CACHIX_FLAKEHUB_SETUP.md) | Set up binary cache and flake publishing |
 | **🎨 Developer Experience** | [`docs/DX_GUIDE.md`](docs/DX_GUIDE.md) | DX tooling, commits, and best practices |
-| **💻 Development** | [`docs/guides/development.md`](docs/guides/development.md) | Development environments and shells |
-| **⚙️ Configuration** | [`docs/guides/configuration.md`](docs/guides/configuration.md) | Adding packages, hosts, and modules |
-| **🔐 Secrets** | [`docs/guides/secrets.md`](docs/guides/secrets.md) | SOPS secrets management |
 | **🏗️ Architecture** | [`docs/reference/architecture.md`](docs/reference/architecture.md) | System design and patterns |
+| **⚙️ Features** | [`docs/FEATURES.md`](docs/FEATURES.md) | Feature-based configuration system |
 | **⌨️ Keyboard Layout** | [`docs/reference/keyboard-keymap.md`](docs/reference/keyboard-keymap.md) | WKL F13 TKL ergonomic keymap for software engineers |
-| **🤖 AI Assistants** | [`docs/ai-assistants/`](docs/ai-assistants/) | Claude, ChatGPT, Cursor guidance |
 | **🔄 Updating** | [`docs/UPDATING.md`](docs/UPDATING.md) | How to update dependencies and inputs |
 | **💬 Code Review** | [`docs/CONVENTIONAL_COMMENTS.md`](docs/CONVENTIONAL_COMMENTS.md) | Conventional comments for reviews |
-| **🔍 Build Profiling** | [`docs/BUILD_PROFILING.md`](docs/BUILD_PROFILING.md) | Debug and optimize build times |
+| **🔍 Build Profiling** | [`docs/BUILD_PROFILING.md`](docs/BUILD_PROFILING.md) | Tools for profiling builds |
+| **📊 Performance Tuning** | [`docs/PERFORMANCE_TUNING.md`](docs/PERFORMANCE_TUNING.md) | Performance optimizations and configurations |
+| **📈 Performance Monitoring** | [`docs/reference/performance-monitoring.md`](docs/reference/performance-monitoring.md) | Monitoring and tracking performance metrics |
 | **🤝 Contributing** | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to contribute to this repo |
 
 ## 🎯 Common Tasks
 
-- **Add a package:** See [Configuration Guide → Adding Packages](docs/guides/configuration.md#adding-packages)
+- **Add a package:** See [DX Guide](docs/DX_GUIDE.md) or [Features Guide](docs/FEATURES.md) for configuration patterns
 - **Set up dev environment:** `nix develop` - includes pre-commit hooks, formatters, and linters
 - **Update dependencies:** See [Updating Guide](docs/UPDATING.md) or run `nix run .#update-all`
 - **Format code:** `nixfmt .` for Nix, automatic via pre-commit hooks
 - **Write good commits:** See [DX Guide → Conventional Commits](docs/DX_GUIDE.md#conventional-commits)
-- **Troubleshoot issues:** See [Troubleshooting Guide](docs/guides/troubleshooting.md)
+- **Troubleshoot issues:** See [Build Profiling](docs/BUILD_PROFILING.md) or [Performance Tuning](docs/PERFORMANCE_TUNING.md)
 
 ## 🛠️ Maintenance
 

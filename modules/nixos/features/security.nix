@@ -3,12 +3,10 @@
   config,
   lib,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkIf;
   cfg = config.host.features.security;
-in
-{
+in {
   config = mkIf cfg.enable {
     # YubiKey support (pcscd service is Linux-only)
     services.pcscd.enable = mkIf cfg.yubikey true;

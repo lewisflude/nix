@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   config = {
     nix = {
       settings = {
@@ -50,10 +49,14 @@
         # Enables deferring source fetching until actual build time for inputs marked with buildTime = true
         # This speeds up flake evaluation by not fetching inputs during evaluation phase
         # Note: This is an experimental feature that must be enabled in both nixConfig and nix.settings
-        extra-experimental-features = [ "build-time-fetch-tree" ];
+        extra-experimental-features = [
+          "build-time-fetch-tree"
+          "cgroups" # Execute builds inside cgroups (NixOS/Linux only - better build isolation)
+        ];
 
-        # Note: Binary caches, trusted-public-keys, and other experimental-features are configured
+        # Note: Binary caches, trusted-public-keys, and most experimental-features are configured
         # in flake.nix nixConfig section. Those settings apply to both Darwin and NixOS.
+        # Platform-specific features like 'cgroups' are added here (NixOS only).
         # Determinate Nix's lazy-trees feature already speeds up evaluation significantly.
       };
 
@@ -74,7 +77,7 @@
       # Runs daily at 3:45 AM, after GC completes
       optimise = {
         automatic = true;
-        dates = [ "03:45" ];
+        dates = ["03:45"];
       };
     };
     environment = {
@@ -167,7 +170,7 @@
     # NixOS-specific systemd services
     systemd = {
       timers.nix-store-optimization = {
-        wantedBy = [ "timers.target" ];
+        wantedBy = ["timers.target"];
         timerConfig = {
           OnCalendar = "Mon 03:30:00";
           Persistent = true;
@@ -180,7 +183,7 @@
         };
       };
       timers.nix-duplicate-cleanup = {
-        wantedBy = [ "timers.target" ];
+        wantedBy = ["timers.target"];
         timerConfig = {
           OnCalendar = "Mon 04:00:00"; # Run after optimization
           Persistent = true;

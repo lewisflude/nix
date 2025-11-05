@@ -3,16 +3,16 @@
   config,
   lib,
   ...
-}:
-with lib;
-let
+}: let
+  inherit (lib) mkEnableOption mkIf;
   cfg = config.host.services.mediaManagement.prowlarr;
-in
-{
+in {
   options.host.services.mediaManagement.prowlarr = {
-    enable = mkEnableOption "Prowlarr indexer manager" // {
-      default = true;
-    };
+    enable =
+      mkEnableOption "Prowlarr indexer manager"
+      // {
+        default = true;
+      };
   };
 
   config = mkIf (config.host.services.mediaManagement.enable && cfg.enable) {
