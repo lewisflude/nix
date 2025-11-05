@@ -23,6 +23,16 @@
       # Performance optimizations for faster evaluation and builds
       builders-use-substitutes = true; # Allow builders to use substitutes
 
+      # High-throughput substitution parallelism (Tip 5)
+      # Maximizes parallel TCP connections and substitution jobs for faster binary cache fetching
+      http-connections = 64; # Parallel TCP connections (default: ~2-5, recommended: 64-128)
+      max-substitution-jobs = 64; # Concurrent substitution jobs (default: low, recommended: 64-128)
+
+      # Allow substitution for aggregator derivations (Tip 7)
+      # Forces Nix to use binary cache even for derivations marked allowSubstitutes = false
+      # Speeds up symlinkJoin and other lightweight aggregator builds
+      always-allow-substitutes = true;
+
       # Cache TTL for faster lookups
       narinfo-cache-positive-ttl = 30; # Cache positive narinfo lookups for 30 seconds
       narinfo-cache-negative-ttl = 1; # Cache negative narinfo lookups for 1 second

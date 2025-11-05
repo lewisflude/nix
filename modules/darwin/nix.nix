@@ -31,6 +31,16 @@
       # Download optimization (500MB buffer)
       download-buffer-size = 524288000
 
+      # High-throughput substitution parallelism (Tip 5)
+      # Maximizes parallel TCP connections and substitution jobs for faster binary cache fetching
+      http-connections = 64
+      max-substitution-jobs = 64
+
+      # Allow substitution for aggregator derivations (Tip 7)
+      # Forces Nix to use binary cache even for derivations marked allowSubstitutes = false
+      # Speeds up symlinkJoin and other lightweight aggregator builds
+      always-allow-substitutes = true
+
       # Build sandbox (security)
       sandbox = true
 
