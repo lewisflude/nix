@@ -262,13 +262,22 @@ in {
     systemd.services.qbittorrent =
       {
         # Ensure directories have correct ownership before starting
-        preStart = ''
-          # Fix ownership if directories exist with wrong permissions
-          # Use media group so qbittorrent can write when running with Group=media
-          if [ -d /var/lib/qBittorrent ]; then
-            chown -R qbittorrent:${cfg.group} /var/lib/qBittorrent || true
-          fi
-        '';
+        preStart =
+          ''
+            # Fix ownership if directories exist with wrong permissions
+            # Use media group so qbittorrent can write when running with Group=media
+            if [ -d /var/lib/qBittorrent ]; then
+              chown -R qbittorrent:${cfg.group} /var/lib/qBittorrent || true
+            fi
+          ''
+          + optionalString vpnEnabled ''
+            # CRITICAL: Add route to ProtonVPN NAT-PMP gateway via WireGuard interface
+            # VPN-Confinement's routing sends 10.2.0.1 through the bridge instead of WireGuard
+            # This route ensures qBittorrent's built-in NAT-PMP client can reach the gateway
+            # to detect and use the forwarded port. Without this, qBittorrent shows "firewalled"
+            # and cannot receive incoming connections because it doesn't know the forwarded port.
+            ${pkgs.iproute2}/bin/ip route add 10.2.0.1/32 dev qbittor0 2>/dev/null || true
+          '';
 
         # Use media as primary group so qbittorrent can write to media-owned directories
         # This is necessary because mergerfs with default_permissions checks primary group
@@ -276,10 +285,9 @@ in {
         serviceConfig.Group = mkOverride 1000 cfg.group;
       }
       // optionalAttrs vpnEnabled {
-        after = ["network.target"] ++ ["${vpnNamespace}.service"];
-        requires = ["${vpnNamespace}.service"];
-
+        after = ["network.target"];
         # VPN-Confinement integration
+        # VPN-Confinement handles namespace setup automatically - no need to manually depend on a service
         vpnConfinement = {
           enable = true;
           inherit vpnNamespace;

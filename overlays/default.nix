@@ -1,5 +1,30 @@
 # Overlay system with selective application
-# Overlays are organized by priority and platform
+#
+# PURPOSE:
+# This file centralizes all package overlays for the Nix configuration. Overlays are
+# organized by priority and platform, allowing selective application based on the
+# target system architecture.
+#
+# OVERLAY APPLICATION:
+# Overlays are applied in lib/system-builders.nix via functionsLib.mkOverlays, which
+# imports this file and applies all overlays to nixpkgs. The order of overlays matters
+# as later overlays can override earlier ones.
+#
+# PERFORMANCE CONSIDERATIONS:
+# Some overlays modify build flags (pamixer, mpd-fix) which cause cache misses.
+# Others (webkitgtk-compat, npm-packages) are pure aliases/additions with no impact.
+# See individual overlay files for detailed performance notes.
+#
+# ADDING NEW OVERLAYS:
+# 1. Create overlay file in this directory (e.g., my-overlay.nix)
+# 2. Import it in this file (e.g., `my-overlay = import ./my-overlay.nix;`)
+# 3. Add it to the appropriate section (Core, Application, Platform-Specific)
+# 4. Document performance impact and removal conditions in the overlay file
+#
+# REMOVAL GUIDELINES:
+# - Core overlays: Rarely removed (unstable, localPkgs)
+# - Application overlays: Can be removed when fixes are upstreamed
+# - Platform overlays: Only active on specific platforms
 {
   inputs,
   system,
@@ -7,6 +32,7 @@
   isLinux = system == "x86_64-linux" || system == "aarch64-linux";
 
   # Helper to make conditional overlays
+  # Returns the overlay if condition is true, otherwise returns a no-op overlay
   mkConditional = condition: overlay:
     if condition
     then overlay
@@ -23,8 +49,11 @@ in rec {
   };
 
   # === Application Overlays (always applied) ===
+  # These overlays provide custom packages and fixes
 
   # Auto-import all packages from ../pkgs (each subdirectory with a default.nix)
+  # This allows easy addition of new custom packages by creating a directory
+  # in pkgs/ with a default.nix file
   localPkgs = _final: prev: let
     pkgsDir = ../pkgs;
     # Read all entries in the pkgs directory
@@ -47,13 +76,12 @@ in rec {
         else prev.callPackage (pkgsDir + "/${name}") {}
     );
 
-  # Package fixes
-  pamixer = import ./pamixer.nix;
-  mpd-fix = import ./mpd-fix.nix;
-  # Promote npm packages (e.g., nx-latest) to top-level pkgs attributes
-  npm-packages = import ./npm-packages.nix;
-  # Compatibility overlay for removed webkitgtk package
-  webkitgtk-compat = import ./webkitgtk-compat.nix;
+  # Package fixes and compatibility overlays
+  # These overlays modify existing packages to fix build issues or provide compatibility
+  pamixer = import ./pamixer.nix; # Fixes ICU 76.1+ compatibility (C++17 flag)
+  mpd-fix = import ./mpd-fix.nix; # Fixes MPD io_uring issue on kernel 6.14.11
+  npm-packages = import ./npm-packages.nix; # Promotes NPM packages to top-level (e.g., nx-latest)
+  webkitgtk-compat = import ./webkitgtk-compat.nix; # Compatibility alias for removed webkitgtk
 
   # Essential tools
   nh = inputs.nh.overlays.default;

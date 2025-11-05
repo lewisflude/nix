@@ -1,5 +1,6 @@
 # Gaming feature module for NixOS
 # Controlled by host.features.gaming.*
+# Integrates Chaotic-Nyx gaming packages and performance optimizations
 {
   config,
   lib,
@@ -58,20 +59,74 @@ in {
       "vm.max_map_count" = 2147483642; # Needed for some games
     };
 
+    # Chaotic-Nyx gaming optimizations
+    # Use CachyOS kernel for gaming performance (if performance is enabled)
+    # Use mkForce to override the default kernel from boot.nix
+    boot.kernelPackages = mkIf cfg.performance (mkForce pkgs.linuxPackages_cachyos);
+
+    # Enable bleeding-edge Mesa drivers for better gaming performance
+    chaotic.mesa-git.enable = mkIf cfg.performance true;
+
     # Install gaming-related packages
     environment.systemPackages = with pkgs;
-      optionals cfg.steam [
+      [
+        # Core gaming tools
+        protonup-qt # Proton version manager
+        wine # Windows compatibility layer
+        winetricks # Wine utilities
+      ]
+      # Steam packages
+      ++ optionals cfg.steam [
         steamcmd
         steam-run
+        # Chaotic-Nyx bleeding-edge gaming packages
+        gamescope_git # Latest Gamescope for better performance
       ]
+      # Performance tools
       ++ optionals cfg.performance [
-        mangohud
-        gamemode
+        mangohud_git # Bleeding-edge MangoHud from Chaotic-Nyx (preferred over stable)
+        gamemode # Performance optimization daemon
+      ]
+      # Lutris game manager
+      ++ optionals cfg.lutris [
+        lutris
+      ]
+      # Emulators
+      ++ optionals cfg.emulators [
+        # Add popular emulators here
+        # dolphin-emu # GameCube/Wii
+        # pcsx2 # PlayStation 2
+        # rpcs3 # PlayStation 3
       ];
 
-    # Gamemode for performance
+    # Gamemode for performance optimization
     programs.gamemode = mkIf cfg.performance {
       enable = true;
+      settings = {
+        general = {
+          renice = 10;
+        };
+        gpu = {
+          apply_gpu_optimisations = "accept-responsibility";
+          gpu_device = 0;
+          # AMD performance level (adjust for NVIDIA if needed)
+          amd_performance_level = "high";
+        };
+      };
     };
+
+    # Graphics drivers & OpenGL support
+    hardware.graphics = mkIf cfg.enable {
+      enable = true;
+      enable32Bit = true; # For 32-bit games
+    };
+
+    # Assertions
+    assertions = [
+      {
+        assertion = cfg.emulators -> cfg.enable;
+        message = "Emulators require gaming feature to be enabled";
+      }
+    ];
   };
 }

@@ -171,9 +171,9 @@ and loads all required plugins.
 ### Style
 
 ```
-style(nix): format all files with alejandra
+style(nix): format all files with nixfmt
 
-Run alejandra formatter across entire codebase for consistent
+Run nixfmt formatter across entire codebase for consistent
 formatting.
 ```
 

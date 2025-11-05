@@ -176,4 +176,30 @@
       # nh handles sudo elevation internally, so no sudo prefix needed
       # Falls back to nixos-rebuild if nh is not available (though unlikely with programs.nh.enable)
     in "nh os switch ${flakePath}${hostSuffix}";
+
+  # Helper to build Home Manager extraSpecialArgs
+  # Reduces duplication between system-builders.nix and output-builders.nix
+  mkHomeManagerExtraSpecialArgs = {
+    inputs,
+    hostConfig,
+    virtualisationLib,
+    includeUserFields ? true,
+  }:
+    inputs
+    // hostConfig
+    // {
+      inherit inputs;
+      inherit (hostConfig) system;
+      hostSystem = hostConfig.system;
+      host = hostConfig;
+    }
+    // lib.optionalAttrs includeUserFields {
+      inherit (hostConfig) username useremail hostname;
+    }
+    // {
+      virtualisation = hostConfig.features.virtualisation or {};
+      modulesVirtualisation = virtualisationLib.mkModulesVirtualisationArgs {
+        hostVirtualisation = hostConfig.features.virtualisation or {};
+      };
+    };
 }

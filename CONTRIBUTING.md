@@ -48,7 +48,7 @@ Thank you for your interest in contributing! This document provides guidelines a
    nix flake check
 
    # Format code
-   alejandra .
+   nixfmt .
    ```
 
 ## Development Workflow
@@ -72,7 +72,7 @@ git checkout -b fix/your-bug-fix
 
 ```bash
 # Format Nix files
-alejandra .
+nixfmt .
 
 # Lint Nix files
 statix check .
@@ -334,7 +334,7 @@ docs/
 
 ### Before Submitting
 
-- [ ] Code is formatted (`alejandra .`)
+- [ ] Code is formatted (`nixfmt .`)
 - [ ] Code is linted (`statix check .`)
 - [ ] All checks pass (`nix flake check`)
 - [ ] Pre-commit hooks pass (`pre-commit run --all-files`)

@@ -171,7 +171,7 @@
   defaultShell = pkgs.mkShell {
     buildInputs = with pkgs; [
       # Nix tooling
-      alejandra # Nix formatter
+      nixfmt # Nix formatter
       deadnix # Find dead Nix code
       statix # Lints and suggestions for Nix
       nixpkgs-fmt # Alternative formatter
@@ -204,7 +204,7 @@
       echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
       echo ""
       echo "📦 Available Tools:"
-      echo "  • alejandra        - Format Nix files"
+      echo "  • nixfmt           - Format Nix files"
       echo "  • deadnix          - Find unused code"
       echo "  • statix           - Lint Nix files"
       echo "  • nix-tree         - Visualize dependencies"
@@ -220,7 +220,7 @@
       echo "🚀 Quick Commands:"
       echo "  • nix flake check             - Run all checks"
       echo "  • nix flake update            - Update all inputs"
-      echo "  • alejandra .                 - Format all files"
+      echo "  • nixfmt .                    - Format all files"
       echo "  • pre-commit run --all-files  - Run linters"
       echo ""
       echo "📚 Documentation:"
@@ -239,7 +239,7 @@
       export PATH="$PWD/scripts/utils:$PWD/scripts/maintenance:$PATH"
 
       # Set helpful aliases
-      alias fmt='alejandra .'
+      alias fmt='nixfmt .'
       alias lint='statix check .'
       alias check='nix flake check'
       alias update='nix flake update'

@@ -30,7 +30,7 @@ in {
       # Debugger
       lldb
     ]
-    ++ lib.optionals cfg.python [
+    ++ lib.optionals (cfg.python or false) [
       python313
       python313Packages.pip
       python313Packages.virtualenv
@@ -38,16 +38,16 @@ in {
       ruff
       pyright
     ]
-    ++ lib.optionals cfg.go [
+    ++ lib.optionals (cfg.go or false) [
       go
       gopls
       gotools
       go-tools
     ]
-    ++ lib.optionals cfg.node [
+    ++ lib.optionals (cfg.node or false) [
       nodejs_24
     ]
-    ++ lib.optionals cfg.lua [
+    ++ lib.optionals (cfg.lua or false) [
       luajit # Primary Lua interpreter (provides /bin/lua)
       (lib.lowPrio lua) # Fallback Lua 5.2 (lower priority to avoid conflict)
       luajitPackages.luarocks

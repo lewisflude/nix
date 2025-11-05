@@ -38,10 +38,11 @@ in {
       };
     };
 
-    # Ensure nginx starts after VPN namespace is ready
+    # Ensure nginx starts after network is ready
+    # VPN-Confinement namespace is created automatically when vpnNamespaces is configured
+    # No need to manually depend on a non-existent service
     systemd.services.nginx = {
-      after = ["qbittor.service"];
-      wants = ["qbittor.service"];
+      after = ["network.target"];
     };
   };
 }

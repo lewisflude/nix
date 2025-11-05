@@ -4,15 +4,16 @@
 }: let
   inherit (inputs) nixpkgs pre-commit-hooks home-manager;
   virtualisationLib = import ./virtualisation.nix {inherit (nixpkgs) lib;};
+  functionsLib = import ./functions.nix {inherit (nixpkgs) lib;};
   systems = builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
 in {
-  mkFormatters = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.alejandra);
+  mkFormatters = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt);
   mkChecks = nixpkgs.lib.genAttrs systems (system: {
     pre-commit-check = pre-commit-hooks.lib.${system}.run {
       src = ./.;
       hooks = {
         # Nix formatting and linting
-        alejandra.enable = true;
+        nixfmt.enable = true;
         deadnix.enable = true;
         statix.enable = true;
 
@@ -68,7 +69,6 @@ in {
   mkHomeConfigurations =
     builtins.mapAttrs (
       _name: hostConfig: let
-        functionsLib = import ./functions.nix {inherit (nixpkgs) lib;};
         pkgs = import nixpkgs {
           inherit (hostConfig) system;
           config = functionsLib.mkPkgsConfig;
@@ -80,17 +80,10 @@ in {
       in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs =
-            inputs
-            // hostConfig
-            // {
-              host = hostConfig;
-              hostSystem = hostConfig.system;
-              virtualisation = hostConfig.features.virtualisation or {};
-              modulesVirtualisation = virtualisationLib.mkModulesVirtualisationArgs {
-                hostVirtualisation = hostConfig.features.virtualisation or {};
-              };
-            };
+          extraSpecialArgs = functionsLib.mkHomeManagerExtraSpecialArgs {
+            inherit inputs hostConfig virtualisationLib;
+            includeUserFields = false;
+          };
           modules = [
             ../home
             inputs.niri.homeModules.niri
