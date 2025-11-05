@@ -1,7 +1,8 @@
 # Minimal Home Manager profile
 # Essential tools and configurations only, without optional features
 # Use this for servers or constrained environments
-{...}: {
+{ ... }:
+{
   imports = [
     ../shell.nix
     ../git.nix

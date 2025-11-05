@@ -1,6 +1,8 @@
-{lib}: let
+{ lib }:
+let
   inherit (lib) mkOption types optional;
-in {
+in
+{
   # Generate resource limit options for a container
   mkResourceOptions = defaults: {
     memory = mkOption {
@@ -26,7 +28,8 @@ in {
   };
 
   # Produce resource flags for podman/docker extraOptions
-  mkResourceFlags = resources:
+  mkResourceFlags =
+    resources:
     [
       "--memory=${resources.memory}"
       "--cpus=${resources.cpus}"
@@ -34,13 +37,14 @@ in {
     ++ optional (resources.memorySwap != null) "--memory-swap=${resources.memorySwap}";
 
   # Standard health-check flags helper
-  mkHealthFlags = {
-    cmd,
-    interval ? "30s",
-    timeout ? "10s",
-    retries ? "3",
-    startPeriod ? null,
-  }:
+  mkHealthFlags =
+    {
+      cmd,
+      interval ? "30s",
+      timeout ? "10s",
+      retries ? "3",
+      startPeriod ? null,
+    }:
     [
       "--health-cmd=${cmd}"
       "--health-interval=${interval}"

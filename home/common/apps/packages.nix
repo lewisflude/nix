@@ -3,11 +3,14 @@
   lib,
   system,
   ...
-}: let
-  platformLib = (import ../../../lib/functions.nix {inherit lib;}).withSystem system;
-in {
-  home.packages = with pkgs;
-  # Core development tools
+}:
+let
+  platformLib = (import ../../../lib/functions.nix { inherit lib; }).withSystem system;
+in
+{
+  home.packages =
+    with pkgs;
+    # Core development tools
     [
       claude-code
       pkgs.gemini-cli-bin
@@ -39,17 +42,18 @@ in {
       yaml-language-server
     ]
     # Platform-specific packages
-    ++ platformLib.platformPackages
-    # Linux-specific
-    [
-      musescore
-    ]
-    # Darwin-specific
-    [
-      xcodebuild
-      gnutar
-      gzip
-    ];
+    ++
+      platformLib.platformPackages
+        # Linux-specific
+        [
+          musescore
+        ]
+        # Darwin-specific
+        [
+          xcodebuild
+          gnutar
+          gzip
+        ];
 
   # programs.rustup.enable = true; # Not available in home-manager
 

@@ -1,7 +1,8 @@
 # Base profile
 # Essential user tools that should be available on all systems
 # These are always included regardless of feature flags
-{...}: {
+{ ... }:
+{
   imports = [
     # Core configuration
     ../shell.nix

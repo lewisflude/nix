@@ -1,4 +1,5 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   vsc = pkgs.vscode-extensions;
   themes = [
   ];
@@ -57,7 +58,8 @@
   devopsEngineer = essentials ++ devops ++ database;
   backend = essentials ++ extraLangs ++ database ++ devops;
   frontend = essentials ++ webDev;
-in {
+in
+{
   inherit extSets;
   extensions = essentials ++ extraLangs;
   inherit

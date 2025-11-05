@@ -4,38 +4,43 @@
   pkgs,
   lib,
   ...
-}: let
+}:
+let
   # Helper to create a basic test
   mkTest = import "${pkgs.path}/nixos/tests/make-test-python.nix";
 
   # Common test machine configuration
-  mkTestMachine = hostFeatures: {...}: {
-    imports = [
-      ../modules/shared
-      ../modules/nixos
-    ];
+  mkTestMachine =
+    hostFeatures:
+    { ... }:
+    {
+      imports = [
+        ../modules/shared
+        ../modules/nixos
+      ];
 
-    # Minimal boot config for VMs
-    boot.loader.grub.enable = false;
-    boot.loader.systemd-boot.enable = lib.mkForce false;
-    fileSystems."/" = {
-      device = "/dev/vda";
-      fsType = "ext4";
+      # Minimal boot config for VMs
+      boot.loader.grub.enable = false;
+      boot.loader.systemd-boot.enable = lib.mkForce false;
+      fileSystems."/" = {
+        device = "/dev/vda";
+        fsType = "ext4";
+      };
+
+      # Test host configuration
+      config.host = {
+        username = "testuser";
+        useremail = "test@example.com";
+        hostname = "test-machine";
+        features = hostFeatures;
+      };
+
+      # Disable services that don't work in VMs
+      services.xserver.enable = lib.mkForce false;
+      virtualisation.graphics = false;
     };
-
-    # Test host configuration
-    config.host = {
-      username = "testuser";
-      useremail = "test@example.com";
-      hostname = "test-machine";
-      features = hostFeatures;
-    };
-
-    # Disable services that don't work in VMs
-    services.xserver.enable = lib.mkForce false;
-    virtualisation.graphics = false;
-  };
-in {
+in
+{
   # Basic boot test - ensures system can boot
   basic-boot = mkTest {
     name = "basic-boot-test";
@@ -88,7 +93,7 @@ in {
   nix-config = mkTest {
     name = "nix-config-test";
 
-    nodes.machine = mkTestMachine {};
+    nodes.machine = mkTestMachine { };
 
     testScript = ''
       machine.start()

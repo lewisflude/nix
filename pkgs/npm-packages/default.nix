@@ -1,5 +1,6 @@
-{pkgs, ...}: {
-  nx-latest = pkgs.buildNpmPackage.override {nodejs = pkgs.nodejs_24;} rec {
+{ pkgs, ... }:
+{
+  nx-latest = pkgs.buildNpmPackage.override { nodejs = pkgs.nodejs_24; } rec {
     pname = "nx";
     version = "21.5.3";
     src = pkgs.fetchurl {
@@ -15,7 +16,7 @@
       description = "Smart monorepos · Fast CI";
       homepage = "https://nx.dev";
       license = licenses.mit;
-      maintainers = [maintainers.lewisflude];
+      maintainers = [ maintainers.lewisflude ];
       mainProgram = "nx";
     };
   };

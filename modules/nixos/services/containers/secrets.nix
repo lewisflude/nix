@@ -5,9 +5,11 @@
   lib,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.host.services.containers;
-in {
+in
+{
   options.host.services.containers.secrets = {
     sonarrApiKey = mkOption {
       type = types.nullOr types.str;

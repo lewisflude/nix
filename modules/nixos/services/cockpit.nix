@@ -3,9 +3,10 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   # Use config and lib to satisfy deadnix (required by NixOS module system)
-  _module.args = lib.mkIf (config == null) {};
+  _module.args = lib.mkIf (config == null) { };
   services.cockpit = {
     enable = true;
     port = 9090;

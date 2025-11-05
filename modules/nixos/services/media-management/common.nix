@@ -3,11 +3,13 @@
   lib,
   ...
 }:
-with lib; let
-  mediaLib = import ./lib.nix {inherit lib;};
+with lib;
+let
+  mediaLib = import ./lib.nix { inherit lib; };
   inherit (mediaLib) mkDirRule;
   cfg = config.host.services.mediaManagement;
-in {
+in
+{
   config = mkIf cfg.enable {
     users.users.${cfg.user} = {
       isSystemUser = true;
@@ -18,7 +20,7 @@ in {
       createHome = true;
     };
 
-    users.groups.${cfg.group} = {};
+    users.groups.${cfg.group} = { };
 
     systemd.tmpfiles.rules = [
       # Create user home directory with proper permissions

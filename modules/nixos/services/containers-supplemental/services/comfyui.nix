@@ -2,25 +2,24 @@
   config,
   lib,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     mkIf
     mkEnableOption
     mkOption
     types
     mkMerge
     ;
-  containersLib = import ../lib.nix {inherit lib;};
+  containersLib = import ../lib.nix { inherit lib; };
   inherit (containersLib) mkResourceOptions mkResourceFlags;
   cfg = config.host.services.containersSupplemental;
-in {
+in
+{
   options.host.services.containersSupplemental.comfyui = {
-    enable =
-      mkEnableOption "ComfyUI NVIDIA container"
-      // {
-        default = false;
-      };
+    enable = mkEnableOption "ComfyUI NVIDIA container" // {
+      default = false;
+    };
 
     image = mkOption {
       type = types.str;
@@ -61,12 +60,11 @@ in {
           "${cfg.comfyui.dataPath}/comfyui:/comfy/mnt"
           "${cfg.comfyui.dataPath}/basedir:/basedir"
         ];
-        ports = ["8188:8188"];
-        extraOptions =
-          [
-            "--device=nvidia.com/gpu=all"
-          ]
-          ++ mkResourceFlags cfg.comfyui.resources;
+        ports = [ "8188:8188" ];
+        extraOptions = [
+          "--device=nvidia.com/gpu=all"
+        ]
+        ++ mkResourceFlags cfg.comfyui.resources;
       };
 
       systemd.tmpfiles.rules = [
@@ -75,8 +73,8 @@ in {
       ];
 
       systemd.services.podman-comfyui-nvidia = {
-        wants = ["systemd-tmpfiles-setup.service"];
-        after = ["systemd-tmpfiles-setup.service"];
+        wants = [ "systemd-tmpfiles-setup.service" ];
+        after = [ "systemd-tmpfiles-setup.service" ];
         preStart = ''
           install -d -m 0755 -o ${toString cfg.uid} -g ${toString cfg.gid} \
             ${cfg.comfyui.dataPath}/comfyui \

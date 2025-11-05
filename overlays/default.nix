@@ -30,16 +30,15 @@
 {
   inputs,
   system,
-}: let
+}:
+let
   isLinux = system == "x86_64-linux" || system == "aarch64-linux";
 
   # Helper to make conditional overlays
   # Returns the overlay if condition is true, otherwise returns a no-op overlay
-  mkConditional = condition: overlay:
-    if condition
-    then overlay
-    else (_final: _prev: {});
-in rec {
+  mkConditional = condition: overlay: if condition then overlay else (_final: _prev: { });
+in
+rec {
   # === Core Overlays (always applied) ===
 
   # Unstable packages namespace
@@ -60,26 +59,27 @@ in rec {
   # Auto-import all packages from ../pkgs (each subdirectory with a default.nix)
   # This allows easy addition of new custom packages by creating a directory
   # in pkgs/ with a default.nix file
-  localPkgs = _final: prev: let
-    pkgsDir = ../pkgs;
-    # Read all entries in the pkgs directory
-    dirEntries = builtins.readDir pkgsDir;
-    # Filter for entries that are directories AND have a default.nix, all in one pass
-    validPkgs =
-      prev.lib.filterAttrs (
+  localPkgs =
+    _final: prev:
+    let
+      pkgsDir = ../pkgs;
+      # Read all entries in the pkgs directory
+      dirEntries = builtins.readDir pkgsDir;
+      # Filter for entries that are directories AND have a default.nix, all in one pass
+      validPkgs = prev.lib.filterAttrs (
         name: type: type == "directory" && builtins.pathExists (pkgsDir + "/${name}/default.nix")
-      )
-      dirEntries;
-    # Get the names of the valid packages
-    packageNames = builtins.attrNames validPkgs;
-  in
+      ) dirEntries;
+      # Get the names of the valid packages
+      packageNames = builtins.attrNames validPkgs;
+    in
     # Build only the valid packages
     # Pass inputs only to packages that explicitly need it (like ghostty)
     prev.lib.genAttrs packageNames (
       name:
-        if name == "ghostty"
-        then prev.callPackage (pkgsDir + "/${name}") {inherit inputs;}
-        else prev.callPackage (pkgsDir + "/${name}") {}
+      if name == "ghostty" then
+        prev.callPackage (pkgsDir + "/${name}") { inherit inputs; }
+      else
+        prev.callPackage (pkgsDir + "/${name}") { }
     );
 
   # Package fixes and compatibility overlays
@@ -91,19 +91,16 @@ in rec {
 
   # Essential tools (conditional on input existence)
   nh =
-    if inputs ? nh && inputs.nh ? overlays
-    then inputs.nh.overlays.default
-    else (_final: _prev: {});
+    if inputs ? nh && inputs.nh ? overlays then inputs.nh.overlays.default else (_final: _prev: { });
   nur =
-    if inputs ? nur && inputs.nur ? overlays
-    then inputs.nur.overlays.default
-    else (_final: _prev: {});
+    if inputs ? nur && inputs.nur ? overlays then inputs.nur.overlays.default else (_final: _prev: { });
 
   # Infrastructure visualization (conditional on input existence)
   nix-topology =
-    if inputs ? nix-topology && inputs.nix-topology ? overlays
-    then inputs.nix-topology.overlays.default
-    else (_final: _prev: {});
+    if inputs ? nix-topology && inputs.nix-topology ? overlays then
+      inputs.nix-topology.overlays.default
+    else
+      (_final: _prev: { });
 
   # === Latest Flake Packages ===
   # Code editors with bleeding-edge features
@@ -114,17 +111,20 @@ in rec {
         && inputs.helix ? packages
         && inputs.helix.packages ? ${system}
         && inputs.helix.packages.${system} ? default
-      then inputs.helix.packages.${system}.default
-      else prev.helix;
+      then
+        inputs.helix.packages.${system}.default
+      else
+        prev.helix;
     # Using stable zed-editor from nixpkgs instead (for cached binaries)
     # zed-editor = inputs.zed-editor.packages.${system}.default or prev.zed-editor;
   };
 
   # Rust toolchain overlay (provides latest Rust, rust-analyzer, etc.)
   rust-overlay =
-    if inputs ? rust-overlay && inputs.rust-overlay ? overlays
-    then inputs.rust-overlay.overlays.default
-    else (_final: _prev: {});
+    if inputs ? rust-overlay && inputs.rust-overlay ? overlays then
+      inputs.rust-overlay.overlays.default
+    else
+      (_final: _prev: { });
 
   # Git tools with latest features
   flake-git-tools = _final: prev: {
@@ -134,8 +134,10 @@ in rec {
         && inputs.lazygit ? packages
         && inputs.lazygit.packages ? ${system}
         && inputs.lazygit.packages.${system} ? default
-      then inputs.lazygit.packages.${system}.default
-      else prev.lazygit;
+      then
+        inputs.lazygit.packages.${system}.default
+      else
+        prev.lazygit;
   };
 
   # CLI tools with latest improvements
@@ -146,28 +148,30 @@ in rec {
         && inputs.atuin ? packages
         && inputs.atuin.packages ? ${system}
         && inputs.atuin.packages.${system} ? default
-      then inputs.atuin.packages.${system}.default
-      else prev.atuin;
+      then
+        inputs.atuin.packages.${system}.default
+      else
+        prev.atuin;
   };
 
   # === Platform-Specific Overlays ===
 
   # Audio production packages (Linux-only)
   audio-nix = mkConditional (isLinux && inputs ? audio-nix && inputs.audio-nix ? overlays) (
-    if inputs ? audio-nix && inputs.audio-nix ? overlays
-    then inputs.audio-nix.overlays.default
-    else (_final: _prev: {})
+    if inputs ? audio-nix && inputs.audio-nix ? overlays then
+      inputs.audio-nix.overlays.default
+    else
+      (_final: _prev: { })
   );
 
   # Linux-only
   niri = mkConditional (isLinux && inputs ? niri && inputs.niri ? overlays) (
-    if inputs ? niri && inputs.niri ? overlays
-    then inputs.niri.overlays.niri
-    else (_final: _prev: {})
+    if inputs ? niri && inputs.niri ? overlays then inputs.niri.overlays.niri else (_final: _prev: { })
   );
   nvidia-patch = mkConditional (isLinux && inputs ? nvidia-patch && inputs.nvidia-patch ? overlays) (
-    if inputs ? nvidia-patch && inputs.nvidia-patch ? overlays
-    then inputs.nvidia-patch.overlays.default
-    else (_final: _prev: {})
+    if inputs ? nvidia-patch && inputs.nvidia-patch ? overlays then
+      inputs.nvidia-patch.overlays.default
+    else
+      (_final: _prev: { })
   );
 }

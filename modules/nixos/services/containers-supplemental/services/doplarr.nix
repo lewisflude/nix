@@ -2,15 +2,15 @@
   config,
   lib,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     mkIf
     mkEnableOption
     mkOption
     types
     ;
-  containersLib = import ../lib.nix {inherit lib;};
+  containersLib = import ../lib.nix { inherit lib; };
   inherit (containersLib) mkResourceOptions mkResourceFlags;
 
   cfg = config.host.services.containersSupplemental;
@@ -20,13 +20,12 @@
     PGID = toString cfg.gid;
     TZ = cfg.timezone;
   };
-in {
+in
+{
   options.host.services.containersSupplemental.doplarr = {
-    enable =
-      mkEnableOption "Doplarr Discord bot"
-      // {
-        default = false;
-      };
+    enable = mkEnableOption "Doplarr Discord bot" // {
+      default = false;
+    };
 
     resources = mkResourceOptions {
       memory = "128m";
@@ -65,21 +64,18 @@ in {
   config = mkIf (cfg.enable && cfg.doplarr.enable) {
     virtualisation.oci-containers.containers.doplarr = {
       image = "ghcr.io/hotio/doplarr:release-3.7.0";
-      environment =
-        commonEnv
-        // {
-          DISCORD_TOKEN = cfg.doplarr.discordToken;
-          SONARR_API_KEY = cfg.doplarr.sonarrApiKey;
-          RADARR_API_KEY = cfg.doplarr.radarrApiKey;
-          SONARR_URL = "http://localhost:8989";
-          RADARR_URL = "http://localhost:7878";
-        };
-      volumes = ["${cfg.configPath}/doplarr:/config"];
-      extraOptions =
-        [
-          "--network=host"
-        ]
-        ++ mkResourceFlags cfg.doplarr.resources;
+      environment = commonEnv // {
+        DISCORD_TOKEN = cfg.doplarr.discordToken;
+        SONARR_API_KEY = cfg.doplarr.sonarrApiKey;
+        RADARR_API_KEY = cfg.doplarr.radarrApiKey;
+        SONARR_URL = "http://localhost:8989";
+        RADARR_URL = "http://localhost:7878";
+      };
+      volumes = [ "${cfg.configPath}/doplarr:/config" ];
+      extraOptions = [
+        "--network=host"
+      ]
+      ++ mkResourceFlags cfg.doplarr.resources;
     };
 
     systemd.tmpfiles.rules = [

@@ -4,7 +4,8 @@
   inputs,
   lib,
   ...
-}: {
+}:
+{
   imports = lib.optionals (inputs ? nixos-hardware && inputs.nixos-hardware ? nixosModules) [
     inputs.nixos-hardware.nixosModules.common-cpu-intel
 

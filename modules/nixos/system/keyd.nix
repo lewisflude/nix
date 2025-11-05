@@ -17,7 +17,7 @@ _: {
     enable = true;
     keyboards.mnk88 = {
       # MNK88 keyboard IDs: vendor=19280 (0x4b50), product=34816 (0x8800)
-      ids = ["4b50:8800"];
+      ids = [ "4b50:8800" ];
       settings = {
         # Global timing configuration
         # Based on research: 200ms balances false positives/negatives
@@ -91,8 +91,8 @@ _: {
 
   # Ensure keyd starts early in the boot process
   systemd.services.keyd = {
-    wantedBy = ["sysinit.target"];
+    wantedBy = [ "sysinit.target" ];
     # Ensures keyd runs before the graphical login manager
-    before = ["display-manager.service"];
+    before = [ "display-manager.service" ];
   };
 }

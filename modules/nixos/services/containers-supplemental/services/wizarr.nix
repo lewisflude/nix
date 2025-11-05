@@ -2,18 +2,18 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   inherit (lib) mkIf mkEnableOption;
-  containersLib = import ../lib.nix {inherit lib;};
+  containersLib = import ../lib.nix { inherit lib; };
   inherit (containersLib) mkResourceOptions mkResourceFlags mkHealthFlags;
   cfg = config.host.services.containersSupplemental;
-in {
+in
+{
   options.host.services.containersSupplemental.wizarr = {
-    enable =
-      mkEnableOption "Wizarr invitation system"
-      // {
-        default = true;
-      };
+    enable = mkEnableOption "Wizarr invitation system" // {
+      default = true;
+    };
 
     resources = mkResourceOptions {
       memory = "256m";
@@ -27,8 +27,8 @@ in {
       environment = {
         TZ = cfg.timezone;
       };
-      volumes = ["${cfg.configPath}/wizarr:/data/database"];
-      ports = ["5690:5690"];
+      volumes = [ "${cfg.configPath}/wizarr:/data/database" ];
+      ports = [ "5690:5690" ];
       extraOptions =
         mkHealthFlags {
           cmd = "wget --no-verbose --tries=1 --spider http://localhost:5690/ || exit 1";

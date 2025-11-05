@@ -4,10 +4,13 @@
   system,
   inputs,
   ...
-}: let
-  platformLib = (import ../../../lib/functions.nix {inherit lib;}).withSystem system;
-in {
-  home.packages = with pkgs;
+}:
+let
+  platformLib = (import ../../../lib/functions.nix { inherit lib; }).withSystem system;
+in
+{
+  home.packages =
+    with pkgs;
     [
       # Core CLI tooling
       git
@@ -32,16 +35,17 @@ in {
       nix-prefetch-github # Fetch GitHub hashes
       nvfetcher # Batch update sources from TOML
     ]
-    ++ lib.optionals
-    (
-      inputs ? flakehub
-      && inputs.flakehub ? packages
-      && inputs.flakehub.packages ? ${system}
-      && inputs.flakehub.packages.${system} ? default
-    )
-    [
-      inputs.flakehub.packages.${system}.default
-    ]
+    ++
+      lib.optionals
+        (
+          inputs ? flakehub
+          && inputs.flakehub ? packages
+          && inputs.flakehub.packages ? ${system}
+          && inputs.flakehub.packages.${system} ? default
+        )
+        [
+          inputs.flakehub.packages.${system}.default
+        ]
     ++ [
       # Development helpers
       # Note: rustup and build tools are now in devShells.
@@ -57,14 +61,15 @@ in {
       # Language servers
       yaml-language-server
     ]
-    ++ platformLib.platformPackages
-    [
-      # musescore moved to packages.nix to avoid duplication
-      xdg-utils
-    ]
-    [
-      xcodebuild
-      gnutar
-      gzip
-    ];
+    ++
+      platformLib.platformPackages
+        [
+          # musescore moved to packages.nix to avoid duplication
+          xdg-utils
+        ]
+        [
+          xcodebuild
+          gnutar
+          gzip
+        ];
 }

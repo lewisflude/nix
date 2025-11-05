@@ -2,10 +2,11 @@
 # deadnix: skip-file
 {
   fetchgit,
-  # deadnix: ignore
-  # deadnix: ignore
-  # deadnix: ignore
-}: {
+# deadnix: ignore
+# deadnix: ignore
+# deadnix: ignore
+}:
+{
   zsh-abbr = {
     pname = "zsh-abbr";
     version = "13b34cdc29d8b22323fa2079193ea1529723747c";
@@ -15,7 +16,7 @@
       fetchSubmodules = false;
       deepClone = false;
       leaveDotGit = false;
-      sparseCheckout = [];
+      sparseCheckout = [ ];
       sha256 = "sha256-F1IIvSzXDuneqE5tYJPP6JmiAFEGqZu5lFzevQLsRrQ=";
     };
     date = "2025-08-19";
@@ -29,7 +30,7 @@
       fetchSubmodules = false;
       deepClone = false;
       leaveDotGit = false;
-      sparseCheckout = [];
+      sparseCheckout = [ ];
       sha256 = "sha256-s3TBAsXOpmiXMAQkbaS5de0t0hNC1EzUUb0ZG+p9keE=";
     };
     date = "2025-06-23";
@@ -43,7 +44,7 @@
       fetchSubmodules = false;
       deepClone = false;
       leaveDotGit = false;
-      sparseCheckout = [];
+      sparseCheckout = [ ];
       sha256 = "sha256-3zvOgIi+q7+sTXrT+r/4v98qjeiEL4Wh64rxBYnwJvQ=";
     };
     date = "2024-07-14";
@@ -57,7 +58,7 @@
       fetchSubmodules = false;
       deepClone = false;
       leaveDotGit = false;
-      sparseCheckout = [];
+      sparseCheckout = [ ];
       sha256 = "sha256-JAC9u7IzkW0b7J43w4c+yLuPGdvMtxBlobrQwlyvVcM=";
     };
     date = "2025-01-09";
@@ -71,7 +72,7 @@
       fetchSubmodules = false;
       deepClone = false;
       leaveDotGit = false;
-      sparseCheckout = [];
+      sparseCheckout = [ ];
       sha256 = "sha256-MFlvAnPCknSgkW3RFA8pfxMZZS/JbyF3aMsJj9uHHVU=";
     };
     date = "2024-02-10";
@@ -85,7 +86,7 @@
       fetchSubmodules = false;
       deepClone = false;
       leaveDotGit = false;
-      sparseCheckout = [];
+      sparseCheckout = [ ];
       sha256 = "sha256-u3abhv9ewq3m4QsnsxT017xdlPm3dYq5dqHNmQhhcpI=";
     };
     date = "2025-07-10";
@@ -99,7 +100,7 @@
       fetchSubmodules = false;
       deepClone = false;
       leaveDotGit = false;
-      sparseCheckout = [];
+      sparseCheckout = [ ];
       sha256 = "sha256-m3m+ErBakBMrBsoiYgI8AdJZwXgcpz4C9hIM5Q+6lO4=";
     };
     date = "2025-03-23";

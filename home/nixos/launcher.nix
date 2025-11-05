@@ -4,30 +4,32 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   # Use FULL Catppuccin palette - access all semantic colors
   # Uses catppuccin.nix module palette when available, falls back to direct input access
   catppuccinPalette =
-    if lib.hasAttrByPath ["catppuccin" "sources" "palette"] config
-    then
+    if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
       # Use catppuccin.nix module palette if available
       (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
       .${config.catppuccin.flavor}.colors
-    else if inputs ? catppuccin
-    then
+    else if inputs ? catppuccin then
       # Try to get palette directly from catppuccin input
       # catppuccin/nix repository has palette.json at the root
       let
         catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
       in
-        if catppuccinSrc != null
-        then (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
-        else throw "Cannot find catppuccin source (input exists but src/outPath not found)"
-    else throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
+      if catppuccinSrc != null then
+        (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
+      else
+        throw "Cannot find catppuccin source (input exists but src/outPath not found)"
+    else
+      throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
 
   # Use Catppuccin colors directly for accurate theming
   palette = catppuccinPalette;
-in {
+in
+{
   programs.fuzzel = {
     enable = true;
     settings = {

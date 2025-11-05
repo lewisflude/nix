@@ -6,11 +6,11 @@
   system,
   hostSystem,
   ...
-}: let
+}:
+let
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
-  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
-  inherit
-    (lib)
+  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+  inherit (lib)
     concatStringsSep
     mapAttrsToList
     escapeShellArg
@@ -96,22 +96,25 @@
         "''${extra_args[@]}" -c "$OUT_LINK/bin/rustdocs_mcp_server" "$@"
     '';
   };
-  mkAddJsonCmd = name: serverCfg: let
-    json = builtins.toJSON (
-      {
-        type = "stdio";
-        args = serverCfg.args or [];
-        env = serverCfg.env or {};
-      }
-      // {
-        inherit (serverCfg) command;
-      }
-    );
-    jsonArg = escapeShellArg json;
-  in ''
-    claude mcp remove ${escapeShellArg name} --scope user >/dev/null 2>&1 || true
-    claude mcp add-json ${escapeShellArg name} ${jsonArg} --scope user
-  '';
+  mkAddJsonCmd =
+    name: serverCfg:
+    let
+      json = builtins.toJSON (
+        {
+          type = "stdio";
+          args = serverCfg.args or [ ];
+          env = serverCfg.env or { };
+        }
+        // {
+          inherit (serverCfg) command;
+        }
+      );
+      jsonArg = escapeShellArg json;
+    in
+    ''
+      claude mcp remove ${escapeShellArg name} --scope user >/dev/null 2>&1 || true
+      claude mcp add-json ${escapeShellArg name} ${jsonArg} --scope user
+    '';
   declaredNames = mapAttrsToList (n: _: escapeShellArg n) config.services.mcp.servers;
   addCommands = concatStringsSep "\n" (mapAttrsToList mkAddJsonCmd config.services.mcp.servers);
   registerScript = pkgs.writeShellScript "mcp-register" ''
@@ -173,7 +176,8 @@
     ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y tritlo/lsp-mcp --help >/dev/null 2>&1 || true
     echo "[mcp-warm] Warm-up complete."
   '';
-in {
+in
+{
   home = {
     packages = with pkgs; [
       uv
@@ -188,10 +192,10 @@ in {
       (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs).pkgs.typescript-language-server
       (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs).pkgs.typescript
     ];
-    activation.mcpWarm = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    activation.mcpWarm = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       ${warmScript}
     '';
-    activation.setupClaudeMcp = lib.hm.dag.entryAfter ["mcpWarm"] ''
+    activation.setupClaudeMcp = lib.hm.dag.entryAfter [ "mcpWarm" ] ''
       ${registerScript}
     '';
   };
@@ -210,7 +214,7 @@ in {
     servers = {
       github = {
         command = "${githubWrapper}/bin/github-mcp-wrapper";
-        args = [];
+        args = [ ];
         port = 11434;
       };
       memory = {
@@ -242,7 +246,7 @@ in {
       };
       kagi = {
         command = "${kagiWrapper}/bin/kagi-mcp-wrapper";
-        args = [];
+        args = [ ];
         port = 11431;
       };
       fetch = {
@@ -285,7 +289,7 @@ in {
       };
       openai = {
         command = "${openaiWrapper}/bin/openai-mcp-wrapper";
-        args = [];
+        args = [ ];
         port = 11439;
       };
       rust-docs-bevy = {
@@ -302,8 +306,8 @@ in {
   systemd.user.services.mcp-claude-register = lib.mkIf isLinux {
     Unit = {
       Description = "Register MCP servers for Claude CLI (idempotent)";
-      After = ["graphical-session.target"];
-      PartOf = ["graphical-session.target"];
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
     };
     Service = {
       Type = "oneshot";
@@ -316,13 +320,13 @@ in {
       RestartSec = "30";
     };
     Install = {
-      WantedBy = ["default.target"];
+      WantedBy = [ "default.target" ];
     };
   };
   systemd.user.services.mcp-warm = lib.mkIf isLinux {
     Unit = {
       Description = "Warm MCP servers (build binaries, prefetch packages)";
-      After = ["network-online.target"];
+      After = [ "network-online.target" ];
     };
     Service = {
       Type = "oneshot";
@@ -333,7 +337,7 @@ in {
       ];
     };
     Install = {
-      WantedBy = ["default.target"];
+      WantedBy = [ "default.target" ];
     };
   };
 }

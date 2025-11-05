@@ -1,6 +1,7 @@
 # Native NixOS Media Management Stack
 # Uses official NixOS modules instead of containers
-{...}: {
+{ ... }:
+{
   imports = [
     ./options.nix
     ./common.nix

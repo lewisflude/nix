@@ -49,8 +49,8 @@ pog.pog {
     gum # For interactive prompts
   ];
 
-  script = helpers:
-    with helpers; ''
+  script =
+    helpers: with helpers; ''
       REPO_ROOT="${config-root}"
       MODULE_TYPE="$type"
       MODULE_NAME="$name"

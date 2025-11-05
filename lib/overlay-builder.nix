@@ -6,7 +6,9 @@
 {
   inputs,
   system,
-}: final: prev: let
+}:
+final: prev:
+let
   # Import all overlays for this system
   overlaySet = import ../overlays {
     inherit inputs;
@@ -21,6 +23,6 @@
   # of all previous overlays applied
   inherit (prev.lib) composeExtensions foldl';
 in
-  # Apply all overlays by folding composeExtensions
-  # This is the standard nixpkgs way to compose multiple overlays
-  (foldl' composeExtensions (_: _: {}) overlayList) final prev
+# Apply all overlays by folding composeExtensions
+# This is the standard nixpkgs way to compose multiple overlays
+(foldl' composeExtensions (_: _: { }) overlayList) final prev

@@ -19,10 +19,8 @@
 _final: prev: {
   pamixer = prev.pamixer.overrideAttrs (oldAttrs: {
     # Ensure C++17 is used for compilation
-    env =
-      (oldAttrs.env or {})
-      // {
-        NIX_CFLAGS_COMPILE = (oldAttrs.env.NIX_CFLAGS_COMPILE or "") + " -std=c++17";
-      };
+    env = (oldAttrs.env or { }) // {
+      NIX_CFLAGS_COMPILE = (oldAttrs.env.NIX_CFLAGS_COMPILE or "") + " -std=c++17";
+    };
   });
 }

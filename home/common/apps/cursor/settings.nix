@@ -2,9 +2,11 @@
   pkgs,
   constants,
   ...
-}: let
+}:
+let
   inherit (constants) commonIgnores watcherIgnores;
-in {
+in
+{
   userSettings = {
     "editor.fontSize" = 14;
     "editor.lineHeight" = 1.5;
@@ -40,7 +42,7 @@ in {
     "workbench.reduceMotion" = "on";
     "workbench.enableExperiments" = false;
     "git.autoRepositoryDetection" = "subFolders";
-    "git.scanRepositories" = [];
+    "git.scanRepositories" = [ ];
     "typescript.preferences.includePackageJsonAutoImports" = "on";
     "typescript.suggest.autoImports" = true;
     "workbench.experimental.settingsProfiles.enabled" = false;

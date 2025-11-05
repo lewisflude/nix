@@ -3,9 +3,11 @@
   lib,
   system,
   ...
-}: let
-  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
-in {
+}:
+let
+  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+in
+{
   # Catppuccin configuration - full palette fidelity
   catppuccin = {
     flavor = "mocha";

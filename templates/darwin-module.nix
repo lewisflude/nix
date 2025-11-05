@@ -2,7 +2,8 @@
   pkgs,
   username,
   ...
-}: {
+}:
+{
   system.defaults = {
     dock.autohide = true;
     finder.FXPreferredViewStyle = "clmv";

@@ -13,14 +13,12 @@ final: prev: {
     };
 
     # Add additional build inputs
-    buildInputs = oldAttrs.buildInputs or [] ++ [final.extra-dep];
+    buildInputs = oldAttrs.buildInputs or [ ] ++ [ final.extra-dep ];
 
     # Modify build flags
-    configureFlags =
-      oldAttrs.configureFlags or []
-      ++ [
-        "--enable-feature"
-      ];
+    configureFlags = oldAttrs.configureFlags or [ ] ++ [
+      "--enable-feature"
+    ];
   });
 
   # Add new custom package
@@ -57,7 +55,7 @@ final: prev: {
       description = "Brief description of the package";
       homepage = "https://github.com/username/my-custom-package";
       license = licenses.mit;
-      maintainers = [];
+      maintainers = [ ];
       platforms = platforms.unix;
     };
   };
@@ -65,12 +63,12 @@ final: prev: {
   # Wrapper around existing package with custom settings
   my-wrapped-package = final.symlinkJoin {
     name = "my-wrapped-package";
-    paths = [final.original-package];
-    buildInputs = [final.makeWrapper];
+    paths = [ final.original-package ];
+    buildInputs = [ final.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/original-package \
         --set CUSTOM_VAR "value" \
-        --prefix PATH : ${final.lib.makeBinPath [final.extra-tool]}
+        --prefix PATH : ${final.lib.makeBinPath [ final.extra-tool ]}
     '';
   };
 }

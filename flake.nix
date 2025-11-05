@@ -246,8 +246,9 @@
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
   };
 
-  outputs = inputs @ {self, ...}:
-    inputs.flake-parts.lib.mkFlake {inherit inputs self;} {
+  outputs =
+    inputs@{ self, ... }:
+    inputs.flake-parts.lib.mkFlake { inherit inputs self; } {
       imports = [
         ./flake-parts/core.nix
         inputs.nix-topology.flakeModule

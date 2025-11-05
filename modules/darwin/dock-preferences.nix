@@ -2,9 +2,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   cfg = config.host.features.dockPreferences;
-in {
+in
+{
   options.host.features.dockPreferences = {
     enable = lib.mkOption {
       type = lib.types.bool;

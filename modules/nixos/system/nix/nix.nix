@@ -1,4 +1,5 @@
-{username, ...}: {
+{ username, ... }:
+{
   # Determinate Nix manages the daemon on NixOS via systemd-nix-daemon
   # Do NOT set nix.enable = true as it conflicts with Determinate Nix's daemon management
   # The determinate.nixosModules.default module handles daemon configuration

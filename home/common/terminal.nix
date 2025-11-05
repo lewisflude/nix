@@ -3,10 +3,13 @@
   lib,
   system,
   ...
-}: let
-  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
-in {
-  home.packages = with pkgs;
+}:
+let
+  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+in
+{
+  home.packages =
+    with pkgs;
     [
       clipse
       # wget and curl provided by core-tooling.nix
@@ -25,14 +28,15 @@ in {
       # jq provided by core-tooling.nix
       git-extras
     ]
-    ++ platformLib.platformPackages
-    [
-      networkmanager
-      lsof
-      wtype
-    ]
-    [
-    ];
+    ++
+      platformLib.platformPackages
+        [
+          networkmanager
+          lsof
+          wtype
+        ]
+        [
+        ];
   programs.ghostty = {
     enable = true;
     package = platformLib.platformPackage pkgs.ghostty pkgs.ghostty-bin;
@@ -45,7 +49,7 @@ in {
       scrollback-limit = 100000;
       # Removed initial-command to prevent session proliferation
       # Use 'zj' command or direnv layout_zellij instead
-      keybind = ["shift+enter=text:\n"];
+      keybind = [ "shift+enter=text:\n" ];
     };
   };
 }

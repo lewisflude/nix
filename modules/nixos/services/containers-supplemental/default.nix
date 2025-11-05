@@ -19,9 +19,9 @@
   config,
   lib,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     mkIf
     mkEnableOption
     mkOption
@@ -30,7 +30,8 @@
     ;
 
   cfg = config.host.services.containersSupplemental;
-in {
+in
+{
   imports = [
     ./services/homarr.nix
     ./services/wizarr.nix

@@ -4,14 +4,14 @@
   lib,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.host.services.mediaManagement;
-in {
-  options.host.services.mediaManagement.jellyfin.enable =
-    mkEnableOption "Jellyfin media server"
-    // {
-      default = true;
-    };
+in
+{
+  options.host.services.mediaManagement.jellyfin.enable = mkEnableOption "Jellyfin media server" // {
+    default = true;
+  };
 
   config = mkIf (cfg.enable && cfg.jellyfin.enable) {
     services.jellyfin = {

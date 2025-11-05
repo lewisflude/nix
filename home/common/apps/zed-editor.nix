@@ -1,4 +1,5 @@
-{lib, ...}: {
+{ lib, ... }:
+{
   programs.zed-editor = {
     enable = true;
 
@@ -40,7 +41,7 @@
 
       # File Finder
       # Note: modal_width is not a valid setting in Zed
-      file_finder = {};
+      file_finder = { };
 
       # Tabs (show only errors to reduce noise)
       tabs = {
@@ -287,7 +288,7 @@
             "-y"
             "cursor-agent-acp"
           ];
-          env = {};
+          env = { };
         };
       };
 
@@ -414,7 +415,7 @@
         Nix = {
           tab_size = 2;
           # Explicitly use nixd instead of nil
-          language_servers = ["nixd"];
+          language_servers = [ "nixd" ];
           format_on_save = "on";
         };
         Python = {

@@ -1,36 +1,37 @@
-{lib, ...}: let
+{ lib, ... }:
+let
   standards = import ../features/development/language-standards.nix;
   makeIndentString = n: builtins.concatStringsSep "" (builtins.genList (_x: " ") n);
-in {
+in
+{
   programs.helix = {
     enable = true;
     languages = {
-      language =
-        lib.mapAttrsToList (
-          name: value: (
-            {
-              inherit name;
-              scope = "source.${name}";
-              injection-regex = name;
-              file-types = value.fileTypes or [name];
-              language-servers = [value.lsp];
-              indent = {
-                tab-width = value.indent;
-                unit = value.unit or (makeIndentString value.indent);
-              };
-              auto-format = value.formatter != null;
-            }
-            // lib.optionalAttrs (value ? comment) {
-              comment-tokens = [value.comment];
-            }
-            // lib.optionalAttrs (value.formatter != null) {
-              formatter = {
-                command = value.formatter;
-              };
-            }
-          )
+      language = lib.mapAttrsToList (
+        name: value:
+        (
+          {
+            inherit name;
+            scope = "source.${name}";
+            injection-regex = name;
+            file-types = value.fileTypes or [ name ];
+            language-servers = [ value.lsp ];
+            indent = {
+              tab-width = value.indent;
+              unit = value.unit or (makeIndentString value.indent);
+            };
+            auto-format = value.formatter != null;
+          }
+          // lib.optionalAttrs (value ? comment) {
+            comment-tokens = [ value.comment ];
+          }
+          // lib.optionalAttrs (value.formatter != null) {
+            formatter = {
+              command = value.formatter;
+            };
+          }
         )
-        standards.languages;
+      ) standards.languages;
     };
     settings = {
       editor = {
@@ -76,7 +77,7 @@ in {
           "file-name"
           "file-modification-indicator"
         ];
-        center = [];
+        center = [ ];
         right = [
           "diagnostics"
           "selections"

@@ -1,7 +1,7 @@
 # Development Shell - Common Development Tools
 # Use this shell for general development work
 # Access with: nix develop .#devShells.development
-{pkgs, ...}:
+{ pkgs, ... }:
 pkgs.mkShell {
   buildInputs = with pkgs; [
     # Build tools

@@ -2,11 +2,13 @@
   lib,
   config,
   ...
-}: let
-  features = config.host.features or {};
-  desktopEnabled = (features.desktop or {}).enable or false;
-  gamingEnabled = (features.gaming or {}).enable or false;
-in {
+}:
+let
+  features = config.host.features or { };
+  desktopEnabled = (features.desktop or { }).enable or false;
+  gamingEnabled = (features.gaming or { }).enable or false;
+in
+{
   system.activationScripts.fixUsrLocalOwnership = ''
     if [ -d "/usr/local/share/zsh" ]; then
       chown -R root:wheel /usr/local/share/zsh

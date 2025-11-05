@@ -3,11 +3,13 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   cfg = config.host.features.desktop;
-in {
+in
+{
   config = lib.mkIf cfg.enable {
-    environment.pathsToLink = ["/share/wayland-sessions"];
+    environment.pathsToLink = [ "/share/wayland-sessions" ];
     time.timeZone = "Europe/London";
     programs.niri.enable = true;
     programs.uwsm = {

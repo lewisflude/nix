@@ -3,9 +3,9 @@
   lib,
   cursorInfo,
   cursorVersion,
-}: let
-  inherit
-    (pkgs)
+}:
+let
+  inherit (pkgs)
     appimageTools
     fetchurl
     makeDesktopItem
@@ -71,30 +71,30 @@
     ];
   };
 in
-  appimageTools.wrapType2 rec {
-    inherit pname src;
-    version = cursorVersion;
-    nativeBuildInputs = [makeWrapper];
-    extraPkgs = _pkgs: runtimeLibs;
-    extraInstallCommands = ''
-      install -Dm644 ${desktopItem}/share/applications/cursor.desktop \
-        "$out/share/applications/cursor.desktop"
-      if [ -d "${contents}/usr/share/icons/hicolor" ]; then
-        mkdir -p "$out/share/icons"
-        cp -r "${contents}/usr/share/icons/hicolor" "$out/share/icons/"
-      fi
-      wrapProgram "$out/bin/${pname}" \
-        --set NIXOS_OZONE_WL 1 \
-        --set ELECTRON_OZONE_PLATFORM_HINT "auto" \
-        --set GTK_USE_PORTAL 1 \
-        --add-flags "--ozone-platform-hint=auto"
-    '';
-    meta = with lib; {
-      description = "Cursor — AI-first code editor (AppImage wrapped for Nix/NixOS)";
-      homepage = "https://www.cursor.com/";
-      license = licenses.unfree;
-      platforms = platforms.linux;
-      mainProgram = "cursor";
-      sourceProvenance = with sourceTypes; [binaryNativeCode];
-    };
-  }
+appimageTools.wrapType2 rec {
+  inherit pname src;
+  version = cursorVersion;
+  nativeBuildInputs = [ makeWrapper ];
+  extraPkgs = _pkgs: runtimeLibs;
+  extraInstallCommands = ''
+    install -Dm644 ${desktopItem}/share/applications/cursor.desktop \
+      "$out/share/applications/cursor.desktop"
+    if [ -d "${contents}/usr/share/icons/hicolor" ]; then
+      mkdir -p "$out/share/icons"
+      cp -r "${contents}/usr/share/icons/hicolor" "$out/share/icons/"
+    fi
+    wrapProgram "$out/bin/${pname}" \
+      --set NIXOS_OZONE_WL 1 \
+      --set ELECTRON_OZONE_PLATFORM_HINT "auto" \
+      --set GTK_USE_PORTAL 1 \
+      --add-flags "--ozone-platform-hint=auto"
+  '';
+  meta = with lib; {
+    description = "Cursor — AI-first code editor (AppImage wrapped for Nix/NixOS)";
+    homepage = "https://www.cursor.com/";
+    license = licenses.unfree;
+    platforms = platforms.linux;
+    mainProgram = "cursor";
+    sourceProvenance = with sourceTypes; [ binaryNativeCode ];
+  };
+}

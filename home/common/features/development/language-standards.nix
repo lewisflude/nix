@@ -27,13 +27,13 @@
       lsp = "vscode-langservers-extracted";
       formatter = "biome";
       indent = 2;
-      fileTypes = ["json"];
+      fileTypes = [ "json" ];
     };
     css = {
       lsp = "vscode-langservers-extracted";
       formatter = "biome";
       indent = 2;
-      fileTypes = ["css"];
+      fileTypes = [ "css" ];
     };
     graphql = {
       lsp = "graphql-language-server";
@@ -57,7 +57,7 @@
       lsp = "taplo";
       formatter = "taplo";
       indent = 2;
-      fileTypes = ["toml"];
+      fileTypes = [ "toml" ];
     };
     markdown = {
       lsp = "marksman";
@@ -73,21 +73,21 @@
       formatter = "goimports";
       indent = 4;
       unit = "    ";
-      fileTypes = ["go"];
+      fileTypes = [ "go" ];
     };
     rust = {
       lsp = "rust-analyzer";
       formatter = "rustfmt";
       indent = 4;
       unit = "    ";
-      fileTypes = ["rs"];
+      fileTypes = [ "rs" ];
     };
     python = {
       lsp = "pyright";
       formatter = "black";
       indent = 4;
       unit = "    ";
-      fileTypes = ["py"];
+      fileTypes = [ "py" ];
     };
     cpp = {
       lsp = "clangd";
