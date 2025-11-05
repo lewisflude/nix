@@ -206,8 +206,33 @@ in {
           )
       )
       hosts;
+
+    # Build topology outputs for Linux systems (where topology.modules is configured)
+    # The nix-topology flake module should create this automatically via perSystem,
+    # but we explicitly create it here to ensure it exists for flake check
+    topology =
+      builtins.foldl'
+      (acc: system:
+        acc
+        // (withSystem system (
+          {config, ...}: let
+            # Only create topology for systems with non-empty modules
+            modules = config.topology.modules or [];
+          in
+            if modules != []
+            then {
+              ${system} = import inputs.nix-topology {
+                # Use pkgs from perSystem config, which includes nix-topology overlay
+                inherit (config) pkgs;
+                inherit modules;
+              };
+            }
+            else {}
+        )))
+      {}
+      ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
   in {
-    inherit darwinConfigurations nixosConfigurations homeConfigurations;
+    inherit darwinConfigurations nixosConfigurations homeConfigurations topology;
     lib = functionsLib // validationLib;
 
     # Export overlays following flake-parts conventions
