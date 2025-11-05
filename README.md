@@ -67,6 +67,8 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 | **🔍 Build Profiling** | [`docs/BUILD_PROFILING.md`](docs/BUILD_PROFILING.md) | Tools for profiling builds |
 | **📊 Performance Tuning** | [`docs/PERFORMANCE_TUNING.md`](docs/PERFORMANCE_TUNING.md) | Performance optimizations and configurations |
 | **📈 Performance Monitoring** | [`docs/reference/performance-monitoring.md`](docs/reference/performance-monitoring.md) | Monitoring and tracking performance metrics |
+| **🔍 Cache Behavior** | [`docs/SUBSTITUTER_QUERY_BEHAVIOR.md`](docs/SUBSTITUTER_QUERY_BEHAVIOR.md) | How Nix queries binary caches |
+| **⚡ Cache Error Impact** | [`docs/CACHE_ERROR_IMPACT.md`](docs/CACHE_ERROR_IMPACT.md) | How cache errors affect build performance |
 | **🤝 Contributing** | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to contribute to this repo |
 
 ## 🎯 Common Tasks

@@ -1,6 +1,8 @@
 {
   username,
   lib,
+  config,
+  pkgs,
   ...
 }:
 {
@@ -22,7 +24,7 @@
       # Performance optimizations
       auto-optimise-store = true
       max-jobs = auto
-      build-cores = 0
+      cores = 0
 
       # Keep outputs for better caching and development
       keep-outputs = true
@@ -35,19 +37,33 @@
 
       # High-throughput substitution parallelism (Tip 5)
       # Maximizes parallel TCP connections and substitution jobs for faster binary cache fetching
-      http-connections = 64
-      max-substitution-jobs = 64
+      # Optimized for high-RAM system (48GB) - can handle more parallelism
+      http-connections = 96
+      max-substitution-jobs = 96
 
       # Allow substitution for aggregator derivations (Tip 7)
       # Forces Nix to use binary cache even for derivations marked allowSubstitutes = false
       # Speeds up symlinkJoin and other lightweight aggregator builds
       always-allow-substitutes = true
 
+      # Performance optimizations for faster evaluation and builds
+      builders-use-substitutes = true
+
+      # Cache TTL for faster lookups
+      narinfo-cache-positive-ttl = 30
+      narinfo-cache-negative-ttl = 1
+
       # Build sandbox (security)
       sandbox = true
 
       # Connection settings
       connect-timeout = 5
+
+      # Remove FlakeHub cache from trusted-substituters
+      # FlakeHub cache requires authentication and isn't needed (flakes use API, not binary cache)
+      # This overrides Determinate Nix's default which includes cache.flakehub.com
+      # See: flake.nix nixConfig comments and docs/CACHE_ERROR_IMPACT.md
+      trusted-substituters = https://install.determinate.systems
 
       # Logging
       log-lines = 25
@@ -62,6 +78,47 @@
       # Note: Binary caches and experimental features are configured in flake.nix nixConfig
       # Those settings apply to both Darwin and NixOS systems via the flake
       # Note: Determinate Nix sets 'eval-cores' and 'lazy-trees' in /etc/nix/nix.conf
+      # Note: GitHub access token is added dynamically via activation script
+    '';
+  };
+
+  # Configure GitHub token from sops if available
+  system.activationScripts.nixGithubToken = lib.mkIf (config.sops.secrets ? GITHUB_TOKEN) {
+    text = ''
+      set -euo pipefail
+
+      NIX_CUSTOM_CONF="/etc/nix/nix.custom.conf"
+      SECRET_PATH="${config.sops.secrets.GITHUB_TOKEN.path}"
+
+      # Check if secret exists and is readable
+      if [ -z "$SECRET_PATH" ] || [ ! -r "$SECRET_PATH" ]; then
+        echo "Warning: GitHub token secret not available" >&2
+        exit 0
+      fi
+
+      GITHUB_TOKEN="$(cat "$SECRET_PATH")"
+
+      if [ -z "$GITHUB_TOKEN" ]; then
+        echo "Warning: GitHub token is empty" >&2
+        exit 0
+      fi
+
+      # Ensure the custom config file exists (should be created by nix-darwin)
+      if [ ! -f "$NIX_CUSTOM_CONF" ]; then
+        echo "Warning: $NIX_CUSTOM_CONF does not exist, creating it" >&2
+        touch "$NIX_CUSTOM_CONF"
+        chmod 644 "$NIX_CUSTOM_CONF"
+      fi
+
+      # Remove any existing access-tokens lines for github.com (there might be multiple)
+      # Then add the new one at the end
+      ${pkgs.gnused}/bin/sed -i "" '/^access-tokens.*github\.com/d' "$NIX_CUSTOM_CONF" 2>/dev/null || true
+
+      # Add the GitHub access token at the end
+      echo "access-tokens = github.com=$GITHUB_TOKEN" >> "$NIX_CUSTOM_CONF"
+
+      # Ensure proper permissions
+      chmod 644 "$NIX_CUSTOM_CONF"
     '';
   };
 

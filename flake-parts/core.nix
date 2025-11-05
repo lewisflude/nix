@@ -103,14 +103,15 @@ in
           # Use the same pog overlay check as above
           pkgsWithPog = pkgsWithOverlays.extend pogOverlay;
           # Helper to create pog app
-          # Scripts that need config-root: new-module, update-all
-          # Scripts that don't: setup-cachix
+          # Scripts that need config-root: new-module, update-all, visualize-modules
+          # Scripts that don't: setup-cachix, cleanup-duplicates, analyze-services
           mkPogApp =
             script-name:
             let
               needsConfigRoot = lib.elem script-name [
                 "new-module"
                 "update-all"
+                "visualize-modules"
               ];
               scriptArgs =
                 if needsConfigRoot then
@@ -119,12 +120,15 @@ in
                   }
                 else
                   {
-                    # setup-cachix and others don't need config-root
+                    # These scripts don't need config-root
                   };
               descriptions = {
                 "new-module" = "Scaffold new NixOS/home-manager modules";
                 "setup-cachix" = "Configure Cachix binary cache";
                 "update-all" = "Update all flake dependencies";
+                "cleanup-duplicates" = "Remove old/unused package versions from Nix store";
+                "analyze-services" = "Analyze Nix store service usage";
+                "visualize-modules" = "Generate module dependency graphs";
               };
             in
             {
@@ -138,6 +142,9 @@ in
           new-module = mkPogApp "new-module";
           setup-cachix = mkPogApp "setup-cachix";
           update-all = mkPogApp "update-all";
+          cleanup-duplicates = mkPogApp "cleanup-duplicates";
+          analyze-services = mkPogApp "analyze-services";
+          visualize-modules = mkPogApp "visualize-modules";
         };
 
       # Configure topology for systems that can build it (Linux only)
@@ -214,46 +221,15 @@ in
         )
       ) hosts;
 
-      # Build topology outputs for Linux systems (where topology.modules is configured)
-      # The nix-topology flake module should create this automatically via perSystem,
-      # but we explicitly create it here to ensure it exists for flake check
-      topology =
-        builtins.foldl'
-          (
-            acc: system:
-            acc
-            // (withSystem system (
-              { config, ... }:
-              let
-                # Only create topology for systems with non-empty modules
-                modules = config.topology.modules or [ ];
-              in
-              if modules != [ ] then
-                {
-                  ${system} = import inputs.nix-topology {
-                    # Use pkgs from perSystem config, which includes nix-topology overlay
-                    inherit (config) pkgs;
-                    inherit modules;
-                  };
-                }
-              else
-                { }
-            ))
-          )
-          { }
-          [
-            "x86_64-linux"
-            "aarch64-linux"
-            "x86_64-darwin"
-            "aarch64-darwin"
-          ];
+      # Topology outputs are created automatically by the nix-topology flake module
+      # via perSystem.topology. We don't need to manually create them here.
+      # The module uses config.topology.modules which is only set for Linux systems.
     in
     {
       inherit
         darwinConfigurations
         nixosConfigurations
         homeConfigurations
-        topology
         ;
       lib = functionsLib // validationLib;
 

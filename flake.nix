@@ -17,30 +17,42 @@
     ];
 
     # Binary caches for faster builds
-    # Note: Order matters - personal cache first for fastest access
+    # Best practice: Order matters - fastest/most reliable caches first to minimize query delays
+    # Best practice: Limit to 3-8 caches to reduce sequential query time
     # Note: Determinate Nix v3.6.0+ doesn't require install.determinate.systems cache
     #       (you're on v3.12.0, so this is optional but included for FlakeHub flakes)
     extra-substituters = [
-      "https://lewisflude.cachix.org" # Personal cache - highest priority
+      # === Tier 1: Most Reliable General-Purpose Caches (Highest Priority) ===
+      # Order: Most comprehensive and reliable caches first to minimize query delays
+      # These caches have the highest hit rate for most packages
+      "https://nix-community.cachix.org" # General community packages (most comprehensive, highest reliability)
+      "https://lewisflude.cachix.org" # Personal cache (fast if available, but may not have all packages due to frequent updates)
+      "https://nixpkgs-wayland.cachix.org" # Wayland packages (common in NixOS)
+      "https://numtide.cachix.org" # General cache (backup for common packages)
+      "https://chaotic-nyx.cachix.org" # Bleeding-edge packages (NixOS only, but general-purpose)
+
+      # === Tier 2: Application-Specific Caches (Only queried when specific apps are needed) ===
+      # Order: Most commonly used applications first
+      "https://niri.cachix.org" # Niri compositor
+      "https://helix.cachix.org" # Helix editor
+      "https://ghostty.cachix.org" # Ghostty terminal
+      "https://yazi.cachix.org" # Yazi file manager
+      "https://ags.cachix.org" # AGS (Aylur's GTK Shell)
+
+      # === Tier 3: Specialized/Optional Caches (Least commonly used) ===
+      # Only queried when specific specialized packages are needed
+      "https://zed.cachix.org" # Zed editor (if used)
+      "https://catppuccin.cachix.org" # Catppuccin themes (if used)
+      "https://devenv.cachix.org" # Devenv (if used)
+      "https://viperml.cachix.org" # ViperML (if used)
+      "https://cuda-maintainers.cachix.org" # CUDA packages (if used)
+
+      # === Removed Caches (No longer valid/unreachable) ===
       # Note: aseipp-nix-cache removed - HTTP 400 errors, cache no longer valid
       # Note: FlakeHub cache removed - requires authentication and isn't needed
-      # FlakeHub flakes are downloaded from the API, not the binary cache
-      "https://nix-community.cachix.org"
-      "https://nixpkgs-wayland.cachix.org"
-      "https://helix.cachix.org"
-      "https://cache.thalheim.io"
-      "https://numtide.cachix.org"
-      "https://viperml.cachix.org"
-      "https://catppuccin.cachix.org"
-      "https://niri.cachix.org"
-      "https://ghostty.cachix.org"
-      "https://zed.cachix.org"
-      "https://cache.garnix.io"
-      "https://chaotic-nyx.cachix.org" # Bleeding-edge packages (NixOS only)
-      "https://ags.cachix.org"
-      "https://devenv.cachix.org"
-      "https://yazi.cachix.org"
-      "https://cuda-maintainers.cachix.org"
+      #       FlakeHub flakes are downloaded from the API, not the binary cache
+      # Note: cache.thalheim.io removed - connection failed
+      # Note: cache.garnix.io removed - connection failed
     ];
 
     extra-trusted-public-keys = [
@@ -48,14 +60,14 @@
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
       "helix.cachix.org-1:ejp9KQpR1FBI2onstMQ34yogDm4OgU2ru6lIwPvuCVs="
-      "cache.thalheim.io-1:R7msbosLEZKrxk/lKxf9BTjOOH7Ax3H0Qj0/6wiHOgc="
+      # Note: cache.thalheim.io key removed - cache connection failed
       "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
       "viperml.cachix.org-1:qrxbEKGdajQ+s0pzofucGqUKqkjT+N3c5vy7mOML04c="
       "catppuccin.cachix.org-1:noG/4HkbhJb+lUAdKrph6LaozJvAeEEZj4N732IysmU="
       "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
       "ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns="
       "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
-      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+      # Note: cache.garnix.io key removed - cache connection failed
       "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8=" # Bleeding-edge packages
       "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc=" # Personal cache
       "ags.cachix.org-1:naAvMrz0CuYqeyGNyLgE010iUiuf/qx6kYrUv3NwAJ8="

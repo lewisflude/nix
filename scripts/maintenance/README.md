@@ -56,10 +56,10 @@ This directory contains maintenance and monitoring scripts for the Nix configura
 
 ## Related Documentation
 
-- **Performance Monitoring**: `docs/PERFORMANCE_MONITORING.md` - Comprehensive monitoring guide
+- **Performance Monitoring**: `docs/reference/performance-monitoring.md` - Comprehensive monitoring guide
 - **Performance Tuning**: `docs/PERFORMANCE_TUNING.md` - Performance optimizations and baseline
 - **Upstream Contributions**: `docs/UPSTREAM_CONTRIBUTIONS.md` - Overlay contribution tracking
-- **Feature Review**: `docs/FEATURE_MODULE_REVIEW.md` - Feature module boundary review
+- **Feature System**: `docs/FEATURES.md` - Feature system documentation
 
 ## Scheduling Examples
 

@@ -459,7 +459,18 @@ nix path-info --recursive --size /run/current-system | head -20
 
 # Check substitution status
 nix store ping
+
+# Test cache connectivity
+./scripts/utils/test-caches.sh
+
+# Test cache substitution with real packages
+./scripts/utils/test-cache-substitution.sh [package-name]
 ```
+
+**Note**: For detailed information on cache behavior and troubleshooting, see:
+
+- [`docs/SUBSTITUTER_QUERY_BEHAVIOR.md`](SUBSTITUTER_QUERY_BEHAVIOR.md) - How Nix queries substituters
+- [`docs/CACHE_ERROR_IMPACT.md`](CACHE_ERROR_IMPACT.md) - Impact of cache errors on builds
 
 ### Key Metrics to Track
 

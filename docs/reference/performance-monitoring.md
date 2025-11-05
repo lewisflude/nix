@@ -319,7 +319,7 @@ When FlakeHub alternatives are available:
 **Initial Review**: After 3 months of using feature system
 **Ongoing Reviews**: Quarterly
 
-**Related Documentation**: See [`FEATURE_MODULE_REVIEW.md`](../FEATURE_MODULE_REVIEW.md) for detailed review framework.
+**Related Documentation**: See [`FEATURES.md`](../FEATURES.md) for feature system documentation.
 
 ### Pain Points to Identify
 
@@ -377,5 +377,5 @@ Use this checklist each month:
 
 - **Performance Optimizations**: [`PERFORMANCE_TUNING.md`](../PERFORMANCE_TUNING.md) - Current optimizations and baseline
 - **Build Profiling**: [`BUILD_PROFILING.md`](../BUILD_PROFILING.md) - Tools for profiling builds
-- **Feature Reviews**: [`FEATURE_MODULE_REVIEW.md`](../FEATURE_MODULE_REVIEW.md) - Feature module review framework
+- **Feature System**: [`FEATURES.md`](../FEATURES.md) - Feature system documentation
 - **Scripts**: [`scripts/maintenance/README.md`](../../scripts/maintenance/README.md) - Script documentation

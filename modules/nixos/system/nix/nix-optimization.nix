@@ -28,8 +28,10 @@
 
         # High-throughput substitution parallelism (Tip 5)
         # Maximizes parallel TCP connections and substitution jobs for faster binary cache fetching
-        http-connections = 64; # Parallel TCP connections (default: ~2-5, recommended: 64-128)
-        max-substitution-jobs = 64; # Concurrent substitution jobs (default: low, recommended: 64-128)
+        # Optimized for high-RAM system (64GB) - balanced for performance and timeout delay mitigation
+        # Reduced from 128 to 96 to balance parallelism vs timeout multiplication (96 × 5s = 480s max vs 128 × 5s = 640s)
+        http-connections = 96; # Parallel TCP connections (default: ~2-5, recommended: 64-96 for high-end)
+        max-substitution-jobs = 96; # Concurrent substitution jobs (default: low, recommended: 64-96 for high-end)
 
         # Allow substitution for aggregator derivations (Tip 7)
         # Forces Nix to use binary cache even for derivations marked allowSubstitutes = false
@@ -42,6 +44,24 @@
 
         # Connection settings
         connect-timeout = 5; # Connection timeout (seconds) - faster failure detection
+
+        # Remove FlakeHub cache from trusted-substituters
+        # FlakeHub cache requires authentication and isn't needed (flakes use API, not binary cache)
+        # This overrides Determinate Nix's default which includes cache.flakehub.com
+        # See: flake.nix nixConfig comments and docs/CACHE_ERROR_IMPACT.md
+        trusted-substituters = [
+          "https://install.determinate.systems"
+          # FlakeHub cache removed - causes connection errors and timeout delays
+          # See flake.nix line 26: "Note: FlakeHub cache removed - requires authentication and isn't needed"
+        ];
+
+        # Also override extra-trusted-substituters to remove FlakeHub cache
+        # Determinate Nix adds cache.flakehub.com via extra-trusted-substituters,
+        # which gets merged with trusted-substituters. We need to explicitly override it.
+        extra-trusted-substituters = [
+          "https://install.determinate.systems"
+          # FlakeHub cache explicitly removed to prevent timeout delays
+        ];
 
         # Logging
         log-lines = 25; # Lines of build output to show on failure
@@ -105,7 +125,7 @@
           text = ''
             set -euo pipefail
             # Lightweight duplicate cleanup - only runs first Monday of month
-            # Full cleanup script available at: ~/.config/nix/scripts/cleanup-duplicates.sh
+            # Uses pog-powered cleanup-duplicates tool
 
             CURRENT_DAY=$(date +%d)
             # Only run on first Monday (days 1-7)
@@ -115,14 +135,9 @@
             fi
 
             echo "🧹 Running monthly duplicate cleanup..."
-            # Run non-interactive version (skip confirmations)
-            CLEANUP_SCRIPT="/home/lewis/.config/nix/scripts/cleanup-duplicates.sh"
-            if [ -f "$CLEANUP_SCRIPT" ]; then
-              # Run in non-interactive mode (stdin not a terminal)
-              NON_INTERACTIVE=1 bash "$CLEANUP_SCRIPT" </dev/null || true
-            else
-              echo "⚠️ Cleanup script not found at $CLEANUP_SCRIPT"
-            fi
+            # Run non-interactive pog version (skip confirmations)
+            cd /home/lewis/.config/nix
+            nix run .#cleanup-duplicates -- --non-interactive || true
           '';
           mode = "0755";
         };
