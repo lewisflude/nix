@@ -49,6 +49,11 @@ let
       };
     };
 
+    # Python packages from nixpkgs-python (must come early to affect all subsequent overlays)
+    # Provides better cache coverage and pre-built Python packages
+    # Temporarily disabled to debug dependencies issue
+    # python = import ./python.nix { inherit inputs system; };
+
     # === Application Overlays (always applied) ===
     # These overlays provide custom packages and fixes
 
