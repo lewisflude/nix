@@ -30,14 +30,25 @@ scripts/
 │   ├── mcp_love2d_docs.py # Love2D MCP server
 │   └── mcp_lua_docs.py    # Lua MCP server
 ├── utils/
-│   ├── benchmark-rebuild.sh # Performance benchmarking
-│   └── profile-build.sh     # Build profiling (NEW) ⭐
-└── visualize-modules.sh    # Module visualization
+│   ├── analyze-build-time.sh # Build time analysis
+│   ├── benchmark-rebuild.sh  # Performance benchmarking
+│   ├── monitor-cache-hits.sh # Cache hit monitoring
+│   ├── nix-with-github-token.sh # Nix commands with GitHub token
+│   ├── profile-build.sh      # Build profiling ⭐
+│   ├── profile-evaluation.sh # Evaluation profiling
+│   ├── profile-modules.sh    # Module profiling
+│   ├── test-cache-substitution.sh # Test cache substitution
+│   └── test-caches.sh        # Test cache connectivity
+└── maintenance/
+    └── update-flake.sh    # Flake update with analysis (deprecated: use update-all)
 
 POG Apps (nix run .#<name>):
 ├── new-module ⭐           # Create new modules (interactive)
 ├── setup-cachix           # Configure Cachix caching
-└── update-all ⭐           # Update all dependencies
+├── update-all ⭐           # Update all dependencies
+├── cleanup-duplicates ⭐   # Remove old package versions
+├── analyze-services       # Analyze service usage
+└── visualize-modules      # Generate module dependency graphs
 
 Community Tools (use these):
 ├── nix-update            # Update package hashes (replaces update-git-hash)
@@ -133,7 +144,7 @@ nix-collect-garbage --delete-older-than 30d
 nix store optimise
 
 # Clean up duplicate package versions
-sudo bash scripts/cleanup-duplicates.sh
+sudo nix run .#cleanup-duplicates
 
 # Or use aliases
 nix-gc          # Delete all old
@@ -146,10 +157,15 @@ nix-optimize    # Deduplicate
 Remove old/unused package versions to free up space:
 
 ```bash
-sudo bash scripts/cleanup-duplicates.sh
+# Use the pog-powered version (recommended)
+sudo nix run .#cleanup-duplicates
+
+# With flags
+sudo nix run .#cleanup-duplicates -- --dry-run    # Preview changes
+sudo nix run .#cleanup-duplicates -- --non-interactive  # Auto-confirm
 ```
 
-This script will:
+This tool will:
 
 - Run garbage collection to remove dead paths
 - Identify and remove old versions of packages
@@ -173,9 +189,12 @@ This script will:
 ### Module Scaffolding
 
 ```bash
-# Create new module from template
-~/.config/nix/scripts/utils/new-module.sh feature kubernetes
-~/.config/nix/scripts/utils/new-module.sh service grafana
+# Use the pog-powered version (recommended)
+nix run .#new-module -- --type feature --name kubernetes
+nix run .#new-module -- --type service --name grafana
+
+# Interactive mode (prompts for missing args)
+nix run .#new-module
 ```
 
 ## 📊 Useful Tools
@@ -236,23 +255,65 @@ Track rebuild performance over time.
 # Results saved to .benchmark-history/
 ```
 
-### `visualize-modules.sh` - Dependency Graph
+### `visualize-modules` - Dependency Graph (POG)
 
 Generate module dependency visualizations.
 
 ```bash
-./scripts/visualize-modules.sh
-# Outputs to docs/generated/
+# Use the pog-powered version (recommended)
+nix run .#visualize-modules
+
+# With options
+nix run .#visualize-modules -- --format svg --output_dir docs/generated
+# Options: --format (svg|png|dot|all), --output_dir <path>
 ```
 
-## 🗑️ Recently Removed Scripts
+The old bash script `scripts/visualize-modules.sh` has been migrated to pog.
+
+### Cache Testing Utilities
+
+Test binary cache connectivity and substitution:
+
+```bash
+# Test cache connectivity (HTTP checks)
+./scripts/utils/test-caches.sh
+
+# Test actual cache substitution with real packages
+./scripts/utils/test-cache-substitution.sh [package-name]
+# Default package: hello
+```
+
+These scripts help diagnose cache issues and verify substituter configuration.
+
+## 🗑️ Recently Removed/Migrated Scripts
+
+### Migrated to POG Apps
+
+The following scripts have been migrated to pog-powered CLI tools with better UX:
+
+| Old Script | New POG App | Usage |
+|-----------|-------------|-------|
+| `setup-cachix-local.sh` | `setup-cachix` | `nix run .#setup-cachix` |
+| `cleanup-duplicates.sh` | `cleanup-duplicates` | `nix run .#cleanup-duplicates` |
+| `analyze-services.sh` | `analyze-services` | `nix run .#analyze-services` |
+| `visualize-modules.sh` | `visualize-modules` | `nix run .#visualize-modules` |
+
+**Benefits of pog migration:**
+
+- ✅ Auto-generated help text (`--help`)
+- ✅ Tab completion for flags
+- ✅ Interactive prompts for missing required flags
+- ✅ Consistent interface across all tools
+- ✅ Better error messages and validation
+- ✅ Built-in verbose mode (`-v`)
+
+### Removed Scripts
 
 The following wrapper scripts were removed in favor of direct commands and aliases:
 
 | Removed Script | Replacement |
 |---------------|-------------|
 | `fix-file-limits.sh` | Now handled declaratively in `modules/darwin/system.nix` |
-| `update-flake.sh` | Use `nix flake update` or `nix-update` alias |
 | `check-config.sh` | Use `nix build .#... --dry-run` or `nix-build` alias |
 | `diff-config.sh` | Use `nvd diff` directly or `nix-diff` alias |
 | `build/dev.sh` | Use direct commands or aliases from `ALIASES.sh` |

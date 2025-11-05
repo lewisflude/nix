@@ -17,6 +17,106 @@ All scripts built with pog get these features automatically:
 
 ## Available Scripts
 
+### `cleanup-duplicates` - Remove Old Package Versions
+
+Remove old/unused package versions from Nix store while keeping latest versions.
+
+**Usage:**
+
+```bash
+# Interactive cleanup (with confirmations)
+sudo nix run .#cleanup-duplicates
+
+# Dry run to see what would be deleted
+sudo nix run .#cleanup-duplicates -- --dry_run
+
+# Non-interactive (auto-confirm)
+sudo nix run .#cleanup-duplicates -- --non_interactive
+
+# Help
+nix run .#cleanup-duplicates -- --help
+```
+
+**Flags:**
+
+- `-y, --non_interactive` - Auto-confirm all prompts
+- `-d, --dry_run` - Show what would be deleted without making changes
+- `-v, --verbose` - Enable verbose output
+- `-h, --help` - Show help
+
+**What it cleans:**
+
+- Old LibreOffice versions (keeps latest)
+- Old Ollama versions (keeps latest)
+- Old NVIDIA drivers (keeps current kernel version)
+- Old LLVM/Clang versions (keeps latest)
+- Old OpenJDK versions (keeps latest)
+- Old Iosevka fonts (keeps latest)
+- Old Zoom versions (keeps latest)
+- Debug packages (cmake debug)
+- Old Rust toolchains (if not referenced)
+
+### `analyze-services` - Service Usage Analyzer
+
+Analyze Nix store service usage to identify optimization opportunities.
+
+**Usage:**
+
+```bash
+# Analyze services
+nix run .#analyze-services
+
+# Verbose output
+nix run .#analyze-services -- --verbose
+
+# Help
+nix run .#analyze-services -- --help
+```
+
+**What it analyzes:**
+
+- Currently running services vs configured
+- Large packages that might be optional
+- Multiple versions of packages (LibreOffice, Ollama, etc.)
+- Development tools usage
+- Store size and recommendations
+
+### `visualize-modules` - Module Dependency Graph
+
+Generate dependency graph of all modules in the configuration.
+
+**Usage:**
+
+```bash
+# Generate all formats (default)
+nix run .#visualize-modules
+
+# Specific format
+nix run .#visualize-modules -- --format svg
+nix run .#visualize-modules -- --format png
+nix run .#visualize-modules -- --format dot
+
+# Custom output directory
+nix run .#visualize-modules -- --output_dir docs/generated
+
+# Help
+nix run .#visualize-modules -- --help
+```
+
+**Flags:**
+
+- `-f, --format` - Output format (svg, png, dot, all) [default: all]
+- `-o, --output_dir` - Output directory [default: docs/generated]
+- `-v, --verbose` - Enable verbose output
+- `-h, --help` - Show help
+
+**Output files:**
+
+- `module-dependencies.dot` - Graphviz DOT file
+- `module-dependencies.svg` - SVG visualization (if graphviz available)
+- `module-dependencies.png` - PNG visualization (if graphviz available)
+- `module-summary.txt` - Text summary of modules
+
 ### `update-all` - Update All Dependencies
 
 Update all dependencies in your Nix configuration: flake inputs, custom packages, and ZSH plugins.
@@ -135,6 +235,9 @@ pkgs/pog-scripts/
 ├── update-all.nix         # Update all dependencies
 ├── new-module.nix         # Module scaffolding tool
 ├── setup-cachix.nix       # Setup cachix binary cache
+├── cleanup-duplicates.nix # Remove old package versions
+├── analyze-services.nix   # Analyze service usage
+├── visualize-modules.nix  # Generate module dependency graphs
 └── [future scripts...]
 ```
 

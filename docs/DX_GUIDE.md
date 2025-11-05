@@ -346,7 +346,8 @@ nix flake check
 pre-commit run --all-files
 
 # Test build
-nh os build # or nh darwin build
+nh os build # NixOS only, or: nix build .#nixosConfigurations.<hostname>.config.system.build.toplevel
+# For Darwin: nix build .#darwinConfigurations.<hostname>.system
 ```
 
 ## Helpful Aliases
@@ -409,8 +410,9 @@ nix flake update
 # Clear build cache
 nix-collect-garbage
 
-# Rebuild
+# Rebuild (NixOS only)
 nh os build --no-nom
+# Or for Darwin: darwin-rebuild switch --flake ~/.config/nix#<hostname>
 ```
 
 ## Resources
