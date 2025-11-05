@@ -37,9 +37,12 @@
 
       # High-throughput substitution parallelism (Tip 5)
       # Maximizes parallel TCP connections and substitution jobs for faster binary cache fetching
-      # Optimized for high-RAM system (48GB) - can handle more parallelism
-      http-connections = 96
-      max-substitution-jobs = 96
+      # Optimized for high-RAM system (48GB) - set to 128 for maximum throughput
+      # Note: With cache priorities properly set in flake.nix, timeout delays are minimized,
+      # so higher parallelism (128) is safe and beneficial
+      # Reference: https://brianmcgee.uk/posts/2023/12/13/how-to-optimise-substitutions-in-nix/
+      http-connections = 128
+      max-substitution-jobs = 128
 
       # Allow substitution for aggregator derivations (Tip 7)
       # Forces Nix to use binary cache even for derivations marked allowSubstitutes = false

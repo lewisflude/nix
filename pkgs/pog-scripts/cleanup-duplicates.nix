@@ -9,7 +9,7 @@ pog.pog {
 
   flags = [
     {
-      name = "non_interactive";
+      name = "auto-confirm";
       short = "y";
       bool = true;
       description = "Non-interactive mode (auto-confirm all prompts)";
@@ -68,7 +68,7 @@ pog.pog {
 
       if ${flag "dry_run"}; then
         debug "DRY RUN: Would run nix-store --gc"
-      elif ${flag "non_interactive"} || ${confirm { prompt = "Continue with garbage collection?"; }}; then
+      elif ${flag "auto-confirm"} || ${confirm { prompt = "Continue with garbage collection?"; }}; then
         debug "Running nix-store --gc..."
         nix-store --gc 2>&1 | tail -5
         echo ""
@@ -270,7 +270,7 @@ pog.pog {
         exit 0
       fi
 
-      if ! ${flag "non_interactive"}; then
+      if ! ${flag "auto-confirm"}; then
         if ! ${confirm { prompt = "Do you want to proceed with deletion?"; }}; then
           yellow "Aborted."
           exit 0
@@ -310,6 +310,6 @@ pog.pog {
       cyan "=== Final store size ==="
       du -sh /nix/store
 
-      green "✅ Cleanup completed!"
+      green "? Cleanup completed!"
     '';
 }

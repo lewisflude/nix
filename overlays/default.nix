@@ -50,9 +50,12 @@ let
     };
 
     # Python packages from nixpkgs-python (must come early to affect all subsequent overlays)
-    # Provides better cache coverage and pre-built Python packages
-    # Temporarily disabled to debug dependencies issue
+    # DISABLED: nixpkgs-python packages have incompatible structure - missing 'dependencies' attribute
+    # that some nixpkgs code expects (e.g., all-packages.nix:3522)
+    # TODO: Re-enable when nixpkgs-python compatibility improves or use package-specific override
+    # Alternative: Use nixpkgs-python packages directly in Home Assistant modules only
     # python = import ./python.nix { inherit inputs system; };
+    python = _final: _prev: { };
 
     # === Application Overlays (always applied) ===
     # These overlays provide custom packages and fixes
@@ -103,19 +106,11 @@ let
 
     # === Latest Flake Packages ===
     # Code editors with bleeding-edge features
-    flake-editors = _final: prev: {
-      helix =
-        if
-          inputs ? helix
-          && inputs.helix ? packages
-          && inputs.helix.packages ? ${system}
-          && inputs.helix.packages.${system} ? default
-        then
-          inputs.helix.packages.${system}.default
-        else
-          prev.helix;
-      # Using stable zed-editor from nixpkgs instead (for cached binaries)
-      # zed-editor = inputs.zed-editor.packages.${system}.default or prev.zed-editor;
+    # NOTE: Helix and Zed are now provided via chaotic-packages overlay (bleeding-edge versions)
+    # Keeping this for other editors that might not be in chaotic
+    flake-editors = _final: _prev: {
+      # Helix and Zed are handled by chaotic-packages overlay
+      # This section kept for future use with other editors
     };
 
     # Rust toolchain overlay (provides latest Rust, rust-analyzer, etc.)
@@ -173,6 +168,12 @@ let
       else
         (_final: _prev: { })
     );
+
+    # Chaotic-Nyx bleeding-edge packages (Linux-only)
+    # Replaces stable packages with bleeding-edge versions from Chaotic-Nyx
+    # Chaotic module adds packages with _git suffix, this overlay makes them default
+    # Must come after chaotic module is applied (which happens in system-builders.nix)
+    chaotic-packages = mkConditional (isLinux && inputs ? chaotic) (import ./chaotic-packages.nix);
   };
 in
 overlaySet

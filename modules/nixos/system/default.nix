@@ -21,6 +21,9 @@
     # Secrets management
     ./sops.nix
 
+    # Documentation configuration
+    ./documentation.nix
+
     # Deprecated/empty modules (to be removed)
     # ./file-management.nix - Empty file
   ];

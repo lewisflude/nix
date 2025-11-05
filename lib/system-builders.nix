@@ -73,6 +73,7 @@ let
       sharedModules =
         lib.optionals (sops-nix != null) [ sops-nix.homeManagerModules.sops ]
         ++ lib.optionals (catppuccin != null) [ catppuccin.homeModules.catppuccin ]
+        ++ lib.optionals (chaotic != null) [ chaotic.homeManagerModules.default ]
         ++ extraSharedModules;
       users.${hostConfig.username} = import ../home;
     };

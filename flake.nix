@@ -5,15 +5,6 @@
     experimental-features = [
       "nix-command"
       "flakes"
-      "ca-derivations"
-      "fetch-closure"
-      "parse-toml-timestamps"
-      "build-time-fetch-tree" # Enables build-time input fetching for inputs marked with buildTime = true
-      "blake3-hashes" # Faster hashing algorithm (BLAKE3)
-      "verified-fetches" # Verify git commit signatures via fetchGit
-      "pipe-operators" # |> and <| operators for cleaner Nix code
-      "no-url-literals" # Disallow unquoted URLs (prevents deprecated syntax)
-      "git-hashing" # Git hashing for content-addressed store objects
     ];
 
     # Binary caches for faster builds
@@ -21,32 +12,38 @@
     # Best practice: Limit to 3-8 caches to reduce sequential query time
     # Note: Determinate Nix v3.6.0+ doesn't require install.determinate.systems cache
     #       (you're on v3.12.0, so this is optional but included for FlakeHub flakes)
+    #
+    # Priority Optimization: Using ?priority=xxx query parameters to control cache query order
+    # Lower numbers = higher priority (queried first). This prevents Nix from querying
+    # slow/unreliable caches first, which can cause significant delays when a cache times out
+    # (5s timeout per cache ? number of caches = potential delay).
+    # Reference: https://brianmcgee.uk/posts/2023/12/13/how-to-optimise-substitutions-in-nix/
     extra-substituters = [
       # === Tier 1: Most Reliable General-Purpose Caches (Highest Priority) ===
       # Order: Most comprehensive and reliable caches first to minimize query delays
       # These caches have the highest hit rate for most packages
-      "https://nix-community.cachix.org" # General community packages (most comprehensive, highest reliability)
-      "https://nixpkgs-python.cachix.org" # Pre-built Python packages (especially helpful for Python 3.13)
-      "https://lewisflude.cachix.org" # Personal cache (fast if available, but may not have all packages due to frequent updates)
-      "https://nixpkgs-wayland.cachix.org" # Wayland packages (common in NixOS)
-      "https://numtide.cachix.org" # General cache (backup for common packages)
-      "https://chaotic-nyx.cachix.org" # Bleeding-edge packages (NixOS only, but general-purpose)
+      "https://nix-community.cachix.org?priority=1" # General community packages (most comprehensive, highest reliability)
+      "https://lewisflude.cachix.org?priority=2" # Personal cache (fast if available, but may not have all packages due to frequent updates)
+      "https://nixpkgs-wayland.cachix.org?priority=3" # Wayland packages (common in NixOS)
+      "https://numtide.cachix.org?priority=4" # General cache (backup for common packages)
+      "https://chaotic-nyx.cachix.org?priority=5" # Bleeding-edge packages (NixOS only, but general-purpose)
+      "https://nixpkgs-python.cachix.org?priority=6" # Pre-built Python 3.13 packages (only for Home Assistant, not needed for most builds)
 
       # === Tier 2: Application-Specific Caches (Only queried when specific apps are needed) ===
       # Order: Most commonly used applications first
-      "https://niri.cachix.org" # Niri compositor
-      "https://helix.cachix.org" # Helix editor
-      "https://ghostty.cachix.org" # Ghostty terminal
-      "https://yazi.cachix.org" # Yazi file manager
-      "https://ags.cachix.org" # AGS (Aylur's GTK Shell)
+      "https://niri.cachix.org?priority=7" # Niri compositor
+      "https://helix.cachix.org?priority=8" # Helix editor
+      "https://ghostty.cachix.org?priority=9" # Ghostty terminal
+      "https://yazi.cachix.org?priority=10" # Yazi file manager
+      "https://ags.cachix.org?priority=11" # AGS (Aylur's GTK Shell)
 
       # === Tier 3: Specialized/Optional Caches (Least commonly used) ===
       # Only queried when specific specialized packages are needed
-      "https://zed.cachix.org" # Zed editor (if used)
-      "https://catppuccin.cachix.org" # Catppuccin themes (if used)
-      "https://devenv.cachix.org" # Devenv (if used)
-      "https://viperml.cachix.org" # ViperML (if used)
-      "https://cuda-maintainers.cachix.org" # CUDA packages (if used)
+      "https://zed.cachix.org?priority=12" # Zed editor (if used)
+      "https://catppuccin.cachix.org?priority=13" # Catppuccin themes (if used)
+      "https://devenv.cachix.org?priority=14" # Devenv (if used)
+      "https://viperml.cachix.org?priority=15" # ViperML (if used)
+      "https://cuda-maintainers.cachix.org?priority=16" # CUDA packages (if used)
 
       # === Removed Caches (No longer valid/unreachable) ===
       # Note: aseipp-nix-cache removed - HTTP 400 errors, cache no longer valid
@@ -59,7 +56,7 @@
     extra-trusted-public-keys = [
       # Note: FlakeHub cache key removed - cache requires authentication
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "nixpkgs-python.cachix.org-1:xj9bgMh6w5DjN5n6W5Kd8MycHvDKq1m6nk3QlNS1p2c=" # Python packages cache
+      "nixpkgs-python.cachix.org-1:hxjI7pFxTyuTHn2NkvWCrAUcNZLNS3ZAvfYNuYifcEU=" # Python packages cache
       "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
       "helix.cachix.org-1:ejp9KQpR1FBI2onstMQ34yogDm4OgU2ru6lIwPvuCVs="
       # Note: cache.thalheim.io key removed - cache connection failed
@@ -215,7 +212,8 @@
     };
 
     # Code Editors (latest features & fixes)
-    # Helix editor (used in overlays/default.nix)
+    # NOTE: Helix is now provided via chaotic-packages overlay (bleeding-edge helix_git)
+    # This input is kept for backward compatibility but may be removed in future
     helix = {
       url = "https://flakehub.com/f/helix-editor/helix/*.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";

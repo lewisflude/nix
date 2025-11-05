@@ -19,49 +19,14 @@
         # Download optimization (500MB buffer)
         download-buffer-size = 524288000;
 
-        # Build reliability settings
-        fallback = true; # Build from source if binary cache fails
-        keep-going = true; # Continue building other derivations on failure
-
-        # Performance optimizations for faster evaluation and builds
-        builders-use-substitutes = true; # Allow builders to use substitutes
-
         # High-throughput substitution parallelism (Tip 5)
         # Maximizes parallel TCP connections and substitution jobs for faster binary cache fetching
-        # Optimized for high-RAM system (64GB) - balanced for performance and timeout delay mitigation
-        # Reduced from 128 to 96 to balance parallelism vs timeout multiplication (96 × 5s = 480s max vs 128 × 5s = 640s)
-        http-connections = 96; # Parallel TCP connections (default: ~2-5, recommended: 64-96 for high-end)
-        max-substitution-jobs = 96; # Concurrent substitution jobs (default: low, recommended: 64-96 for high-end)
-
-        # Allow substitution for aggregator derivations (Tip 7)
-        # Forces Nix to use binary cache even for derivations marked allowSubstitutes = false
-        # Speeds up symlinkJoin and other lightweight aggregator builds
-        always-allow-substitutes = true;
-
-        # Cache TTL for faster lookups
-        narinfo-cache-positive-ttl = 30; # Cache positive narinfo lookups for 30 seconds
-        narinfo-cache-negative-ttl = 1; # Cache negative narinfo lookups for 1 second
-
-        # Connection settings
-        connect-timeout = 5; # Connection timeout (seconds) - faster failure detection
-
-        # Remove FlakeHub cache from trusted-substituters
-        # FlakeHub cache requires authentication and isn't needed (flakes use API, not binary cache)
-        # This overrides Determinate Nix's default which includes cache.flakehub.com
-        # See: flake.nix nixConfig comments and docs/CACHE_ERROR_IMPACT.md
-        trusted-substituters = [
-          "https://install.determinate.systems"
-          # FlakeHub cache removed - causes connection errors and timeout delays
-          # See flake.nix line 26: "Note: FlakeHub cache removed - requires authentication and isn't needed"
-        ];
-
-        # Also override extra-trusted-substituters to remove FlakeHub cache
-        # Determinate Nix adds cache.flakehub.com via extra-trusted-substituters,
-        # which gets merged with trusted-substituters. We need to explicitly override it.
-        extra-trusted-substituters = [
-          "https://install.determinate.systems"
-          # FlakeHub cache explicitly removed to prevent timeout delays
-        ];
+        # Optimized for high-RAM system (64GB) - set to 128 for maximum throughput
+        # Note: With cache priorities properly set in flake.nix, timeout delays are minimized,
+        # so higher parallelism (128) is safe and beneficial
+        # Reference: https://brianmcgee.uk/posts/2023/12/13/how-to-optimise-substitutions-in-nix/
+        http-connections = 128; # Parallel TCP connections (default: ~2-5, recommended: 64-128 for high-end)
+        max-substitution-jobs = 128; # Concurrent substitution jobs (default: low, recommended: 64-128 for high-end)
 
         # Logging
         log-lines = 25; # Lines of build output to show on failure
@@ -137,7 +102,7 @@
             echo "🧹 Running monthly duplicate cleanup..."
             # Run non-interactive pog version (skip confirmations)
             cd /home/lewis/.config/nix
-            nix run .#cleanup-duplicates -- --non-interactive || true
+            nix run .#cleanup-duplicates -- --auto-confirm || true
           '';
           mode = "0755";
         };
