@@ -3,7 +3,8 @@
   username,
   lib,
   ...
-}: {
+}:
+{
   environment.etc."sudoers.d/timeout".text = ''
     Defaults timestamp_timeout=30
   '';
@@ -35,24 +36,25 @@
     primaryUser = username;
     defaults = lib.mkMerge [
       {
-        dock.persistent-apps = let
-          homebrewApps = lib.filter (app: builtins.pathExists app) [
-            "/Applications/Docker.app"
-            "/Applications/Google Chrome.app"
-            "/Applications/Figma.app"
-            "/Applications/Notion.app"
-            "/Applications/Obsidian.app"
-            "/Applications/Slack.app"
-            "/Applications/Linear.app"
-            "/Applications/Raycast.app"
-            "/Applications/Beekeeper Studio.app"
-            "/Applications/ChatGPT.app"
-            "/Applications/Steam.app"
-          ];
-          systemApps = [
-            "/System/Applications/System Settings.app"
-          ];
-        in
+        dock.persistent-apps =
+          let
+            homebrewApps = lib.filter (app: builtins.pathExists app) [
+              "/Applications/Docker.app"
+              "/Applications/Google Chrome.app"
+              "/Applications/Figma.app"
+              "/Applications/Notion.app"
+              "/Applications/Obsidian.app"
+              "/Applications/Slack.app"
+              "/Applications/Linear.app"
+              "/Applications/Raycast.app"
+              "/Applications/Beekeeper Studio.app"
+              "/Applications/ChatGPT.app"
+              "/Applications/Steam.app"
+            ];
+            systemApps = [
+              "/System/Applications/System Settings.app"
+            ];
+          in
           homebrewApps ++ systemApps;
       }
       {

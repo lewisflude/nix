@@ -4,7 +4,8 @@
   pkgs,
   lib,
   ...
-}: let
+}:
+let
   updateNixConf = pkgs.writeShellScript "update-nix-conf" ''
     set -euo pipefail
     NIX_CONF_DIR="${config.xdg.configHome}/nix"
@@ -25,9 +26,10 @@
       fi
     fi
   '';
-in {
+in
+{
   # Create activation script to update nix.conf on each generation switch
-  home.activation.updateNixConf = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.updateNixConf = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD ${updateNixConf}
   '';
 

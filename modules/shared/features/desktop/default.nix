@@ -8,11 +8,13 @@
   hostSystem,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.host.features.desktop;
-  platformLib = (import ../../../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
+  platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
   inherit (platformLib) isLinux;
-in {
+in
+{
   config = mkIf cfg.enable {
     # NixOS-specific desktop configuration
     # Note: Actual compositor configuration (Niri, Hyprland) is handled
@@ -21,21 +23,21 @@ in {
     # System-level packages (NixOS only)
     environment.systemPackages = mkIf isLinux (
       with pkgs;
-        optionals cfg.utilities [
-          # Screenshot tools
-          grim # Screenshot tool for Wayland
-          slurp # Region selector for Wayland
-          wl-clipboard # Clipboard for Wayland
-          # Display management
-          wlr-randr # Display management for Wayland
-          brightnessctl # Brightness control
-          # XDG utilities
-          xdg-utils # Desktop integration
-          # Color management
-          argyllcms # Color management
-          colord-gtk # Color daemon GUI
-          wl-gammactl # Gamma control for Wayland
-        ]
+      optionals cfg.utilities [
+        # Screenshot tools
+        grim # Screenshot tool for Wayland
+        slurp # Region selector for Wayland
+        wl-clipboard # Clipboard for Wayland
+        # Display management
+        wlr-randr # Display management for Wayland
+        brightnessctl # Brightness control
+        # XDG utilities
+        xdg-utils # Desktop integration
+        # Color management
+        argyllcms # Color management
+        colord-gtk # Color daemon GUI
+        wl-gammactl # Gamma control for Wayland
+      ]
     );
 
     # User groups for desktop access (NixOS only)

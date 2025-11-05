@@ -3,7 +3,8 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   networking = {
     hostName = hostname;
     enableIPv6 = true;
@@ -126,7 +127,7 @@
     };
     dbus = {
       implementation = "broker";
-      packages = [pkgs.avahi];
+      packages = [ pkgs.avahi ];
     };
   };
   boot.kernel.sysctl = {

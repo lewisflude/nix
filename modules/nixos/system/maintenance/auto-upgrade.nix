@@ -2,11 +2,13 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   inherit (lib) mkBefore mkIf;
   flakePath = "/home/${config.host.username}/.config/nix";
   flakeRef = "${flakePath}#${config.host.hostname}";
-in {
+in
+{
   config = mkIf (config.host ? username && config.host ? hostname) {
     system.autoUpgrade = {
       enable = true;

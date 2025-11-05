@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   imports = [
     # Nix configuration and optimization
     ./nix

@@ -1,4 +1,5 @@
-_: let
+_:
+let
   systemFiles = {
     "**/.DS_Store" = true;
     "**/.AppleDouble" = true;
@@ -181,7 +182,8 @@ _: let
     "**/.git" = true;
     "**/node_modules" = true;
   };
-in {
+in
+{
   inherit
     commonIgnores
     searchIgnores

@@ -30,5 +30,5 @@ _: {
   '';
 
   # Ensure user is in the input group for device access
-  users.groups.input = {};
+  users.groups.input = { };
 }

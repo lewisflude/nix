@@ -75,7 +75,7 @@
     ollama = {
       enable = true;
       acceleration = null; # null, "cuda", or "rocm"
-      models = []; # e.g. ["llama2" "mistral"]
+      models = [ ]; # e.g. ["llama2" "mistral"]
     };
     openWebui = {
       enable = true;
@@ -116,11 +116,11 @@
 
   restic = {
     enable = false;
-    backups = {};
+    backups = { };
     restServer = {
       enable = false;
       port = 8000;
-      extraFlags = [];
+      extraFlags = [ ];
       htpasswdFile = null;
     };
   };

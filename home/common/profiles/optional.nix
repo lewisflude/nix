@@ -1,7 +1,8 @@
 # Optional profile
 # Import all modules unconditionally and let them control their behavior with mkIf
 # This avoids infinite recursion from referencing config in imports
-{...}: {
+{ ... }:
+{
   imports = [
     # Development tools
     ../apps/cursor

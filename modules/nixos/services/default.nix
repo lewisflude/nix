@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   imports = [
     # Legacy container services (being phased out)
     ./containers

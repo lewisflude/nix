@@ -1,4 +1,5 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   # Generate a Vial-compatible JSON definition for kopibeng MNK88 (tkl f13 ansi)
   vialJson = builtins.toJSON {
     name = "MNK88";
@@ -739,7 +740,8 @@
       ];
     };
   };
-in {
+in
+{
   # Keyboard firmware tools for macOS (optional)
   home.packages = with pkgs; [
     # qmk

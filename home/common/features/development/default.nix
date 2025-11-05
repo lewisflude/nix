@@ -8,9 +8,10 @@
   hostSystem,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = host.features.development;
-  platformLib = (import ../../../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
+  platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
   packageSets = import ../../../../lib/package-sets.nix {
     inherit pkgs;
     inherit (platformLib) versions;
@@ -18,7 +19,8 @@ with lib; let
   featureBuilders = import ../../../../lib/feature-builders.nix {
     inherit lib packageSets;
   };
-in {
+in
+{
   imports = [
     ./version-control.nix
     ./language-tools.nix

@@ -1,4 +1,5 @@
-_: let
+_:
+let
   # Karabiner-Elements: macOS equivalent to keyd
   # Provides ergonomic keyboard remapping matching NixOS configuration
   #
@@ -40,11 +41,11 @@ _: let
         # are now in the device-specific mnk88-wkl.json file
         # This prevents global remappings from affecting other keyboards
         complex_modifications = {
-          rules = [];
+          rules = [ ];
         };
 
         # Simple modifications (direct key remaps)
-        simple_modifications = [];
+        simple_modifications = [ ];
 
         # Virtual modifier key (not used in our config)
         virtual_hid_keyboard = {
@@ -55,7 +56,8 @@ _: let
       }
     ];
   };
-in {
+in
+{
   # Write declarative Karabiner configuration
   # This creates ~/.config/karabiner/karabiner.json
   home.file.".config/karabiner/karabiner.json" = {
@@ -80,7 +82,7 @@ in {
               from = {
                 key_code = "caps_lock";
               };
-              to = [{key_code = "left_control";}];
+              to = [ { key_code = "left_control"; } ];
               conditions = [
                 {
                   type = "device_if";
@@ -103,7 +105,7 @@ in {
               from = {
                 key_code = "left_option";
               };
-              to = [{key_code = "left_command";}];
+              to = [ { key_code = "left_command"; } ];
               conditions = [
                 {
                   type = "device_if";
@@ -121,7 +123,7 @@ in {
               from = {
                 key_code = "left_control";
               };
-              to = [{key_code = "left_option";}];
+              to = [ { key_code = "left_option"; } ];
               conditions = [
                 {
                   type = "device_if";
@@ -139,7 +141,7 @@ in {
               from = {
                 key_code = "right_option";
               };
-              to = [{key_code = "right_command";}];
+              to = [ { key_code = "right_command"; } ];
               conditions = [
                 {
                   type = "device_if";
@@ -157,7 +159,7 @@ in {
               from = {
                 key_code = "right_control";
               };
-              to = [{key_code = "right_option";}];
+              to = [ { key_code = "right_option"; } ];
               conditions = [
                 {
                   type = "device_if";
@@ -180,7 +182,7 @@ in {
               from = {
                 key_code = "f13";
               };
-              to = [{shell_command = "open -a Ghostty";}];
+              to = [ { shell_command = "open -a Ghostty"; } ];
               conditions = [
                 {
                   type = "device_if";
@@ -198,7 +200,7 @@ in {
               from = {
                 key_code = "print_screen";
               };
-              to = [{shell_command = "open -a \"Safari\" || open -a \"Arc\" || open -a \"Google Chrome\"";}];
+              to = [ { shell_command = "open -a \"Safari\" || open -a \"Arc\" || open -a \"Google Chrome\""; } ];
               conditions = [
                 {
                   type = "device_if";

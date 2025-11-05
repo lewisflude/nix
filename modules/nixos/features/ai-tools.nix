@@ -5,15 +5,17 @@
   lib,
   ...
 }:
-with lib; let
-  cfg = config.host.features.aiTools or {};
-in {
+with lib;
+let
+  cfg = config.host.features.aiTools or { };
+in
+{
   config = mkIf (cfg.enable or false) {
     # Map features to services
     host.services.aiTools = {
       enable = true;
-      ollama = cfg.ollama or {};
-      openWebui = cfg.openWebui or {};
+      ollama = cfg.ollama or { };
+      openWebui = cfg.openWebui or { };
     };
   };
 }

@@ -3,10 +3,12 @@
   pkgs,
   lib,
   ...
-}: let
+}:
+let
   cfg = config.host.features.desktop;
   package = config.boot.kernelPackages.nvidiaPackages.beta;
-in {
+in
+{
   config = lib.mkIf cfg.enable {
     environment.sessionVariables = {
       __GL_SYNC_DISPLAY_DEVICE = "DP-1";
@@ -37,12 +39,12 @@ in {
     };
     services.xserver = {
       enable = false;
-      videoDrivers = ["nvidia"];
+      videoDrivers = [ "nvidia" ];
     };
     services.udev.extraRules = ''
       ACTION=="add", DEVPATH=="/bus/pci/drivers/nvidia", RUN+="${pkgs.nvidia-container-toolkit}/bin/nvidia-ctk system create-dev-char-symlinks --create-all"
       KERNEL=="card[0-9]*", SUBSYSTEM=="drm", ACTION=="change", RUN+="${pkgs.bash}/bin/bash -c 'echo detect > /sys/class/drm/card1-DP-1/status'"
     '';
-    boot.blacklistedKernelModules = ["nouveau"];
+    boot.blacklistedKernelModules = [ "nouveau" ];
   };
 }

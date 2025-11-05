@@ -6,9 +6,11 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.host.features.virtualisation;
-in {
+in
+{
   config = mkIf cfg.enable {
     # Virtualisation tooling
     virtualisation = mkMerge [
@@ -39,7 +41,7 @@ in {
             swtpm.enable = true;
             ovmf = {
               enable = true;
-              packages = [pkgs.OVMFFull.fd];
+              packages = [ pkgs.OVMFFull.fd ];
             };
           };
         };
@@ -61,7 +63,8 @@ in {
     # Install related tools
     # Note: docker-compose and lazydocker moved to home-manager
     # See home/common/apps/docker.nix and home/common/apps/lazydocker.nix
-    environment.systemPackages = with pkgs;
+    environment.systemPackages =
+      with pkgs;
       optionals cfg.qemu [
         virt-manager
         qemu

@@ -5,17 +5,18 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.features.development;
-  inherit
-    (lib)
+  inherit (lib)
     mkIf
     mkEnableOption
     mkOption
     types
     optionals
     ;
-in {
+in
+{
   options.features.development = {
     enable = mkEnableOption "development tools and environments";
 
@@ -77,7 +78,8 @@ in {
 
   config = mkIf cfg.enable {
     # Core development packages
-    environment.systemPackages = with pkgs;
+    environment.systemPackages =
+      with pkgs;
       [
         # Always include these
         gnumake
@@ -131,8 +133,8 @@ in {
         golangci-lint
       ]
       # Editors
-      ++ optionals cfg.editors.vscode [vscode]
-      ++ optionals cfg.editors.neovim [neovim];
+      ++ optionals cfg.editors.vscode [ vscode ]
+      ++ optionals cfg.editors.neovim [ neovim ];
 
     # Enable Docker service if Docker is enabled
     virtualisation.docker.enable = mkIf cfg.docker true;

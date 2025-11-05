@@ -4,9 +4,11 @@
   lib,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.host.services.mediaManagement;
-in {
+in
+{
   options.host.services.mediaManagement.navidrome.enable =
     mkEnableOption "Navidrome music server"
     // {

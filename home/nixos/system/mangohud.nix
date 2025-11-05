@@ -4,65 +4,74 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   # Get Catppuccin palette colors
   catppuccinPalette =
-    if lib.hasAttrByPath ["catppuccin" "sources" "palette"] config
-    then (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
+    if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
+      (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
       .${config.catppuccin.flavor}.colors
-    else if inputs ? catppuccin
-    then let
-      catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
-    in
-      if catppuccinSrc != null
-      then (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
-      else throw "Cannot find catppuccin source (input exists but src/outPath not found)"
-    else throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
+    else if inputs ? catppuccin then
+      let
+        catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
+      in
+      if catppuccinSrc != null then
+        (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
+      else
+        throw "Cannot find catppuccin source (input exists but src/outPath not found)"
+    else
+      throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
 
   # Convert hex color to RGB (0-1 range) for Mangohud
-  hexToRgb = hex: let
-    # Remove # or 0x prefix if present
-    hexClean = lib.removePrefix "#" (lib.removePrefix "0x" hex);
-    # Convert hex digits to decimal manually
-    hexDigitToInt = c:
-      if c == "0"
-      then 0
-      else if c == "1"
-      then 1
-      else if c == "2"
-      then 2
-      else if c == "3"
-      then 3
-      else if c == "4"
-      then 4
-      else if c == "5"
-      then 5
-      else if c == "6"
-      then 6
-      else if c == "7"
-      then 7
-      else if c == "8"
-      then 8
-      else if c == "9"
-      then 9
-      else if c == "a" || c == "A"
-      then 10
-      else if c == "b" || c == "B"
-      then 11
-      else if c == "c" || c == "C"
-      then 12
-      else if c == "d" || c == "D"
-      then 13
-      else if c == "e" || c == "E"
-      then 14
-      else if c == "f" || c == "F"
-      then 15
-      else throw "Invalid hex digit: ${c}";
-    hexPairToInt = pair: (hexDigitToInt (lib.substring 0 1 pair)) * 16 + (hexDigitToInt (lib.substring 1 1 pair));
-    r = (hexPairToInt (lib.substring 0 2 hexClean)) / 255.0;
-    g = (hexPairToInt (lib.substring 2 2 hexClean)) / 255.0;
-    b = (hexPairToInt (lib.substring 4 2 hexClean)) / 255.0;
-  in "${toString r},${toString g},${toString b}";
+  hexToRgb =
+    hex:
+    let
+      # Remove # or 0x prefix if present
+      hexClean = lib.removePrefix "#" (lib.removePrefix "0x" hex);
+      # Convert hex digits to decimal manually
+      hexDigitToInt =
+        c:
+        if c == "0" then
+          0
+        else if c == "1" then
+          1
+        else if c == "2" then
+          2
+        else if c == "3" then
+          3
+        else if c == "4" then
+          4
+        else if c == "5" then
+          5
+        else if c == "6" then
+          6
+        else if c == "7" then
+          7
+        else if c == "8" then
+          8
+        else if c == "9" then
+          9
+        else if c == "a" || c == "A" then
+          10
+        else if c == "b" || c == "B" then
+          11
+        else if c == "c" || c == "C" then
+          12
+        else if c == "d" || c == "D" then
+          13
+        else if c == "e" || c == "E" then
+          14
+        else if c == "f" || c == "F" then
+          15
+        else
+          throw "Invalid hex digit: ${c}";
+      hexPairToInt =
+        pair: (hexDigitToInt (lib.substring 0 1 pair)) * 16 + (hexDigitToInt (lib.substring 1 1 pair));
+      r = (hexPairToInt (lib.substring 0 2 hexClean)) / 255.0;
+      g = (hexPairToInt (lib.substring 2 2 hexClean)) / 255.0;
+      b = (hexPairToInt (lib.substring 4 2 hexClean)) / 255.0;
+    in
+    "${toString r},${toString g},${toString b}";
 
   # Catppuccin Mocha colors (RGB format for Mangohud)
   colors = {
@@ -93,7 +102,8 @@
     flamingo = hexToRgb catppuccinPalette.flamingo.hex;
     rosewater = hexToRgb catppuccinPalette.rosewater.hex;
   };
-in {
+in
+{
   home.file.".config/MangoHud/MangoHud.conf" = {
     text = ''
       fps_limit=0

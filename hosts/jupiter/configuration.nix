@@ -3,7 +3,8 @@
   pkgs,
   config,
   ...
-}: {
+}:
+{
   # Host configuration using the new options system
 
   imports = [

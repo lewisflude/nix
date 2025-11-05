@@ -4,23 +4,27 @@
   system,
   config,
   ...
-}: let
-  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
-in {
+}:
+let
+  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+in
+{
   home = {
-    packages = with pkgs;
+    packages =
+      with pkgs;
       [
         git
         curl
         jq
       ]
-      ++ platformLib.platformPackages
-      [
-        linux-specific-package
-      ]
-      [
-        darwin-specific-package
-      ];
+      ++
+        platformLib.platformPackages
+          [
+            linux-specific-package
+          ]
+          [
+            darwin-specific-package
+          ];
     file = {
       ".example-config" = {
         text = ''
@@ -39,16 +43,15 @@ in {
   };
   programs.example = {
     enable = true;
-    settings =
-      {
-        theme = "dark";
-        editor = "vim";
-      }
-      // lib.optionalAttrs platformLib.isDarwin {
-        integration = "macos";
-      }
-      // lib.optionalAttrs platformLib.isLinux {
-        integration = "systemd";
-      };
+    settings = {
+      theme = "dark";
+      editor = "vim";
+    }
+    // lib.optionalAttrs platformLib.isDarwin {
+      integration = "macos";
+    }
+    // lib.optionalAttrs platformLib.isLinux {
+      integration = "systemd";
+    };
   };
 }

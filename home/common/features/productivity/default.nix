@@ -3,15 +3,18 @@
   host,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = host.features.productivity;
-in {
+in
+{
   imports = [
     ./resume.nix
   ];
 
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs;
+    home.packages =
+      with pkgs;
       lib.optionals cfg.office [
         libreoffice-fresh
       ]

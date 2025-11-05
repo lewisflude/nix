@@ -5,12 +5,14 @@
   lib,
   system,
   ...
-}: let
-  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
+}:
+let
+  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
   claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
   codeDirectory = "${config.home.homeDirectory}/Code";
   dexWebProject = "${codeDirectory}/dex-web";
-in {
+in
+{
   home = {
     packages = with pkgs; [
       uv
@@ -27,42 +29,43 @@ in {
         executable = true;
       };
     };
-    activation.setupClaudeMcp = lib.hm.dag.entryAfter ["writeBoundary"] (
+    activation.setupClaudeMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] (
       let
         cfg = config.services.mcp;
         mcpAddCommands = lib.concatStringsSep "\n        " (
           lib.mapAttrsToList (
-            name: serverCfg: let
+            name: serverCfg:
+            let
               command = lib.escapeShellArg serverCfg.command;
               argsStr = lib.concatStringsSep " " (map lib.escapeShellArg serverCfg.args);
               argsPart = lib.optionalString (argsStr != "") "-- ${argsStr}";
               envVars = lib.concatStringsSep " " (
                 lib.mapAttrsToList (
                   key: value: "export ${lib.escapeShellArg key}=${lib.escapeShellArg value};"
-                )
-                serverCfg.env
+                ) serverCfg.env
               );
-            in ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${command} ${argsPart} || echo "Failed to add ${name} server"''
-          )
-          cfg.servers
+            in
+            ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${command} ${argsPart} || echo "Failed to add ${name} server"''
+          ) cfg.servers
         );
-      in ''
+      in
+      ''
         if command -v claude >/dev/null 2>&1; then
           echo "Registering MCP servers with Claude Code..."
           ${pkgs.findutils}/bin/find ~/.config/claude -name "*.json" -delete 2>/dev/null || true
           $DRY_RUN_CMD ${pkgs.writeShellScript "setup-claude-mcp" ''
-          echo "Removing existing MCP servers..."
-          for server in ${
-            lib.concatStringsSep " " (lib.mapAttrsToList (name: _: lib.escapeShellArg name) cfg.servers)
-          }; do
-            claude mcp remove "$server" -s user 2>/dev/null || true
-            claude mcp remove "$server" -s project 2>/dev/null || true
-            claude mcp remove "$server" 2>/dev/null || true
-          done
-          echo "Running MCP server registration commands..."
-          ${mcpAddCommands}
-          echo "Claude MCP server registration complete"
-        ''}
+            echo "Removing existing MCP servers..."
+            for server in ${
+              lib.concatStringsSep " " (lib.mapAttrsToList (name: _: lib.escapeShellArg name) cfg.servers)
+            }; do
+              claude mcp remove "$server" -s user 2>/dev/null || true
+              claude mcp remove "$server" -s project 2>/dev/null || true
+              claude mcp remove "$server" 2>/dev/null || true
+            done
+            echo "Running MCP server registration commands..."
+            ${mcpAddCommands}
+            echo "Claude MCP server registration complete"
+          ''}
         else
           echo "Claude CLI not found, skipping MCP server registration"
         fi
@@ -84,12 +87,12 @@ in {
     servers = {
       kagi = {
         command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
-        args = [];
+        args = [ ];
         port = 11431;
       };
       fetch = {
         command = "${pkgs.uv}/bin/uvx";
-        args = ["mcp-server-fetch"];
+        args = [ "mcp-server-fetch" ];
         port = 11432;
       };
       git = {
@@ -145,7 +148,7 @@ in {
       };
       time = {
         command = "${pkgs.uv}/bin/uvx";
-        args = ["mcp-server-time"];
+        args = [ "mcp-server-time" ];
         port = 11443;
       };
     };

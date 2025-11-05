@@ -1,7 +1,8 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   # Reuse the same Vial JSON generated on macOS by duplicating its shape here if needed.
   # If you want to source from the Darwin file, we can factor it into a shared module later.
-  vialJson = (pkgs.formats.json {}).generate "mnk88-vial.json" {
+  vialJson = (pkgs.formats.json { }).generate "mnk88-vial.json" {
     name = "MNK88";
     vendorId = 19280; # 0x4B50
     productId = 34816; # 0x8800
@@ -14,7 +15,8 @@
     };
     # Layout omitted here for brevity — Vial firmware embeds definitions; JSON is optional on Linux.
   };
-in {
+in
+{
   home.packages = with pkgs; [
     vial
     via

@@ -43,8 +43,8 @@ pog.pog {
     nix-update
   ];
 
-  script = helpers:
-    with helpers; ''
+  script =
+    helpers: with helpers; ''
       FLAKE_DIR="${config-root}"
       cd "$FLAKE_DIR" || die "Failed to change to flake directory"
 
@@ -57,7 +57,7 @@ pog.pog {
       if ! git diff-index --quiet HEAD -- 2>/dev/null; then
         yellow "⚠️  You have uncommitted changes"
         if ! ${flag "dry_run"}; then
-          ${confirm {prompt = "Continue anyway?";}}
+          ${confirm { prompt = "Continue anyway?"; }}
         fi
       fi
 

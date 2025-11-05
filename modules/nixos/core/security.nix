@@ -1,10 +1,11 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   security = {
     doas = {
       enable = true;
       extraRules = [
         {
-          users = ["lewis"];
+          users = [ "lewis" ];
           keepEnv = true;
           persist = true;
         }
@@ -31,7 +32,7 @@
         niri.enableGnomeKeyring = true;
         sudo.enableGnomeKeyring = true;
         su.enableGnomeKeyring = true;
-        swaylock = {};
+        swaylock = { };
         sudo.u2fAuth = true;
         login.u2fAuth = true;
         greetd.u2fAuth = true;
@@ -69,8 +70,8 @@
       # This complements Home Manager's gnome-keyring service which handles the daemon
       unlock-login-keyring = {
         description = "Unlock GNOME login keyring for auto-login sessions";
-        after = ["gnome-keyring-daemon.service"];
-        wants = ["gnome-keyring-daemon.service"];
+        after = [ "gnome-keyring-daemon.service" ];
+        wants = [ "gnome-keyring-daemon.service" ];
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
@@ -81,7 +82,7 @@
             fi
           ''}";
         };
-        wantedBy = ["default.target"];
+        wantedBy = [ "default.target" ];
       };
     };
   };

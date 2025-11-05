@@ -38,8 +38,8 @@ pog.pog {
     jq
   ];
 
-  script = helpers:
-    with helpers; ''
+  script =
+    helpers: with helpers; ''
       CACHE_NAME="$cache"
       COMMAND="$1"
 

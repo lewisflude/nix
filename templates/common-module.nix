@@ -4,9 +4,11 @@
   system,
   username,
   ...
-}: let
-  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
-in {
+}:
+let
+  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+in
+{
   environment.systemPackages = with pkgs; [
     curl
     wget

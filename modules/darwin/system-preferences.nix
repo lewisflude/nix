@@ -2,9 +2,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   cfg = config.host.features.systemPreferences;
-in {
+in
+{
   options.host.features.systemPreferences = {
     enable = lib.mkOption {
       type = lib.types.bool;

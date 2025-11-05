@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   services = {
     samba = {
       enable = true;
@@ -50,5 +51,5 @@
       };
     };
   };
-  systemd.services.samba.path = [pkgs.cifs-utils];
+  systemd.services.samba.path = [ pkgs.cifs-utils ];
 }

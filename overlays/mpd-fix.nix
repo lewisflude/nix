@@ -31,6 +31,6 @@
 _final: prev: {
   mpd = prev.mpd.overrideAttrs (old: {
     # Disable io_uring to fix build on kernel 6.14.11
-    mesonFlags = (old.mesonFlags or []) ++ ["-Dio_uring=disabled"];
+    mesonFlags = (old.mesonFlags or [ ]) ++ [ "-Dio_uring=disabled" ];
   });
 }

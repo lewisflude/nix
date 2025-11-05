@@ -3,11 +3,14 @@
   host,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = host.features.security;
-in {
+in
+{
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs;
+    home.packages =
+      with pkgs;
       [
         age
         sops

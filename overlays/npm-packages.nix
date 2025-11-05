@@ -22,7 +22,7 @@
 _final: prev: {
   # Latest Nx monorepo tooling
   # Provides nx-latest as a top-level package for easy access
-  nx-latest = prev.buildNpmPackage.override {nodejs = prev.nodejs_24;} rec {
+  nx-latest = prev.buildNpmPackage.override { nodejs = prev.nodejs_24; } rec {
     pname = "nx";
     version = "21.5.3";
     src = prev.fetchurl {
@@ -38,7 +38,7 @@ _final: prev: {
       description = "Smart monorepos · Fast CI";
       homepage = "https://nx.dev";
       license = licenses.mit;
-      maintainers = [maintainers.lewisflude];
+      maintainers = [ maintainers.lewisflude ];
       mainProgram = "nx";
     };
   };

@@ -2,7 +2,8 @@
   pkgs,
   config,
   ...
-}: {
+}:
+{
   home.packages = with pkgs; [
     platform-specific-tool
     platform-specific-app

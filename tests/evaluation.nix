@@ -4,14 +4,17 @@
   pkgs,
   inputs,
   ...
-}: let
+}:
+let
   # Test that a configuration evaluates successfully
-  mkEvalTest = name: config:
-    pkgs.runCommand "eval-test-${name}" {} ''
+  mkEvalTest =
+    name: config:
+    pkgs.runCommand "eval-test-${name}" { } ''
       ${pkgs.nix}/bin/nix eval --impure --expr 'builtins.deepSeq (${config}) true' || exit 1
       touch $out
     '';
-in {
+in
+{
   # Test all system configurations evaluate
   darwin-config = mkEvalTest "darwin" ''
     (import ${inputs.darwin} {

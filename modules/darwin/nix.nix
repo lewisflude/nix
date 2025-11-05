@@ -2,7 +2,8 @@
   username,
   lib,
   ...
-}: {
+}:
+{
   # Determinate Nix configuration
   determinate-nix.customSettings = {
     flake-registry = "/etc/nix/flake-registry.json";

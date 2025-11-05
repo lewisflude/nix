@@ -8,23 +8,23 @@
   # Add this to your hosts/jupiter/default.nix features section:
 
   /*
-  containers = {
-    enable = true;
-
-    mediaManagement = {
+    containers = {
       enable = true;
-      # Path where your movies, tv shows, music, etc. are stored
-      dataPath = "/mnt/storage";
-      # Path where container configurations will be stored
-      configPath = "/var/lib/containers/media-management";
-    };
 
-    productivity = {
-      enable = true;
-      # Path where AI tool configurations will be stored
-      configPath = "/var/lib/containers/productivity";
+      mediaManagement = {
+        enable = true;
+        # Path where your movies, tv shows, music, etc. are stored
+        dataPath = "/mnt/storage";
+        # Path where container configurations will be stored
+        configPath = "/var/lib/containers/media-management";
+      };
+
+      productivity = {
+        enable = true;
+        # Path where AI tool configurations will be stored
+        configPath = "/var/lib/containers/productivity";
+      };
     };
-  };
   */
 
   # The configuration above will:

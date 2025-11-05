@@ -4,9 +4,11 @@
   lib,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.host.services.mediaManagement;
-in {
+in
+{
   options.host.services.mediaManagement.sabnzbd.enable =
     mkEnableOption "SABnzbd usenet downloader"
     // {
@@ -67,6 +69,6 @@ in {
     # - Temporary Download Folder: ${cfg.dataPath}/usenet/incomplete
 
     # Open firewall on port 8082 (non-standard port to avoid conflict with qBittorrent on 8080)
-    networking.firewall.allowedTCPPorts = mkAfter [8082];
+    networking.firewall.allowedTCPPorts = mkAfter [ 8082 ];
   };
 }

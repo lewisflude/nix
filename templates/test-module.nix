@@ -6,22 +6,24 @@ _: {
 
   # Test that verifies the feature works correctly
   nodes = {
-    machine = {...}: {
-      imports = [
-        ../modules/shared/host-options.nix
-        ../modules/CATEGORY/features/FEATURE_NAME.nix
-      ];
+    machine =
+      { ... }:
+      {
+        imports = [
+          ../modules/shared/host-options.nix
+          ../modules/CATEGORY/features/FEATURE_NAME.nix
+        ];
 
-      # Enable the feature
-      host = {
-        username = "testuser";
-        hostname = "test-machine";
-        features.FEATURE_NAME = {
-          enable = true;
-          # Additional test-specific options
+        # Enable the feature
+        host = {
+          username = "testuser";
+          hostname = "test-machine";
+          features.FEATURE_NAME = {
+            enable = true;
+            # Additional test-specific options
+          };
         };
       };
-    };
   };
 
   testScript = ''

@@ -5,7 +5,8 @@
   lib,
   ...
 }:
-with lib; {
+with lib;
+{
   options.host.features.containers.test = {
     enable = mkEnableOption "test mode - enables only minimal containers";
   };
@@ -25,7 +26,7 @@ with lib; {
       # Simple test container - nginx web server
       test-nginx = {
         image = "nginx:alpine";
-        ports = ["8888:80"];
+        ports = [ "8888:80" ];
         volumes = [
           "/tmp/test-container:/usr/share/nginx/html:ro"
         ];

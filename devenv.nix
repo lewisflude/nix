@@ -1,4 +1,4 @@
 {
   cachix.push = "lewisflude";
-  cachix.pull = ["lewisflude"];
+  cachix.pull = [ "lewisflude" ];
 }

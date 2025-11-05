@@ -3,9 +3,11 @@
   lib,
   system,
   ...
-}: let
-  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
-in {
+}:
+let
+  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+in
+{
   programs.nh = {
     enable = true;
     # Disable automatic cleanup to speed up nh os switch

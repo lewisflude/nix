@@ -4,9 +4,11 @@
   lib,
   system,
   ...
-}: let
-  platformLib = (import ../../../lib/functions.nix {inherit lib;}).withSystem system;
-in {
+}:
+let
+  platformLib = (import ../../../lib/functions.nix { inherit lib; }).withSystem system;
+in
+{
   home.file = {
     ".p10k.zsh" = {
       source = ../lib/p10k.zsh;

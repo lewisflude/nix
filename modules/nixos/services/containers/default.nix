@@ -5,9 +5,11 @@
   lib,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.host.services.containers;
-in {
+in
+{
   imports = [
     ./media-management.nix
     ./productivity.nix
@@ -80,26 +82,24 @@ in {
     virtualisation.oci-containers.backend = "podman";
 
     # Create necessary directories
-    systemd.tmpfiles.rules = let
-      mkContainerDirs = path: [
-        "d ${path} 0755 root root -"
-        "d ${path}/config 0755 ${toString cfg.uid} ${toString cfg.gid} -"
-      ];
+    systemd.tmpfiles.rules =
+      let
+        mkContainerDirs = path: [
+          "d ${path} 0755 root root -"
+          "d ${path}/config 0755 ${toString cfg.uid} ${toString cfg.gid} -"
+        ];
 
-      mediaRules =
-        if cfg.mediaManagement.enable
-        then
-          mkContainerDirs cfg.mediaManagement.configPath
-          ++ [
-            "d ${cfg.mediaManagement.dataPath} 0755 ${toString cfg.uid} ${toString cfg.gid} -"
-          ]
-        else [];
+        mediaRules =
+          if cfg.mediaManagement.enable then
+            mkContainerDirs cfg.mediaManagement.configPath
+            ++ [
+              "d ${cfg.mediaManagement.dataPath} 0755 ${toString cfg.uid} ${toString cfg.gid} -"
+            ]
+          else
+            [ ];
 
-      prodRules =
-        if cfg.productivity.enable
-        then mkContainerDirs cfg.productivity.configPath
-        else [];
-    in
+        prodRules = if cfg.productivity.enable then mkContainerDirs cfg.productivity.configPath else [ ];
+      in
       mediaRules ++ prodRules;
   };
 }

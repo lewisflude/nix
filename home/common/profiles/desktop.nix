@@ -1,6 +1,7 @@
 # Desktop profile
 # For systems with GUI and productivity tools
-{...}: {
+{ ... }:
+{
   imports = [
     ./development.nix
 

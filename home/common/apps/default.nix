@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   imports = [
     # Package installations
     ./packages.nix

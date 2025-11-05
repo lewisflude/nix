@@ -4,14 +4,14 @@
   lib,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.host.services.mediaManagement;
-in {
-  options.host.services.mediaManagement.lidarr.enable =
-    mkEnableOption "Lidarr music management"
-    // {
-      default = true;
-    };
+in
+{
+  options.host.services.mediaManagement.lidarr.enable = mkEnableOption "Lidarr music management" // {
+    default = true;
+  };
 
   config = mkIf (cfg.enable && cfg.lidarr.enable) {
     services.lidarr = {

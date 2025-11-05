@@ -8,9 +8,10 @@
   hostSystem,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.host.features.development;
-  platformLib = (import ../../../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
+  platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
   packageSets = import ../../../../lib/package-sets.nix {
     inherit pkgs;
     inherit (platformLib) versions;
@@ -19,7 +20,8 @@ with lib; let
     inherit lib packageSets;
   };
   inherit (platformLib) isLinux;
-in {
+in
+{
   config = mkIf cfg.enable {
     # Environment variables for development
     environment.variables = featureBuilders.mkDevEnvironment cfg;
@@ -30,7 +32,7 @@ in {
         inherit cfg pkgs;
       }
       # Add Linux-specific packages (e.g., glibc.dev for build tools)
-      ++ lib.optionals (cfg.buildTools or false) [pkgs.glibc.dev]
+      ++ lib.optionals (cfg.buildTools or false) [ pkgs.glibc.dev ]
     );
 
     # NixOS-specific services

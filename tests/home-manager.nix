@@ -4,10 +4,12 @@
   pkgs,
   inputs,
   ...
-}: let
+}:
+let
   # Test home-manager activation for a given profile
-  mkHomeTest = profile: username:
-    pkgs.runCommand "home-manager-${profile}-test" {} ''
+  mkHomeTest =
+    profile: username:
+    pkgs.runCommand "home-manager-${profile}-test" { } ''
       # Create a minimal home-manager configuration
       export HOME=$(mktemp -d)
       export USER=${username}
@@ -33,7 +35,8 @@
 
       touch $out
     '';
-in {
+in
+{
   # Test minimal profile
   home-minimal = mkHomeTest "minimal" "testuser";
 

@@ -2,23 +2,26 @@
   pkgs,
   lib,
   system,
-  virtualisation ? {},
-  modulesVirtualisation ? {},
+  virtualisation ? { },
+  modulesVirtualisation ? { },
   ...
-}: let
-  platformLib = (import ../../../lib/functions.nix {inherit lib;}).withSystem system;
+}:
+let
+  platformLib = (import ../../../lib/functions.nix { inherit lib; }).withSystem system;
   podmanEnabled = platformLib.getVirtualisationFlag {
     inherit modulesVirtualisation virtualisation;
     flagName = "enablePodman";
     default = false;
   };
-in {
+in
+{
   home.packages =
-    if podmanEnabled
-    then
-      with pkgs; [
+    if podmanEnabled then
+      with pkgs;
+      [
         podman
         podman-compose
       ]
-    else [];
+    else
+      [ ];
 }

@@ -1,3 +1,4 @@
-{pkgs, ...}: {
-  podman-containers = pkgs.callPackage ./podman-containers.nix {};
+{ pkgs, ... }:
+{
+  podman-containers = pkgs.callPackage ./podman-containers.nix { };
 }

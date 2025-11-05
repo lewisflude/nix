@@ -2,9 +2,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   cfg = config.host.features.finderPreferences;
-in {
+in
+{
   options.host.features.finderPreferences = {
     enable = lib.mkOption {
       type = lib.types.bool;

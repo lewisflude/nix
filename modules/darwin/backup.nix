@@ -1,4 +1,5 @@
-{username, ...}: {
+{ username, ... }:
+{
   system.activationScripts.backup.text = ''
     mkdir -p /Users/${username}/Backups/nix-config
     chown ${username}:staff /Users/${username}/Backups/nix-config

@@ -3,7 +3,8 @@
   lib,
   username,
   ...
-}: {
+}:
+{
   environment.systemPackages = with pkgs; [
     systemd
     udev
@@ -11,14 +12,14 @@
   ];
   systemd.services.example = {
     description = "Example service";
-    wantedBy = ["multi-user.target"];
+    wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       ExecStart = "${pkgs.example}/bin/example";
       Restart = "on-failure";
     };
   };
   systemd.timers.example = {
-    wantedBy = ["timers.target"];
+    wantedBy = [ "timers.target" ];
     timerConfig = {
       OnCalendar = "daily";
       Persistent = true;
@@ -29,7 +30,7 @@
   };
   boot = {
     loader.systemd-boot.enable = lib.mkDefault true;
-    kernelModules = ["example-module"];
+    kernelModules = [ "example-module" ];
   };
   networking = {
     firewall.allowedTCPPorts = [

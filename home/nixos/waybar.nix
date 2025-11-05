@@ -2,7 +2,8 @@
   pkgs,
   lib,
   ...
-}: let
+}:
+let
   workspaceIcons = {
     "1" = "";
     "2" = "";
@@ -89,7 +90,8 @@
       printf '{"percentage":%d,"alt":"%s"}' "$load_pct" "$alt" | jq --unbuffered --compact-output
     '';
   };
-in {
+in
+{
   programs.waybar = {
     enable = true;
     systemd.enable = true;
@@ -100,7 +102,7 @@ in {
         log-level = 3;
         layer = "top";
         position = "top";
-        output = ["DP-1"];
+        output = [ "DP-1" ];
         modules-left = [
           "niri/workspaces"
           "niri/window"

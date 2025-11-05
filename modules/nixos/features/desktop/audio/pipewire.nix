@@ -3,9 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.host.features.desktop;
-in {
+in
+{
   config = lib.mkIf cfg.enable {
     services.pipewire = {
       enable = true;

@@ -1,5 +1,6 @@
-{lib, ...}:
-with lib; {
+{ lib, ... }:
+with lib;
+{
   options.host.services.mediaManagement = {
     enable = mkEnableOption "native media management stack";
 

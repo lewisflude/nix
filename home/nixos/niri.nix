@@ -5,7 +5,8 @@
   inputs,
   system,
   ...
-}: let
+}:
+let
   themeConstants = import ./theme-constants.nix {
     inherit
       pkgs
@@ -15,7 +16,8 @@
       lib
       ;
   };
-in {
+in
+{
   home.packages = with pkgs; [
     swww
     grim
@@ -143,7 +145,7 @@ in {
               app-id = "^displaycal$";
             }
           ];
-          default-column-width = {};
+          default-column-width = { };
           open-floating = true;
         }
       ];

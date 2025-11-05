@@ -2,7 +2,8 @@
   username,
   pkgs,
   ...
-}: {
+}:
+{
   system.activationScripts.home-manager-backup-cleanup = {
     text = ''
       echo "🧹 Cleaning up Home Manager backup files..."

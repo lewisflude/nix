@@ -1,7 +1,8 @@
 # Darwin host configuration for Lewis's MacBook Pro
 let
   defaultFeatures = import ../_common/features.nix;
-in {
+in
+{
   # System identification
   username = "lewisflude";
   useremail = "lewis@lewisflude.com";
@@ -9,15 +10,11 @@ in {
   hostname = "Lewiss-MacBook-Pro";
 
   # Feature configuration
-  features =
-    defaultFeatures
-    // {
-      productivity =
-        defaultFeatures.productivity
-        // {
-          enable = true;
-          notes = true;
-          resume = true;
-        };
+  features = defaultFeatures // {
+    productivity = defaultFeatures.productivity // {
+      enable = true;
+      notes = true;
+      resume = true;
     };
+  };
 }

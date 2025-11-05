@@ -2,7 +2,8 @@
   pkgs,
   lib,
   ...
-}: let
+}:
+let
   desktopFile = "chromium-browser.desktop";
   webMimeTypes = [
     "text/html"
@@ -10,8 +11,9 @@
     "x-scheme-handler/https"
   ];
   addons = pkgs.nur.repos.rycee.firefox-addons;
-  mimeDefaults = lib.genAttrs webMimeTypes (_type: [desktopFile]);
-in {
+  mimeDefaults = lib.genAttrs webMimeTypes (_type: [ desktopFile ]);
+in
+{
   home.packages = [
   ];
   home.sessionVariables = {
@@ -70,7 +72,7 @@ in {
       search = {
         force = true;
         default = "Kagi";
-        order = ["Kagi"];
+        order = [ "Kagi" ];
         engines.Kagi = {
           urls = [
             {
@@ -83,7 +85,7 @@ in {
               ];
             }
           ];
-          definedAliases = ["@k"];
+          definedAliases = [ "@k" ];
         };
       };
       settings = {

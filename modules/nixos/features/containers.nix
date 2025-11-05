@@ -5,9 +5,11 @@
   lib,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.host.features.containers;
-in {
+in
+{
   options.host.features.containers = {
     enable = mkEnableOption "container services";
 

@@ -2,9 +2,11 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   cfg = config.features.desktop;
-in {
+in
+{
   imports = [
     ./audio
     ./desktop-environment.nix
