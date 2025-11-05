@@ -1,4 +1,9 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 {
   config = {
     nix = {
@@ -47,12 +52,13 @@
       };
 
       # Automatic garbage collection
-      # Note: With Determinate Nix, Determinate Nixd handles GC automatically.
-      # However, the traditional nix.gc.automatic should still work alongside it.
-      # If you experience conflicts, consider disabling this and relying on:
+      # Note: With Determinate Nix (nix.enable = false), Determinate Nixd handles GC automatically.
+      # These options require nix.enable = true, so they're only set when NixOS manages the daemon.
+      # When using Determinate Nix, rely on:
       # 1. Determinate Nixd's built-in GC
       # 2. nh clean service (configured in home/common/nh.nix)
-      gc = {
+      # 3. Manual cleanup via systemd timers (nix-store-optimization service below)
+      gc = lib.mkIf config.nix.enable {
         automatic = true;
         dates = "weekly";
         options = "--delete-older-than 3d"; # More aggressive: keep only 3 days instead of 7
@@ -61,7 +67,9 @@
       # Automatic store optimization
       # Automatically hardlinks duplicate files in the store, recovering 20-40% space
       # Runs daily at 3:45 AM, after GC completes
-      optimise = {
+      # Note: Requires nix.enable = true, so disabled when using Determinate Nix
+      # Use systemd timers (nix-store-optimization service) instead for manual optimization
+      optimise = lib.mkIf config.nix.enable {
         automatic = true;
         dates = [ "03:45" ];
       };
