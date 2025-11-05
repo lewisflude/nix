@@ -30,15 +30,13 @@
 {
   inputs,
   system,
-}: let
+}:
+let
   isLinux = system == "x86_64-linux" || system == "aarch64-linux";
 
   # Helper to make conditional overlays
   # Returns the overlay if condition is true, otherwise returns a no-op overlay
-  mkConditional = condition: overlay:
-    if condition
-    then overlay
-    else (_final: _prev: {});
+  mkConditional = condition: overlay: if condition then overlay else (_final: _prev: { });
 
   overlaySet = {
     # === Core Overlays (always applied) ===
@@ -61,19 +59,21 @@
     # Explicitly list only packages actually used to avoid evaluation overhead
     # from directory scanning and unused package definitions
     # To add a new package: add it to this list and import it explicitly
-    localPkgs = _final: prev: let
-      pkgsDir = ../pkgs;
-      # Only include packages that are actually used in the configuration
-      # This avoids evaluating unused package definitions during every build
-      usedPackages = {
-        ghostty = prev.callPackage (pkgsDir + "/ghostty") {inherit inputs;};
-        cursor = prev.callPackage (pkgsDir + "/cursor") {};
-        # npm-packages overlay is imported separately below
-        # pog-scripts are used in shells, not top-level
-        # cockpit-extensions are used in cockpit modules, not top-level
-        # nx is provided via npm-packages overlay
-      };
-    in
+    localPkgs =
+      _final: prev:
+      let
+        pkgsDir = ../pkgs;
+        # Only include packages that are actually used in the configuration
+        # This avoids evaluating unused package definitions during every build
+        usedPackages = {
+          ghostty = prev.callPackage (pkgsDir + "/ghostty") { inherit inputs; };
+          cursor = prev.callPackage (pkgsDir + "/cursor") { };
+          # npm-packages overlay is imported separately below
+          # pog-scripts are used in shells, not top-level
+          # cockpit-extensions are used in cockpit modules, not top-level
+          # nx is provided via npm-packages overlay
+        };
+      in
       usedPackages;
 
     # Package fixes and compatibility overlays
@@ -85,19 +85,16 @@
 
     # Essential tools (conditional on input existence)
     nh =
-      if inputs ? nh && inputs.nh ? overlays
-      then inputs.nh.overlays.default
-      else (_final: _prev: {});
+      if inputs ? nh && inputs.nh ? overlays then inputs.nh.overlays.default else (_final: _prev: { });
     nur =
-      if inputs ? nur && inputs.nur ? overlays
-      then inputs.nur.overlays.default
-      else (_final: _prev: {});
+      if inputs ? nur && inputs.nur ? overlays then inputs.nur.overlays.default else (_final: _prev: { });
 
     # Infrastructure visualization (conditional on input existence)
     nix-topology =
-      if inputs ? nix-topology && inputs.nix-topology ? overlays
-      then inputs.nix-topology.overlays.default
-      else (_final: _prev: {});
+      if inputs ? nix-topology && inputs.nix-topology ? overlays then
+        inputs.nix-topology.overlays.default
+      else
+        (_final: _prev: { });
 
     # === Latest Flake Packages ===
     # Code editors with bleeding-edge features
@@ -108,17 +105,20 @@
           && inputs.helix ? packages
           && inputs.helix.packages ? ${system}
           && inputs.helix.packages.${system} ? default
-        then inputs.helix.packages.${system}.default
-        else prev.helix;
+        then
+          inputs.helix.packages.${system}.default
+        else
+          prev.helix;
       # Using stable zed-editor from nixpkgs instead (for cached binaries)
       # zed-editor = inputs.zed-editor.packages.${system}.default or prev.zed-editor;
     };
 
     # Rust toolchain overlay (provides latest Rust, rust-analyzer, etc.)
     rust-overlay =
-      if inputs ? rust-overlay && inputs.rust-overlay ? overlays
-      then inputs.rust-overlay.overlays.default
-      else (_final: _prev: {});
+      if inputs ? rust-overlay && inputs.rust-overlay ? overlays then
+        inputs.rust-overlay.overlays.default
+      else
+        (_final: _prev: { });
 
     # Git tools with latest features
     flake-git-tools = _final: prev: {
@@ -128,8 +128,10 @@
           && inputs.lazygit ? packages
           && inputs.lazygit.packages ? ${system}
           && inputs.lazygit.packages.${system} ? default
-        then inputs.lazygit.packages.${system}.default
-        else prev.lazygit;
+        then
+          inputs.lazygit.packages.${system}.default
+        else
+          prev.lazygit;
     };
 
     # CLI tools with latest improvements
@@ -140,30 +142,32 @@
           && inputs.atuin ? packages
           && inputs.atuin.packages ? ${system}
           && inputs.atuin.packages.${system} ? default
-        then inputs.atuin.packages.${system}.default
-        else prev.atuin;
+        then
+          inputs.atuin.packages.${system}.default
+        else
+          prev.atuin;
     };
 
     # === Platform-Specific Overlays ===
 
     # Audio production packages (Linux-only)
     audio-nix = mkConditional (isLinux && inputs ? audio-nix && inputs.audio-nix ? overlays) (
-      if inputs ? audio-nix && inputs.audio-nix ? overlays
-      then inputs.audio-nix.overlays.default
-      else (_final: _prev: {})
+      if inputs ? audio-nix && inputs.audio-nix ? overlays then
+        inputs.audio-nix.overlays.default
+      else
+        (_final: _prev: { })
     );
 
     # Linux-only
     niri = mkConditional (isLinux && inputs ? niri && inputs.niri ? overlays) (
-      if inputs ? niri && inputs.niri ? overlays
-      then inputs.niri.overlays.niri
-      else (_final: _prev: {})
+      if inputs ? niri && inputs.niri ? overlays then inputs.niri.overlays.niri else (_final: _prev: { })
     );
     nvidia-patch = mkConditional (isLinux && inputs ? nvidia-patch && inputs.nvidia-patch ? overlays) (
-      if inputs ? nvidia-patch && inputs.nvidia-patch ? overlays
-      then inputs.nvidia-patch.overlays.default
-      else (_final: _prev: {})
+      if inputs ? nvidia-patch && inputs.nvidia-patch ? overlays then
+        inputs.nvidia-patch.overlays.default
+      else
+        (_final: _prev: { })
     );
   };
 in
-  overlaySet
+overlaySet

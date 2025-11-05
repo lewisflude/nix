@@ -2,9 +2,9 @@
   config,
   lib,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     mkOption
     mkEnableOption
     mkIf
@@ -25,12 +25,12 @@
       };
       args = mkOption {
         type = types.listOf types.str;
-        default = [];
+        default = [ ];
         description = "Additional arguments to pass to the MCP server (for CLI servers)";
       };
       env = mkOption {
         type = types.attrsOf types.str;
-        default = {};
+        default = { };
         description = "Environment variables to set for the MCP server (for CLI servers)";
       };
 
@@ -42,7 +42,7 @@
       };
       headers = mkOption {
         type = types.attrsOf types.str;
-        default = {};
+        default = { };
         description = "HTTP headers to send to the remote MCP server (for remote servers)";
       };
 
@@ -54,7 +54,7 @@
       };
       extraArgs = mkOption {
         type = types.listOf types.str;
-        default = [];
+        default = [ ];
         description = "Additional arguments to pass to the MCP server (optional, not used in config generation)";
       };
     };
@@ -71,32 +71,33 @@
       };
     };
   };
-  mkMcpConfig = _name: serverCfg:
-  # Remote server configuration (url-based)
-    if serverCfg.url != null
-    then
+  mkMcpConfig =
+    _name: serverCfg:
+    # Remote server configuration (url-based)
+    if serverCfg.url != null then
       {
         inherit (serverCfg) url;
       }
-      // (optionalAttrs (serverCfg.headers != {}) {inherit (serverCfg) headers;})
+      // (optionalAttrs (serverCfg.headers != { }) { inherit (serverCfg) headers; })
     # CLI server configuration (command-based)
-    else if serverCfg.command != null
-    then
+    else if serverCfg.command != null then
       {
         inherit (serverCfg) command;
       }
-      // (optionalAttrs (serverCfg.args != []) {inherit (serverCfg) args;})
-      // (optionalAttrs (serverCfg.env != {}) {inherit (serverCfg) env;})
-    else throw "MCP server '${_name}' must specify either 'command' (for CLI server) or 'url' (for remote server)";
+      // (optionalAttrs (serverCfg.args != [ ]) { inherit (serverCfg) args; })
+      // (optionalAttrs (serverCfg.env != { }) { inherit (serverCfg) env; })
+    else
+      throw "MCP server '${_name}' must specify either 'command' (for CLI server) or 'url' (for remote server)";
   mcpConfigJson = {
     mcpServers = mapAttrs mkMcpConfig cfg.servers;
   };
-in {
+in
+{
   options.services.mcp = {
     enable = mkEnableOption "MCP (Model Context Protocol) servers";
     targets = mkOption {
       type = types.attrsOf mcpTargetType;
-      default = {};
+      default = { };
       description = "MCP targets to configure";
       example = {
         "cursor" = {
@@ -111,13 +112,13 @@ in {
     };
     servers = mkOption {
       type = types.attrsOf mcpServerType;
-      default = {};
+      default = { };
       description = "MCP servers to configure";
       example = {
         # CLI server with npx
         kagi = {
           command = "uvx";
-          args = ["kagimcp"];
+          args = [ "kagimcp" ];
           env = {
             KAGI_API_KEY = "YOUR_API_KEY_HERE";
             KAGI_SUMMARIZER_ENGINE = "YOUR_ENGINE_CHOICE_HERE";
@@ -126,7 +127,7 @@ in {
         # CLI server with Python
         python-server = {
           command = "python";
-          args = ["mcp-server.py"];
+          args = [ "mcp-server.py" ];
           env = {
             API_KEY = "value";
           };
@@ -147,22 +148,21 @@ in {
       mapAttrsToList (name: target: {
         name = ".mcp-generated/${name}/${target.fileName}";
         value.text = builtins.toJSON mcpConfigJson;
-      })
-      cfg.targets
+      }) cfg.targets
     );
 
     # Copy to final location (not symlinked) because cursor-agent can't read symlinks
-    home.activation.copyMcpConfig = lib.hm.dag.entryAfter ["writeBoundary"] (
+    home.activation.copyMcpConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] (
       let
         copyCommands = concatStringsSep "\n" (
           mapAttrsToList (name: target: ''
             mkdir -p "${target.directory}"
             cp -f "$HOME/.mcp-generated/${name}/${target.fileName}" "${target.directory}/${target.fileName}"
             chmod 644 "${target.directory}/${target.fileName}"
-          '')
-          cfg.targets
+          '') cfg.targets
         );
-      in ''
+      in
+      ''
         ${copyCommands}
       ''
     );

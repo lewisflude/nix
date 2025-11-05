@@ -4,10 +4,12 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   inherit (lib) mkOption types mkIf;
   cfg = config.host.services.containers;
-in {
+in
+{
   options.host.services.containers.secrets = {
     sonarrApiKey = mkOption {
       type = types.nullOr types.str;

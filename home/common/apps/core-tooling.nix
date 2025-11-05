@@ -34,6 +34,7 @@ in
       nix-update # Update package versions automatically
       nix-prefetch-github # Fetch GitHub hashes
       nvfetcher # Batch update sources from TOML
+      nix-output-monitor # Progress monitor for nh (shows build progress)
     ]
     ++
       lib.optionals

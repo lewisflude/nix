@@ -4,9 +4,11 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   inherit (lib) mkEnableOption mkIf;
-in {
+in
+{
   options.host.features.containers.test = {
     enable = mkEnableOption "test mode - enables only minimal containers";
   };
@@ -26,7 +28,7 @@ in {
       # Simple test container - nginx web server
       test-nginx = {
         image = "nginx:alpine";
-        ports = ["8888:80"];
+        ports = [ "8888:80" ];
         volumes = [
           "/tmp/test-container:/usr/share/nginx/html:ro"
         ];

@@ -7,12 +7,14 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   inherit (lib) mkIf;
   inherit (lib.lists) optional optionals;
   cfg = config.host.features.audio;
   audioNixCfg = cfg.audioNix;
-in {
+in
+{
   config = mkIf cfg.enable {
     # Enable musnix for real-time audio optimization
     musnix = {
@@ -29,8 +31,9 @@ in {
     security.rtkit.enable = true;
 
     # Audio production packages
-    environment.systemPackages = with pkgs;
-    # Standard audio production packages
+    environment.systemPackages =
+      with pkgs;
+      # Standard audio production packages
       (optionals cfg.production [
         # ardour # TEMPORARILY DISABLED: depends on webkitgtk which was removed
         audacity

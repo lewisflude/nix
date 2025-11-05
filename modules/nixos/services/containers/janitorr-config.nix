@@ -5,18 +5,18 @@
   placeholders,
   janitorrCfg,
   ...
-}: {
-  logging =
-    {
-      level = {
-        "com.github.schaka" = janitorrCfg.loggingLevel;
-      };
-    }
-    // lib.optionalAttrs (janitorrCfg.loggingFile != null) {
-      file = {
-        name = janitorrCfg.loggingFile;
-      };
+}:
+{
+  logging = {
+    level = {
+      "com.github.schaka" = janitorrCfg.loggingLevel;
     };
+  }
+  // lib.optionalAttrs (janitorrCfg.loggingFile != null) {
+    file = {
+      name = janitorrCfg.loggingFile;
+    };
+  };
 
   "file-system" = {
     access = true;

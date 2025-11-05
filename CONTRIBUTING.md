@@ -47,8 +47,10 @@ Thank you for your interest in contributing! This document provides guidelines a
    # Run checks
    nix flake check
 
-   # Format code
-   nixfmt .
+   # Format code (recommended)
+   nix fmt
+   # or format all file types
+   treefmt
    ```
 
 ## Development Workflow

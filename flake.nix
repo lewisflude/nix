@@ -22,7 +22,7 @@
     #       (you're on v3.12.0, so this is optional but included for FlakeHub flakes)
     extra-substituters = [
       "https://lewisflude.cachix.org" # Personal cache - highest priority
-      "https://aseipp-nix-cache.freetls.fastly.net" # Cache v2 beta (IPv6 + HTTP/2 support, faster TTFB, improved routing)
+      # Note: aseipp-nix-cache removed - HTTP 400 errors, cache no longer valid
       # Note: FlakeHub cache removed - requires authentication and isn't needed
       # FlakeHub flakes are downloaded from the API, not the binary cache
       "https://nix-community.cachix.org"
@@ -252,8 +252,9 @@
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
   };
 
-  outputs = inputs @ {self, ...}:
-    inputs.flake-parts.lib.mkFlake {inherit inputs self;} {
+  outputs =
+    inputs@{ self, ... }:
+    inputs.flake-parts.lib.mkFlake { inherit inputs self; } {
       imports = [
         ./flake-parts/core.nix
         inputs.nix-topology.flakeModule

@@ -4,16 +4,17 @@
   config,
   lib,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     mkIf
     mkEnableOption
     mkOption
     types
     ;
   cfg = config.host.services.aiTools;
-in {
+in
+{
   imports = [
     ./ollama.nix
     ./open-webui.nix
@@ -36,11 +37,9 @@ in {
 
     # Service-specific enables
     ollama = {
-      enable =
-        mkEnableOption "Ollama LLM backend"
-        // {
-          default = true;
-        };
+      enable = mkEnableOption "Ollama LLM backend" // {
+        default = true;
+      };
 
       acceleration = mkOption {
         type = types.nullOr (
@@ -55,7 +54,7 @@ in {
 
       models = mkOption {
         type = types.listOf types.str;
-        default = [];
+        default = [ ];
         description = "List of models to pre-download";
         example = [
           "llama2"
@@ -65,11 +64,9 @@ in {
     };
 
     openWebui = {
-      enable =
-        mkEnableOption "Open WebUI interface for LLMs"
-        // {
-          default = true;
-        };
+      enable = mkEnableOption "Open WebUI interface for LLMs" // {
+        default = true;
+      };
 
       port = mkOption {
         type = types.port;
@@ -93,6 +90,6 @@ in {
       description = "AI tools services user";
     };
 
-    users.groups.${cfg.group} = {};
+    users.groups.${cfg.group} = { };
   };
 }

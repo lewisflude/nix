@@ -3,11 +3,13 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   inherit (lib) mkIf mkAfter;
   inherit (lib.lists) optional;
   cfg = config.host.services.aiTools;
-in {
+in
+{
   config = mkIf (cfg.enable && cfg.openWebui.enable) {
     services.open-webui = {
       enable = true;
@@ -20,7 +22,7 @@ in {
     };
 
     # Open firewall
-    networking.firewall.allowedTCPPorts = [cfg.openWebui.port];
+    networking.firewall.allowedTCPPorts = [ cfg.openWebui.port ];
 
     # Run as common productivity user
     systemd.services.open-webui.serviceConfig = {

@@ -5,10 +5,12 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   inherit (lib) mkIf;
   cfg = config.host.features.productivity;
-in {
+in
+{
   config = mkIf cfg.enable {
     # System-level packages (NixOS only)
     # Note: Most productivity tools are user-level and installed via home-manager

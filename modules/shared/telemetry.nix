@@ -7,8 +7,15 @@
   pkgs,
   hostSystem,
   ...
-}: let
-  inherit (lib) mkEnableOption mkOption types optionalString mkIf;
+}:
+let
+  inherit (lib)
+    mkEnableOption
+    mkOption
+    types
+    optionalString
+    mkIf
+    ;
   inherit (lib.strings) hasSuffix;
   cfg = config.telemetry;
   isLinux = hasSuffix "linux" hostSystem;
@@ -32,23 +39,25 @@
 
     # Count packages
     SYSTEM_PACKAGES=$(${
-      if isLinux
-      then "nix-env -q --installed --profile /nix/var/nix/profiles/system | wc -l"
-      else "nix-env -q --installed --profile /run/current-system | wc -l"
+      if isLinux then
+        "nix-env -q --installed --profile /nix/var/nix/profiles/system | wc -l"
+      else
+        "nix-env -q --installed --profile /run/current-system | wc -l"
     })
     USER_PACKAGES=$(nix-env -q --installed | wc -l)
 
     # Get current generation
     ${
-      if isLinux
-      then ''
-        CURRENT_GEN=$(nixos-rebuild list-generations 2>/dev/null | grep current | awk '{print $1}' || echo "unknown")
-        TOTAL_GENS=$(nixos-rebuild list-generations 2>/dev/null | wc -l || echo "0")
-      ''
-      else ''
-        CURRENT_GEN=$(darwin-rebuild --list-generations 2>/dev/null | grep current | awk '{print $1}' || echo "unknown")
-        TOTAL_GENS=$(darwin-rebuild --list-generations 2>/dev/null | wc -l || echo "0")
-      ''
+      if isLinux then
+        ''
+          CURRENT_GEN=$(nixos-rebuild list-generations 2>/dev/null | grep current | awk '{print $1}' || echo "unknown")
+          TOTAL_GENS=$(nixos-rebuild list-generations 2>/dev/null | wc -l || echo "0")
+        ''
+      else
+        ''
+          CURRENT_GEN=$(darwin-rebuild --list-generations 2>/dev/null | grep current | awk '{print $1}' || echo "unknown")
+          TOTAL_GENS=$(darwin-rebuild --list-generations 2>/dev/null | wc -l || echo "0")
+        ''
     }
 
     # Calculate days since last rebuild
@@ -70,7 +79,7 @@
         "platform": "${hostSystem}",
         "nixVersion": "$(nix --version | awk '{print $3}')"
       },
-      "features": ${builtins.toJSON (config.host.features or {})},
+      "features": ${builtins.toJSON (config.host.features or { })},
       "packages": {
         "system": $SYSTEM_PACKAGES,
         "user": $USER_PACKAGES,
@@ -194,16 +203,14 @@
       echo "📁 History: $HISTORY_FILE"
       echo ""
   '';
-in {
+in
+{
   options.telemetry = {
     enable = mkEnableOption "local usage telemetry (privacy-first, nothing sent externally)";
 
     dataDir = mkOption {
       type = types.str;
-      default =
-        if isLinux
-        then "/var/lib/nix-config-telemetry"
-        else "\${HOME}/.nix-config-telemetry";
+      default = if isLinux then "/var/lib/nix-config-telemetry" else "\${HOME}/.nix-config-telemetry";
       description = "Directory to store telemetry data";
     };
 

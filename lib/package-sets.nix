@@ -4,7 +4,8 @@
 {
   pkgs,
   versions,
-}: let
+}:
+let
   # Version-aware package getters (defined at top level for use in other functions)
   getPython = pkgs: pkgs.${versions.python};
   getNodejs = pkgs: pkgs.${versions.nodejs};
@@ -26,10 +27,13 @@
     ];
 
     # Python toolchain (complete set)
-    pythonToolchain = pkgs: let
-      python = getPython pkgs;
-    in
-      with pkgs; [
+    pythonToolchain =
+      pkgs:
+      let
+        python = getPython pkgs;
+      in
+      with pkgs;
+      [
         python
         python.pkgs.pip
         python.pkgs.virtualenv
@@ -50,10 +54,13 @@
     ];
 
     # Node.js/TypeScript toolchain
-    nodeToolchain = pkgs: let
-      nodejs = getNodejs pkgs;
-    in
-      with pkgs; [
+    nodeToolchain =
+      pkgs:
+      let
+        nodejs = getNodejs pkgs;
+      in
+      with pkgs;
+      [
         nodejs
         nodejs.pkgs.npm
         nodejs.pkgs.yarn
@@ -129,9 +136,9 @@
 
     # Editors
     editors = {
-      vscode = pkgs: [pkgs.vscode];
-      neovim = pkgs: [pkgs.neovim];
-      helix = pkgs: [pkgs.helix];
+      vscode = pkgs: [ pkgs.vscode ];
+      neovim = pkgs: [ pkgs.neovim ];
+      helix = pkgs: [ pkgs.helix ];
     };
 
     # Debugging tools
@@ -166,4 +173,4 @@
     };
   };
 in
-  packageSets
+packageSets

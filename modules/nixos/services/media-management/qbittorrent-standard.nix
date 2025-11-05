@@ -4,8 +4,18 @@
   lib,
   pkgs,
   ...
-}: let
-  inherit (lib) mkEnableOption mkOption mkIf types optionalAttrs mapAttrs mkOverride optionalString;
+}:
+let
+  inherit (lib)
+    mkEnableOption
+    mkOption
+    mkIf
+    types
+    optionalAttrs
+    mapAttrs
+    mkOverride
+    optionalString
+    ;
   cfg = config.host.services.mediaManagement;
   vpnEnabled = cfg.enable && cfg.qbittorrent.enable && cfg.qbittorrent.vpn.enable;
 
@@ -13,15 +23,14 @@
   vpnNamespace = "qbittor"; # Max 7 chars, shortened from qbittorrent
   # Standard NixOS module defaults to 8080, but we allow override via config
   webUIPort = cfg.qbittorrent.webUI.port or 8080;
-  torrentingPort = (cfg.qbittorrent.bittorrent or {}).port or 6881;
-in {
+  torrentingPort = (cfg.qbittorrent.bittorrent or { }).port or 6881;
+in
+{
   # Define options for compatibility with bridge module
   options.host.services.mediaManagement.qbittorrent = {
-    enable =
-      mkEnableOption "qBittorrent BitTorrent client"
-      // {
-        default = true;
-      };
+    enable = mkEnableOption "qBittorrent BitTorrent client" // {
+      default = true;
+    };
 
     webUI = {
       port = mkOption {
@@ -69,7 +78,7 @@ in {
 
     categories = mkOption {
       type = types.attrsOf types.str;
-      default = {};
+      default = { };
       description = "Category path mappings. Maps category names to their save paths. Example: { movies = \"/mnt/storage/movies\"; tv = \"/mnt/storage/tv\"; }";
       example = {
         movies = "/mnt/storage/movies";
@@ -113,7 +122,7 @@ in {
 
   config = mkIf (cfg.enable && cfg.qbittorrent.enable) {
     # Add qbittorrent user to media group to allow writing to media-owned directories
-    users.users.qbittorrent.extraGroups = [cfg.group];
+    users.users.qbittorrent.extraGroups = [ cfg.group ];
 
     # Ensure profile directory and subdirectories exist with correct permissions
     # Use media group so qbittorrent can write when running with Group=media
@@ -152,33 +161,28 @@ in {
         };
 
         Preferences = {
-          WebUI =
-            {
-              Enabled = true; # Explicitly enable WebUI
-              Port = webUIPort; # Explicitly set port in config to match webuiPort option
-              Address =
-                if cfg.qbittorrent.webUI.address != null
-                then cfg.qbittorrent.webUI.address
-                else
-                  (
-                    if vpnEnabled
-                    then "*"
-                    else null
-                  );
-            }
-            // optionalAttrs (cfg.qbittorrent.webUI.username != null) {
-              Username = cfg.qbittorrent.webUI.username;
-            }
-            // optionalAttrs (cfg.qbittorrent.webUI.password != null) {
-              Password_PBKDF2 = cfg.qbittorrent.webUI.password;
-            }
-            // {
-              # Enable VueTorrent as alternative WebUI
-              AlternativeUIEnabled = true;
-              RootFolder = "${pkgs.vuetorrent}/share/vuetorrent";
-              # Disable CSRF protection (can cause issues per guide)
-              CSRFProtection = false;
-            };
+          WebUI = {
+            Enabled = true; # Explicitly enable WebUI
+            Port = webUIPort; # Explicitly set port in config to match webuiPort option
+            Address =
+              if cfg.qbittorrent.webUI.address != null then
+                cfg.qbittorrent.webUI.address
+              else
+                (if vpnEnabled then "*" else null);
+          }
+          // optionalAttrs (cfg.qbittorrent.webUI.username != null) {
+            Username = cfg.qbittorrent.webUI.username;
+          }
+          // optionalAttrs (cfg.qbittorrent.webUI.password != null) {
+            Password_PBKDF2 = cfg.qbittorrent.webUI.password;
+          }
+          // {
+            # Enable VueTorrent as alternative WebUI
+            AlternativeUIEnabled = true;
+            RootFolder = "${pkgs.vuetorrent}/share/vuetorrent";
+            # Disable CSRF protection (can cause issues per guide)
+            CSRFProtection = false;
+          };
 
           # Downloads settings (from guide recommendations)
           Downloads = {
@@ -225,28 +229,28 @@ in {
 
         # BitTorrent session settings
         BitTorrent = {
-          Session =
-            {
-              DefaultSavePath = "${cfg.dataPath}/torrents";
-              TempPath = "${cfg.dataPath}/torrents/incomplete";
-              FinishedTorrentExportDirectory = "${cfg.dataPath}/torrents/complete";
-              BTProtocol = (cfg.qbittorrent.bittorrent or {}).protocol or "TCP";
-              # Pre-allocate disk space (from guide: recommended)
-              Preallocation = true;
-              # Use subcategories (from guide: recommended)
-              SubcategoriesEnabled = true;
-            }
-            // (
-              # Bind to VPN interface when VPN is enabled
-              # This ensures all traffic (including UDP tracker announces) goes through the VPN
-              # VPN-Confinement creates the WireGuard interface as "qbittor0" in the namespace
-              # This corresponds to Options > Advanced > Network Interface in qBittorrent WebUI
-              if vpnEnabled
-              then {
+          Session = {
+            DefaultSavePath = "${cfg.dataPath}/torrents";
+            TempPath = "${cfg.dataPath}/torrents/incomplete";
+            FinishedTorrentExportDirectory = "${cfg.dataPath}/torrents/complete";
+            BTProtocol = (cfg.qbittorrent.bittorrent or { }).protocol or "TCP";
+            # Pre-allocate disk space (from guide: recommended)
+            Preallocation = true;
+            # Use subcategories (from guide: recommended)
+            SubcategoriesEnabled = true;
+          }
+          // (
+            # Bind to VPN interface when VPN is enabled
+            # This ensures all traffic (including UDP tracker announces) goes through the VPN
+            # VPN-Confinement creates the WireGuard interface as "qbittor0" in the namespace
+            # This corresponds to Options > Advanced > Network Interface in qBittorrent WebUI
+            if vpnEnabled then
+              {
                 InterfaceName = "qbittor0";
               }
-              else {}
-            );
+            else
+              { }
+          );
         };
 
         # Category path mappings
@@ -254,45 +258,43 @@ in {
         # NixOS module converts nested attrsets to backslash-separated keys
         Category = mapAttrs (_: path: {
           SavePath = path;
-        }) (cfg.qbittorrent.categories or {});
+        }) (cfg.qbittorrent.categories or { });
       };
     };
 
     # VPN-Confinement integration and directory setup for standard qBittorrent service
-    systemd.services.qbittorrent =
-      {
-        # Ensure directories have correct ownership before starting
-        preStart =
-          ''
-            # Fix ownership if directories exist with wrong permissions
-            # Use media group so qbittorrent can write when running with Group=media
-            if [ -d /var/lib/qBittorrent ]; then
-              chown -R qbittorrent:${cfg.group} /var/lib/qBittorrent || true
-            fi
-          ''
-          + optionalString vpnEnabled ''
-            # CRITICAL: Add route to ProtonVPN NAT-PMP gateway via WireGuard interface
-            # VPN-Confinement's routing sends 10.2.0.1 through the bridge instead of WireGuard
-            # This route ensures qBittorrent's built-in NAT-PMP client can reach the gateway
-            # to detect and use the forwarded port. Without this, qBittorrent shows "firewalled"
-            # and cannot receive incoming connections because it doesn't know the forwarded port.
-            ${pkgs.iproute2}/bin/ip route add 10.2.0.1/32 dev qbittor0 2>/dev/null || true
-          '';
+    systemd.services.qbittorrent = {
+      # Ensure directories have correct ownership before starting
+      preStart = ''
+        # Fix ownership if directories exist with wrong permissions
+        # Use media group so qbittorrent can write when running with Group=media
+        if [ -d /var/lib/qBittorrent ]; then
+          chown -R qbittorrent:${cfg.group} /var/lib/qBittorrent || true
+        fi
+      ''
+      + optionalString vpnEnabled ''
+        # CRITICAL: Add route to ProtonVPN NAT-PMP gateway via WireGuard interface
+        # VPN-Confinement's routing sends 10.2.0.1 through the bridge instead of WireGuard
+        # This route ensures qBittorrent's built-in NAT-PMP client can reach the gateway
+        # to detect and use the forwarded port. Without this, qBittorrent shows "firewalled"
+        # and cannot receive incoming connections because it doesn't know the forwarded port.
+        ${pkgs.iproute2}/bin/ip route add 10.2.0.1/32 dev qbittor0 2>/dev/null || true
+      '';
 
-        # Use media as primary group so qbittorrent can write to media-owned directories
-        # This is necessary because mergerfs with default_permissions checks primary group
-        # Use mkOverride to ensure this takes precedence over the standard module's Group setting
-        serviceConfig.Group = mkOverride 1000 cfg.group;
-      }
-      // optionalAttrs vpnEnabled {
-        after = ["network.target"];
-        # VPN-Confinement integration
-        # VPN-Confinement handles namespace setup automatically - no need to manually depend on a service
-        vpnConfinement = {
-          enable = true;
-          inherit vpnNamespace;
-        };
+      # Use media as primary group so qbittorrent can write to media-owned directories
+      # This is necessary because mergerfs with default_permissions checks primary group
+      # Use mkOverride to ensure this takes precedence over the standard module's Group setting
+      serviceConfig.Group = mkOverride 1000 cfg.group;
+    }
+    // optionalAttrs vpnEnabled {
+      after = [ "network.target" ];
+      # VPN-Confinement integration
+      # VPN-Confinement handles namespace setup automatically - no need to manually depend on a service
+      vpnConfinement = {
+        enable = true;
+        inherit vpnNamespace;
       };
+    };
 
     # Note: Per VPN-Confinement docs, ports in portMappings shouldn't be open on default netns
     # However, port 8080 may be used by other services, so we rely on VPN-Confinement's

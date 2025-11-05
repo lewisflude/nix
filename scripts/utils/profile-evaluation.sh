@@ -64,9 +64,10 @@ measure_evaluation() {
     nix eval --raw ".#$OUTPUT_PATH" >/dev/null 2>&1 || true
     local end=$(date +%s%N 2>/dev/null || date +%s)
   else
-    log_subsection "Measuring $label..."
+    log_subsection "Measuring $label..." >&2
     local start=$(date +%s%N 2>/dev/null || date +%s)
-    nix eval --raw ".#$OUTPUT_PATH" 2>&1 | grep -v "^warning:" || true
+    # Capture nix output to stderr so it doesn't interfere with duration output
+    nix eval --raw ".#$OUTPUT_PATH" 2>&1 | grep -v "^warning:" >&2 || true
     local end=$(date +%s%N 2>/dev/null || date +%s)
   fi
 
@@ -78,6 +79,7 @@ measure_evaluation() {
     local duration=$(( (end - start) * 1000 ))
   fi
 
+  # Output only the duration number (no other output)
   echo "$duration"
 }
 
@@ -266,7 +268,7 @@ show_recommendations() {
     recommendations+=("  2. Optimize module import structure")
   fi
 
-  # Check for large host-options.nix
+  # Check for large host-options files (if not already split)
   if [[ -f "modules/shared/host-options.nix" ]]; then
     local lines=$(wc -l < "modules/shared/host-options.nix" 2>/dev/null || echo "0")
     if [[ $lines -gt 500 ]]; then
@@ -274,6 +276,18 @@ show_recommendations() {
       recommendations+=("  - modules/shared/host-options/core.nix")
       recommendations+=("  - modules/shared/host-options/features.nix")
       recommendations+=("  - modules/shared/host-options/services.nix")
+    fi
+  elif [[ -d "modules/shared/host-options" ]]; then
+    # Check if split files are large
+    local total_lines=0
+    for file in modules/shared/host-options/*.nix; do
+      if [[ -f "$file" ]]; then
+        local file_lines=$(wc -l < "$file" 2>/dev/null || echo "0")
+        total_lines=$((total_lines + file_lines))
+      fi
+    done
+    if [[ $total_lines -gt 1000 ]]; then
+      recommendations+=("host-options files are large (${total_lines} total lines). Consider further splitting feature-specific options.")
     fi
   fi
 

@@ -130,16 +130,25 @@ praise: Excellent abstraction! This will make testing much easier.
 
 ### Nix-specific Tools
 
-- **nixfmt**: Nix formatter
+- **nixfmt-rfc-style**: Official Nix formatter (RFC 166) - recommended
+- **treefmt**: Unified formatter for multiple file types (Nix, YAML, Markdown, Shell)
 - **deadnix**: Find and remove dead Nix code
 - **statix**: Linter and suggestions for Nix
-- **nixpkgs-fmt**: Alternative formatter (available but not default)
 
 ### Usage
 
 ```bash
-# Format all Nix files
-nixfmt .
+# Format all Nix files (recommended)
+nix fmt
+# or alias: fmt
+
+# Format all file types (Nix, YAML, Markdown, Shell)
+treefmt
+# or alias: fmt-all
+
+# Format specific file or directory
+nixfmt-rfc-style <file-or-directory>
+# or alias: fmt-nix <file-or-directory>
 
 # Find dead code
 deadnix
@@ -220,15 +229,48 @@ The `.editorconfig` file defines:
 
 ### Nix Files
 
+We use `nixfmt-rfc-style` (official Nix formatter, RFC 166) for formatting. Multiple formatting methods are available:
+
 ```bash
-# Format
-nixfmt .
+# Recommended: Use nix fmt (flake formatter)
+nix fmt
+# or use the alias
+fmt
+
+# Alternative: Format all files with treefmt (includes Nix, YAML, Markdown, Shell)
+treefmt
+# or use the alias
+fmt-all
+
+# Format specific directory or file
+nixfmt-rfc-style <file-or-directory>
+# or use the alias
+fmt-nix <file-or-directory>
+
+# Format using helper script
+format.sh treefmt        # Format all files
+format.sh nix .          # Format Nix files in current directory
+format.sh nix-fmt        # Use nix fmt command
+format.sh status         # Check what needs formatting
 
 # Lint
 statix check .
 
-# Both
+# Both format and lint
 nix flake check
+```
+
+### Git Mergetool Integration
+
+`nixfmt` can automatically resolve formatting-related merge conflicts:
+
+```bash
+# Resolve merge conflicts with nixfmt
+git mergetool -t nixfmt <file>
+git mergetool -t nixfmt .  # Resolve all conflicts
+
+# If you don't like the result, restore
+git restore --merge <file>
 ```
 
 ### Markdown Files
@@ -292,8 +334,10 @@ yamllint .
 ### Before Submitting PRs
 
 ```bash
-# Format everything
-nixfmt .
+# Format everything (recommended)
+nix fmt
+# or format all file types
+treefmt
 
 # Run all checks
 nix flake check
@@ -310,7 +354,9 @@ nh os build # or nh darwin build
 When in the dev shell, these aliases are available:
 
 ```bash
-fmt       # Format all Nix files (nixfmt)
+fmt       # Format all Nix files (nix fmt)
+fmt-nix   # Format with nixfmt-rfc-style (for specific files)
+fmt-all   # Format all file types (treefmt)
 lint      # Lint all Nix files (statix)
 check     # Run all flake checks
 update    # Update all flake inputs

@@ -6,34 +6,33 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   # Feature configuration shorthand
   cfg = config.features.gaming;
 
   # Import commonly used lib functions
-  inherit
-    (lib)
+  inherit (lib)
     mkIf
     mkEnableOption
     mkOption
     types
     ;
   inherit (lib.lists) optionals;
-in {
+in
+{
   # ============================================================================
   # OPTIONS DEFINITION
   # ============================================================================
 
   options.features.gaming = {
     # Main feature toggle
-    enable =
-      mkEnableOption "gaming support"
-      // {
-        description = ''
-          Enable gaming features including Steam, game launchers,
-          performance optimizations, and GPU driver enhancements.
-        '';
-      };
+    enable = mkEnableOption "gaming support" // {
+      description = ''
+        Enable gaming features including Steam, game launchers,
+        performance optimizations, and GPU driver enhancements.
+      '';
+    };
 
     # Sub-features with sensible defaults
     steam = mkOption {
@@ -63,7 +62,7 @@ in {
     # Advanced options
     extraPackages = mkOption {
       type = types.listOf types.package;
-      default = [];
+      default = [ ];
       description = "Additional gaming-related packages to install";
       example = lib.literalExpression "[ pkgs.dolphin-emu pkgs.pcsx2 ]";
     };
@@ -78,7 +77,8 @@ in {
     # System Packages
     # ------------------------------------------------------------------------
 
-    environment.systemPackages = with pkgs;
+    environment.systemPackages =
+      with pkgs;
       [
         # Always include these when gaming is enabled
         protonup-qt
@@ -90,9 +90,9 @@ in {
         steam
         steam-run
       ]
-      ++ optionals cfg.lutris [lutris]
-      ++ optionals cfg.gamemode [gamemode]
-      ++ optionals cfg.mangohud [mangohud]
+      ++ optionals cfg.lutris [ lutris ]
+      ++ optionals cfg.gamemode [ gamemode ]
+      ++ optionals cfg.mangohud [ mangohud ]
       # User-specified extra packages
       ++ cfg.extraPackages;
 
@@ -160,8 +160,8 @@ in {
 
     networking.firewall = {
       # Common gaming ports (can be customized per game)
-      allowedTCPPorts = [];
-      allowedUDPPorts = [];
+      allowedTCPPorts = [ ];
+      allowedUDPPorts = [ ];
     };
 
     # ------------------------------------------------------------------------

@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   config = {
     nix = {
       settings = {
@@ -77,7 +78,7 @@
       # Runs daily at 3:45 AM, after GC completes
       optimise = {
         automatic = true;
-        dates = ["03:45"];
+        dates = [ "03:45" ];
       };
     };
     environment = {
@@ -170,7 +171,7 @@
     # NixOS-specific systemd services
     systemd = {
       timers.nix-store-optimization = {
-        wantedBy = ["timers.target"];
+        wantedBy = [ "timers.target" ];
         timerConfig = {
           OnCalendar = "Mon 03:30:00";
           Persistent = true;
@@ -183,7 +184,7 @@
         };
       };
       timers.nix-duplicate-cleanup = {
-        wantedBy = ["timers.target"];
+        wantedBy = [ "timers.target" ];
         timerConfig = {
           OnCalendar = "Mon 04:00:00"; # Run after optimization
           Persistent = true;

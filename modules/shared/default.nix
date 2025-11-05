@@ -1,6 +1,8 @@
 {
   imports = [
-    ./host-options.nix
+    ./host-options/core.nix
+    ./host-options/features.nix
+    ./host-options/services.nix
     ./core.nix
     ./shell.nix
     ./dev.nix

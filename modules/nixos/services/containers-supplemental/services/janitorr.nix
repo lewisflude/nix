@@ -3,9 +3,9 @@
   lib,
   pkgs,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     mkIf
     mkEnableOption
     mkOption
@@ -15,17 +15,16 @@
     nameValuePair
     recursiveUpdate
     ;
-  containersLib = import ../lib.nix {inherit lib;};
+  containersLib = import ../lib.nix { inherit lib; };
   inherit (containersLib) mkResourceOptions mkResourceFlags mkHealthFlags;
 
   cfg = config.host.services.containersSupplemental;
-in {
+in
+{
   options.host.services.containersSupplemental.janitorr = {
-    enable =
-      mkEnableOption "Janitorr media cleanup"
-      // {
-        default = true;
-      };
+    enable = mkEnableOption "Janitorr media cleanup" // {
+      default = true;
+    };
 
     useSops = mkOption {
       type = types.bool;
@@ -77,7 +76,7 @@ in {
 
     extraConfig = mkOption {
       type = types.attrsOf types.anything;
-      default = {};
+      default = { };
       description = "Recursive overrides applied to the generated Janitorr configuration.";
     };
 
@@ -89,7 +88,7 @@ in {
 
   config = mkIf (cfg.enable && cfg.janitorr.enable) (
     let
-      yamlFormat = pkgs.formats.yaml {};
+      yamlFormat = pkgs.formats.yaml { };
       secretNames = {
         sonarr = "janitorr-sonarr-api-key";
         radarr = "janitorr-radarr-api-key";
@@ -103,9 +102,10 @@ in {
         streamystats = "janitorr-streamystats-api-key";
       };
       placeholders =
-        if cfg.janitorr.useSops
-        then mapAttrs (_: secret: config.sops.placeholder.${secret}) secretNames
-        else throw "Janitorr requires useSops enabled to reference secrets.";
+        if cfg.janitorr.useSops then
+          mapAttrs (_: secret: config.sops.placeholder.${secret}) secretNames
+        else
+          throw "Janitorr requires useSops enabled to reference secrets.";
 
       # Import base config from separate file for lazy loading
       baseConfig =
@@ -122,18 +122,17 @@ in {
 
       janitorrConfig = recursiveUpdate baseConfig cfg.janitorr.extraConfig;
       janitorrConfigFile = yamlFormat.generate "janitorr-application.yml" janitorrConfig;
-      secretEntries =
-        mapAttrs' (
-          _name: secret:
-            nameValuePair secret {
-              mode = "0400";
-              owner = "root";
-              group = "root";
-            }
-        )
-        secretNames;
+      secretEntries = mapAttrs' (
+        _name: secret:
+        nameValuePair secret {
+          mode = "0400";
+          owner = "root";
+          group = "root";
+        }
+      ) secretNames;
       inherit (pkgs) coreutils;
-    in {
+    in
+    {
       assertions = [
         {
           assertion = cfg.janitorr.useSops;
@@ -157,18 +156,17 @@ in {
           "${cfg.configPath}/janitorr/logs:/logs"
           "${cfg.janitorr.dataPath}:${cfg.janitorr.dataPath}"
         ];
-        extraOptions =
-          [
-            "--network=host"
-          ] # Use host network to access native services
-          ++ mkHealthFlags {
-            cmd = "/workspace/health-check";
-            interval = "5s";
-            timeout = "10s";
-            retries = "3";
-            startPeriod = "30s"; # Give Java app time to start before health checks
-          }
-          ++ mkResourceFlags cfg.janitorr.resources;
+        extraOptions = [
+          "--network=host"
+        ] # Use host network to access native services
+        ++ mkHealthFlags {
+          cmd = "/workspace/health-check";
+          interval = "5s";
+          timeout = "10s";
+          retries = "3";
+          startPeriod = "30s"; # Give Java app time to start before health checks
+        }
+        ++ mkResourceFlags cfg.janitorr.resources;
       };
 
       systemd.tmpfiles.rules = [
