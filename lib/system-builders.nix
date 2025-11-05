@@ -217,18 +217,11 @@ in {
           home-manager.nixosModules.home-manager
 
           # Home Manager configuration
+          { config, ... }:
           {
-            home-manager =
-              mkHomeManagerConfig {inherit hostConfig;}
-              // {
-                useUserPackages = true;
-              };
+            home-manager.extraSpecialArgs.systemConfig = config;
           }
-          (
-            {config, ...}: {
-              home-manager.extraSpecialArgs.systemConfig = config;
-            }
-          )
+        )
 
           # Validation assertions - now just a call to our helper
           mkValidationModule
