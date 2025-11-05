@@ -92,6 +92,8 @@
     # === macOS Specific ===
     mac-app-util.url = "github:hraban/mac-app-util";
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    # PERFORMANCE NOTE (Tip 11): This input could potentially be marked as build-time-only
+    # since it's only used during macOS-specific builds, not during evaluation
     homebrew-j178 = {
       url = "github:j178/homebrew-tap";
       flake = false;
@@ -131,6 +133,9 @@
     };
 
     # === Hardware Configuration ===
+    # PERFORMANCE NOTE (Tip 11): This input could potentially be marked as build-time-only
+    # since hardware-specific modules are typically only needed during realization,
+    # not during general evaluation. Research Determinate Nix syntax for this.
     nixos-hardware = {
       url = "github:NixOS/nixos-hardware";
     };
