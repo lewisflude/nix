@@ -78,11 +78,11 @@
 
   inputs = {
     # === Core Infrastructure ===
-    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+
     nixpkgs-python.url = "github:cachix/nixpkgs-python";
     flake-parts = {
-      url = "https://flakehub.com/f/hercules-ci/flake-parts/*";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
+      url = "github:hercules-ci/flake-parts";
     };
 
     darwin = {
@@ -97,17 +97,21 @@
 
     determinate = {
       url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # === System Management ===
     # FlakeHub CLI tool for managing flakes (used in home/common/apps/core-tooling.nix)
     flakehub = {
       url = "https://flakehub.com/f/DeterminateSystems/fh/*.tar.gz";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Secrets management with SOPS encryption (used in system-builders.nix for both platforms)
     sops-nix = {
-      url = "https://flakehub.com/f/Mic92/sops-nix/*.tar.gz";
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+
     };
 
     # === macOS Specific ===
@@ -215,7 +219,7 @@
     # NOTE: Helix is now provided via chaotic-packages overlay (bleeding-edge helix_git)
     # This input is kept for backward compatibility but may be removed in future
     helix = {
-      url = "https://flakehub.com/f/helix-editor/helix/*.tar.gz";
+      url = "github:helix-editor/helix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -228,7 +232,7 @@
     # Language toolchains
     # Rust toolchain overlay (used in overlays/default.nix)
     rust-overlay = {
-      url = "https://flakehub.com/f/oxalica/rust-overlay/*.tar.gz";
+      url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
