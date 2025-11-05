@@ -49,19 +49,13 @@ let
       };
     };
 
-    # Python packages from nixpkgs-python (must come early to affect all subsequent overlays)
-    # DISABLED: nixpkgs-python packages have incompatible structure - missing 'dependencies' attribute
-    # that some nixpkgs code expects (e.g., all-packages.nix:3522)
-    # TODO: Re-enable when nixpkgs-python compatibility improves or use package-specific override
-    # Alternative: Use nixpkgs-python packages directly in Home Assistant modules only
-    # python = import ./python.nix { inherit inputs system; };
-    python = _final: _prev: { };
+    # Python: Using standard nixpkgs Python packages (well-cached, tested)
 
     # === Application Overlays (always applied) ===
     # These overlays provide custom packages and fixes
 
-    # Node.js version alias (must come early to affect all subsequent overlays)
-    # Ensures all packages use nodejs_24 instead of the default nodejs to prevent conflicts
+    # Node.js version alias (disabled - using default nodejs)
+    # Previously aliased nodejs to nodejs_24, but now using default nodejs globally
     nodejs-alias = import ./nodejs-alias.nix;
 
     # Explicitly list only packages actually used to avoid evaluation overhead

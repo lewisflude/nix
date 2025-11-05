@@ -16,13 +16,13 @@
 #
 # TECHNICAL DETAILS:
 # - Uses buildNpmPackage to build from npm registry
-# - Overrides nodejs to use nodejs_24 (latest LTS)
+# - Uses default nodejs from nixpkgs
 # - Includes package-lock.json for reproducible builds
 #
 _final: prev: {
   # Latest Nx monorepo tooling
   # Provides nx-latest as a top-level package for easy access
-  nx-latest = prev.buildNpmPackage.override { nodejs = prev.nodejs_24; } rec {
+  nx-latest = prev.buildNpmPackage.override { inherit (prev) nodejs; } rec {
     pname = "nx";
     version = "21.5.3";
     src = prev.fetchurl {
