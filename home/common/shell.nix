@@ -283,6 +283,9 @@ in
       initContent = lib.mkMerge [
         (lib.mkBefore ''
           # Instant prompt initialization - DO NOT move this down!
+          # Suppress direnv output during zsh initialization to avoid Powerlevel10k warnings
+          # This must be set before direnv hook runs
+          export DIRENV_LOG_FORMAT=""
           if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
             source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
           fi
@@ -302,8 +305,6 @@ in
           # NH_CLEAN_ARGS is now set via home.sessionVariables in nh.nix
           # Keep this as fallback if nh.nix isn't loaded
           export NH_CLEAN_ARGS="''${NH_CLEAN_ARGS:---keep-since 4d --keep 3}"
-          # Suppress direnv output during zsh initialization to avoid Powerlevel10k warnings
-          export DIRENV_LOG_FORMAT=""
           source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
           [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
           zsh-defer -c 'export YSU_MESSAGE_POSITION="after"'
@@ -385,6 +386,8 @@ in
       EDITOR = "hx";
       NH_FLAKE = "${config.home.homeDirectory}/.config/nix";
       # NH_CLEAN_ARGS is set in nh.nix via sessionVariables
+      # Suppress direnv output during zsh initialization to avoid Powerlevel10k warnings
+      DIRENV_LOG_FORMAT = "";
     };
     file = {
       ".p10k.zsh".source = ./lib/p10k.zsh;
