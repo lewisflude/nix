@@ -145,7 +145,7 @@ let
 
   # Version management (defined at top level for use in withSystem)
   versions = {
-    nodejs = "nodejs_24"; # Latest LTS version with full binary cache support
+    nodejs = "nodejs"; # Default Node.js version from nixpkgs
     python = "python312"; # Python 3.12 from nixpkgs-python (via overlay) - better cache coverage
     go = "go";
     rust = {

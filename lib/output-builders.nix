@@ -5,7 +5,6 @@
 let
   # Access required inputs with error if missing
   nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
-  nixpkgs-python = inputs.nixpkgs-python or (throw "nixpkgs-python input is required");
   pre-commit-hooks = inputs.pre-commit-hooks or (throw "pre-commit-hooks input is required");
   home-manager = inputs.home-manager or null;
 
@@ -13,12 +12,9 @@ let
   functionsLib = import ./functions.nix { inherit (nixpkgs) lib; };
   systems = builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
 
-  # Get Python packages from nixpkgs-python for a given system
-  # Uses Python 3.12 as the default version
-  getPythonPackages =
-    system:
-    (nixpkgs-python.packages.${system}."3.12" or nixpkgs.legacyPackages.${system}.python312).pkgs
-      or nixpkgs.legacyPackages.${system}.python3Packages;
+  # Get Python packages from nixpkgs for a given system
+  # Uses Python 3.12 as the default version (standard nixpkgs packages, well-cached)
+  getPythonPackages = system: nixpkgs.legacyPackages.${system}.python312.pkgs;
 in
 {
   mkFormatters = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt);
