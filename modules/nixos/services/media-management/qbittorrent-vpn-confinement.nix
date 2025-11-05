@@ -96,7 +96,7 @@ in {
       description = "ProtonVPN NAT-PMP Port Forwarding for qBittorrent";
       wantedBy = ["multi-user.target"];
       after = ["${vpnNamespace}.service"];
-      requires = ["${vpnNamespace}.service"];
+      wants = ["${vpnNamespace}.service"];
 
       serviceConfig = {
         Type = "simple";
