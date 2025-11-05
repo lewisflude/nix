@@ -3,8 +3,9 @@
   lib,
   system,
   ...
-}: let
-  platformLib = (import ../lib/functions.nix {inherit lib;}).withSystem system;
+}:
+let
+  platformLib = (import ../lib/functions.nix { inherit lib; }).withSystem system;
   packageSets = import ../lib/package-sets.nix {
     inherit pkgs;
     inherit (platformLib) versions;
@@ -17,17 +18,18 @@
     git
   ];
   devShellsCommon = {
-    qmk = import ./projects/qmk.nix {inherit pkgs lib system;};
-    nextjs = import ./projects/nextjs.nix {inherit pkgs lib system;};
+    qmk = import ./projects/qmk.nix { inherit pkgs lib system; };
+    nextjs = import ./projects/nextjs.nix { inherit pkgs lib system; };
     react-native = import ./projects/react-native.nix {
       inherit pkgs lib system;
     };
-    api-backend = import ./projects/api-backend.nix {inherit pkgs lib system;};
-    development = import ./projects/development.nix {inherit pkgs lib system;};
-    shell-selector = import ./utils/shell-selector.nix {inherit pkgs;};
+    api-backend = import ./projects/api-backend.nix { inherit pkgs lib system; };
+    development = import ./projects/development.nix { inherit pkgs lib system; };
+    shell-selector = import ./utils/shell-selector.nix { inherit pkgs; };
     node = pkgs.mkShell {
-      buildInputs = with pkgs;
-        [(platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)] ++ commonTools;
+      buildInputs =
+        with pkgs;
+        [ (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs) ] ++ commonTools;
       shellHook = ''
         echo "🚀 Node.js development environment loaded"
         echo "Node version: $(node --version)"
@@ -86,7 +88,8 @@
       '';
     };
     web = pkgs.mkShell {
-      buildInputs = with pkgs;
+      buildInputs =
+        with pkgs;
         [
           (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
           tailwindcss-language-server
@@ -101,7 +104,8 @@
       '';
     };
     solana = pkgs.mkShell {
-      buildInputs = with pkgs;
+      buildInputs =
+        with pkgs;
         [
           rustc
           cargo
@@ -114,7 +118,8 @@
       '';
     };
     devops = pkgs.mkShell {
-      buildInputs = with pkgs;
+      buildInputs =
+        with pkgs;
         [
           kubectl
           opentofu
@@ -136,7 +141,8 @@
   };
   devShellsLinuxOnly = platformLib.ifLinux {
     love2d = pkgs.mkShell {
-      buildInputs = with pkgs;
+      buildInputs =
+        with pkgs;
         [
           love
           lua
@@ -174,10 +180,10 @@
   defaultShell = pkgs.mkShell {
     buildInputs = with pkgs; [
       # Nix tooling
-      nixfmt # Nix formatter
+      nixfmt-rfc-style # Official Nix formatter (RFC 166)
       deadnix # Find dead Nix code
       statix # Lints and suggestions for Nix
-      nixpkgs-fmt # Alternative formatter
+      treefmt # Unified formatter for multiple file types
       nix-tree # Visualize dependencies
       nix-diff # Compare derivations
       nvd # Nix version diff
@@ -207,7 +213,8 @@
       echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
       echo ""
       echo "📦 Available Tools:"
-      echo "  • nixfmt           - Format Nix files"
+      echo "  • nixfmt-rfc-style - Official Nix formatter (RFC 166)"
+      echo "  • treefmt          - Unified formatter (Nix, YAML, Markdown, Shell)"
       echo "  • deadnix          - Find unused code"
       echo "  • statix           - Lint Nix files"
       echo "  • nix-tree         - Visualize dependencies"
@@ -223,7 +230,10 @@
       echo "🚀 Quick Commands:"
       echo "  • nix flake check             - Run all checks"
       echo "  • nix flake update            - Update all inputs"
-      echo "  • nixfmt .                    - Format all files"
+      echo "  • nix fmt                     - Format all Nix files (flake formatter)"
+      echo "  • treefmt                     - Format all files (Nix, YAML, Markdown, Shell)"
+      echo "  • format.sh treefmt           - Format using helper script"
+      echo "  • fmt                         - Alias for nix fmt"
       echo "  • pre-commit run --all-files  - Run linters"
       echo ""
       echo "📚 Documentation:"
@@ -242,7 +252,9 @@
       export PATH="$PWD/scripts/utils:$PWD/scripts/maintenance:$PATH"
 
       # Set helpful aliases
-      alias fmt='nixfmt .'
+      alias fmt='nix fmt'
+      alias fmt-nix='nixfmt-rfc-style'
+      alias fmt-all='treefmt'
       alias lint='statix check .'
       alias check='nix flake check'
       alias update='nix flake update'
@@ -250,6 +262,7 @@
       alias build-nixos='nix build .#nixosConfigurations.jupiter.config.system.build.toplevel'
     '';
   };
-in {
-  devShells = devShellsCommon // devShellsLinuxOnly // {default = defaultShell;};
+in
+{
+  devShells = devShellsCommon // devShellsLinuxOnly // { default = defaultShell; };
 }

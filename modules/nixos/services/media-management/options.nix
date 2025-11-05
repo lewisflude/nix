@@ -1,6 +1,8 @@
-{lib, ...}: let
+{ lib, ... }:
+let
   inherit (lib) mkEnableOption mkOption types;
-in {
+in
+{
   options.host.services.mediaManagement = {
     enable = mkEnableOption "native media management stack";
 

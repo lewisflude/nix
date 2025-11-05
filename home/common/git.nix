@@ -44,6 +44,12 @@
         update = "submodule update --init --recursive";
         foreach = "submodule foreach";
       };
+      # Configure nixfmt as git mergetool for automatic formatting conflict resolution
+      # Usage: git mergetool -t nixfmt <file>
+      mergetool.nixfmt = {
+        cmd = "${pkgs.nixfmt-rfc-style}/bin/nixfmt-rfc-style --mergetool \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"";
+        trustExitCode = true;
+      };
     };
   };
   programs.delta = {

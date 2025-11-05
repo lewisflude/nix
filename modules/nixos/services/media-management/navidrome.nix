@@ -3,10 +3,12 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.host.services.mediaManagement;
-in {
+in
+{
   options.host.services.mediaManagement.navidrome.enable =
     mkEnableOption "Navidrome music server"
     // {

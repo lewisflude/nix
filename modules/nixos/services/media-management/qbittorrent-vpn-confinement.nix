@@ -4,14 +4,15 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   inherit (lib) mkIf;
   cfg = config.host.services.mediaManagement;
   vpnEnabled = cfg.enable && cfg.qbittorrent.enable && cfg.qbittorrent.vpn.enable;
 
   # VPN namespace name (limited to 7 characters by VPN-Confinement)
   vpnNamespace = "qbittor"; # Max 7 chars, shortened from qbittorrent
-  bittorrentPort = (cfg.qbittorrent.bittorrent or {}).port or 6881;
+  bittorrentPort = (cfg.qbittorrent.bittorrent or { }).port or 6881;
 
   # ProtonVPN NAT-PMP gateway IP (typically 10.2.0.1 for ProtonVPN WireGuard)
   # This can be verified by running: ip route | grep default inside the namespace
@@ -48,7 +49,8 @@
       sleep 45
     done
   '';
-in {
+in
+{
   config = mkIf vpnEnabled {
     # VPN-Confinement namespace configuration
     vpnNamespaces.${vpnNamespace} = {
@@ -98,8 +100,8 @@ in {
     # See: https://protonvpn.com/support/port-forwarding-manual-setup
     systemd.services.protonvpn-port-forwarding = {
       description = "ProtonVPN NAT-PMP Port Forwarding for qBittorrent";
-      wantedBy = ["multi-user.target"];
-      after = ["network.target"];
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
 
       # VPN-Confinement integration - run this service inside the VPN namespace
       vpnConfinement = {

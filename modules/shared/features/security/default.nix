@@ -7,13 +7,15 @@
   pkgs,
   hostSystem,
   ...
-}: let
+}:
+let
   inherit (lib) mkIf mkDefault;
   inherit (lib.lists) optional optionals;
   cfg = config.host.features.security;
-  platformLib = (import ../../../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
+  platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
   inherit (platformLib) isLinux;
-in {
+in
+{
   config = mkIf cfg.enable {
     # NixOS-specific security configuration
     security = mkIf isLinux {
@@ -22,7 +24,7 @@ in {
         enable = true;
         extraRules = [
           {
-            users = [config.host.username];
+            users = [ config.host.username ];
             keepEnv = true;
             persist = true;
           }
@@ -73,15 +75,15 @@ in {
     # System-level security packages (NixOS only)
     environment.systemPackages = mkIf isLinux (
       with pkgs;
-        optionals cfg.yubikey [
-          yubikey-manager
-          yubikey-personalization
-          yubioath-flutter # GUI tool (replaces yubikey-manager-qt)
-        ]
-        ++ optionals cfg.gpg [
-          gnupg
-          pinentry-qt
-        ]
+      optionals cfg.yubikey [
+        yubikey-manager
+        yubikey-personalization
+        yubioath-flutter # GUI tool (replaces yubikey-manager-qt)
+      ]
+      ++ optionals cfg.gpg [
+        gnupg
+        pinentry-qt
+      ]
     );
 
     # User groups for security hardware access (NixOS)

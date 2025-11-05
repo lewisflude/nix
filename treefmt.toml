@@ -1,8 +1,8 @@
 # treefmt - unified code formatter configuration
 # https://github.com/numtide/treefmt
 
-[formatter.nix]
-command = "nixfmt"
+[formatter.nixfmt-rfc-style]
+command = "nixfmt-rfc-style"
 options = []
 includes = ["*.nix"]
 excludes = ["result", "result-*", ".direnv", "node_modules", "flake.lock"]

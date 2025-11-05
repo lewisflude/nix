@@ -4,9 +4,9 @@
   config,
   lib,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     mkEnableOption
     mkOption
     mkIf
@@ -14,7 +14,8 @@
     types
     ;
   cfg = config.host.features.containers;
-in {
+in
+{
   options.host.features.containers = {
     enable = mkEnableOption "container services";
 

@@ -4,9 +4,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   inherit (lib) mkOption mkEnableOption types;
-in {
+in
+{
   options.host = {
     username = mkOption {
       type = types.str;
@@ -121,7 +123,7 @@ in {
                 };
                 extraOptions = mkOption {
                   type = types.listOf types.str;
-                  default = [];
+                  default = [ ];
                   description = "Additional CLI options passed to restic.";
                 };
                 initialize = mkOption {
@@ -137,7 +139,7 @@ in {
               };
             })
           );
-          default = {};
+          default = { };
           description = "Per-backup job configuration for Restic.";
         };
 
@@ -150,7 +152,7 @@ in {
           };
           extraFlags = mkOption {
             type = types.listOf types.str;
-            default = [];
+            default = [ ];
             description = "Additional flags for restic-rest-server.";
           };
           htpasswdFile = mkOption {
@@ -347,7 +349,7 @@ in {
 
           categories = mkOption {
             type = types.attrsOf types.str;
-            default = {};
+            default = { };
             description = "Category path mappings. Maps category names to their save paths. Example: { movies = \"/mnt/storage/movies\"; tv = \"/mnt/storage/tv\"; }";
             example = {
               movies = "/mnt/storage/movies";
@@ -454,7 +456,7 @@ in {
 
           models = mkOption {
             type = types.listOf types.str;
-            default = [];
+            default = [ ];
             description = "List of models to pre-download";
             example = [
               "llama2"
@@ -695,7 +697,7 @@ in {
     # Legacy virtualisation config for backward compatibility
     virtualisation = mkOption {
       type = types.attrsOf types.anything;
-      default = {};
+      default = { };
       description = "Legacy virtualisation configuration (deprecated, use host.features.virtualisation)";
     };
   };
