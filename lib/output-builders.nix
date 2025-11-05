@@ -2,7 +2,11 @@
   inputs,
   hosts,
 }: let
-  inherit (inputs) nixpkgs pre-commit-hooks home-manager;
+  # Access required inputs with error if missing
+  nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
+  pre-commit-hooks = inputs.pre-commit-hooks or (throw "pre-commit-hooks input is required");
+  home-manager = inputs.home-manager or null;
+
   virtualisationLib = import ./virtualisation.nix {inherit (nixpkgs) lib;};
   functionsLib = import ./functions.nix {inherit (nixpkgs) lib;};
   systems = builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
@@ -66,6 +70,44 @@ in {
     #   inputs = inputs;
     # };
   });
+  # Build a single Home Manager configuration using perSystem pkgs
+  # This follows flake-parts best practices: use withSystem to access perSystem definitions
+  mkHomeConfigurationForHost = {
+    hostConfig,
+    perSystemPkgs,
+  }:
+    (
+      if home-manager == null
+      then throw "home-manager input is required for mkHomeConfigurationForHost"
+      else home-manager.lib.homeManagerConfiguration
+    )
+    {
+      # Use pkgs from perSystem instead of importing nixpkgs separately
+      # This ensures consistency with perSystem definitions
+      pkgs = perSystemPkgs;
+      extraSpecialArgs = functionsLib.mkHomeManagerExtraSpecialArgs {
+        inherit inputs hostConfig virtualisationLib;
+        includeUserFields = false;
+      };
+      modules =
+        [
+          ../home
+        ]
+        ++ nixpkgs.lib.optionals (inputs ? niri && inputs.niri ? homeModules) [
+          inputs.niri.homeModules.niri
+        ]
+        ++ nixpkgs.lib.optionals (inputs ? sops-nix && inputs.sops-nix ? homeManagerModules) [
+          inputs.sops-nix.homeManagerModules.sops
+        ]
+        ++ nixpkgs.lib.optionals (inputs ? catppuccin && inputs.catppuccin ? homeModules) [
+          inputs.catppuccin.homeModules.catppuccin
+        ]
+        ++ [
+          {_module.args = {inherit inputs;};}
+        ];
+    };
+
+  # Legacy function for backward compatibility (deprecated: use mkHomeConfigurationForHost with withSystem)
   mkHomeConfigurations =
     builtins.mapAttrs (
       _name: hostConfig: let
@@ -78,19 +120,33 @@ in {
           };
         };
       in
-        home-manager.lib.homeManagerConfiguration {
+        (
+          if home-manager == null
+          then throw "home-manager input is required for mkHomeConfigurations"
+          else home-manager.lib.homeManagerConfiguration
+        )
+        {
           inherit pkgs;
           extraSpecialArgs = functionsLib.mkHomeManagerExtraSpecialArgs {
             inherit inputs hostConfig virtualisationLib;
             includeUserFields = false;
           };
-          modules = [
-            ../home
-            inputs.niri.homeModules.niri
-            inputs.sops-nix.homeManagerModules.sops
-            inputs.catppuccin.homeModules.catppuccin
-            {_module.args = {inherit inputs;};}
-          ];
+          modules =
+            [
+              ../home
+            ]
+            ++ nixpkgs.lib.optionals (inputs ? niri && inputs.niri ? homeModules) [
+              inputs.niri.homeModules.niri
+            ]
+            ++ nixpkgs.lib.optionals (inputs ? sops-nix && inputs.sops-nix ? homeManagerModules) [
+              inputs.sops-nix.homeManagerModules.sops
+            ]
+            ++ nixpkgs.lib.optionals (inputs ? catppuccin && inputs.catppuccin ? homeModules) [
+              inputs.catppuccin.homeModules.catppuccin
+            ]
+            ++ [
+              {_module.args = {inherit inputs;};}
+            ];
         }
     )
     hosts;

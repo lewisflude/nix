@@ -1,1 +1,3 @@
-{...}: {imports = [./java.nix];}
+{...}: {
+  imports = [./java.nix];
+}

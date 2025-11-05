@@ -13,13 +13,7 @@
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
   # Import nvfetcher-generated sources for ZSH plugins
   sources = import ./_sources/generated.nix {
-    inherit
-      (pkgs)
-      fetchgit
-      fetchFromGitHub
-      fetchurl
-      dockerTools
-      ;
+    inherit (pkgs) fetchgit;
   };
   # Use FULL Catppuccin palette - access all semantic colors directly
   # Uses catppuccin.nix module palette when available, falls back to direct input access
@@ -29,14 +23,19 @@
       # Use catppuccin.nix module palette if available
       (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
       .${config.catppuccin.flavor}.colors
-    else
+    else if inputs ? catppuccin
+    then
       # Try to get palette directly from catppuccin input
       # catppuccin/nix repository has palette.json at the root
       let
-        catppuccinSrc =
-          inputs.catppuccin.src or inputs.catppuccin.outPath or (throw "Cannot find catppuccin source");
+        catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
       in
-        (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors;
+        if catppuccinSrc != null
+        then (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
+        else throw "Cannot find catppuccin source (input exists but src/outPath not found)"
+    else
+      # Fallback to a default palette if catppuccin input is not available
+      throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
   secretAvailable = name: lib.hasAttrByPath ["sops" "secrets" name "path"] systemConfig;
   secretPath = name: lib.attrByPath ["sops" "secrets" name "path"] "" systemConfig;
   secretExportSnippet = name: var: let

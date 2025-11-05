@@ -31,15 +31,13 @@ in {
       let
         cfg = config.services.mcp;
         mcpAddCommands = lib.concatStringsSep "\n        " (
-          lib.mapAttrsToList
-          (
+          lib.mapAttrsToList (
             name: serverCfg: let
               command = lib.escapeShellArg serverCfg.command;
               argsStr = lib.concatStringsSep " " (map lib.escapeShellArg serverCfg.args);
               argsPart = lib.optionalString (argsStr != "") "-- ${argsStr}";
               envVars = lib.concatStringsSep " " (
-                lib.mapAttrsToList
-                (
+                lib.mapAttrsToList (
                   key: value: "export ${lib.escapeShellArg key}=${lib.escapeShellArg value};"
                 )
                 serverCfg.env

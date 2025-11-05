@@ -5,30 +5,30 @@
   ...
 }: let
   cfg = config.host.features.restic;
-  enabledBackups =
-    lib.filterAttrs (_name: backupCfg: backupCfg.enable) cfg.backups;
+  enabledBackups = lib.filterAttrs (_name: backupCfg: backupCfg.enable) cfg.backups;
   backupsWithWrappers =
-    lib.filterAttrs (_name: backupCfg: backupCfg.enable && backupCfg.createWrapper) cfg.backups;
+    lib.filterAttrs (
+      _name: backupCfg: backupCfg.enable && backupCfg.createWrapper
+    )
+    cfg.backups;
 in {
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [pkgs.restic];
 
     services.restic.backups =
-      lib.mapAttrs (
-        _name: backupCfg: {
-          inherit
-            (backupCfg)
-            path
-            repository
-            passwordFile
-            user
-            initialize
-            createWrapper
-            ;
-          timerConfig.OnCalendar = backupCfg.timer;
-          inherit (backupCfg) extraOptions;
-        }
-      )
+      lib.mapAttrs (_name: backupCfg: {
+        inherit
+          (backupCfg)
+          path
+          repository
+          passwordFile
+          user
+          initialize
+          createWrapper
+          ;
+        timerConfig.OnCalendar = backupCfg.timer;
+        inherit (backupCfg) extraOptions;
+      })
       enabledBackups;
 
     services.restic.server = lib.mkIf cfg.restServer.enable {

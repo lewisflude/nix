@@ -7,7 +7,14 @@
   ...
 }: let
   cfg = config.features.development;
-  inherit (lib) mkIf mkEnableOption mkOption types optionals;
+  inherit
+    (lib)
+    mkIf
+    mkEnableOption
+    mkOption
+    types
+    optionals
+    ;
 in {
   options.features.development = {
     enable = mkEnableOption "development tools and environments";

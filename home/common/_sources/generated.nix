@@ -3,11 +3,8 @@
 {
   fetchgit,
   # deadnix: ignore
-  fetchurl,
   # deadnix: ignore
-  fetchFromGitHub,
   # deadnix: ignore
-  dockerTools,
 }: {
   zsh-abbr = {
     pname = "zsh-abbr";

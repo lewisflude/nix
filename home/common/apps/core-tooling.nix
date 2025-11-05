@@ -31,8 +31,18 @@ in {
       nix-update # Update package versions automatically
       nix-prefetch-github # Fetch GitHub hashes
       nvfetcher # Batch update sources from TOML
+    ]
+    ++ lib.optionals
+    (
+      inputs ? flakehub
+      && inputs.flakehub ? packages
+      && inputs.flakehub.packages ? ${system}
+      && inputs.flakehub.packages.${system} ? default
+    )
+    [
       inputs.flakehub.packages.${system}.default
-
+    ]
+    ++ [
       # Development helpers
       # Note: rustup and build tools are now in devShells.
       # Use: nix develop .#devShells.development or nix develop .#devShells.rust

@@ -33,7 +33,10 @@ pog.pog {
     }
   ];
 
-  runtimeInputs = with pkgs; [cachix jq];
+  runtimeInputs = with pkgs; [
+    cachix
+    jq
+  ];
 
   script = helpers:
     with helpers; ''

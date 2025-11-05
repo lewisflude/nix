@@ -11,8 +11,7 @@
 with lib; let
   cfg = config.host.features.security;
   platformLib = (import ../../../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
-  isLinux = platformLib.isLinux;
-  isDarwin = platformLib.isDarwin;
+  inherit (platformLib) isLinux;
 in {
   config = mkIf cfg.enable {
     # NixOS-specific security configuration
@@ -73,10 +72,7 @@ in {
     # System-level security packages (NixOS only)
     environment.systemPackages = mkIf isLinux (
       with pkgs;
-        [
-          # Security tools
-        ]
-        ++ optionals cfg.yubikey [
+        optionals cfg.yubikey [
           yubikey-manager
           yubikey-personalization
           yubioath-flutter # GUI tool (replaces yubikey-manager-qt)

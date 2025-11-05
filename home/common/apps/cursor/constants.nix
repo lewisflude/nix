@@ -153,12 +153,7 @@ _: let
   # Combined ignore sets
   commonIgnores = systemFiles // vcsFiles // devEnvFiles;
   searchIgnores =
-    commonIgnores
-    // nodeFiles
-    // buildFiles
-    // cacheFiles
-    // frameworkFiles
-    // ideFiles;
+    commonIgnores // nodeFiles // buildFiles // cacheFiles // frameworkFiles // ideFiles;
   watcherIgnores =
     searchIgnores
     // largeFiles

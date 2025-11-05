@@ -32,10 +32,16 @@
     kernelModules = ["example-module"];
   };
   networking = {
-    firewall.allowedTCPPorts = [80 443];
+    firewall.allowedTCPPorts = [
+      80
+      443
+    ];
   };
   users.users.${username} = {
     isNormalUser = true;
-    extraGroups = ["wheel" "networkmanager"];
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+    ];
   };
 }

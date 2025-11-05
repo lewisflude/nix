@@ -9,8 +9,9 @@
   # Extract revision as string to avoid store path references in option documentation
   # We extract the value first to break any direct store path references
   revision = let
-    revVal = inputs.self.rev or null;
-    dirtyRevVal = inputs.self.dirtyRev or null;
+    self = inputs.self or {};
+    revVal = self.rev or null;
+    dirtyRevVal = self.dirtyRev or null;
   in
     if revVal != null
     then toString revVal

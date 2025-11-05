@@ -34,7 +34,11 @@ with lib; {
       # Test container - simple busybox
       test-busybox = {
         image = "busybox:latest";
-        cmd = ["sh" "-c" "echo 'Container test successful!' && sleep 3600"];
+        cmd = [
+          "sh"
+          "-c"
+          "echo 'Container test successful!' && sleep 3600"
+        ];
       };
     };
 

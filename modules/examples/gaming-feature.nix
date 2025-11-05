@@ -11,7 +11,14 @@
   cfg = config.features.gaming;
 
   # Import commonly used lib functions
-  inherit (lib) mkIf mkEnableOption mkOption types optionals;
+  inherit
+    (lib)
+    mkIf
+    mkEnableOption
+    mkOption
+    types
+    optionals
+    ;
 in {
   # ============================================================================
   # OPTIONS DEFINITION
@@ -79,7 +86,10 @@ in {
         winetricks
       ]
       # Conditional packages based on sub-features
-      ++ optionals cfg.steam [steam steam-run]
+      ++ optionals cfg.steam [
+        steam
+        steam-run
+      ]
       ++ optionals cfg.lutris [lutris]
       ++ optionals cfg.gamemode [gamemode]
       ++ optionals cfg.mangohud [mangohud]

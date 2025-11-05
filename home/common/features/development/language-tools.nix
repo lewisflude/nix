@@ -1,56 +1,36 @@
+# Language-specific tools and formatters
+# This module provides additional tools not included in the main development feature
+# All toolchain packages are handled by the main feature module via package-sets.nix
 {
   lib,
-  host,
   pkgs,
   ...
-}: let
-  cfg = host.features.development;
-in {
-  home.packages = with pkgs;
-    [
-      # Nix tools
-      nixfmt-rfc-style
-      nixd
-
-      # General formatters/linters
+}: {
+  home.packages =
+    with pkgs; [
+      # General formatters/linters that work across languages
+      # Note: These are also in packageSets.languageFormatters.general,
+      # but included here for backward compatibility
       biome
       taplo
       marksman
 
-      # Python tools (duplicates removed - managed by feature flags)
-      # pyright - installed by modules/shared/features/development.nix
-      black
-
-      # Lua tools (duplicates removed - managed by feature flags)
-      # lua-language-server - installed by modules/shared/features/development.nix
-      stylua
-      selene
+      # Lua-specific tool (not in main toolchain)
       luaPackages.luacheck
 
-      # Debugger
-      lldb
-    ]
-    ++ lib.optionals (cfg.python or false) [
-      python313
-      python313Packages.pip
-      python313Packages.virtualenv
-      python313Packages.uv
-      ruff
-      pyright
-    ]
-    ++ lib.optionals (cfg.go or false) [
-      go
-      gopls
-      gotools
-      go-tools
-    ]
-    ++ lib.optionals (cfg.node or false) [
-      nodejs_24
-    ]
-    ++ lib.optionals (cfg.lua or false) [
-      luajit # Primary Lua interpreter (provides /bin/lua)
+      # Lua interpreter fallback (for compatibility)
+      # Note: luajit is in packageSets.luaToolchain
       (lib.lowPrio lua) # Fallback Lua 5.2 (lower priority to avoid conflict)
-      luajitPackages.luarocks
-      lua-language-server
-    ];
+    ]
+    # All major toolchain packages are now handled by the main feature module
+    # This file only contains additional/supplemental tools
+    # Removed duplicates:
+    # - python313, pip, virtualenv, uv, ruff, pyright -> in packageSets.pythonToolchain
+    # - go, gopls, gotools, delve -> in packageSets.goToolchain
+    # - nodejs_24 -> in packageSets.nodeToolchain
+    # - luajit, luarocks, lua-language-server -> in packageSets.luaToolchain
+    # - nixfmt-rfc-style, nixd -> in packageSets.nixTools
+    # - lldb -> in packageSets.debugTools (included in mkHomePackages)
+    # - stylua, selene -> in packageSets.luaToolchain
+    ;
 }

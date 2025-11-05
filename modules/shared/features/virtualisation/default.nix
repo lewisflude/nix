@@ -11,8 +11,8 @@
 with lib; let
   cfg = config.host.features.virtualisation;
   platformLib = (import ../../../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
-  isLinux = platformLib.isLinux;
-  isDarwin = platformLib.isDarwin;
+  inherit (platformLib) isLinux;
+  inherit (platformLib) isDarwin;
 in {
   config = mkIf cfg.enable {
     # NixOS-specific virtualization configuration
@@ -67,10 +67,7 @@ in {
     # System-level packages (NixOS only)
     environment.systemPackages = mkIf isLinux (
       with pkgs;
-        [
-          # QEMU tools
-        ]
-        ++ optionals cfg.qemu [
+        optionals cfg.qemu [
           virt-manager # Virtual machine manager GUI
           qemu # QEMU emulator
           qemu_kvm # QEMU with KVM support

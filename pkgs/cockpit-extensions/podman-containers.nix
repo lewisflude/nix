@@ -17,7 +17,10 @@ stdenv.mkDerivation rec {
     gettext
   ];
 
-  makeFlags = ["DESTDIR=$(out)" "PREFIX="];
+  makeFlags = [
+    "DESTDIR=$(out)"
+    "PREFIX="
+  ];
 
   postPatch = ''
     substituteInPlace Makefile \
