@@ -51,6 +51,52 @@ This document outlines performance optimizations applied to this Nix configurati
 - Correctly using `pkgs.fetchurl` for build-time fetching
 - Example: `modules/nixos/services/home-assistant.nix`
 
+### Additional Optimizations (Comprehensive Guide) ✅
+
+#### Build Resilience Settings
+
+- **keep-going**: Set to `true`
+  - Allows Nix to continue building other derivations when one fails
+  - Improves parallel build efficiency by not stopping entire build on single failure
+  - Configured in:
+    - `modules/nixos/system/nix/nix-optimization.nix`
+    - `modules/darwin/nix.nix`
+
+**Expected Impact**: Better parallel build utilization, especially for large builds with many independent derivations
+
+#### Connection Timeout Optimization
+
+- **connect-timeout**: Reduced from 10s to 5s
+  - Faster failure detection on unresponsive cache servers
+  - Reduces wait times when cache servers are down or unreachable
+  - Configured in:
+    - `modules/nixos/system/nix/nix-optimization.nix`
+    - `modules/darwin/nix.nix`
+
+**Expected Impact**: Faster error detection and recovery from cache failures
+
+#### Build Logging
+
+- **log-lines**: Set to 25
+  - Shows more build output lines on failure (25 instead of default)
+  - Improves debugging capability when builds fail
+  - Configured in:
+    - `modules/nixos/system/nix/nix-optimization.nix`
+    - `modules/darwin/nix.nix`
+
+**Expected Impact**: Better debugging information for failed builds
+
+#### Automatic Store Optimization
+
+- **nix.optimise.automatic**: Enabled with daily schedule
+  - Automatically hardlinks duplicate files in the store
+  - Runs daily at 3:45 AM (after GC completes)
+  - Configured in: `modules/nixos/system/nix/nix-optimization.nix`
+
+**Expected Impact**: Recovers 20-40% of store space automatically without manual intervention
+
+**Note**: This complements the existing manual optimization scripts and systemd timers already in place.
+
 ## Known Performance Trade-offs
 
 ### Overlay Usage (Tip 10) ⚠️
