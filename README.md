@@ -75,7 +75,7 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 - **Add a package:** See [Configuration Guide → Adding Packages](docs/guides/configuration.md#adding-packages)
 - **Set up dev environment:** `nix develop` - includes pre-commit hooks, formatters, and linters
 - **Update dependencies:** See [Updating Guide](docs/UPDATING.md) or run `nix run .#update-all`
-- **Format code:** `alejandra .` for Nix, automatic via pre-commit hooks
+- **Format code:** `nixfmt .` for Nix, automatic via pre-commit hooks
 - **Write good commits:** See [DX Guide → Conventional Commits](docs/DX_GUIDE.md#conventional-commits)
 - **Troubleshoot issues:** See [Troubleshooting Guide](docs/guides/troubleshooting.md)
 

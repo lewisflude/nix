@@ -62,7 +62,7 @@ in {
     _module.args.pkgs = pkgsWithOverlays;
 
     # Per-system formatter
-    formatter = pkgsWithOverlays.alejandra;
+    formatter = pkgsWithOverlays.nixfmt;
 
     # Per-system checks
     checks = outputBuilders.mkChecks.${system} or {};
@@ -94,7 +94,10 @@ in {
       # Scripts that need config-root: new-module, update-all
       # Scripts that don't: setup-cachix
       mkPogApp = script-name: let
-        needsConfigRoot = lib.elem script-name ["new-module" "update-all"];
+        needsConfigRoot = lib.elem script-name [
+          "new-module"
+          "update-all"
+        ];
         scriptArgs =
           if needsConfigRoot
           then {
@@ -105,9 +108,7 @@ in {
           };
       in {
         type = "app";
-        program = "${
-          pkgsWithPog.callPackage ../pkgs/pog-scripts/${script-name}.nix scriptArgs
-        }/bin/${script-name}";
+        program = "${pkgsWithPog.callPackage ../pkgs/pog-scripts/${script-name}.nix scriptArgs}/bin/${script-name}";
       };
     in {
       # POG-powered CLI tools

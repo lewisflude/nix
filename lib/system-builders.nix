@@ -60,20 +60,10 @@
     useGlobalPkgs = true;
     verbose = true;
     backupFileExtension = "backup";
-    extraSpecialArgs =
-      inputs
-      // hostConfig
-      // {
-        inherit inputs;
-        inherit (hostConfig) system;
-        hostSystem = hostConfig.system;
-        host = hostConfig;
-        inherit (hostConfig) username useremail hostname;
-        virtualisation = hostConfig.features.virtualisation or {};
-        modulesVirtualisation = virtualisationLib.mkModulesVirtualisationArgs {
-          hostVirtualisation = hostConfig.features.virtualisation or {};
-        };
-      };
+    extraSpecialArgs = functionsLib.mkHomeManagerExtraSpecialArgs {
+      inherit inputs hostConfig virtualisationLib;
+      includeUserFields = true;
+    };
     sharedModules =
       [
         sops-nix.homeManagerModules.sops
@@ -118,6 +108,11 @@ in {
           sops-nix.darwinModules.sops
 
           # Apply overlays from overlays/ directory
+          # OVERLAY APPLICATION MECHANISM:
+          # Overlays are imported from overlays/default.nix via functionsLib.mkOverlays,
+          # which converts the overlay attribute set to a list. Overlays are applied
+          # early in the module list so all subsequent modules receive modified packages.
+          # See overlays/default.nix for overlay definitions and documentation.
           {
             nixpkgs = {
               overlays = functionsLib.mkOverlays {
@@ -185,6 +180,11 @@ in {
           }
 
           # Apply overlays from overlays/ directory
+          # OVERLAY APPLICATION MECHANISM:
+          # Overlays are imported from overlays/default.nix via functionsLib.mkOverlays,
+          # which converts the overlay attribute set to a list. Overlays are applied
+          # early in the module list so all subsequent modules receive modified packages.
+          # See overlays/default.nix for overlay definitions and documentation.
           {
             nixpkgs = {
               overlays = functionsLib.mkOverlays {

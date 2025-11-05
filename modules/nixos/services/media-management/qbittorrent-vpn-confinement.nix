@@ -22,6 +22,11 @@ with lib; let
   portForwardScript = pkgs.writeShellScript "protonvpn-port-forward-ns" ''
     set -euo pipefail
 
+    # CRITICAL: Add route to NAT-PMP gateway via WireGuard interface
+    # VPN-Confinement's routing sends 10.2.0.1 through the bridge instead of WireGuard
+    # This route ensures NAT-PMP traffic goes through the VPN tunnel
+    ${pkgs.iproute2}/bin/ip route add ${protonvpnGateway}/32 dev qbittor0 2>/dev/null || true
+
     # Wait for gateway to be reachable (check by trying natpmpc)
     # If gateway isn't ready, natpmpc will fail and service will restart
 
@@ -95,36 +100,25 @@ in {
     systemd.services.protonvpn-port-forwarding = {
       description = "ProtonVPN NAT-PMP Port Forwarding for qBittorrent";
       wantedBy = ["multi-user.target"];
-      after = ["${vpnNamespace}.service"];
-      wants = ["${vpnNamespace}.service"];
+      after = ["network.target"];
+
+      # VPN-Confinement integration - run this service inside the VPN namespace
+      vpnConfinement = {
+        enable = true;
+        inherit vpnNamespace;
+      };
 
       serviceConfig = {
         Type = "simple";
         Restart = "on-failure";
         RestartSec = "10s";
 
-        # Wait for VPN namespace to exist
-        ExecStartPre = pkgs.writeShellScript "check-vpn-namespace" ''
-          # Wait for namespace to exist
-          for i in {1..30}; do
-            if ${pkgs.iproute2}/bin/ip netns list | grep -q "^${vpnNamespace} "; then
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "ERROR: VPN namespace ${vpnNamespace} not found" >&2
-          exit 1
-        '';
-
         # Run natpmpc inside the VPN namespace
         # Format: natpmpc -a <private_port> <public_port> <protocol> <lifetime> -g <gateway>
         # Using 0 for public_port means "any available port" (ProtonVPN will assign)
         # Lifetime of 60 seconds, renew every 45 seconds (as per ProtonVPN docs)
-        ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${vpnNamespace} ${portForwardScript}";
-
-        # Security: Need NET_ADMIN to use network namespaces
-        CapabilityBoundingSet = "CAP_NET_ADMIN";
-        AmbientCapabilities = "CAP_NET_ADMIN";
+        # Note: With vpnConfinement, the service runs directly in the namespace, so no need for ip netns exec
+        ExecStart = portForwardScript;
       };
     };
   };

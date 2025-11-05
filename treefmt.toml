@@ -2,23 +2,17 @@
 # https://github.com/numtide/treefmt
 
 [formatter.nix]
-command = "alejandra"
-options = ["--quiet"]
+command = "nixfmt"
+options = []
 includes = ["*.nix"]
-excludes = [
-  "result",
-  "result-*",
-  ".direnv",
-  "node_modules",
-  "flake.lock",
-]
+excludes = ["result", "result-*", ".direnv", "node_modules", "flake.lock"]
 
 [formatter.yaml]
 command = "prettier"
 options = ["--write"]
 includes = ["*.yaml", "*.yml"]
 excludes = [
-  "secrets/*.yaml",  # Don't format encrypted secrets
+  "secrets/*.yaml", # Don't format encrypted secrets
 ]
 
 [formatter.markdown]

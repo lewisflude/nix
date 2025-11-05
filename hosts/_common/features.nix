@@ -3,6 +3,7 @@
 {
   development = {
     enable = true;
+    git = true; # Required for rust development
     rust = true;
     python = true;
     go = true;

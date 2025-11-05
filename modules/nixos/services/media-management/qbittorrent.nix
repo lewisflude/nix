@@ -455,15 +455,11 @@ in {
     # Systemd service for qBittorrent
     systemd.services.qbittorrent = {
       description = "qBittorrent BitTorrent client";
-      after =
-        [
-          "network.target"
-        ]
-        ++ optional vpnEnabled "${vpnNamespace}.service";
-      requires = optional vpnEnabled "${vpnNamespace}.service";
+      after = ["network.target"];
       wantedBy = ["multi-user.target"];
 
       # VPN-Confinement integration
+      # VPN-Confinement handles namespace setup automatically - no need to manually depend on a service
       vpnConfinement = lib.mkIf vpnEnabled {
         enable = true;
         inherit vpnNamespace;

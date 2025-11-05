@@ -51,6 +51,13 @@
       # Logging
       log-lines = 25
 
+      # Build-time input fetching (Tip 11)
+      # Enables deferring source fetching until actual build time for inputs marked with buildTime = true
+      # This speeds up flake evaluation by not fetching inputs during evaluation phase
+      # Note: This is also set in flake.nix nixConfig.experimental-features for consistency
+      # Note: In nix.conf format, this should be space-separated if multiple features are needed
+      extra-experimental-features = build-time-fetch-tree
+
       # Note: Binary caches and experimental features are configured in flake.nix nixConfig
       # Those settings apply to both Darwin and NixOS systems via the flake
       # Note: Determinate Nix sets 'eval-cores' and 'lazy-trees' in /etc/nix/nix.conf

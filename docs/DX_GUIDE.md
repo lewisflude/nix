@@ -130,7 +130,7 @@ praise: Excellent abstraction! This will make testing much easier.
 
 ### Nix-specific Tools
 
-- **alejandra**: Opinionated Nix formatter
+- **nixfmt**: Nix formatter
 - **deadnix**: Find and remove dead Nix code
 - **statix**: Linter and suggestions for Nix
 - **nixpkgs-fmt**: Alternative formatter (available but not default)
@@ -139,7 +139,7 @@ praise: Excellent abstraction! This will make testing much easier.
 
 ```bash
 # Format all Nix files
-alejandra .
+nixfmt .
 
 # Find dead code
 deadnix
@@ -161,7 +161,7 @@ Pre-commit hooks run automatically before each commit. They ensure code quality 
 ### Enabled Hooks
 
 1. **Nix Formatting & Linting**
-   - `alejandra`: Format Nix files
+   - `nixfmt`: Format Nix files
    - `deadnix`: Check for dead code
    - `statix`: Lint Nix files
 
@@ -184,7 +184,7 @@ Pre-commit hooks run automatically before each commit. They ensure code quality 
 pre-commit run --all-files
 
 # Run specific hook
-pre-commit run alejandra --all-files
+pre-commit run nixfmt --all-files
 
 # Skip hooks (not recommended)
 git commit --no-verify
@@ -222,7 +222,7 @@ The `.editorconfig` file defines:
 
 ```bash
 # Format
-alejandra .
+nixfmt .
 
 # Lint
 statix check .
@@ -293,7 +293,7 @@ yamllint .
 
 ```bash
 # Format everything
-alejandra .
+nixfmt .
 
 # Run all checks
 nix flake check
@@ -310,7 +310,7 @@ nh os build # or nh darwin build
 When in the dev shell, these aliases are available:
 
 ```bash
-fmt       # Format all Nix files (alejandra)
+fmt       # Format all Nix files (nixfmt)
 lint      # Lint all Nix files (statix)
 check     # Run all flake checks
 update    # Update all flake inputs
@@ -342,7 +342,7 @@ pre-commit run --all-files
 ### Formatters conflict
 
 ```bash
-# Our precedence: alejandra > nixpkgs-fmt
+# Our precedence: nixfmt > nixpkgs-fmt
 # If you prefer nixpkgs-fmt, adjust pre-commit config
 ```
 

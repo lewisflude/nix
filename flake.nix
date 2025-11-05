@@ -8,6 +8,7 @@
       "ca-derivations"
       "fetch-closure"
       "parse-toml-timestamps"
+      "build-time-fetch-tree" # Enables build-time input fetching for inputs marked with buildTime = true
     ];
 
     # Binary caches for faster builds
@@ -81,58 +82,74 @@
     };
 
     # === System Management ===
+    # FlakeHub CLI tool for managing flakes (used in home/common/apps/core-tooling.nix)
     flakehub = {
       url = "https://flakehub.com/f/DeterminateSystems/fh/*.tar.gz";
     };
 
+    # Secrets management with SOPS encryption (used in system-builders.nix for both platforms)
     sops-nix = {
       url = "https://flakehub.com/f/Mic92/sops-nix/*.tar.gz";
     };
 
     # === macOS Specific ===
+    # macOS application utilities - provides mac-app-util modules
+    # Used in: lib/system-builders.nix (mkDarwinSystem), home manager modules
     mac-app-util.url = "github:hraban/mac-app-util";
+
+    # Homebrew integration for Nix-Darwin - provides nix-homebrew modules
+    # Used in: lib/system-builders.nix (mkDarwinSystem) for Homebrew tap configuration
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
-    # PERFORMANCE NOTE (Tip 11): This input could potentially be marked as build-time-only
-    # since it's only used during macOS-specific builds, not during evaluation
+
+    # Homebrew tap for j178 formulas - used by nix-homebrew during macOS builds
+    # Used in: lib/system-builders.nix (mkDarwinSystem) via nix-homebrew taps configuration
     homebrew-j178 = {
       url = "github:j178/homebrew-tap";
       flake = false;
     };
 
     # === NixOS Desktop Environment ===
+    # Niri Wayland compositor (used in system-builders.nix and overlays/default.nix)
     niri = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Bleeding-edge packages for NixOS (gaming, desktop, audio)
+    # Used in system-builders.nix for chaotic.nixosModules.default
+    # Do NOT follow nixpkgs - this breaks their cache
     chaotic = {
       url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
       # Do NOT follow nixpkgs - this breaks their cache
     };
 
     # === NixOS Audio ===
+    # Real-time audio kernel configuration (used in system-builders.nix)
     musnix = {
       url = "github:musnix/musnix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Audio production packages and Bitwig Studio (used in overlays/default.nix)
     audio-nix = {
       url = "github:polygon/audio.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Solaar Logitech device manager (used in system-builders.nix)
     solaar = {
       url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # NVIDIA GPU patch for NixOS (used in overlays/default.nix, Linux-only)
     nvidia-patch = {
       url = "github:icewind1991/nvidia-patch-nixos";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # === Hardware Configuration ===
+    # Hardware-specific NixOS modules (used in hosts/*/hardware-configuration.nix)
     # PERFORMANCE NOTE (Tip 11): This input could potentially be marked as build-time-only
     # since hardware-specific modules are typically only needed during realization,
     # not during general evaluation. Research Determinate Nix syntax for this.
@@ -141,36 +158,43 @@
     };
 
     # === Cross-Platform Applications ===
+    # Catppuccin color scheme (used in system-builders.nix and home manager)
     catppuccin = {
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Ghostty terminal emulator (used in pkgs/ghostty/default.nix and home/nixos/)
     ghostty = {
       url = "github:ghostty-org/ghostty";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # === Resume ===
+    # JSON Resume generator (used in home/common/features/productivity/resume.nix)
     jsonresume-nix = {
       url = "https://flakehub.com/f/TaserudConsulting/jsonresume-nix/*.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # === Development Tools ===
+    # Nix User Repository - community packages (used in system-builders.nix)
     nur.url = "github:nix-community/NUR";
 
+    # nh - NixOS helper tool (used via home/common/nh.nix)
     nh = {
       url = "https://flakehub.com/f/nix-community/nh/4.2.0-beta5.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Pre-commit hooks for code quality (used in lib/output-builders.nix)
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Code Editors (latest features & fixes)
+    # Helix editor (used in overlays/default.nix)
     helix = {
       url = "https://flakehub.com/f/helix-editor/helix/*.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -183,36 +207,42 @@
     # };
 
     # Language toolchains
+    # Rust toolchain overlay (used in overlays/default.nix)
     rust-overlay = {
       url = "https://flakehub.com/f/oxalica/rust-overlay/*.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Git tools
+    # LazyGit terminal UI for Git (used in overlays/default.nix)
     lazygit = {
       url = "github:jesseduffield/lazygit";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # === CLI Tools (Latest Features) ===
+    # Atuin shell history (used in overlays/default.nix)
     atuin = {
       url = "github:atuinsh/atuin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # === Script Tooling ===
+    # POG - Nix script framework (used in flake-parts/core.nix and pkgs/pog-scripts/)
     pog = {
       url = "github:jpetrucciani/pog";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # === Infrastructure Visualization ===
+    # Nix topology visualization (used in flake.nix and system-builders.nix)
     nix-topology = {
       url = "github:oddlama/nix-topology";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # === VPN Confinement ===
+    # VPN network namespace isolation for qBittorrent (used in system-builders.nix)
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
   };
 
