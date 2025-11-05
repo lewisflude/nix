@@ -21,6 +21,7 @@ in
       protontricks.enable = true;
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
+      # Use chaotic steam (bleeding-edge) if available, otherwise fall back to stable
       package = pkgs.steam.override {
         extraPkgs =
           pkgs: with pkgs; [
@@ -83,12 +84,12 @@ in
       ++ optionals cfg.steam [
         steamcmd
         steam-run
-        # Chaotic-Nyx bleeding-edge gaming packages
-        gamescope_git # Latest Gamescope for better performance
+        # Chaotic-Nyx bleeding-edge gaming packages (now default via overlay)
+        gamescope # Latest Gamescope for better performance (from chaotic overlay)
       ]
       # Performance tools
       ++ optionals cfg.performance [
-        mangohud_git # Bleeding-edge MangoHud from Chaotic-Nyx (preferred over stable)
+        mangohud # Bleeding-edge MangoHud from Chaotic-Nyx (now default via overlay)
         gamemode # Performance optimization daemon
       ]
       # Lutris game manager

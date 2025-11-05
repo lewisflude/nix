@@ -32,7 +32,9 @@ in
         }
       ];
     };
-    zfs.package = pkgs.zfs_unstable;
+    # Use chaotic zfs_cachyos (optimized) if available, otherwise fall back to stable zfs
+    # The chaotic-packages overlay handles this automatically
+    zfs.package = pkgs.zfs;
     supportedFilesystems = [ "zfs" ];
     loader.timeout = 0;
     kernelParams = [

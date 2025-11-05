@@ -8,16 +8,41 @@ This document outlines performance optimizations applied to this Nix configurati
 
 #### Parallelism Configuration (Tip 5) ✅
 
-- **http-connections**: Set to 64 (from default ~2-5)
+- **http-connections**: Set to 128 (from default ~2-5)
   - Maximizes parallel TCP connections for binary cache fetching
   - Configured in:
     - `modules/nixos/system/nix/nix-optimization.nix`
     - `modules/darwin/nix.nix`
-- **max-substitution-jobs**: Set to 64 (from default low)
+- **max-substitution-jobs**: Set to 128 (from default low)
   - Controls maximum concurrent substitution tasks
   - Improves throughput on systems with high I/O capability
 
 **Expected Impact**: 2-4x faster substitution, especially on high-speed network connections
+
+**Reference**: [How to Optimise Substitutions in Nix](https://brianmcgee.uk/posts/2023/12/13/how-to-optimise-substitutions-in-nix/)
+
+#### Cache Priority Optimization ✅
+
+- **Priority Parameters**: All binary caches in `flake.nix` now use `?priority=xxx` query parameters
+  - Lower numbers = higher priority (queried first)
+  - Prevents Nix from querying slow/unreliable caches first
+  - Minimizes timeout delays (5s timeout per cache × number of caches = potential delay)
+  - Configured in: `flake.nix` nixConfig.extra-substituters
+
+**Cache Priority Tiers**:
+
+- **Tier 1 (Priority 1-5)**: Most reliable general-purpose caches
+  - nix-community (priority=1), lewisflude (priority=2), nixpkgs-wayland (priority=3), etc.
+- **Tier 1.5 (Priority 6)**: Specialized but frequently used
+  - nixpkgs-python (priority=6) - Python 3.13 packages for Home Assistant only
+- **Tier 2 (Priority 7-11)**: Application-specific caches
+  - niri, helix, ghostty, yazi, ags
+- **Tier 3 (Priority 12-16)**: Specialized/optional caches
+  - zed, catppuccin, devenv, viperml, cuda-maintainers
+
+**Expected Impact**: Significantly faster substitutions when packages are found in high-priority caches, avoiding unnecessary queries to low-priority caches
+
+**Reference**: [How to Optimise Substitutions in Nix](https://brianmcgee.uk/posts/2023/12/13/how-to-optimise-substitutions-in-nix/)
 
 #### Substitution Override (Tip 7) ✅
 
@@ -41,9 +66,10 @@ This document outlines performance optimizations applied to this Nix configurati
 
 #### Private Cache Strategy (Tip 6) ✅
 
-- Personal cache (`lewisflude.cachix.org`) prioritized first
-- FlakeHub cache included for Determinate Nix flakes
-- Proper cache ordering in `flake.nix` nixConfig section
+- Personal cache (`lewisflude.cachix.org`) prioritized with `priority=3` (high priority)
+- FlakeHub cache removed (requires authentication, not needed for flakes)
+- Proper cache ordering via priority parameters in `flake.nix` nixConfig section
+- Cache priorities ensure most reliable caches are queried first, minimizing timeout delays
 
 #### Network I/O Decoupling (Tip 3) ✅
 
@@ -163,6 +189,113 @@ nix-store --query --requisites /run/current-system | xargs nix-store --query --r
 # Identify cache misses (packages not in binary cache)
 nix path-info --recursive /run/current-system | grep -v "https://"
 ```
+
+## Experimental Features Performance Impact
+
+When attempting to mitigate slowdowns caused by experimental features, the most effective approach is to disable the features that introduce the highest fixed latency tax or, more critically, those that force expensive rebuilds.
+
+### Features to Strongly Avoid/Disable (High Performance Risk)
+
+#### `impure-derivations` ❌ **DO NOT ENABLE**
+
+**Status**: Currently **disabled** (correct configuration)
+
+**Performance Impact**: Catastrophic. This feature violates Nix's principle of hermeticity, leading to non-deterministic outputs. This permanently breaks binary cache substitution for that derivation and all subsequent dependent derivations, forcing a full source build every time. Losing substitution transforms potentially instantaneous operations into multi-hour builds (e.g., for large software like Firefox).
+
+**Recommendation**: **Strongly avoid/disable.** Only enable this feature temporarily and exclusively for derivations that absolutely require impure access (e.g., specific network-using tests).
+
+**Current Configuration**: Not enabled in `flake.nix` or `modules/shared/core.nix` ✅
+
+#### `parallel-eval` ❌ **DISABLED - NOT BENEFICIAL ON THIS SYSTEM**
+
+**Status**: Currently **disabled** (tested and found to be slower)
+
+**Performance Impact**: Theoretical 3-4x faster evaluation, but in practice:
+
+- **Actual result**: 38% slower (45.95s vs 33.28s wall clock time)
+- **Overhead**: Higher system time (12.5s vs 2.5s) suggests parallelization overhead
+- **Reason**: Determinate Nix already provides `eval-cores` and `lazy-trees` features that optimize evaluation
+
+**Recommendation**: **Disable on systems using Determinate Nix** (which already has parallel evaluation features).
+
+- ❌ **Disabled**: Determinate Nix's built-in `eval-cores` and `lazy-trees` already provide parallel evaluation benefits
+- ⚠️ **Test if**: You're using standard Nix (not Determinate) and have 32GB+ RAM
+- **Monitor**: If you test it, compare wall clock time, not just CPU time
+
+**Current Configuration**: Disabled in `flake.nix` and `modules/shared/core.nix` (commented out) ✅
+
+**Test Results**:
+
+- Without `parallel-eval`: 33.28s wall clock, 28.09s user CPU
+- With `parallel-eval`: 45.95s wall clock, 33.10s user CPU
+- **Verdict**: Disable - overhead outweighs benefits on this system
+
+### Features to Keep but Optimize (Latency/Resource Risk)
+
+These features provide significant functional benefits but introduce architectural costs that must be managed:
+
+#### `ca-derivations` (Content-Addressable) ⚠️ **ENABLED - OPTIMIZE**
+
+**Status**: Currently **enabled** in `flake.nix` and `modules/shared/core.nix`
+
+**Performance Impact**: Post-build CPU/I/O bottleneck. For derivations producing multi-gigabyte outputs, the mandatory cryptographic hashing and serialization required to calculate the content address *after* the build can consume excessive CPU resources.
+
+**Recommendation**: **Keep enabled** (required for modern Nix workflows), but configure NAR compression to speed up the post-build phase:
+
+- For remote stores: Use `store-uri?parallel-compression=true` (to leverage multiple cores) or `store-uri?compression=none` (to eliminate the compression bottleneck)
+- For local stores: Current optimizations (`auto-optimise-store`, `keep-outputs`) already help mitigate impact
+
+**Testing Impact**: If builds are still slow after enabling `parallel-eval`, you can temporarily test disabling `ca-derivations` to see if post-build hashing is the bottleneck:
+
+```bash
+# Test build time without ca-derivations (temporarily remove from experimental-features)
+time nix build .#nixosConfigurations.jupiter --dry-run
+```
+
+⚠️ **Warning**: Disabling `ca-derivations` may break some modern Nix features. Only test temporarily.
+
+**Current Configuration**:
+
+- Enabled in `flake.nix` line 8 ✅
+- Enabled in `modules/shared/core.nix` line 37 ✅
+- `auto-optimise-store = true` configured in optimization modules ✅
+
+#### `nix-command` / `flakes` ⚠️ **ENABLED - OPTIMIZE WORKFLOW**
+
+**Status**: Currently **enabled** (required for modern Nix workflow)
+
+**Performance Impact**: Fixed latency overhead. These features, while essential for the modern Nix workflow, introduce unavoidable latency due to daemon communication (IPC overhead) and mandatory lock file parsing on every invocation.
+
+**Recommendation**: **Keep enabled** (essential), but optimize workflow:
+
+- Minimize the number of sequential `nix` command invocations in scripts
+- Batch operations where possible (e.g., `nix flake check` instead of multiple separate commands)
+- Use `nix eval` caching for repeated evaluations
+- Consider using `nix-fast-build` for parallel evaluation (see Research Items)
+
+**Current Configuration**:
+
+- Enabled in `flake.nix` lines 6-7 ✅
+- Enabled in `modules/shared/core.nix` lines 35-36 ✅
+
+### Summary Table
+
+| Feature | Current Status | Action | Performance Risk |
+|---------|---------------|--------|------------------|
+| `impure-derivations` | ❌ Disabled | ✅ Keep disabled | 🔴 Catastrophic |
+| `parallel-eval` | ❌ Disabled | ✅ Keep disabled (Determinate Nix has eval-cores) | ⚠️ Actually slower on this system |
+| `ca-derivations` | ✅ Enabled | ⚠️ Optimize compression | 🟡 CPU/I/O bottleneck |
+| `nix-command` | ✅ Enabled | ⚠️ Optimize workflow | 🟡 Latency overhead |
+| `flakes` | ✅ Enabled | ⚠️ Optimize workflow | 🟡 Latency overhead |
+
+### Configuration Files
+
+Experimental features are configured in:
+
+- `flake.nix` (`nixConfig.experimental-features`) - Applies to both NixOS and Darwin
+- `modules/shared/core.nix` (`nix.settings.experimental-features`) - System-level configuration
+
+**Best Practice**: Keep experimental features list synchronized between these two locations.
 
 ## Research Items (Phase 2)
 
@@ -530,5 +663,6 @@ Record improvements after optimizations:
 ## References
 
 - [Strategic Performance Tuning for Determinate Nix and Home Manager Environments](./reference/performance-tuning-reference.md) (if available)
+- [How to Optimise Substitutions in Nix](https://brianmcgee.uk/posts/2023/12/13/how-to-optimise-substitutions-in-nix/) - Cache priority optimization and parallelism settings
 - [Determinate Nix Manual](https://manual.determinate.systems/)
 - [NixOS Performance Wiki](https://nixos.wiki/wiki/Nix_Evaluation_Performance)

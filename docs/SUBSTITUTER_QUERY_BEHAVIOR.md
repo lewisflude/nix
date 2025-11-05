@@ -54,36 +54,48 @@ Package: hello
 
 ## Parallel Substitution Jobs
 
-With `max-substitution-jobs = 64`, you have **64 packages** being queried simultaneously:
+With `max-substitution-jobs = 128`, you have **128 packages** being queried simultaneously:
 
 ```
-Job 1: hello     → cache.flakehub.com (5s timeout) → lewisflude.cachix.org (0.1s) = 5.1s
-Job 2: git       → cache.flakehub.com (5s timeout) → lewisflude.cachix.org (0.1s) = 5.1s
-Job 3: curl      → cache.flakehub.com (5s timeout) → lewisflude.cachix.org (0.1s) = 5.1s
+Job 1: hello     → nix-community.cachix.org (0.1s) = 0.1s ✅
+Job 2: git       → nix-community.cachix.org (0.1s) = 0.1s ✅
+Job 3: curl      → nix-community.cachix.org (0.1s) = 0.1s ✅
 ...
-Job 64: vim      → cache.flakehub.com (5s timeout) → lewisflude.cachix.org (0.1s) = 5.1s
+Job 128: vim     → nix-community.cachix.org (0.1s) = 0.1s ✅
 ```
 
-**Total delay:** 64 jobs × 5 seconds = **320 seconds (5.3 minutes)** of wasted time!
+**With proper priorities:** 128 jobs × 0.1 seconds = **12.8 seconds total** (much better!)
+
+**Without priorities (worst case):** 128 jobs × 5 seconds = **640 seconds (10.7 minutes)** of wasted time!
 
 ## Cache Order Matters
 
-Your `flake.nix` correctly orders caches:
+Your `flake.nix` uses **priority parameters** to explicitly control cache query order:
 
 ```nix
 extra-substituters = [
-  "https://lewisflude.cachix.org"  # Personal cache - FIRST (fastest)
-  "https://nix-community.cachix.org"  # Second
-  "https://nixpkgs-wayland.cachix.org"  # Third
-  # ... more caches
+  "https://nix-community.cachix.org?priority=1"  # Highest priority (queried first)
+  "https://lewisflude.cachix.org?priority=3"  # Personal cache - high priority
+  "https://nixpkgs-wayland.cachix.org?priority=4"  # Medium priority
+  # ... more caches with priority=5, priority=6, etc.
 ]
 ```
 
+**How Priority Works:**
+
+- **Lower numbers = higher priority** (queried first)
+- Nix sorts caches by priority before querying
+- This ensures reliable caches are always checked first, regardless of array order
+- Prevents slow/unreliable caches from being queried first due to alphabetical sorting
+
 **Why this matters:**
 
-- Most packages are found in the first cache
+- Most packages are found in high-priority caches
 - Failed caches should be removed, not just reordered
 - If a cache is unreachable, it will always cause delays regardless of position
+- Priority parameters provide explicit control over query order
+
+**Reference**: [How to Optimise Substitutions in Nix](https://brianmcgee.uk/posts/2023/12/13/how-to-optimise-substitutions-in-nix/)
 
 ## Timeout Behavior
 
@@ -124,22 +136,25 @@ With `narinfo-cache-negative-ttl = 1`:
 1. **Sequential, not parallel:** Nix checks caches one after another
 2. **Doesn't stop on failure:** Continues to next cache
 3. **Waits for timeout:** Each failed cache causes a delay before trying the next
-4. **Order matters:** First cache is checked first, so put fastest/most reliable first
+4. **Priority matters:** Use `?priority=xxx` parameters to control query order explicitly
 5. **Remove failed caches:** Better than reordering - eliminates delays entirely
-6. **Parallel jobs multiply delays:** 64 jobs × 5s timeout = major delay
+6. **Parallel jobs multiply delays:** 128 jobs × 5s timeout = major delay (but priorities minimize this)
 
 ## Best Practices
 
 ✅ **Do:**
 
-- Put your personal/fastest cache first
+- Use `?priority=xxx` parameters to explicitly control cache query order
+- Set lower priority numbers for most reliable/fastest caches (priority=1, priority=2, etc.)
 - Remove unreachable or failed caches entirely
 - Keep `connect-timeout` low (5s is good) for faster failure detection
 - Use `narinfo-cache-negative-ttl = 1` to avoid repeated queries
+- Set `http-connections = 128` and `max-substitution-jobs = 128` for maximum parallelism
 
 ❌ **Don't:**
 
 - Keep failed caches "just in case" (they cause delays)
-- Put slow/unreliable caches first
+- Put slow/unreliable caches at high priority (low numbers)
 - Set timeout too high (wastes time on failures)
 - Ignore cache connection errors (they compound with parallel jobs)
+- Rely on array order alone - use priority parameters for explicit control

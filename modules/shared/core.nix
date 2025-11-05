@@ -42,6 +42,7 @@ in
           "pipe-operators" # |> and <| operators for cleaner Nix code
           "no-url-literals" # Disallow unquoted URLs (prevents deprecated syntax)
           "git-hashing" # Git hashing for content-addressed store objects
+          # "parallel-eval" # Disabled - slower on this system (Determinate Nix already has eval-cores/lazy-trees)
         ];
       }
       (lib.mkIf (hostSystem == "aarch64-darwin") {
