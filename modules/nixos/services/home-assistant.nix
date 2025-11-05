@@ -4,7 +4,13 @@
   ...
 }:
 let
-  home-llm = pkgs.callPackage ./home-assistant/custom-components/home-llm.nix { inherit pkgs; };
+  # Home Assistant uses Python 3.13 by default (required by current version)
+  # Custom components must use the same Python version as Home Assistant
+  # buildHomeAssistantComponent uses Python 3.13, so dependencies must also be Python 3.13
+  home-llm = pkgs.callPackage ./home-assistant/custom-components/home-llm.nix {
+    inherit pkgs;
+    # buildHomeAssistantComponent defaults to Python 3.13, which matches Home Assistant
+  };
   intent_script_yaml = ./home-assistant/intent-scripts/intent_script.yaml;
 in
 {

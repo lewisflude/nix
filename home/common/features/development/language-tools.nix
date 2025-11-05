@@ -25,7 +25,7 @@
   # All major toolchain packages are now handled by the main feature module
   # This file only contains additional/supplemental tools
   # Removed duplicates:
-  # - python313, pip, virtualenv, uv, ruff, pyright -> in packageSets.pythonToolchain
+  # - python312, pip, virtualenv, uv, ruff, pyright -> in packageSets.pythonToolchain
   # - go, gopls, gotools, delve -> in packageSets.goToolchain
   # - nodejs_24 -> in packageSets.nodeToolchain
   # - luajit, luarocks, lua-language-server -> in packageSets.luaToolchain

@@ -26,6 +26,7 @@
       # Order: Most comprehensive and reliable caches first to minimize query delays
       # These caches have the highest hit rate for most packages
       "https://nix-community.cachix.org" # General community packages (most comprehensive, highest reliability)
+      "https://nixpkgs-python.cachix.org" # Pre-built Python packages (especially helpful for Python 3.13)
       "https://lewisflude.cachix.org" # Personal cache (fast if available, but may not have all packages due to frequent updates)
       "https://nixpkgs-wayland.cachix.org" # Wayland packages (common in NixOS)
       "https://numtide.cachix.org" # General cache (backup for common packages)
@@ -58,6 +59,7 @@
     extra-trusted-public-keys = [
       # Note: FlakeHub cache key removed - cache requires authentication
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "nixpkgs-python.cachix.org-1:xj9bgMh6w5DjN5n6W5Kd8MycHvDKq1m6nk3QlNS1p2c=" # Python packages cache
       "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
       "helix.cachix.org-1:ejp9KQpR1FBI2onstMQ34yogDm4OgU2ru6lIwPvuCVs="
       # Note: cache.thalheim.io key removed - cache connection failed

@@ -98,19 +98,25 @@ let
         # Rust
         (lib.optionals (cfg.rust or false) packageSets.rustToolchain)
         # Python (with version override)
+        # Follows wiki pattern: https://nixos.wiki/wiki/Python
+        # Uses python3.withPackages as recommended in the wiki
         (lib.optionals (cfg.python or false) (
           let
             python = pkgs.${pythonVersion};
           in
           [
-            python
-            python.pkgs.pip
-            python.pkgs.virtualenv
-            python.pkgs.pytest
-            python.pkgs.black
-            python.pkgs.isort
-            python.pkgs.mypy
-            python.pkgs.ruff
+            (python.withPackages (
+              python-pkgs: with python-pkgs; [
+                pip
+                virtualenv
+                pytest
+                black
+                isort
+                mypy
+                ruff
+              ]
+            ))
+            # poetry is a standalone tool, not a Python package
             poetry
           ]
         ))
@@ -138,7 +144,7 @@ let
           NODE_OPTIONS = "--max-old-space-size=4096";
         })
         (lib.mkIf (cfg.python or false) {
-          PYTHONPATH = "$HOME/.local/lib/python3.13/site-packages:$PYTHONPATH";
+          PYTHONPATH = "$HOME/.local/lib/python3.12/site-packages:$PYTHONPATH";
         })
       ];
   };
