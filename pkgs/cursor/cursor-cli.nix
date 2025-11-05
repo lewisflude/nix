@@ -16,15 +16,13 @@ in
       then
         if pkgs.stdenv.hostPlatform.system == "aarch64-darwin"
         then
-          fetchurl
-          {
+          fetchurl {
             inherit (cursorCliInfo.darwin.aarch64) url;
             inherit (cursorCliInfo.darwin.aarch64) sha256;
           }
         else if pkgs.stdenv.hostPlatform.system == "x86_64-darwin"
         then
-          fetchurl
-          {
+          fetchurl {
             inherit (cursorCliInfo.darwin.x86_64) url;
             inherit (cursorCliInfo.darwin.x86_64) sha256;
           }
@@ -33,15 +31,13 @@ in
       then
         if pkgs.stdenv.hostPlatform.system == "aarch64-linux"
         then
-          fetchurl
-          {
+          fetchurl {
             inherit (cursorCliInfo.linux.aarch64) url;
             inherit (cursorCliInfo.linux.aarch64) sha256;
           }
         else if pkgs.stdenv.hostPlatform.system == "x86_64-linux"
         then
-          fetchurl
-          {
+          fetchurl {
             inherit (cursorCliInfo.linux.x86_64) url;
             inherit (cursorCliInfo.linux.x86_64) sha256;
           }

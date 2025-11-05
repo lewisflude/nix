@@ -30,10 +30,19 @@ in {
 
     # Service-specific enables
     ollama = {
-      enable = mkEnableOption "Ollama LLM backend" // {default = true;};
+      enable =
+        mkEnableOption "Ollama LLM backend"
+        // {
+          default = true;
+        };
 
       acceleration = mkOption {
-        type = types.nullOr (types.enum ["rocm" "cuda"]);
+        type = types.nullOr (
+          types.enum [
+            "rocm"
+            "cuda"
+          ]
+        );
         default = null;
         description = "GPU acceleration type (null for CPU-only)";
       };
@@ -42,12 +51,19 @@ in {
         type = types.listOf types.str;
         default = [];
         description = "List of models to pre-download";
-        example = ["llama2" "mistral"];
+        example = [
+          "llama2"
+          "mistral"
+        ];
       };
     };
 
     openWebui = {
-      enable = mkEnableOption "Open WebUI interface for LLMs" // {default = true;};
+      enable =
+        mkEnableOption "Open WebUI interface for LLMs"
+        // {
+          default = true;
+        };
 
       port = mkOption {
         type = types.port;

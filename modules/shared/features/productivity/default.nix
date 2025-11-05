@@ -4,15 +4,10 @@
 {
   config,
   lib,
-  pkgs,
-  hostSystem,
   ...
 }:
 with lib; let
   cfg = config.host.features.productivity;
-  platformLib = (import ../../../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
-  isLinux = platformLib.isLinux;
-  isDarwin = platformLib.isDarwin;
 in {
   config = mkIf cfg.enable {
     # System-level packages (NixOS only)

@@ -13,14 +13,17 @@
       # Use catppuccin.nix module palette if available
       (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
       .${config.catppuccin.flavor}.colors
-    else
+    else if inputs ? catppuccin
+    then
       # Try to get palette directly from catppuccin input
       # catppuccin/nix repository has palette.json at the root
       let
-        catppuccinSrc =
-          inputs.catppuccin.src or inputs.catppuccin.outPath or (throw "Cannot find catppuccin source");
+        catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
       in
-        (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors;
+        if catppuccinSrc != null
+        then (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
+        else throw "Cannot find catppuccin source (input exists but src/outPath not found)"
+    else throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
 
   # Use Catppuccin colors directly for accurate theming
   palette = catppuccinPalette;

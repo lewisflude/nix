@@ -23,7 +23,10 @@ in {
             default_config = {};
             http = {
               server_host = "0.0.0.0";
-              trusted_proxies = ["127.0.0.1" "::1"];
+              trusted_proxies = [
+                "127.0.0.1"
+                "::1"
+              ];
             };
           };
         };
@@ -69,8 +72,14 @@ in {
         allowedTCPPorts = [8123];
       })
       (mkIf cfg.fileSharing {
-        allowedTCPPorts = [139 445];
-        allowedUDPPorts = [137 138];
+        allowedTCPPorts = [
+          139
+          445
+        ];
+        allowedUDPPorts = [
+          137
+          138
+        ];
       })
     ];
   };

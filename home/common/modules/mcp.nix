@@ -134,8 +134,7 @@ in {
   config = mkIf cfg.enable {
     # Write to a temporary location first (as symlink)
     home.file = builtins.listToAttrs (
-      mapAttrsToList
-      (name: target: {
+      mapAttrsToList (name: target: {
         name = ".mcp-generated/${name}/${target.fileName}";
         value.text = builtins.toJSON mcpConfigJson;
       })
@@ -146,8 +145,7 @@ in {
     home.activation.copyMcpConfig = lib.hm.dag.entryAfter ["writeBoundary"] (
       let
         copyCommands = concatStringsSep "\n" (
-          mapAttrsToList
-          (name: target: ''
+          mapAttrsToList (name: target: ''
             mkdir -p "${target.directory}"
             cp -f "$HOME/.mcp-generated/${name}/${target.fileName}" "${target.directory}/${target.fileName}"
             chmod 644 "${target.directory}/${target.fileName}"

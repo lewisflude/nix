@@ -46,7 +46,10 @@
 
   # Format as JSON array string for Cal.com's validation
   # Cal.com expects a JSON-encoded array like: ["cal.example.com","localhost:3000"]
-  calcomAllowedHostnames = builtins.toJSON [calcomHost "localhost:${toString calCfg.port}"];
+  calcomAllowedHostnames = builtins.toJSON [
+    calcomHost
+    "localhost:${toString calCfg.port}"
+  ];
 in {
   options.host.services.containersSupplemental.calcom = {
     enable =
@@ -296,7 +299,9 @@ in {
             // optionalAttrs (calCfg.availabilityInterval != null) {
               NEXT_PUBLIC_AVAILABILITY_SCHEDULE_INTERVAL = toString calCfg.availabilityInterval;
             }
-            // optionalAttrs (calCfg.googleCalendar.enabled && !calCfg.useSops && calCfg.googleCalendar.credentials != null) {
+            // optionalAttrs
+            (calCfg.googleCalendar.enabled && !calCfg.useSops && calCfg.googleCalendar.credentials != null)
+            {
               GOOGLE_API_CREDENTIALS = calCfg.googleCalendar.credentials;
               GOOGLE_LOGIN_ENABLED = "true";
             }
@@ -385,8 +390,12 @@ in {
         "calcom-app-env" = {
           content =
             ''
-              DATABASE_URL=postgresql://calcom:${config.sops.placeholder."calcom-db-password"}@calcom-db:5432/calcom
-              DATABASE_DIRECT_URL=postgresql://calcom:${config.sops.placeholder."calcom-db-password"}@calcom-db:5432/calcom
+              DATABASE_URL=postgresql://calcom:${
+                config.sops.placeholder."calcom-db-password"
+              }@calcom-db:5432/calcom
+              DATABASE_DIRECT_URL=postgresql://calcom:${
+                config.sops.placeholder."calcom-db-password"
+              }@calcom-db:5432/calcom
               NEXTAUTH_SECRET=${config.sops.placeholder."calcom-nextauth-secret"}
               CALENDSO_ENCRYPTION_KEY=${config.sops.placeholder."calcom-encryption-key"}
               EMAIL_SERVER_PASSWORD=${config.sops.placeholder."calcom-email-password"}

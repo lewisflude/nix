@@ -75,7 +75,9 @@ in {
     systemd.services.unpackerr = {
       description = "Unpackerr - Archive extractor for *arr apps";
       after =
-        ["network.target"]
+        [
+          "network.target"
+        ]
         ++ optional cfg.radarr.enable "radarr.service"
         ++ optional cfg.sonarr.enable "sonarr.service"
         ++ optional cfg.lidarr.enable "lidarr.service"

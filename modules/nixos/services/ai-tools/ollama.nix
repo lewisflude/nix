@@ -20,8 +20,7 @@ in {
     };
 
     # Enable CUDA toolkit if using NVIDIA GPU
-    hardware.nvidia-container-toolkit.enable =
-      mkIf (cfg.ollama.acceleration == "cuda") true;
+    hardware.nvidia-container-toolkit.enable = mkIf (cfg.ollama.acceleration == "cuda") true;
 
     # Pre-download models if specified
     systemd.services.ollama-models = mkIf (cfg.ollama.models != []) {
@@ -38,11 +37,7 @@ in {
       };
 
       script = let
-        modelPulls =
-          concatMapStringsSep "\n" (
-            model: "ollama pull ${model} || true"
-          )
-          cfg.ollama.models;
+        modelPulls = concatMapStringsSep "\n" (model: "ollama pull ${model} || true") cfg.ollama.models;
       in ''
         # Wait for Ollama to be ready
         for i in {1..30}; do

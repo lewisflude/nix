@@ -3,7 +3,14 @@
   lib,
   ...
 }: let
-  inherit (lib) mkIf mkEnableOption mkOption types mkMerge;
+  inherit
+    (lib)
+    mkIf
+    mkEnableOption
+    mkOption
+    types
+    mkMerge
+    ;
   containersLib = import ../lib.nix {inherit lib;};
   inherit (containersLib) mkResourceOptions mkResourceFlags;
   cfg = config.host.services.containersSupplemental;

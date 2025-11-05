@@ -35,7 +35,13 @@ pog.pog {
     }
   ];
 
-  runtimeInputs = with pkgs; [git nix nvfetcher gum nix-update];
+  runtimeInputs = with pkgs; [
+    git
+    nix
+    nvfetcher
+    gum
+    nix-update
+  ];
 
   script = helpers:
     with helpers; ''

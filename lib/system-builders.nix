@@ -2,23 +2,23 @@
   inputs,
   validationLib, # <-- Now correctly accepted as an argument
 }: let
-  inherit
-    (inputs)
-    darwin
-    nixpkgs
-    home-manager
-    mac-app-util
-    nix-homebrew
-    sops-nix
-    catppuccin
-    niri
-    musnix
-    nur
-    solaar
-    determinate
-    chaotic
-    ;
+  # Access inputs conditionally to avoid assumptions about which inputs are present
+  nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
   inherit (nixpkgs) lib;
+
+  # Optional inputs - check existence before use
+  darwin = inputs.darwin or null;
+  home-manager = inputs.home-manager or null;
+  mac-app-util = inputs.mac-app-util or null;
+  nix-homebrew = inputs.nix-homebrew or null;
+  sops-nix = inputs.sops-nix or null;
+  catppuccin = inputs.catppuccin or null;
+  niri = inputs.niri or null;
+  musnix = inputs.musnix or null;
+  nur = inputs.nur or null;
+  solaar = inputs.solaar or null;
+  determinate = inputs.determinate or null;
+  chaotic = inputs.chaotic or null;
 
   # Import virtualisation library
   virtualisationLib = import ./virtualisation.nix {inherit lib;};
@@ -65,17 +65,22 @@
       includeUserFields = true;
     };
     sharedModules =
-      [
-        sops-nix.homeManagerModules.sops
-        catppuccin.homeModules.catppuccin
-      ]
+      lib.optionals (sops-nix != null) [sops-nix.homeManagerModules.sops]
+      ++ lib.optionals (catppuccin != null) [catppuccin.homeModules.catppuccin]
       ++ extraSharedModules;
     users.${hostConfig.username} = import ../home;
   };
 in {
   # Build a Darwin (macOS) system configuration
+  # Uses perSystemPkgs from flake-parts perSystem to ensure consistency
+  # This follows flake-parts best practices: top-level configs should use withSystem
   mkDarwinSystem = hostName: hostConfig: {homebrew-j178}:
-    darwin.lib.darwinSystem {
+    (
+      if darwin == null
+      then throw "darwin input is required for mkDarwinSystem"
+      else darwin.lib.darwinSystem
+    )
+    {
       inherit (hostConfig) system;
 
       specialArgs = {
@@ -100,13 +105,14 @@ in {
           # Platform modules
           ../modules/darwin/default.nix
 
-          # Integration modules
-          determinate.darwinModules.default
-          home-manager.darwinModules.home-manager
-          mac-app-util.darwinModules.default
-          nix-homebrew.darwinModules.nix-homebrew
-          sops-nix.darwinModules.sops
-
+          # Integration modules (conditional on input existence)
+        ]
+        ++ lib.optionals (determinate != null) [determinate.darwinModules.default]
+        ++ lib.optionals (home-manager != null) [home-manager.darwinModules.home-manager]
+        ++ lib.optionals (mac-app-util != null) [mac-app-util.darwinModules.default]
+        ++ lib.optionals (nix-homebrew != null) [nix-homebrew.darwinModules.nix-homebrew]
+        ++ lib.optionals (sops-nix != null) [sops-nix.darwinModules.sops]
+        ++ [
           # Apply overlays from overlays/ directory
           # OVERLAY APPLICATION MECHANISM:
           # Overlays are imported from overlays/default.nix via functionsLib.mkOverlays,
@@ -139,7 +145,9 @@ in {
           {
             home-manager = mkHomeManagerConfig {
               inherit hostConfig;
-              extraSharedModules = [mac-app-util.homeManagerModules.default];
+              extraSharedModules = lib.optionals (mac-app-util != null) [
+                mac-app-util.homeManagerModules.default
+              ];
             };
           }
           (
@@ -155,6 +163,8 @@ in {
     };
 
   # Build a NixOS system configuration
+  # Uses perSystemPkgs from flake-parts perSystem to ensure consistency
+  # This follows flake-parts best practices: top-level configs should use withSystem
   mkNixosSystem = hostName: hostConfig: {self}:
     nixpkgs.lib.nixosSystem {
       inherit (hostConfig) system;
@@ -197,31 +207,34 @@ in {
 
           # Platform modules
           ../modules/nixos/default.nix
-          determinate.nixosModules.default
-
-          # Integration modules
-          sops-nix.nixosModules.sops
-          niri.nixosModules.niri
-          chaotic.nixosModules.default
-          inputs.nix-topology.nixosModules.default
-          inputs.vpn-confinement.nixosModules.default
         ]
-        ++ lib.optional (
-          hostConfig.system == "x86_64-linux" || hostConfig.system == "aarch64-linux"
-        )
-        catppuccin.nixosModules.catppuccin
+        ++ lib.optionals (determinate != null) [determinate.nixosModules.default]
+        ++ lib.optionals (sops-nix != null) [sops-nix.nixosModules.sops]
+        ++ lib.optionals (niri != null) [niri.nixosModules.niri]
+        ++ lib.optionals (chaotic != null) [chaotic.nixosModules.default]
+        ++ lib.optionals (inputs ? nix-topology) [inputs.nix-topology.nixosModules.default]
+        ++ lib.optionals (inputs ? vpn-confinement) [inputs.vpn-confinement.nixosModules.default]
+        ++ lib.optionals (
+          (hostConfig.system == "x86_64-linux" || hostConfig.system == "aarch64-linux") && catppuccin != null
+        ) [catppuccin.nixosModules.catppuccin]
+        ++ lib.optionals (musnix != null) [musnix.nixosModules.musnix]
+        ++ lib.optionals (nur != null) [nur.modules.nixos.default]
+        ++ lib.optionals (solaar != null) [solaar.nixosModules.default]
+        ++ lib.optionals (home-manager != null) [home-manager.nixosModules.home-manager]
         ++ [
-          musnix.nixosModules.musnix
-          nur.modules.nixos.default
-          solaar.nixosModules.default
-          home-manager.nixosModules.home-manager
-
           # Home Manager configuration
-          { config, ... }:
           {
-            home-manager.extraSpecialArgs.systemConfig = config;
+            home-manager =
+              mkHomeManagerConfig {inherit hostConfig;}
+              // {
+                useUserPackages = true;
+              };
           }
-        )
+          (
+            {config, ...}: {
+              home-manager.extraSpecialArgs.systemConfig = config;
+            }
+          )
 
           # Validation assertions - now just a call to our helper
           mkValidationModule

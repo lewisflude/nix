@@ -105,7 +105,11 @@ in {
           # Pinned version for security
           image = "ghcr.io/sergi0g/cup:v1.2.0";
 
-          cmd = ["serve" "-p" "1188"];
+          cmd = [
+            "serve"
+            "-p"
+            "1188"
+          ];
 
           volumes = [
             # SECURITY WARNING: Full access to container runtime

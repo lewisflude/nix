@@ -20,7 +20,14 @@
   lib,
   ...
 }: let
-  inherit (lib) mkIf mkEnableOption mkOption types mkDefault;
+  inherit
+    (lib)
+    mkIf
+    mkEnableOption
+    mkOption
+    types
+    mkDefault
+    ;
 
   cfg = config.host.services.containersSupplemental;
 in {

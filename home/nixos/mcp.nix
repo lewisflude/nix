@@ -97,14 +97,16 @@
     '';
   };
   mkAddJsonCmd = name: serverCfg: let
-    json = builtins.toJSON ({
+    json = builtins.toJSON (
+      {
         type = "stdio";
         args = serverCfg.args or [];
         env = serverCfg.env or {};
       }
       // {
         inherit (serverCfg) command;
-      });
+      }
+    );
     jsonArg = escapeShellArg json;
   in ''
     claude mcp remove ${escapeShellArg name} --scope user >/dev/null 2>&1 || true

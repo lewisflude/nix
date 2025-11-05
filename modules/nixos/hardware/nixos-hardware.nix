@@ -1,8 +1,11 @@
 # Integration with nixos-hardware repository
 # Provides hardware-specific modules for common components
-{inputs, ...}: {
-  imports = [
-    # Intel CPU - microcode updates (may be redundant with existing config)
+{
+  inputs,
+  lib,
+  ...
+}: {
+  imports = lib.optionals (inputs ? nixos-hardware && inputs.nixos-hardware ? nixosModules) [
     inputs.nixos-hardware.nixosModules.common-cpu-intel
 
     # SSD maintenance - enables fstrim service for NVMe/SSD drives

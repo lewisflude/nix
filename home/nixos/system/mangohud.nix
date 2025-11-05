@@ -10,11 +10,14 @@
     if lib.hasAttrByPath ["catppuccin" "sources" "palette"] config
     then (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
       .${config.catppuccin.flavor}.colors
-    else let
-      catppuccinSrc =
-        inputs.catppuccin.src or inputs.catppuccin.outPath or (throw "Cannot find catppuccin source");
+    else if inputs ? catppuccin
+    then let
+      catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
     in
-      (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors;
+      if catppuccinSrc != null
+      then (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
+      else throw "Cannot find catppuccin source (input exists but src/outPath not found)"
+    else throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
 
   # Convert hex color to RGB (0-1 range) for Mangohud
   hexToRgb = hex: let

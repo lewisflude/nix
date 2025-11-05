@@ -1,9 +1,11 @@
 {
   inputs,
   self,
+  withSystem,
   ...
 }: let
-  inherit (inputs.nixpkgs) lib;
+  nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
+  inherit (nixpkgs) lib;
 
   hostsConfig = import ../lib/hosts.nix {inherit lib;};
   inherit (hostsConfig) hosts;
@@ -23,13 +25,6 @@
       };
     inherit hosts;
   };
-
-  mkDarwinSystem = hostName: hostConfig:
-    systemBuilders.mkDarwinSystem hostName hostConfig {
-      inherit (inputs) homebrew-j178;
-    };
-
-  mkNixosSystem = hostName: hostConfig: systemBuilders.mkNixosSystem hostName hostConfig {inherit self;};
 in {
   systems = [
     "x86_64-linux"
@@ -45,15 +40,25 @@ in {
   }: let
     # Configure pkgs with overlays for this system
     # Override pkgs via _module.args to apply overlays
-    pkgsWithOverlays = import inputs.nixpkgs {
+    nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
+    pkgsWithOverlays = import nixpkgs {
       inherit system;
       overlays = functionsLib.mkOverlays {inherit inputs system;};
       config = functionsLib.mkPkgsConfig;
     };
 
     # Import shells configuration
+    # pog overlay is optional - only extend if available
+    pogOverlay =
+      if
+        inputs ? pog
+        && inputs.pog ? overlays
+        && inputs.pog.overlays ? ${system}
+        && inputs.pog.overlays.${system} ? default
+      then inputs.pog.overlays.${system}.default
+      else (_final: _prev: {});
     shellsConfig = import ../shells {
-      pkgs = pkgsWithOverlays.extend inputs.pog.overlays.${system}.default;
+      pkgs = pkgsWithOverlays.extend pogOverlay;
       inherit (pkgsWithOverlays) lib;
       inherit system;
     };
@@ -89,7 +94,8 @@ in {
 
     # Per-system apps
     apps = let
-      pkgsWithPog = pkgsWithOverlays.extend inputs.pog.overlays.${system}.default;
+      # Use the same pog overlay check as above
+      pkgsWithPog = pkgsWithOverlays.extend pogOverlay;
       # Helper to create pog app
       # Scripts that need config-root: new-module, update-all
       # Scripts that don't: setup-cachix
@@ -143,13 +149,71 @@ in {
       ;
   };
 
-  flake = {
-    darwinConfigurations = builtins.mapAttrs mkDarwinSystem (hostsConfig.getDarwinHosts hosts);
+  flake = let
+    # Build Darwin configurations using withSystem to access perSystem definitions
+    # This follows flake-parts best practices: top-level configs should use withSystem
+    # to access perSystem packages and other definitions
+    darwinHosts = hostsConfig.getDarwinHosts hosts;
+    darwinConfigurations =
+      builtins.mapAttrs (
+        hostName: hostConfig:
+          withSystem hostConfig.system (
+            {config, ...}:
+              systemBuilders.mkDarwinSystem hostName hostConfig {
+                inherit (inputs) homebrew-j178;
+                # Use pkgs from perSystem instead of importing nixpkgs separately
+                # This ensures consistency and follows flake-parts patterns
+                perSystemPkgs = config.pkgs;
+              }
+          )
+      )
+      darwinHosts;
 
-    nixosConfigurations = builtins.mapAttrs mkNixosSystem (hostsConfig.getNixosHosts hosts);
+    # Build NixOS configurations using withSystem to access perSystem definitions
+    nixosHosts = hostsConfig.getNixosHosts hosts;
+    nixosConfigurations =
+      builtins.mapAttrs (
+        hostName: hostConfig:
+          withSystem hostConfig.system (
+            _:
+              systemBuilders.mkNixosSystem hostName hostConfig {
+                inherit self;
+              }
+          )
+      )
+      nixosHosts;
 
-    homeConfigurations = outputBuilders.mkHomeConfigurations;
-
+    # Build Home Manager configurations using withSystem to access perSystem definitions
+    # Map over all hosts and use withSystem for each host's system
+    homeConfigurations =
+      builtins.mapAttrs (
+        _hostName: hostConfig:
+          withSystem hostConfig.system (
+            {config, ...}:
+              outputBuilders.mkHomeConfigurationForHost {
+                inherit hostConfig;
+                perSystemPkgs = config.pkgs;
+              }
+          )
+      )
+      hosts;
+  in {
+    inherit darwinConfigurations nixosConfigurations homeConfigurations;
     lib = functionsLib // validationLib;
+
+    # Export overlays following flake-parts conventions
+    # Overlays are defined at the top level (not under system attributes).
+    # The system is determined from prev.stdenv.hostPlatform.system at evaluation time.
+    # If an overlay needs perSystem config (e.g., config.packages), use withSystem pattern.
+    # See: https://flake.parts/overlays.html
+    overlays.default = final: prev:
+    # Extract system from prev.stdenv.hostPlatform.system (flake-parts recommended pattern)
+    # This allows the overlay to work with any system without being defined under a system attribute
+      (import ../lib/overlay-builder.nix {
+        inherit inputs;
+        inherit (prev.stdenv.hostPlatform) system;
+      })
+      final
+      prev;
   };
 }

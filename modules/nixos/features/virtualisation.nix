@@ -56,9 +56,7 @@ in {
 
     # Add user to virtualisation groups
     users.users.${config.host.username}.extraGroups =
-      optional cfg.docker "docker"
-      ++ optional cfg.qemu "libvirtd"
-      ++ optional cfg.virtualbox "vboxusers";
+      optional cfg.docker "docker" ++ optional cfg.qemu "libvirtd" ++ optional cfg.virtualbox "vboxusers";
 
     # Install related tools
     # Note: docker-compose and lazydocker moved to home-manager

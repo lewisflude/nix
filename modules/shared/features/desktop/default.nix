@@ -11,8 +11,7 @@
 with lib; let
   cfg = config.host.features.desktop;
   platformLib = (import ../../../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
-  isLinux = platformLib.isLinux;
-  isDarwin = platformLib.isDarwin;
+  inherit (platformLib) isLinux;
 in {
   config = mkIf cfg.enable {
     # NixOS-specific desktop configuration
@@ -22,11 +21,7 @@ in {
     # System-level packages (NixOS only)
     environment.systemPackages = mkIf isLinux (
       with pkgs;
-        [
-          # Desktop utilities
-        ]
-        # Desktop utilities (if enabled)
-        ++ optionals cfg.utilities [
+        optionals cfg.utilities [
           # Screenshot tools
           grim # Screenshot tool for Wayland
           slurp # Region selector for Wayland

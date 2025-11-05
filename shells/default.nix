@@ -5,6 +5,13 @@
   ...
 }: let
   platformLib = (import ../lib/functions.nix {inherit lib;}).withSystem system;
+  packageSets = import ../lib/package-sets.nix {
+    inherit pkgs;
+    inherit (platformLib) versions;
+  };
+  featureBuilders = import ../lib/feature-builders.nix {
+    inherit lib packageSets;
+  };
   commonTools = with pkgs; [
     pre-commit
     git
@@ -28,18 +35,16 @@
       '';
     };
     python = pkgs.mkShell {
-      buildInputs = with pkgs;
-        [
-          python312 # Python 3.13 is too new for some packages
-          python312Packages.pip
-          python312Packages.virtualenv
-          python312Packages.pytest
-          python312Packages.black
-          python312Packages.isort
-          python312Packages.mypy
-          python312Packages.ruff
-          poetry
-        ]
+      buildInputs =
+        featureBuilders.mkShellPackages {
+          cfg = {
+            python = true;
+          };
+          inherit pkgs;
+          inherit (platformLib) versions;
+          # Shells use python312 (older version for compatibility)
+          pythonVersion = "python312";
+        }
         ++ commonTools;
       shellHook = ''
         echo "🐍 Python development environment loaded"
@@ -48,16 +53,14 @@
       '';
     };
     rust = pkgs.mkShell {
-      buildInputs = with pkgs;
-        [
-          rustc
-          cargo
-          rust-analyzer
-          clippy
-          cargo-watch
-          cargo-edit
-          cargo-audit
-        ]
+      buildInputs =
+        featureBuilders.mkShellPackages {
+          cfg = {
+            rust = true;
+          };
+          inherit pkgs;
+          inherit (platformLib) versions;
+        }
         ++ commonTools;
       shellHook = ''
         echo "🦀 Rust development environment loaded"
@@ -66,14 +69,14 @@
       '';
     };
     go = pkgs.mkShell {
-      buildInputs = with pkgs;
-        [
-          go
-          gopls
-          golangci-lint
-          gotools
-          delve
-        ]
+      buildInputs =
+        featureBuilders.mkShellPackages {
+          cfg = {
+            go = true;
+          };
+          inherit pkgs;
+          inherit (platformLib) versions;
+        }
         ++ commonTools;
       shellHook = ''
         echo "🐹 Go development environment loaded"

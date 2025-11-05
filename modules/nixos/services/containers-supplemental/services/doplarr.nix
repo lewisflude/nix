@@ -3,7 +3,13 @@
   lib,
   ...
 }: let
-  inherit (lib) mkIf mkEnableOption mkOption types;
+  inherit
+    (lib)
+    mkIf
+    mkEnableOption
+    mkOption
+    types
+    ;
   containersLib = import ../lib.nix {inherit lib;};
   inherit (containersLib) mkResourceOptions mkResourceFlags;
 

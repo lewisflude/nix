@@ -11,19 +11,14 @@
 with lib; let
   cfg = config.host.features.media;
   platformLib = (import ../../../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
-  isLinux = platformLib.isLinux;
-  isDarwin = platformLib.isDarwin;
+  inherit (platformLib) isLinux;
   audioNixCfg = cfg.audio.audioNix;
 in {
   config = mkIf cfg.enable {
     # System-level packages (NixOS only)
     environment.systemPackages = mkIf isLinux (
       with pkgs;
-        [
-          # Audio production packages
-        ]
-        # Standard audio production packages
-        ++ optionals (cfg.audio.enable && cfg.audio.production) [
+        optionals (cfg.audio.enable && cfg.audio.production) [
           audacity
           helm # Software synthesizer
           lsp-plugins # Linux Studio Plugins

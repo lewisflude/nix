@@ -219,11 +219,16 @@ in {
             # F16 → Maximize (⌃⌥⏎ default in Rectangle)
             {
               type = "basic";
-              from = {key_code = "f16";};
+              from = {
+                key_code = "f16";
+              };
               to = [
                 {
                   key_code = "return_or_enter";
-                  modifiers = ["left_control" "left_option"];
+                  modifiers = [
+                    "left_control"
+                    "left_option"
+                  ];
                 }
               ];
               conditions = [
@@ -241,11 +246,16 @@ in {
             # F17 → Tile Left (⌃⌥←)
             {
               type = "basic";
-              from = {key_code = "f17";};
+              from = {
+                key_code = "f17";
+              };
               to = [
                 {
                   key_code = "left_arrow";
-                  modifiers = ["left_control" "left_option"];
+                  modifiers = [
+                    "left_control"
+                    "left_option"
+                  ];
                 }
               ];
               conditions = [
@@ -263,11 +273,16 @@ in {
             # F18 → Center (⌃⌥C)
             {
               type = "basic";
-              from = {key_code = "f18";};
+              from = {
+                key_code = "f18";
+              };
               to = [
                 {
                   key_code = "c";
-                  modifiers = ["left_control" "left_option"];
+                  modifiers = [
+                    "left_control"
+                    "left_option"
+                  ];
                 }
               ];
               conditions = [
@@ -285,11 +300,16 @@ in {
             # F19 → Tile Right (⌃⌥→)
             {
               type = "basic";
-              from = {key_code = "f19";};
+              from = {
+                key_code = "f19";
+              };
               to = [
                 {
                   key_code = "right_arrow";
-                  modifiers = ["left_control" "left_option"];
+                  modifiers = [
+                    "left_control"
+                    "left_option"
+                  ];
                 }
               ];
               conditions = [
