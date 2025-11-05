@@ -8,6 +8,7 @@
 let
   # Home Assistant uses Python 3.13, so we must use Python 3.13 packages
   # buildHomeAssistantComponent uses Python 3.13 by default to match Home Assistant
+  # Uses Python 3.13 from nixpkgs-python (via overlay) for better cache coverage
   python = pkgs.python313;
   pythonPackages = python.pkgs;
 

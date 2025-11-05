@@ -82,6 +82,7 @@
   inputs = {
     # === Core Infrastructure ===
     nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz";
+    nixpkgs-python.url = "github:cachix/nixpkgs-python";
     flake-parts = {
       url = "https://flakehub.com/f/hercules-ci/flake-parts/*";
       inputs.nixpkgs-lib.follows = "nixpkgs";

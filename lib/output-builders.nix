@@ -5,74 +5,82 @@
 let
   # Access required inputs with error if missing
   nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
+  nixpkgs-python = inputs.nixpkgs-python or (throw "nixpkgs-python input is required");
   pre-commit-hooks = inputs.pre-commit-hooks or (throw "pre-commit-hooks input is required");
   home-manager = inputs.home-manager or null;
 
   virtualisationLib = import ./virtualisation.nix { inherit (nixpkgs) lib; };
   functionsLib = import ./functions.nix { inherit (nixpkgs) lib; };
   systems = builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
+
+  # Get Python packages from nixpkgs-python for a given system
+  # Uses Python 3.12 as the default version
+  getPythonPackages =
+    system:
+    (nixpkgs-python.packages.${system}."3.12" or nixpkgs.legacyPackages.${system}.python312).pkgs
+      or nixpkgs.legacyPackages.${system}.python3Packages;
 in
 {
   mkFormatters = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt);
-  mkChecks = nixpkgs.lib.genAttrs systems (system: {
-    pre-commit-check = pre-commit-hooks.lib.${system}.run {
-      src = ./.;
-      hooks = {
-        # Nix formatting and linting
-        nixfmt.enable = true;
-        alejandra.enable = false; # Explicitly disable alejandra, use nixfmt only
-        deadnix.enable = true;
-        statix.enable = true;
+  mkChecks = nixpkgs.lib.genAttrs systems (
+    system:
+    let
+      pythonPackages = getPythonPackages system;
+    in
+    {
+      pre-commit-check = pre-commit-hooks.lib.${system}.run {
+        src = ./.;
+        hooks = {
+          # Nix formatting and linting
+          nixfmt.enable = true;
+          alejandra.enable = false; # Explicitly disable alejandra, use nixfmt only
+          deadnix.enable = true;
+          statix.enable = true;
 
-        # Conventional commits enforcement
-        commitizen.enable = true;
+          # Conventional commits enforcement
+          commitizen.enable = true;
 
-        # General code quality
-        trailing-whitespace = {
-          enable = true;
-          entry = "${
-            nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks
-          }/bin/trailing-whitespace-fixer";
-          types = [ "text" ];
-        };
-        end-of-file-fixer = {
-          enable = true;
-          entry = "${
-            nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks
-          }/bin/end-of-file-fixer";
-          types = [ "text" ];
-        };
-        mixed-line-ending = {
-          enable = true;
-          entry = "${
-            nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks
-          }/bin/mixed-line-ending";
-          types = [ "text" ];
-        };
+          # General code quality
+          trailing-whitespace = {
+            enable = true;
+            entry = "${pythonPackages.pre-commit-hooks}/bin/trailing-whitespace-fixer";
+            types = [ "text" ];
+          };
+          end-of-file-fixer = {
+            enable = true;
+            entry = "${pythonPackages.pre-commit-hooks}/bin/end-of-file-fixer";
+            types = [ "text" ];
+          };
+          mixed-line-ending = {
+            enable = true;
+            entry = "${pythonPackages.pre-commit-hooks}/bin/mixed-line-ending";
+            types = [ "text" ];
+          };
 
-        # YAML validation
-        check-yaml = {
-          enable = true;
-          entry = "${nixpkgs.legacyPackages.${system}.python3Packages.pre-commit-hooks}/bin/check-yaml";
-          types = [ "yaml" ];
-          excludes = [ "secrets/.*\\.yaml$" ];
-        };
+          # YAML validation
+          check-yaml = {
+            enable = true;
+            entry = "${pythonPackages.pre-commit-hooks}/bin/check-yaml";
+            types = [ "yaml" ];
+            excludes = [ "secrets/.*\\.yaml$" ];
+          };
 
-        # Markdown formatting
-        markdownlint = {
-          enable = true;
-          entry = "${nixpkgs.legacyPackages.${system}.markdownlint-cli}/bin/markdownlint --fix";
-          types = [ "markdown" ];
+          # Markdown formatting
+          markdownlint = {
+            enable = true;
+            entry = "${nixpkgs.legacyPackages.${system}.markdownlint-cli}/bin/markdownlint --fix";
+            types = [ "markdown" ];
+          };
         };
       };
-    };
 
-    # nixosTests-mcp = import ../tests/integration/mcp.nix {
-    #   inherit pkgs;
-    #   lib = nixpkgs.lib;
-    #   inputs = inputs;
-    # };
-  });
+      # nixosTests-mcp = import ../tests/integration/mcp.nix {
+      #   inherit pkgs;
+      #   lib = nixpkgs.lib;
+      #   inputs = inputs;
+      # };
+    }
+  );
   # Build a single Home Manager configuration using perSystem pkgs
   # This follows flake-parts best practices: use withSystem to access perSystem definitions
   mkHomeConfigurationForHost =
