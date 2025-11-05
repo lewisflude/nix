@@ -27,6 +27,8 @@ let
     ];
 
     # Python toolchain (complete set)
+    # Follows wiki pattern: https://nixos.wiki/wiki/Python
+    # Uses python3.withPackages as recommended in the wiki
     pythonToolchain =
       pkgs:
       let
@@ -34,13 +36,16 @@ let
       in
       with pkgs;
       [
-        python
-        python.pkgs.pip
-        python.pkgs.virtualenv
-        python.pkgs.uv
+        (python.withPackages (
+          python-pkgs: with python-pkgs; [
+            pip
+            virtualenv
+            black
+          ]
+        ))
+        # Standalone tools (not Python packages)
         ruff
         pyright
-        black
         poetry
       ];
 
