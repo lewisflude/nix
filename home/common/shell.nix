@@ -92,7 +92,7 @@ in
       historySubstringSearch.enable = true;
       promptInit = ''
         source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-        source ~/.p10k.zsh
+        [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
       '';
       plugins = [
         {
@@ -382,9 +382,6 @@ in
       NH_FLAKE = "${config.home.homeDirectory}/.config/nix";
 
       DIRENV_LOG_FORMAT = "";
-    };
-    file = {
-      ".p10k.zsh".source = ./lib/p10k.zsh;
     };
     packages = with pkgs; [
       zoxide

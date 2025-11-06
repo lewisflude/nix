@@ -94,6 +94,7 @@
     };
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     lazygit = {
       url = "github:jesseduffield/lazygit";
