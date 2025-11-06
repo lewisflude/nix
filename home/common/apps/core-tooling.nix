@@ -42,8 +42,8 @@ in {
     #     ]
     ++ [
       claude-code
-      pkgs.gemini-cli-bin
-      pkgs.cursor-cli
+      # pkgs.gemini-cli-bin # Package doesn't exist in nixpkgs
+      # cursor.cursor-cli # cursorCli data missing from cursor-info.json
       codex
       nx-latest
 

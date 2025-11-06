@@ -4,55 +4,53 @@
   pkgs,
   hostSystem,
   ...
-}:
-let
-  inherit (lib) mkIf;
+}: let
+  inherit (lib) mkIf mkMerge optionalAttrs;
   inherit (lib.lists) optional optionals;
   cfg = config.host.features.desktop;
-  platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
+  platformLib = (import ../../../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
   inherit (platformLib) isLinux;
-in
-{
-  config = mkIf cfg.enable {
+in {
+  config = mkIf cfg.enable (mkMerge [
+    (optionalAttrs isLinux {
+      environment.systemPackages = optionals cfg.utilities (
+        with pkgs; [
+          grim
+          slurp
+          wl-clipboard
 
-    environment.systemPackages = mkIf isLinux (
-      with pkgs;
-      optionals cfg.utilities [
+          wlr-randr
+          brightnessctl
 
-        grim
-        slurp
-        wl-clipboard
+          xdg-utils
 
-        wlr-randr
-        brightnessctl
+          argyllcms
+          colord-gtk
+          wl-gammactl
+        ]
+      );
 
-        xdg-utils
+      users.users.${config.host.username}.extraGroups =
+        [
+          "audio"
+          "video"
+          "input"
+          "networkmanager"
+        ]
+        ++ optional cfg.niri "render";
+    })
 
-        argyllcms
-        colord-gtk
-        wl-gammactl
-      ]
-    );
-
-    users.users.${config.host.username}.extraGroups = mkIf isLinux (
-      [
-        "audio"
-        "video"
-        "input"
-        "networkmanager"
-      ]
-      ++ optional cfg.niri "render"
-    );
-
-    assertions = [
-      {
-        assertion = cfg.niri -> !cfg.hyprland || isLinux;
-        message = "Niri and Hyprland cannot both be enabled";
-      }
-      {
-        assertion = cfg.theming -> cfg.enable;
-        message = "Theming requires desktop feature to be enabled";
-      }
-    ];
-  };
+    {
+      assertions = [
+        {
+          assertion = cfg.niri -> !cfg.hyprland || isLinux;
+          message = "Niri and Hyprland cannot both be enabled";
+        }
+        {
+          assertion = cfg.theming -> cfg.enable;
+          message = "Theming requires desktop feature to be enabled";
+        }
+      ];
+    }
+  ]);
 }

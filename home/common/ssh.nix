@@ -15,7 +15,6 @@ _: {
         compression = false;
         hashKnownHosts = true;
         extraOptions = {
-          PKCS11Provider = "none";
           StrictHostKeyChecking = "accept-new";
           UserKnownHostsFile = "~/.ssh/known_hosts";
           ConnectTimeout = "10";
