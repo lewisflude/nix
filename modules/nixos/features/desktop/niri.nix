@@ -1,17 +1,19 @@
 {
   config,
   lib,
-  pkgs,
+  inputs,
+  hostSystem,
   ...
 }:
 let
   cfg = config.host.features.desktop;
+  inherit (inputs.niri.packages.${hostSystem}) niri-unstable;
 in
 {
   config = lib.mkIf cfg.enable {
     programs.niri = {
       enable = true;
-      package = pkgs.niri-unstable;
+      package = niri-unstable;
     };
   };
 }
