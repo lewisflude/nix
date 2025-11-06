@@ -4,9 +4,6 @@
 }:
 let
   packageSets = {
-    getPython = pkgs: pkgs.${versions.python};
-    getNodejs = pkgs: pkgs.${versions.nodejs};
-
     # Use fenix if available (via overlay), otherwise fall back to nixpkgs rust
     # Fenix is always in inputs, but overlay is conditionally applied
     rustToolchain =
@@ -62,27 +59,12 @@ let
 
     nodeToolchain = pkgs: [
       pkgs.${versions.nodejs}
-      pkgs.nodePackages.npm
-      pkgs.nodePackages.yarn
       pkgs.nodePackages.pnpm
       pkgs.nodePackages.typescript
-      pkgs.nodePackages.typescript-language-server
-      pkgs.nodePackages.eslint
-      pkgs.nodePackages.prettier
     ];
 
     luaToolchain = [
       pkgs.luajit
-      pkgs.luajitPackages.luarocks
-      pkgs.lua-language-server
-      pkgs.stylua
-      pkgs.selene
-    ];
-
-    javaToolchain = [
-      pkgs.jdk
-      pkgs.gradle
-      pkgs.maven
     ];
 
     buildTools = [
@@ -91,29 +73,16 @@ let
       pkgs.pkg-config
       pkgs.gcc
       pkgs.binutils
-      pkgs.autoconf
-      pkgs.automake
-      pkgs.libtool
-    ];
-
-    gitTools = [
-      pkgs.git
-      pkgs.git-lfs
-      pkgs.gh
-      pkgs.delta
     ];
 
     dockerTools = [
-      pkgs.docker
       pkgs.docker-compose
       pkgs.docker-credential-helpers
-      pkgs.lazydocker
     ];
 
     kubernetesTools = [
       pkgs.kubectl
       pkgs.k9s
-      pkgs.helm
       pkgs.kubernetes-helm
       pkgs.kubectx
       pkgs.kubens
@@ -128,11 +97,12 @@ let
     ];
 
     editors = {
-      vscode = pkgs: [ pkgs.vscode ];
-      neovim = pkgs: [ pkgs.neovim ];
-      helix = pkgs: [ pkgs.helix ];
+      vscode = [ pkgs.vscode ];
+      neovim = [ pkgs.neovim ];
+      helix = [ pkgs.helix ];
     };
 
+    # Debug tools are conditionally included via cfg.debugTools option
     debugTools = [
       pkgs.lldb
       pkgs.gdb
@@ -146,14 +116,6 @@ let
     ];
 
     languageFormatters = {
-      python = [
-        pkgs.ruff
-        pkgs.black
-      ];
-      lua = [
-        pkgs.stylua
-        pkgs.selene
-      ];
       general = [
         pkgs.biome
         pkgs.taplo

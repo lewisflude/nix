@@ -112,6 +112,8 @@ let
       allowUnfreePredicate = _: true;
       # Don't allow broken packages globally - only override for specific packages if needed
       # allowBroken = true;
+      # Allow broken packages for ZFS kernel modules (temporarily broken during kernel updates)
+      allowBrokenPredicate = pkg: lib.hasPrefix "zfs-kernel" (toString (pkg.name or ""));
       allowUnsupportedSystem = false;
     };
 

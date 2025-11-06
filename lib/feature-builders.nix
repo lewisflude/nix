@@ -16,7 +16,7 @@ let
 
         (lib.optionals (cfg.buildTools or false) packageSets.buildTools)
 
-        (lib.optionals (cfg.git or false) packageSets.gitTools)
+        (lib.optionals (cfg.git or false) [ pkgs.git ])
 
         (lib.optionals (cfg.rust or false) packageSets.rustToolchain)
 
@@ -28,7 +28,7 @@ let
 
         (lib.optionals (cfg.lua or false) packageSets.luaToolchain)
 
-        (lib.optionals (cfg.java or false) packageSets.javaToolchain)
+        (lib.optionals (cfg.java or false) [ pkgs.jdk ])
 
         (lib.optionals (cfg.nix or false) packageSets.nixTools)
 
@@ -36,9 +36,9 @@ let
 
         (lib.optionals (cfg.kubernetes or false) packageSets.kubernetesTools)
 
-        (lib.optionals (cfg.vscode or false) (packageSets.editors.vscode pkgs))
-        (lib.optionals (cfg.neovim or false) (packageSets.editors.neovim pkgs))
-        (lib.optionals (cfg.helix or false) (packageSets.editors.helix pkgs))
+        (lib.optionals (cfg.vscode or false) packageSets.editors.vscode)
+        (lib.optionals (cfg.neovim or false) packageSets.editors.neovim)
+        (lib.optionals (cfg.helix or false) packageSets.editors.helix)
       ];
 
     mkHomePackages =
@@ -49,7 +49,7 @@ let
       }:
       with pkgs;
       packageSets.devUtilities
-      ++ packageSets.debugTools
+      ++ lib.optionals (cfg.debugTools or false) packageSets.debugTools
 
       ++ lib.optionals (cfg.buildTools or false) packageSets.buildTools
 
@@ -66,7 +66,7 @@ let
 
       ++ lib.optionals (cfg.lua or false) packageSets.luaToolchain
 
-      ++ lib.optionals (cfg.java or false) packageSets.javaToolchain
+      ++ lib.optionals (cfg.java or false) [ pkgs.jdk ]
 
       ++ lib.optionals (cfg.nix or false) (packageSets.nixTools ++ packageSets.languageFormatters.general)
 
@@ -74,9 +74,9 @@ let
 
       ++ lib.optionals (cfg.kubernetes or false) packageSets.kubernetesTools
 
-      ++ lib.optionals (cfg.vscode or false) (packageSets.editors.vscode pkgs)
-      ++ lib.optionals (cfg.neovim or false) (packageSets.editors.neovim pkgs)
-      ++ lib.optionals (cfg.helix or false) (packageSets.editors.helix pkgs);
+      ++ lib.optionals (cfg.vscode or false) packageSets.editors.vscode
+      ++ lib.optionals (cfg.neovim or false) packageSets.editors.neovim
+      ++ lib.optionals (cfg.helix or false) packageSets.editors.helix;
 
     mkShellPackages =
       {

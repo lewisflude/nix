@@ -21,13 +21,22 @@ let
 
 
       if [ -n "$GITHUB_TOKEN" ]; then
-        echo "access-tokens = github.com=$GITHUB_TOKEN" > "$NIX_CONF_FILE"
+        # Remove existing access-tokens line if present, then append new one
+        # This preserves other settings like substituters
+        if [ -f "$NIX_CONF_FILE" ]; then
+          ${pkgs.gnused}/bin/sed -i '/^access-tokens.*github\.com/d' "$NIX_CONF_FILE" || true
+        fi
+        echo "access-tokens = github.com=$GITHUB_TOKEN" >> "$NIX_CONF_FILE"
         chmod 600 "$NIX_CONF_FILE"
       fi
     fi
   '';
 in
 {
+  # Set NIX_USER_CONF_FILES to explicitly point to our config folder
+  home.sessionVariables = {
+    NIX_USER_CONF_FILES = "${config.xdg.configHome}/nix/nix.conf";
+  };
 
   home.activation.updateNixConf = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD ${updateNixConf}

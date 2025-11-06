@@ -64,6 +64,8 @@ let
     ++ optionalModule (sops-nix != null) sops-nix.nixosModules.sops
     # NixOS-specific integrations
     ++ optionalModule (niri != null) niri.nixosModules.niri
+    # Chaotic-nyx: For nixos-unstable, use .default module only
+    # For stable channels, use nyx-cache, nyx-overlay, nyx-registry separately
     ++ optionalModule (chaotic != null) chaotic.nixosModules.default
     ++ optionalModule (musnix != null) musnix.nixosModules.musnix
     ++ optionalModule (solaar != null) solaar.nixosModules.default

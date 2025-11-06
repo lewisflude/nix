@@ -18,27 +18,10 @@ in
       protontricks.enable = true;
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
-
-      package = pkgs.steam.override {
-        extraPkgs =
-          pkgs: with pkgs; [
-            xorg.libXcursor
-            xorg.libXi
-            xorg.libXinerama
-            xorg.libXScrnSaver
-            libpng
-            libpulseaudio
-            libvorbis
-            stdenv.cc.cc.lib
-            libkrb5
-            keyutils
-          ];
-      };
     };
 
     services.sunshine = mkIf cfg.steam {
       enable = true;
-      package = pkgs.sunshine.override { cudaSupport = true; };
       autoStart = true;
       capSysAdmin = true;
       openFirewall = true;
@@ -56,7 +39,27 @@ in
       "vm.max_map_count" = 2147483642;
     };
 
-    boot.kernelPackages = mkIf cfg.performance (mkForce pkgs.linuxPackages_cachyos);
+    # Only use cachyos kernel if it's compatible with ZFS
+    boot.kernelPackages = mkIf (
+      cfg.performance
+      && (
+        let
+          cachyosKernel = pkgs.linuxPackages_cachyos;
+          zfsKernelModuleAttr = pkgs.zfs.kernelModuleAttribute;
+          # Check if the attribute exists and is compatible
+          hasZfsModule = builtins.hasAttr zfsKernelModuleAttr cachyosKernel;
+          zfsModuleEval =
+            if hasZfsModule then
+              builtins.tryEval cachyosKernel.${zfsKernelModuleAttr}
+            else
+              {
+                success = false;
+                value = null;
+              };
+        in
+        zfsModuleEval.success && (!(zfsModuleEval.value.meta.broken or false))
+      )
+    ) (mkForce pkgs.linuxPackages_cachyos);
 
     chaotic.mesa-git.enable = mkIf cfg.performance true;
 

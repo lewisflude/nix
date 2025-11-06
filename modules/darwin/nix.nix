@@ -39,8 +39,8 @@
 
 
 
-      http-connections = 128
-      max-substitution-jobs = 128
+      http-connections = 64
+      max-substitution-jobs = 28
 
 
 
