@@ -13,8 +13,8 @@ This guide covers the performance monitoring and tracking system for maintaining
 ### Update Flake Inputs (Weekly)
 
 ```bash
-./scripts/maintenance/update-flake.sh --dry-run  # Check first
-./scripts/maintenance/update-flake.sh              # Then update
+nix run .#update-all --dry-run  # Check first
+nix run .#update-all              # Then update
 ```
 
 ## Overview
@@ -124,28 +124,30 @@ When new Determinate Nix releases are available:
 
 ## Review Flake Input Freshness
 
-### Flake Update Script
+### Update All Script
 
-**Script**: `scripts/maintenance/update-flake.sh`
+**Command**: `nix run .#update-all`
 
-This script:
+This interactive POG script updates:
 
-- Updates flake inputs (all or specific)
-- Monitors for deprecated/archived repositories
-- Checks for FlakeHub alternatives with better cache coverage
-- Documents problematic inputs
+- Flake inputs (flake.lock)
+- ZSH plugins (nvfetcher)
+- Custom packages
+- Provides progress feedback and validation
 
 ### Usage
 
 ```bash
-# Update all inputs
-./scripts/maintenance/update-flake.sh
+# Update everything
+nix run .#update-all
 
 # Dry run (check what would change)
-./scripts/maintenance/update-flake.sh --dry-run
+nix run .#update-all --dry-run
 
-# Update specific input
-./scripts/maintenance/update-flake.sh --input nixpkgs
+# Skip specific updates
+nix run .#update-all --skip-flake      # Skip flake.lock
+nix run .#update-all --skip-plugins    # Skip ZSH plugins
+nix run .#update-all --skip-packages   # Skip custom packages
 ```
 
 ### Scheduling
@@ -167,7 +169,7 @@ systemd.timers.weekly-flake-update = {
 **cron** (macOS/Darwin):
 
 ```bash
-# Add to crontab: 0 0 * * 0 /path/to/scripts/maintenance/update-flake.sh --dry-run
+# Add to crontab: 0 0 * * 0 cd ~/.config/nix && nix run .#update-all --dry-run
 ```
 
 ### Input Health Checks
@@ -349,7 +351,7 @@ Use this checklist each month:
 - [ ] Run `track-performance.sh` to collect metrics
 - [ ] Review performance trends in `.performance-metrics/`
 - [ ] Check for new Determinate Nix releases
-- [ ] Run `update-flake.sh` to update inputs
+- [ ] Run `nix run .#update-all` to update inputs
 - [ ] Review any problematic inputs
 - [ ] Check community discussions for new optimization approaches
 - [ ] Review feature module usage and identify pain points

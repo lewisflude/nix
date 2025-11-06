@@ -18,15 +18,6 @@ let
     else
       [ ];
 
-  archPackages =
-    system: x86Pkgs: aarch64Pkgs:
-    if isX86_64 system then
-      x86Pkgs
-    else if isAarch64 system then
-      aarch64Pkgs
-    else
-      [ ];
-
   platformModules =
     system: linuxModules: darwinModules:
     if isLinux system then
@@ -62,21 +53,7 @@ let
     else
       "${homeDir system username}/.cache";
 
-  rootGroup = system: if isDarwin system then "wheel" else "root";
-
   platformStateVersion = system: if isDarwin system then 6 else "25.05";
-
-  enableSystemService =
-    system: serviceName:
-    lib.mkIf (isLinux system) {
-      systemd.user.services.${serviceName}.enable = true;
-    };
-
-  brewPackages =
-    system: packages:
-    lib.mkIf (isDarwin system) {
-      homebrew.brews = packages;
-    };
 
   systemRebuildCommand =
     system:
@@ -133,7 +110,8 @@ let
     mkPkgsConfig = {
       allowUnfree = true;
       allowUnfreePredicate = _: true;
-      allowBroken = true;
+      # Don't allow broken packages globally - only override for specific packages if needed
+      # allowBroken = true;
       allowUnsupportedSystem = false;
     };
 
@@ -162,7 +140,6 @@ let
       ifLinux = ifLinux system;
       ifDarwin = ifDarwin system;
       platformPackages = platformPackages system;
-      archPackages = archPackages system;
       platformModules = platformModules system;
       platformConfig = platformConfig system;
       platformPackage = platformPackage system;
@@ -172,11 +149,8 @@ let
       dataDir = dataDir system;
       cacheDir = cacheDir system;
 
-      rootGroup = rootGroup system;
       platformStateVersion = platformStateVersion system;
 
-      enableSystemService = enableSystemService system;
-      brewPackages = brewPackages system;
       systemRebuildCommand = systemRebuildCommand system;
     };
 
@@ -191,7 +165,6 @@ let
       ifLinux
       ifDarwin
       platformPackages
-      archPackages
       platformModules
       platformConfig
       platformPackage
@@ -204,9 +177,7 @@ let
       cacheDir
       ;
 
-    inherit rootGroup platformStateVersion;
-
-    inherit enableSystemService brewPackages;
+    inherit platformStateVersion;
 
     inherit systemRebuildCommand;
 

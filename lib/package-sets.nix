@@ -58,13 +58,13 @@ let
       with pkgs;
       [
         nodejs
-        nodejs.pkgs.npm
-        nodejs.pkgs.yarn
-        nodejs.pkgs.pnpm
-        nodejs.pkgs.typescript
-        nodejs.pkgs.typescript-language-server
-        nodejs.pkgs.eslint
-        nodejs.pkgs.prettier
+        nodePackages.npm
+        nodePackages.yarn
+        nodePackages.pnpm
+        nodePackages.typescript
+        nodePackages.typescript-language-server
+        nodePackages.eslint
+        nodePackages.prettier
       ];
 
     luaToolchain = with pkgs; [

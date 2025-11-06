@@ -44,14 +44,18 @@ in
       };
     };
 
-    audio = defaultFeatures.audio // {
+    media = defaultFeatures.media // {
       enable = true;
-      realtime = true;
-      production = false;
-      audioNix = {
-        enable = false;
-        bitwig = true;
-        plugins = true;
+
+      audio = defaultFeatures.media.audio // {
+        enable = true;
+        realtime = true;
+        production = false;
+        audioNix = {
+          enable = false;
+          bitwig = true;
+          plugins = true;
+        };
       };
     };
 

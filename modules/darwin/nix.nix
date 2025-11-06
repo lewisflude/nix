@@ -125,9 +125,8 @@
   nix = {
     enable = false;
 
-    nixPath = lib.mkDefault [
-      "nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixpkgs"
-      "/nix/var/nix/profiles/per-user/root/channels"
-    ];
+    # Flakes don't use channels - nixPath is only for legacy compatibility
+    # Leaving empty for pure flakes approach
+    nixPath = lib.mkDefault [ ];
   };
 }

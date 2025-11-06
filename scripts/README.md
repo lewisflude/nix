@@ -22,25 +22,19 @@ echo 'source ~/.config/nix/scripts/ALIASES.sh' >> ~/.zshrc
 scripts/
 ├── ALIASES.sh              # Shell aliases ⭐
 ├── build/
-│   ├── init-project.sh    # Project scaffolding
 │   └── nix-monitor.sh     # Cross-platform monitoring ⭐
 ├── containers/
 │   └── test-containers.sh # Container testing
-├── mcp/
-│   ├── mcp_love2d_docs.py # Love2D MCP server
-│   └── mcp_lua_docs.py    # Lua MCP server
-├── utils/
-│   ├── analyze-build-time.sh # Build time analysis
-│   ├── benchmark-rebuild.sh  # Performance benchmarking
-│   ├── monitor-cache-hits.sh # Cache hit monitoring
-│   ├── nix-with-github-token.sh # Nix commands with GitHub token
-│   ├── profile-build.sh      # Build profiling ⭐
-│   ├── profile-evaluation.sh # Evaluation profiling
-│   ├── profile-modules.sh    # Module profiling
-│   ├── test-cache-substitution.sh # Test cache substitution
-│   └── test-caches.sh        # Test cache connectivity
-└── maintenance/
-    └── update-flake.sh    # Flake update with analysis (deprecated: use update-all)
+└── utils/
+    ├── analyze-build-time.sh # Build time analysis
+    ├── benchmark-rebuild.sh  # Performance benchmarking
+    ├── monitor-cache-hits.sh # Cache hit monitoring
+    ├── nix-with-github-token.sh # Nix commands with GitHub token
+    ├── profile-build.sh      # Build profiling ⭐
+    ├── profile-evaluation.sh # Evaluation profiling
+    ├── profile-modules.sh    # Module profiling
+    ├── test-cache-substitution.sh # Test cache substitution
+    └── test-caches.sh        # Test cache connectivity
 
 POG Apps (nix run .#<name>):
 ├── new-module ⭐           # Create new modules (interactive)
@@ -268,7 +262,7 @@ nix run .#visualize-modules -- --format svg --output_dir docs/generated
 # Options: --format (svg|png|dot|all), --output_dir <path>
 ```
 
-The old bash script `scripts/visualize-modules.sh` has been migrated to pog.
+The old bash script has been removed. Use the POG version: `nix run .#visualize-modules`.
 
 ### Cache Testing Utilities
 
@@ -294,9 +288,12 @@ The following scripts have been migrated to pog-powered CLI tools with better UX
 | Old Script | New POG App | Usage |
 |-----------|-------------|-------|
 | `setup-cachix-local.sh` | `setup-cachix` | `nix run .#setup-cachix` |
-| `cleanup-duplicates.sh` | `cleanup-duplicates` | `nix run .#cleanup-duplicates` |
-| `analyze-services.sh` | `analyze-services` | `nix run .#analyze-services` |
-| `visualize-modules.sh` | `visualize-modules` | `nix run .#visualize-modules` |
+| `cleanup-duplicates.sh` ✅ | `cleanup-duplicates` | `nix run .#cleanup-duplicates` |
+| `analyze-services.sh` ✅ | `analyze-services` | `nix run .#analyze-services` |
+| `visualize-modules.sh` ✅ | `visualize-modules` | `nix run .#visualize-modules` |
+| `update-flake.sh` ✅ | `update-all` | `nix run .#update-all` |
+
+✅ = Old script removed, use POG version
 
 **Benefits of pog migration:**
 
@@ -333,7 +330,7 @@ If you were using the old wrapper scripts:
 
 ```bash
 ./scripts/fix-file-limits.sh
-./scripts/maintenance/update-flake.sh
+nix run .#update-all  # Replaces update-flake.sh
 ./scripts/maintenance/check-config.sh
 ./scripts/utils/diff-config.sh
 ./scripts/build/dev.sh rebuild
