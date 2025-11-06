@@ -7,49 +7,6 @@
 {
   config = {
     nix = {
-      settings = {
-        # Performance optimizations
-        auto-optimise-store = true;
-        max-jobs = "auto"; # Use all available CPU cores
-        cores = 0; # Use all cores per build job (0 = auto)
-
-        # Keep outputs/derivations for faster rebuilds and better caching
-        keep-outputs = true; # Keep build outputs for better caching
-        keep-derivations = true; # Keep .drv files for better rebuilds
-
-        # Free space management
-        min-free = 1073741824; # 1GB minimum free space
-        max-free = 3221225472; # 3GB maximum free space
-
-        # Download optimization (500MB buffer)
-        download-buffer-size = 524288000;
-
-        # High-throughput substitution parallelism (Tip 5)
-        # Maximizes parallel TCP connections and substitution jobs for faster binary cache fetching
-        # Optimized for high-RAM system (64GB) - set to 128 for maximum throughput
-        # Note: With cache priorities properly set in flake.nix, timeout delays are minimized,
-        # so higher parallelism (128) is safe and beneficial
-        # Reference: https://brianmcgee.uk/posts/2023/12/13/how-to-optimise-substitutions-in-nix/
-        http-connections = 128; # Parallel TCP connections (default: ~2-5, recommended: 64-128 for high-end)
-        max-substitution-jobs = 128; # Concurrent substitution jobs (default: low, recommended: 64-128 for high-end)
-
-        # Logging
-        log-lines = 25; # Lines of build output to show on failure
-
-        # Build-time input fetching (Tip 11)
-        # Enables deferring source fetching until actual build time for inputs marked with buildTime = true
-        # This speeds up flake evaluation by not fetching inputs during evaluation phase
-        # Note: This is an experimental feature that must be enabled in both nixConfig and nix.settings
-        extra-experimental-features = [
-          "build-time-fetch-tree"
-          "cgroups" # Execute builds inside cgroups (NixOS/Linux only - better build isolation)
-        ];
-
-        # Note: Binary caches, trusted-public-keys, and most experimental-features are configured
-        # in flake.nix nixConfig section. Those settings apply to both Darwin and NixOS.
-        # Platform-specific features like 'cgroups' are added here (NixOS only).
-        # Determinate Nix's lazy-trees feature already speeds up evaluation significantly.
-      };
 
       # Automatic garbage collection
       # Note: With Determinate Nix (nix.enable = false), Determinate Nixd handles GC automatically.
@@ -76,6 +33,48 @@
     };
     environment = {
       etc = {
+        "nix/nix.custom.conf" = {
+          text = ''
+            # Custom Nix configuration for Determinate Nix
+            # These settings are applied via /etc/nix/nix.custom.conf to avoid conflicts
+            # with Determinate Nix's managed /etc/nix/nix.conf
+            # Reference: https://docs.determinate.systems/determinate-nix#determinate-nix-configuration
+
+            # Performance optimizations
+            max-jobs = auto
+            cores = 0
+
+            # Keep outputs/derivations for faster rebuilds and better caching
+            keep-outputs = true
+            keep-derivations = true
+
+            # Free space management
+            min-free = 1073741824
+            max-free = 3221225472
+
+            # Download optimization (500MB buffer)
+            download-buffer-size = 524288000
+
+            # High-throughput substitution parallelism
+            # Maximizes parallel TCP connections and substitution jobs for faster binary cache fetching
+            # Optimized for high-RAM system (64GB)
+            # Reference: https://brianmcgee.uk/posts/2023/12/13/how-to-optimise-substitutions-in-nix/
+            http-connections = 128
+            max-substitution-jobs = 128
+
+            # Logging
+            log-lines = 25
+
+            # Platform-specific experimental features for NixOS
+            extra-experimental-features = build-time-fetch-tree cgroups
+
+            # Binary caches (moved from flake.nix to follow Determinate Nix best practices)
+            # Substituters are queried in order of priority
+            extra-substituters = https://nix-community.cachix.org?priority=1 https://lewisflude.cachix.org?priority=2 https://nixpkgs-wayland.cachix.org?priority=3 https://numtide.cachix.org?priority=4 https://chaotic-nyx.cachix.org?priority=5 https://nixpkgs-python.cachix.org?priority=6 https://niri.cachix.org?priority=7 https://ghostty.cachix.org?priority=9 https://yazi.cachix.org?priority=10 https://ags.cachix.org?priority=11 https://zed.cachix.org?priority=12 https://catppuccin.cachix.org?priority=13 https://devenv.cachix.org?priority=14 https://viperml.cachix.org?priority=15 https://cuda-maintainers.cachix.org?priority=16
+
+            extra-trusted-public-keys = nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= nixpkgs-python.cachix.org-1:hxjI7pFxTyuTHn2NkvWCrAUcNZLNS3ZAvfYNuYifcEU= nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA= numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE= viperml.cachix.org-1:qrxbEKGdajQ+s0pzofucGqUKqkjT+N3c5vy7mOML04c= catppuccin.cachix.org-1:noG/4HkbhJb+lUAdKrph6LaozJvAeEEZj4N732IysmU= niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964= ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns= zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU= chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8= lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc= ags.cachix.org-1:naAvMrz0CuYqeyGNyLgE010iUiuf/qx6kYrUv3NwAJ8= devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw= yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k= cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E=
+          '';
+        };
         "nix-optimization/optimize-store.sh" = {
           text = ''
             set -euo pipefail

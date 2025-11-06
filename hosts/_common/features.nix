@@ -4,6 +4,7 @@
   development = {
     enable = true;
     git = true; # Required for rust development
+    neovim = false;
     rust = true;
     python = true;
     go = true;
@@ -14,15 +15,20 @@
   };
 
   gaming = {
-    # All options default to false, override in host config to enable
+    enable = false;
+    steam = false;
+    performance = false;
   };
 
   virtualisation = {
-    # All options default to false, override in host config to enable
+    enable = false;
+    docker = false;
+    podman = false;
   };
 
   homeServer = {
-    # All options default to false, override in host config to enable
+    enable = false;
+    fileSharing = false;
   };
 
   # Native media management services (preferred)
@@ -126,14 +132,21 @@
   };
 
   productivity = {
-    # All options default to false, override in host config to enable
+    enable = false;
+    notes = false;
+    resume = false;
+    office = false;
+    email = false;
+    calendar = false;
   };
 
   audio = {
-    # Most options default to false, override in host config to enable
+    enable = false;
+    realtime = false;
+    production = false;
     # Audio.nix packages (polygon/audio.nix)
     audioNix = {
-      # enable defaults to false
+      enable = false;
       bitwig = true; # Bitwig Studio (latest beta) - only used if audioNix.enable = true
       plugins = true; # Install all available plugins - only used if audioNix.enable = true
     };
