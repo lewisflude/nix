@@ -90,6 +90,10 @@ in
       autosuggestion.enable = true;
       syntaxHighlighting.enable = true;
       historySubstringSearch.enable = true;
+      promptInit = ''
+        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+        source ~/.p10k.zsh
+      '';
       plugins = [
         {
           name = "zsh-defer";
@@ -132,11 +136,9 @@ in
 
         setopt EXTENDEDGLOB
         local zcompdump="${config.xdg.cacheHome}/zsh/.zcompdump"
-        if [[ -n $zcompdump(
-
+        if [[ -f "$zcompdump" ]]; then
           compinit -C -d "$zcompdump"
         else
-
           compinit -i -d "$zcompdump"
         fi
         unsetopt EXTENDEDGLOB
@@ -280,7 +282,6 @@ in
 
 
 
-          export DIRENV_LOG_FORMAT=""
           if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
             source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
           fi
@@ -300,8 +301,6 @@ in
 
 
           export NH_CLEAN_ARGS="''${NH_CLEAN_ARGS:---keep-since 4d --keep 3}"
-          source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-          [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
           zsh-defer -c 'export YSU_MESSAGE_POSITION="after"'
           zsh-defer -c 'export YSU_HARDCORE=1'
 
@@ -312,7 +311,7 @@ in
             "man" "less" "more" "vim" "nano" "htop" "top" "ssh" "scp" "rsync"
             "watch" "tail" "sleep" "ping" "curl" "wget" "git log" "git diff"
           )'
-          export WORDCHARS='*?_-.[]~=&;!
+          export WORDCHARS='*?_-.[]~=&;!'
           export ATUIN_NOBIND="true"
           zsh-defer -c 'bindkey "^r" _atuin_search_widget'
           bindkey '^[[1;5C' forward-word
@@ -347,7 +346,7 @@ in
           zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
           zstyle ':completion:*:warnings' format '%F{red}No matches found%f'
           zstyle ':completion:*:corrections' format '%F{green}%d (errors: %e)%f'
-          zstyle ':completion:*:*:kill:*:processes' list-colors '=(
+          zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
           zstyle ':completion:*:*:kill:*' menu yes select
           zstyle ':completion:*:cd:*' tag-order local-directories directory-stack path-directories
           zstyle ':completion:*:cd:*' ignore-parents parent pwd
@@ -368,10 +367,12 @@ in
 
           source ${sources.zsh_codex.src}/zsh_codex.plugin.zsh
           bindkey '^X' create_completion
-
-          eval "$(zoxide init zsh)"
         '')
       ];
+      initExtra = ''
+        # Initialize zoxide at the very end of shell configuration
+        eval "$(zoxide init zsh)"
+      '';
     };
   };
   home = {

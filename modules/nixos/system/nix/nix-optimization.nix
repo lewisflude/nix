@@ -24,48 +24,6 @@ in
     };
     environment = {
       etc = {
-        "nix/nix.custom.conf" = {
-          text = ''
-
-
-
-
-
-
-            max-jobs = auto
-            cores = 0
-
-
-            keep-outputs = true
-            keep-derivations = true
-
-
-            min-free = 1073741824
-            max-free = 3221225472
-
-
-            download-buffer-size = 524288000
-
-
-
-
-
-            http-connections = 128
-            max-substitution-jobs = 128
-
-
-            log-lines = 25
-
-
-            extra-experimental-features = build-time-fetch-tree cgroups
-
-
-
-            extra-substituters = https://nix-community.cachix.org?priority=1 https://lewisflude.cachix.org?priority=2 https://nixpkgs-wayland.cachix.org?priority=3 https://numtide.cachix.org?priority=4 https://chaotic-nyx.cachix.org?priority=5 https://nixpkgs-python.cachix.org?priority=6 https://niri.cachix.org?priority=7 https://ghostty.cachix.org?priority=9 https://yazi.cachix.org?priority=10 https://ags.cachix.org?priority=11 https://zed.cachix.org?priority=12 https://catppuccin.cachix.org?priority=13 https://devenv.cachix.org?priority=14 https://viperml.cachix.org?priority=15 https://cuda-maintainers.cachix.org?priority=16
-
-            extra-trusted-public-keys = nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= nixpkgs-python.cachix.org-1:hxjI7pFxTyuTHn2NkvWCrAUcNZLNS3ZAvfYNuYifcEU= nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA= numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE= viperml.cachix.org-1:qrxbEKGdajQ+s0pzofucGqUKqkjT+N3c5vy7mOML04c= catppuccin.cachix.org-1:noG/4HkbhJb+lUAdKrph6LaozJvAeEEZj4N732IysmU= niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964= ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns= zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU= chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8= lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc= ags.cachix.org-1:naAvMrz0CuYqeyGNyLgE010iUiuf/qx6kYrUv3NwAJ8= devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw= yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k= cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E=
-          '';
-        };
         "nix-optimization/optimize-store.sh" = {
           text = ''
             set -euo pipefail

@@ -6,8 +6,6 @@
 
     ./integration
 
-    ./maintenance
-
     ./keyboard.nix
     ./keyd.nix
     ./monitor-brightness.nix
