@@ -7,10 +7,10 @@
 }:
 let
   inherit (lib) mkIf;
-  cfg = config.host.features.aiTools or { };
+  cfg = config.host.features.aiTools;
 in
 {
-  config = mkIf (cfg.enable or false) {
+  config = mkIf cfg.enable {
     # Map features to services
     host.services.aiTools = {
       enable = true;

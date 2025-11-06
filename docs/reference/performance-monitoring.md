@@ -268,49 +268,40 @@ When FlakeHub alternatives are available:
 
 ### Overlays Under Evaluation
 
-#### pamixer.nix Overlay
+### Overlay Optimization Status
 
-**Location**: `overlays/pamixer.nix`
+**Status**: ? **Optimized** - All cache-impacting overlays have been removed
 
-**Issue**: ICU 76.1+ requires C++17 for compilation, but pamixer doesn't set this flag by default.
+Previous overlays that caused cache misses have been removed:
 
-**Evaluation Steps**:
+- `pamixer.nix` - Removed, using upstream nixpkgs version
+- `mpd-fix.nix` - Removed, using upstream nixpkgs version
+- `nodejs-alias.nix` - Removed, using default nodejs
+- `webkitgtk-compat.nix` - Removed, packages now use versioned webkitgtk
 
-1. [ ] Search nixpkgs issues for similar problems
-2. [ ] Check if upstream pamixer has fixed this
-3. [ ] Test if newer nixpkgs versions include the fix
-4. [ ] Document the issue clearly for upstream
-5. [ ] Create PR if generally applicable
+Remaining overlays are low-impact (aliases and new packages only):
 
-#### mpd-fix.nix Overlay
+- `npm-packages.nix` - Adds new packages (nx-latest)
+- `chaotic-packages.nix` - Pure aliases to existing bleeding-edge packages
+- `localPkgs` - Custom packages not yet in nixpkgs (cursor, ghostty)
 
-**Location**: `overlays/mpd-fix.nix`
+### Future Overlay Additions
 
-**Issue**: MPD build fails with io_uring on kernel 6.14.11+, requiring io_uring to be disabled.
-
-**Evaluation Steps**:
-
-1. [ ] Search nixpkgs issues for MPD io_uring problems
-2. [ ] Check MPD upstream for io_uring compatibility fixes
-3. [ ] Test if newer kernel versions resolve the issue
-4. [ ] Document the issue clearly for upstream
-5. [ ] Create PR if generally applicable
-
-### Contribution Process
+If new overlays are needed:
 
 1. **Evaluate General Applicability**: Is this a common problem?
 2. **Search Existing Issues**: Check nixpkgs and upstream repos
 3. **Test Current State**: Verify issue still exists in latest nixpkgs
 4. **Document Clearly**: Create clear issue report with reproduction steps
-5. **Create PR**: If fix is straightforward and generally applicable
-6. **Monitor Progress**: Track PR status and update this document
+5. **Consider Alternatives**: Can we wait for upstream fix instead?
+6. **Create PR**: If fix is straightforward and generally applicable
+7. **Monitor Progress**: Track PR status and update documentation
 
 ### Contribution Log
 
 | Overlay | Issue | PR/Issue Link | Status | Date |
 |---------|-------|---------------|--------|------|
-| pamixer.nix | ICU 76.1+ C++17 requirement | [Link] | [Status] | [Date] |
-| mpd-fix.nix | io_uring kernel 6.14.11+ issue | [Link] | [Status] | [Date] |
+| (None currently requiring upstream contribution) | - | - | - | - |
 
 ## Review Feature Module Boundaries
 

@@ -132,18 +132,18 @@ let
     mkDevEnvironment =
       cfg:
       lib.mkMerge [
-        (lib.mkIf (cfg.rust or false) {
+        (lib.mkIf cfg.rust {
           RUST_BACKTRACE = "1";
           # CARGO_HOME is managed by rustup
         })
-        (lib.mkIf (cfg.go or false) {
+        (lib.mkIf cfg.go {
           GOPATH = "$HOME/go";
           GOBIN = "$HOME/go/bin";
         })
-        (lib.mkIf (cfg.node or false) {
+        (lib.mkIf cfg.node {
           NODE_OPTIONS = "--max-old-space-size=4096";
         })
-        (lib.mkIf (cfg.python or false) {
+        (lib.mkIf cfg.python {
           PYTHONPATH = "$HOME/.local/lib/python3.12/site-packages:$PYTHONPATH";
         })
       ];

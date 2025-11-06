@@ -8,7 +8,6 @@ let
   pre-commit-hooks = inputs.pre-commit-hooks or (throw "pre-commit-hooks input is required");
   home-manager = inputs.home-manager or null;
 
-  virtualisationLib = import ./virtualisation.nix { inherit (nixpkgs) lib; };
   functionsLib = import ./functions.nix { inherit (nixpkgs) lib; };
   systems = builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
 
@@ -95,7 +94,7 @@ in
         # This ensures consistency with perSystem definitions
         pkgs = perSystemPkgs;
         extraSpecialArgs = functionsLib.mkHomeManagerExtraSpecialArgs {
-          inherit inputs hostConfig virtualisationLib;
+          inherit inputs hostConfig;
           includeUserFields = false;
         };
         modules = [
@@ -137,7 +136,7 @@ in
       {
         inherit pkgs;
         extraSpecialArgs = functionsLib.mkHomeManagerExtraSpecialArgs {
-          inherit inputs hostConfig virtualisationLib;
+          inherit inputs hostConfig;
           includeUserFields = false;
         };
         modules = [

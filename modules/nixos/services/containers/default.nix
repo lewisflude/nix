@@ -74,7 +74,6 @@ in
 
   config = mkIf cfg.enable {
     # Enable Podman with docker compatibility
-    # Note: dockerCompat is managed by virtualisation.nix based on docker enablement
     virtualisation.podman = {
       enable = true;
       defaultNetwork.settings.dns_enabled = true;
