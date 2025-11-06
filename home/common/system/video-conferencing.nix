@@ -1,6 +1,5 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   home.packages = with pkgs; [
-    zoom-us
+    # zoom-us  # Removed - unfree license
   ];
 }

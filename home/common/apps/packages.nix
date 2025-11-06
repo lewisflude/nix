@@ -4,42 +4,34 @@
   system,
   ...
 }: let
-  platformLib = (import ../../../lib/functions.nix {inherit lib;}).withSystem system;
+  helpers = import ./_helpers.nix {inherit lib pkgs system;};
+  inherit (helpers) platformLib getNxPackage;
+  nx = getNxPackage pkgs;
 in {
   home.packages = with pkgs;
     [
       claude-code
-      # pkgs.gemini-cli-bin # Package doesn't exist in nixpkgs
-      # cursor.cursor-cli # cursorCli data missing from cursor-info.json
       codex
-      nx-latest
-    ]
-    ++ [
       coreutils
       libnotify
       tree
-    ]
-    ++ [
       pgcli
-    ]
-    ++ [
       cachix
       nix-tree
       nix-du
       sops
-    ]
-    ++ [
       yaml-language-server
-    ]
-    ++ platformLib.platformPackages
-    [
       musescore
-    ]
-    [
-      xcodebuild
       gnutar
       gzip
-    ];
+    ]
+    ++ lib.optional (nx != null) nx
+    ++ platformLib.platformPackages
+    [] # Linux packages
+
+    [
+      xcodebuild
+    ]; # Darwin packages
 
   programs.htop.enable = true;
   programs.btop.enable = true;

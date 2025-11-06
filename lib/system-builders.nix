@@ -24,7 +24,7 @@
     hostConfig,
     extraSharedModules ? [],
   }: {
-    useGlobalPkgs = true;
+    useUserPackages = true;
     verbose = true;
     backupFileExtension = "backup";
     extraSpecialArgs = functionsLib.mkHomeManagerExtraSpecialArgs {
@@ -91,16 +91,12 @@ in {
             };
           }
           {
-            home-manager =
-              mkHomeManagerConfig {
-                inherit hostConfig;
-                extraSharedModules = lib.optionals (mac-app-util != null) [
-                  mac-app-util.homeManagerModules.default
-                ];
-              }
-              // {
-                useUserPackages = true;
-              };
+            home-manager = mkHomeManagerConfig {
+              inherit hostConfig;
+              extraSharedModules = lib.optionals (mac-app-util != null) [
+                mac-app-util.homeManagerModules.default
+              ];
+            };
           }
           (
             {config, ...}: {
@@ -157,10 +153,7 @@ in {
         ++ [
           {
             home-manager =
-              mkHomeManagerConfig {inherit hostConfig;}
-              // {
-                useUserPackages = true;
-              };
+              mkHomeManagerConfig {inherit hostConfig;};
           }
           (
             {config, ...}: {

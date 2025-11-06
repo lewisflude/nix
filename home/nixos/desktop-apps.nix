@@ -1,28 +1,22 @@
-{ pkgs, ... }:
-let
+{pkgs, ...}: let
   cmakePolicyFlag = "-DCMAKE_POLICY_VERSION_MINIMUM=3.5";
   asepriteFixed = pkgs.aseprite.overrideAttrs (prev: {
-    cmakeFlags = (prev.cmakeFlags or [ ]) ++ [ cmakePolicyFlag ];
+    cmakeFlags = (prev.cmakeFlags or []) ++ [cmakePolicyFlag];
   });
-in
-{
-  home.packages =
-    (with pkgs; [
-      mpv
-
-      gimp
-      krita
-      discord
-      telegram-desktop
-      file-roller
-      libnotify
-      swaylock-effects
-
-      xfce.thunar
-
-      font-awesome
-    ])
-    ++ [ asepriteFixed ];
+in {
+  home.packages = with pkgs; [
+    mpv
+    gimp
+    krita
+    discord
+    telegram-desktop
+    file-roller
+    libnotify
+    swaylock-effects
+    xfce.thunar
+    font-awesome
+    asepriteFixed
+  ];
   services.cliphist = {
     enable = true;
   };

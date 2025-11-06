@@ -4,7 +4,9 @@
   system,
   ...
 }: let
-  platformLib = (import ../../../lib/functions.nix {inherit lib;}).withSystem system;
+  helpers = import ./_helpers.nix {inherit lib pkgs system;};
+  inherit (helpers) platformLib getNxPackage;
+  nx = getNxPackage pkgs;
 in {
   home.packages = with pkgs;
     [
@@ -29,32 +31,23 @@ in {
       nvfetcher
       nix-output-monitor
     ]
-    # ++
-    #   lib.optionals
-    #     (
-    #       inputs ? flakehub
-    #       && inputs.flakehub ? packages
-    #       && inputs.flakehub.packages ? ${system}
-    #       && inputs.flakehub.packages.${system} ? default
-    #     )
-    #     [
-    #       inputs.flakehub.packages.${system}.default
-    #     ]
     ++ [
       claude-code
-      # pkgs.gemini-cli-bin # Package doesn't exist in nixpkgs
-      # cursor.cursor-cli # cursorCli data missing from cursor-info.json
       codex
-      nx-latest
-
+    ]
+    ++ lib.optional (nx != null) nx
+    ++ [
       yaml-language-server
     ]
     ++ platformLib.platformPackages
     [
       xdg-utils
-    ]
+    ] # Linux packages
+
     [
       xcodebuild
+    ] # Darwin packages
+    ++ [
       gnutar
       gzip
     ];

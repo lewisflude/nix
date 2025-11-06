@@ -1,33 +1,15 @@
 {
   pkgs,
   versions,
-}:
-let
-
-  getPython = pkgs: pkgs.${versions.python};
-  getNodejs = pkgs: pkgs.${versions.nodejs};
-
+}: let
   packageSets = {
-
-    inherit getPython getNodejs;
+    getPython = pkgs: pkgs.${versions.python};
+    getNodejs = pkgs: pkgs.${versions.nodejs};
 
     rustToolchain =
-      # Optimized for maximum cache usage and build speed:
-      # - Uses fenix.stable.withComponents with explicit component list
-      #   This matches rustup's default profile + rust-src (common pattern, well-cached)
-      # - All toolchain components are pre-built binaries from nix-community.cachix.org
-      # - rust-analyzer-nightly from fenix overlay (pre-built, cached)
-      # - cargo-* tools from nixpkgs (should be cached in nixpkgs cache)
-      #
-      # Component selection rationale:
-      # - cargo, rustc, rustfmt, clippy: core tools (in rustup default profile)
-      # - rust-src: required for rust-analyzer (not in default profile, but commonly added)
-      # This combination is widely used and has excellent cache coverage
-      if pkgs ? fenix && pkgs.fenix ? stable then
-        with pkgs;
-        [
-          # Use stable toolchain with components matching rustup default + rust-src
-          # This is a common pattern, so it's well-cached in nix-community.cachix.org
+      if pkgs ? fenix && pkgs.fenix ? stable
+      then
+        with pkgs; [
           (fenix.stable.withComponents [
             "cargo"
             "clippy"
@@ -35,18 +17,17 @@ let
             "rustc"
             "rustfmt"
           ])
-          # rust-analyzer-nightly from fenix overlay (pre-built nightly, cached)
-          # Falls back to nixpkgs rust-analyzer if overlay not available
-          (if builtins.hasAttr "rust-analyzer-nightly" pkgs then rust-analyzer-nightly else rust-analyzer)
-          # Cargo tools from nixpkgs (should be cached)
+          (
+            if builtins.hasAttr "rust-analyzer-nightly" pkgs
+            then rust-analyzer-nightly
+            else rust-analyzer
+          )
           cargo-watch
           cargo-audit
           cargo-edit
         ]
       else
-        # Fallback: nixpkgs Rust packages (built from source, slower, less cache-friendly)
-        with pkgs;
-        [
+        with pkgs; [
           rustc
           cargo
           rustfmt
@@ -57,21 +38,16 @@ let
           cargo-edit
         ];
 
-    pythonToolchain =
-      pkgs:
-      let
-        python = getPython pkgs;
-      in
-      with pkgs;
-      [
-        (python.withPackages (
-          python-pkgs: with python-pkgs; [
-            pip
-            virtualenv
-            black
-          ]
+    pythonToolchain = pkgs:
+      with pkgs; [
+        ((pkgs.${versions.python}).withPackages (
+          python-pkgs:
+            with python-pkgs; [
+              pip
+              virtualenv
+              black
+            ]
         ))
-
         ruff
         pyright
         poetry
@@ -85,14 +61,9 @@ let
       delve
     ];
 
-    nodeToolchain =
-      pkgs:
-      let
-        nodejs = getNodejs pkgs;
-      in
-      with pkgs;
-      [
-        nodejs
+    nodeToolchain = pkgs:
+      with pkgs; [
+        pkgs.${versions.nodejs}
         nodePackages.npm
         nodePackages.yarn
         nodePackages.pnpm
@@ -159,9 +130,9 @@ let
     ];
 
     editors = {
-      vscode = pkgs: [ pkgs.vscode ];
-      neovim = pkgs: [ pkgs.neovim ];
-      helix = pkgs: [ pkgs.helix ];
+      vscode = pkgs: [pkgs.vscode];
+      neovim = pkgs: [pkgs.neovim];
+      helix = pkgs: [pkgs.helix];
     };
 
     debugTools = with pkgs; [
@@ -193,4 +164,4 @@ let
     };
   };
 in
-packageSets
+  packageSets

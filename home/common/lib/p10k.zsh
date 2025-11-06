@@ -1706,6 +1706,8 @@
 }
 
 # Tell `p10k configure` which file it should overwrite.
+# NOTE: When running `p10k configure`, choose "No" when asked about modifying .zshrc,
+# as instant prompt is already configured in Home Manager's initContent.
 typeset -g POWERLEVEL9K_CONFIG_FILE=${${(%):-%x}:a}
 
 (( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
