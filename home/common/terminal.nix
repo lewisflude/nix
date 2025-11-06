@@ -3,16 +3,19 @@
   lib,
   system,
   ...
-}: let
-  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
-in {
-  home.packages = with pkgs;
+}:
+let
+  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+in
+{
+  home.packages =
+    with pkgs;
     [
       clipse
 
       comma
       devenv
-      eza
+      # Note: eza is handled via programs.eza in apps/eza.nix
       rsync
       trash-cli
       fd
@@ -25,14 +28,14 @@ in {
 
       git-extras
     ]
-    ++ platformLib.platformPackages
-    [
-      networkmanager
-      lsof
-      wtype
-    ] # Linux packages
-
-    []; # Darwin packages
+    ++
+      platformLib.platformPackages
+        [
+          networkmanager
+          lsof
+          wtype
+        ]
+        [ ]; # Linux packages, Darwin packages
   programs.ghostty = {
     enable = platformLib.isLinux;
     package = pkgs.ghostty;
@@ -44,7 +47,7 @@ in {
       font-synthetic-style = true;
       scrollback-limit = 100000;
 
-      keybind = ["shift+enter=text:\n"];
+      keybind = [ "shift+enter=text:\n" ];
     };
   };
 }

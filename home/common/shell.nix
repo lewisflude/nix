@@ -8,37 +8,23 @@
   lib,
   inputs,
   ...
-}: let
-  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
+}:
+let
+  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
 
   sources = import ./_sources/generated.nix {
     inherit (pkgs) fetchgit;
   };
 
-  palette =
-    if lib.hasAttrByPath ["catppuccin" "sources" "palette"] config
-    then (lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
-      .${config.catppuccin.flavor}.colors
-    else if inputs ? catppuccin
-    then let
-      catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
-    in
-      if catppuccinSrc != null
-      then (lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
-      else throw "Cannot find catppuccin source (input exists but src/outPath not found)"
-    else throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
-  secretAvailable = name: lib.hasAttrByPath ["sops" "secrets" name "path"] systemConfig;
-  secretPath = name: lib.attrByPath ["sops" "secrets" name "path"] "" systemConfig;
-  secretExportSnippet = name: var: let
-    path = secretPath name;
-  in
-    lib.optionalString (secretAvailable name) ''
-      if [ -r ${lib.escapeShellArg path} ]; then
-        export ${var}="$(cat ${lib.escapeShellArg path})"
-      fi
-    '';
-in {
+  shellHelpers = import ./lib/shell-helpers.nix {
+    inherit lib config inputs;
+  };
+  inherit (shellHelpers) getPalette secretExportSnippet;
+
+  palette = getPalette config;
+in
+{
   xdg.enable = true;
   programs = {
     fzf = {
@@ -50,16 +36,18 @@ in {
         "--border"
       ];
       defaultCommand = lib.mkDefault (
-        if pkgs ? fd
-        then "${lib.getExe pkgs.fd} --hidden --strip-cwd-prefix --exclude .git"
-        else if pkgs ? ripgrep
-        then "${lib.getExe pkgs.ripgrep} --files --hidden --follow --glob '!.git'"
-        else null
+        if pkgs ? fd then
+          "${lib.getExe pkgs.fd} --hidden --strip-cwd-prefix --exclude .git"
+        else if pkgs ? ripgrep then
+          "${lib.getExe pkgs.ripgrep} --files --hidden --follow --glob '!.git'"
+        else
+          null
       );
       fileWidgetCommand = lib.mkDefault (
-        if pkgs ? fd
-        then "${lib.getExe pkgs.fd} --type f --hidden --strip-cwd-prefix --exclude .git"
-        else null
+        if pkgs ? fd then
+          "${lib.getExe pkgs.fd} --type f --hidden --strip-cwd-prefix --exclude .git"
+        else
+          null
       );
     };
     direnv = {
@@ -167,7 +155,7 @@ in {
       };
       shellAliases = lib.mkMerge [
         {
-          switch = platformLib.systemRebuildCommand {hostName = host.hostname;};
+          switch = platformLib.systemRebuildCommand { hostName = host.hostname; };
           edit = "sudo -e";
           ls = "eza";
           l = "eza -l";
@@ -266,8 +254,8 @@ in {
         '')
 
         (lib.mkAfter ''
-          ${secretExportSnippet "KAGI_API_KEY" "KAGI_API_KEY"}
-          ${secretExportSnippet "GITHUB_TOKEN" "GITHUB_TOKEN"}
+          ${secretExportSnippet systemConfig "KAGI_API_KEY" "KAGI_API_KEY"}
+          ${secretExportSnippet systemConfig "GITHUB_TOKEN" "GITHUB_TOKEN"}
           export SSH_AUTH_SOCK="$(${pkgs.gnupg}/bin/gpgconf --list-dirs agent-ssh-socket)"
 
           typeset -ga ZSH_AUTOSUGGEST_STRATEGY

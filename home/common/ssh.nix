@@ -2,6 +2,13 @@ _: {
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
+    extraConfig = ''
+      StrictHostKeyChecking accept-new
+      UserKnownHostsFile ~/.ssh/known_hosts
+      ConnectTimeout 10
+      ConnectionAttempts 3
+      VisualHostKey yes
+    '';
     matchBlocks = {
       "*" = {
         addKeysToAgent = "yes";
@@ -13,19 +20,11 @@ _: {
         serverAliveCountMax = 3;
         compression = false;
         hashKnownHosts = true;
-        extraConfig = ''
-          StrictHostKeyChecking accept-new
-          UserKnownHostsFile ~/.ssh/known_hosts
-          ConnectTimeout 10
-          ConnectionAttempts 3
-          VisualHostKey yes
-        '';
       };
       "github.com" = {
         identitiesOnly = false;
         forwardAgent = false;
         user = "git";
-        extraConfig = "StrictHostKeyChecking yes";
       };
     };
   };

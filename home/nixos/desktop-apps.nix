@@ -1,9 +1,11 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   cmakePolicyFlag = "-DCMAKE_POLICY_VERSION_MINIMUM=3.5";
   asepriteFixed = pkgs.aseprite.overrideAttrs (prev: {
-    cmakeFlags = (prev.cmakeFlags or []) ++ [cmakePolicyFlag];
+    cmakeFlags = (prev.cmakeFlags or [ ]) ++ [ cmakePolicyFlag ];
   });
-in {
+in
+{
   home.packages = with pkgs; [
     mpv
     gimp
@@ -11,7 +13,7 @@ in {
     discord
     telegram-desktop
     file-roller
-    libnotify
+    # Note: libnotify is handled in core-tooling.nix
     swaylock-effects
     xfce.thunar
     font-awesome

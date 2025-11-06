@@ -44,6 +44,11 @@ Thumbs.db
 result
 result-*
 
+# Profiling and stats files
+*.profile
+*-stats.json
+stats.json
+
 # Temporary files
 *.tmp
 *.bak
