@@ -17,12 +17,8 @@ in
       with pkgs;
       lib.optionals cfg.office [
         libreoffice-fresh
-      ]
-      ++ lib.optionals cfg.notes [
-        obsidian
-      ]
-      ++ lib.optionals cfg.email [
-        thunderbird
       ];
+    # Note: obsidian is handled via programs.obsidian in apps/obsidian.nix
+    # Note: thunderbird is handled via programs.thunderbird in apps/thunderbird.nix
   };
 }

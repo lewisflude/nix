@@ -3,35 +3,24 @@
   lib,
   system,
   ...
-}: let
-  helpers = import ./_helpers.nix {inherit lib pkgs system;};
+}:
+let
+  helpers = import ./_helpers.nix { inherit lib system; };
   inherit (helpers) platformLib getNxPackage;
   nx = getNxPackage pkgs;
-in {
-  home.packages = with pkgs;
-    [
-      claude-code
-      codex
-      coreutils
-      libnotify
-      tree
-      pgcli
-      cachix
-      nix-tree
-      nix-du
-      sops
-      yaml-language-server
-      musescore
-      gnutar
-      gzip
-    ]
-    ++ lib.optional (nx != null) nx
-    ++ platformLib.platformPackages
-    [] # Linux packages
-
-    [
-      xcodebuild
-    ]; # Darwin packages
+in
+{
+  home.packages = [
+    # Note: coreutils, libnotify, tree, nix-tree, nix-du, yaml-language-server,
+    # gnutar, and gzip are handled in core-tooling.nix
+    # Note: cachix is handled via programs.cachix in cachix.nix
+    # Note: yq is handled via programs.yq in yq.nix
+    # Note: sops is handled in features/security/default.nix
+    pkgs.pgcli
+    pkgs.musescore
+  ]
+  ++ lib.optional (nx != null) nx
+  ++ platformLib.platformPackages [ ] [ pkgs.xcodebuild ];
 
   programs.htop.enable = true;
   programs.btop.enable = true;

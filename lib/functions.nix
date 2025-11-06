@@ -154,6 +154,7 @@ let
       systemRebuildCommand = systemRebuildCommand system;
     };
 
+    # Platform detection functions
     inherit
       isLinux
       isDarwin
@@ -161,6 +162,7 @@ let
       isX86_64
       ;
 
+    # Platform conditional functions
     inherit
       ifLinux
       ifDarwin
@@ -170,6 +172,7 @@ let
       platformPackage
       ;
 
+    # Path functions
     inherit
       homeDir
       configDir
@@ -177,11 +180,12 @@ let
       cacheDir
       ;
 
-    inherit platformStateVersion;
-
-    inherit systemRebuildCommand;
-
-    inherit mkHomeManagerExtraSpecialArgs;
+    # System functions
+    inherit
+      platformStateVersion
+      systemRebuildCommand
+      mkHomeManagerExtraSpecialArgs
+      ;
   };
 in
 functionsLib

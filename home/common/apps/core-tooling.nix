@@ -3,27 +3,26 @@
   lib,
   system,
   ...
-}: let
-  helpers = import ./_helpers.nix {inherit lib pkgs system;};
+}:
+let
+  helpers = import ./_helpers.nix { inherit lib system; };
   inherit (helpers) platformLib getNxPackage;
   nx = getNxPackage pkgs;
-in {
-  home.packages = with pkgs;
+in
+{
+  home.packages =
+    with pkgs;
     [
-      git
-      gh
       curl
       wget
-      yq
-      git-lfs
+      # Note: yq is handled via programs.yq in home/common/apps/yq.nix
 
       coreutils
-      delta
 
       libnotify
       tree
 
-      cachix
+      # Note: cachix is handled via programs.cachix in home/common/apps/cachix.nix
       nix-tree
       nix-du
       nix-update
@@ -31,22 +30,19 @@ in {
       nvfetcher
       nix-output-monitor
     ]
-    ++ [
-      claude-code
-      codex
-    ]
     ++ lib.optional (nx != null) nx
     ++ [
       yaml-language-server
     ]
-    ++ platformLib.platformPackages
-    [
-      xdg-utils
-    ] # Linux packages
-
-    [
-      xcodebuild
-    ] # Darwin packages
+    ++
+      platformLib.platformPackages
+        [
+          xdg-utils
+        ]
+        [
+          # Linux packages
+          xcodebuild
+        ] # Darwin packages
     ++ [
       gnutar
       gzip

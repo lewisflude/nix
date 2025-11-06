@@ -1,8 +1,5 @@
-{ pkgs, ... }:
-{
-  home.packages = with pkgs; [
-    swaynotificationcenter
-  ];
+_: {
+  # Note: swaynotificationcenter is automatically installed by services.swaync.enable
   services.swaync = {
     enable = true;
     settings = {

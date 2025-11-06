@@ -53,10 +53,8 @@ let
 
       ++ lib.optionals (cfg.buildTools or false) packageSets.buildTools
 
-      ++ lib.optionals (cfg.git or false) [
-        delta
-        git-lfs
-      ]
+      # Note: delta and git-lfs are handled via programs.delta and programs.git.lfs
+      # in home/common/git.nix, so they don't need to be installed here
 
       ++ lib.optionals (cfg.rust or false) packageSets.rustToolchain
 

@@ -22,74 +22,57 @@ in
 
     users.groups.${cfg.group} = { };
 
-    systemd.tmpfiles.rules = [
-
-      (mkDirRule {
-        path = "/var/lib/${cfg.user}";
-        mode = "0755";
-        inherit (cfg) user;
-        inherit (cfg) group;
-      })
-      (mkDirRule {
-        path = cfg.dataPath;
-        mode = "0775";
-        inherit (cfg) user;
-        inherit (cfg) group;
-      })
-      (mkDirRule {
-        path = "${cfg.dataPath}/media";
-        mode = "0775";
-        inherit (cfg) user;
-        inherit (cfg) group;
-      })
-      (mkDirRule {
-        path = "${cfg.dataPath}/media/movies";
-        mode = "0775";
-        inherit (cfg) user;
-        inherit (cfg) group;
-      })
-      (mkDirRule {
-        path = "${cfg.dataPath}/media/tv";
-        mode = "0775";
-        inherit (cfg) user;
-        inherit (cfg) group;
-      })
-      (mkDirRule {
-        path = "${cfg.dataPath}/media/music";
-        mode = "0775";
-        inherit (cfg) user;
-        inherit (cfg) group;
-      })
-      (mkDirRule {
-        path = "${cfg.dataPath}/media/books";
-        mode = "0775";
-        inherit (cfg) user;
-        inherit (cfg) group;
-      })
-      (mkDirRule {
-        path = "${cfg.dataPath}/torrents";
-        mode = "0775";
-        inherit (cfg) user;
-        inherit (cfg) group;
-      })
-      (mkDirRule {
-        path = "${cfg.dataPath}/usenet";
-        mode = "0775";
-        inherit (cfg) user;
-        inherit (cfg) group;
-      })
-      (mkDirRule {
-        path = "${cfg.dataPath}/usenet/complete";
-        mode = "0775";
-        inherit (cfg) user;
-        inherit (cfg) group;
-      })
-      (mkDirRule {
-        path = "${cfg.dataPath}/usenet/incomplete";
-        mode = "0775";
-        inherit (cfg) user;
-        inherit (cfg) group;
-      })
-    ];
+    # Use native systemd.tmpfiles.rules format (standard NixOS pattern)
+    # Format: "d <path> <mode> <user> <group> -"
+    systemd.tmpfiles.rules =
+      let
+        mediaDirs = [
+          {
+            path = "/var/lib/${cfg.user}";
+            mode = "0755";
+          }
+          {
+            path = cfg.dataPath;
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/media";
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/media/movies";
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/media/tv";
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/media/music";
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/media/books";
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/torrents";
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/usenet";
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/usenet/complete";
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/usenet/incomplete";
+            mode = "0775";
+          }
+        ];
+      in
+      map (dir: mkDirRule (dir // { inherit (cfg) user group; })) mediaDirs;
   };
 }

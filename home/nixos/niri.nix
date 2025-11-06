@@ -26,7 +26,7 @@ in
     wlr-randr
     wayland-utils
     brightnessctl
-    xdg-utils
+    # Note: xdg-utils is handled in core-tooling.nix
     lxqt.lxqt-policykit
     xwayland-satellite-unstable
     argyllcms

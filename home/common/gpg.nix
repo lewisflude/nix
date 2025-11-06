@@ -9,7 +9,7 @@ let
 in
 {
   home.packages = with pkgs; [
-    gnupg
+    # Note: gnupg is automatically installed by programs.gpg.enable = true
     (platformLib.platformPackage pinentry-curses pinentry_mac)
   ];
   programs.gpg = {

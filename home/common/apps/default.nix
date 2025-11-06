@@ -6,8 +6,11 @@
 
     ./cursor
     ./bat.nix
+    ./claude-code.nix
+    ./codex.nix
     ./direnv.nix
     ./fzf.nix
+    ./gh.nix
     ./ripgrep.nix
     ./helix.nix
     ./zed-editor.nix
@@ -19,6 +22,8 @@
     ./lazydocker.nix
     ./eza.nix
     ./jq.nix
+    ./yq.nix
+    ./cachix.nix
     ./zellij.nix
   ];
 }

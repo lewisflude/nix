@@ -19,7 +19,7 @@ in
 {
   home.packages = with pkgs; [
     hyprpicker
-    jq
+    # Note: jq is handled via programs.jq in apps/jq.nix
   ];
   programs.niri.settings.binds = {
 
