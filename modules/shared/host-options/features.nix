@@ -22,6 +22,7 @@ in
       kubernetes = mkEnableOption "Kubernetes and container orchestration";
       git = mkEnableOption "Git and version control tools";
       buildTools = mkEnableOption "Build tools (make, cmake, pkg-config, etc.)";
+      debugTools = mkEnableOption "Debug tools (lldb, gdb)";
 
       vscode = mkEnableOption "VS Code editor";
       helix = mkEnableOption "Helix editor";

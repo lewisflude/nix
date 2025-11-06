@@ -5,17 +5,41 @@
   ...
 }:
 let
+  zfsKernelModuleAttr = pkgs.zfs.kernelModuleAttribute;
+
+  # Check if a kernel package is compatible with ZFS
+  isZfsCompatible =
+    kernelPackages:
+    let
+      hasZfsModule = builtins.hasAttr zfsKernelModuleAttr kernelPackages;
+      zfsModuleEval =
+        if hasZfsModule then
+          builtins.tryEval kernelPackages.${zfsKernelModuleAttr}
+        else
+          {
+            success = false;
+            value = null;
+          };
+    in
+    zfsModuleEval.success && (!(zfsModuleEval.value.meta.broken or false));
+
+  # Find all ZFS-compatible kernel packages
   zfsCompatibleKernelPackages = lib.filterAttrs (
     name: kernelPackages:
     (builtins.match "linux_[0-9]+_[0-9]+" name) != null
     && (builtins.tryEval kernelPackages).success
-    && (!kernelPackages.${config.boot.zfs.package.kernelModuleAttribute}.meta.broken)
+    && isZfsCompatible kernelPackages
   ) pkgs.linuxKernel.packages;
-  latestKernelPackage = lib.last (
-    lib.sort (a: b: (lib.versionOlder a.kernel.version b.kernel.version)) (
-      builtins.attrValues zfsCompatibleKernelPackages
-    )
-  );
+
+  compatibleKernelList = builtins.attrValues zfsCompatibleKernelPackages;
+  latestKernelPackage =
+    if compatibleKernelList != [ ] then
+      lib.last (
+        lib.sort (a: b: (lib.versionOlder a.kernel.version b.kernel.version)) compatibleKernelList
+      )
+    else
+      pkgs.linuxPackages;
+
 in
 {
   boot = {
@@ -52,5 +76,16 @@ in
     consoleLogLevel = 0;
     initrd.verbose = false;
   };
+
+  # Assert that the selected kernel is compatible with ZFS
+  assertions = [
+    {
+      assertion = isZfsCompatible config.boot.kernelPackages;
+      message = ''
+        The selected kernel (${config.boot.kernelPackages.kernel.version}) is not compatible with ZFS ${pkgs.zfs.version}.
+        Please select a compatible kernel or update ZFS to a version that supports this kernel.
+      '';
+    }
+  ];
 
 }
