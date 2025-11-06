@@ -70,10 +70,6 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    ghostty = {
-      url = "github:ghostty-org/ghostty";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     jsonresume-nix = {
       url = "https://flakehub.com/f/TaserudConsulting/jsonresume-nix/*.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -3,9 +3,18 @@
 # Chaotic packages are added via chaotic.nixosModules.default with _git suffix
 # This overlay makes them the default versions instead of requiring _git suffix
 _final: prev: {
+  # Audio packages
+  pipewire = prev.pipewire_git or prev.pipewire;
+
+  # Browser packages
+  firefox = prev.firefox_latest or prev.firefox;
+
   # Editor packages
   helix = prev.helix_git or prev.helix;
   zed-editor = prev.zed-editor_git or prev.zed-editor;
+
+  # Terminal packages
+  ghostty = prev.ghostty_git or prev.ghostty;
 
   # Gaming packages
   discord = prev.discord-krisp or prev.discord;
@@ -15,6 +24,17 @@ _final: prev: {
   # Chaotic's steam is the bleeding-edge version, so we prefer it if available
   # Note: This assumes chaotic's steam is already in prev.steam if chaotic module is loaded
   inherit (prev) steam;
+
+  # Multimedia packages
+  gstreamer = prev.gstreamer_git or prev.gstreamer;
+  mpv = prev.mpv_git or prev.mpv;
+  ffmpeg = prev.ffmpeg_git or prev.ffmpeg;
+
+  # Development packages
+  git = prev.git_git or prev.git;
+  nodejs = prev.nodejs_latest or prev.nodejs;
+  llvm = prev.llvm_git or prev.llvm;
+  neovim = prev.neovim_git or prev.neovim;
 
   # Wayland/WLroots packages
   sway = prev.sway_git or prev.sway;
@@ -27,6 +47,9 @@ _final: prev: {
 
   # XDG desktop portal packages
   xdg-desktop-portal-wlr = prev.xdg-desktop-portal-wlr_git or prev.xdg-desktop-portal-wlr;
+
+  # Streaming/recording packages
+  obs-studio = prev.obs-studio_git or prev.obs-studio;
 
   # ZFS packages (using CachyOS optimized version)
   zfs = prev.zfs_cachyos or prev.zfs;
