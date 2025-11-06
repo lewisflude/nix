@@ -3,13 +3,10 @@
   lib,
   system,
   ...
-}:
-let
-  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
-in
-{
-  home.packages =
-    with pkgs;
+}: let
+  platformLib = (import ../../lib/functions.nix {inherit lib;}).withSystem system;
+in {
+  home.packages = with pkgs;
     [
       clipse
 
@@ -28,18 +25,17 @@ in
 
       git-extras
     ]
-    ++
-      platformLib.platformPackages
-        [
-          networkmanager
-          lsof
-          wtype
-        ]
-        [
-        ];
+    ++ platformLib.platformPackages
+    [
+      networkmanager
+      lsof
+      wtype
+    ]
+    [
+    ];
   programs.ghostty = {
-    enable = true;
-    package = platformLib.platformPackage pkgs.ghostty pkgs.ghostty-bin;
+    enable = platformLib.isLinux;
+    package = pkgs.ghostty;
     enableZshIntegration = true;
     settings = {
       font-family = "Iosevka Nerd Font";
@@ -48,7 +44,7 @@ in
       font-synthetic-style = true;
       scrollback-limit = 100000;
 
-      keybind = [ "shift+enter=text:\n" ];
+      keybind = ["shift+enter=text:\n"];
     };
   };
 }
