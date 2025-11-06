@@ -56,6 +56,10 @@ let
       isLinux && inputs ? niri && inputs.niri ? overlays
     ) inputs.niri.overlays.niri;
 
+    nvidia-patch = mkOptionalOverlay (
+      isLinux && inputs ? nvidia-patch && inputs.nvidia-patch ? overlays
+    ) inputs.nvidia-patch.overlays.default;
+
     # Removed chaotic-packages overlay - using nyx-overlay module instead
     # This allows packages to use stable (cached) versions by default
     # If you need _git versions, use them explicitly (e.g., pkgs.pipewire_git)
