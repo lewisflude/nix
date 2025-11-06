@@ -6,7 +6,7 @@
 }:
 let
   cfg = config.host.features.desktop;
-  package = config.boot.kernelPackages.nvidiaPackages.beta;
+  package = config.boot.kernelPackages.nvidiaPackages.stable;
 in
 {
   config = lib.mkIf cfg.enable {
