@@ -1,4 +1,3 @@
-# Radarr - Movie management
 {
   config,
   lib,
@@ -26,7 +25,6 @@ in
       inherit (cfg) group;
     };
 
-    # Set timezone and add soft dependency on prowlarr
     systemd.services.radarr = {
       environment = {
         TZ = cfg.timezone;

@@ -17,7 +17,7 @@ let
   cfg = config.services.mcp;
   mcpServerType = types.submodule {
     options = {
-      # CLI server options
+
       command = mkOption {
         type = types.nullOr types.str;
         default = null;
@@ -34,7 +34,6 @@ let
         description = "Environment variables to set for the MCP server (for CLI servers)";
       };
 
-      # Remote server options
       url = mkOption {
         type = types.nullOr types.str;
         default = null;
@@ -46,7 +45,6 @@ let
         description = "HTTP headers to send to the remote MCP server (for remote servers)";
       };
 
-      # Optional metadata
       port = mkOption {
         type = types.nullOr types.port;
         default = null;
@@ -73,13 +71,13 @@ let
   };
   mkMcpConfig =
     _name: serverCfg:
-    # Remote server configuration (url-based)
+
     if serverCfg.url != null then
       {
         inherit (serverCfg) url;
       }
       // (optionalAttrs (serverCfg.headers != { }) { inherit (serverCfg) headers; })
-    # CLI server configuration (command-based)
+
     else if serverCfg.command != null then
       {
         inherit (serverCfg) command;
@@ -115,7 +113,7 @@ in
       default = { };
       description = "MCP servers to configure";
       example = {
-        # CLI server with npx
+
         kagi = {
           command = "uvx";
           args = [ "kagimcp" ];
@@ -124,7 +122,7 @@ in
             KAGI_SUMMARIZER_ENGINE = "YOUR_ENGINE_CHOICE_HERE";
           };
         };
-        # CLI server with Python
+
         python-server = {
           command = "python";
           args = [ "mcp-server.py" ];
@@ -132,7 +130,7 @@ in
             API_KEY = "value";
           };
         };
-        # Remote server
+
         remote-server = {
           url = "http://localhost:3000/mcp";
           headers = {
@@ -143,7 +141,7 @@ in
     };
   };
   config = mkIf cfg.enable {
-    # Write to a temporary location first (as symlink)
+
     home.file = builtins.listToAttrs (
       mapAttrsToList (name: target: {
         name = ".mcp-generated/${name}/${target.fileName}";
@@ -151,7 +149,6 @@ in
       }) cfg.targets
     );
 
-    # Copy to final location (not symlinked) because cursor-agent can't read symlinks
     home.activation.copyMcpConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] (
       let
         copyCommands = concatStringsSep "\n" (

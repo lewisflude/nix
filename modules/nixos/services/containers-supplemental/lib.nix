@@ -3,7 +3,7 @@ let
   inherit (lib) mkOption types optional;
 in
 {
-  # Generate resource limit options for a container
+
   mkResourceOptions = defaults: {
     memory = mkOption {
       type = types.str;
@@ -27,7 +27,6 @@ in
     };
   };
 
-  # Produce resource flags for podman/docker extraOptions
   mkResourceFlags =
     resources:
     [
@@ -36,7 +35,6 @@ in
     ]
     ++ optional (resources.memorySwap != null) "--memory-swap=${resources.memorySwap}";
 
-  # Standard health-check flags helper
   mkHealthFlags =
     {
       cmd,

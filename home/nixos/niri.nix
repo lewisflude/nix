@@ -27,7 +27,7 @@ in
     wayland-utils
     brightnessctl
     xdg-utils
-    lxqt.lxqt-policykit # Changed from polkit_gnome due to webkitgtk removal
+    lxqt.lxqt-policykit
     xwayland-satellite-unstable
     argyllcms
     colord-gtk
@@ -47,10 +47,9 @@ in
         keyboard = {
           xkb = {
             layout = "us";
-            # WKL keyboard configuration handled by keyd at system level
-            # Keeping this section for future XKB customization if needed
+
           };
-          # Disable repeat for modifier keys to prevent issues with layer switching
+
           repeat-delay = 600;
           repeat-rate = 25;
         };
@@ -197,7 +196,7 @@ in
             "${pkgs.uwsm}/bin/uwsm"
             "app"
             "--"
-            "${pkgs.lxqt.lxqt-policykit}/bin/lxqt-policykit-agent" # Changed from polkit-gnome due to webkitgtk removal
+            "${pkgs.lxqt.lxqt-policykit}/bin/lxqt-policykit-agent"
           ];
         }
         {

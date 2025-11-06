@@ -12,7 +12,7 @@ in
   home.packages =
     with pkgs;
     [
-      # Core CLI tooling
+
       git
       gh
       curl
@@ -20,21 +20,19 @@ in
       yq
       git-lfs
 
-      # Monitoring & utilities
       coreutils
       delta
-      # htop and btop configured via programs.* in packages.nix
+
       libnotify
       tree
 
-      # Nix tooling
       cachix
       nix-tree
       nix-du
-      nix-update # Update package versions automatically
-      nix-prefetch-github # Fetch GitHub hashes
-      nvfetcher # Batch update sources from TOML
-      nix-output-monitor # Progress monitor for nh (shows build progress)
+      nix-update
+      nix-prefetch-github
+      nvfetcher
+      nix-output-monitor
     ]
     ++
       lib.optionals
@@ -48,24 +46,19 @@ in
           inputs.flakehub.packages.${system}.default
         ]
     ++ [
-      # Development helpers
-      # Note: rustup and build tools are now in devShells.
-      # Use: nix develop .#devShells.development or nix develop .#devShells.rust
 
-      # AI / workflow helpers
       claude-code
       pkgs.gemini-cli-bin
       pkgs.cursor-cli
       codex
       nx-latest
 
-      # Language servers
       yaml-language-server
     ]
     ++
       platformLib.platformPackages
         [
-          # musescore moved to packages.nix to avoid duplication
+
           xdg-utils
         ]
         [

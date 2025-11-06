@@ -107,7 +107,6 @@ in
         else
           throw "Janitorr requires useSops enabled to reference secrets.";
 
-      # Import base config from separate file for lazy loading
       baseConfig =
         (import ../../containers/janitorr-config.nix {
           inherit lib;
@@ -158,13 +157,13 @@ in
         ];
         extraOptions = [
           "--network=host"
-        ] # Use host network to access native services
+        ]
         ++ mkHealthFlags {
           cmd = "/workspace/health-check";
           interval = "5s";
           timeout = "10s";
           retries = "3";
-          startPeriod = "30s"; # Give Java app time to start before health checks
+          startPeriod = "30s";
         }
         ++ mkResourceFlags cfg.janitorr.resources;
       };
@@ -175,10 +174,9 @@ in
         "d ${cfg.configPath}/janitorr/logs 0755 ${toString cfg.uid} ${toString cfg.gid} -"
       ];
 
-      # Add config copy to the service's pre-start sequence
       systemd.services."podman-janitorr" = {
         preStart = lib.mkAfter ''
-          # Copy the sops-rendered config file to the container's config directory
+
           ${coreutils}/bin/install -m 644 -o ${toString cfg.uid} -g ${toString cfg.gid} \
             ${config.sops.templates."janitorr-application.yml".path} \
             ${cfg.configPath}/janitorr/config/application.yml

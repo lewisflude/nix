@@ -9,7 +9,6 @@
     Defaults timestamp_timeout=30
   '';
 
-  # Increase file descriptor limits for Nix builds
   launchd.daemons.limit-maxfiles = {
     command = "/bin/launchctl limit maxfiles 65536 200000";
     serviceConfig = {
@@ -64,14 +63,14 @@
             "/Users/${username}/Documents"
           ];
         };
-        # Control Center preferences
+
         controlcenter = {
           NowPlaying = true;
           Sound = true;
         };
 
         CustomUserPreferences = {
-          # Screenshot settings
+
           "com.apple.screencapture" = {
             location = "~/Desktop";
             type = "png";
@@ -80,12 +79,10 @@
             show-thumbnail = true;
           };
 
-          # Battery menu bar settings
           "com.apple.menuextra.battery" = {
             ShowPercent = true;
           };
 
-          # Time Machine settings (moved from backup.nix to avoid duplication)
           "com.apple.TimeMachine" = {
             DoNotOfferNewDisksForBackup = false;
           };

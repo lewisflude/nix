@@ -1,4 +1,3 @@
-# Navidrome - Music server
 {
   config,
   lib,
@@ -30,14 +29,12 @@ in
       };
     };
 
-    # Set timezone
     systemd.services.navidrome = {
       environment = {
         TZ = cfg.timezone;
       };
     };
 
-    # Grant access to audio for transcoding
     users.users.${cfg.user}.extraGroups = [
       "audio"
     ];

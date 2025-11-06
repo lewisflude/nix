@@ -193,7 +193,7 @@ When attempting to mitigate slowdowns caused by experimental features, the most 
 
 **Status**: Currently **disabled** (correct configuration)
 
-**Performance Impact**: Catastrophic. This feature violates Nix's principle of hermeticity, leading to non-deterministic outputs. This permanently breaks binary cache substitution for that derivation and all subsequent dependent derivations, forcing a full source build every time. Losing substitution transforms potentially instantaneous operations into multi-hour builds (e.g., for large software like Firefox).
+**Performance Impact**: Catastrophic. This feature violates Nix's principle of hermeticity, leading to non-deterministic outputs. This permanently breaks binary cache substitution for that derivation and all subsequent dependent derivations, forcing a full source build every time. Losing substitution transforms potentially instantaneous operations into multi-hour builds (e.g., for large software like Chromium or complex desktop environments).
 
 **Recommendation**: **Strongly avoid/disable.** Only enable this feature temporarily and exclusively for derivations that absolutely require impure access (e.g., specific network-using tests).
 

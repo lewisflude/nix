@@ -1,5 +1,3 @@
-# Container services module
-# Manages all containerized services using Podman
 {
   config,
   lib,
@@ -52,7 +50,6 @@ in
       };
     };
 
-    # Common settings
     timezone = mkOption {
       type = types.str;
       default = "Europe/London";
@@ -73,19 +70,16 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Enable Podman with docker compatibility
+
     virtualisation.podman = {
       enable = true;
       defaultNetwork.settings.dns_enabled = true;
     };
 
-    # Needed for GPU support
     hardware.nvidia-container-toolkit.enable = config.hardware.nvidia.modesetting.enable or false;
 
-    # Enable OCI containers backend
     virtualisation.oci-containers.backend = "podman";
 
-    # Create necessary directories
     systemd.tmpfiles.rules =
       let
         mkContainerDirs = path: [

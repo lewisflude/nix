@@ -41,7 +41,6 @@ in
         );
     };
 
-    # Security wrapper for restic
     users.users.restic = lib.mkIf (backupsWithWrappers != { }) {
       isNormalUser = true;
     };
@@ -54,10 +53,5 @@ in
       capabilities = "cap_dac_read_search=+ep";
     };
 
-    # Override restic package for backups that use the wrapper
-    # This part needs to be handled carefully, as it's per-backup job
-    # and not a global override.
-    # The user's example shows how to do this within the backup job definition.
-    # services.restic.backups.<name>.package = pkgs.writeShellScriptBin "restic" ''exec /run/wrappers/bin/restic "$@"'';
   };
 }

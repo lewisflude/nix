@@ -1,5 +1,3 @@
-# Native NixOS AI Tools Stack
-# Uses official NixOS modules for AI tools (Ollama, Open WebUI)
 {
   config,
   lib,
@@ -35,7 +33,6 @@ in
       description = "Group to run AI tools services as";
     };
 
-    # Service-specific enables
     ollama = {
       enable = mkEnableOption "Ollama LLM backend" // {
         default = true;
@@ -83,7 +80,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Create common AI tools user and group
+
     users.users.${cfg.user} = {
       isSystemUser = true;
       inherit (cfg) group;

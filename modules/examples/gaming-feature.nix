@@ -1,6 +1,3 @@
-# Example: Gaming Feature Module
-# This is a complete example of a well-structured feature module.
-# Copy this as a template for creating new features.
 {
   config,
   lib,
@@ -8,10 +5,9 @@
   ...
 }:
 let
-  # Feature configuration shorthand
+
   cfg = config.features.gaming;
 
-  # Import commonly used lib functions
   inherit (lib)
     mkIf
     mkEnableOption
@@ -21,12 +17,9 @@ let
   inherit (lib.lists) optionals;
 in
 {
-  # ============================================================================
-  # OPTIONS DEFINITION
-  # ============================================================================
 
   options.features.gaming = {
-    # Main feature toggle
+
     enable = mkEnableOption "gaming support" // {
       description = ''
         Enable gaming features including Steam, game launchers,
@@ -34,7 +27,6 @@ in
       '';
     };
 
-    # Sub-features with sensible defaults
     steam = mkOption {
       type = types.bool;
       default = true;
@@ -59,7 +51,6 @@ in
       description = "Enable MangoHud performance overlay";
     };
 
-    # Advanced options
     extraPackages = mkOption {
       type = types.listOf types.package;
       default = [ ];
@@ -68,24 +59,17 @@ in
     };
   };
 
-  # ============================================================================
-  # CONFIGURATION IMPLEMENTATION
-  # ============================================================================
-
   config = mkIf cfg.enable {
-    # ------------------------------------------------------------------------
-    # System Packages
-    # ------------------------------------------------------------------------
 
     environment.systemPackages =
       with pkgs;
       [
-        # Always include these when gaming is enabled
+
         protonup-qt
         wine
         winetricks
       ]
-      # Conditional packages based on sub-features
+
       ++ optionals cfg.steam [
         steam
         steam-run
@@ -93,22 +77,14 @@ in
       ++ optionals cfg.lutris [ lutris ]
       ++ optionals cfg.gamemode [ gamemode ]
       ++ optionals cfg.mangohud [ mangohud ]
-      # User-specified extra packages
-      ++ cfg.extraPackages;
 
-    # ------------------------------------------------------------------------
-    # Steam Configuration
-    # ------------------------------------------------------------------------
+      ++ cfg.extraPackages;
 
     programs.steam = mkIf cfg.steam {
       enable = true;
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
     };
-
-    # ------------------------------------------------------------------------
-    # GameMode Configuration
-    # ------------------------------------------------------------------------
 
     programs.gamemode = mkIf cfg.gamemode {
       enable = true;
@@ -124,21 +100,12 @@ in
       };
     };
 
-    # ------------------------------------------------------------------------
-    # Graphics Drivers & OpenGL
-    # ------------------------------------------------------------------------
-
     hardware.opengl = {
       enable = true;
       driSupport = true;
-      driSupport32Bit = true; # For 32-bit games
+      driSupport32Bit = true;
     };
 
-    # ------------------------------------------------------------------------
-    # Kernel & System Optimizations
-    # ------------------------------------------------------------------------
-
-    # Enable realtime priority for gaming processes
     security.pam.loginLimits = [
       {
         domain = "@users";
@@ -154,19 +121,11 @@ in
       }
     ];
 
-    # ------------------------------------------------------------------------
-    # Networking (for multiplayer)
-    # ------------------------------------------------------------------------
-
     networking.firewall = {
-      # Common gaming ports (can be customized per game)
+
       allowedTCPPorts = [ ];
       allowedUDPPorts = [ ];
     };
-
-    # ------------------------------------------------------------------------
-    # Assertions & Warnings
-    # ------------------------------------------------------------------------
 
     assertions = [
       {

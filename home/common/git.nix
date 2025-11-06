@@ -21,7 +21,7 @@
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
       pull.rebase = true;
-      # Automatically use SSH for GitHub URLs
+
       url."git@github.com:" = {
         insteadOf = "https://github.com/";
       };
@@ -44,8 +44,7 @@
         update = "submodule update --init --recursive";
         foreach = "submodule foreach";
       };
-      # Configure nixfmt as git mergetool for automatic formatting conflict resolution
-      # Usage: git mergetool -t nixfmt <file>
+
       mergetool.nixfmt = {
         cmd = "${pkgs.nixfmt-rfc-style}/bin/nixfmt-rfc-style --mergetool \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"";
         trustExitCode = true;

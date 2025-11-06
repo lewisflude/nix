@@ -1,4 +1,3 @@
-# Lidarr - Music management
 {
   config,
   lib,
@@ -22,7 +21,6 @@ in
       inherit (cfg) group;
     };
 
-    # Set timezone and add soft dependency on prowlarr
     systemd.services.lidarr = {
       environment = {
         TZ = cfg.timezone;

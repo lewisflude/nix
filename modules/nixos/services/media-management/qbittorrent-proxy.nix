@@ -1,4 +1,3 @@
-# qBittorrent Proxy - Reverse proxy for VPN-configured qBittorrent
 {
   config,
   lib,
@@ -12,7 +11,7 @@ let
 in
 {
   config = mkIf (vpnEnabled && cfg.qbittorrent.enable) {
-    # Simple reverse proxy using nginx
+
     services.nginx = {
       enable = true;
       virtualHosts."qbittorrent-proxy" = {
@@ -38,9 +37,6 @@ in
       };
     };
 
-    # Ensure nginx starts after network is ready
-    # VPN-Confinement namespace is created automatically when vpnNamespaces is configured
-    # No need to manually depend on a non-existent service
     systemd.services.nginx = {
       after = [ "network.target" ];
     };

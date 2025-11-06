@@ -1,5 +1,3 @@
-# Secrets management for container services
-# Handles API keys, passwords, and other sensitive data
 {
   config,
   lib,
@@ -43,24 +41,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Example sops-nix integration
-    # Uncomment and configure when ready to use secrets
-    # sops.secrets = mkIf (config.sops.defaultSopsFile != null) {
-    #   "containers/sonarr_api_key" = {
-    #     owner = "root";
-    #     group = "root";
-    #     mode = "0400";
-    #   };
-    #   "containers/radarr_api_key" = {
-    #     owner = "root";
-    #     group = "root";
-    #     mode = "0400";
-    #   };
-    #   "containers/discord_token" = {
-    #     owner = "root";
-    #     group = "root";
-    #     mode = "0400";
-    #   };
-    # };
+
   };
 }

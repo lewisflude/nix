@@ -6,7 +6,7 @@
   ...
 }:
 {
-  # Host configuration using the new options system
+
   nix =
     let
       flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
@@ -27,7 +27,6 @@
   };
   time.timeZone = lib.mkForce "Europe/London";
 
-  # Remote Restic backup to Jupiter (NixOS host)
   host.features.restic = {
     enable = true;
     backups.macbook-home = {

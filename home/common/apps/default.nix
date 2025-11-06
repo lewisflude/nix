@@ -1,10 +1,9 @@
 { ... }:
 {
   imports = [
-    # Package installations
+
     ./packages.nix
 
-    # Application configurations
     ./cursor
     ./bat.nix
     ./direnv.nix

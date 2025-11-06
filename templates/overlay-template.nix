@@ -1,8 +1,5 @@
-# Overlay template
-# For overriding or adding packages to nixpkgs
-# Place in overlays/ directory and import in overlays/default.nix
 final: prev: {
-  # Override existing package
+
   example-package = prev.example-package.overrideAttrs (oldAttrs: {
     version = "1.2.3";
     src = final.fetchFromGitHub {
@@ -12,16 +9,13 @@ final: prev: {
       sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     };
 
-    # Add additional build inputs
     buildInputs = oldAttrs.buildInputs or [ ] ++ [ final.extra-dep ];
 
-    # Modify build flags
     configureFlags = oldAttrs.configureFlags or [ ] ++ [
       "--enable-feature"
     ];
   });
 
-  # Add new custom package
   my-custom-package = final.stdenv.mkDerivation {
     pname = "my-custom-package";
     version = "1.0.0";
@@ -39,7 +33,7 @@ final: prev: {
     ];
 
     buildInputs = with final; [
-      # runtime dependencies
+
     ];
 
     installPhase = ''
@@ -60,7 +54,6 @@ final: prev: {
     };
   };
 
-  # Wrapper around existing package with custom settings
   my-wrapped-package = final.symlinkJoin {
     name = "my-wrapped-package";
     paths = [ final.original-package ];

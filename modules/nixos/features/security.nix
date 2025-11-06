@@ -1,4 +1,3 @@
-# NixOS-specific security feature configuration
 {
   config,
   lib,
@@ -10,7 +9,7 @@ let
 in
 {
   config = mkIf cfg.enable {
-    # YubiKey support (pcscd service is Linux-only)
+
     services.pcscd.enable = mkIf cfg.yubikey true;
   };
 }

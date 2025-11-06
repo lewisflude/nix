@@ -21,12 +21,10 @@ in
       {
         home = {
           packages = with pkgs; [
-            # jsonresume-nix provides resume generation tools
+
             inputs.jsonresume-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
           ];
 
-          # Resume data configuration
-          # This will be your resume data in JSON format
           file.".config/resume/resume.json" = {
             text = builtins.toJSON {
               basics = {
@@ -250,7 +248,6 @@ in
             };
           };
 
-          # Create a script to generate the resume
           file.".local/bin/generate-resume" = {
             text = ''
               #!/usr/bin/env bash
@@ -259,25 +256,25 @@ in
               RESUME_DIR="$HOME/.config/resume"
               OUTPUT_DIR="$HOME/Documents/resume"
 
-              # Create output directory if it doesn't exist
+
               mkdir -p "$OUTPUT_DIR"
 
-              # Generate different formats
+
               echo "Generating resume in various formats..."
 
-              # Generate PDF
+
               ${
                 inputs.jsonresume-nix.packages.${pkgs.system}.default
               }/bin/resume-pdf "$RESUME_DIR/resume.json" "$OUTPUT_DIR/resume.pdf"
               echo "✓ PDF generated: $OUTPUT_DIR/resume.pdf"
 
-              # Generate HTML
+
               ${
                 inputs.jsonresume-nix.packages.${pkgs.system}.default
               }/bin/resume-html "$RESUME_DIR/resume.json" "$OUTPUT_DIR/resume.html"
               echo "✓ HTML generated: $OUTPUT_DIR/resume.html"
 
-              # Generate JSON (copy the source)
+
               cp "$RESUME_DIR/resume.json" "$OUTPUT_DIR/resume.json"
               echo "✓ JSON copied: $OUTPUT_DIR/resume.json"
 

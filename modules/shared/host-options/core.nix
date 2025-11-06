@@ -1,5 +1,3 @@
-# Core host configuration options
-# Basic host identification and validation
 {
   lib,
   config,
@@ -34,7 +32,6 @@ in
       example = "x86_64-linux";
     };
 
-    # Legacy virtualisation config for backward compatibility
     virtualisation = mkOption {
       type = types.attrsOf types.anything;
       default = { };
@@ -43,7 +40,7 @@ in
   };
 
   config = {
-    # Validation assertions
+
     assertions = [
       {
         assertion = config.host.username != "";

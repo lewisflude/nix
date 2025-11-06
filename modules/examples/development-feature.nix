@@ -1,5 +1,3 @@
-# Example: Development Feature Module
-# Demonstrates a more complex feature with language sub-features.
 {
   config,
   lib,
@@ -20,7 +18,6 @@ in
   options.features.development = {
     enable = mkEnableOption "development tools and environments";
 
-    # Core development tools (always enabled with feature)
     git = mkOption {
       type = types.bool;
       default = true;
@@ -33,7 +30,6 @@ in
       description = "Enable Docker for containerization";
     };
 
-    # Language-specific sub-features
     languages = {
       python = mkOption {
         type = types.bool;
@@ -60,7 +56,6 @@ in
       };
     };
 
-    # IDE/Editor options
     editors = {
       vscode = mkOption {
         type = types.bool;
@@ -77,31 +72,31 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Core development packages
+
     environment.systemPackages =
       with pkgs;
       [
-        # Always include these
+
         gnumake
         cmake
         pkg-config
         gcc
         binutils
       ]
-      # Git and tools
+
       ++ optionals cfg.git [
         git
         gh
         git-lfs
         delta
       ]
-      # Docker
+
       ++ optionals cfg.docker [
         docker
         docker-compose
         lazydocker
       ]
-      # Python
+
       ++ optionals cfg.languages.python [
         python3
         python3Packages.pip
@@ -109,7 +104,7 @@ in
         poetry
         ruff
       ]
-      # JavaScript/Node.js
+
       ++ optionals cfg.languages.javascript [
         nodejs_24
         nodejs_24.pkgs.npm
@@ -118,7 +113,7 @@ in
         nodejs_24.pkgs.typescript
         nodejs_24.pkgs.typescript-language-server
       ]
-      # Rust
+
       ++ optionals cfg.languages.rust [
         rustc
         cargo
@@ -126,32 +121,28 @@ in
         clippy
         rust-analyzer
       ]
-      # Go
+
       ++ optionals cfg.languages.go [
         go
         gopls
         golangci-lint
       ]
-      # Editors
+
       ++ optionals cfg.editors.vscode [ vscode ]
       ++ optionals cfg.editors.neovim [ neovim ];
 
-    # Enable Docker service if Docker is enabled
     virtualisation.docker.enable = mkIf cfg.docker true;
 
-    # Git configuration
     programs.git = mkIf cfg.git {
       enable = true;
       lfs.enable = true;
     };
 
-    # Development-friendly shell configuration
     programs.direnv = {
       enable = true;
       nix-direnv.enable = true;
     };
 
-    # Assertions
     assertions = [
       {
         assertion = cfg.languages.rust -> cfg.git;

@@ -19,9 +19,7 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Binary caches and substituters are now configured in
-    # modules/nixos/system/nix/nix-optimization.nix via nix.custom.conf
-    # to follow Determinate Nix best practices
+
     determinate = {
       url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
       inputs.nixpkgs.follows = "nixpkgs";

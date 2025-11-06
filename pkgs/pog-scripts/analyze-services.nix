@@ -28,15 +28,15 @@ pog.pog {
       echo "Analyzing your system to identify optimization opportunities..."
       echo ""
 
-      # Check running services
+
       cyan "=== Currently Running Services ==="
       RUNNING_SERVICES=$(systemctl list-units --type=service --state=running --no-pager --no-legend 2>/dev/null | awk '{print $1}' | sed 's/\.service$//' || echo "")
 
-      # Check configured services
+
       echo ""
       cyan "=== Configured Services (from your config) ==="
 
-      # Large services to check
+
       declare -A SERVICES=(
           ["jellyseerr"]="826MB"
           ["jellyfin"]="~500MB"
@@ -52,7 +52,7 @@ pog.pog {
           ["sabnzbd"]="~100MB"
       )
 
-      # Check each service
+
       USED_SERVICES=()
       UNUSED_SERVICES=()
       TOTAL_POTENTIAL_SAVINGS=0
@@ -63,11 +63,11 @@ pog.pog {
               USED_SERVICES+=("$service ($size)")
               green "  ✅ $service - RUNNING ($size)"
           else
-              # Check if service exists but is stopped
+
               if systemctl list-unit-files --type=service 2>/dev/null | grep -q "$service"; then
                   UNUSED_SERVICES+=("$service ($size)")
                   yellow "  ⚠️  $service - CONFIGURED but NOT RUNNING ($size)"
-                  # Extract number from size
+
                   if [[ $size =~ ([0-9]+) ]]; then
                       num="''${BASH_REMATCH[1]}"
                       if [[ $size =~ GB ]]; then
@@ -84,10 +84,10 @@ pog.pog {
 
       echo ""
       cyan "=== Service Status Summary ==="
-      echo "✅ Running services: ''${#USED_SERVICES[@]}"
-      echo "⚠️  Configured but not running: ''${#UNUSED_SERVICES[@]}"
+      echo "✅ Running services: ''${
+      echo "⚠️  Configured but not running: ''${
 
-      if [ ''${#UNUSED_SERVICES[@]} -gt 0 ]; then
+      if [ ''${
           echo ""
           echo "Services you could disable to save space:"
           for service in "''${UNUSED_SERVICES[@]}"; do
@@ -97,7 +97,7 @@ pog.pog {
           echo "Estimated potential savings: ~$((TOTAL_POTENTIAL_SAVINGS / 1024))GB"
       fi
 
-      # Check for large packages
+
       echo ""
       cyan "=== Large Packages Analysis ==="
       echo "Checking for large packages that might be optional..."
@@ -110,7 +110,7 @@ pog.pog {
           size=$(echo "$line" | awk '{print $1}')
           name=$(echo "$line" | awk '{print $2}' | sed 's|/nix/store/||' | sed 's|/$||')
 
-          # Check if it's referenced
+
           if [ -L /run/current-system ]; then
               CURRENT_SYSTEM=$(readlink -f /run/current-system)
               if nix-store -qR "$CURRENT_SYSTEM" 2>/dev/null | grep -q "^/nix/store/.*$name"; then
@@ -123,7 +123,7 @@ pog.pog {
           fi
       done <<< "$LARGE_PACKAGES"
 
-      # Check for LibreOffice
+
       echo ""
       cyan "=== LibreOffice Analysis ==="
       LIBREOFFICE_VERSIONS=$(du -sh /nix/store/*libreoffice* 2>/dev/null | wc -l)
@@ -137,7 +137,7 @@ pog.pog {
           green "✅ Only one LibreOffice version found"
       fi
 
-      # Check for Ollama
+
       echo ""
       cyan "=== Ollama Analysis ==="
       OLLAMA_VERSIONS=$(du -sh /nix/store/*ollama* 2>/dev/null | grep -E "ollama-[0-9]" | wc -l)
@@ -156,7 +156,7 @@ pog.pog {
           green "✅ Only one Ollama version found"
       fi
 
-      # Check for development tools
+
       echo ""
       cyan "=== Development Tools Analysis ==="
       RUST_VERSIONS=$(du -sh /nix/store/*rustc* 2>/dev/null | grep -E "rustc-[0-9]" | wc -l)
@@ -165,20 +165,20 @@ pog.pog {
           echo "💡 Tip: Consider using rustup in devShells instead of global rustc"
       fi
 
-      # Current store size
+
       echo ""
       cyan "=== Current Store Size ==="
       CURRENT_SIZE=$(du -sh /nix/store 2>/dev/null | awk '{print $1}')
       echo "Current size: $CURRENT_SIZE"
 
-      # Recommendations
+
       echo ""
       cyan "=== Recommendations ==="
       echo ""
       echo "1. ✅ Run cleanup script (already done!)"
       echo "2. Review services above - disable unused ones"
       echo "3. Consider disabling:"
-      if [ ''${#UNUSED_SERVICES[@]} -gt 0 ]; then
+      if [ ''${
           for service in "''${UNUSED_SERVICES[@]}"; do
               echo "   - $service"
           done
@@ -203,6 +203,6 @@ pog.pog {
       echo "  featureName.serviceName.enable = false;"
       echo ""
       echo "Then rebuild:"
-      echo "  sudo nixos-rebuild switch --flake ~/.config/nix#jupiter"
+      echo "  sudo nixos-rebuild switch --flake ~/.config/nix
     '';
 }

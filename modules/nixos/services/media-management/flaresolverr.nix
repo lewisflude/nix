@@ -1,4 +1,3 @@
-# FlareSolverr - Cloudflare bypass
 {
   config,
   lib,
@@ -22,7 +21,6 @@ in
       port = 8191;
     };
 
-    # Set timezone
     systemd.services.flaresolverr.environment = {
       TZ = cfg.timezone;
       LOG_LEVEL = "info";

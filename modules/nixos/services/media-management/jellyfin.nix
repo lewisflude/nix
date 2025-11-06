@@ -1,4 +1,3 @@
-# Jellyfin - Media server
 {
   config,
   lib,
@@ -21,19 +20,17 @@ in
       inherit (cfg) group;
     };
 
-    # Additional ports for HTTPS and service discovery
     networking.firewall = {
       allowedTCPPorts = [
-        8096 # HTTP
-        8920 # HTTPS
+        8096
+        8920
       ];
       allowedUDPPorts = [
-        7359 # Service discovery
-        # 1900 # DLNA - commented out due to potential port conflict
+        7359
+
       ];
     };
 
-    # Grant access to GPU for hardware transcoding
     users.users.${cfg.user}.extraGroups = [
       "render"
       "video"

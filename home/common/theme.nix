@@ -8,7 +8,7 @@ let
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
 in
 {
-  # Catppuccin configuration - full palette fidelity
+
   catppuccin = {
     flavor = "mocha";
     accent = "mauve";
@@ -16,23 +16,13 @@ in
     waybar.mode = "createLink";
     mako.enable = lib.mkIf platformLib.isLinux true;
     swaync.enable = lib.mkIf platformLib.isLinux true;
-    firefox = lib.mkIf platformLib.isLinux {
-      profiles = {
-        default = {
-          enable = true;
-          accent = "mauve";
-          flavor = "mocha";
-        };
-      };
-    };
   };
 
-  # Keep your custom GTK and cursor theme configuration
   home = lib.optionalAttrs platformLib.isLinux {
     packages = with pkgs; [
       magnetic-catppuccin-gtk
       nwg-look
-      # Use binary font instead of building from source to save space
+
       iosevka-bin
       nerd-fonts.iosevka
       gtk4
@@ -53,7 +43,7 @@ in
     enable = true;
     font = {
       name = "Iosevka";
-      package = pkgs.iosevka-bin; # Use binary font instead of building from source
+      package = pkgs.iosevka-bin;
       size = 12;
     };
     theme = {

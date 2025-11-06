@@ -9,9 +9,7 @@ in
   home.packages =
     (with pkgs; [
       mpv
-      # libreoffice - Installed via productivity feature (home/common/features/productivity/default.nix)
-      # evince # TEMPORARILY DISABLED: likely uses webkitgtk which was removed from nixpkgs
-      # kicad # TEMPORARILY DISABLED: testing for webkitgtk dependency
+
       gimp
       krita
       discord
@@ -19,16 +17,9 @@ in
       file-roller
       libnotify
       swaylock-effects
-      # seahorse # TEMPORARILY DISABLED: uses webkitgtk which was removed from nixpkgs
-      # nautilus # TEMPORARILY DISABLED: likely uses webkitgtk which was removed from nixpkgs
-      # sushi # TEMPORARILY DISABLED: likely uses webkitgtk which was removed from nixpkgs
-      # gvfs # TEMPORARILY DISABLED: testing for webkitgtk dependency
+
       xfce.thunar
-      # ardour # TEMPORARILY DISABLED: depends on webkitgtk which was removed from nixpkgs
-      # guitarix # TEMPORARILY DISABLED: testing for webkitgtk dependency
-      # rakarrack # TEMPORARILY DISABLED: testing for webkitgtk dependency
-      # calf # TEMPORARILY DISABLED: testing for webkitgtk dependency
-      # vcv-rack # TEMPORARILY DISABLED: testing for webkitgtk dependency
+
       font-awesome
     ])
     ++ [ asepriteFixed ];

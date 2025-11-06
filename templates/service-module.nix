@@ -1,6 +1,3 @@
-# Service module template
-# For standalone services that don't fit into the feature system
-# Replace SERVICE_NAME with your service name (e.g., "home-assistant", "grafana")
 {
   config,
   lib,
@@ -52,7 +49,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Create user and group
+
     users.users.${cfg.user} = {
       isSystemUser = true;
       inherit (cfg) group;
@@ -62,12 +59,10 @@ in
 
     users.groups.${cfg.group} = { };
 
-    # Create data directory
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir} 0750 ${cfg.user} ${cfg.group} -"
     ];
 
-    # Systemd service
     systemd.services.SERVICE_NAME = {
       description = "SERVICE_NAME Service";
       wantedBy = [ "multi-user.target" ];
@@ -82,7 +77,6 @@ in
         Restart = "on-failure";
         RestartSec = "10s";
 
-        # Security hardening
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";
@@ -91,12 +85,7 @@ in
       };
     };
 
-    # Firewall configuration
     networking.firewall.allowedTCPPorts = [ cfg.port ];
 
-    # Backup configuration (optional)
-    # services.restic.backups.SERVICE_NAME = mkIf config.services.restic.server.enable {
-    #   paths = [ cfg.dataDir ];
-    # };
   };
 }

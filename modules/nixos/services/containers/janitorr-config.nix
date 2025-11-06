@@ -1,5 +1,3 @@
-# Janitorr base configuration
-# Extracted to separate file for lazy loading to improve evaluation performance
 {
   lib,
   placeholders,

@@ -1,8 +1,8 @@
 { lib }:
 let
-  hostDirectories = lib.filterAttrs (
-    name: type: type == "directory" && !(lib.hasPrefix "_" name) # Exclude directories starting with underscore
-  ) (builtins.readDir ../hosts);
+  hostDirectories = lib.filterAttrs (name: type: type == "directory" && !(lib.hasPrefix "_" name)) (
+    builtins.readDir ../hosts
+  );
   hosts = builtins.mapAttrs (name: _: import (../hosts + "/${name}")) hostDirectories;
 in
 {

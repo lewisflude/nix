@@ -44,7 +44,7 @@ let
           };
           inherit pkgs;
           inherit (platformLib) versions;
-          # Shells use python312 (older version for compatibility)
+
           pythonVersion = "python312";
         }
         ++ commonTools;
@@ -171,7 +171,7 @@ let
       '';
     };
   };
-  # Default shell for nix-config development
+
   updateAllScript = import ../pkgs/pog-scripts/update-all.nix {
     inherit pkgs;
     inherit (pkgs) pog;
@@ -179,31 +179,28 @@ let
   };
   defaultShell = pkgs.mkShell {
     buildInputs = with pkgs; [
-      # Nix tooling
-      nixfmt-rfc-style # Official Nix formatter (RFC 166)
-      deadnix # Find dead Nix code
-      statix # Lints and suggestions for Nix
-      treefmt # Unified formatter for multiple file types
-      nix-tree # Visualize dependencies
-      nix-diff # Compare derivations
-      nvd # Nix version diff
 
-      # Documentation
-      mdbook # Build documentation
-      graphviz # Module visualization
+      nixfmt-rfc-style
+      deadnix
+      statix
+      treefmt
+      nix-tree
+      nix-diff
+      nvd
 
-      # Git and utilities
+      mdbook
+      graphviz
+
       git
       pre-commit
-      gh # GitHub CLI
-      jq # JSON processing
+      gh
+      jq
 
-      # Shell utilities
-      ripgrep # Fast search
-      fd # Fast find
-      bat # Better cat
-      eza # Better ls
-      direnv # Auto-load environments
+      ripgrep
+      fd
+      bat
+      eza
+      direnv
       updateAllScript
     ];
 
@@ -245,21 +242,21 @@ let
       echo ""
       echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-      # Configure git to use conventional commit template
+
       git config commit.template "$PWD/.gitmessage"
 
-      # Add scripts to PATH
+
       export PATH="$PWD/scripts/utils:$PWD/scripts/maintenance:$PATH"
 
-      # Set helpful aliases
+
       alias fmt='nix fmt'
       alias fmt-nix='nixfmt-rfc-style'
       alias fmt-all='treefmt'
       alias lint='statix check .'
       alias check='nix flake check'
       alias update='nix flake update'
-      alias build-darwin='nix build .#darwinConfigurations.Lewiss-MacBook-Pro.system'
-      alias build-nixos='nix build .#nixosConfigurations.jupiter.config.system.build.toplevel'
+      alias build-darwin='nix build .
+      alias build-nixos='nix build .
     '';
   };
 in

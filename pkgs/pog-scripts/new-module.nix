@@ -46,7 +46,7 @@ pog.pog {
   runtimeInputs = with pkgs; [
     coreutils
     gnused
-    gum # For interactive prompts
+    gum
   ];
 
   script =
@@ -55,7 +55,7 @@ pog.pog {
       MODULE_TYPE="$type"
       MODULE_NAME="$name"
 
-      # Convert name to different formats
+
       NAME_UPPER=$(echo "$MODULE_NAME" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
       NAME_CAMEL=$(echo "$MODULE_NAME" | sed -r 's/(^|-)([a-z])/\U\2/g')
       NAME_SNAKE=$(echo "$MODULE_NAME" | tr '-' '_')
@@ -64,7 +64,7 @@ pog.pog {
       debug "Module name: $MODULE_NAME"
       debug "Name formats: upper=$NAME_UPPER, camel=$NAME_CAMEL, snake=$NAME_SNAKE"
 
-      # Determine paths based on type
+
       case "$MODULE_TYPE" in
         feature)
           TEMPLATE="$REPO_ROOT/templates/feature-module.nix"
@@ -94,10 +94,10 @@ pog.pog {
       debug "Template: $TEMPLATE"
       debug "Output: $OUTPUT_FILE"
 
-      # Check if template exists
+
       ${file.notExists "TEMPLATE"} && die "Template not found: $TEMPLATE"
 
-      # Check if file already exists
+
       if ${file.exists "OUTPUT_FILE"}; then
         if ${flag "force"}; then
           yellow "⚠️  File exists, but --force flag provided"
@@ -106,7 +106,7 @@ pog.pog {
         fi
       fi
 
-      # Dry run mode
+
       if ${flag "dry_run"}; then
         cyan "🔍 Dry run mode - would create:"
         echo "  Type:     $MODULE_TYPE"
@@ -116,13 +116,13 @@ pog.pog {
         exit 0
       fi
 
-      # Create the module
+
       blue "🚀 Creating new $MODULE_TYPE module: $MODULE_NAME"
 
-      # Ensure output directory exists
+
       mkdir -p "$OUTPUT_DIR"
 
-      # Replace placeholders in template
+
       sed -e "s/FEATURE_NAME/$NAME_SNAKE/g" \
           -e "s/SERVICE_NAME/$NAME_SNAKE/g" \
           -e "s/SERVICE_PACKAGE/$MODULE_NAME/g" \
@@ -131,7 +131,7 @@ pog.pog {
 
       green "✓ Created: $OUTPUT_FILE"
 
-      # Provide next steps based on module type
+
       echo ""
       cyan "📋 Next steps:"
 
@@ -146,7 +146,7 @@ pog.pog {
           echo ""
           echo "    $NAME_SNAKE = {"
           echo "      enable = mkEnableOption \"$MODULE_NAME feature\";"
-          echo "      # Add additional options here"
+          echo "
           echo "    };"
           ;;
         service)
@@ -161,7 +161,7 @@ pog.pog {
           ;;
         test)
           echo "  1. Implement tests in $OUTPUT_FILE"
-          echo "  2. Run with: nix build .#checks.x86_64-linux.$MODULE_NAME"
+          echo "  2. Run with: nix build .
           ;;
       esac
 

@@ -1,4 +1,3 @@
-# Sonarr - TV show management
 {
   config,
   lib,
@@ -24,12 +23,11 @@ in
       inherit (cfg) group;
     };
 
-    # Set timezone and add soft dependency on prowlarr
     systemd.services.sonarr = {
       environment = {
         TZ = cfg.timezone;
       };
-      # Soft dependency on prowlarr for startup order
+
       after = mkAfter (optional cfg.prowlarr.enable "prowlarr.service");
     };
   };

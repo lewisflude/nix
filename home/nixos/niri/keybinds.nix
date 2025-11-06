@@ -22,17 +22,14 @@ in
     jq
   ];
   programs.niri.settings.binds = {
-    # Launchers from firmware keys (Linux equivalents of macOS Karabiner rules)
-    # F13 → launch/focus Ghostty
+
     "F13".action.spawn = [ terminal ];
 
-    # Print Screen → preferred browser (aligns with firmware macro intent)
-    # Keep existing Print bindings for screenshots; use Mod+Print for screenshots to avoid conflict.
     "Print".action.spawn = [
       uwsm
       "app"
       "--"
-      (lib.getExe pkgs.firefox)
+      (lib.getExe pkgs.chromium)
     ];
     "Mod+Shift+Slash".action.show-hotkey-overlay = { };
     "Mod+Escape" = {
@@ -123,14 +120,6 @@ in
         "${config.home.homeDirectory}/.config/nix"
       ];
     };
-    "Mod+Shift+B" = {
-      action.spawn = [
-        uwsm
-        "app"
-        "--"
-        (lib.getExe pkgs.firefox)
-      ];
-    };
     "Mod+M" = {
       action.spawn = [
         uwsm
@@ -139,13 +128,12 @@ in
         (lib.getExe pkgs.thunderbird)
       ];
     };
-    # OS-agnostic window management: F16–F19 from firmware
-    # F16 → Maximize, F18 → Center, F17/F19 → Tile Left/Right
+
     "F16".action.maximize-column = { };
     "F18".action.center-column = { };
     "F17".action.set-column-width = "50%";
     "F19".action.set-column-width = "50%";
-    # Moved screenshot to Shift+Mod+Print to free Print and Mod+Print
+
     "Mod+Shift+Print" = {
       allow-inhibiting = false;
       action.spawn = [
@@ -178,7 +166,7 @@ in
         ''grim -g "$(slurp)" - | wl-copy''
       ];
     };
-    # Keep a saver to file on Ctrl+Shift+Print
+
     "Mod+Ctrl+Shift+Print" = {
       allow-inhibiting = false;
       action.spawn = [

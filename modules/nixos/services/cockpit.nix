@@ -5,13 +5,13 @@
   ...
 }:
 {
-  # Use config and lib to satisfy deadnix (required by NixOS module system)
+
   _module.args = lib.mkIf (config == null) { };
   services.cockpit = {
     enable = true;
     port = 9090;
     openFirewall = true;
-    # Allow connections from your domain and local addresses
+
     allowed-origins = [
       "https://localhost:9090"
       "http://localhost:9090"
@@ -22,22 +22,17 @@
     ];
     settings = {
       WebService = {
-        # Allow unencrypted connections since Caddy handles TLS
+
         AllowUnencrypted = true;
 
-        # Tell Cockpit to trust the X-Forwarded-Proto header from Caddy
         ProtocolHeader = "X-Forwarded-Proto";
 
-        # Tell Cockpit to trust the X-Forwarded-For header from Caddy
         ForwardedForHeader = "X-Forwarded-For";
       };
     };
   };
 
-  # Optional: Install Cockpit Podman extension for container management
-  # Note: Using pkgs to satisfy deadnix (module system requires these args)
   environment.systemPackages = with pkgs; [
-    # cockpit # Already installed by services.cockpit
-    # cockpit-apps.podman-containers # Uncomment if needed
+
   ];
 }

@@ -1,12 +1,10 @@
-# Configuration evaluation tests
-# Ensures all configurations evaluate without errors
 {
   pkgs,
   inputs,
   ...
 }:
 let
-  # Test that a configuration evaluates successfully
+
   mkEvalTest =
     name: config:
     pkgs.runCommand "eval-test-${name}" { } ''
@@ -15,7 +13,7 @@ let
     '';
 in
 {
-  # Test all system configurations evaluate
+
   darwin-config = mkEvalTest "darwin" ''
     (import ${inputs.darwin} {
       inherit (inputs) nixpkgs;
@@ -35,7 +33,6 @@ in
     }.config.system.build.toplevel
   '';
 
-  # Test that options are properly typed
   host-options = mkEvalTest "host-options" ''
     let
       lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
@@ -44,7 +41,6 @@ in
       module.options.host.username.type
   '';
 
-  # Test that overlays evaluate
   overlays = mkEvalTest "overlays" ''
     let
       overlaySet = import ../overlays {
@@ -55,7 +51,6 @@ in
       builtins.attrNames overlaySet
   '';
 
-  # Test feature system
   features = mkEvalTest "features" ''
     let
       lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
@@ -64,7 +59,6 @@ in
       featuresLib.availableFeatures
   '';
 
-  # Test individual feature modules evaluate
   feature-gaming = mkEvalTest "feature-gaming" ''
     let
       lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
@@ -224,7 +218,6 @@ in
       (evalModule ../modules/nixos/features/restic.nix).config.host.features.restic.enable
   '';
 
-  # Test feature combinations evaluate without conflicts
   feature-combinations = mkEvalTest "feature-combinations" ''
     let
       lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
@@ -257,7 +250,6 @@ in
       ]).config.host.features.gaming.enable
   '';
 
-  # Test that feature flags properly enable and disable functionality
   feature-flag-enable = mkEvalTest "feature-flag-enable" ''
     let
       lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
@@ -282,7 +274,6 @@ in
       enabled && !disabled
   '';
 
-  # Test that feature options are properly typed
   feature-options-typed = mkEvalTest "feature-options-typed" ''
     let
       lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
@@ -292,7 +283,6 @@ in
       && module.options.host.features.development.rust.type.name == "bool"
   '';
 
-  # Regression test: Verify common configuration patterns evaluate
   feature-regression-common = mkEvalTest "feature-regression-common" ''
     let
       lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;

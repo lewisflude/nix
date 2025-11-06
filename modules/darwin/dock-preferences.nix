@@ -17,55 +17,44 @@ in
 
   config = lib.mkIf cfg.enable {
     system.defaults.dock = {
-      # Auto-hide behavior for more screen space
+
       autohide = true;
-      autohide-delay = 0.0; # No delay before showing
-      autohide-time-modifier = 0.5; # Faster animation
+      autohide-delay = 0.0;
+      autohide-time-modifier = 0.5;
 
-      # Hot corners for productivity
-      # Values: 1=Disabled, 2=Mission Control, 3=Application Windows, 4=Desktop,
-      # 5=Start Screen Saver, 6=Disable Screen Saver, 10=Put Display to Sleep,
-      # 11=Launchpad, 12=Notification Center, 13=Lock Screen, 14=Quick Note
-      wvous-bl-corner = 4; # Bottom left: Show Desktop
-      wvous-br-corner = 2; # Bottom right: Mission Control
-      wvous-tl-corner = 11; # Top left: Launchpad
-      wvous-tr-corner = 12; # Top right: Notification Center
+      wvous-bl-corner = 4;
+      wvous-br-corner = 2;
+      wvous-tl-corner = 11;
+      wvous-tr-corner = 12;
 
-      # App management
-      show-recents = false; # Don't show recently used apps in dock
-      show-process-indicators = true; # Show dots for running apps
-      static-only = false; # Show both static and running apps
-      showhidden = true; # Make hidden app icons translucent
+      show-recents = false;
+      show-process-indicators = true;
+      static-only = false;
+      showhidden = true;
 
-      # Mission Control and Spaces
-      mru-spaces = false; # Don't rearrange spaces based on use
-      expose-group-apps = true; # Group windows by app in Mission Control
-      expose-animation-duration = 0.5; # Faster Mission Control animation
-      appswitcher-all-displays = false; # Show app switcher on main display only
+      mru-spaces = false;
+      expose-group-apps = true;
+      expose-animation-duration = 0.5;
+      appswitcher-all-displays = false;
 
-      # Visual preferences
-      magnification = true; # Magnify icons on hover
-      largesize = 80; # Size when magnified (16-128)
-      tilesize = 48; # Default icon size
-      minimize-to-application = false; # Don't minimize to app icon
-      mineffect = "scale"; # Minimize effect: "genie", "suck", or "scale"
+      magnification = true;
+      largesize = 80;
+      tilesize = 48;
+      minimize-to-application = false;
+      mineffect = "scale";
 
-      # Animation and behavior
-      launchanim = false; # Don't animate opening applications
-      enable-spring-load-actions-on-all-items = true; # Spring loading for all items
-      mouse-over-hilite-stack = true; # Highlight stack items on hover
-      scroll-to-open = false; # Don't use scroll gesture to open stacks
+      launchanim = false;
+      enable-spring-load-actions-on-all-items = true;
+      mouse-over-hilite-stack = true;
+      scroll-to-open = false;
 
-      # Position and layout
-      orientation = "bottom"; # Dock position: "bottom", "left", or "right"
+      orientation = "bottom";
 
-      # Dashboard (legacy, but set for completeness)
-      dashboard-in-overlay = false; # Don't show Dashboard as overlay
+      dashboard-in-overlay = false;
     };
 
-    # LaunchServices preferences
     system.defaults.LaunchServices = {
-      LSQuarantine = false; # Disable quarantine for downloaded apps
+      LSQuarantine = false;
     };
   };
 }

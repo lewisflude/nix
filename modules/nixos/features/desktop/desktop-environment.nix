@@ -34,7 +34,7 @@ in
           };
         };
       };
-      # colord.enable = true; # TEMPORARILY DISABLED: testing for webkitgtk dependency
+
     };
   };
 }

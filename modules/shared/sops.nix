@@ -60,7 +60,6 @@ in
     };
   };
 
-  # Validation assertions for SOPS configuration
   assertions = lib.optionals (isLinux || isDarwin) [
     {
       assertion = config.sops.secrets != { } -> config.sops.age.keyFile != null;

@@ -1,20 +1,3 @@
-# Supplemental Container Services
-# Services that don't have native NixOS modules yet
-# These remain as containers: Homarr, Wizarr, Doplarr, ComfyUI, Cal.com
-#
-# ⚠️  SECURITY WARNING: SECRETS MANAGEMENT
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Services like Cal.com, Doplarr require secrets (API keys, passwords, etc.)
-# This module does NOT provide default secrets for security reasons.
-#
-# You MUST configure secrets before enabling these services:
-# - Cal.com: requires nextauthSecret, calendarEncryptionKey, dbPassword
-# - Doplarr: requires discordToken, sonarrApiKey, radarrApiKey
-#
-# For development: Set secrets directly in your host configuration
-# For production: Use sops-nix for encrypted secrets management
-#
-# See docs/SECRETS-MANAGEMENT.md for detailed implementation guide.
 {
   config,
   lib,

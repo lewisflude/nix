@@ -36,7 +36,7 @@ pog.pog {
       OUTPUT_DIR="$output_dir"
       FORMAT="$format"
 
-      # Ensure output directory exists
+
       mkdir -p "$OUTPUT_DIR"
 
       GRAPH_FILE="$OUTPUT_DIR/module-dependencies.dot"
@@ -47,7 +47,7 @@ pog.pog {
       echo "======================================"
       echo ""
 
-      # Function to generate DOT graph
+
       generate_dot() {
           cyan "Generating dependency graph..."
 
@@ -59,19 +59,19 @@ pog.pog {
           edge [fontname="Arial", fontsize=10];
 
           // Styling
-          graph [bgcolor="#f8f9fa", pad="0.5", ranksep="1.0", nodesep="0.5"];
-          node [fillcolor="#e3f2fd", style="rounded,filled", color="#1976d2"];
-          edge [color="#757575"];
+          graph [bgcolor="
+          node [fillcolor="
+          edge [color="
 
           // Subgraphs for organization
           subgraph cluster_shared {
               label="Shared Modules";
               style=filled;
-              color="#c5e1a5";
-              fillcolor="#f1f8e9";
+              color="
+              fillcolor="
       EOF
 
-          # Add shared modules
+
           find "$REPO_ROOT/modules/shared" -name "default.nix" 2>/dev/null | while read -r file; do
               local module_name=$(basename "$(dirname "$file")")
               if [[ "$module_name" == "shared" ]]; then
@@ -82,14 +82,14 @@ pog.pog {
 
           echo "      }" >> "$GRAPH_FILE"
 
-          # Add darwin modules
+
           cat >> "$GRAPH_FILE" <<'EOF'
 
           subgraph cluster_darwin {
               label="Darwin Modules";
               style=filled;
-              color="#b39ddb";
-              fillcolor="#ede7f6";
+              color="
+              fillcolor="
       EOF
 
           find "$REPO_ROOT/modules/darwin" -name "default.nix" 2>/dev/null | while read -r file; do
@@ -102,14 +102,14 @@ pog.pog {
 
           echo "      }" >> "$GRAPH_FILE"
 
-          # Add nixos modules
+
           cat >> "$GRAPH_FILE" <<'EOF'
 
           subgraph cluster_nixos {
               label="NixOS Modules";
               style=filled;
-              color="#90caf9";
-              fillcolor="#e3f2fd";
+              color="
+              fillcolor="
       EOF
 
           find "$REPO_ROOT/modules/nixos" -name "default.nix" 2>/dev/null | while read -r file; do
@@ -122,13 +122,13 @@ pog.pog {
 
           echo "      }" >> "$GRAPH_FILE"
 
-          # Close graph
+
           echo "}" >> "$GRAPH_FILE"
 
           green "✓ DOT file created: $GRAPH_FILE"
       }
 
-      # Function to render graph
+
       render_graph() {
           if command -v dot &> /dev/null; then
               case "$FORMAT" in
@@ -156,7 +156,7 @@ pog.pog {
           fi
       }
 
-      # Function to generate text summary
+
       generate_summary() {
           cyan "Generating module summary..."
 
@@ -188,7 +188,7 @@ pog.pog {
           cat "$summary_file"
       }
 
-      # Main execution
+
       cyan "Starting module analysis..."
       echo ""
 

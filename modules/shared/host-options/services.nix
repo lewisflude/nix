@@ -1,5 +1,3 @@
-# Service-specific feature options
-# Defines options for service features: mediaManagement, aiTools, containersSupplemental
 {
   lib,
   ...
@@ -9,7 +7,7 @@ let
 in
 {
   options.host.features = {
-    # Native media management services
+
     mediaManagement = {
       enable = mkEnableOption "native media management services";
 
@@ -25,7 +23,6 @@ in
         description = "Timezone for media services";
       };
 
-      # Individual service enables (all default to service's default when parent is enabled)
       prowlarr = {
         enable = mkOption {
           type = types.bool;
@@ -186,7 +183,6 @@ in
       };
     };
 
-    # Native AI tools services
     aiTools = {
       enable = mkEnableOption "AI tools and LLM services";
 
@@ -234,7 +230,6 @@ in
       };
     };
 
-    # Supplemental container services (no native modules available yet)
     containersSupplemental = {
       enable = mkEnableOption "supplemental container services";
 
@@ -333,7 +328,6 @@ in
           description = "PostgreSQL database password for Cal.com";
         };
 
-        # Email configuration
         email = {
           host = mkOption {
             type = types.str;
@@ -372,7 +366,6 @@ in
           };
         };
 
-        # Branding configuration
         branding = {
           appName = mkOption {
             type = types.str;
@@ -393,7 +386,6 @@ in
           };
         };
 
-        # General settings
         disableSignup = mkOption {
           type = types.bool;
           default = true;
@@ -430,7 +422,6 @@ in
           description = "Encryption key for service account credentials";
         };
 
-        # Google Calendar integration
         googleCalendar = {
           enabled = mkOption {
             type = types.bool;

@@ -1,6 +1,3 @@
-# Security feature module (cross-platform)
-# Controlled by host.features.security.*
-# Provides YubiKey, GPG, firewall, and other security tools
 {
   config,
   lib,
@@ -17,9 +14,9 @@ let
 in
 {
   config = mkIf cfg.enable {
-    # NixOS-specific security configuration
+
     security = mkIf isLinux {
-      # DOAS configuration (alternative to sudo)
+
       doas = {
         enable = true;
         extraRules = [
@@ -31,7 +28,6 @@ in
         ];
       };
 
-      # PAM configuration for U2F/YubiKey
       pam = {
         services = {
           login.u2fAuth = cfg.yubikey;
@@ -52,33 +48,28 @@ in
         };
       };
 
-      # Polkit for privilege elevation
       polkit.enable = true;
     };
 
-    # GNOME Keyring for credential storage (NixOS)
     services.gnome.gnome-keyring.enable = mkIf isLinux true;
 
-    # GPG agent configuration (NixOS)
     programs.gnupg.agent = mkIf (isLinux && cfg.gpg) {
       enable = true;
       enableSSHSupport = true;
       pinentryPackage = mkDefault pkgs.pinentry-qt;
     };
 
-    # Firewall configuration (NixOS)
     networking.firewall = mkIf (isLinux && cfg.firewall) {
       enable = true;
-      # Add firewall rules as needed
+
     };
 
-    # System-level security packages (NixOS only)
     environment.systemPackages = mkIf isLinux (
       with pkgs;
       optionals cfg.yubikey [
         yubikey-manager
         yubikey-personalization
-        yubioath-flutter # GUI tool (replaces yubikey-manager-qt)
+        yubioath-flutter
       ]
       ++ optionals cfg.gpg [
         gnupg
@@ -86,12 +77,8 @@ in
       ]
     );
 
-    # User groups for security hardware access (NixOS)
-    users.users.${config.host.username}.extraGroups = mkIf isLinux (
-      optional cfg.yubikey "uucp" # YubiKey access
-    );
+    users.users.${config.host.username}.extraGroups = mkIf isLinux (optional cfg.yubikey "uucp");
 
-    # Assertions
     assertions = [
       {
         assertion = cfg.firewall -> isLinux;

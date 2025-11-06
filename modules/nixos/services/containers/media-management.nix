@@ -1,5 +1,3 @@
-# Media Management Stack
-# Converts services from /opt/stacks/media-management
 {
   config,
   lib,
@@ -24,7 +22,6 @@ let
   cfg = config.host.services.containers;
   mmCfg = cfg.mediaManagement;
 
-  # Common environment for all media apps
   commonEnv = {
     PUID = toString cfg.uid;
     PGID = toString cfg.gid;
@@ -32,7 +29,6 @@ let
     TZ = cfg.timezone;
   };
 
-  # Helper to create volume paths
   mkVolumes = appName: [
     "${mmCfg.configPath}/${appName}:/config"
     "${mmCfg.dataPath}:/mnt/storage"
@@ -126,7 +122,7 @@ in
   config = mkIf (cfg.enable && mmCfg.enable) (mkMerge [
     {
       virtualisation.oci-containers.containers = {
-        # Prowlarr - Indexer manager
+
         prowlarr = {
           image = "ghcr.io/hotio/prowlarr:latest";
           environment = commonEnv;
@@ -135,27 +131,24 @@ in
           extraOptions = [ "--network=media" ];
         };
 
-        # Radarr - Movie management
         radarr = {
           image = "ghcr.io/hotio/radarr:latest";
           environment = commonEnv;
           volumes = mkVolumes "radarr";
           ports = [ "7878:7878" ];
           extraOptions = [ "--network=media" ];
-          # dependsOn removed - using soft After= dependency instead via systemd overrides
+
         };
 
-        # Sonarr - TV show management
         sonarr = {
           image = "ghcr.io/hotio/sonarr:latest";
           environment = commonEnv;
           volumes = mkVolumes "sonarr";
           ports = [ "8989:8989" ];
           extraOptions = [ "--network=media" ];
-          # dependsOn removed - using soft After= dependency instead via systemd overrides
+
         };
 
-        # Lidarr - Music management
         lidarr = {
           image = "ghcr.io/hotio/lidarr:nightly";
           environment = commonEnv;
@@ -165,7 +158,6 @@ in
           dependsOn = [ "prowlarr" ];
         };
 
-        # Whisparr - Adult content management
         whisparr = {
           image = "ghcr.io/hotio/whisparr:latest";
           environment = commonEnv // {
@@ -176,7 +168,6 @@ in
           extraOptions = [ "--network=media" ];
         };
 
-        # Readarr - Book management
         readarr = {
           image = "ghcr.io/hotio/readarr:nightly";
           environment = commonEnv;
@@ -186,7 +177,6 @@ in
           dependsOn = [ "prowlarr" ];
         };
 
-        # SABnzbd - Usenet downloader
         sabnzbd = {
           image = "ghcr.io/hotio/sabnzbd:latest";
           environment = commonEnv;
@@ -199,7 +189,6 @@ in
           extraOptions = [ "--network=media" ];
         };
 
-        # Jellyfin - Media server
         jellyfin = {
           image = "jellyfin/jellyfin:latest";
           user = "${toString cfg.uid}:${toString cfg.gid}";
@@ -212,18 +201,17 @@ in
             "${mmCfg.dataPath}:/mnt/storage"
           ];
           ports = [
-            "8096:8096" # HTTP
-            "8920:8920" # HTTPS
-            "7359:7359/udp" # Service discovery
-            # "1900:1900/udp" # DLNA - commented out due to port conflict
+            "8096:8096"
+            "8920:8920"
+            "7359:7359/udp"
+
           ];
           extraOptions = [
             "--network=media"
-            "--device=/dev/dri:/dev/dri" # Hardware acceleration
+            "--device=/dev/dri:/dev/dri"
           ];
         };
 
-        # Jellyseerr - Request management
         jellyseerr = {
           image = "fallenbagel/jellyseerr:latest";
           environment = commonEnv // {
@@ -235,7 +223,6 @@ in
           dependsOn = [ "jellyfin" ];
         };
 
-        # Unpackerr - Extract downloads
         unpackerr = {
           image = "ghcr.io/hotio/unpackerr:latest";
           environment = commonEnv;
@@ -244,10 +231,9 @@ in
             "${mmCfg.dataPath}:/mnt/storage"
           ];
           extraOptions = [ "--network=media" ];
-          # dependsOn removed - using soft After= dependency instead via systemd overrides
+
         };
 
-        # Homarr - Dashboard
         homarr = {
           image = "ghcr.io/ajnart/homarr:latest";
           environment = {
@@ -262,7 +248,6 @@ in
           extraOptions = [ "--network=frontend" ];
         };
 
-        # Wizarr - Invitation system
         wizarr = {
           image = "ghcr.io/wizarrrr/wizarr:latest";
           environment = {
@@ -273,7 +258,6 @@ in
           extraOptions = [ "--network=frontend" ];
         };
 
-        # Kapowarr - Comic management
         kapowarr = {
           image = "mrcas/kapowarr:latest";
           environment = commonEnv;
@@ -285,7 +269,6 @@ in
           extraOptions = [ "--network=media" ];
         };
 
-        # Doplarr - Discord bot
         doplarr = {
           image = "ghcr.io/hotio/doplarr:latest";
           environment =
@@ -295,11 +278,11 @@ in
             // mkSecretEnv "RADARR_API_KEY" secrets.radarrApiKey;
           volumes = [ "${mmCfg.configPath}/doplarr:/config" ];
           extraOptions = [ "--network=media" ];
-          # dependsOn removed - using soft After= dependency instead via systemd overrides
+
         };
       }
       // optionalAttrs mmCfg.janitorr.enable {
-        # Janitorr - Media cleanup automation
+
         janitorr = {
           image = "ghcr.io/schaka/janitorr:jvm-stable";
           user = "${toString cfg.uid}:${toString cfg.gid}";
@@ -320,23 +303,6 @@ in
           ];
         };
 
-        # Recommendarr - Recommendation engine (image repo doesn't exist - disabled)
-        # recommendarr = {
-        #   image = "ghcr.io/hotio/recommendarr:latest";
-        #   environment = commonEnv;
-        #   volumes = ["${mmCfg.configPath}/recommendarr:/config"];
-        #   ports = ["3579:3579"];
-        #   extraOptions = ["--network=media"];
-        # };
-
-        # Autopulse - Automation (image repo doesn't exist - disabled)
-        # autopulse = {
-        #   image = "ghcr.io/autopulse/autopulse:latest";
-        #   environment = commonEnv;
-        #   volumes = ["${mmCfg.configPath}/autopulse:/config"];
-        #   extraOptions = ["--network=media"];
-        #   dependsOn = ["radarr" "sonarr"];
-        # };
       };
     }
     (mkIf mmCfg.janitorr.enable (
@@ -359,7 +325,7 @@ in
             mapAttrs (_: secret: config.sops.placeholder.${secret}) secretNames
           else
             throw "Janitorr requires useSops enabled to reference secrets.";
-        # Import base config from separate file for lazy loading
+
         baseConfig =
           (import ./janitorr-config.nix {
             inherit lib;
@@ -418,7 +384,7 @@ in
     ))
     {
       systemd.services = mkMerge [
-        # Ensure Podman storage and networks exist before containers start
+
         {
           podman-storage-check = {
             description = "Check and repair Podman storage";
@@ -468,8 +434,7 @@ in
         }
         (mkNetworkDeps "media" mediaContainers)
         (mkNetworkDeps "frontend" frontendContainers)
-        # Override service dependencies to use soft After= instead of hard Requires=
-        # This prevents cascading failures on boot while maintaining startup order
+
         (
           {
             podman-radarr = {
@@ -477,7 +442,7 @@ in
                 "podman-prowlarr.service"
                 "podman-sabnzbd.service"
               ];
-              # Make restart more resilient
+
               serviceConfig = {
                 RestartSec = "30s";
                 StartLimitBurst = 10;
@@ -517,7 +482,7 @@ in
                 StartLimitIntervalSec = 600;
               };
             };
-            # Add resilient restart for base services too
+
             podman-prowlarr.serviceConfig = {
               RestartSec = "10s";
               StartLimitBurst = 10;

@@ -1,6 +1,3 @@
-# Development feature module (cross-platform)
-# Controlled by host.features.development.*
-# Provides comprehensive development environment with languages, tools, and editors
 {
   config,
   lib,
@@ -24,19 +21,17 @@ let
 in
 {
   config = mkIf cfg.enable {
-    # Environment variables for development
+
     environment.variables = featureBuilders.mkDevEnvironment cfg;
 
-    # System-level packages (NixOS only)
     environment.systemPackages = mkIf isLinux (
       featureBuilders.mkSystemPackages {
         inherit cfg pkgs;
       }
-      # Add Linux-specific packages (e.g., glibc.dev for build tools)
+
       ++ lib.optionals (cfg.buildTools or false) [ pkgs.glibc.dev ]
     );
 
-    # NixOS-specific services
     virtualisation.docker = mkIf (isLinux && cfg.docker) {
       enable = true;
       daemon.settings = {
@@ -44,10 +39,8 @@ in
       };
     };
 
-    # User groups for Docker
     users.users.${config.host.username}.extraGroups = optional (isLinux && cfg.docker) "docker";
 
-    # Assertions
     assertions = [
       {
         assertion = cfg.rust -> (cfg.git or false);

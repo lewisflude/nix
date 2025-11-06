@@ -53,7 +53,7 @@ pog.pog {
 
       blue "🚀 Starting Full Update Process"
 
-      # Check git status
+
       if ! git diff-index --quiet HEAD -- 2>/dev/null; then
         yellow "⚠️  You have uncommitted changes"
         if ! ${flag "dry_run"}; then
@@ -61,7 +61,7 @@ pog.pog {
         fi
       fi
 
-      # 1. Update flake inputs
+
       if ! ${flag "skip_flake"}; then
         cyan "1️⃣  Updating Flake Inputs"
 
@@ -75,11 +75,11 @@ pog.pog {
         yellow "Skipping flake update"
       fi
 
-      # 2. Update custom packages with nix-update
+
       if ! ${flag "skip_packages"}; then
         cyan "2️⃣  Updating Custom Packages"
 
-        # List of packages to update (file path)
+
         PACKAGES=(
           "modules/nixos/services/home-assistant/custom-components/home-llm.nix"
         )
@@ -91,7 +91,7 @@ pog.pog {
               debug "DRY RUN: Would update $pkg_name with nix-update"
             else
               debug "Updating $pkg_name..."
-              # Update to latest version, skip if no new version
+
               if nix-update --override-filename "$pkg_file" 2>&1 | tee /tmp/nix-update.log | grep -q "Not updating"; then
                 echo "  $pkg_name: Already up to date"
               else
@@ -108,7 +108,7 @@ pog.pog {
         yellow "Skipping custom package updates"
       fi
 
-      # 3. Update ZSH plugins
+
       if ! ${flag "skip_plugins"}; then
         cyan "3️⃣  Updating ZSH Plugins"
 
@@ -128,11 +128,11 @@ pog.pog {
         yellow "Skipping plugin updates"
       fi
 
-      # 4. Show summary
+
       cyan "📊 Update Summary"
 
       if ! ${flag "dry_run"}; then
-        # Show flake.lock changes
+
         if ! ${flag "skip_flake"} && git diff --quiet flake.lock 2>/dev/null; then
           echo "flake.lock: No changes"
         elif ! ${flag "skip_flake"}; then
@@ -140,7 +140,7 @@ pog.pog {
           git diff flake.lock --stat 2>/dev/null || true
         fi
 
-        # Show custom package changes
+
         if ! ${flag "skip_packages"}; then
           PACKAGES=(
             "modules/nixos/services/home-assistant/custom-components/home-llm.nix"
@@ -156,7 +156,7 @@ pog.pog {
           done
         fi
 
-        # Show plugin changes
+
         if ! ${flag "skip_plugins"} && [ -d "$FLAKE_DIR/home/common/_sources" ]; then
           if git diff --quiet home/common/_sources/ 2>/dev/null; then
             echo "_sources/: No changes"

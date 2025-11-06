@@ -20,27 +20,22 @@ let
   cfg = config.host.services.containersSupplemental;
   calCfg = cfg.calcom;
 
-  # Extract hostname from webappUrl for ALLOWED_HOSTNAMES
-  # Cal.com expects hostnames without protocol (e.g., "cal.example.com")
   calcomHost =
     let
       matches = builtins.match "https?://([^/:]+)" calCfg.webappUrl;
     in
     if matches == null || matches == [ ] then calCfg.webappUrl else lib.head matches;
 
-  # Extract domain for cookie settings (e.g., ".example.com" from "https://cal.example.com")
   calcomCookieDomain =
     let
       matches = builtins.match "https?://([^/:]+)" calCfg.webappUrl;
       host = if matches == null || matches == [ ] then calCfg.webappUrl else lib.head matches;
-      # Split by dots and take the last two parts for the base domain
+
       parts = lib.splitString "." host;
       partsLen = lib.length parts;
     in
     if partsLen >= 2 then ".${lib.concatStringsSep "." (lib.drop (partsLen - 2) parts)}" else host;
 
-  # Format as JSON array string for Cal.com's validation
-  # Cal.com expects a JSON-encoded array like: ["cal.example.com","localhost:3000"]
   calcomAllowedHostnames = builtins.toJSON [
     calcomHost
     "localhost:${toString calCfg.port}"
@@ -107,7 +102,6 @@ in
       description = "PostgreSQL database password for Cal.com.";
     };
 
-    # Email configuration
     email = {
       host = mkOption {
         type = types.str;
@@ -146,7 +140,6 @@ in
       };
     };
 
-    # Branding configuration
     branding = {
       appName = mkOption {
         type = types.str;
@@ -167,7 +160,6 @@ in
       };
     };
 
-    # General settings
     disableSignup = mkOption {
       type = types.bool;
       default = true;
@@ -208,7 +200,6 @@ in
       '';
     };
 
-    # Google Calendar integration
     googleCalendar = {
       enabled = mkOption {
         type = types.bool;
@@ -264,19 +255,16 @@ in
             TZ = cfg.timezone;
             ALLOWED_HOSTNAMES = calcomAllowedHostnames;
 
-            # Email configuration
             EMAIL_FROM = calCfg.email.from;
             EMAIL_FROM_NAME = calCfg.email.fromName;
             EMAIL_SERVER_HOST = calCfg.email.host;
             EMAIL_SERVER_PORT = toString calCfg.email.port;
             EMAIL_SERVER_USER = calCfg.email.username;
 
-            # Branding
             NEXT_PUBLIC_APP_NAME = calCfg.branding.appName;
             NEXT_PUBLIC_COMPANY_NAME = calCfg.branding.companyName;
             NEXT_PUBLIC_SUPPORT_MAIL_ADDRESS = calCfg.branding.supportEmail;
 
-            # General settings
             CALCOM_TELEMETRY_DISABLED = if calCfg.disableTelemetry then "1" else "0";
             NEXT_PUBLIC_DISABLE_SIGNUP = if calCfg.disableSignup then "true" else "false";
             NEXT_PUBLIC_LOGGER_LEVEL = toString calCfg.logLevel;
