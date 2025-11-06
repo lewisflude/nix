@@ -1,6 +1,7 @@
 {
   lib,
   inputs,
+  ...
 }:
 let
   # Helper: Get catppuccin palette with fallback logic
