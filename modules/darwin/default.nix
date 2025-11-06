@@ -1,6 +1,5 @@
 {
   imports = [
-
     ./nix.nix
     ./system.nix
 
@@ -19,5 +18,6 @@
 
     ./backup.nix
     ./sops.nix
+    ./atuin.nix
   ];
 }

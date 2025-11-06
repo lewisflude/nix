@@ -30,9 +30,9 @@ in {
       networkmanager
       lsof
       wtype
-    ]
-    [
-    ];
+    ] # Linux packages
+
+    []; # Darwin packages
   programs.ghostty = {
     enable = platformLib.isLinux;
     package = pkgs.ghostty;

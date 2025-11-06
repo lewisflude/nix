@@ -67,11 +67,6 @@ in {
       nix-direnv.enable = true;
       enableZshIntegration = true;
     };
-    atuin = {
-      enable = true;
-      enableZshIntegration = true;
-      flags = ["--disable-up-arrow"];
-    };
     zsh = {
       enable = true;
       enableCompletion = true;
@@ -355,7 +350,14 @@ in {
           source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
 
           # Load p10k configuration (managed by Home Manager)
-          [[ -f ${config.home.homeDirectory}/.p10k.zsh ]] && source ${config.home.homeDirectory}/.p10k.zsh
+          # Ensure the file exists before sourcing to avoid p10k wizard
+          if [[ -f ${config.home.homeDirectory}/.p10k.zsh ]]; then
+            source ${config.home.homeDirectory}/.p10k.zsh
+          else
+            # If file doesn't exist, p10k will show wizard - this shouldn't happen
+            # as Home Manager should create it, but we handle it gracefully
+            echo "Warning: ~/.p10k.zsh not found. Run 'home-manager switch' to create it."
+          fi
 
           # Initialize zoxide at the very end of shell configuration
           eval "$(zoxide init zsh)"
@@ -376,8 +378,11 @@ in {
   };
 
   # Declaratively manage p10k configuration
+  # This file must exist for p10k to work - if it doesn't, p10k will show the wizard
   home.file.".p10k.zsh" = {
     source = ./lib/p10k.zsh;
+    # Ensure the file is readable and executable
+    executable = false;
   };
 
   home.file.".config/direnv/lib/layout_zellij.sh".text = ''

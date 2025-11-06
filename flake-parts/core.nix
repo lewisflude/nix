@@ -187,12 +187,14 @@ in {
       ;
     lib = functionsLib;
 
-    overlays.default = final: prev:
-      (import ../lib/overlay-builder.nix {
+    overlays.default = final: prev: let
+      overlaySet = import ../overlays {
         inherit inputs;
-        inherit (prev.stdenv.hostPlatform) system;
-      })
-      final
-      prev;
+        system = prev.stdenv.hostPlatform.system;
+      };
+      overlayList = builtins.attrValues overlaySet;
+      inherit (prev.lib) composeExtensions foldl';
+    in
+      (foldl' composeExtensions (_: _: {}) overlayList) final prev;
   };
 }
