@@ -6,9 +6,6 @@ _final: prev: {
   # Audio packages
   pipewire = prev.pipewire_git or prev.pipewire;
 
-  # Browser packages
-  firefox = prev.firefox_latest or prev.firefox;
-
   # Editor packages
   helix = prev.helix_git or prev.helix;
   zed-editor = prev.zed-editor_git or prev.zed-editor;

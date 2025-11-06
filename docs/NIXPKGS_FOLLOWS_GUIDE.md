@@ -24,7 +24,7 @@ Does the input provide:
 
 2. **Overlay Providers**
    - Any input that provides `overlays` that modify packages
-   - Examples: `rust-overlay`, `nur` (Nix User Repository)
+   - Examples: `rust-overlay`
    - **Why**: Overlays operate on nixpkgs packages and need version compatibility
 
 3. **Package Providers**

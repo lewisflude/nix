@@ -46,28 +46,7 @@ nix-homebrew = {
 
 ---
 
-### 3. `nur` (Nix User Repository) ⚠️ **MISSING**
-
-**Current:**
-
-```nix
-nur.url = "github:nix-community/NUR";
-```
-
-**Should be:**
-
-```nix
-nur = {
-  url = "github:nix-community/NUR";
-  inputs.nixpkgs.follows = "nixpkgs";
-};
-```
-
-**Reason:** Provides `modules.nixos.default` (see `lib/system-builders.nix:233`)
-
----
-
-### 4. `vpn-confinement` ⚠️ **MISSING**
+### 3. `vpn-confinement` ⚠️ **MISSING**
 
 **Current:**
 

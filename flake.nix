@@ -10,7 +10,6 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixpkgs-python.url = "github:cachix/nixpkgs-python";
     flake-parts.url = "github:hercules-ci/flake-parts";
     darwin = {
       url = "github:nix-darwin/nix-darwin/master";
@@ -53,16 +52,8 @@
       url = "github:musnix/musnix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    audio-nix = {
-      url = "github:polygon/audio.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     solaar = {
       url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nvidia-patch = {
-      url = "github:icewind1991/nvidia-patch-nixos";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
@@ -72,10 +63,6 @@
     };
     jsonresume-nix = {
       url = "https://flakehub.com/f/TaserudConsulting/jsonresume-nix/*.tar.gz";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nur = {
-      url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nh = {

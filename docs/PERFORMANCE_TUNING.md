@@ -33,8 +33,6 @@ This document outlines performance optimizations applied to this Nix configurati
 
 - **Tier 1 (Priority 1-5)**: Most reliable general-purpose caches
   - nix-community (priority=1), lewisflude (priority=2), nixpkgs-wayland (priority=3), etc.
-- **Tier 1.5 (Priority 6)**: Specialized but frequently used
-  - nixpkgs-python (priority=6) - Python 3.13 packages for Home Assistant only
 - **Tier 2 (Priority 7-11)**: Application-specific caches
   - niri, helix, ghostty, yazi, ags
 - **Tier 3 (Priority 12-16)**: Specialized/optional caches
@@ -394,10 +392,6 @@ The following inputs are candidates for future conversion to `buildTime = true` 
    - **Consideration**: May affect module discovery if modules reference hardware configs during evaluation
    - **Risk**: Low - only used in hardware-configuration.nix files
    - **Testing**: Requires validation that hardware modules are accessible during build-time fetch
-
-2. **`nvidia-patch`** (NVIDIA GPU patch, Linux-only)
-   - **Rationale**: Only used in overlays during build, not during evaluation
-   - **Status**: Not yet implemented (lower priority)
    - **Risk**: Low - overlay application happens at build time
    - **Testing**: Verify overlay still applies correctly
 

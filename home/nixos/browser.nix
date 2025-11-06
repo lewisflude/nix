@@ -10,7 +10,6 @@ let
     "x-scheme-handler/http"
     "x-scheme-handler/https"
   ];
-  addons = pkgs.nur.repos.rycee.firefox-addons;
   mimeDefaults = lib.genAttrs webMimeTypes (_type: [ desktopFile ]);
 in
 {
@@ -48,65 +47,6 @@ in
         "WebBrowser"
       ];
       terminal = false;
-    };
-  };
-  programs.firefox = {
-    enable = true;
-    package = pkgs.firefox;
-    profiles.default = {
-      id = 0;
-      isDefault = true;
-      name = "default";
-      extensions = {
-        force = true;
-        packages = with addons; [
-          ublock-origin
-          privacy-badger
-          kagi-search
-          onepassword-password-manager
-          firefox-color
-          clearurls
-          decentraleyes
-        ];
-      };
-      search = {
-        force = true;
-        default = "Kagi";
-        order = [ "Kagi" ];
-        engines.Kagi = {
-          urls = [
-            {
-              template = "https://kagi.com/search";
-              params = [
-                {
-                  name = "q";
-                  value = "{searchTerms}";
-                }
-              ];
-            }
-          ];
-          definedAliases = [ "@k" ];
-        };
-      };
-      settings = {
-        "privacy.trackingprotection.enabled" = true;
-        "privacy.trackingprotection.socialtracking.enabled" = true;
-        "privacy.trackingprotection.cryptomining.enabled" = true;
-        "privacy.trackingprotection.fingerprinting.enabled" = true;
-        "widget.use-xdg-desktop-portal.file-picker" = 1;
-        "media.ffmpeg.vaapi.enabled" = true;
-        "devtools.chrome.enabled" = true;
-        "devtools.debugger.remote-enabled" = true;
-        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
-        "gfx.webrender.all" = true;
-        "layers.acceleration.force-enabled" = true;
-        "media.hardware-video-decoding.enabled" = true;
-        "media.rdd-ffmpeg.enabled" = true;
-      };
-      userChrome = ''
-
-        :root[inFullscreen]
-      '';
     };
   };
   programs.chromium = {

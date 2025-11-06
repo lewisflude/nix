@@ -11,18 +11,21 @@
 ? **Current Approach:**
 
 - Standard nixpkgs Python packages (well-cached in nix-community cache)
-- nixpkgs-python overlay disabled due to compatibility issues
+- `nixpkgs-python` input has been removed (compatibility issues)
 
 ## Cache Configuration
 
 1. `nix-community.cachix.org` (priority=1) - ? Active - Has standard nixpkgs packages
-2. `nixpkgs-python.cachix.org` (priority=2) - ?? Not used (overlay disabled)
 
 **Status:** Using nix-community cache for all Python packages
 
-## Why nixpkgs-python Overlay is Disabled
+## Why nixpkgs-python Was Removed
 
-The overlay was disabled because nixpkgs-python packages have a different structure - they're missing the `dependencies` attribute that some nixpkgs code expects. This causes evaluation errors.
+The `nixpkgs-python` input was removed because:
+
+1. Its packages had a different structure missing the `dependencies` attribute
+2. This caused evaluation errors in some nixpkgs code
+3. Standard nixpkgs Python packages are well-cached in nix-community already
 
 ## Verification
 
@@ -42,6 +45,6 @@ nix build --verbose .#home-assistant 2>&1 | grep -E "substituting|copying"
 
 - Using standard nixpkgs Python packages (following wiki best practices)
 - Packages cached in nix-community cache (priority=1)
-- nixpkgs-python overlay disabled due to compatibility issues
+- `nixpkgs-python` input removed (not needed)
 
-This is the recommended approach from the NixOS wiki and should provide good cache coverage for most Python packages.
+This is the recommended approach from the NixOS wiki and provides good cache coverage for all Python packages.
