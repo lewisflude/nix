@@ -48,8 +48,7 @@ in
       };
     };
 
-    programs.helix = mkIf cfg.helix {
-      enable = true;
-    };
+    # Helix is provided by the chaotic module
+    # See: https://github.com/chaotic-cx/nyx/tree/main/homeModules
   };
 }
