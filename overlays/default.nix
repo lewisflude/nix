@@ -60,8 +60,8 @@ let
         # Only include packages that are actually used in the configuration
         # This avoids evaluating unused package definitions during every build
         usedPackages = {
-          ghostty = prev.callPackage (pkgsDir + "/ghostty") { inherit inputs; };
           cursor = prev.callPackage (pkgsDir + "/cursor") { };
+          # ghostty is now provided by chaotic-packages overlay (bleeding-edge version)
           # npm-packages overlay is imported separately below
           # pog-scripts are used in shells, not top-level
           # cockpit-extensions are used in cockpit modules, not top-level
