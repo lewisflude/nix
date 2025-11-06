@@ -12,10 +12,13 @@ let
     inherit getPython getNodejs;
 
     rustToolchain = with pkgs; [
-      rustc
-      cargo
-      rustfmt
-      clippy
+      # Use rust-overlay's pre-built binary toolchain (much faster than building from source)
+      # rust-bin.stable.latest.default provides: rustc, cargo, rustfmt, clippy, rust-std, rust-docs
+      # This matches rustup's default profile and uses pre-built binaries (no compilation needed)
+      (rust-bin.stable.latest.default.override {
+        extensions = [ "rust-src" ]; # Include rust-src for rust-analyzer
+      })
+      # rust-analyzer and cargo tools still come from nixpkgs (usually cached in binary caches)
       rust-analyzer
       cargo-watch
       cargo-audit
