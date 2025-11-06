@@ -182,7 +182,8 @@ in
   home = {
     packages = with pkgs; [
       uv
-      python3
+      # python3 is provided by pythonToolchain when python feature is enabled
+      # Removing to avoid conflict with python3.withPackages environment
       nodejs
       coreutils
       gawk
