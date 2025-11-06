@@ -16,6 +16,8 @@ let
       lib
       ;
   };
+  inherit (inputs.niri.packages.${system}) xwayland-satellite-unstable niri-unstable;
+  xwayland-satellite = xwayland-satellite-unstable;
 in
 {
   home.packages = with pkgs; [
@@ -28,7 +30,7 @@ in
     brightnessctl
     # Note: xdg-utils is handled in core-tooling.nix
     lxqt.lxqt-policykit
-    xwayland-satellite-unstable
+    xwayland-satellite
     argyllcms
     colord-gtk
     wl-gammactl
@@ -37,11 +39,11 @@ in
     ./niri/keybinds.nix
   ];
   programs.niri = {
-    package = pkgs.niri-unstable;
+    package = niri-unstable;
     settings = {
       xwayland-satellite = {
         enable = true;
-        path = "${lib.getExe pkgs.xwayland-satellite-unstable}";
+        path = "${lib.getExe xwayland-satellite}";
       };
       input = {
         keyboard = {
@@ -201,7 +203,7 @@ in
         }
         {
           command = [
-            "${lib.getExe pkgs.xwayland-satellite-unstable}"
+            "${lib.getExe xwayland-satellite}"
           ];
         }
         {
