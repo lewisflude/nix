@@ -12,10 +12,9 @@ let
   inherit (hostsConfig) hosts;
 
   functionsLib = import ../lib/functions.nix { inherit lib; };
-  validationLib = import ../lib/validation.nix { inherit lib; };
 
   systemBuilders = import ../lib/system-builders.nix {
-    inherit inputs validationLib;
+    inherit inputs;
   };
 
   outputBuilders = import ../lib/output-builders.nix {
@@ -231,7 +230,7 @@ in
         nixosConfigurations
         homeConfigurations
         ;
-      lib = functionsLib // validationLib;
+      lib = functionsLib;
 
       # Export overlays following flake-parts conventions
       # Overlays are defined at the top level (not under system attributes).

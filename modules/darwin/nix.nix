@@ -13,6 +13,7 @@
 
   # Custom Nix configuration that gets included by Determinate Nix
   # This file is included via !include directive in /etc/nix/nix.conf
+  # Binary caches are configured in flake.nix nixConfig, so we only set performance and security options here
   environment.etc."nix/nix.custom.conf" = {
     text = ''
       # User permissions
@@ -78,7 +79,7 @@
       # Note: In nix.conf format, this should be space-separated if multiple features are needed
       extra-experimental-features = build-time-fetch-tree
 
-      # Note: Binary caches and experimental features are configured in flake.nix nixConfig
+      # Note: Binary caches are configured in flake.nix nixConfig.extra-substituters and extra-trusted-public-keys
       # Those settings apply to both Darwin and NixOS systems via the flake
       # Note: Determinate Nix sets 'eval-cores' and 'lazy-trees' in /etc/nix/nix.conf
       # Note: GitHub access token is added dynamically via activation script

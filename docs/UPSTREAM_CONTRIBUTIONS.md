@@ -6,85 +6,30 @@ This document tracks evaluation and potential upstream contributions for overlay
 
 Reducing maintenance burden by contributing fixes upstream to nixpkgs or other repositories when they are generally applicable.
 
+## Current Status
+
+**✅ Optimized**: This configuration has been optimized to minimize cache-impacting overlays.
+
+All previously problematic overlays have been removed in favor of using upstream nixpkgs versions:
+
+- `pamixer.nix` - Removed, using upstream nixpkgs version
+- `mpd-fix.nix` - Removed, using upstream nixpkgs version
+- `nodejs-alias.nix` - Removed, using default nodejs
+- `webkitgtk-compat.nix` - Removed, packages now use versioned webkitgtk
+
+Current overlays are low-impact (aliases and new packages only):
+
+- `npm-packages.nix` - Adds new packages (nx-latest)
+- `chaotic-packages.nix` - Pure aliases to existing bleeding-edge packages
+- `localPkgs` - Custom packages not yet in nixpkgs (cursor, ghostty)
+
 ## Overlays Under Evaluation
 
-### 1. pamixer.nix
+**None currently** - All overlays are either:
 
-**Location**: `overlays/pamixer.nix`
-
-**Issue Description**:
-ICU 76.1+ requires C++17 for compilation (std::u16string_view and other features). The pamixer package doesn't set the C++17 flag by default, causing build failures.
-
-**Current Fix**:
-Adds `-std=c++17` to `NIX_CFLAGS_COMPILE` in the overlay.
-
-**Upstream Applicability**:
-
-- **Status**: ⏳ To Be Evaluated
-- **Impact**: Affects anyone using pamixer with ICU 76.1+
-- **Likelihood**: High - this is a compatibility issue that affects many users
-
-**Evaluation Steps**:
-
-- [ ] Search nixpkgs issues for "pamixer ICU" or "pamixer C++17"
-- [ ] Check if newer nixpkgs versions include the fix
-- [ ] Test building pamixer from current nixpkgs without overlay
-- [ ] Check pamixer upstream for C++17 support status
-- [ ] Document issue clearly with reproduction steps
-
-**Potential PR Approach**:
-If generally applicable, create PR to nixpkgs that adds C++17 flag to pamixer derivation.
-
-**Related Issues**:
-
-- [nixpkgs issue #XXXXX](https://github.com/NixOS/nixpkgs/issues/XXXXX) - [Status]
-- [pamixer issue #XXXXX](https://github.com/pulsemixer/pamixer/issues/XXXXX) - [Status]
-
-**Notes**:
-
-```
-[Add notes from evaluation]
-```
-
----
-
-### 2. mpd-fix.nix
-
-**Location**: `overlays/mpd-fix.nix`
-
-**Issue Description**:
-MPD build fails with io_uring on kernel 6.14.11+. The io_uring feature needs to be disabled to allow MPD to build successfully.
-
-**Current Fix**:
-Adds `-Dio_uring=disabled` to mesonFlags in the overlay.
-
-**Upstream Applicability**:
-
-- **Status**: ⏳ To Be Evaluated
-- **Impact**: Affects anyone building MPD on kernel 6.14.11+
-- **Likelihood**: Medium - may be kernel-specific or already fixed upstream
-
-**Evaluation Steps**:
-
-- [ ] Search nixpkgs issues for "MPD io_uring" or "MPD kernel 6.14"
-- [ ] Check MPD upstream for io_uring compatibility fixes
-- [ ] Test building MPD from current nixpkgs without overlay
-- [ ] Check if newer kernel versions (or MPD versions) resolve the issue
-- [ ] Document issue clearly with reproduction steps
-
-**Potential PR Approach**:
-If generally applicable, create PR to nixpkgs that disables io_uring for MPD (or makes it conditional on kernel version).
-
-**Related Issues**:
-
-- [nixpkgs issue #XXXXX](https://github.com/NixOS/nixpkgs/issues/XXXXX) - [Status]
-- [MPD issue #XXXXX](https://github.com/MusicPlayerDaemon/MPD/issues/XXXXX) - [Status]
-
-**Notes**:
-
-```
-[Add notes from evaluation]
-```
+1. Custom packages not in nixpkgs (cursor, ghostty)
+2. Pure aliases with no build modifications (chaotic-packages)
+3. New package additions (npm-packages)
 
 ---
 
@@ -147,8 +92,7 @@ If applicable:
 
 | Overlay | Issue | PR/Issue | Status | Date | Notes |
 |---------|-------|----------|--------|------|-------|
-| pamixer.nix | ICU 76.1+ C++17 | [Link] | [Status] | [Date] | [Notes] |
-| mpd-fix.nix | io_uring kernel 6.14.11+ | [Link] | [Status] | [Date] | [Notes] |
+| (None currently) | - | - | - | - | All cache-impacting overlays removed |
 
 ## Status Legend
 

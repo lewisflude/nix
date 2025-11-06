@@ -13,8 +13,8 @@
 # The order of overlays matters as later overlays can override earlier ones.
 #
 # PERFORMANCE CONSIDERATIONS:
-# Some overlays modify build flags (pamixer, mpd-fix) which cause cache misses.
-# Others (webkitgtk-compat, npm-packages) are pure aliases/additions with no impact.
+# Some overlays modify build flags, which can cause cache misses.
+# Others (npm-packages, chaotic-packages) are pure aliases/additions with no impact.
 # See individual overlay files for detailed performance notes.
 #
 # ADDING NEW OVERLAYS:
@@ -34,10 +34,6 @@
 let
   isLinux = system == "x86_64-linux" || system == "aarch64-linux";
 
-  # Helper to make conditional overlays
-  # Returns the overlay if condition is true, otherwise returns a no-op overlay
-  mkConditional = condition: overlay: if condition then overlay else (_final: _prev: { });
-
   overlaySet = {
     # === Core Overlays (always applied) ===
 
@@ -53,10 +49,6 @@ let
 
     # === Application Overlays (always applied) ===
     # These overlays provide custom packages and fixes
-
-    # Node.js version alias (disabled - using default nodejs)
-    # Previously aliased nodejs to nodejs_24, but now using default nodejs globally
-    nodejs-alias = import ./nodejs-alias.nix;
 
     # Explicitly list only packages actually used to avoid evaluation overhead
     # from directory scanning and unused package definitions
@@ -80,10 +72,7 @@ let
 
     # Package fixes and compatibility overlays
     # These overlays modify existing packages to fix build issues or provide compatibility
-    pamixer = import ./pamixer.nix; # Fixes ICU 76.1+ compatibility (C++17 flag)
-    mpd-fix = import ./mpd-fix.nix; # Fixes MPD io_uring issue on kernel 6.14.11
     npm-packages = import ./npm-packages.nix; # Promotes NPM packages to top-level (e.g., nx-latest)
-    webkitgtk-compat = import ./webkitgtk-compat.nix; # Compatibility alias for removed webkitgtk
 
     # Essential tools (conditional on input existence)
     nh =
@@ -145,29 +134,31 @@ let
     # === Platform-Specific Overlays ===
 
     # Audio production packages (Linux-only)
-    audio-nix = mkConditional (isLinux && inputs ? audio-nix && inputs.audio-nix ? overlays) (
-      if inputs ? audio-nix && inputs.audio-nix ? overlays then
+    audio-nix =
+      if isLinux && inputs ? audio-nix && inputs.audio-nix ? overlays then
         inputs.audio-nix.overlays.default
       else
-        (_final: _prev: { })
-    );
+        (_final: _prev: { });
 
     # Linux-only
-    niri = mkConditional (isLinux && inputs ? niri && inputs.niri ? overlays) (
-      if inputs ? niri && inputs.niri ? overlays then inputs.niri.overlays.niri else (_final: _prev: { })
-    );
-    nvidia-patch = mkConditional (isLinux && inputs ? nvidia-patch && inputs.nvidia-patch ? overlays) (
-      if inputs ? nvidia-patch && inputs.nvidia-patch ? overlays then
+    niri =
+      if isLinux && inputs ? niri && inputs.niri ? overlays then
+        inputs.niri.overlays.niri
+      else
+        (_final: _prev: { });
+
+    nvidia-patch =
+      if isLinux && inputs ? nvidia-patch && inputs.nvidia-patch ? overlays then
         inputs.nvidia-patch.overlays.default
       else
-        (_final: _prev: { })
-    );
+        (_final: _prev: { });
 
     # Chaotic-Nyx bleeding-edge packages (Linux-only)
     # Replaces stable packages with bleeding-edge versions from Chaotic-Nyx
     # Chaotic module adds packages with _git suffix, this overlay makes them default
     # Must come after chaotic module is applied (which happens in system-builders.nix)
-    chaotic-packages = mkConditional (isLinux && inputs ? chaotic) (import ./chaotic-packages.nix);
+    chaotic-packages =
+      if isLinux && inputs ? chaotic then import ./chaotic-packages.nix else (_final: _prev: { });
   };
 in
 overlaySet

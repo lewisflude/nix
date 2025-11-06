@@ -83,20 +83,6 @@ let
       homebrew.brews = packages;
     };
 
-  # Virtualisation flag getter
-  getVirtualisationFlag =
-    {
-      virtualisation ? { },
-      modulesVirtualisation ? { },
-      flagName,
-      default ? false,
-    }:
-    let
-      flagPath = if builtins.isList flagName then flagName else lib.splitString "." flagName;
-      mergedVirtualisation = lib.recursiveUpdate modulesVirtualisation virtualisation;
-    in
-    lib.attrByPath flagPath default mergedVirtualisation;
-
   # System rebuild command generator
   # Uses nh for NixOS (recommended with Determinate Nix) and darwin-rebuild for macOS
   systemRebuildCommand =
@@ -122,7 +108,6 @@ let
     {
       inputs,
       hostConfig,
-      virtualisationLib,
       includeUserFields ? true,
     }:
     inputs
@@ -138,9 +123,6 @@ let
     }
     // {
       virtualisation = hostConfig.features.virtualisation or { };
-      modulesVirtualisation = virtualisationLib.mkModulesVirtualisationArgs {
-        hostVirtualisation = hostConfig.features.virtualisation or { };
-      };
     };
 
   # Version management (defined at top level for use in withSystem)
@@ -189,7 +171,6 @@ let
       inherit system;
       inherit versions;
       inherit getVersionedPackage;
-      inherit getVirtualisationFlag;
 
       # System detection (bound to system)
       isLinux = isLinux system;
@@ -254,9 +235,6 @@ let
 
     # System service helpers
     inherit enableSystemService brewPackages;
-
-    # Virtualisation flag getter
-    inherit getVirtualisationFlag;
 
     # System rebuild command generator
     inherit systemRebuildCommand;

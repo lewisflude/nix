@@ -37,18 +37,18 @@ in
         enable = true;
         nix-direnv.enable = true;
       };
-      git = mkIf (cfg.git or false) {
+      git = mkIf cfg.git {
         enable = true;
         lfs.enable = true;
       };
-      neovim = mkIf (cfg.neovim or false) {
+      neovim = mkIf cfg.neovim {
         enable = true;
         viAlias = true;
         vimAlias = true;
       };
     };
 
-    programs.helix = mkIf (cfg.helix or false) {
+    programs.helix = mkIf cfg.helix {
       enable = true;
     };
   };

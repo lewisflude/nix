@@ -125,60 +125,55 @@ This document outlines performance optimizations applied to this Nix configurati
 
 ## Known Performance Trade-offs
 
-### Overlay Usage (Tip 10) ⚠️
+### Overlay Usage (Tip 10) ✅
 
-Overlays can modify package builds, causing cache misses and local rebuilds. This section documents the performance impact of each overlay.
+Overlays can modify package builds, causing cache misses and local rebuilds. This configuration has been optimized to minimize cache-impacting overlays.
 
-#### High Impact Overlays (Cause Cache Misses)
+#### Current Overlay Strategy
 
-These overlays modify build flags or compilation settings, forcing local rebuilds:
+**✅ Optimized**: All cache-impacting overlays have been removed. The remaining overlays are low-impact:
 
-1. **pamixer.nix**: Modifies C++ compilation flags for ICU 76.1 compatibility
-   - **Impact**: Forces local rebuild of pamixer and dependencies
-   - **Rationale**: Necessary for compatibility with newer ICU versions
-   - **Status**: Acceptable trade-off for compatibility
-   - **Removal**: Can be removed when nixpkgs includes C++17 support by default
-
-2. **mpd-fix.nix**: Disables io_uring for MPD build
-   - **Impact**: Forces local rebuild of MPD
-   - **Rationale**: Required to fix build failures on kernel 6.14.11
-   - **Status**: Acceptable trade-off for functionality
-   - **Removal**: Can be removed when MPD upstream fixes io_uring compatibility
-
-#### Low Impact Overlays (No Cache Misses)
-
-These overlays provide aliases or add new packages without modifying builds:
-
-3. **webkitgtk-compat.nix**: Compatibility alias for removed webkitgtk
-   - **Impact**: None (pure evaluation-time alias)
-   - **Rationale**: Maintains compatibility with packages not yet updated to versioned variants
-   - **Removal**: Can be removed when all packages use webkitgtk_6_0 or similar
-
-4. **npm-packages.nix**: Promotes NPM packages to top-level
+1. **npm-packages.nix**: Promotes NPM packages to top-level
    - **Impact**: None (creates new derivations, but binary cache should have them)
    - **Rationale**: Provides easy access to latest Nx tooling
    - **Removal**: Can be removed when packages are added to nixpkgs upstream
 
+2. **chaotic-packages.nix**: Aliases bleeding-edge packages from Chaotic-Nyx
+   - **Impact**: None (pure aliases to existing packages)
+   - **Rationale**: Simplifies access to bleeding-edge versions (e.g., helix_git → helix)
+   - **Removal**: Can be removed if bleeding-edge versions are not needed
+
+3. **localPkgs**: Custom packages from `pkgs/` directory
+   - **Impact**: Minimal (only packages actually used are included)
+   - **Rationale**: Provides packages not yet in nixpkgs (cursor, ghostty)
+   - **Removal**: Individual packages can be removed as they are upstreamed
+
 #### Trade-off Analysis
 
-**When to use overlays**:
+**Current approach**: Prioritize cache hits over custom fixes
 
-- ✅ Fixing critical build failures (pamixer, mpd-fix)
-- ✅ Providing compatibility shims (webkitgtk-compat)
-- ✅ Adding custom packages (localPkgs, npm-packages)
+- ✅ Using packages from nixpkgs whenever possible
+- ✅ Accepting upstream package versions (even if slightly outdated)
+- ✅ Only using overlays for new packages or pure aliases
+
+**When to add new overlays**:
+
+- ✅ Adding custom packages (localPkgs)
+- ✅ Providing pure aliases (no build modifications)
+- ⚠️ Fixing critical build failures (document and upstream fix)
 
 **When to avoid overlays**:
 
 - ❌ Cosmetic changes that don't fix issues
 - ❌ Modifications that can be upstreamed quickly
-- ❌ Changes that affect many packages (use overlays sparingly)
+- ❌ Changes that affect many packages (causes extensive cache misses)
 
 **Minimizing Impact**:
 
 - Keep overlays minimal and focused
 - Document removal conditions clearly
 - Regularly check if fixes are upstreamed
-- Prefer package overrides over full rebuilds when possible
+- Prefer waiting for upstream fixes over local overlays
 
 **Monitoring Overlay Impact**:
 
