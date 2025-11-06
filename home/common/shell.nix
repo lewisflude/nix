@@ -364,7 +364,7 @@ in
           source ${sources.zsh_codex.src}/zsh_codex.plugin.zsh
           bindkey '^X' create_completion
 
-          # Initialize powerlevel10k (as recommended by nixpkgs)
+          # Initialize powerlevel10k (as recommended by nixpkgs, using initContent since promptInit is NixOS-only)
           source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
           # Initialize zoxide at the very end of shell configuration
           eval "$(zoxide init zsh)"
