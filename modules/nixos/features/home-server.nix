@@ -1,5 +1,3 @@
-# Home server feature module for NixOS
-# Controlled by host.features.homeServer.*
 {
   config,
   lib,
@@ -11,7 +9,7 @@ let
 in
 {
   config = mkIf cfg.enable {
-    # Home server services
+
     services = mkMerge [
       (mkIf cfg.homeAssistant {
         home-assistant = {
@@ -68,7 +66,6 @@ in
       })
     ];
 
-    # Open firewall ports for services
     networking.firewall = mkMerge [
       (mkIf cfg.homeAssistant {
         allowedTCPPorts = [ 8123 ];

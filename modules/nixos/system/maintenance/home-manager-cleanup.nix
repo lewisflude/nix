@@ -25,7 +25,6 @@
             ${pkgs.coreutils}/bin/xargs -0 -r rm -f 2>/dev/null || true
         fi
       }
-      cleanup_backup_files "$USER_HOME/.mozilla/firefox" "Firefox"
       cleanup_backup_files "$USER_HOME/.config" "config"
       cleanup_backup_files "$USER_HOME/.local/share" "local data"
       if [ -d "$USER_HOME" ]; then

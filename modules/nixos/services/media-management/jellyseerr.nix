@@ -1,4 +1,3 @@
-# Jellyseerr - Request management
 {
   config,
   lib,
@@ -24,7 +23,7 @@ in
     };
 
     systemd.services.jellyseerr = {
-      # Soft dependency on jellyfin and shared runtime configuration
+
       after = mkAfter (optional cfg.jellyfin.enable "jellyfin.service");
       environment = {
         TZ = cfg.timezone;

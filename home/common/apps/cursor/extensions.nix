@@ -10,7 +10,7 @@ let
   coreLangs = [
     vsc.jnoortheen.nix-ide
     vsc.bradlc.vscode-tailwindcss
-    # vsc.rust-lang.rust-analyzer # Temporarily disabled due to build error with keytar on macOS
+
     vsc.tamasfe.even-better-toml
   ];
   extraLangs = [

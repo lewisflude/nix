@@ -1,9 +1,7 @@
-# Shared feature defaults for all hosts
-# Hosts can import this set and override only host-specific toggles
 {
   development = {
     enable = true;
-    git = true; # Required for rust development
+    git = true;
     neovim = false;
     rust = true;
     python = true;
@@ -11,7 +9,7 @@
     node = true;
     lua = false;
     docker = false;
-    java = false; # Override to true if Java is needed
+    java = false;
   };
 
   gaming = {
@@ -31,12 +29,11 @@
     fileSharing = false;
   };
 
-  # Native media management services (preferred)
   mediaManagement = {
     enable = false;
     dataPath = "/mnt/storage";
     timezone = "Europe/London";
-    # Individual service toggles - all default to true when mediaManagement.enable = true
+
     prowlarr = {
       enable = true;
     };
@@ -75,13 +72,12 @@
     };
   };
 
-  # Native AI tools services (Ollama, Open WebUI)
   aiTools = {
     enable = false;
     ollama = {
       enable = true;
-      acceleration = null; # null, "cuda", or "rocm"
-      models = [ ]; # e.g. ["llama2" "mistral"]
+      acceleration = null;
+      models = [ ];
     };
     openWebui = {
       enable = true;
@@ -89,7 +85,6 @@
     };
   };
 
-  # Supplemental container services (no native modules available)
   containersSupplemental = {
     enable = false;
     homarr = {
@@ -144,11 +139,11 @@
     enable = false;
     realtime = false;
     production = false;
-    # Audio.nix packages (polygon/audio.nix)
+
     audioNix = {
       enable = false;
-      bitwig = true; # Bitwig Studio (latest beta) - only used if audioNix.enable = true
-      plugins = true; # Install all available plugins - only used if audioNix.enable = true
+      bitwig = true;
+      plugins = true;
     };
   };
 
@@ -156,6 +151,6 @@
     enable = true;
     yubikey = true;
     gpg = true;
-    # firewall defaults to false
+
   };
 }

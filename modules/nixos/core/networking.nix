@@ -67,8 +67,8 @@
         8888
         5656
         3001
-        8083 # qBittorrent WebUI (VPN-Confinement)
-        8090 # Janitorr (changed from 8080 to avoid conflict with qBittorrent)
+        8083
+        8090
       ];
       allowedUDPPorts = [
         5353

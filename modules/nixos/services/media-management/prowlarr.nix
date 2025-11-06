@@ -1,4 +1,3 @@
-# Prowlarr - Indexer manager
 {
   config,
   lib,
@@ -21,7 +20,6 @@ in
       openFirewall = true;
     };
 
-    # Set timezone, user, and group via systemd
     systemd.services.prowlarr = {
       environment = {
         TZ = config.host.services.mediaManagement.timezone;

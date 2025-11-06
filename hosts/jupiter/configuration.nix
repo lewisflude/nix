@@ -5,7 +5,6 @@
   ...
 }:
 {
-  # Host configuration using the new options system
 
   imports = [
     ./hardware-configuration.nix
@@ -36,12 +35,6 @@
     wheelNeedsPassword = false;
   };
 
-  # Limit system generations to save space
   boot.loader.systemd-boot.configurationLimit = 5;
 
-  # WireGuard ProtonVPN configuration for qBittorrent
-  # Note: VPN-Confinement manages the WireGuard interface using a config file stored in sops
-  # The WireGuard config file should be stored in secrets.yaml as "vpn-confinement/qbittorrent"
-  # Format: Standard WireGuard config file with [Interface] and [Peer] sections
-  # VPN-Confinement handles interface creation, DNS configuration, and leak prevention automatically
 }

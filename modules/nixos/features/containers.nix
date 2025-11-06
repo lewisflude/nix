@@ -1,5 +1,3 @@
-# Container services feature module
-# Bridges host.features.containers to host.services.containers
 {
   config,
   lib,
@@ -44,7 +42,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Enable container services
+
     host.services.containers = {
       enable = true;
 
@@ -59,13 +57,11 @@ in
         inherit (cfg.productivity) configPath;
       };
 
-      # Set timezone and user/group IDs from system config
       timezone = mkDefault (config.time.timeZone or "Europe/London");
       uid = mkDefault 1000;
       gid = mkDefault 100;
     };
 
-    # Ensure Podman is enabled
     host.features.virtualisation = {
       enable = true;
       podman = true;

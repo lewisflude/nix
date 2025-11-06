@@ -6,7 +6,7 @@
   ...
 }:
 let
-  # Get Catppuccin palette colors
+
   catppuccinPalette =
     if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
       (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
@@ -30,9 +30,9 @@ in
         save_dir = "${config.home.homeDirectory}/Pictures/Screenshots";
         save_filename_format = "swappy-%Y%m%d-%H%M%S.png";
         show_panel = true;
-        fill_color = "${catppuccinPalette.base.hex}80"; # Base color with transparency
-        line_color = "${catppuccinPalette.mauve.hex}ff"; # Mauve accent color
-        text_color = "${catppuccinPalette.text.hex}ff"; # Text color
+        fill_color = "${catppuccinPalette.base.hex}80";
+        line_color = "${catppuccinPalette.mauve.hex}ff";
+        text_color = "${catppuccinPalette.text.hex}ff";
         text_font = "sans-serif";
         text_size = 16;
         line_size = 5;

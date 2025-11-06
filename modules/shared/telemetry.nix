@@ -1,6 +1,3 @@
-# Local-only usage telemetry for tracking feature usage and rebuild patterns
-# All data is stored locally - nothing is sent to external services
-# This helps you understand which features you actually use
 {
   config,
   lib,
@@ -20,24 +17,21 @@ let
   cfg = config.telemetry;
   isLinux = hasSuffix "linux" hostSystem;
 
-  # Generate telemetry data
-
-  # Script to collect runtime telemetry
   collectTelemetryScript = pkgs.writeShellScript "collect-telemetry" ''
     #!/usr/bin/env bash
-    # Collect runtime telemetry data
+
 
     TELEMETRY_DIR="${cfg.dataDir}"
     TELEMETRY_FILE="$TELEMETRY_DIR/telemetry.json"
     HISTORY_FILE="$TELEMETRY_DIR/history.json"
 
-    # Create directory if needed
+
     mkdir -p "$TELEMETRY_DIR"
 
-    # Generate timestamp
+
     TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-    # Count packages
+
     SYSTEM_PACKAGES=$(${
       if isLinux then
         "nix-env -q --installed --profile /nix/var/nix/profiles/system | wc -l"
@@ -46,7 +40,7 @@ let
     })
     USER_PACKAGES=$(nix-env -q --installed | wc -l)
 
-    # Get current generation
+
     ${
       if isLinux then
         ''
@@ -60,7 +54,7 @@ let
         ''
     }
 
-    # Calculate days since last rebuild
+
     if [ -f "$TELEMETRY_FILE" ]; then
       LAST_REBUILD=$(${pkgs.jq}/bin/jq -r '.lastRebuild // "0"' "$TELEMETRY_FILE")
       CURRENT_TIME=$(date +%s)
@@ -69,7 +63,7 @@ let
       DAYS_SINCE=0
     fi
 
-    # Generate telemetry JSON
+
     cat > "$TELEMETRY_FILE" <<EOF
     {
       "version": "1.0.0",
@@ -98,7 +92,7 @@ let
     }
     EOF
 
-    # Append to history
+
     if [ -f "$HISTORY_FILE" ]; then
       ${pkgs.jq}/bin/jq -s '. += [input]' "$HISTORY_FILE" "$TELEMETRY_FILE" > "$HISTORY_FILE.tmp"
       mv "$HISTORY_FILE.tmp" "$HISTORY_FILE"
@@ -106,7 +100,7 @@ let
       cp "$TELEMETRY_FILE" "$HISTORY_FILE"
     fi
 
-    # Keep only last ${toString cfg.historyDays} days of history
+
     ${pkgs.jq}/bin/jq --arg cutoff "$(date -d "${toString cfg.historyDays} days ago" +%s 2>/dev/null || date -v-${toString cfg.historyDays}d +%s)" \
       '[.[] | select(.rebuild.lastRebuild > ($cutoff | tonumber))]' \
       "$HISTORY_FILE" > "$HISTORY_FILE.tmp" || cp "$HISTORY_FILE" "$HISTORY_FILE.tmp"
@@ -122,10 +116,9 @@ let
     ''}
   '';
 
-  # Script to view telemetry stats
   viewTelemetryScript = pkgs.writeShellScript "view-telemetry" ''
       #!/usr/bin/env bash
-      # View telemetry statistics
+
 
       TELEMETRY_FILE="${cfg.dataDir}/telemetry.json"
       HISTORY_FILE="${cfg.dataDir}/history.json"
@@ -140,7 +133,7 @@ let
       echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
       echo ""
 
-      # Current stats
+
       echo "📦 Current State:"
       ${pkgs.jq}/bin/jq -r '"  Hostname: \(.hostname)
     Platform: \(.system.platform)
@@ -185,7 +178,7 @@ let
       echo ""
       echo "💡 Usage Insights:"
 
-      # Feature usage
+
       if ${pkgs.jq}/bin/jq -e '.features.development.enable' "$TELEMETRY_FILE" > /dev/null; then
         echo "  ✅ Development features are enabled"
       else
@@ -234,7 +227,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Add telemetry collection scripts to environment
+
     environment.systemPackages = [
       (pkgs.writeShellScriptBin "collect-telemetry" ''
         exec ${collectTelemetryScript}
@@ -244,14 +237,12 @@ in
       '')
     ];
 
-    # Create telemetry data directory (Darwin only - NixOS uses systemd tmpfiles)
     system.activationScripts.telemetry = mkIf (!isLinux) {
       text = ''
         mkdir -p ${cfg.dataDir}
       '';
     };
 
-    # Run on system activation (Darwin only - NixOS uses systemd service)
     system.activationScripts.telemetry-collect = mkIf (!isLinux && cfg.collectOnBuild) {
       text = ''
         ${collectTelemetryScript}

@@ -1,6 +1,3 @@
-# Gaming feature module for NixOS
-# Controlled by host.features.gaming.*
-# Integrates Chaotic-Nyx gaming packages and performance optimizations
 {
   config,
   lib,
@@ -14,14 +11,14 @@ let
 in
 {
   config = mkIf cfg.enable {
-    # Steam configuration with enhanced features
+
     programs.steam = mkIf cfg.steam {
       enable = true;
       gamescopeSession.enable = true;
       protontricks.enable = true;
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
-      # Use chaotic steam (bleeding-edge) if available, otherwise fall back to stable
+
       package = pkgs.steam.override {
         extraPkgs =
           pkgs: with pkgs; [
@@ -39,7 +36,6 @@ in
       };
     };
 
-    # Sunshine game streaming service
     services.sunshine = mkIf cfg.steam {
       enable = true;
       package = pkgs.sunshine.override { cudaSupport = true; };
@@ -48,63 +44,51 @@ in
       openFirewall = true;
     };
 
-    # Gaming device udev rules
     services.udev = mkIf cfg.enable {
       packages = with pkgs; [
         game-devices-udev-rules
       ];
     };
 
-    # Enable uinput for virtual input devices
     hardware.uinput.enable = mkIf cfg.enable true;
 
-    # Gaming performance optimizations
     boot.kernel.sysctl = mkIf cfg.performance {
-      "vm.max_map_count" = 2147483642; # Needed for some games
+      "vm.max_map_count" = 2147483642;
     };
 
-    # Chaotic-Nyx gaming optimizations
-    # Use CachyOS kernel for gaming performance (if performance is enabled)
-    # Use mkForce to override the default kernel from boot.nix
     boot.kernelPackages = mkIf cfg.performance (mkForce pkgs.linuxPackages_cachyos);
 
-    # Enable bleeding-edge Mesa drivers for better gaming performance
     chaotic.mesa-git.enable = mkIf cfg.performance true;
 
-    # Install gaming-related packages
     environment.systemPackages =
       with pkgs;
       [
-        # Core gaming tools
-        protonup-qt # Proton version manager
-        wine # Windows compatibility layer
-        winetricks # Wine utilities
+
+        protonup-qt
+        wine
+        winetricks
       ]
-      # Steam packages
+
       ++ optionals cfg.steam [
         steamcmd
         steam-run
-        # Chaotic-Nyx bleeding-edge gaming packages (now default via overlay)
-        gamescope # Latest Gamescope for better performance (from chaotic overlay)
+
+        gamescope
       ]
-      # Performance tools
+
       ++ optionals cfg.performance [
-        mangohud # Bleeding-edge MangoHud from Chaotic-Nyx (now default via overlay)
-        gamemode # Performance optimization daemon
+        mangohud
+        gamemode
       ]
-      # Lutris game manager
+
       ++ optionals cfg.lutris [
         lutris
       ]
-      # Emulators
+
       ++ optionals cfg.emulators [
-        # Add popular emulators here
-        # dolphin-emu # GameCube/Wii
-        # pcsx2 # PlayStation 2
-        # rpcs3 # PlayStation 3
+
       ];
 
-    # Gamemode for performance optimization
     programs.gamemode = mkIf cfg.performance {
       enable = true;
       settings = {
@@ -114,19 +98,17 @@ in
         gpu = {
           apply_gpu_optimisations = "accept-responsibility";
           gpu_device = 0;
-          # AMD performance level (adjust for NVIDIA if needed)
+
           amd_performance_level = "high";
         };
       };
     };
 
-    # Graphics drivers & OpenGL support
     hardware.graphics = mkIf cfg.enable {
       enable = true;
-      enable32Bit = true; # For 32-bit games
+      enable32Bit = true;
     };
 
-    # Assertions
     assertions = [
       {
         assertion = cfg.emulators -> cfg.enable;

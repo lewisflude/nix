@@ -29,7 +29,7 @@
         identitiesOnly = true;
         forwardAgent = false;
         user = "git";
-        # GitHub's SSH fingerprints - these are well-known and safe to verify
+
         extraOptions = {
           StrictHostKeyChecking = "yes";
         };

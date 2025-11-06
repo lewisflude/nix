@@ -16,15 +16,14 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Enable all documentation types
+
     documentation = {
-      enable = true; # Master switch for documentation
-      doc.enable = true; # Enable documentation distributed in packages' /share/doc
-      info.enable = true; # Enable GNU info pages and info command
-      man.enable = true; # Enable man pages and man command
+      enable = true;
+      doc.enable = true;
+      info.enable = true;
+      man.enable = true;
     };
 
-    # Set the nix-darwin configuration path
     environment.darwinConfig = "$HOME/.config/nix";
   };
 }

@@ -1,6 +1,3 @@
-# Virtualisation feature module (cross-platform)
-# Controlled by host.features.virtualisation.*
-# Provides unified virtualization configuration for NixOS and Darwin
 {
   config,
   lib,
@@ -18,7 +15,7 @@ let
 in
 {
   config = mkIf cfg.enable {
-    # NixOS-specific virtualization configuration
+
     virtualisation = mkIf isLinux (mkMerge [
       (mkIf cfg.docker {
         docker = {
@@ -34,7 +31,7 @@ in
       (mkIf cfg.podman {
         podman = {
           enable = true;
-          dockerCompat = !cfg.docker; # Only if docker is not enabled
+          dockerCompat = !cfg.docker;
           defaultNetwork.settings.dns_enabled = true;
         };
       })
@@ -62,42 +59,35 @@ in
       })
     ]);
 
-    # Add user to virtualisation groups (NixOS only)
     users.users.${config.host.username}.extraGroups = mkIf isLinux (
       optional cfg.docker "docker" ++ optional cfg.qemu "libvirtd" ++ optional cfg.virtualbox "vboxusers"
     );
 
-    # System-level packages (NixOS only)
     environment.systemPackages = mkIf isLinux (
       with pkgs;
       optionals cfg.qemu [
-        virt-manager # Virtual machine manager GUI
-        qemu # QEMU emulator
-        qemu_kvm # QEMU with KVM support
+        virt-manager
+        qemu
+        qemu_kvm
       ]
-      # Podman tools
+
       ++ optionals cfg.podman [
-        podman-compose # Podman Compose
-        buildah # Build container images
-        skopeo # Container image management
+        podman-compose
+        buildah
+        skopeo
       ]
-      # Docker tools (system-level, client tools in home-manager)
+
       ++ optionals cfg.docker [
-        docker-client # Docker CLI
+        docker-client
       ]
     );
 
-    # Darwin-specific virtualization handling
-    # Note: Docker Desktop on macOS is typically installed via Homebrew or Docker Desktop installer
-    # This module provides configuration hooks for potential future integration
-    # For now, Darwin users should use Docker Desktop or colima
     homebrew = mkIf isDarwin {
       casks = optionals cfg.docker [
-        "docker" # Docker Desktop for macOS
+        "docker"
       ];
     };
 
-    # Assertions
     assertions = [
       {
         assertion = !(cfg.docker && cfg.podman) || isLinux;

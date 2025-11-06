@@ -1,4 +1,3 @@
-# Open WebUI - Web interface for LLMs
 {
   config,
   lib,
@@ -21,16 +20,13 @@ in
       };
     };
 
-    # Open firewall
     networking.firewall.allowedTCPPorts = [ cfg.openWebui.port ];
 
-    # Run as common productivity user
     systemd.services.open-webui.serviceConfig = {
       User = cfg.user;
       Group = cfg.group;
     };
 
-    # Soft dependency on ollama
     systemd.services.open-webui = {
       after = mkAfter (optional cfg.ollama.enable "ollama.service");
     };

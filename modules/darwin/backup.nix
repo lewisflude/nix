@@ -50,7 +50,7 @@
       StandardErrorPath = "/Users/${username}/Library/Logs/nix-git-backup-error.log";
     };
   };
-  # Time Machine exclusions for development directories
+
   system.defaults.CustomUserPreferences."com.apple.TimeMachine".SkipPaths = [
     "/Users/${username}/.cache"
     "/Users/${username}/.npm"
@@ -58,7 +58,7 @@
     "/Users/${username}/.cargo"
     "/Users/${username}/.rustup"
     "/Users/${username}/Library/Caches"
-    # Additional development paths
+
     "/Users/${username}/.pnpm-store"
     "/Users/${username}/.yarn"
     "/Users/${username}/.gradle"

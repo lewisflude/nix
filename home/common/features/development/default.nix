@@ -1,6 +1,3 @@
-# Home Manager development feature module (cross-platform)
-# Controlled by host.features.development.*
-# Provides user-level development packages for both NixOS and Darwin
 {
   lib,
   pkgs,
@@ -31,7 +28,6 @@ in
       inherit cfg pkgs platformLib;
     };
 
-    # Program configurations
     programs = {
       direnv = {
         enable = true;
@@ -48,7 +44,5 @@ in
       };
     };
 
-    # Helix is provided by the chaotic module
-    # See: https://github.com/chaotic-cx/nyx/tree/main/homeModules
   };
 }

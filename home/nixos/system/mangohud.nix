@@ -6,7 +6,7 @@
   ...
 }:
 let
-  # Get Catppuccin palette colors
+
   catppuccinPalette =
     if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
       (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
@@ -22,13 +22,12 @@ let
     else
       throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
 
-  # Convert hex color to RGB (0-1 range) for Mangohud
   hexToRgb =
     hex:
     let
-      # Remove # or 0x prefix if present
-      hexClean = lib.removePrefix "#" (lib.removePrefix "0x" hex);
-      # Convert hex digits to decimal manually
+
+      hexClean = lib.removePrefix "#" hex;
+
       hexDigitToInt =
         c:
         if c == "0" then
@@ -73,7 +72,6 @@ let
     in
     "${toString r},${toString g},${toString b}";
 
-  # Catppuccin Mocha colors (RGB format for Mangohud)
   colors = {
     base = hexToRgb catppuccinPalette.base.hex;
     mantle = hexToRgb catppuccinPalette.mantle.hex;

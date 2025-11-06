@@ -1,5 +1,3 @@
-# Bridge module: Maps host.features.mediaManagement to host.services.mediaManagement
-# This allows host configurations to use the features interface
 {
   config,
   lib,
@@ -11,7 +9,7 @@ let
 in
 {
   config = mkIf cfg.enable {
-    # Map features to services
+
     host.services.mediaManagement = {
       enable = true;
       dataPath = cfg.dataPath or "/mnt/storage";

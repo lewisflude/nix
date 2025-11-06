@@ -1,4 +1,3 @@
-# qBittorrent - BitTorrent client
 {
   config,
   lib,
@@ -22,8 +21,6 @@ let
   inherit (lib.lists) optional;
   cfg = config.host.services.mediaManagement;
 
-  # Generate qBittorrent configuration file from Nix options
-  # Following the pattern from the article
   generateConfig =
     attrs:
     concatStringsSep "\n\n" (
@@ -46,24 +43,15 @@ let
       ) (filterAttrs (_: v: v != { }) attrs)
     );
 
-  # Helper to get interfaceName
-  # When VPN-Confinement is enabled, it handles routing automatically, so we don't need to set interfaceName
   interfaceNameValue =
     if cfg.qbittorrent.bittorrent.interfaceName != null then
       cfg.qbittorrent.bittorrent.interfaceName
-    # VPN-Confinement handles routing via namespace, so no need to set interfaceName
+
     else
       null;
 
-  # Check if VPN is enabled (needed for config generation)
   vpnEnabled = cfg.qbittorrent.vpn.enable;
 
-  # Helper to get Connection\NetworkInterface value
-  # When VPN-Confinement is enabled, bind to WireGuard interface name inside the namespace
-  # (typically wg0). This creates a kill switch at the application level - if VPN disconnects,
-  # qBittorrent can't access the internet because it's bound to the VPN interface.
-  # VPN-Confinement provides network isolation at the system level, while this setting
-  # provides an additional application-level kill switch.
   connectionNetworkInterfaceValue =
     if cfg.qbittorrent.connection.networkInterface != null then
       cfg.qbittorrent.connection.networkInterface
@@ -72,7 +60,6 @@ let
     else
       null;
 
-  # Create the qBittorrent configuration file
   qbittorrentConf = pkgs.writeText "qBittorrent.conf" (generateConfig {
     BitTorrent = filterAttrs (_: v: v != null) {
       "Session\\BTProtocol" = cfg.qbittorrent.bittorrent.protocol;
@@ -106,7 +93,7 @@ let
       "PortForwardingEnabled" = cfg.qbittorrent.network.portForwardingEnabled;
     };
     Preferences = filterAttrs (_: v: v != null) {
-      # WebUI must be explicitly enabled for the WebUI server to start
+
       "WebUI\\Enabled" = true;
       "WebUI\\LocalHostAuth" = cfg.qbittorrent.webUI.localHostAuth;
       "WebUI\\AuthSubnetWhitelist" = cfg.qbittorrent.webUI.authSubnetWhitelist;
@@ -121,7 +108,7 @@ let
       "WebUI\\Password_PBKDF2" = cfg.qbittorrent.webUI.password;
       "WebUI\\CSRFProtection" = cfg.qbittorrent.webUI.csrfProtection;
       "WebUI\\ClickjackingProtection" = cfg.qbittorrent.webUI.clickjackingProtection;
-      # Connection settings for VPN kill switch and network configuration
+
       "Connection\\NetworkInterface" = connectionNetworkInterfaceValue;
       "Connection\\NetworkInterfaceAddress" = cfg.qbittorrent.connection.networkInterfaceAddress;
       "Connection\\IPFilter\\Enabled" = cfg.qbittorrent.connection.ipFilterEnabled;
@@ -135,8 +122,8 @@ let
   });
 
   inherit (cfg.qbittorrent) configDir;
-  # VPN namespace name (must match qbittorrent-vpn-confinement.nix)
-  vpnNamespace = "qbittor"; # Max 7 chars for VPN-Confinement
+
+  vpnNamespace = "qbittor";
 in
 {
   options.host.services.mediaManagement.qbittorrent = {
@@ -440,19 +427,17 @@ in
   };
 
   config = mkIf (cfg.enable && cfg.qbittorrent.enable) {
-    # Create config directory and qBittorrent directories
-    # qBittorrent expects its config at $XDG_CONFIG_HOME/qBittorrent/qBittorrent.conf
-    # With XDG_CONFIG_HOME=${configDir}, that's ${configDir}/qBittorrent/qBittorrent.conf
+
     systemd.tmpfiles.rules = [
       "d '${configDir}' 0700 ${cfg.user} ${cfg.group} -"
       "d '${configDir}/qBittorrent' 0700 ${cfg.user} ${cfg.group} -"
-      # Create qBittorrent directory in user home (qBittorrent expects this)
+
       "d '/var/lib/${cfg.user}/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
       "d '/var/lib/${cfg.user}/.config/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
       "d '/var/lib/${cfg.user}/.cache/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
       "d '/var/lib/${cfg.user}/.local/share/qBittorrent' 0755 ${cfg.user} ${cfg.group} -"
     ]
-    # Create download directories if they have defaults
+
     ++ optional (
       cfg.qbittorrent.bittorrent.tempPath != null
     ) "d '${cfg.qbittorrent.bittorrent.tempPath}' 0775 ${cfg.user} ${cfg.group} -"
@@ -460,23 +445,20 @@ in
       optional (cfg.qbittorrent.bittorrent.finishedTorrentExportDirectory != null)
         "d '${cfg.qbittorrent.bittorrent.finishedTorrentExportDirectory}' 0775 ${cfg.user} ${cfg.group} -";
 
-    # Systemd service for qBittorrent
     systemd.services.qbittorrent = {
       description = "qBittorrent BitTorrent client";
       after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
 
-      # VPN-Confinement integration
-      # VPN-Confinement handles namespace setup automatically - no need to manually depend on a service
       vpnConfinement = lib.mkIf vpnEnabled {
         enable = true;
         inherit vpnNamespace;
       };
 
       preStart = ''
-        # Copy configuration file only if it doesn't exist
-        # This allows qBittorrent to manage the config file after initial setup
-        # (saving WebUI preferences, session state, etc.)
+
+
+
         CONFIG_FILE="${configDir}/qBittorrent/qBittorrent.conf"
         if [ ! -f "$CONFIG_FILE" ]; then
           cp ${qbittorrentConf} "$CONFIG_FILE"
@@ -488,23 +470,20 @@ in
         Type = "simple";
         User = cfg.user;
         Group = cfg.group;
-        # VPN-Confinement handles namespace setup automatically via vpnConfinement option
-        # No need to set NetworkNamespacePath manually
+
         ExecStart = "${lib.getExe cfg.qbittorrent.package} --webui-port=${toString cfg.qbittorrent.webUI.port}";
         Restart = "on-failure";
         RestartSec = "10s";
 
-        # Security hardening - no need for CAP_SYS_ADMIN when using NetworkNamespacePath
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";
-        # Don't protect home since we need to write to /var/lib/media for qBittorrent
-        # Access is controlled via ReadWritePaths
+
         ProtectHome = false;
-        # Create cache directory for qBittorrent (needed for Qt application cache)
+
         CacheDirectory = "qbittorrent";
         CacheDirectoryMode = "0755";
-        # Allow access to config directory, data path, and user home
+
         ReadWritePaths = [
           configDir
           cfg.dataPath
@@ -514,20 +493,16 @@ in
 
       environment = {
         TZ = cfg.timezone;
-        # Prevent Qt from trying to initialize GUI components
+
         QT_QPA_PLATFORM = "offscreen";
         DISPLAY = "";
-        # Set XDG directories to use proper locations
-        # qBittorrent expects config at $XDG_CONFIG_HOME/qBittorrent/qBittorrent.conf
-        # So with XDG_CONFIG_HOME=${configDir}, config is at ${configDir}/qBittorrent/qBittorrent.conf
+
         XDG_CONFIG_HOME = "${configDir}";
         XDG_CACHE_HOME = "/var/cache/qbittorrent";
         XDG_DATA_HOME = "/var/lib/${cfg.user}";
       };
     };
 
-    # Open firewall port only when VPN is disabled
-    # When VPN is enabled, VPN-Confinement handles port mappings via veth interface
     networking.firewall.allowedTCPPorts = mkIf (!vpnEnabled) [ cfg.qbittorrent.webUI.port ];
   };
 }

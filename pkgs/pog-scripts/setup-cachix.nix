@@ -43,7 +43,7 @@ pog.pog {
       CACHE_NAME="$cache"
       COMMAND="$1"
 
-      # Ensure cachix is available
+
       if ! command -v cachix &> /dev/null; then
         die "cachix not found in PATH"
       fi
@@ -52,7 +52,7 @@ pog.pog {
       debug "Cache name: $CACHE_NAME"
       debug "Command: $COMMAND"
 
-      # Setup for read-only access
+
       setup_user() {
         blue "📥 Setting up Cachix for read access..."
 
@@ -75,7 +75,7 @@ pog.pog {
         green "✓ Binary caches will now be used for faster builds"
       }
 
-      # Setup for write access (CI/maintainer)
+
       setup_ci() {
         blue "📤 Setting up Cachix for write access..."
 
@@ -96,7 +96,7 @@ pog.pog {
         green "✓ You can now push to cache: $CACHE_NAME"
       }
 
-      # Push system to cache
+
       push_system() {
         local sys="''${system:-}"
 
@@ -107,24 +107,24 @@ pog.pog {
         blue "📤 Pushing system to Cachix: $sys"
 
         yellow "→ Building system..."
-        nix build ".#$sys" --json \
+        nix build ".
           | jq -r '.[].outputs | to_entries[].value' \
           | cachix push "$CACHE_NAME"
 
         green "✓ System pushed to cache: $CACHE_NAME"
       }
 
-      # Push development shells
+
       push_shells() {
         blue "📤 Pushing development shells to Cachix"
 
-        # Get list of dev shells
+
         local shells
         shells=$(nix flake show --json 2>/dev/null | jq -r '.devShells."x86_64-linux" | keys[]' || echo "default")
 
         for shell in $shells; do
           yellow "→ Pushing shell: $shell..."
-          nix build ".#devShells.x86_64-linux.$shell" --json \
+          nix build ".
             | jq -r '.[].outputs | to_entries[].value' \
             | cachix push "$CACHE_NAME" || true
         done
@@ -132,17 +132,17 @@ pog.pog {
         green "✓ Development shells pushed to cache"
       }
 
-      # Watch and auto-push
+
       watch_build() {
         blue "👀 Watching for builds and auto-pushing to Cachix"
         yellow "→ This will push all new builds to: $CACHE_NAME"
         yellow "→ Press Ctrl+C to stop"
 
-        shift # Remove 'watch' argument
+        shift
         cachix watch-exec "$CACHE_NAME" -- nix build "$@"
       }
 
-      # Show statistics
+
       show_stats() {
         blue "📊 Cache Statistics"
 
@@ -159,7 +159,7 @@ pog.pog {
         du -sh /nix/store 2>/dev/null || echo "  Unable to determine"
       }
 
-      # Main command routing
+
       case "$COMMAND" in
         user)
           setup_user
@@ -202,7 +202,7 @@ pog.pog {
           echo "  setup-cachix user"
           echo "  setup-cachix ci"
           echo "  setup-cachix push --system nixosConfigurations.jupiter"
-          echo "  setup-cachix watch nix build .#"
+          echo "  setup-cachix watch nix build .
           ;;
         *)
           die "Unknown command: $COMMAND. Run 'setup-cachix help' for usage"

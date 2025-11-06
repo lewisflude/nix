@@ -1,5 +1,3 @@
-# Bridge module: Maps host.features.containersSupplemental to host.services.containersSupplemental
-# This allows host configurations to use the features interface
 {
   config,
   lib,
@@ -11,7 +9,7 @@ let
 in
 {
   config = mkIf cfg.enable {
-    # Map features to services
+
     host.services.containersSupplemental = {
       enable = true;
       uid = cfg.uid or 1000;

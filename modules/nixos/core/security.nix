@@ -53,11 +53,7 @@
     polkit.enable = true;
   };
   services.gnome.gnome-keyring.enable = true;
-  # Note: gnome-keyring-daemon user service is now managed by Home Manager's
-  # services.gnome-keyring module (see home/nixos/system/gnome-keyring.nix)
-  # This replaces the custom systemd.user.services.gnome-keyring-daemon configuration
 
-  # Ensure polkit runtime directories are created (tmpfiles.d best practice)
   systemd.tmpfiles.rules = [
     "d /run/polkit-1 0755 root root"
     "d /run/polkit-1/rules.d 0755 root root"
@@ -66,8 +62,7 @@
   systemd = {
     settings.Manager.DefaultLimitNOFILE = "524288";
     user.services = {
-      # Auto-unlock service for login keyring in auto-login scenarios
-      # This complements Home Manager's gnome-keyring service which handles the daemon
+
       unlock-login-keyring = {
         description = "Unlock GNOME login keyring for auto-login sessions";
         after = [ "gnome-keyring-daemon.service" ];
@@ -99,7 +94,7 @@
     gnupg.agent = {
       enable = true;
       enableSSHSupport = true;
-      pinentryPackage = pkgs.pinentry-qt; # Changed from pinentry-gnome3 due to webkitgtk removal
+      pinentryPackage = pkgs.pinentry-qt;
     };
     _1password = {
       enable = true;

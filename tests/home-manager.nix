@@ -1,20 +1,18 @@
-# Home Manager activation tests
-# Tests that Home Manager configurations can activate successfully
 {
   pkgs,
   inputs,
   ...
 }:
 let
-  # Test home-manager activation for a given profile
+
   mkHomeTest =
     profile: username:
     pkgs.runCommand "home-manager-${profile}-test" { } ''
-      # Create a minimal home-manager configuration
+
       export HOME=$(mktemp -d)
       export USER=${username}
 
-      # Test that the configuration evaluates
+
       ${pkgs.nix}/bin/nix eval --impure --expr '
         let
           pkgs = import ${inputs.nixpkgs} { system = "${pkgs.stdenv.hostPlatform.system}"; };
@@ -37,15 +35,12 @@ let
     '';
 in
 {
-  # Test minimal profile
+
   home-minimal = mkHomeTest "minimal" "testuser";
 
-  # Test development profile
   home-development = mkHomeTest "development" "testuser";
 
-  # Test desktop profile
   home-desktop = mkHomeTest "desktop" "testuser";
 
-  # Test full profile
   home-full = mkHomeTest "full" "testuser";
 }

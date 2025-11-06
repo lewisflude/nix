@@ -1,4 +1,3 @@
-# Unpackerr - Extraction automation
 {
   config,
   lib,
@@ -10,7 +9,6 @@ let
   inherit (lib.lists) optional;
   cfg = config.host.services.mediaManagement;
 
-  # Configuration file for Unpackerr
   unpackerrConfig = pkgs.writeText "unpackerr.conf" ''
     [unpackerr]
     debug = false
@@ -70,10 +68,9 @@ in
     };
 
   config = mkIf (cfg.enable && cfg.unpackerr.enable) {
-    # Ensure unpackerr package is available
+
     environment.systemPackages = [ pkgs.unpackerr ];
 
-    # Create systemd service for unpackerr
     systemd.services.unpackerr = {
       description = "Unpackerr - Archive extractor for *arr apps";
       after = [
@@ -93,7 +90,6 @@ in
         Restart = "on-failure";
         RestartSec = "30s";
 
-        # Security hardening
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";

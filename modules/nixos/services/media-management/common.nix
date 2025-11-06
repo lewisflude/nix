@@ -15,7 +15,7 @@ in
       isSystemUser = true;
       inherit (cfg) group;
       description = "Media services user";
-      # Set home directory to a writable location for services that need it (e.g., qBittorrent)
+
       home = "/var/lib/${cfg.user}";
       createHome = true;
     };
@@ -23,7 +23,7 @@ in
     users.groups.${cfg.group} = { };
 
     systemd.tmpfiles.rules = [
-      # Create user home directory with proper permissions
+
       (mkDirRule {
         path = "/var/lib/${cfg.user}";
         mode = "0755";

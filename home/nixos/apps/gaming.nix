@@ -11,7 +11,7 @@ in
 {
   home.packages =
     (with pkgs; [
-      # lutris  # Temporarily disabled due to pyrate-limiter build failure
+
       mangohud
       protonup-qt
       (sunshine.override { cudaSupport = true; })

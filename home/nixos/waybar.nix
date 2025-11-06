@@ -14,7 +14,7 @@ let
   };
   uwsm = "${pkgs.uwsm}/bin/uwsm";
   ghostty = "${pkgs.ghostty}/bin/ghostty";
-  # Scripts for waybar custom modules
+
   brightnessScript = pkgs.writeShellApplication {
     name = "brightness";
     runtimeInputs = with pkgs; [

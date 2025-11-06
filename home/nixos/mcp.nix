@@ -136,7 +136,7 @@ let
     ADD_CMDS
             else
               while IFS= read -r line; do
-                line="''${line%%#*}"
+                line="''${line%%
                 [ -z "$line" ] && continue
                 case "$line" in
                   *)
@@ -188,7 +188,7 @@ in
       kagiWrapper
       openaiWrapper
       lua-language-server
-      # Use explicitly versioned nodejs packages to avoid cache misses
+
       (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs).pkgs.typescript-language-server
       (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs).pkgs.typescript
     ];

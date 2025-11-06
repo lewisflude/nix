@@ -1,10 +1,7 @@
-# Base profile
-# Essential user tools that should be available on all systems
-# These are always included regardless of feature flags
 { ... }:
 {
   imports = [
-    # Core configuration
+
     ../shell.nix
     ../git.nix
     ../ssh.nix
@@ -13,7 +10,6 @@
     ../terminal.nix
     ../nh.nix
 
-    # Essential apps that are lightweight and universally useful
     ../apps/bat.nix
     ../apps/direnv.nix
     ../apps/fzf.nix
@@ -27,13 +23,10 @@
     ../apps/zellij.nix
     ../apps/core-tooling.nix
 
-    # Additional packages
     ../apps/packages.nix
 
-    # Library functions
     ../lib
 
-    # Custom modules
     ../modules.nix
   ];
 }

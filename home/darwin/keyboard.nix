@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  # Generate a Vial-compatible JSON definition for kopibeng MNK88 (tkl f13 ansi)
+
   vialJson = builtins.toJSON {
     name = "MNK88";
     vendorId = 19280;
@@ -12,7 +12,7 @@ let
     lighting = {
       supported = false;
     };
-    # Layout derived from LAYOUT_tkl_f13_ansi in keyboard.json
+
     layouts = {
       keymap = [
         {
@@ -742,11 +742,10 @@ let
   };
 in
 {
-  # Keyboard firmware tools for macOS (optional)
+
   home.packages = with pkgs; [
-    # qmk
+
   ];
 
-  # Install the Vial definition so the Vial app recognizes MNK88 immediately
   home.file."Library/Application Support/Vial/definitions/mnk88.json".text = vialJson;
 }

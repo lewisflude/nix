@@ -22,7 +22,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Automatically add the user to desktop-related groups
+
     users.users.${config.host.username}.extraGroups = [
       "audio"
       "video"

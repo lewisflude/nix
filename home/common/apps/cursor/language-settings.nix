@@ -18,8 +18,7 @@ let
   ];
   jsonVariants = [ "jsonc" ];
   languages = baseLanguages ++ reactVariants ++ jsonVariants;
-  # More efficient: use concatMap to combine map+filter in one pass
-  # This avoids creating intermediate lists from separate map and filter operations
+
   perLanguageFormatters = lib.listToAttrs (
     lib.concatMap (
       lang:

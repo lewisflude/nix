@@ -18,7 +18,5 @@
     ./apps/gaming.nix
     ./apps/mpv.nix
   ];
-  # home.sessionVariables = {
-  #   GIO_EXTRA_MODULES = "${pkgs.gnome.gvfs}/lib/gio/modules";  # TEMPORARILY DISABLED: gnome.gvfs uses webkitgtk which was removed
-  # };
+
 }

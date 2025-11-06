@@ -39,8 +39,7 @@ in
       ...
     }:
     let
-      # Configure pkgs with overlays for this system
-      # Override pkgs via _module.args to apply overlays
+
       nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
       pkgsWithOverlays = import nixpkgs {
         inherit system;
@@ -48,8 +47,6 @@ in
         config = functionsLib.mkPkgsConfig;
       };
 
-      # Import shells configuration
-      # pog overlay is optional - only extend if available
       pogOverlay =
         if
           inputs ? pog
@@ -67,18 +64,13 @@ in
       };
     in
     {
-      # Override pkgs that flake-parts provides
+
       _module.args.pkgs = pkgsWithOverlays;
 
-      # Per-system formatter
-      # Use nixfmt-rfc-style for official Nix formatting (RFC 166)
-      # This enables `nix fmt` command to format all Nix files in the project
       formatter = pkgsWithOverlays.nixfmt-rfc-style;
 
-      # Per-system checks
       checks = outputBuilders.mkChecks.${system} or { };
 
-      # Per-system dev shells
       devShells = shellsConfig.devShells // {
         default = pkgsWithOverlays.mkShell {
           shellHook = config.checks.pre-commit-check.shellHook or "";
@@ -91,19 +83,16 @@ in
               gh
               direnv
               nix-direnv
-              nix-update # Tool for updating package versions/hashes
+              nix-update
             ]);
         };
       };
 
-      # Per-system apps
       apps =
         let
-          # Use the same pog overlay check as above
+
           pkgsWithPog = pkgsWithOverlays.extend pogOverlay;
-          # Helper to create pog app
-          # Scripts that need config-root: new-module, update-all, visualize-modules
-          # Scripts that don't: setup-cachix, cleanup-duplicates, analyze-services
+
           mkPogApp =
             script-name:
             let
@@ -119,7 +108,7 @@ in
                   }
                 else
                   {
-                    # These scripts don't need config-root
+
                   };
               descriptions = {
                 "new-module" = "Scaffold new NixOS/home-manager modules";
@@ -137,7 +126,7 @@ in
             };
         in
         {
-          # POG-powered CLI tools
+
           new-module = mkPogApp "new-module";
           setup-cachix = mkPogApp "setup-cachix";
           update-all = mkPogApp "update-all";
@@ -146,22 +135,14 @@ in
           visualize-modules = mkPogApp "visualize-modules";
         };
 
-      # Configure topology for systems that can build it (Linux only)
       topology.modules =
         if system == "x86_64-linux" || system == "aarch64-linux" then
           [
             {
-              # Inform topology of existing NixOS hosts
+
               inherit (self) nixosConfigurations;
             }
-            # Add your topology definitions here (networks, connections, etc.)
-            # Example:
-            # {
-            #   networks.home = {
-            #     name = "Home Network";
-            #     cidrv4 = "192.168.1.0/24";
-            #   };
-            # }
+
           ]
         else
           [ ];
@@ -178,9 +159,7 @@ in
 
   flake =
     let
-      # Build Darwin configurations using withSystem to access perSystem definitions
-      # This follows flake-parts best practices: top-level configs should use withSystem
-      # to access perSystem packages and other definitions
+
       darwinHosts = hostsConfig.getDarwinHosts hosts;
       darwinConfigurations = builtins.mapAttrs (
         hostName: hostConfig:
@@ -188,14 +167,12 @@ in
           { config, ... }:
           systemBuilders.mkDarwinSystem hostName hostConfig {
             inherit (inputs) homebrew-j178;
-            # Use pkgs from perSystem instead of importing nixpkgs separately
-            # This ensures consistency and follows flake-parts patterns
+
             perSystemPkgs = config.pkgs;
           }
         )
       ) darwinHosts;
 
-      # Build NixOS configurations using withSystem to access perSystem definitions
       nixosHosts = hostsConfig.getNixosHosts hosts;
       nixosConfigurations = builtins.mapAttrs (
         hostName: hostConfig:
@@ -207,8 +184,6 @@ in
         )
       ) nixosHosts;
 
-      # Build Home Manager configurations using withSystem to access perSystem definitions
-      # Map over all hosts and use withSystem for each host's system
       homeConfigurations = builtins.mapAttrs (
         _hostName: hostConfig:
         withSystem hostConfig.system (
@@ -220,9 +195,6 @@ in
         )
       ) hosts;
 
-      # Topology outputs are created automatically by the nix-topology flake module
-      # via perSystem.topology. We don't need to manually create them here.
-      # The module uses config.topology.modules which is only set for Linux systems.
     in
     {
       inherit
@@ -232,15 +204,9 @@ in
         ;
       lib = functionsLib;
 
-      # Export overlays following flake-parts conventions
-      # Overlays are defined at the top level (not under system attributes).
-      # The system is determined from prev.stdenv.hostPlatform.system at evaluation time.
-      # If an overlay needs perSystem config (e.g., config.packages), use withSystem pattern.
-      # See: https://flake.parts/overlays.html
       overlays.default =
         final: prev:
-        # Extract system from prev.stdenv.hostPlatform.system (flake-parts recommended pattern)
-        # This allows the overlay to work with any system without being defined under a system attribute
+
         (import ../lib/overlay-builder.nix {
           inherit inputs;
           inherit (prev.stdenv.hostPlatform) system;

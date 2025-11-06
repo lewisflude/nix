@@ -1,5 +1,3 @@
-# Host configuration options with type safety
-# Defines a proper module options interface for host-specific configuration
 {
   lib,
   config,
@@ -38,7 +36,6 @@ in
       development = {
         enable = mkEnableOption "development tools and environments";
 
-        # Language sub-features
         rust = mkEnableOption "Rust development environment";
         python = mkEnableOption "Python development environment";
         go = mkEnableOption "Go development environment";
@@ -47,13 +44,11 @@ in
         java = mkEnableOption "Java development environment";
         nix = mkEnableOption "Nix development tools";
 
-        # Tool sub-features
         docker = mkEnableOption "Docker and containerization";
         kubernetes = mkEnableOption "Kubernetes and container orchestration";
         git = mkEnableOption "Git and version control tools";
         buildTools = mkEnableOption "Build tools (make, cmake, pkg-config, etc.)";
 
-        # Editor sub-features
         vscode = mkEnableOption "VS Code editor";
         helix = mkEnableOption "Helix editor";
         neovim = mkEnableOption "Neovim editor";
@@ -172,18 +167,15 @@ in
         resume = mkEnableOption "resume generation and management";
       };
 
-      # Media production feature (audio, video, streaming)
       media = {
         enable = mkEnableOption "media production tools and environments";
 
-        # Audio sub-features
         audio = {
           enable = mkEnableOption "audio production and music";
           production = mkEnableOption "DAW and audio tools";
           realtime = mkEnableOption "real-time audio optimizations (musnix)";
           streaming = mkEnableOption "audio streaming";
 
-          # Audio.nix packages (from polygon/audio.nix flake)
           audioNix = {
             enable = mkOption {
               type = types.bool;
@@ -205,28 +197,24 @@ in
           };
         };
 
-        # Video sub-features
         video = {
           enable = mkEnableOption "video production and editing";
           editing = mkEnableOption "Video editing tools (Kdenlive, etc.)";
           streaming = mkEnableOption "Video streaming tools (OBS, etc.)";
         };
 
-        # Streaming sub-features
         streaming = {
           enable = mkEnableOption "Streaming and recording tools";
           obs = mkEnableOption "OBS Studio for streaming/recording";
         };
       };
 
-      # Legacy audio feature (deprecated, use host.features.media.audio instead)
       audio = {
         enable = mkEnableOption "audio production and music (deprecated, use host.features.media.audio)";
         production = mkEnableOption "DAW and audio tools";
         realtime = mkEnableOption "real-time audio optimizations";
         streaming = mkEnableOption "audio streaming";
 
-        # Audio.nix packages (from polygon/audio.nix flake)
         audioNix = {
           enable = mkOption {
             type = types.bool;
@@ -255,7 +243,6 @@ in
         firewall = mkEnableOption "advanced firewall";
       };
 
-      # Native media management services
       mediaManagement = {
         enable = mkEnableOption "native media management services";
 
@@ -271,7 +258,6 @@ in
           description = "Timezone for media services";
         };
 
-        # Individual service enables (all default to service's default when parent is enabled)
         prowlarr = {
           enable = mkOption {
             type = types.bool;
@@ -432,7 +418,6 @@ in
         };
       };
 
-      # Native AI tools services
       aiTools = {
         enable = mkEnableOption "AI tools and LLM services";
 
@@ -480,7 +465,6 @@ in
         };
       };
 
-      # Supplemental container services (no native modules available yet)
       containersSupplemental = {
         enable = mkEnableOption "supplemental container services";
 
@@ -579,7 +563,6 @@ in
             description = "PostgreSQL database password for Cal.com";
           };
 
-          # Email configuration
           email = {
             host = mkOption {
               type = types.str;
@@ -618,7 +601,6 @@ in
             };
           };
 
-          # Branding configuration
           branding = {
             appName = mkOption {
               type = types.str;
@@ -639,7 +621,6 @@ in
             };
           };
 
-          # General settings
           disableSignup = mkOption {
             type = types.bool;
             default = true;
@@ -676,7 +657,6 @@ in
             description = "Encryption key for service account credentials";
           };
 
-          # Google Calendar integration
           googleCalendar = {
             enabled = mkOption {
               type = types.bool;
@@ -694,7 +674,6 @@ in
       };
     };
 
-    # Legacy virtualisation config for backward compatibility
     virtualisation = mkOption {
       type = types.attrsOf types.anything;
       default = { };
@@ -703,7 +682,7 @@ in
   };
 
   config = {
-    # Validation assertions
+
     assertions = [
       {
         assertion = config.host.username != "";

@@ -1,19 +1,6 @@
 _:
 let
-  # Karabiner-Elements: macOS equivalent to keyd
-  # Provides ergonomic keyboard remapping matching NixOS configuration
-  #
-  # Design Philosophy (matches NixOS keyd.nix):
-  # - Caps Lock as primary Cmd (most ergonomic, home row)
-  # - F13 as backup Cmd (for two-handed chords)
-  # - Right Option as navigation layer (vim-style + media)
-  # - Caps Tap = Escape (bonus for vim/helix users)
-  #
-  # Based on ergonomic research:
-  # - Fitts's Law (1954): Home row modifiers 70-90% faster than function row
-  # - RSI reduction (Rempel et al., 2006): 40% reduction in wrist strain
-  # - Time savings: 10-15 minutes daily (conservative estimate)
-  # Karabiner configuration matching keyd behavior
+
   karabinerConfig = {
     global = {
       check_for_updates_on_startup = true;
@@ -26,28 +13,19 @@ let
         name = "Ergonomic Hybrid v2.0";
         selected = true;
 
-        # Timing parameters (match keyd defaults)
         parameters = {
-          # Tap/hold threshold: 200ms (research-backed optimal value)
-          # Increase to 250-300ms for slower typers or motor control considerations
-          # Decrease to 150ms for very fast typers (may cause false taps)
+
           "basic.to_if_alone_timeout_milliseconds" = 200;
 
-          # Simultaneous threshold for combination detection
           "basic.simultaneous_threshold_milliseconds" = 50;
         };
 
-        # Complex modifications removed - all keyboard-specific rules
-        # are now in the device-specific mnk88-wkl.json file
-        # This prevents global remappings from affecting other keyboards
         complex_modifications = {
           rules = [ ];
         };
 
-        # Simple modifications (direct key remaps)
         simple_modifications = [ ];
 
-        # Virtual modifier key (not used in our config)
         virtual_hid_keyboard = {
           country_code = 0;
           indicate_sticky_modifier_keys_state = true;
@@ -58,17 +36,12 @@ let
   };
 in
 {
-  # Write declarative Karabiner configuration
-  # This creates ~/.config/karabiner/karabiner.json
+
   home.file.".config/karabiner/karabiner.json" = {
     text = builtins.toJSON karabinerConfig;
-    # Force overwrite to ensure declarative config wins
+
     force = true;
   };
-
-  # Note: User must manually grant permissions after first install:
-  # System Settings → Privacy & Security → Input Monitoring → Enable Karabiner
-  # System Settings → Privacy & Security → Accessibility → Enable Karabiner-Elements
 
   home.file.".config/karabiner/assets/complex_modifications/mnk88-wkl.json" = {
     text = builtins.toJSON {
@@ -218,7 +191,7 @@ in
         {
           description = "MNK88: Window management via F16–F19 (Rectangle chords)";
           manipulators = [
-            # F16 → Maximize (⌃⌥⏎ default in Rectangle)
+
             {
               type = "basic";
               from = {
@@ -245,7 +218,7 @@ in
                 }
               ];
             }
-            # F17 → Tile Left (⌃⌥←)
+
             {
               type = "basic";
               from = {
@@ -272,7 +245,7 @@ in
                 }
               ];
             }
-            # F18 → Center (⌃⌥C)
+
             {
               type = "basic";
               from = {
@@ -299,7 +272,7 @@ in
                 }
               ];
             }
-            # F19 → Tile Right (⌃⌥→)
+
             {
               type = "basic";
               from = {

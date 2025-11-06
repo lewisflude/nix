@@ -151,7 +151,6 @@ let
     "**/node_modules" = true;
   };
 
-  # Combined ignore sets
   commonIgnores = systemFiles // vcsFiles // devEnvFiles;
   searchIgnores =
     commonIgnores // nodeFiles // buildFiles // cacheFiles // frameworkFiles // ideFiles;
