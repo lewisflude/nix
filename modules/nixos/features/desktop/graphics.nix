@@ -11,16 +11,38 @@ in
 {
   config = lib.mkIf cfg.enable {
     environment.sessionVariables = {
+      # Display synchronization (reduce tearing)
       __GL_SYNC_DISPLAY_DEVICE = "DP-1";
       __GL_SYNC_TO_VBLANK = "1";
+
+      # Wayland support for Electron/Chromium apps
+      ELECTRON_OZONE_PLATFORM_HINT = "auto";
+
+      # NVIDIA VA-API (video acceleration) support
+      LIBVA_DRIVER_NAME = "nvidia";
+      NVD_BACKEND = "direct";
     };
     hardware = {
       graphics = {
         enable = true;
         enable32Bit = true;
         extraPackages = with pkgs; [
+          # NVIDIA VA-API bridge for hardware video acceleration
           nvidia-vaapi-driver
+
+          # Wayland EGL support for GPU access from Wayland compositors
           egl-wayland
+
+          # Vulkan and graphics debugging tools
+          vulkan-tools
+          mesa-demos # includes glxinfo / eglinfo
+
+          # VA-API (Video Acceleration API) support
+          libva # VA-API loader
+          libva-utils # vainfo for checking VA-API support
+
+          # NVIDIA codec headers for encoding/decoding
+          nv-codec-headers
         ];
       };
       nvidia = {
