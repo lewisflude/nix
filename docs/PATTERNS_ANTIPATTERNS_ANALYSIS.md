@@ -70,7 +70,7 @@ This document provides a comprehensive analysis of the current Nix configuration
 - NixOS Desktop: niri, chaotic, musnix, solaar
 - Hardware: nixos-hardware
 - Applications: catppuccin, jsonresume-nix
-- Development: nh, pre-commit-hooks, rust-overlay, lazygit, atuin, pog, nix-topology
+- Development: nh, pre-commit-hooks, fenix, lazygit, atuin, pog, nix-topology
 - VPN: vpn-confinement
 
 **Recommendation:**

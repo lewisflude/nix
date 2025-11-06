@@ -34,9 +34,22 @@ let
 
     };
 
-    rust-overlay =
-      if inputs ? rust-overlay && inputs.rust-overlay ? overlays then
-        inputs.rust-overlay.overlays.default
+    fenix-overlay =
+      if inputs ? fenix && inputs.fenix ? overlays then
+        # Cache optimization workaround (see fenix issue #79):
+        # Use fenix's nixpkgs instead of the system's nixpkgs to ensure cache compatibility.
+        # This is critical for cache hits because:
+        # 1. Fenix packages are built against fenix's nixpkgs version
+        # 2. Using system nixpkgs can cause cache misses if versions differ
+        # 3. nix-community.cachix.org has packages built with fenix's nixpkgs
+        # This ensures maximum cache utilization and fastest builds.
+        (
+          _: _:
+          let
+            pkgs = inputs.fenix.inputs.nixpkgs.legacyPackages.${system};
+          in
+          inputs.fenix.overlays.default pkgs pkgs
+        )
       else
         (_final: _prev: { });
 

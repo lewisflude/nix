@@ -11,19 +11,51 @@ let
 
     inherit getPython getNodejs;
 
-    rustToolchain = with pkgs; [
-      # Use rust-overlay's pre-built binary toolchain (much faster than building from source)
-      # rust-bin.stable.latest.default provides: rustc, cargo, rustfmt, clippy, rust-std, rust-docs
-      # This matches rustup's default profile and uses pre-built binaries (no compilation needed)
-      (rust-bin.stable.latest.default.override {
-        extensions = [ "rust-src" ]; # Include rust-src for rust-analyzer
-      })
-      # rust-analyzer and cargo tools still come from nixpkgs (usually cached in binary caches)
-      rust-analyzer
-      cargo-watch
-      cargo-audit
-      cargo-edit
-    ];
+    rustToolchain =
+      # Optimized for maximum cache usage and build speed:
+      # - Uses fenix.stable.withComponents with explicit component list
+      #   This matches rustup's default profile + rust-src (common pattern, well-cached)
+      # - All toolchain components are pre-built binaries from nix-community.cachix.org
+      # - rust-analyzer-nightly from fenix overlay (pre-built, cached)
+      # - cargo-* tools from nixpkgs (should be cached in nixpkgs cache)
+      #
+      # Component selection rationale:
+      # - cargo, rustc, rustfmt, clippy: core tools (in rustup default profile)
+      # - rust-src: required for rust-analyzer (not in default profile, but commonly added)
+      # This combination is widely used and has excellent cache coverage
+      if pkgs ? fenix && pkgs.fenix ? stable then
+        with pkgs;
+        [
+          # Use stable toolchain with components matching rustup default + rust-src
+          # This is a common pattern, so it's well-cached in nix-community.cachix.org
+          (fenix.stable.withComponents [
+            "cargo"
+            "clippy"
+            "rust-src"
+            "rustc"
+            "rustfmt"
+          ])
+          # rust-analyzer-nightly from fenix overlay (pre-built nightly, cached)
+          # Falls back to nixpkgs rust-analyzer if overlay not available
+          (if builtins.hasAttr "rust-analyzer-nightly" pkgs then rust-analyzer-nightly else rust-analyzer)
+          # Cargo tools from nixpkgs (should be cached)
+          cargo-watch
+          cargo-audit
+          cargo-edit
+        ]
+      else
+        # Fallback: nixpkgs Rust packages (built from source, slower, less cache-friendly)
+        with pkgs;
+        [
+          rustc
+          cargo
+          rustfmt
+          clippy
+          rust-analyzer
+          cargo-watch
+          cargo-audit
+          cargo-edit
+        ];
 
     pythonToolchain =
       pkgs:

@@ -77,7 +77,7 @@ check_input() {
   done
 
   # Check if it's a well-known overlay provider
-  local known_overlays=("rust-overlay" "chaotic")
+  local known_overlays=("fenix" "chaotic")
   for known in "${known_overlays[@]}"; do
     if [[ "$input_name" == "$known" ]]; then
       # Special case: chaotic explicitly doesn't follow
