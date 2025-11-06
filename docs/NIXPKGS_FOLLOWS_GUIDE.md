@@ -24,7 +24,7 @@ Does the input provide:
 
 2. **Overlay Providers**
    - Any input that provides `overlays` that modify packages
-   - Examples: `rust-overlay`
+   - Examples: `fenix` (Rust toolchain overlay)
    - **Why**: Overlays operate on nixpkgs packages and need version compatibility
 
 3. **Package Providers**
@@ -103,8 +103,8 @@ home-manager = {
   inputs.nixpkgs.follows = "nixpkgs";  # ✅ Provides modules
 };
 
-rust-overlay = {
-  url = "github:oxalica/rust-overlay";
+fenix = {
+  url = "github:nix-community/fenix";
   inputs.nixpkgs.follows = "nixpkgs";  # ✅ Provides overlays
 };
 ```

@@ -103,20 +103,6 @@ let
         echo "TypeScript version: $(tsc --version)"
       '';
     };
-    solana = pkgs.mkShell {
-      buildInputs =
-        with pkgs;
-        [
-          rustc
-          cargo
-          (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
-        ]
-        ++ commonTools;
-      shellHook = ''
-        echo "⚡ Solana development environment loaded"
-        echo "Solana version: $(solana --version)"
-      '';
-    };
     devops = pkgs.mkShell {
       buildInputs =
         with pkgs;

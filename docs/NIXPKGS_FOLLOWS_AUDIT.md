@@ -102,7 +102,7 @@ These inputs already have `follows = "nixpkgs"` set correctly:
 - ✅ `catppuccin` - Provides modules
 - ✅ `determinate` - Provides modules
 - ✅ `nix-topology` - Provides modules
-- ✅ `rust-overlay` - Provides overlays
+- ✅ `fenix` - Provides overlays (Rust toolchain)
 - ✅ `pre-commit-hooks` - Build tool
 - ✅ All other overlay/package providers
 
