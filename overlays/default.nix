@@ -7,13 +7,6 @@ let
 
   overlaySet = {
 
-    unstable = _final: prev: {
-      unstable = import (inputs.nixpkgs or (throw "nixpkgs input is required")) {
-        inherit system;
-        inherit (prev) config;
-      };
-    };
-
     localPkgs =
       _final: prev:
       let

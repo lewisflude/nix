@@ -1,6 +1,6 @@
 { pkgs, ... }:
 {
-  nx-latest = pkgs.buildNpmPackage.override { inherit (pkgs) nodejs; } rec {
+  nx-latest = pkgs.buildNpmPackage rec {
     pname = "nx";
     version = "21.5.3";
     src = pkgs.fetchurl {

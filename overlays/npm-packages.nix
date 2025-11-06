@@ -1,6 +1,6 @@
 _final: prev: {
 
-  nx-latest = prev.buildNpmPackage.override { inherit (prev) nodejs; } rec {
+  nx-latest = prev.buildNpmPackage rec {
     pname = "nx";
     version = "21.5.3";
     src = prev.fetchurl {
