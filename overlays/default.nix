@@ -77,8 +77,6 @@ let
     # Essential tools (conditional on input existence)
     nh =
       if inputs ? nh && inputs.nh ? overlays then inputs.nh.overlays.default else (_final: _prev: { });
-    nur =
-      if inputs ? nur && inputs.nur ? overlays then inputs.nur.overlays.default else (_final: _prev: { });
 
     # Infrastructure visualization (conditional on input existence)
     nix-topology =
@@ -133,23 +131,10 @@ let
 
     # === Platform-Specific Overlays ===
 
-    # Audio production packages (Linux-only)
-    audio-nix =
-      if isLinux && inputs ? audio-nix && inputs.audio-nix ? overlays then
-        inputs.audio-nix.overlays.default
-      else
-        (_final: _prev: { });
-
     # Linux-only
     niri =
       if isLinux && inputs ? niri && inputs.niri ? overlays then
         inputs.niri.overlays.niri
-      else
-        (_final: _prev: { });
-
-    nvidia-patch =
-      if isLinux && inputs ? nvidia-patch && inputs.nvidia-patch ? overlays then
-        inputs.nvidia-patch.overlays.default
       else
         (_final: _prev: { });
 

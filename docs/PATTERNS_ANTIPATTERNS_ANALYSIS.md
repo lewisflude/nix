@@ -67,10 +67,10 @@ This document provides a comprehensive analysis of the current Nix configuration
 
 - Core: nixpkgs, flake-parts, darwin, home-manager, determinate, flakehub, sops-nix
 - macOS: mac-app-util, nix-homebrew, homebrew-j178
-- NixOS Desktop: niri, chaotic, musnix, audio-nix, solaar, nvidia-patch
+- NixOS Desktop: niri, chaotic, musnix, solaar
 - Hardware: nixos-hardware
-- Applications: catppuccin, ghostty, jsonresume-nix
-- Development: nur, nh, pre-commit-hooks, helix, rust-overlay, lazygit, atuin, pog, nix-topology
+- Applications: catppuccin, jsonresume-nix
+- Development: nh, pre-commit-hooks, rust-overlay, lazygit, atuin, pog, nix-topology
 - VPN: vpn-confinement
 
 **Recommendation:**
@@ -251,8 +251,8 @@ home-manager = {
 
 ```nix
 # overlays/default.nix
-audio-nix = mkConditional (isLinux && inputs ? audio-nix) (
-  inputs.audio-nix.overlays.default
+niri = mkConditional (isLinux && inputs ? niri) (
+  inputs.niri.overlays.niri
 );
 ```
 

@@ -11,7 +11,6 @@ let
   catppuccin = inputs.catppuccin or null;
   niri = inputs.niri or null;
   musnix = inputs.musnix or null;
-  nur = inputs.nur or null;
   solaar = inputs.solaar or null;
   determinate = inputs.determinate or null;
   chaotic = inputs.chaotic or null;
@@ -157,7 +156,6 @@ in
         (hostConfig.system == "x86_64-linux" || hostConfig.system == "aarch64-linux") && catppuccin != null
       ) [ catppuccin.nixosModules.catppuccin ]
       ++ lib.optionals (musnix != null) [ musnix.nixosModules.musnix ]
-      ++ lib.optionals (nur != null) [ nur.modules.nixos.default ]
       ++ lib.optionals (solaar != null) [ solaar.nixosModules.default ]
       ++ lib.optionals (home-manager != null) [ home-manager.nixosModules.home-manager ]
       ++ [
