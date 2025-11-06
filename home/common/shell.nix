@@ -20,7 +20,7 @@ let
   palette =
     if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
 
-      (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
+      (lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
       .${config.catppuccin.flavor}.colors
     else if inputs ? catppuccin then
 
@@ -28,7 +28,7 @@ let
         catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
       in
       if catppuccinSrc != null then
-        (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
+        (lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
       else
         throw "Cannot find catppuccin source (input exists but src/outPath not found)"
     else

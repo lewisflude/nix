@@ -4,6 +4,9 @@
   lib,
   ...
 }:
+let
+  flakeDir = "${config.users.users.${config.host.username}.home}/.config/nix";
+in
 {
   config = {
     nix = {
@@ -96,7 +99,7 @@
 
             echo "🧹 Running monthly duplicate cleanup..."
 
-            cd /home/lewis/.config/nix
+            cd ${flakeDir}
             nix run .
           '';
           mode = "0755";

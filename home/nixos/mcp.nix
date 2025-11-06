@@ -16,11 +16,12 @@ let
     escapeShellArg
     ;
   uvx = "${pkgs.uv}/bin/uvx";
+  nodejs = platformLib.getVersionedPackage pkgs platformLib.versions.nodejs;
   openaiWrapper = pkgs.writeShellApplication {
     name = "openai-mcp-wrapper";
     runtimeInputs = [
       pkgs.coreutils
-      (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
+      nodejs
     ];
     text = ''
       set -euo pipefail
@@ -30,7 +31,7 @@ let
       if [ -z "''${RUSTDOCFLAGS:-}" ]; then
         export RUSTDOCFLAGS="--cfg=docsrs"
       fi
-      exec ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @mzxrai/mcp-openai "$@"
+      exec ${nodejs}/bin/npx -y @mzxrai/mcp-openai "$@"
     '';
   };
   kagiWrapper = pkgs.writeShellApplication {
@@ -51,13 +52,13 @@ let
     name = "github-mcp-wrapper";
     runtimeInputs = [
       pkgs.coreutils
-      (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
+      nodejs
     ];
     text = ''
       set -euo pipefail
       GITHUB_TOKEN="$(cat ${systemConfig.sops.secrets.GITHUB_TOKEN.path})"
       export GITHUB_TOKEN
-      exec ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @modelcontextprotocol/server-github@latest "$@"
+      exec ${nodejs}/bin/npx -y @modelcontextprotocol/server-github@latest "$@"
     '';
   };
   rustdocsWrapper = pkgs.writeShellApplication {
@@ -136,7 +137,7 @@ let
     ADD_CMDS
             else
               while IFS= read -r line; do
-                line="''${line%%
+                line="''${line%%$'\r'}"
                 [ -z "$line" ] && continue
                 case "$line" in
                   *)
@@ -169,11 +170,11 @@ let
     ${pkgs.uv}/bin/uvx --from mcp-server-git mcp-server-git --help >/dev/null 2>&1 || true
     ${pkgs.uv}/bin/uvx --from mcp-server-time mcp-server-time --help >/dev/null 2>&1 || true
     echo "[mcp-warm] Prefetching npx servers…"
-    ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @modelcontextprotocol/server-everything@latest --help >/dev/null 2>&1 || true
-    ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @modelcontextprotocol/server-filesystem@latest --help >/dev/null 2>&1 || true
-    ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @modelcontextprotocol/server-memory@latest --help >/dev/null 2>&1 || true
-    ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @modelcontextprotocol/server-sequential-thinking@latest --help >/dev/null 2>&1 || true
-    ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y tritlo/lsp-mcp --help >/dev/null 2>&1 || true
+    ${nodejs}/bin/npx -y @modelcontextprotocol/server-everything@latest --help >/dev/null 2>&1 || true
+    ${nodejs}/bin/npx -y @modelcontextprotocol/server-filesystem@latest --help >/dev/null 2>&1 || true
+    ${nodejs}/bin/npx -y @modelcontextprotocol/server-memory@latest --help >/dev/null 2>&1 || true
+    ${nodejs}/bin/npx -y @modelcontextprotocol/server-sequential-thinking@latest --help >/dev/null 2>&1 || true
+    ${nodejs}/bin/npx -y tritlo/lsp-mcp --help >/dev/null 2>&1 || true
     echo "[mcp-warm] Warm-up complete."
   '';
 in
@@ -182,15 +183,14 @@ in
     packages = with pkgs; [
       uv
       python3
-      (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
+      nodejs
       coreutils
       gawk
       kagiWrapper
       openaiWrapper
       lua-language-server
-
-      (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs).pkgs.typescript-language-server
-      (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs).pkgs.typescript
+      nodePackages.typescript-language-server
+      nodePackages.typescript
     ];
     activation.mcpWarm = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       ${warmScript}
@@ -218,7 +218,7 @@ in
         port = 11434;
       };
       memory = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
+        command = "${nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-memory@latest"
@@ -226,7 +226,7 @@ in
         port = 11436;
       };
       sequential-thinking = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
+        command = "${nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-sequential-thinking@latest"
@@ -234,7 +234,7 @@ in
         port = 11437;
       };
       general-filesystem = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
+        command = "${nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-filesystem@latest"

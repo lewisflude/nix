@@ -209,33 +209,6 @@ in
         };
       };
 
-      audio = {
-        enable = mkEnableOption "audio production and music (deprecated, use host.features.media.audio)";
-        production = mkEnableOption "DAW and audio tools";
-        realtime = mkEnableOption "real-time audio optimizations";
-        streaming = mkEnableOption "audio streaming";
-
-        audioNix = {
-          enable = mkOption {
-            type = types.bool;
-            default = false;
-            description = "Enable audio packages from polygon/audio.nix flake";
-          };
-
-          bitwig = mkOption {
-            type = types.bool;
-            default = true;
-            description = "Install Bitwig Studio (latest beta version)";
-          };
-
-          plugins = mkOption {
-            type = types.bool;
-            default = true;
-            description = "Install audio plugins from audio.nix (neuralnote, paulxstretch, etc.)";
-          };
-        };
-      };
-
       security = {
         enable = mkEnableOption "security and privacy tools";
         yubikey = mkEnableOption "YubiKey hardware support";
@@ -674,11 +647,6 @@ in
       };
     };
 
-    virtualisation = mkOption {
-      type = types.attrsOf types.anything;
-      default = { };
-      description = "Legacy virtualisation configuration (deprecated, use host.features.virtualisation)";
-    };
   };
 
   config = {

@@ -7,7 +7,7 @@
 let
   inherit (lib) mkIf;
   inherit (lib.lists) optional optionals;
-  cfg = config.host.features.audio;
+  cfg = config.host.features.media.audio;
   audioNixCfg = cfg.audioNix;
 in
 {

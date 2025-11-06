@@ -26,31 +26,35 @@ This directory contains maintenance and monitoring scripts for the Nix configura
 
 **Scheduling**: Run monthly via cron or systemd timer (see `docs/PERFORMANCE_MONITORING.md`)
 
-### update-flake.sh
+### update-all (POG)
 
-**Purpose**: Flake input freshness review (Task 4.3)
+**Purpose**: Update all dependencies (Task 4.3)
+
+**Command**: `nix run .#update-all`
 
 **What it does**:
 
-- Updates flake inputs (all or specific)
-- Monitors for deprecated/archived repositories
-- Checks for FlakeHub alternatives
-- Documents problematic inputs
+- Updates flake inputs (flake.lock)
+- Updates ZSH plugins (nvfetcher)
+- Updates custom packages
+- Interactive progress and validation
+- Dry-run mode for safety
 
 **Usage**:
 
 ```bash
-# Update all inputs
-./scripts/maintenance/update-flake.sh
+# Update everything
+nix run .#update-all
 
 # Dry run (check what would change)
-./scripts/maintenance/update-flake.sh --dry-run
+nix run .#update-all --dry-run
 
-# Update specific input
-./scripts/maintenance/update-flake.sh --input nixpkgs
+# Skip specific updates
+nix run .#update-all --skip-flake
+nix run .#update-all --skip-plugins
 ```
 
-**Output**: `.flake-updates/report-YYYY-MM-DD.json` and change logs
+**Output**: Progress feedback and validation results
 
 **Scheduling**: Run weekly via cron or systemd timer (see `docs/PERFORMANCE_MONITORING.md`)
 
@@ -90,7 +94,7 @@ systemd.services = {
   };
   weekly-flake-update = {
     serviceConfig.Type = "oneshot";
-    script = "${pkgs.bash}/bin/bash ${./scripts/maintenance/update-flake.sh} --dry-run";
+    script = "cd ~/.config/nix && ${pkgs.nix}/bin/nix run .#update-all -- --dry-run";
   };
 };
 ```
@@ -103,5 +107,5 @@ systemd.services = {
 0 0 1 * * /path/to/scripts/maintenance/track-performance.sh
 
 # Weekly flake update (Sundays at midnight)
-0 0 * * 0 /path/to/scripts/maintenance/update-flake.sh --dry-run
+0 0 * * 0 cd ~/.config/nix && nix run .#update-all -- --dry-run
 ```

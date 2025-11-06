@@ -97,12 +97,16 @@ in
             };
           }
           {
-            home-manager = mkHomeManagerConfig {
-              inherit hostConfig;
-              extraSharedModules = lib.optionals (mac-app-util != null) [
-                mac-app-util.homeManagerModules.default
-              ];
-            };
+            home-manager =
+              mkHomeManagerConfig {
+                inherit hostConfig;
+                extraSharedModules = lib.optionals (mac-app-util != null) [
+                  mac-app-util.homeManagerModules.default
+                ];
+              }
+              // {
+                useUserPackages = true;
+              };
           }
           (
             { config, ... }:

@@ -32,11 +32,6 @@ in
       example = "x86_64-linux";
     };
 
-    virtualisation = mkOption {
-      type = types.attrsOf types.anything;
-      default = { };
-      description = "Legacy virtualisation configuration (deprecated, use host.features.virtualisation)";
-    };
   };
 
   config = {

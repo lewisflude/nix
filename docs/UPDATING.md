@@ -39,7 +39,7 @@ nix flake update ghostty
 nix flake lock --update-input nixpkgs --dry-run
 
 # Using the script (includes validation)
-./scripts/maintenance/update-flake.sh
+nix run .#update-all
 ```
 
 ### 3. Update ZSH Plugins

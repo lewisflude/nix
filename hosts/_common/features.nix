@@ -135,15 +135,19 @@
     calendar = false;
   };
 
-  audio = {
+  media = {
     enable = false;
-    realtime = false;
-    production = false;
 
-    audioNix = {
+    audio = {
       enable = false;
-      bitwig = true;
-      plugins = true;
+      realtime = false;
+      production = false;
+
+      audioNix = {
+        enable = false;
+        bitwig = true;
+        plugins = true;
+      };
     };
   };
 
