@@ -90,10 +90,6 @@ in
       autosuggestion.enable = true;
       syntaxHighlighting.enable = true;
       historySubstringSearch.enable = true;
-      promptInit = ''
-        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-        [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-      '';
       plugins = [
         {
           name = "zsh-defer";
@@ -370,6 +366,8 @@ in
         '')
       ];
       initExtra = ''
+        # Initialize powerlevel10k (as recommended by nixpkgs)
+        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
         # Initialize zoxide at the very end of shell configuration
         eval "$(zoxide init zsh)"
       '';
