@@ -1,26 +1,17 @@
 {
   config,
   pkgs,
-  inputs,
   lib,
+  scientificPalette ? null,
   ...
 }:
 let
-
-  catppuccinPalette =
-    if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
-      (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
-      .${config.catppuccin.flavor}.colors
-    else if inputs ? catppuccin then
-      let
-        catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
-      in
-      if catppuccinSrc != null then
-        (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
-      else
-        throw "Cannot find catppuccin source (input exists but src/outPath not found)"
-    else
-      throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
+  # Use scientific theme if available, fallback to neutral colors
+  colors = if scientificPalette != null then scientificPalette.semantic else {
+    "surface-base" = { hex = "#1e1f26"; };
+    "accent-focus" = { hex = "#5a7dcf"; };
+    "text-primary" = { hex = "#c0c3d1"; };
+  };
 in
 {
   programs.swappy = {
@@ -30,9 +21,9 @@ in
         save_dir = "${config.home.homeDirectory}/Pictures/Screenshots";
         save_filename_format = "swappy-%Y%m%d-%H%M%S.png";
         show_panel = true;
-        fill_color = "${catppuccinPalette.base.hex}80";
-        line_color = "${catppuccinPalette.mauve.hex}ff";
-        text_color = "${catppuccinPalette.text.hex}ff";
+        fill_color = "${colors."surface-base".hex}80";
+        line_color = "${colors."accent-focus".hex}ff";
+        text_color = "${colors."text-primary".hex}ff";
         text_font = "sans-serif";
         text_size = 16;
         line_size = 5;
@@ -54,7 +45,7 @@ in
       text = ''
         export GDK_SCALE=1
         export GDK_DPI_SCALE=1
-        export GTK_THEME=Catppuccin-GTK-Dark
+        # GTK theme is set by theming system (home/common/theming/applications/gtk.nix)
         exec ${pkgs.swappy}/bin/swappy "$@" 2> >(grep -v "Theme parsing error: gtk.css" >&2)
       '';
     })
