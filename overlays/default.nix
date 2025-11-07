@@ -38,8 +38,6 @@ let
 
     npm-packages = import ./npm-packages.nix;
 
-    ironbar-fix = mkOptionalOverlay isLinux (import ./ironbar.nix);
-
     nh = mkOptionalOverlay (inputs ? nh && inputs.nh ? overlays) inputs.nh.overlays.default;
 
     nix-topology = mkOptionalOverlay (

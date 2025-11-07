@@ -63,7 +63,7 @@ in
   home.packages = [ brightnessScript ];
 
   programs.ironbar = {
-    enable = true;
+    enable = false;  # DISABLED: Waiting for wrapGAppsHook fix (PR #1225)
     systemd = true;
 
     config = {
