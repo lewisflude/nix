@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkForce;
+  inherit (lib) mkIf;
   inherit (lib.lists) optionals;
   cfg = config.host.features.gaming;
 in
@@ -34,34 +34,6 @@ in
     };
 
     hardware.uinput.enable = mkIf cfg.enable true;
-
-    boot.kernel.sysctl = mkIf cfg.performance {
-      "vm.max_map_count" = 2147483642;
-    };
-
-    # Only use cachyos kernel if it's compatible with ZFS
-    boot.kernelPackages = mkIf (
-      cfg.performance
-      && (
-        let
-          cachyosKernel = pkgs.linuxPackages_cachyos;
-          zfsKernelModuleAttr = pkgs.zfs.kernelModuleAttribute;
-          # Check if the attribute exists and is compatible
-          hasZfsModule = builtins.hasAttr zfsKernelModuleAttr cachyosKernel;
-          zfsModuleEval =
-            if hasZfsModule then
-              builtins.tryEval cachyosKernel.${zfsKernelModuleAttr}
-            else
-              {
-                success = false;
-                value = null;
-              };
-        in
-        zfsModuleEval.success && (!(zfsModuleEval.value.meta.broken or false))
-      )
-    ) (mkForce pkgs.linuxPackages_cachyos);
-
-    chaotic.mesa-git.enable = mkIf cfg.performance true;
 
     environment.systemPackages =
       with pkgs;

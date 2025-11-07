@@ -174,24 +174,6 @@ in
           };
         };
       };
-      environment = {
-        ELECTRON_OZONE_PLATFORM_HINT = "auto";
-        NIXOS_OZONE_WL = "1";
-        MOZ_ENABLE_WAYLAND = "1";
-        MOZ_WEBRENDER = "1";
-        XDG_CURRENT_DESKTOP = "niri";
-        XDG_SESSION_DESKTOP = "niri";
-        XDG_SESSION_TYPE = "wayland";
-        QT_QPA_PLATFORM = "wayland";
-        QT_QPA_PLATFORMTHEME = "gtk3";
-        QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
-        QT_AUTO_SCREEN_SCALE_FACTOR = "1";
-        QT_WAYLAND_FORCE_DPI = "physical";
-        _JAVA_AWT_WM_NONREPARENTING = "1";
-        SDL_VIDEODRIVER = "wayland,x11";
-        GTK_THEME = "Adwaita:dark";
-        FREETYPE_PROPERTIES = "cff:no-stem-darkening=0 autofitter:no-stem-darkening=0";
-      };
       spawn-at-startup = [
         {
           command = [

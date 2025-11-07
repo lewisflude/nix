@@ -7,5 +7,6 @@
     libva-utils
     egl-wayland
     nv-codec-headers
+    libglvnd
   ];
 }

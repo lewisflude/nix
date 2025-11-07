@@ -127,6 +127,9 @@
     };
     dbus = {
       implementation = "broker";
+      # Note: NixOS automatically adds packages for enabled services
+      # (networkmanager, polkit, gnome-keyring are auto-added when their services are enabled)
+      # Only add packages here that provide dbus services but aren't managed by NixOS service modules
       packages = [ pkgs.avahi ];
     };
   };
