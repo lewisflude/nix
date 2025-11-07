@@ -32,9 +32,15 @@ let
     inputs.fenix.overlays.default pkgs pkgs;
 
   overlaySet = {
-    localPkgs = _final: prev: {
-      cursor = prev.callPackage (../pkgs + "/cursor") { };
-    };
+    localPkgs =
+      _final: prev:
+      let
+        cursorPkgs = prev.callPackage (../pkgs + "/cursor") { };
+      in
+      {
+        # Only expose cursor app, cursor-cli should come from nixpkgs
+        cursor = cursorPkgs.cursor;
+      };
 
     npm-packages = import ./npm-packages.nix;
 

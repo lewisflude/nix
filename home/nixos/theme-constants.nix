@@ -25,20 +25,21 @@ let
       throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
 in
 {
+  # Use mkDefault so Scientific theme can override these Catppuccin colors
   niri.colors = {
     focus-ring = {
-      active = catppuccinPalette.mauve.hex;
-      inactive = catppuccinPalette.overlay1.hex;
+      active = lib.mkDefault catppuccinPalette.mauve.hex;
+      inactive = lib.mkDefault catppuccinPalette.overlay1.hex;
     };
     border = {
-      active = catppuccinPalette.lavender.hex;
-      inactive = catppuccinPalette.surface1.hex;
-      urgent = catppuccinPalette.red.hex;
+      active = lib.mkDefault catppuccinPalette.lavender.hex;
+      inactive = lib.mkDefault catppuccinPalette.surface1.hex;
+      urgent = lib.mkDefault catppuccinPalette.red.hex;
     };
-    shadow = "${catppuccinPalette.base.hex}aa";
+    shadow = lib.mkDefault "${catppuccinPalette.base.hex}aa";
     tab-indicator = {
-      active = catppuccinPalette.mauve.hex;
-      inactive = catppuccinPalette.overlay1.hex;
+      active = lib.mkDefault catppuccinPalette.mauve.hex;
+      inactive = lib.mkDefault catppuccinPalette.overlay1.hex;
     };
   };
 }

@@ -4,17 +4,20 @@
   pkgs,
   hostSystem,
   ...
-}: let
+}:
+let
   inherit (lib) mkIf mkMerge optionalAttrs;
   inherit (lib.lists) optional optionals;
   cfg = config.host.features.media;
-  platformLib = (import ../../../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
+  platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
   inherit (platformLib) isLinux;
   audioNixCfg = cfg.audio.audioNix;
-in {
+in
+{
   config = mkIf cfg.enable (mkMerge [
     (optionalAttrs isLinux {
-      environment.systemPackages = with pkgs;
+      environment.systemPackages =
+        with pkgs;
         optionals (cfg.audio.enable && cfg.audio.production) [
           audacity
           helm
@@ -35,10 +38,11 @@ in {
           imagemagick
           gimp
         ]
-        ++ optionals ((cfg.video.enable && cfg.video.streaming) || (cfg.streaming.enable && cfg.streaming.obs))
-        [
-          obs-studio
-        ]
+        ++
+          optionals ((cfg.video.enable && cfg.video.streaming) || (cfg.streaming.enable && cfg.streaming.obs))
+            [
+              obs-studio
+            ]
         ++ optionals (cfg.video.enable && cfg.video.streaming) [
           v4l2loopback
         ];

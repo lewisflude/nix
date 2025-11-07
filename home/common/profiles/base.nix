@@ -28,5 +28,11 @@
     ../lib
 
     ../modules.nix
+
+    # Theming system
+    ../theming
+
+    # Feature modules (includes security with sops)
+    ../features
   ];
 }

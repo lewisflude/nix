@@ -28,7 +28,9 @@ let
         else
           mode;
       resolvedOwner = if isDarwin then config.host.username else "root";
-      resolvedGroup = if isDarwin then "staff" else secretsGroup;
+      # On darwin, use "wheel" for user-readable secrets since neededForUsers creates files in
+      # /run/secrets-for-users/ with wheel group, and the user needs to be in wheel to read them
+      resolvedGroup = if isDarwin then "wheel" else secretsGroup;
     in
     {
       mode = resolvedMode;

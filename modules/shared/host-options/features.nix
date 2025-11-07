@@ -59,6 +59,25 @@ in
       hyprland = mkEnableOption "Hyprland Wayland compositor";
       theming = mkEnableOption "system-wide theming";
       utilities = mkEnableOption "desktop utilities";
+
+      # Scientific theme options
+      scientificTheme = {
+        enable = mkEnableOption "scientific OKLCH color palette theme";
+        mode = mkOption {
+          type = types.enum [
+            "light"
+            "dark"
+            "auto"
+          ];
+          default = "dark";
+          description = ''
+            Color theme mode:
+            - light: Use light mode colors
+            - dark: Use dark mode colors
+            - auto: Follow system preference (defaults to dark)
+          '';
+        };
+      };
     };
 
     restic = {

@@ -4,14 +4,16 @@
   pkgs,
   hostSystem,
   ...
-}: let
+}:
+let
   inherit (lib) mkIf mkMerge optionalAttrs;
   inherit (lib.lists) optional optionals;
   cfg = config.host.features.virtualisation;
-  platformLib = (import ../../../../lib/functions.nix {inherit lib;}).withSystem hostSystem;
+  platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
   inherit (platformLib) isLinux;
   inherit (platformLib) isDarwin;
-in {
+in
+{
   config = mkIf cfg.enable (mkMerge [
     (optionalAttrs isLinux {
       virtualisation = mkMerge [
@@ -42,7 +44,7 @@ in {
               swtpm.enable = true;
               ovmf = {
                 enable = true;
-                packages = [pkgs.OVMFFull.fd];
+                packages = [ pkgs.OVMFFull.fd ];
               };
             };
           };
@@ -60,7 +62,8 @@ in {
       users.users.${config.host.username}.extraGroups =
         optional cfg.docker "docker" ++ optional cfg.qemu "libvirtd" ++ optional cfg.virtualbox "vboxusers";
 
-      environment.systemPackages = with pkgs;
+      environment.systemPackages =
+        with pkgs;
         optionals cfg.qemu [
           virt-manager
           qemu

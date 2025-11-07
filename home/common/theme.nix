@@ -12,7 +12,7 @@ in
   catppuccin = {
     flavor = "mocha";
     accent = "mauve";
-    enable = true;
+    enable = false; # Disabled in favor of Scientific theme
     waybar.mode = "createLink";
     mako.enable = lib.mkIf platformLib.isLinux true;
     swaync.enable = lib.mkIf platformLib.isLinux true;
@@ -20,23 +20,14 @@ in
 
   home = lib.optionalAttrs platformLib.isLinux {
     packages = with pkgs; [
-      magnetic-catppuccin-gtk
       nwg-look
 
       iosevka-bin
       nerd-fonts.iosevka
       gtk4
     ];
-    pointerCursor = {
-      name = "catppuccin-mocha-mauve-cursors";
-      package = pkgs.catppuccin-cursors.mochaMauve;
-      size = 24;
-      gtk.enable = true;
-      x11 = {
-        enable = true;
-        defaultCursor = "left_ptr";
-      };
-    };
+    # Cursor theme configuration moved to theming system
+    # Enable via: host.features.desktop.scientificTheme.enable = true
   };
 
   gtk = lib.mkIf platformLib.isLinux {
@@ -46,15 +37,8 @@ in
       package = pkgs.iosevka-bin;
       size = 12;
     };
-    theme = {
-      name = "Catppuccin-GTK-Dark";
-      package = pkgs.magnetic-catppuccin-gtk;
-    };
-    cursorTheme = {
-      name = "catppuccin-mocha-mauve-cursors";
-      package = pkgs.catppuccin-cursors.mochaMauve;
-      size = 24;
-    };
+    # GTK theme and cursor configuration moved to theming system
+    # Enable via: host.features.desktop.scientificTheme.enable = true
   };
 
   fonts.fontconfig.enable = lib.mkIf platformLib.isLinux true;

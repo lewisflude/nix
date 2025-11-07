@@ -319,4 +319,99 @@ in
       evalModules.config.host.features.gaming.enable
       && evalModules.config.host.features.mediaManagement.enable
   '';
+
+  # Theming module tests
+  theming-palette = mkEvalTest "theming-palette" ''
+    let
+      lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
+      palette = import ../home/common/theming/palette.nix { inherit lib; };
+    in
+      palette.tonal.dark.base-L015.hex == "#1e1f26"
+  '';
+
+  theming-lib = mkEvalTest "theming-lib" ''
+    let
+      lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
+      palette = import ../home/common/theming/palette.nix { inherit lib; };
+      themeLib = import ../home/common/theming/lib.nix { inherit lib palette; };
+      theme = themeLib.generateTheme "dark";
+    in
+      theme.mode == "dark"
+      && theme.semantic ? "surface-base"
+      && theme.semantic ? "text-primary"
+  '';
+
+  theming-module = mkEvalTest "theming-module" ''
+    let
+      lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
+      evalModule = lib.evalModules {
+        modules = [
+          ../home/common/theming/default.nix
+          {
+            config = {
+              theming.scientific = {
+                enable = true;
+                mode = "dark";
+                applications = {
+                  cursor.enable = true;
+                  helix.enable = true;
+                };
+              };
+            };
+          }
+        ];
+      };
+    in
+      evalModule.config.theming.scientific.enable
+      && evalModule.config.theming.scientific.mode == "dark"
+  '';
+
+  theming-feature = mkEvalTest "theming-feature" ''
+    let
+      lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
+      evalModule = lib.evalModules {
+        modules = [
+          ../modules/shared/host-options.nix
+          ../modules/shared/features/desktop/default.nix
+          {
+            config = {
+              host = {
+                username = "test";
+                useremail = "test@example.com";
+                hostname = "test";
+                system = "x86_64-linux";
+                features.desktop = {
+                  enable = true;
+                  scientificTheme = {
+                    enable = true;
+                    mode = "dark";
+                  };
+                };
+              };
+            };
+            hostSystem = "x86_64-linux";
+          }
+        ];
+      };
+    in
+      evalModule.config.theming.scientific.enable
+      && evalModule.config.host.features.desktop.scientificTheme.enable
+  '';
+
+  theming-unit-tests = mkEvalTest "theming-unit-tests" ''
+    let
+      lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
+      tests = import ../tests/theming.nix { inherit lib pkgs; };
+
+      # Run a subset of the tests
+      results = {
+        palette = tests.testPaletteStructure.expr == tests.testPaletteStructure.expected;
+        hexFormat = tests.testHexFormat.expr == tests.testHexFormat.expected;
+        darkTheme = tests.testDarkThemeGeneration.expr == tests.testDarkThemeGeneration.expected;
+        lightTheme = tests.testLightThemeGeneration.expr == tests.testLightThemeGeneration.expected;
+        semantic = tests.testSemanticColorsDark.expr == tests.testSemanticColorsDark.expected;
+      };
+    in
+      results.palette && results.hexFormat && results.darkTheme && results.lightTheme && results.semantic
+  '';
 }

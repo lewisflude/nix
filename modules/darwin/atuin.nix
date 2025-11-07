@@ -3,9 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.services.atuin;
-in {
+in
+{
   options.services.atuin = {
     enable = lib.mkEnableOption "Atuin server for shell history sync";
 
@@ -59,26 +61,25 @@ in {
       command = lib.getExe cfg.package;
       serviceConfig = {
         Label = "com.atuin.server";
-        ProgramArguments =
-          [
-            (lib.getExe cfg.package)
-            "server"
-            "--host"
-            cfg.host
-            "--port"
-            (toString cfg.port)
-          ]
-          ++ lib.optionals (cfg.path != "") [
-            "--path"
-            cfg.path
-          ]
-          ++ [
-            "--max-history-length"
-            (toString cfg.maxHistoryLength)
-          ]
-          ++ lib.optionals cfg.openRegistration [
-            "--open-registration"
-          ];
+        ProgramArguments = [
+          (lib.getExe cfg.package)
+          "server"
+          "--host"
+          cfg.host
+          "--port"
+          (toString cfg.port)
+        ]
+        ++ lib.optionals (cfg.path != "") [
+          "--path"
+          cfg.path
+        ]
+        ++ [
+          "--max-history-length"
+          (toString cfg.maxHistoryLength)
+        ]
+        ++ lib.optionals cfg.openRegistration [
+          "--open-registration"
+        ];
         RunAtLoad = true;
         KeepAlive = true;
         StandardOutPath = "/tmp/atuin-server.log";
