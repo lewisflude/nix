@@ -17,6 +17,7 @@ in
     xfce.thunar
     font-awesome
     asepriteFixed
+    wl-screenrec
   ];
   services.cliphist = {
     enable = true;

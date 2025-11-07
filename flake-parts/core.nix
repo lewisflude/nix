@@ -174,29 +174,18 @@ in
         )
       ) nixosHosts;
 
-      homeConfigurations = builtins.mapAttrs (
-        _hostName: hostConfig:
-        withSystem hostConfig.system (
-          { config, ... }:
-          outputBuilders.mkHomeConfigurationForHost {
-            inherit hostConfig;
-            perSystemPkgs = config.pkgs;
-          }
-        )
-      ) hosts;
     in
     {
       inherit
         darwinConfigurations
         nixosConfigurations
-        homeConfigurations
         ;
       lib = functionsLib;
 
       overlays.default =
         final: prev:
         let
-          inherit (prev.stdenv.hostPlatform) system;
+          system = prev.stdenv.hostPlatform.system;
           overlaySet = import ../overlays {
             inherit inputs system;
           };

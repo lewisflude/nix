@@ -79,7 +79,7 @@ in
           ]
           ++ optionals cfg.gpg [
             gnupg
-            pinentry-qt
+            pinentry-gnome3
           ];
 
         users.users.${config.host.username}.extraGroups = optional cfg.yubikey "uucp";
@@ -89,7 +89,7 @@ in
         programs.gnupg.agent = {
           enable = true;
           enableSSHSupport = true;
-          pinentryPackage = mkDefault pkgs.pinentry-qt;
+          pinentryPackage = mkDefault pkgs.pinentry-gnome3;
         };
       })
 

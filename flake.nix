@@ -76,6 +76,10 @@
     awww = {
       url = "git+https://codeberg.org/LGFae/awww";
     };
+    ironbar = {
+      url = "github:JakeStanger/ironbar";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     musnix = {
       url = "github:musnix/musnix";
