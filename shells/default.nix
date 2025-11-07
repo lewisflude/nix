@@ -18,6 +18,7 @@ let
     git
   ];
   devShellsCommon = {
+    # Project-specific shells
     qmk = import ./projects/qmk.nix { inherit pkgs lib system; };
     nextjs = import ./projects/nextjs.nix { inherit pkgs lib system; };
     react-native = import ./projects/react-native.nix {
@@ -26,50 +27,11 @@ let
     api-backend = import ./projects/api-backend.nix { inherit pkgs lib system; };
     development = import ./projects/development.nix { inherit pkgs lib system; };
     shell-selector = import ./utils/shell-selector.nix { inherit pkgs; };
-    node = pkgs.mkShell {
-      buildInputs =
-        with pkgs;
-        [ (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs) ] ++ commonTools;
-      shellHook = ''
-        echo "🚀 Node.js development environment loaded"
-        echo "Node version: $(node --version)"
-        echo "TypeScript version: $(tsc --version)"
-      '';
-    };
-    python = pkgs.mkShell {
-      buildInputs =
-        featureBuilders.mkShellPackages {
-          cfg = {
-            python = true;
-          };
-          inherit pkgs;
-          inherit (platformLib) versions;
 
-          pythonVersion = "python312";
-        }
-        ++ commonTools;
-      shellHook = ''
-        echo "🐍 Python development environment loaded"
-        echo "Python version: $(python --version)"
-        export PYTHONPATH="$PWD:$PYTHONPATH"
-      '';
-    };
-    rust = pkgs.mkShell {
-      buildInputs =
-        featureBuilders.mkShellPackages {
-          cfg = {
-            rust = true;
-          };
-          inherit pkgs;
-          inherit (platformLib) versions;
-        }
-        ++ commonTools;
-      shellHook = ''
-        echo "🦀 Rust development environment loaded"
-        echo "Rust version: $(rustc --version)"
-        echo "Cargo version: $(cargo --version)"
-      '';
-    };
+    # Language shells for non-default languages
+    # Note: node, python, rust are installed system-wide via development.* features
+    # These shells are only for languages NOT in your system defaults
+
     go = pkgs.mkShell {
       buildInputs =
         featureBuilders.mkShellPackages {
@@ -87,22 +49,27 @@ let
         export PATH="$GOPATH/bin:$PATH"
       '';
     };
+
+    # Web-specific tools (extends system node/typescript)
     web = pkgs.mkShell {
       buildInputs =
         with pkgs;
         [
-          (platformLib.getVersionedPackage pkgs platformLib.versions.nodejs)
+          # System provides: node, typescript, pnpm
+          # Add web-specific tools only
           tailwindcss-language-server
           html-tidy
           sass
         ]
         ++ commonTools;
       shellHook = ''
-        echo "🌐 Web development environment loaded"
+        echo "🌐 Web development environment loaded (using system Node.js)"
         echo "Node version: $(node --version)"
-        echo "TypeScript version: $(tsc --version)"
+        echo "Additional tools: tailwindcss-ls, html-tidy, sass"
       '';
     };
+
+    # DevOps tools (specialized environment)
     devops = pkgs.mkShell {
       buildInputs =
         with pkgs;

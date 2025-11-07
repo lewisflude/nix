@@ -10,12 +10,14 @@ in
 {
   home.packages = with pkgs; [
     # Note: gnupg is automatically installed by programs.gpg.enable = true
-    (platformLib.platformPackage pinentry-curses pinentry_mac)
+    (platformLib.platformPackage pinentry-gnome3 pinentry_mac)
   ];
   programs.gpg = {
     enable = true;
     scdaemonSettings = {
       disable-ccid = true;
+      # Cache the Yubikey PIN for 24 hours
+      card-timeout = "86400";
     };
     settings = {
       default-key = "48B34CF9C735A6AE";
@@ -24,12 +26,13 @@ in
   services.gpg-agent = {
     enable = true;
     enableSshSupport = true;
-    pinentry.package = lib.mkForce (platformLib.platformPackage pkgs.pinentry-qt pkgs.pinentry_mac);
+    pinentry.package = lib.mkForce (platformLib.platformPackage pkgs.pinentry-gnome3 pkgs.pinentry_mac);
+    # Cache GPG and SSH keys for 24 hours
     defaultCacheTtl = 86400;
     maxCacheTtl = 86400;
+    defaultCacheTtlSsh = 86400;
+    maxCacheTtlSsh = 86400;
     extraConfig = ''
-      default-cache-ttl-ssh 3600
-      max-cache-ttl-ssh     7200
       allow-preset-passphrase
       grab
       allow-loopback-pinentry

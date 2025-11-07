@@ -5,12 +5,13 @@
     ./browser.nix
     ./launcher.nix
     ./swaync.nix
-    ./waybar.nix
+    ./ironbar.nix
     ./desktop-apps.nix
     ./yazi.nix
     ./niri.nix
     ./mcp.nix
-    ./apps/gtklock.nix
+    ./apps/polkit-gnome.nix
+    ./apps/wlsunset.nix
     ./apps/swayidle.nix
     ./apps/swappy.nix
     ./apps/wofi.nix

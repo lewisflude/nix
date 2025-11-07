@@ -29,7 +29,6 @@ in
       wayland-utils
       brightnessctl
       # Note: xdg-utils is handled in core-tooling.nix
-      lxqt.lxqt-policykit
       xwayland-satellite
       argyllcms
       colord-gtk
@@ -180,14 +179,6 @@ in
       spawn-at-startup = [
         {
           command = [
-            "${pkgs.uwsm}/bin/uwsm"
-            "app"
-            "--"
-            "${pkgs.lxqt.lxqt-policykit}/bin/lxqt-policykit-agent"
-          ];
-        }
-        {
-          command = [
             "${lib.getExe xwayland-satellite}"
           ];
         }
@@ -211,14 +202,6 @@ in
             "-d"
             "1"
             "${config.home.homeDirectory}/.local/share/icc/aw3423dwf.icc"
-          ];
-        }
-        {
-          command = [
-            "${pkgs.uwsm}/bin/uwsm"
-            "app"
-            "--"
-            "${pkgs.waybar}/bin/waybar"
           ];
         }
       ];

@@ -10,6 +10,7 @@ let
   sops-nix = inputs.sops-nix or null;
   catppuccin = inputs.catppuccin or null;
   niri = inputs.niri or null;
+  ironbar = inputs.ironbar or null;
   musnix = inputs.musnix or null;
   solaar = inputs.solaar or null;
   determinate = inputs.determinate or null;
@@ -90,6 +91,7 @@ let
         optionalModule (sops-nix != null) sops-nix.homeManagerModules.sops
         ++ optionalModule (catppuccin != null) catppuccin.homeModules.catppuccin
         ++ optionalModule (chaotic != null) chaotic.homeManagerModules.default
+        ++ optionalModule (ironbar != null && ironbar ? homeManagerModules) ironbar.homeManagerModules.default
         ++ extraSharedModules;
       users.${hostConfig.username} = import ../home;
     };
