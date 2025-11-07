@@ -10,7 +10,6 @@
     ./yazi.nix
     ./niri.nix
     ./mcp.nix
-    ./apps/thunderbird.nix
     ./apps/gtklock.nix
     ./apps/swayidle.nix
     ./apps/swappy.nix

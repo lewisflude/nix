@@ -16,12 +16,14 @@ in
       enable = true;
       waylandCompositors = {
         niri = {
-          prettyName = "Niri (UWSM)";
+          prettyName = "Niri";
           comment = "Niri compositor managed by UWSM";
           binPath = lib.getExe config.programs.niri.package;
         };
       };
     };
+    # Disable the plain niri session, only use UWSM-managed session
+    services.displayManager.sessionPackages = lib.mkForce [];
     services = {
       greetd = {
         enable = true;
