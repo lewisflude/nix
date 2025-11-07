@@ -18,9 +18,7 @@ in
         niri = {
           prettyName = "Niri (UWSM)";
           comment = "Niri compositor managed by UWSM";
-          binPath = pkgs.writeShellScript "niri" ''
-            ${lib.getExe config.programs.niri.package} --session
-          '';
+          binPath = lib.getExe config.programs.niri.package;
         };
       };
     };

@@ -66,6 +66,7 @@ in
       "rd.systemd.show_status=false"
       "rd.udev.log_level=3"
       "nvidia-drm.modeset=1"
+      "nvidia-drm.fbdev=1" # Enable DRM fbdev emulation for better Wayland support
       "vt.global_cursor_default=0"
       "enable_fbc=1"
       "enable_psr=2"

@@ -18,6 +18,8 @@ in
     # Note: sops is handled in features/security/default.nix
     pkgs.pgcli
     pkgs.musescore
+    pkgs.cursor-cli # Cursor CLI tool from nixpkgs
+    pkgs.claude-code # Claude agentic coding CLI
   ]
   ++ lib.optional (nx != null) nx
   ++ platformLib.platformPackages [ ] [ pkgs.xcodebuild ];
