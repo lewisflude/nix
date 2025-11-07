@@ -68,6 +68,10 @@ in
           polkit.enable = true;
         };
 
+        networking.firewall = mkIf cfg.firewall {
+          enable = true;
+        };
+
         services.gnome.gnome-keyring.enable = true;
 
         environment.systemPackages =
@@ -76,27 +80,10 @@ in
             yubikey-manager
             yubikey-personalization
             yubioath-flutter
-          ]
-          ++ optionals cfg.gpg [
-            gnupg
-            pinentry-gnome3
           ];
 
         users.users.${config.host.username}.extraGroups = optional cfg.yubikey "uucp";
       })
 
-      (mkIf (isLinux && cfg.gpg) {
-        programs.gnupg.agent = {
-          enable = true;
-          enableSSHSupport = true;
-          pinentryPackage = mkDefault pkgs.pinentry-gnome3;
-        };
-      })
-
-      (mkIf (isLinux && cfg.firewall) {
-        networking.firewall = {
-          enable = true;
-        };
-      })
     ]);
 }

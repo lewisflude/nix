@@ -37,8 +37,8 @@ in
         ]
         [ ]; # Linux packages, Darwin packages
   programs.ghostty = {
-    enable = platformLib.isLinux;
-    package = pkgs.ghostty;
+    enable = true;
+    package = if platformLib.isLinux then pkgs.ghostty else null;
     enableZshIntegration = true;
     settings = {
       font-family = "Iosevka Nerd Font";

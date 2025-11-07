@@ -15,17 +15,7 @@ let
       (import ./darwin.nix { inherit pkgs cursorInfo cursorVersion; })
     else
       throw "Cursor is only packaged for Linux and Darwin.";
-  cursorCli = import ./cursor-cli.nix {
-    inherit
-      pkgs
-      lib
-      fetchurl
-      stdenvNoCC
-      cursorInfo
-      ;
-  };
 in
 {
   cursor = cursorApp;
-  cursor-cli = cursorCli;
 }

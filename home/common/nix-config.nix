@@ -17,7 +17,7 @@ let
     SECRET_PATH="${systemConfig.sops.secrets.GITHUB_TOKEN.path or ""}"
 
     if [ -n "$SECRET_PATH" ] && [ -r "$SECRET_PATH" ]; then
-      GITHUB_TOKEN="$(cat "$SECRET_PATH")"
+      GITHUB_TOKEN="$(${pkgs.coreutils}/bin/cat "$SECRET_PATH")"
 
 
       if [ -n "$GITHUB_TOKEN" ]; then
@@ -44,10 +44,13 @@ in
 
   programs.zsh.initContent = lib.mkAfter ''
 
-    if [ -n "''${GITHUB_TOKEN:-}" ]; then
-      mkdir -p ${config.xdg.configHome}/nix
-      echo "access-tokens = github.com=$GITHUB_TOKEN" > ${config.xdg.configHome}/nix/nix.conf
-      chmod 600 ${config.xdg.configHome}/nix/nix.conf
+    if [ -r "${systemConfig.sops.secrets.GITHUB_TOKEN.path or ""}" ]; then
+      GITHUB_TOKEN="$(${pkgs.coreutils}/bin/cat "${systemConfig.sops.secrets.GITHUB_TOKEN.path}")"
+      if [ -n "$GITHUB_TOKEN" ]; then
+        mkdir -p ${config.xdg.configHome}/nix
+        echo "access-tokens = github.com=$GITHUB_TOKEN" > ${config.xdg.configHome}/nix/nix.conf
+        chmod 600 ${config.xdg.configHome}/nix/nix.conf
+      fi
     fi
   '';
 }

@@ -16,16 +16,8 @@ in
         sops
       ]
       ++ lib.optionals cfg.yubikey [
-
         yubikey-personalization
-      ]
-      ++ lib.optionals cfg.gpg [
-
       ];
-
-    programs.gpg = lib.mkIf cfg.gpg {
-      enable = true;
-    };
-
+    # Note: GPG is configured in home/common/gpg.nix, imported via profiles/base.nix
   };
 }

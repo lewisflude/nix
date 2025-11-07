@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   constants,
   ...
 }:
@@ -56,7 +57,7 @@ in
     "search.useGitIgnore" = true;
     "search.smartCase" = true;
     "search.showLineNumbers" = true;
-    "workbench.colorTheme" = "Catppuccin Mocha";
+    "workbench.colorTheme" = lib.mkDefault "Catppuccin Mocha"; # Can be overridden by Scientific theme
     "explorer.compactFolders" = false;
     "explorer.confirmDelete" = true;
     "explorer.confirmDragAndDrop" = true;

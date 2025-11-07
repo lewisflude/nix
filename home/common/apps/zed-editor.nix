@@ -18,11 +18,8 @@ in
         edit_prediction_provider = "copilot";
       };
 
-      theme = {
-        dark = "Catppuccin Mocha";
-        light = lib.mkForce "Catppuccin Latte";
-      };
-      icon_theme = "Catppuccin Mocha";
+      # Theme configuration moved to theming system (home/common/theming/applications/zed.nix)
+      # Enable via: host.features.desktop.scientificTheme.enable = true;
 
       ui_font_size = 16;
       buffer_font_size = 16;
@@ -137,7 +134,6 @@ in
 
       auto_install_extensions = {
         biome = true;
-        catppuccin-icons = true;
         docker-compose = true;
         dockerfile = true;
         env = true;

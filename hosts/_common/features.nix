@@ -113,6 +113,12 @@
     hyprland = false;
     theming = true;
     utilities = false;
+
+    # Scientific OKLCH color theme
+    scientificTheme = {
+      enable = true;
+      mode = "dark"; # Change to "light" if you prefer light mode
+    };
   };
 
   restic = {

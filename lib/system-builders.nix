@@ -80,6 +80,7 @@ let
       extraSharedModules ? [ ],
     }:
     {
+      useGlobalPkgs = true;
       useUserPackages = true;
       verbose = true;
       backupFileExtension = "backup";
@@ -90,8 +91,12 @@ let
       sharedModules =
         optionalModule (sops-nix != null) sops-nix.homeManagerModules.sops
         ++ optionalModule (catppuccin != null) catppuccin.homeModules.catppuccin
-        ++ optionalModule (chaotic != null) chaotic.homeManagerModules.default
-        ++ optionalModule (ironbar != null && ironbar ? homeManagerModules) ironbar.homeManagerModules.default
+        # Note: chaotic.homeManagerModules.default sets nixpkgs.config, which conflicts with useGlobalPkgs
+        # chaotic packages are still available via system-level overlays
+        # ++ optionalModule (chaotic != null) chaotic.homeManagerModules.default
+        ++ optionalModule (
+          ironbar != null && ironbar ? homeManagerModules
+        ) ironbar.homeManagerModules.default
         ++ extraSharedModules;
       users.${hostConfig.username} = import ../home;
     };

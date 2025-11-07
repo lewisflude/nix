@@ -23,7 +23,7 @@ in
       };
     };
     # Disable the plain niri session, only use UWSM-managed session
-    services.displayManager.sessionPackages = lib.mkForce [];
+    services.displayManager.sessionPackages = lib.mkForce [ ];
     services = {
       greetd = {
         enable = true;

@@ -63,7 +63,7 @@ in
   home.packages = [ brightnessScript ];
 
   programs.ironbar = {
-    enable = false;  # DISABLED: Waiting for wrapGAppsHook fix (PR #1225)
+    enable = false; # DISABLED: Waiting for wrapGAppsHook fix (PR #1225)
     systemd = true;
 
     config = {
@@ -71,75 +71,75 @@ in
         anchor_to_edges = true;
         position = "top";
         height = 42;
-        
-        start = [
-        {
-          type = "workspaces";
-          name_map = {
-            "1" = "";
-            "2" = "";
-            "3" = "";
-            "4" = "";
-            "5" = "";
-          };
-        }
-        {
-          type = "label";
-          label = "{{window_title}}";
-        }
-      ];
 
-      end = [
-        {
-          type = "sys_info";
-          format = [
-            " {cpu_percent}%"
-            " {memory_used_gb}/{memory_total_gb}GB"
-          ];
-          interval = 2000;
-        }
-        {
-          type = "custom";
-          class = "brightness";
-          exec = "${lib.getExe brightnessScript} get";
-          interval = 30000;
-          format = " {}%";
-          on_click_left = "${lib.getExe brightnessScript} set 100";
-          on_click_right = "${lib.getExe brightnessScript} set 0";
-          on_scroll_up = "${lib.getExe brightnessScript} up";
-          on_scroll_down = "${lib.getExe brightnessScript} down";
-        }
-        {
-          type = "volume";
-          format = "{icon} {percentage}%";
-          icons = {
-            volume_high = "";
-            volume_medium = "";
-            volume_low = "";
-            muted = "?";
-          };
-          on_click = "pwvucontrol";
-        }
-        {
-          type = "clock";
-          format = "  %a %d %b %H:%M";
-          on_click = "${pkgs.uwsm}/bin/uwsm app -- gsimplecal";
-        }
-        {
-          type = "tray";
-          icon_size = 24;
-        }
-        {
-          type = "custom";
-          class = "notifications";
-          exec = "swaync-client -swb";
-          return_type = "json";
-          interval = 1000;
-          format = "{icon}";
-          on_click = "swaync-client -t -sw";
-          on_click_right = "swaync-client -d -sw";
-        }
-      ];
+        start = [
+          {
+            type = "workspaces";
+            name_map = {
+              "1" = "";
+              "2" = "";
+              "3" = "";
+              "4" = "";
+              "5" = "";
+            };
+          }
+          {
+            type = "label";
+            label = "{{window_title}}";
+          }
+        ];
+
+        end = [
+          {
+            type = "sys_info";
+            format = [
+              " {cpu_percent}%"
+              " {memory_used_gb}/{memory_total_gb}GB"
+            ];
+            interval = 2000;
+          }
+          {
+            type = "custom";
+            class = "brightness";
+            exec = "${lib.getExe brightnessScript} get";
+            interval = 30000;
+            format = " {}%";
+            on_click_left = "${lib.getExe brightnessScript} set 100";
+            on_click_right = "${lib.getExe brightnessScript} set 0";
+            on_scroll_up = "${lib.getExe brightnessScript} up";
+            on_scroll_down = "${lib.getExe brightnessScript} down";
+          }
+          {
+            type = "volume";
+            format = "{icon} {percentage}%";
+            icons = {
+              volume_high = "";
+              volume_medium = "";
+              volume_low = "";
+              muted = "?";
+            };
+            on_click = "pwvucontrol";
+          }
+          {
+            type = "clock";
+            format = "  %a %d %b %H:%M";
+            on_click = "${pkgs.uwsm}/bin/uwsm app -- gsimplecal";
+          }
+          {
+            type = "tray";
+            icon_size = 24;
+          }
+          {
+            type = "custom";
+            class = "notifications";
+            exec = "swaync-client -swb";
+            return_type = "json";
+            interval = 1000;
+            format = "{icon}";
+            on_click = "swaync-client -t -sw";
+            on_click_right = "swaync-client -d -sw";
+          }
+        ];
       };
     };
 

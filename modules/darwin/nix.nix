@@ -96,7 +96,7 @@
         exit 0
       fi
 
-      GITHUB_TOKEN="$(cat "$SECRET_PATH")"
+      GITHUB_TOKEN="$(${pkgs.coreutils}/bin/cat "$SECRET_PATH")"
 
       if [ -z "$GITHUB_TOKEN" ]; then
         echo "Warning: GitHub token is empty" >&2
