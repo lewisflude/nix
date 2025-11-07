@@ -214,6 +214,14 @@ in
             "${config.home.homeDirectory}/.local/share/icc/aw3423dwf.icc"
           ];
         }
+        {
+          command = [
+            "${pkgs.uwsm}/bin/uwsm"
+            "app"
+            "--"
+            "${pkgs.waybar}/bin/waybar"
+          ];
+        }
       ];
     };
   };
