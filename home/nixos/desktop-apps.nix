@@ -9,7 +9,6 @@ in
   home.packages = with pkgs; [
     mpv
     gimp
-    krita
     discord
     telegram-desktop
     file-roller

@@ -5,7 +5,7 @@
     neovim = false;
     rust = true;
     python = true;
-    go = true;
+    go = false;
     node = true;
     lua = false;
     docker = false;

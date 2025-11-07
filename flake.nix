@@ -73,6 +73,9 @@
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    awww = {
+      url = "git+https://codeberg.org/LGFae/awww";
+    };
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     musnix = {
       url = "github:musnix/musnix";

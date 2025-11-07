@@ -20,21 +20,24 @@ let
   xwayland-satellite = xwayland-satellite-unstable;
 in
 {
-  home.packages = with pkgs; [
-    swww
-    grim
-    slurp
-    wl-clipboard
-    wlr-randr
-    wayland-utils
-    brightnessctl
-    # Note: xdg-utils is handled in core-tooling.nix
-    lxqt.lxqt-policykit
-    xwayland-satellite
-    argyllcms
-    colord-gtk
-    wl-gammactl
-  ];
+  home.packages =
+    (with pkgs; [
+      grim
+      slurp
+      wl-clipboard
+      wlr-randr
+      wayland-utils
+      brightnessctl
+      # Note: xdg-utils is handled in core-tooling.nix
+      lxqt.lxqt-policykit
+      xwayland-satellite
+      argyllcms
+      colord-gtk
+      wl-gammactl
+    ])
+    ++ [
+      inputs.awww.packages.${system}.awww
+    ];
   imports = [
     ./niri/keybinds.nix
   ];
@@ -190,20 +193,16 @@ in
         }
         {
           command = [
-            "${pkgs.uwsm}/bin/uwsm"
-            "app"
-            "--"
-            "${pkgs.swww}/bin/swww-daemon"
+            "${inputs.awww.packages.${system}.awww}/bin/awww-daemon"
           ];
         }
         {
           command = [
-            "${pkgs.uwsm}/bin/uwsm"
-            "app"
-            "--"
-            "${pkgs.swww}/bin/swww"
-            "img"
-            "${config.home.homeDirectory}/wallpapers/nix-wallpaper-nineish-catppuccin-mocha.png"
+            "${pkgs.bash}/bin/bash"
+            "-c"
+            "sleep 1 && ${
+              inputs.awww.packages.${system}.awww
+            }/bin/awww img ${config.home.homeDirectory}/wallpapers/nix-wallpaper-nineish-catppuccin-mocha.png"
           ];
         }
         {

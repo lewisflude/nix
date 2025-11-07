@@ -14,7 +14,7 @@ in
 
     programs.steam = mkIf cfg.steam {
       enable = true;
-      gamescopeSession.enable = true;
+      gamescopeSession.enable = false;
       protontricks.enable = true;
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
