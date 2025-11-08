@@ -4,11 +4,10 @@
   ...
 }:
 let
-  cfg = config.features.desktop;
+  cfg = config.host.features.desktop;
 in
 {
   imports = [
-    ./audio
     ./desktop-environment.nix
     ./graphics.nix
     ./hyprland.nix
@@ -17,12 +16,7 @@ in
     ./xwayland.nix
   ];
 
-  options.features.desktop = {
-    enable = lib.mkEnableOption "Enable desktop environment";
-  };
-
   config = lib.mkIf cfg.enable {
-
     users.users.${config.host.username}.extraGroups = [
       "audio"
       "video"

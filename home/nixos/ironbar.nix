@@ -1,26 +1,10 @@
 {
   pkgs,
   lib,
-  inputs,
   config,
   ...
 }:
 let
-  catppuccinPalette =
-    if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
-      (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
-      .${config.catppuccin.flavor}.colors
-    else if inputs ? catppuccin then
-      let
-        catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
-      in
-      if catppuccinSrc != null then
-        (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
-      else
-        throw "Cannot find catppuccin source"
-    else
-      throw "Cannot find catppuccin input";
-
   brightnessScript = pkgs.writeShellApplication {
     name = "brightness";
     runtimeInputs = with pkgs; [
@@ -62,9 +46,24 @@ in
 {
   home.packages = [ brightnessScript ];
 
+  # Override onChange hooks to handle when ironbar isn't running yet
+  xdg.configFile."ironbar/config.json".onChange = lib.mkForce ''
+    if pgrep -x ironbar > /dev/null; then
+      ${pkgs.ironbar}/bin/ironbar reload || true
+    fi
+  '';
+
+  xdg.configFile."ironbar/style.css".onChange = lib.mkForce ''
+    if pgrep -x ironbar > /dev/null; then
+      ${pkgs.ironbar}/bin/ironbar reload || true
+    fi
+  '';
+
   programs.ironbar = {
-    enable = false; # DISABLED: Waiting for wrapGAppsHook fix (PR #1225)
+    enable = true;
     systemd = true;
+    # Use nixpkgs ironbar (v0.17.1) instead of flake package to avoid wrapGAppsHook issues
+    package = pkgs.ironbar;
 
     config = {
       monitors.DP-1 = {
@@ -76,11 +75,11 @@ in
           {
             type = "workspaces";
             name_map = {
-              "1" = "";
+              "1" = "󰈹";
               "2" = "";
               "3" = "";
-              "4" = "";
-              "5" = "";
+              "4" = "󰭹";
+              "5" = "󰓇";
             };
           }
           {
@@ -116,7 +115,7 @@ in
               volume_high = "";
               volume_medium = "";
               volume_low = "";
-              muted = "?";
+              muted = "󰝟";
             };
             on_click = "pwvucontrol";
           }
@@ -143,46 +142,9 @@ in
       };
     };
 
-    style = ''
-      * {
-        font-family: "Iosevka Nerd Font", "Font Awesome 6 Free", sans-serif;
-        font-size: 14px;
-        border: none;
-      }
-
-      #bar {
-        background-color: #${catppuccinPalette.base.hex};
-        color: #${catppuccinPalette.text.hex};
-      }
-
-      #workspaces button {
-        padding: 0 10px;
-        background-color: transparent;
-        color: #${catppuccinPalette.text.hex};
-      }
-
-      #workspaces button.focused {
-        background-color: #${catppuccinPalette.mauve.hex};
-        color: #${catppuccinPalette.base.hex};
-      }
-
-      #label,
-      #sys_info,
-      #clock,
-      #volume,
-      #tray,
-      .custom,
-      .brightness,
-      .notifications {
-        padding: 0 12px;
-        margin: 0 2px;
-      }
-
-      #volume,
-      #clock,
-      .custom {
-        background-color: #${catppuccinPalette.surface0.hex};
-      }
-    '';
+    # Styles are managed by the Scientific theming system
+    # See: home/common/theming/applications/ironbar.nix
+    # This is a fallback if theming is disabled
+    style = lib.mkDefault "";
   };
 }

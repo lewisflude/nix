@@ -215,6 +215,7 @@ in
           zjk = "zellij kill-session";
           zja = "zellij attach";
           zjd = "zellij delete-session";
+          zed = "env -u WAYLAND_DISPLAY zeditor"; # Force XWayland (native Wayland support is buggy)
         }
         (lib.mkIf isLinux {
           lock = "saylock --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --ring-color cba6f7 --key-hl-color b4befe --line-color 00000000 --inside-color 1e1e2e88 --separator-color 00000000 --text-color cdd6f4 --grace 2 --fade-in 0.2";
@@ -248,7 +249,8 @@ in
 
 
 
-          if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
+          # Only load p10k instant prompt in interactive shells
+          if [[ -o interactive && -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
             source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
           fi
         '')
@@ -279,21 +281,24 @@ in
           )'
           export WORDCHARS='*?_-.[]~=&;!'
           export ATUIN_NOBIND="true"
-          zsh-defer -c 'bindkey "^r" _atuin_search_widget'
-          bindkey '^[[1;5C' forward-word
-          bindkey '^[[1;5D' backward-word
-          bindkey '^H' backward-kill-word
-          bindkey '^[[3;5~' kill-word
 
+          # Only set keybindings in interactive shells (requires ZLE)
+          if [[ -o interactive ]]; then
+            zsh-defer -c 'bindkey "^r" _atuin_search_widget'
+            bindkey '^[[1;5C' forward-word
+            bindkey '^[[1;5D' backward-word
+            bindkey '^H' backward-kill-word
+            bindkey '^[[3;5~' kill-word
 
-          bindkey '^P' history-substring-search-up
-          bindkey '^N' history-substring-search-down
-          function _ghostty_insert_newline() { LBUFFER+=$'\n' }
-          zle -N ghostty-insert-newline _ghostty_insert_newline
-          bindkey -M emacs $'\e[99997u' ghostty-insert-newline
-          bindkey -M viins $'\e[99997u' ghostty-insert-newline
-          bindkey -M emacs $'\e\r'     ghostty-insert-newline
-          bindkey -M viins $'\e\r'     ghostty-insert-newline
+            bindkey '^P' history-substring-search-up
+            bindkey '^N' history-substring-search-down
+            function _ghostty_insert_newline() { LBUFFER+=$'\n' }
+            zle -N ghostty-insert-newline _ghostty_insert_newline
+            bindkey -M emacs $'\e[99997u' ghostty-insert-newline
+            bindkey -M viins $'\e[99997u' ghostty-insert-newline
+            bindkey -M emacs $'\e\r'     ghostty-insert-newline
+            bindkey -M viins $'\e\r'     ghostty-insert-newline
+          fi
 
           zstyle ':completion:*' completer _complete _match _approximate
           zstyle ':completion:*:match:*' original only
@@ -332,19 +337,26 @@ in
           fi
 
           source ${sources.zsh_codex.src}/zsh_codex.plugin.zsh
-          bindkey '^X' create_completion
 
-          # Initialize powerlevel10k (as recommended by nixpkgs, using initContent since promptInit is NixOS-only)
-          source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+          # Only bind keys in interactive shells
+          if [[ -o interactive ]]; then
+            bindkey '^X' create_completion
+          fi
 
-          # Load p10k configuration (managed by Home Manager)
-          # Ensure the file exists before sourcing to avoid p10k wizard
-          if [[ -f ${config.home.homeDirectory}/.p10k.zsh ]]; then
-            source ${config.home.homeDirectory}/.p10k.zsh
-          else
-            # If file doesn't exist, p10k will show wizard - this shouldn't happen
-            # as Home Manager should create it, but we handle it gracefully
-            echo "Warning: ~/.p10k.zsh not found. Run 'home-manager switch' to create it."
+          # Only initialize powerlevel10k in interactive shells
+          if [[ -o interactive ]]; then
+            # Initialize powerlevel10k (as recommended by nixpkgs, using initContent since promptInit is NixOS-only)
+            source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+
+            # Load p10k configuration (managed by Home Manager)
+            # Ensure the file exists before sourcing to avoid p10k wizard
+            if [[ -f ${config.home.homeDirectory}/.p10k.zsh ]]; then
+              source ${config.home.homeDirectory}/.p10k.zsh
+            else
+              # If file doesn't exist, p10k will show wizard - this shouldn't happen
+              # as Home Manager should create it, but we handle it gracefully
+              echo "Warning: ~/.p10k.zsh not found. Run 'home-manager switch' to create it."
+            fi
           fi
 
           # Initialize zoxide at the very end of shell configuration

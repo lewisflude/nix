@@ -5,7 +5,7 @@
     ./browser.nix
     ./launcher.nix
     ./swaync.nix
-    # ./ironbar.nix  # DISABLED: Waiting for wrapGAppsHook fix (PR #1225)
+    ./ironbar.nix
     ./desktop-apps.nix
     ./yazi.nix
     ./niri.nix
