@@ -33,6 +33,7 @@ in
 
     # Desktop environment (Linux)
     ./applications/gtk.nix
+    ./applications/ironbar.nix
 
     # Command-line tools
     ./applications/bat.nix
@@ -81,6 +82,10 @@ in
       # Desktop environment (Linux - user-level)
       gtk = {
         enable = mkEnableOption "Apply theme to GTK applications";
+      };
+
+      ironbar = {
+        enable = mkEnableOption "Apply theme to Ironbar status bar";
       };
 
       # Command-line tools (user-level)

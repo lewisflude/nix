@@ -78,12 +78,11 @@
     awww = {
       url = "git+https://codeberg.org/LGFae/awww";
     };
-    # ironbar = {
-    #   url = "github:JakeStanger/ironbar";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-    # DISABLED: Waiting for PR #1225 to be merged to fix wrapGAppsHook deprecation
-    # See: https://github.com/JakeStanger/ironbar/issues/1224
+    ironbar = {
+      url = "github:JakeStanger/ironbar";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # Note: Using ironbar flake only for home-manager module, package comes from nixpkgs
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     musnix = {
       url = "github:musnix/musnix";

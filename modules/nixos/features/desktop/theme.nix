@@ -31,7 +31,7 @@ in
             # Enable all Wayland/Linux desktop components
             waybar.enable = lib.mkDefault false; # Not using waybar currently
             fuzzel.enable = lib.mkDefault true;
-            ironbar.enable = lib.mkDefault false; # Temporarily disabled
+            ironbar.enable = lib.mkDefault true;
             mako.enable = lib.mkDefault true;
             swaync.enable = lib.mkDefault true;
             swappy.enable = lib.mkDefault true;

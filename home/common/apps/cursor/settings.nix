@@ -57,7 +57,7 @@ in
     "search.useGitIgnore" = true;
     "search.smartCase" = true;
     "search.showLineNumbers" = true;
-    "workbench.colorTheme" = lib.mkDefault "Catppuccin Mocha"; # Can be overridden by Scientific theme
+    "workbench.colorTheme" = lib.mkDefault "Default Dark Modern"; # Can be overridden by user preference
     "explorer.compactFolders" = false;
     "explorer.confirmDelete" = true;
     "explorer.confirmDragAndDrop" = true;

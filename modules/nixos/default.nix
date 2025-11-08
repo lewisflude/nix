@@ -2,6 +2,7 @@
   imports = [
 
     ./features/desktop
+    ./features/theming
     ./features/security.nix
     ./features/gaming.nix
     ./features/virtualisation.nix

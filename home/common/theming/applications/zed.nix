@@ -515,8 +515,13 @@ in
           force = false; # Don't overwrite if file exists, allows manual theme additions
         };
 
-        # Note: After installation, select "Scientific Dark" or "Scientific Light"
-        # from Zed's theme picker (Cmd+K, Cmd+T or Settings > Theme)
-        # Zed will automatically switch between them based on your system appearance
+        # Configure Zed to use the scientific theme
+        programs.zed-editor.userSettings = {
+          theme = {
+            mode = "system";
+            light = "Scientific Light";
+            dark = "Scientific Dark";
+          };
+        };
       };
 }
