@@ -9,14 +9,7 @@ let
 in
 {
 
-  catppuccin = {
-    flavor = "mocha";
-    accent = "mauve";
-    enable = false; # Disabled in favor of Scientific theme
-    waybar.mode = "createLink";
-    mako.enable = lib.mkIf platformLib.isLinux true;
-    swaync.enable = lib.mkIf platformLib.isLinux true;
-  };
+
 
   home = lib.optionalAttrs platformLib.isLinux {
     packages = with pkgs; [
