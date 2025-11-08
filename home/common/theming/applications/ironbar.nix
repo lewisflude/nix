@@ -160,7 +160,7 @@ in
           /* Scrollbar styling for modules with scroll */
           scrollbar {
             background-color: #${colors."surface-base".hex};
-            width: 8px;
+            min-width: 8px;
           }
 
           scrollbar slider {
