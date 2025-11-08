@@ -1,16 +1,4 @@
-@import "./catppuccin.css";
-/* Bar container */
-window#waybar {
-  border-radius: 0;
-  font-family: "Iosevka Nerd Font", Iosevka, "JetBrains Mono", "Fira Code",
-    monospace;
-  background-color: transparent;
-}
 
-window#waybar > box {
-  margin: 8px;
-  margin-bottom: 0;
-}
 /* Module spacing */
 #window,
 #cpu,
