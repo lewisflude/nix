@@ -1,0 +1,12 @@
+# Statix configuration
+# Files that use { ... } or { } patterns for functions that accept any arguments
+# These are valid Nix patterns but statix flags them as "empty patterns"
+
+ignore = [
+  "**/systems.nix",
+  "**/palette.nix",
+  "**/tests/palette.nix",
+  "**/wlsunset.nix",
+  "**/polkit-gnome.nix",
+  "**/gemini-cli.nix",
+]

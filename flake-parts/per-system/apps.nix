@@ -59,10 +59,11 @@ in
             "analyze-services" = "Analyze Nix store service usage";
             "visualize-modules" = "Generate module dependency graphs";
           };
+          pogScript = pkgsWithPog.callPackage ../../pkgs/pog-scripts/${script-name}.nix scriptArgs;
         in
         {
           type = "app";
-          program = "${pkgsWithPog.callPackage ../../pkgs/pog-scripts/${script-name}.nix scriptArgs}/bin/${script-name}";
+          program = "${pogScript}/bin/${script-name}";
           meta.description = descriptions.${script-name} or "POG script: ${script-name}";
         };
       # Import devour-flake (lazy evaluation - only when the app is used)

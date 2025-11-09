@@ -4,11 +4,6 @@ let
 
   # Validation result type
   # This represents the outcome of a validation check
-  validationResult = {
-    passed = true; # Whether validation passed
-    errors = [ ]; # List of error messages
-    warnings = [ ]; # List of warning messages
-  };
 
   # Create a passed validation result
   mkPassed =
@@ -170,8 +165,7 @@ let
   # Check if APCA contrast meets minimum standards
   apcaMinimum = lc: lc >= 15.0; # Minimum for UI elements
   apcaLargeText = lc: lc >= 30.0; # Minimum for large text
-  apcaBodyText = lc: lc >= 45.0; # Good for body text
-  apcaExcellent = lc: lc >= 60.0; # Excellent contrast
+  apcaBodyText = lc: lc >= 45.0; # Good for body text # Excellent contrast
 
   # ============================================================================
   # Contrast Validation Functions
@@ -434,7 +428,6 @@ let
     {
       theme,
       level ? "AA",
-      textSize ? "normal",
       useAPCA ? false,
       strict ? false,
     }:

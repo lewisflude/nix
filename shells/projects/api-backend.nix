@@ -1,12 +1,7 @@
 {
   pkgs,
-  lib,
-  system,
   ...
 }:
-let
-  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
-in
 pkgs.mkShell {
   buildInputs = with pkgs; [
     # System provides: node, pnpm, typescript

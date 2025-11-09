@@ -11,22 +11,6 @@ rec {
     }:
     let
       # Validate inputs (evaluated for side effects)
-      _validation =
-        if themeLib == null then
-          throw "themeLib is required to create theme context"
-        else if palette == null then
-          throw "palette is required to create theme context"
-        else if mode == null then
-          throw "mode is required to create theme context"
-        else if
-          !builtins.elem mode [
-            "light"
-            "dark"
-          ]
-        then
-          throw "mode must be 'light' or 'dark', got: ${mode}"
-        else
-          null;
 
       # Generate theme for the resolved mode
       # Pass empty set {} to disable validation (can be enhanced later to use config)
