@@ -205,10 +205,23 @@ cachix use lewisflude-nix
 # Go to GitHub Actions → "Build and Cache" → Run workflow
 ```
 
+**Build and cache ALL outputs efficiently (using devour-flake):**
+
+```bash
+# This builds all outputs in a single evaluation (much faster!)
+nix run .#setup-cachix push-all
+
+# Or use devour-flake directly:
+nix build github:srid/devour-flake \
+  -L --no-link --print-out-paths \
+  --override-input flake . \
+  | cachix push lewisflude
+```
+
 **Check cache status:**
 
 ```bash
-# Visit: https://app.cachix.org/cache/lewisflude-nix
+# Visit: https://app.cachix.org/cache/lewisflude
 ```
 
 ### FlakeHub: Publishing New Versions
@@ -301,6 +314,7 @@ After setup:
    - Run the workflow manually to do your first cache
    - Rebuild a system and watch it use the cache
    - Consider enabling auto-cache on push
+   - **Use devour-flake** to cache all outputs efficiently: `nix run .#setup-cachix push-all`
 
 2. **FlakeHub**:
    - Clean up your README with usage instructions
@@ -311,6 +325,62 @@ After setup:
    - Add a CHANGELOG.md for version history
    - Document your config features
    - Add screenshots or examples
+
+---
+
+## 🚀 Advanced: Using devour-flake
+
+This configuration includes [devour-flake](https://github.com/srid/devour-flake) for efficient caching of all flake outputs.
+
+### Why devour-flake?
+
+- **Single evaluation**: Builds all outputs in one pass (packages, apps, devShells, checks, nixosConfigurations, darwinConfigurations)
+- **Faster CI**: Reduces build time by avoiding multiple flake evaluations
+- **Complete caching**: Ensures everything is cached, not just what you manually build
+
+### Usage
+
+**Via setup-cachix (recommended):**
+
+```bash
+nix run .#setup-cachix push-all
+```
+
+**Direct usage:**
+
+```bash
+# Build all outputs and push to cache
+nix build github:srid/devour-flake \
+  -L --no-link --print-out-paths \
+  --override-input flake . \
+  | cachix push lewisflude
+
+# Or use the app directly (if available in your devShell)
+nix run .#devour-flake . | cachix push lewisflude
+```
+
+**In CI workflows:**
+
+```yaml
+- name: Build and cache all outputs
+  run: |
+    nix build github:srid/devour-flake \
+      -L --no-link --print-out-paths \
+      --override-input flake . \
+      | cachix push lewisflude
+```
+
+### What gets cached?
+
+devour-flake automatically detects and builds:
+
+- ✅ All `packages.*`
+- ✅ All `apps.*`
+- ✅ All `devShells.*`
+- ✅ All `checks.*`
+- ✅ All `nixosConfigurations.*`
+- ✅ All `darwinConfigurations.*`
+- ✅ All `formatters.*`
 
 ---
 

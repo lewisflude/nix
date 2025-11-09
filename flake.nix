@@ -80,6 +80,13 @@
       url = "github:oddlama/nix-topology";
     };
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
+    nix-colorizer = {
+      url = "github:nutsalhan87/nix-colorizer";
+    };
+    devour-flake = {
+      url = "github:srid/devour-flake";
+      flake = false;
+    };
   };
 
   outputs =

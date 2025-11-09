@@ -1,8 +1,8 @@
-# Scientific Color Palette Theme - Implementation Summary
+# Signal Color Theme - Implementation Summary
 
 ## Overview
 
-Successfully implemented a comprehensive scientific color theming system based on OKLCH color space for the NixOS/nix-darwin configuration. The implementation follows the existing modular architecture and provides seamless integration with multiple applications.
+Successfully implemented a comprehensive Signal color theming system based on OKLCH color space for the NixOS/nix-darwin configuration. The implementation follows the existing modular architecture and provides seamless integration with multiple applications.
 
 ## Implementation Status: ? COMPLETE
 
@@ -36,9 +36,9 @@ home/common/theming/
 ??? default.nix                      # Home-manager integration
 
 docs/
-??? SCIENTIFIC_THEME.md              # Main documentation
+??? SIGNAL_THEME.md              # Main documentation
 ??? examples/
-    ??? scientific-theme-usage.md    # Usage examples
+    ??? signal-theme-usage.md    # Usage examples
 
 tests/
 ??? theming.nix                      # Comprehensive test suite
@@ -85,7 +85,7 @@ Each application has a dedicated module that:
 
 #### 5. Feature Integration
 
-- Added `scientificTheme` option to desktop features
+- Added `signalTheme` option to desktop features
 - Automatic theme application when enabled
 - Assertions for proper configuration
 
@@ -150,7 +150,7 @@ For data visualization and syntax highlighting:
 
 - **Status**: Fully implemented
 - **Format**: VS Code theme JSON
-- **Location**: `~/.config/Cursor/User/themes/scientific-{mode}.json`
+- **Location**: `~/.config/Cursor/User/themes/signal-{mode}.json`
 - **Features**:
   - Complete UI color theming
   - Syntax highlighting
@@ -174,7 +174,7 @@ For data visualization and syntax highlighting:
 
 - **Status**: Fully implemented
 - **Format**: Zed theme JSON
-- **Location**: `~/.config/zed/themes/scientific.json`
+- **Location**: `~/.config/zed/themes/signal.json`
 - **Features**:
   - Editor theming
   - Syntax highlighting
@@ -225,7 +225,7 @@ Enable the theme in your host configuration:
 {
   host.features.desktop = {
     enable = true;
-    scientificTheme = {
+    signalTheme = {
       enable = true;
       mode = "dark";  # or "light"
     };
@@ -239,7 +239,7 @@ Fine-grained control over applications:
 
 ```nix
 {
-  theming.scientific = {
+  theming.signal = {
     enable = true;
     mode = "dark";
     applications = {
@@ -320,7 +320,7 @@ nix flake check
 
 ## Documentation
 
-### Main Documentation (`docs/SCIENTIFIC_THEME.md`)
+### Main Documentation (`docs/SIGNAL_THEME.md`)
 
 Comprehensive guide covering:
 
@@ -337,7 +337,7 @@ Comprehensive guide covering:
 - Technical details
 - Future enhancements
 
-### Usage Examples (`docs/examples/scientific-theme-usage.md`)
+### Usage Examples (`docs/examples/signal-theme-usage.md`)
 
 20 practical examples including:
 
@@ -436,7 +436,7 @@ Each color is stored as:
 Theme is passed to application modules via `_module.args`:
 
 ```nix
-_module.args.scientificPalette = theme;
+_module.args.signalPalette = theme;
 ```
 
 ### Home Manager Integration
@@ -459,8 +459,6 @@ inherit (platformLib) isLinux;
 ```
 
 ## Migration Path
-
-
 
 ### Gradual Migration
 
@@ -553,15 +551,15 @@ Comprehensive test coverage:
 
 ### 1. Review the Implementation
 
-- Read `docs/SCIENTIFIC_THEME.md`
-- Review `docs/examples/scientific-theme-usage.md`
+- Read `docs/SIGNAL_THEME.md`
+- Review `docs/examples/signal-theme-usage.md`
 
 ### 2. Enable the Theme
 
 Add to your host configuration:
 
 ```nix
-host.features.desktop.scientificTheme = {
+host.features.desktop.signalTheme = {
   enable = true;
   mode = "dark";
 };
@@ -602,7 +600,7 @@ nix eval --impure --expr 'let lib = (import <nixpkgs> {}).lib; palette = import 
 
 ## Conclusion
 
-The Scientific Color Palette Theme has been successfully implemented with:
+The Signal Color Theme has been successfully implemented with:
 
 - **Complete functionality** across all planned applications
 - **Comprehensive documentation** for users and developers

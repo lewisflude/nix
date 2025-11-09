@@ -4,9 +4,9 @@
   ...
 }:
 let
-  # Import theme modules for testing
-  palette = import ../home/common/theming/palette.nix { inherit lib; };
-  themeLib = import ../home/common/theming/lib.nix { inherit lib palette; };
+  # Import theme modules for testing (using shared palette - single source of truth)
+  palette = import ../modules/shared/features/theming/palette.nix { inherit lib; };
+  themeLib = import ../modules/shared/features/theming/lib.nix { inherit lib palette; };
 
   # Test helper
   testColor = name: color: {
@@ -15,9 +15,9 @@ let
     message = "Color ${name} must have hex, l, c, and h properties";
   };
 
-  # Generate theme for testing
-  darkTheme = themeLib.generateTheme "dark";
-  lightTheme = themeLib.generateTheme "light";
+  # Generate theme for testing (pass empty set for validation options)
+  darkTheme = themeLib.generateTheme "dark" { };
+  lightTheme = themeLib.generateTheme "light" { };
 in
 {
   # Test palette structure
@@ -295,7 +295,7 @@ in
           modules = [
             ../home/common/theming/default.nix
             {
-              theming.scientific = {
+              theming.signal = {
                 enable = true;
                 mode = "dark";
               };
@@ -303,7 +303,7 @@ in
           ];
         };
       in
-      testModule.config.theming.scientific.enable;
+      testModule.config.theming.signal.enable;
     expected = true;
   };
 

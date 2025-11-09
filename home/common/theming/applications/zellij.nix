@@ -2,13 +2,13 @@
   config,
   lib,
   pkgs,
-  scientificPalette ? null,
+  signalPalette ? null,
   ...
 }:
 let
   inherit (lib) mkIf;
-  cfg = config.theming.scientific;
-  theme = scientificPalette;
+  cfg = config.theming.signal;
+  theme = signalPalette;
 in
 {
   config = mkIf (cfg.enable && cfg.applications.zellij.enable && theme != null) {

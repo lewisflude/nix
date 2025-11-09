@@ -1,18 +1,18 @@
 { stdenvNoCC, lib }:
 
 stdenvNoCC.mkDerivation {
-  pname = "scientific-theme";
+  pname = "signal-theme";
   version = "0.1.0";
 
   src = lib.cleanSource ./.;
 
   installPhase = ''
-    mkdir -p $out/share/themes/Scientific
-    cp -r ${./scientific}/* $out/share/themes/Scientific/
+    mkdir -p $out/share/themes/Signal
+    cp -r ${./scientific}/* $out/share/themes/Signal/
   '';
 
   meta = with lib; {
-    description = "A scientific theme for GTK.";
+    description = "Signal theme for GTK: Perception, engineered.";
     license = licenses.mit; # Assuming MIT, update if needed
     platforms = platforms.all;
   };

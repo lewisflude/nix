@@ -2,13 +2,13 @@
   config,
   lib,
   pkgs,
-  scientificPalette ? null,
+  signalPalette ? null,
   ...
 }:
 let
   inherit (lib) mkIf;
-  cfg = config.theming.scientific;
-  theme = scientificPalette;
+  cfg = config.theming.signal;
+  theme = signalPalette;
 
   # Generate Helix theme
   generateHelixTheme =
@@ -223,10 +223,10 @@ in
   config = mkIf (cfg.enable && cfg.applications.helix.enable && theme != null) {
     programs.helix = {
       settings = {
-        theme = "scientific-${cfg.mode}";
+        theme = "signal-${cfg.mode}";
       };
 
-      themes."scientific-${cfg.mode}" = generateHelixTheme theme;
+      themes."signal-${cfg.mode}" = generateHelixTheme theme;
     };
   };
 }

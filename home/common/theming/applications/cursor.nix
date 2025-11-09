@@ -2,22 +2,24 @@
   config,
   lib,
   pkgs,
-  scientificPalette ? null,
+  signalPalette ? null,
   ...
 }:
 let
   inherit (lib) mkIf optionalString;
-  cfg = config.theming.scientific;
-  theme = scientificPalette;
+  cfg = config.theming.signal;
+  theme = signalPalette;
 
   # Generate VS Code theme JSON
   generateVSCodeTheme =
-    palette: mode:
+    themeObj: mode:
     let
-      colors = palette.semantic;
+      colors = themeObj.colors or themeObj.semantic;
+      # Access internal palette for specific color variants if needed
+      internalPalette = themeObj._internal or { accent = { }; };
     in
     {
-      name = "Scientific ${lib.strings.toUpper (builtins.substring 0 1 mode)}${
+      name = "Signal ${lib.strings.toUpper (builtins.substring 0 1 mode)}${
         builtins.substring 1 (builtins.stringLength mode) mode
       }";
       type = if mode == "light" then "light" else "dark";
@@ -116,7 +118,17 @@ let
         # Buttons
         "button.background" = "${colors."accent-primary".hex}";
         "button.foreground" = "${colors."surface-base".hex}";
-        "button.hoverBackground" = "${palette.accent."Lc60-h130".hex}";
+        "button.hoverBackground" =
+          let
+            modePalette = builtins.getAttr mode (
+              internalPalette.accent or {
+                dark = { };
+                light = { };
+              }
+            );
+            hoverColor = modePalette."Lc60-h130" or null;
+          in
+          if hoverColor != null then hoverColor.hex else colors."accent-primary".hex;
 
         # Dropdown
         "dropdown.background" = "${colors."surface-subtle".hex}";
@@ -254,19 +266,19 @@ in
 {
   config = mkIf (cfg.enable && cfg.applications.cursor.enable && theme != null) {
     # Generate and install the theme file
-    xdg.configFile."Cursor/User/themes/scientific-${cfg.mode}.json" = {
+    xdg.configFile."Cursor/User/themes/signal-${cfg.mode}.json" = {
       text = builtins.toJSON (generateVSCodeTheme theme cfg.mode);
     };
 
     # Also install for VS Code if used
-    xdg.configFile."Code/User/themes/scientific-${cfg.mode}.json" = {
+    xdg.configFile."Code/User/themes/signal-${cfg.mode}.json" = {
       text = builtins.toJSON (generateVSCodeTheme theme cfg.mode);
     };
 
     # Update user settings to use the theme
     programs.vscode = {
       profiles.default.userSettings = {
-        "workbench.colorTheme" = "Scientific ${lib.strings.toUpper (builtins.substring 0 1 cfg.mode)}${
+        "workbench.colorTheme" = "Signal ${lib.strings.toUpper (builtins.substring 0 1 cfg.mode)}${
           builtins.substring 1 (builtins.stringLength cfg.mode) cfg.mode
         }";
       };

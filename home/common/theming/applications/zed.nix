@@ -2,18 +2,17 @@
   config,
   lib,
   pkgs,
-  scientificPalette ? null,
-  scientificThemeLib ? null,
+  signalPalette ? null,
+  signalThemeLib ? null,
   ...
 }:
 let
   inherit (lib) mkIf mkForce;
-  cfg = config.theming.scientific;
+  cfg = config.theming.signal;
 
   # Generate both light and dark palettes
-  darkPalette = if scientificThemeLib != null then scientificThemeLib.generateTheme "dark" else null;
-  lightPalette =
-    if scientificThemeLib != null then scientificThemeLib.generateTheme "light" else null;
+  darkPalette = if signalThemeLib != null then signalThemeLib.generateTheme "dark" else null;
+  lightPalette = if signalThemeLib != null then signalThemeLib.generateTheme "light" else null;
 
   # Generate a single theme variant with complete Zed theme schema
   generateThemeVariant =
@@ -22,7 +21,7 @@ let
       colors = palette.semantic;
     in
     {
-      name = "Scientific ${lib.strings.toUpper (builtins.substring 0 1 mode)}${
+      name = "Signal ${lib.strings.toUpper (builtins.substring 0 1 mode)}${
         builtins.substring 1 (builtins.stringLength mode) mode
       }";
       appearance = if mode == "light" then "light" else "dark";
@@ -496,8 +495,8 @@ let
   # Generate the complete theme family with both light and dark variants
   generateZedTheme = {
     "$schema" = "https://zed.dev/schema/themes/v0.2.0.json";
-    name = "Scientific";
-    author = "Scientific Color System";
+    name = "Signal";
+    author = "Signal Color System";
     themes = [
       (generateThemeVariant darkPalette "dark")
       (generateThemeVariant lightPalette "light")
@@ -510,17 +509,17 @@ in
       {
         # Generate and install the theme file with both light and dark variants
         # Using home.file instead of xdg.configFile to allow manual theme management
-        home.file.".config/zed/themes/scientific.json" = {
+        home.file.".config/zed/themes/signal.json" = {
           text = builtins.toJSON generateZedTheme;
           force = false; # Don't overwrite if file exists, allows manual theme additions
         };
 
-        # Configure Zed to use the scientific theme
+        # Configure Zed to use the Signal theme
         programs.zed-editor.userSettings = {
           theme = {
             mode = "system";
-            light = "Scientific Light";
-            dark = "Scientific Dark";
+            light = "Signal Light";
+            dark = "Signal Dark";
           };
         };
       };

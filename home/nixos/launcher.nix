@@ -1,16 +1,20 @@
 {
   pkgs,
+  lib,
+  signalPalette ? null,
   ...
 }:
 let
-  # Scientific Theme - Dark Mode Palette
-  palette = {
-    base = "#1e1f26"; # base-L015
-    surface = "#2d2e39"; # surface-Lc10
-    text = "#c0c3d1"; # text-Lc75
-    purple = "#a368cf"; # Lc75-h290 (Special)
-    blue = "#5a7dcf"; # Lc75-h240 (Focus)
+  # Import shared palette (single source of truth) for fallback
+  themeHelpers = import ../../modules/shared/features/theming/helpers.nix { inherit lib; };
+  themeImport = themeHelpers.importTheme {
+    repoRootPath = ../..;
   };
+  fallbackTheme = themeImport.generateTheme "dark";
+
+  # Use Signal theme if available, otherwise use fallback from shared palette
+  theme = if signalPalette != null then signalPalette else fallbackTheme;
+  semantic = theme.semantic;
 in
 {
   programs.fuzzel = {
@@ -39,13 +43,13 @@ in
         radius = 10;
       };
       colors = {
-        background = palette.base + "ff";
-        text = palette.text + "ff";
-        match = palette.purple + "ff";
-        selection = palette.surface + "ff";
-        selection-text = palette.text + "ff";
-        selection-match = palette.purple + "ff";
-        border = palette.blue + "ff";
+        background = semantic."surface-base".hex + "ff";
+        text = semantic."text-primary".hex + "ff";
+        match = semantic."accent-special".hex + "ff";
+        selection = semantic."surface-emphasis".hex + "ff";
+        selection-text = semantic."text-primary".hex + "ff";
+        selection-match = semantic."accent-special".hex + "ff";
+        border = semantic."accent-focus".hex + "ff";
       };
       dmenu = {
         exit-immediately-if-empty = true;

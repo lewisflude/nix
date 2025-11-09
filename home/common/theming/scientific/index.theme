@@ -1,11 +1,11 @@
 [Desktop Entry]
 Type=X-GNOME-Metatheme
-Name=Scientific
-Comment=A scientific theme.
+Name=Signal
+Comment=Signal: Perception, engineered. A dual-theme color system built on perceptual uniformity (Oklch) and accessibility (APCA).
 Encoding=UTF-8
 
 [X-GNOME-Metatheme]
-GtkTheme=Scientific
+GtkTheme=Signal
 IconTheme=Papirus-Dark
 CursorTheme=DMZ-White
 ButtonLayout=close,minimize,maximize:

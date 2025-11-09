@@ -1,16 +1,16 @@
-# Theme Switch: Scientific OKLCH
+# Theme Switch: Signal OKLCH
 
 ## Summary
 
-Successfully switched to the Scientific OKLCH color theme across your entire NixOS/nix-darwin configuration.
+Successfully switched to the Signal OKLCH color theme across your entire NixOS/nix-darwin configuration.
 
 ## Changes Made
 
-### 1. Enabled Scientific Theme ?
+### 1. Enabled Signal Theme ?
 
 **File:** `hosts/_common/features.nix`
 
-- Added `desktop.scientificTheme.enable = true`
+- Added `desktop.signalTheme.enable = true`
 - Set `mode = "dark"` (change to "light" if you prefer)
 
 ### 2. Fixed Theme Conflicts ?
@@ -24,33 +24,33 @@ Successfully switched to the Scientific OKLCH color theme across your entire Nix
 **File:** `modules/shared/theming/applications/niri.nix`
 
 - Changed to use `lib.mkForce` to properly override theme constants
-- Scientific theme now controls Niri colors
+- Signal theme now controls Niri colors
 
 #### Cursor/VS Code Theme
 
 **File:** `home/common/apps/cursor/settings.nix`
 
-- Scientific theme can now override the color theme setting
+- Signal theme can now override the color theme setting
 
 ## What Will Change
 
 ### On macOS (Your System)
 
-When you rebuild, these applications will switch to the Scientific theme:
+When you rebuild, these applications will switch to the Signal theme:
 
 ? **Cursor Editor**
 
-- New VS Code theme: "Scientific Dark"
-- Location: `~/.config/Cursor/User/themes/scientific-dark.json`
+- New VS Code theme: "Signal Dark"
+- Location: `~/.config/Cursor/User/themes/signal-dark.json`
 
 ? **Helix Editor** (if you use it)
 
-- Theme: `scientific-dark`
+- Theme: `signal-dark`
 - Native Helix theme integration
 
 ? **Zed Editor** (if you use it)
 
-- Theme file: `~/.config/zed/themes/scientific.json`
+- Theme file: `~/.config/zed/themes/signal.json`
 
 ? **Ghostty Terminal** (if you use it)
 
@@ -143,7 +143,7 @@ For the theme to take effect, restart:
 - **Cursor** may need manual theme selection:
   1. Open Command Palette: `Cmd+Shift+P`
   2. Type: "Color Theme"
-  3. Select: "Scientific Dark"
+  3. Select: "Signal Dark"
 
   (This should be automatic, but sometimes VS Code needs manual selection)
 
@@ -153,12 +153,12 @@ For the theme to take effect, restart:
 
 ```bash
 # Cursor theme
-ls -la ~/.config/Cursor/User/themes/scientific-dark.json
+ls -la ~/.config/Cursor/User/themes/signal-dark.json
 
 # Zed theme
-ls -la ~/.config/zed/themes/scientific.json
+ls -la ~/.config/zed/themes/signal.json
 
-# Helix config (should show scientific-dark theme)
+# Helix config (should show signal-dark theme)
 cat ~/.config/helix/config.toml | grep theme
 ```
 
@@ -184,7 +184,7 @@ scientificTheme = {
 
 Then rebuild.
 
-## Benefits of Scientific Theme
+## Benefits of Signal Theme
 
 ### Features
 
@@ -199,9 +199,9 @@ Then rebuild.
 
 For more information, see:
 
-- **Main Documentation**: `docs/SCIENTIFIC_THEME.md`
-- **Usage Examples**: `docs/examples/scientific-theme-usage.md`
-- **Implementation Details**: `SCIENTIFIC_THEME_IMPLEMENTATION.md`
+- **Main Documentation**: `docs/SIGNAL_THEME.md`
+- **Usage Examples**: `docs/examples/signal-theme-usage.md`
+- **Implementation Details**: `SIGNAL_THEME_IMPLEMENTATION.md`
 
 ## Troubleshooting
 
@@ -228,11 +228,11 @@ darwin-rebuild switch --flake .#Lewiss-MacBook-Pro --show-trace
 
 ### Questions?
 
-Check the troubleshooting section in `docs/SCIENTIFIC_THEME.md` or the usage examples in `docs/examples/scientific-theme-usage.md`.
+Check the troubleshooting section in `docs/SIGNAL_THEME.md` or the usage examples in `docs/examples/signal-theme-usage.md`.
 
 ## Summary
 
-? **Scientific theme enabled**
+? **Signal theme enabled**
 ? **Conflicts resolved**
 ? **Ready to rebuild**
 

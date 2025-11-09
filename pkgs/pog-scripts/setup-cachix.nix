@@ -10,19 +10,19 @@ pog.pog {
   arguments = [
     {
       name = "command";
-      description = "Command to run (user, ci, push, push-shells, watch, stats)";
+      description = "Command to run (user, ci, push, push-shells, push-all, watch, stats)";
       default = "user";
     }
   ];
 
-  argumentCompletion = ''printf "%s\n" user ci push push-shells watch stats'';
+  argumentCompletion = ''printf "%s\n" user ci push push-shells push-all watch stats'';
 
   flags = [
     {
       name = "cache";
       short = "c";
       description = "Cachix cache name";
-      default = "nix-config";
+      default = "lewisflude";
       envVar = "CACHIX_CACHE_NAME";
     }
     {
@@ -36,6 +36,7 @@ pog.pog {
   runtimeInputs = with pkgs; [
     cachix
     jq
+    nix
   ];
 
   script =
@@ -107,7 +108,8 @@ pog.pog {
         blue "📤 Pushing system to Cachix: $sys"
 
         yellow "→ Building system..."
-        nix build ".
+        nix build ".#$sys" \
+          --json \
           | jq -r '.[].outputs | to_entries[].value' \
           | cachix push "$CACHE_NAME"
 
@@ -124,12 +126,30 @@ pog.pog {
 
         for shell in $shells; do
           yellow "→ Pushing shell: $shell..."
-          nix build ".
+          nix build ".#devShells.x86_64-linux.$shell" \
+            --json \
             | jq -r '.[].outputs | to_entries[].value' \
             | cachix push "$CACHE_NAME" || true
         done
 
         green "✓ Development shells pushed to cache"
+      }
+
+
+      push_all() {
+        blue "📤 Building and pushing ALL flake outputs to Cachix"
+        yellow "→ This uses devour-flake for efficient single-evaluation builds"
+        yellow "→ Building all outputs (this may take a while)..."
+
+        # Use devour-flake to build all outputs in one evaluation
+        # This is much faster than building outputs individually
+        nix build github:srid/devour-flake \
+          -L --no-link --print-out-paths \
+          --override-input flake . \
+          | cachix push "$CACHE_NAME"
+
+        green "✓ All outputs built and pushed to cache: $CACHE_NAME"
+        yellow "→ This includes: packages, apps, devShells, checks, nixosConfigurations, darwinConfigurations"
       }
 
 
@@ -173,6 +193,9 @@ pog.pog {
         push-shells)
           push_shells
           ;;
+        push-all)
+          push_all
+          ;;
         watch)
           watch_build "$@"
           ;;
@@ -187,6 +210,7 @@ pog.pog {
           echo "  ci           Setup for write access (requires CACHIX_AUTH_TOKEN)"
           echo "  push         Push a system configuration to cache"
           echo "  push-shells  Push all development shells to cache"
+          echo "  push-all     Build and push ALL flake outputs (uses devour-flake)"
           echo "  watch        Watch and auto-push build results"
           echo "  stats        Show cache statistics"
           echo ""
@@ -202,7 +226,8 @@ pog.pog {
           echo "  setup-cachix user"
           echo "  setup-cachix ci"
           echo "  setup-cachix push --system nixosConfigurations.jupiter"
-          echo "  setup-cachix watch nix build .
+          echo "  setup-cachix push-all  # Build and cache everything efficiently"
+          echo "  setup-cachix watch nix build .#some-package"
           ;;
         *)
           die "Unknown command: $COMMAND. Run 'setup-cachix help' for usage"

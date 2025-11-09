@@ -19,7 +19,7 @@ in
       };
 
       # Theme configuration moved to theming system (home/common/theming/applications/zed.nix)
-      # Enable via: host.features.desktop.scientificTheme.enable = true;
+      # Enable via: host.features.desktop.signalTheme.enable = true;
 
       ui_font_size = 16;
       buffer_font_size = 16;

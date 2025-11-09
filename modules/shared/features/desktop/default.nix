@@ -42,12 +42,12 @@ in
       ++ optional cfg.niri "render";
     })
 
-    # Scientific theme integration (configured at home-manager level)
-    (mkIf cfg.scientificTheme.enable {
+    # Signal theme integration (configured at home-manager level)
+    (mkIf cfg.signalTheme.enable {
       home-manager.users.${config.host.username} = {
-        theming.scientific = {
+        theming.signal = {
           enable = true;
-          mode = cfg.scientificTheme.mode;
+          mode = cfg.signalTheme.mode;
 
           applications = {
             # Code editors and terminals
@@ -82,8 +82,8 @@ in
           message = "Theming requires desktop feature to be enabled";
         }
         {
-          assertion = cfg.scientificTheme.enable -> cfg.enable;
-          message = "Scientific theme requires desktop feature to be enabled";
+          assertion = cfg.signalTheme.enable -> cfg.enable;
+          message = "Signal theme requires desktop feature to be enabled";
         }
       ];
     }

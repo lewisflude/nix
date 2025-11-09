@@ -13,154 +13,132 @@ let
     mkMerge
     ;
 
-  cfg = config.theming.scientific;
+  cfg = config.theming.signal;
 
-  # Import theming palette and library (local copies for home-manager)
-  palette = import ./palette.nix { inherit lib; };
-  themeLib = import ./lib.nix { inherit lib palette; };
+  # Import theming palette and library from shared location (single source of truth)
+  # This ensures consistency across NixOS modules and Home Manager
+  themeHelpers = import ../../../modules/shared/features/theming/helpers.nix { inherit lib; };
+  themeImport = themeHelpers.importTheme {
+    repoRootPath = ../../..;
+    nix-colorizer = config._module.args.nix-colorizer or null;
+  };
+  palette = themeImport.palette;
+  themeLib = themeImport.themeLib;
+  modeLib = import ../../../modules/shared/features/theming/mode.nix {
+    inherit lib;
+    config = config;
+  };
+  contextLib = import ../../../modules/shared/features/theming/context.nix { inherit lib; };
 
-  # Generate the theme for the configured mode
-  theme = themeLib.generateTheme cfg.mode;
+  # Resolve mode (handles "auto" mode by detecting system preference)
+  resolvedMode = modeLib.getResolvedMode cfg;
+
+  # Create theme context (replaces _module.args.signalPalette pattern)
+  themeContext = contextLib.createContext {
+    inherit themeLib palette;
+    mode = resolvedMode;
+  };
 in
 {
-  # Import application-specific theme modules at top level
+  # Import shared options (single source of truth) and application-specific theme modules
   imports = [
-    # Code editors and terminals
-    ./applications/cursor.nix
-    ./applications/helix.nix
-    ./applications/zed.nix
-    ./applications/ghostty.nix
+    ../../../modules/shared/features/theming/options.nix
+    # Code editors
+    ../../../modules/shared/features/theming/applications/editors/cursor.nix
+    ../../../modules/shared/features/theming/applications/editors/helix.nix
+    ../../../modules/shared/features/theming/applications/editors/zed.nix
+
+    # Terminals
+    ../../../modules/shared/features/theming/applications/terminals/ghostty.nix
+    ../../../modules/shared/features/theming/applications/terminals/zellij.nix
 
     # Desktop environment (Linux)
-    ./applications/gtk.nix
-    ./applications/ironbar.nix
+    ../../../modules/shared/features/theming/applications/desktop/gtk.nix
+    ../../../modules/shared/features/theming/applications/desktop/ironbar-home.nix
 
     # Command-line tools
-    ./applications/bat.nix
-    ./applications/fzf.nix
-    ./applications/lazygit.nix
-    ./applications/yazi.nix
-    ./applications/zellij.nix
+    ../../../modules/shared/features/theming/applications/cli/bat.nix
+    ../../../modules/shared/features/theming/applications/cli/fzf.nix
+    ../../../modules/shared/features/theming/applications/cli/lazygit.nix
+    ../../../modules/shared/features/theming/applications/cli/yazi.nix
   ];
 
-  options.theming.scientific = {
-    enable = mkEnableOption "scientific OKLCH color palette theme";
-
-    mode = mkOption {
-      type = types.enum [
-        "light"
-        "dark"
-        "auto"
-      ];
-      default = "dark";
-      description = ''
-        Color theme mode:
-        - light: Use light mode colors
-        - dark: Use dark mode colors
-        - auto: Follow system preference (defaults to dark)
-      '';
+  # Define Home Manager-specific application options
+  options.theming.signal.applications = {
+    cursor = {
+      enable = mkEnableOption "Apply theme to Cursor/VS Code";
     };
 
-    applications = {
-      # Code editors and terminals
-      cursor = {
-        enable = mkEnableOption "Apply theme to Cursor/VS Code";
-      };
-
-      helix = {
-        enable = mkEnableOption "Apply theme to Helix editor";
-      };
-
-      zed = {
-        enable = mkEnableOption "Apply theme to Zed editor";
-      };
-
-      ghostty = {
-        enable = mkEnableOption "Apply theme to Ghostty terminal";
-      };
-
-      # Desktop environment (Linux - user-level)
-      gtk = {
-        enable = mkEnableOption "Apply theme to GTK applications";
-      };
-
-      ironbar = {
-        enable = mkEnableOption "Apply theme to Ironbar status bar";
-      };
-
-      # Command-line tools (user-level)
-      bat = {
-        enable = mkEnableOption "Apply theme to bat (syntax highlighting)";
-      };
-
-      fzf = {
-        enable = mkEnableOption "Apply theme to fzf (fuzzy finder)";
-      };
-
-      lazygit = {
-        enable = mkEnableOption "Apply theme to lazygit (Git TUI)";
-      };
-
-      yazi = {
-        enable = mkEnableOption "Apply theme to yazi (file manager)";
-      };
-
-      zellij = {
-        enable = mkEnableOption "Apply theme to zellij (terminal multiplexer)";
-      };
+    helix = {
+      enable = mkEnableOption "Apply theme to Helix editor";
     };
 
-    # Allow users to override specific colors (advanced usage)
-    overrides = mkOption {
-      type = types.attrsOf (
-        types.submodule {
-          options = {
-            l = mkOption {
-              type = types.float;
-              description = "Lightness (0.0-1.0)";
-            };
-            c = mkOption {
-              type = types.float;
-              description = "Chroma (0.0-0.4+)";
-            };
-            h = mkOption {
-              type = types.float;
-              description = "Hue (0-360 degrees)";
-            };
-            hex = mkOption {
-              type = types.str;
-              description = "Hex color code";
-            };
-          };
-        }
-      );
-      default = { };
-      description = ''
-        Override specific palette colors. Use with caution.
-        Example: { "accent-primary" = { l = 0.7; c = 0.2; h = 130; hex = "#4db368"; }; }
-      '';
+    zed = {
+      enable = mkEnableOption "Apply theme to Zed editor";
+    };
+
+    ghostty = {
+      enable = mkEnableOption "Apply theme to Ghostty terminal";
+    };
+
+    gtk = {
+      enable = mkEnableOption "Apply theme to GTK applications";
+    };
+
+    ironbar = {
+      enable = mkEnableOption "Apply theme to Ironbar status bar";
+    };
+
+    bat = {
+      enable = mkEnableOption "Apply theme to bat (syntax highlighting)";
+    };
+
+    fzf = {
+      enable = mkEnableOption "Apply theme to fzf (fuzzy finder)";
+    };
+
+    lazygit = {
+      enable = mkEnableOption "Apply theme to lazygit (Git TUI)";
+    };
+
+    yazi = {
+      enable = mkEnableOption "Apply theme to yazi (file manager)";
+    };
+
+    zellij = {
+      enable = mkEnableOption "Apply theme to zellij (terminal multiplexer)";
     };
   };
 
   config = mkIf cfg.enable (mkMerge [
     {
-      # Make palette and theme available to application modules via _module.args
-      _module.args.scientificPalette = theme;
-      _module.args.scientificThemeLib = themeLib;
+      # Make theme context available to application modules via _module.args
+      # This replaces the old signalPalette pattern with a more structured approach
+      _module.args.themeContext = themeContext;
+      # Backward compatibility: also provide signalPalette for old modules
+      # TODO: Remove this after all application modules are updated
+      _module.args.signalPalette = themeContext.theme;
+      _module.args.signalThemeLib = themeLib;
     }
 
     # Assertions and warnings
     {
       assertions = [
+        # Mode resolution is now handled by mode.nix, so this assertion is no longer needed
+        # Auto mode will be resolved to dark mode if system detection fails
         {
-          assertion = cfg.mode != "auto" || cfg.mode == "dark";
-          message = "Auto mode is not fully implemented yet, defaulting to dark mode";
+          assertion = cfg.brandGovernance.policy != "integrated" || cfg.brandGovernance.brandColors != { };
+          message = "brandGovernance.policy = \"integrated\" requires brandGovernance.brandColors to be set";
+        }
+        {
+          assertion = cfg.brandGovernance.policy == "integrated" || cfg.brandGovernance.brandColors == { };
+          message = "brandGovernance.brandColors can only be used with policy = \"integrated\"";
         }
       ];
 
-      warnings = lib.optional (
-        cfg.overrides != { }
-      ) "You are using color overrides. This may result in inconsistent theming.";
+      warnings =
+        lib.optional (cfg.overrides != { })
+          "You are using color overrides. This may result in inconsistent theming. Consider using brandGovernance.brandColors for brand integration.";
     }
   ]);
 }
