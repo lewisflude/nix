@@ -1,4 +1,4 @@
-{ _ }:
+{ ... }:
 let
   # Helper to convert a single hex digit (0-9, a-f, A-F) to integer (0-15)
   hexDigitToInt =
