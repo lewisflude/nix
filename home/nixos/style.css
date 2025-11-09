@@ -1,3 +1,4 @@
+/* Scientific Theme - Dark Mode */
 
 /* Module spacing */
 #window,
@@ -12,7 +13,7 @@
 #custom-backup,
 #tray,
 #clock, #workspaces button {
-  background-color: @surface0;
+  background-color: #2d2e39; /* surface-Lc10 */
   opacity: 0.8;
   border-radius: 8px;
   padding-left: 8px;
@@ -29,36 +30,36 @@
 }
 /* Workspace buttons */
 #workspaces button {
-  color: @text;
+  color: #c0c3d1; /* text-Lc75 */
   border: 1px solid transparent;
 }
 
 #workspaces button.empty {
-  color: @text;
+  color: #c0c3d1; /* text-Lc75 */
 }
 
 #workspaces button.visible {
-  color: @text;
+  color: #c0c3d1; /* text-Lc75 */
 }
 
 #workspaces button.active {
-  color: @text;
-  background-color: @mauve;
+  color: #c0c3d1; /* text-Lc75 */
+  background-color: #a368cf; /* purple Lc75-h290 */
   box-shadow: none;
-  border-color: @mauve;
+  border-color: #a368cf; /* purple Lc75-h290 */
 }
 
 #workspaces button.urgent {
-  color: @text;
+  color: #c0c3d1; /* text-Lc75 */
   border: none;
-  background-color: @red;
-  border-color: @red;
+  background-color: #d9574a; /* red Lc75-h040 */
+  border-color: #d9574a; /* red Lc75-h040 */
 }
 
 #workspaces button:hover {
   opacity: 0.5;
   box-shadow: none;
-  border-color: @surface0;
+  border-color: #2d2e39; /* surface-Lc10 */
 }
 
 /* Font and icon size */
@@ -68,38 +69,38 @@
   font-size: 14px;
 }
 #window {
-  color: @text;
+  color: #c0c3d1; /* text-Lc75 */
 }
 /* Existing color and module rules remain below */
 
 #clock {
   font-weight: bold;
-  color: @rosewater;
+  color: #d17a5f; /* GA01 Red-Orange */
 }
 #cpu {
-  color: @peach;
+  color: #d59857; /* GA06 Orange */
 }
 #memory {
-  color: @yellow;
+  color: #c9a93a; /* Lc75-h090 Yellow */
 }
 #network {
-  color: @red;
+  color: #d9574a; /* Lc75-h040 Red */
 }
 #pulseaudio {
-  color: @lavender;
+  color: #5a7dcf; /* Lc75-h240 Blue */
 }
 #custom-brightness {
-  color: @blue;
+  color: #5a7dcf; /* Lc75-h240 Blue */
 }
 #idle_inhibitor {
-  color: @sapphire;
+  color: #5aabb9; /* Lc75-h190 Cyan */
 }
 #custom-alerts {
-  color: @sky;
+  color: #5aabb9; /* Lc75-h190 Cyan */
 }
 #custom-backup {
-  color: @green;
+  color: #4db368; /* Lc75-h130 Green */
 }
 #tray {
-  color: @pink;
+  color: #d985c2; /* GA03 Magenta */
 }

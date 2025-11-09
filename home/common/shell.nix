@@ -20,9 +20,18 @@ let
   shellHelpers = import ./lib/shell-helpers.nix {
     inherit lib config inputs;
   };
-  inherit (shellHelpers) getPalette secretExportSnippet;
+  inherit (shellHelpers) secretExportSnippet;
 
-  palette = getPalette config;
+  # Scientific Theme - Dark Mode Palette
+  palette = {
+    purple = "#a368cf"; # Lc75-h290 (Special)
+    blue = "#5a7dcf"; # Lc75-h240 (Focus)
+    surface = "#2d2e39"; # surface-Lc10
+    divider = "#454759"; # divider-Lc30
+    text = "#c0c3d1"; # text-Lc75
+    base = "#1e1f26"; # base-L015
+    red = "#d9574a"; # Lc75-h040 (Danger)
+  };
 in
 {
   xdg.enable = true;
@@ -218,7 +227,7 @@ in
           zed = "env -u WAYLAND_DISPLAY zeditor"; # Force XWayland (native Wayland support is buggy)
         }
         (lib.mkIf isLinux {
-          lock = "saylock --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --ring-color cba6f7 --key-hl-color b4befe --line-color 00000000 --inside-color 1e1e2e88 --separator-color 00000000 --text-color cdd6f4 --grace 2 --fade-in 0.2";
+          lock = "saylock --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --ring-color ${lib.removePrefix "#" palette.purple} --key-hl-color ${lib.removePrefix "#" palette.blue} --line-color 00000000 --inside-color ${lib.removePrefix "#" palette.base}88 --separator-color 00000000 --text-color ${lib.removePrefix "#" palette.text} --grace 2 --fade-in 0.2";
         })
       ];
       history = {
@@ -247,7 +256,9 @@ in
       initContent = lib.mkMerge [
         (lib.mkBefore ''
 
-
+          # Suppress direnv output during initialization to avoid p10k instant prompt warnings
+          export DIRENV_LOG_FORMAT=""
+          export DIRENV_WARN_TIMEOUT=0
 
           # Only load p10k instant prompt in interactive shells
           if [[ -o interactive && -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
@@ -262,7 +273,7 @@ in
 
           typeset -ga ZSH_AUTOSUGGEST_STRATEGY
           ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-          export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=${palette.mauve.hex},bg=${palette.surface1.hex},bold,underline"
+          export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=${palette.purple},bg=${palette.surface},bold,underline"
           export SOPS_GPG_EXEC="${lib.getExe pkgs.gnupg}"
           export SOPS_GPG_ARGS="--pinentry-mode=loopback"
           export NIX_FLAKE="${config.home.homeDirectory}/.config/nix"

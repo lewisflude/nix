@@ -11,7 +11,6 @@ in
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
 
-
       # System-level Scientific theme configuration (NixOS only)
       (lib.mkIf cfg.scientificTheme.enable {
         theming.scientific = {
