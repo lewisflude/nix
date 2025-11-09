@@ -7,13 +7,13 @@
 let
   inherit (lib) mkIf;
   cfg = config.theming.signal;
-  theme = themeContext.theme;
+  inherit (themeContext) theme;
 
   # Generate Helix theme
   generateHelixTheme =
     themeObj:
     let
-      colors = themeObj.colors;
+      inherit (themeObj) colors;
     in
     {
       # UI elements

@@ -8,7 +8,7 @@
 let
   inherit (lib) mkIf;
   cfg = config.theming.signal;
-  theme = themeContext.theme;
+  inherit (themeContext) theme;
 
   # Determine if we're on Linux
   inherit (pkgs.stdenv) isLinux;
@@ -17,7 +17,7 @@ let
   generateGtkCss =
     palette:
     let
-      colors = palette.colors;
+      inherit (palette) colors;
     in
     ''
       /* Signal Color Theme - GTK Overrides */

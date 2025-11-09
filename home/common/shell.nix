@@ -31,7 +31,7 @@ let
 
   # Use Signal theme if available, otherwise use fallback from shared palette
   theme = (config._module.args.themeContext or { theme = null; }).theme or fallbackTheme;
-  colors = theme.colors;
+  inherit (theme) colors;
 
   # Legacy palette access (for backward compatibility with existing shell config)
   palette = {

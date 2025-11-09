@@ -1,6 +1,5 @@
 {
   lib,
-  pkgs,
   ...
 }:
 let
@@ -98,7 +97,7 @@ in
     expr =
       let
         color = palette.tonal.dark.base-L015;
-        rgb = color.rgb;
+        inherit (color) rgb;
       in
       rgb.r >= 0 && rgb.r <= 255 && rgb.g >= 0 && rgb.g <= 255 && rgb.b >= 0 && rgb.b <= 255;
     expected = true;

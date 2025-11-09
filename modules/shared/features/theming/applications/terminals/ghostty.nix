@@ -7,14 +7,14 @@
 let
   inherit (lib) mkIf;
   cfg = config.theming.signal;
-  theme = themeContext.theme;
+  inherit (themeContext) theme;
 in
 {
   config = mkIf (cfg.enable && cfg.applications.ghostty.enable && theme != null) {
     programs.ghostty = {
       settings =
         let
-          colors = theme.colors;
+          inherit (theme) colors;
         in
         {
           # Background and foreground

@@ -65,11 +65,14 @@
               ];
             }
             {
-              type = "brightness";
+              type = "script";
               class = "brightness";
-              tooltip = "Brightness: {{brightness}}%";
+              format = "?? {}%";
+              command = "brightnessctl -m | awk -F '[(),%]' '{print $6}'";
+              interval = 1;
               on_click_left = "brightnessctl set 10%-";
               on_click_right = "brightnessctl set +10%";
+              tooltip = "Click to change brightness";
             }
             {
               type = "volume";

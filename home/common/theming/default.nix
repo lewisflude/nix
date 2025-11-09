@@ -19,11 +19,9 @@ let
     repoRootPath = ../../..;
     nix-colorizer = config._module.args.nix-colorizer or null;
   };
-  palette = themeImport.palette;
-  themeLib = themeImport.themeLib;
+  inherit (themeImport) palette themeLib;
   modeLib = import ../../../modules/shared/features/theming/mode.nix {
-    inherit lib;
-    config = config;
+    inherit lib config;
   };
   contextLib = import ../../../modules/shared/features/theming/context.nix { inherit lib; };
 
@@ -111,7 +109,7 @@ in
     {
       # Make theme context available to application modules via _module.args
       _module.args = {
-        themeContext = themeContext;
+        inherit themeContext;
         signalThemeLib = themeLib;
       };
     }

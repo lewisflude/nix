@@ -153,7 +153,7 @@ after_update() {
 | Scenario | Auto-Run? | Reason |
 |----------|-----------|--------|
 | **CI/CD (GitHub Actions)** | ? **Yes** | Fast CI, shared cache, isolated |
-| **devenv builds** | ? **Yes** | Already configured, dev-only |
+| **System builds** | ? **Yes** | Auto-pull configured in `modules/shared/core.nix` |
 | **Local rebuilds** | ? **No** | Too slow, user control needed |
 | **Git hooks** | ? **No** | Blocks commits, bad UX |
 | **Flake updates** | ?? **Maybe** | Optional, better in CI |
@@ -184,16 +184,27 @@ The workflow will automatically:
 - Cache builds on main branch
 - Use devour-flake for efficient caching
 
-### 2. **Keep devenv Auto-Push** ?
+### 2. **System-Level Cachix Configuration** ? **Already Configured**
 
-Your `devenv.nix` is already perfect:
+Cachix substituters are configured in `modules/shared/core.nix` for automatic cache pulls during system builds. This works for:
+
+- NixOS system rebuilds (`nh os switch`)
+- nix-darwin rebuilds (`darwin-rebuild switch`)
+- All Nix operations on configured systems
+
+**Optional**: If you want flake-level Cachix config (for `nix build` commands), you can add `nixConfig` to `flake.nix`:
 
 ```nix
 {
-  cachix.push = "lewisflude";
-  cachix.pull = [ "lewisflude" ];
+  nixConfig = {
+    extra-substituters = [ "https://lewisflude.cachix.org" ];
+    extra-trusted-public-keys = [ "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc=" ];
+  };
+  # ... rest of flake
 }
 ```
+
+**Note**: This requires `--accept-flake-config` flag or `accept-flake-config = true` in `nix.conf`. The current system-level config in `modules/shared/core.nix` works without flags.
 
 ### 3. **Manual Commands Available**
 
@@ -215,7 +226,7 @@ nix run .#setup-cachix push-shells
 ## ?? Best Practices
 
 1. **CI is primary**: Let GitHub Actions handle most caching
-2. **devenv for dev**: Keep auto-push for development environments
+2. **System config for pulls**: Cachix substituters in `modules/shared/core.nix` handle automatic cache pulls
 3. **Manual for special cases**: Use `push-all` when you need it
 4. **Monitor cache usage**: Check [Cachix dashboard](https://app.cachix.org/cache/lewisflude) regularly
 5. **Don't block users**: Never auto-run on local rebuilds or git operations
@@ -247,7 +258,7 @@ open https://app.cachix.org/cache/lewisflude
 **Auto-run caching in**:
 
 - ? CI/CD workflows (GitHub Actions)
-- ? devenv environments (already configured)
+- ? System builds (auto-pull configured in `modules/shared/core.nix`)
 
 **Don't auto-run in**:
 

@@ -22,10 +22,6 @@ let
         if hasPackage then inputs.${inputName}.packages.${system}.default else fallback prev;
     };
 
-  # Helper: Fenix overlay
-  # Applied directly without pkgs manipulation since fenix follows our nixpkgs
-  mkFenixOverlay = inputs.fenix.overlays.default;
-
   overlaySet = {
     localPkgs =
       _final: prev:
@@ -34,7 +30,7 @@ let
       in
       {
         # Only expose cursor app, cursor-cli should come from nixpkgs
-        cursor = cursorPkgs.cursor;
+        inherit (cursorPkgs) cursor;
       };
 
     npm-packages = import ./npm-packages.nix;
@@ -47,7 +43,7 @@ let
 
     # Use stable zed-editor from nixpkgs instead of flake input
     flake-editors = _final: prev: {
-      zed-editor = prev.zed-editor;
+      inherit (prev) zed-editor;
     };
 
     # Disabled: fenix generating invalid rust-lang.org URLs causing build failures

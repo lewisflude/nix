@@ -7,8 +7,8 @@
 let
   inherit (lib) mkIf;
   cfg = config.theming.signal;
-  theme = themeContext.theme;
-  colors = theme.colors;
+  inherit (themeContext) theme;
+  inherit (theme) colors;
 in
 {
   config = mkIf (cfg.enable && cfg.applications.mako.enable && theme != null) {

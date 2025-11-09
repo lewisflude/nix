@@ -47,7 +47,7 @@ in
       home-manager.users.${config.host.username} = {
         theming.signal = {
           enable = true;
-          mode = cfg.signalTheme.mode;
+          inherit (cfg.signalTheme) mode;
 
           applications = {
             # Code editors and terminals

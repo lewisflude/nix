@@ -17,7 +17,7 @@ let
   generateThemeVariant =
     palette: variantName:
     let
-      colors = palette.colors;
+      inherit (palette) colors;
     in
     {
       name = "Signal ${variantName}";

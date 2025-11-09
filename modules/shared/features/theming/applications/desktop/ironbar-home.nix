@@ -7,14 +7,14 @@
 let
   inherit (lib) mkIf;
   cfg = config.theming.signal;
-  theme = themeContext.theme;
+  inherit (themeContext) theme;
 in
 {
   config = mkIf (cfg.enable && cfg.applications.ironbar.enable && theme != null) {
     programs.ironbar = {
       style =
         let
-          colors = theme.colors;
+          inherit (theme) colors;
         in
         ''
           * {

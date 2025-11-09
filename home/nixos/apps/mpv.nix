@@ -12,7 +12,8 @@ let
   fallbackTheme = themeImport.generateTheme "dark";
 
   # Use Signal theme if available, otherwise use fallback from shared palette
-  inherit (themeContext.theme or fallbackTheme) colors;
+  theme = themeContext.theme or fallbackTheme;
+  inherit (theme) colors;
 in
 {
 

@@ -2,8 +2,6 @@
   lib,
   config ? null,
 }:
-let
-in
 rec {
   # Valid theme modes
   validModes = [
