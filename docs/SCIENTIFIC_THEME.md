@@ -302,15 +302,7 @@ Syntax highlighting uses distinct hues with consistent saturation:
 - Literals (strings, numbers) use distinctive colors
 - Comments are muted but readable
 
-## Comparison with Catppuccin
 
-| Feature | Scientific Theme | Catppuccin |
-|---------|-----------------|------------|
-| Color Space | OKLCH (perceptually uniform) | sRGB |
-| Accessibility | Built-in WCAG compliance | Manual adjustment needed |
-| Customization | Semantic mappings | Flavor-based |
-| Math Foundation | Yes (LAB color space) | No |
-| Light Mode | Fully supported | Less focus |
 
 ## Troubleshooting
 

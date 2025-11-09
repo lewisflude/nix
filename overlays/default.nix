@@ -22,14 +22,9 @@ let
         if hasPackage then inputs.${inputName}.packages.${system}.default else fallback prev;
     };
 
-  # Helper: Fenix overlay with cache optimization workaround
-  # See fenix issue #79: Use fenix's nixpkgs for cache compatibility
-  mkFenixOverlay =
-    _final: _prev:
-    let
-      pkgs = inputs.fenix.inputs.nixpkgs.legacyPackages.${system};
-    in
-    inputs.fenix.overlays.default pkgs pkgs;
+  # Helper: Fenix overlay
+  # Applied directly without pkgs manipulation since fenix follows our nixpkgs
+  mkFenixOverlay = inputs.fenix.overlays.default;
 
   overlaySet = {
     localPkgs =
@@ -50,9 +45,14 @@ let
       inputs ? nix-topology && inputs.nix-topology ? overlays
     ) inputs.nix-topology.overlays.default;
 
-    flake-editors = _final: _prev: { };
+    # Use stable zed-editor from nixpkgs instead of flake input
+    flake-editors = _final: prev: {
+      zed-editor = prev.zed-editor;
+    };
 
-    fenix-overlay = mkOptionalOverlay (inputs ? fenix && inputs.fenix ? overlays) mkFenixOverlay;
+    # Disabled: fenix generating invalid rust-lang.org URLs causing build failures
+    # fenix-overlay = mkOptionalOverlay (inputs ? fenix && inputs.fenix ? overlays) mkFenixOverlay;
+    fenix-overlay = _final: _prev: { }; # No-op overlay
 
     flake-git-tools = mkFlakePackage "lazygit" "lazygit" (prev: prev.lazygit);
 

@@ -1,32 +1,24 @@
-# Theme Switch: Catppuccin ? Scientific OKLCH
+# Theme Switch: Scientific OKLCH
 
 ## Summary
 
-Successfully switched from Catppuccin to the Scientific OKLCH color theme across your entire NixOS/nix-darwin configuration.
+Successfully switched to the Scientific OKLCH color theme across your entire NixOS/nix-darwin configuration.
 
 ## Changes Made
 
-### 1. Disabled Catppuccin ?
-
-**File:** `home/common/theme.nix`
-
-- Changed `catppuccin.enable = true` ? `false`
-- Kept configuration for easy rollback if needed
-
-### 2. Enabled Scientific Theme ?
+### 1. Enabled Scientific Theme ?
 
 **File:** `hosts/_common/features.nix`
 
 - Added `desktop.scientificTheme.enable = true`
 - Set `mode = "dark"` (change to "light" if you prefer)
 
-### 3. Fixed Theme Conflicts ?
+### 2. Fixed Theme Conflicts ?
 
 #### Niri Window Manager Colors
 
 **File:** `home/nixos/theme-constants.nix`
 
-- Added `lib.mkDefault` to Catppuccin colors
 - Allows Scientific theme to override on Linux
 
 **File:** `modules/shared/theming/applications/niri.nix`
@@ -38,7 +30,6 @@ Successfully switched from Catppuccin to the Scientific OKLCH color theme across
 
 **File:** `home/common/apps/cursor/settings.nix`
 
-- Changed hard-coded theme to `lib.mkDefault "Catppuccin Mocha"`
 - Scientific theme can now override the color theme setting
 
 ## What Will Change
@@ -193,43 +184,7 @@ scientificTheme = {
 
 Then rebuild.
 
-## Rolling Back to Catppuccin
-
-If you want to revert:
-
-1. **Disable Scientific theme** in `hosts/_common/features.nix`:
-
-   ```nix
-   scientificTheme = {
-     enable = false;  # Change this
-     mode = "dark";
-   };
-   ```
-
-2. **Enable Catppuccin** in `home/common/theme.nix`:
-
-   ```nix
-   catppuccin = {
-     enable = true;  # Change this
-     # ... rest stays the same
-   };
-   ```
-
-3. **Rebuild**:
-
-   ```bash
-   darwin-rebuild switch --flake .#Lewiss-MacBook-Pro
-   ```
-
 ## Benefits of Scientific Theme
-
-### vs Catppuccin
-
-1. **Perceptually Uniform** - OKLCH ensures consistent brightness
-2. **Better Accessibility** - WCAG AA compliant contrast ratios
-3. **Code-Optimized** - Syntax colors chosen for readability
-4. **Mathematical Foundation** - Based on human perception research
-5. **Consistent Across Apps** - Same semantic colors everywhere
 
 ### Features
 
@@ -277,7 +232,6 @@ Check the troubleshooting section in `docs/SCIENTIFIC_THEME.md` or the usage exa
 
 ## Summary
 
-? **Catppuccin disabled**
 ? **Scientific theme enabled**
 ? **Conflicts resolved**
 ? **Ready to rebuild**

@@ -19,16 +19,16 @@ in
         in
         {
           # Background and foreground
-          background = colors."surface-base".hex;
-          foreground = colors."text-primary".hex;
+          background = "${colors."surface-base".hex}";
+          foreground = "${colors."text-primary".hex}";
 
           # Cursor
-          cursor-color = colors."accent-primary".hex;
-          cursor-text = colors."surface-base".hex;
+          cursor-color = "${colors."accent-primary".hex}";
+          cursor-text = "${colors."surface-base".hex}";
 
           # Selection
           selection-background = "${colors."accent-primary".hex}";
-          selection-foreground = colors."surface-base".hex;
+          selection-foreground = "${colors."surface-base".hex}";
 
           # ANSI colors (0-7: normal colors)
           palette = [

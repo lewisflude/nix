@@ -13,8 +13,11 @@ let
         l
         c
         h
-        hex
         ;
+      # Store hex with # prefix for direct use in CSS/configs
+      hex = "#${hex}";
+      # Store raw hex without # for RGB parsing
+      hexRaw = hex;
       # Parse hex to RGB (format: RRGGBB)
       rgb = {
         r = lib.toInt "0x${builtins.substring 0 2 hex}";

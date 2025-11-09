@@ -187,15 +187,7 @@ in
             "${inputs.awww.packages.${system}.awww}/bin/awww-daemon"
           ];
         }
-        {
-          command = [
-            "${pkgs.bash}/bin/bash"
-            "-c"
-            "sleep 1 && ${
-              inputs.awww.packages.${system}.awww
-            }/bin/awww img ${config.home.homeDirectory}/wallpapers/nix-wallpaper-nineish-catppuccin-mocha.png"
-          ];
-        }
+
         {
           command = [
             "${pkgs.argyllcms}/bin/dispwin"

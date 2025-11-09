@@ -6,21 +6,34 @@
   ...
 }:
 let
-
-  catppuccinPalette =
-    if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
-      (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
-      .${config.catppuccin.flavor}.colors
-    else if inputs ? catppuccin then
-      let
-        catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
-      in
-      if catppuccinSrc != null then
-        (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
-      else
-        throw "Cannot find catppuccin source (input exists but src/outPath not found)"
-    else
-      throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
+  palette = {
+    rosewater = "#f5e0dc";
+    flamingo = "#f2cdcd";
+    pink = "#f5c2e7";
+    mauve = "#cba6f7";
+    red = "#f38ba8";
+    maroon = "#eba0ac";
+    peach = "#fab387";
+    yellow = "#f9e2af";
+    green = "#a6e3a1";
+    teal = "#94e2d5";
+    sky = "#89dceb";
+    sapphire = "#74c7ec";
+    blue = "#89b4fa";
+    lavender = "#b4befe";
+    text = "#cdd6f4";
+    subtext1 = "#bac2de";
+    subtext0 = "#a6adc8";
+    overlay2 = "#9399b2";
+    overlay1 = "#7f849c";
+    overlay0 = "#6c7086";
+    surface2 = "#585b70";
+    surface1 = "#45475a";
+    surface0 = "#313244";
+    base = "#1e1e2e";
+    mantle = "#181825";
+    crust = "#11111b";
+  };
 
   hexToRgb =
     hex:
@@ -73,32 +86,32 @@ let
     "${toString r},${toString g},${toString b}";
 
   colors = {
-    base = hexToRgb catppuccinPalette.base.hex;
-    mantle = hexToRgb catppuccinPalette.mantle.hex;
-    crust = hexToRgb catppuccinPalette.crust.hex;
-    text = hexToRgb catppuccinPalette.text.hex;
-    subtext0 = hexToRgb catppuccinPalette.subtext0.hex;
-    subtext1 = hexToRgb catppuccinPalette.subtext1.hex;
-    overlay0 = hexToRgb catppuccinPalette.overlay0.hex;
-    overlay1 = hexToRgb catppuccinPalette.overlay1.hex;
-    overlay2 = hexToRgb catppuccinPalette.overlay2.hex;
-    surface0 = hexToRgb catppuccinPalette.surface0.hex;
-    surface1 = hexToRgb catppuccinPalette.surface1.hex;
-    surface2 = hexToRgb catppuccinPalette.surface2.hex;
-    blue = hexToRgb catppuccinPalette.blue.hex;
-    lavender = hexToRgb catppuccinPalette.lavender.hex;
-    sapphire = hexToRgb catppuccinPalette.sapphire.hex;
-    sky = hexToRgb catppuccinPalette.sky.hex;
-    teal = hexToRgb catppuccinPalette.teal.hex;
-    green = hexToRgb catppuccinPalette.green.hex;
-    yellow = hexToRgb catppuccinPalette.yellow.hex;
-    peach = hexToRgb catppuccinPalette.peach.hex;
-    maroon = hexToRgb catppuccinPalette.maroon.hex;
-    red = hexToRgb catppuccinPalette.red.hex;
-    mauve = hexToRgb catppuccinPalette.mauve.hex;
-    pink = hexToRgb catppuccinPalette.pink.hex;
-    flamingo = hexToRgb catppuccinPalette.flamingo.hex;
-    rosewater = hexToRgb catppuccinPalette.rosewater.hex;
+    base = hexToRgb palette.base.hex;
+    mantle = hexToRgb palette.mantle.hex;
+    crust = hexToRgb palette.crust.hex;
+    text = hexToRgb palette.text.hex;
+    subtext0 = hexToRgb palette.subtext0.hex;
+    subtext1 = hexToRgb palette.subtext1.hex;
+    overlay0 = hexToRgb palette.overlay0.hex;
+    overlay1 = hexToRgb palette.overlay1.hex;
+    overlay2 = hexToRgb palette.overlay2.hex;
+    surface0 = hexToRgb palette.surface0.hex;
+    surface1 = hexToRgb palette.surface1.hex;
+    surface2 = hexToRgb palette.surface2.hex;
+    blue = hexToRgb palette.blue.hex;
+    lavender = hexToRgb palette.lavender.hex;
+    sapphire = hexToRgb palette.sapphire.hex;
+    sky = hexToRgb palette.sky.hex;
+    teal = hexToRgb palette.teal.hex;
+    green = hexToRgb palette.green.hex;
+    yellow = hexToRgb palette.yellow.hex;
+    peach = hexToRgb palette.peach.hex;
+    maroon = hexToRgb palette.maroon.hex;
+    red = hexToRgb palette.red.hex;
+    mauve = hexToRgb palette.mauve.hex;
+    pink = hexToRgb palette.pink.hex;
+    flamingo = hexToRgb palette.flamingo.hex;
+    rosewater = hexToRgb palette.rosewater.hex;
   };
 in
 {

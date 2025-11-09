@@ -19,7 +19,7 @@ Does the input provide:
 
 1. **Module Providers**
    - Any input that provides `nixosModules`, `darwinModules`, or `homeManagerModules`
-   - Examples: `home-manager`, `darwin`, `sops-nix`, `niri`, `musnix`, `catppuccin`
+   - Examples: `home-manager`, `darwin`, `sops-nix`, `niri`, `musnix`
    - **Why**: Modules need to be compatible with your nixpkgs version
 
 2. **Overlay Providers**

@@ -6,40 +6,72 @@
   ...
 }:
 let
+  # Function to convert a hex color string to an RGBA set
+  hexToRGBA = hexString:
+    let
+      # Remove '#' prefix
+      cleanHex = lib.removePrefix "#" hexString;
+      # Extract R, G, B, A components
+      rHex = lib.substring 0 2 cleanHex;
+      gHex = lib.substring 2 2 cleanHex;
+      bHex = lib.substring 4 2 cleanHex;
+      aHex = if (lib.stringLength cleanHex) == 8 then lib.substring 6 2 cleanHex else "ff";
 
-  catppuccinPalette =
-    if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
+      # Convert hex to decimal and then to float (0.0 - 1.0)
+      hexToFloat = hex: (lib.strings.fromDigits 16 (lib.strings.stringToCharacters hex)) / 255.0;
+    in
+    {
+      red = hexToFloat rHex;
+      green = hexToFloat gHex;
+      blue = hexToFloat bHex;
+      alpha = hexToFloat aHex;
+    };
 
-      (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
-      .${config.catppuccin.flavor}.colors
-    else if inputs ? catppuccin then
-
-      let
-        catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
-      in
-      if catppuccinSrc != null then
-        (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
-      else
-        throw "Cannot find catppuccin source (input exists but src/outPath not found)"
-    else
-      throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
+  # This is a dummy comment to force re-evaluation.
+  palette = {
+    rosewater = "#f5e0dc";
+    flamingo = "#f2cdcd";
+    pink = "#f5c2e7";
+    mauve = "#cba6f7";
+    red = "#f38ba8";
+    maroon = "#eba0ac";
+    peach = "#fab387";
+    yellow = "#f9e2af";
+    green = "#a6e3a1";
+    teal = "#94e2d5";
+    sky = "#89dceb";
+    sapphire = "#74c7ec";
+    blue = "#89b4fa";
+    lavender = "#b4befe";
+    text = "#cdd6f4";
+    subtext1 = "#bac2de";
+    subtext0 = "#a6adc8";
+    overlay2 = "#9399b2";
+    overlay1 = "#7f849c";
+    overlay0 = "#6c7086";
+    surface2 = "#585b70";
+    surface1 = "#45475a";
+    surface0 = "#313244";
+    base = "#1e1e2e";
+    mantle = "#181825";
+    crust = "#11111b";
+  };
 in
 {
-  # Use mkDefault so Scientific theme can override these Catppuccin colors
   niri.colors = {
     focus-ring = {
-      active = lib.mkDefault catppuccinPalette.mauve.hex;
-      inactive = lib.mkDefault catppuccinPalette.overlay1.hex;
+      active = lib.mkDefault (hexToRGBA palette.mauve);
+      inactive = lib.mkDefault (hexToRGBA palette.overlay1);
     };
     border = {
-      active = lib.mkDefault catppuccinPalette.lavender.hex;
-      inactive = lib.mkDefault catppuccinPalette.surface1.hex;
-      urgent = lib.mkDefault catppuccinPalette.red.hex;
+      active = lib.mkDefault (hexToRGBA palette.lavender);
+      inactive = lib.mkDefault (hexToRGBA palette.surface1);
+      urgent = lib.mkDefault (hexToRGBA palette.red);
     };
-    shadow = lib.mkDefault "${catppuccinPalette.base.hex}aa";
+    shadow = lib.mkDefault (hexToRGBA "${palette.base}aa"); # Assuming 'aa' is alpha for shadow
     tab-indicator = {
-      active = lib.mkDefault catppuccinPalette.mauve.hex;
-      inactive = lib.mkDefault catppuccinPalette.overlay1.hex;
+      active = lib.mkDefault (hexToRGBA palette.mauve);
+      inactive = lib.mkDefault (hexToRGBA palette.overlay1);
     };
   };
 }

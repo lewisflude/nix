@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   security = {
     doas = {
@@ -32,7 +32,10 @@
         niri.enableGnomeKeyring = true;
         sudo.enableGnomeKeyring = true;
         su.enableGnomeKeyring = true;
-        swaylock = { };
+        swaylock = {
+          u2fAuth = true;
+          rules.auth.unix.order = config.security.pam.services.swaylock.rules.auth.u2f.order - 10;
+        };
         sudo.u2fAuth = true;
         login.u2fAuth = true;
         greetd.u2fAuth = true;

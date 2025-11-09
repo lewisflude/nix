@@ -222,15 +222,7 @@ All colors automatically switch to light mode variants when `mode = "light"`.
 4. **Well-Tested**: 40+ tests ensure reliability
 5. **Documented**: Comprehensive docs and examples
 
-## Comparison with Catppuccin
 
-| Feature | Scientific Theme | Catppuccin |
-|---------|-----------------|------------|
-| Color Space | OKLCH (perceptually uniform) | sRGB |
-| Accessibility | Built-in WCAG compliance | Manual adjustment |
-| Customization | Semantic mappings | Flavor-based |
-| Light Mode | Fully supported | Less focus |
-| Code Readability | Optimized for syntax | General purpose |
 
 ## Next Steps
 
@@ -250,13 +242,7 @@ Adjust settings if needed:
 - Enable/disable specific applications
 - Override colors (advanced)
 
-### 4. Migrate from Catppuccin (Optional)
 
-If you want to fully migrate:
-
-1. Enable both themes initially
-2. Test thoroughly
-3. Disable Catppuccin when satisfied
 
 ### 5. Extend (Optional)
 
@@ -294,7 +280,6 @@ Add support for more applications by creating new modules in `modules/shared/the
 
 ### Compatibility
 
-- Works alongside Catppuccin
 - No conflicts with existing themes
 - Easy to disable/enable
 
