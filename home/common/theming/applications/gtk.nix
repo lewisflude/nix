@@ -6,7 +6,7 @@
   ...
 }:
 let
-  inherit (lib) mkIf optionalString;
+  inherit (lib) mkIf;
   cfg = config.theming.scientific;
   theme = scientificPalette;
 
