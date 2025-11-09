@@ -43,7 +43,7 @@ let
           };
       })
     else
-      (oklch: throw "nix-colorizer is required for fromColorizerOklch");
+      (_oklch: throw "nix-colorizer is required for fromColorizerOklch");
 in
 rec {
   # Get palette for specific mode (light or dark)
@@ -124,15 +124,6 @@ rec {
     mode: validationOptions:
     let
       # Validate mode
-      validModes = [
-        "light"
-        "dark"
-      ];
-      _ =
-        if !builtins.elem mode validModes then
-          throw "Invalid theme mode: ${mode}. Must be one of: ${lib.concatStringsSep ", " validModes}"
-        else
-          null;
 
       tonal = getPalette mode palette.tonal;
       accent = getPalette mode palette.accent;
@@ -274,31 +265,31 @@ rec {
               lighten = color: value: adjustLightness color value;
               darken = color: value: adjustLightness color (-value);
               blend =
-                color1: color2: mod:
+                _color1: _color2: _mod:
                 throw "nix-colorizer is required for blend function. Add nix-colorizer to flake inputs and specialArgs.";
               gradient =
-                color1: color2: steps:
+                _color1: _color2: _steps:
                 throw "nix-colorizer is required for gradient function. Add nix-colorizer to flake inputs and specialArgs.";
               shades =
-                color: steps:
+                _color: _steps:
                 throw "nix-colorizer is required for shades function. Add nix-colorizer to flake inputs and specialArgs.";
               tints =
-                color: steps:
+                _color: _steps:
                 throw "nix-colorizer is required for tints function. Add nix-colorizer to flake inputs and specialArgs.";
               tones =
-                color: steps:
+                _color: _steps:
                 throw "nix-colorizer is required for tones function. Add nix-colorizer to flake inputs and specialArgs.";
               polygon =
-                color: count:
+                _color: _count:
                 throw "nix-colorizer is required for polygon function. Add nix-colorizer to flake inputs and specialArgs.";
               complementary =
-                color:
+                _color:
                 throw "nix-colorizer is required for complementary function. Add nix-colorizer to flake inputs and specialArgs.";
               analogous =
-                color:
+                _color:
                 throw "nix-colorizer is required for analogous function. Add nix-colorizer to flake inputs and specialArgs.";
               splitComplementary =
-                color:
+                _color:
                 throw "nix-colorizer is required for splitComplementary function. Add nix-colorizer to flake inputs and specialArgs.";
             };
 
@@ -468,12 +459,6 @@ rec {
     hex:
     let
       cleanHex = if builtins.substring 0 1 hex == "#" then builtins.substring 1 6 hex else hex;
-      hexLen = builtins.stringLength cleanHex;
-      _ =
-        if hexLen != 6 then
-          throw "Invalid hex color: ${hex} (expected 6 hex digits, got ${toString hexLen})"
-        else
-          null;
     in
     {
       r = hexPairToInt (builtins.substring 0 2 cleanHex);
@@ -654,7 +639,6 @@ rec {
   suggestAccessibleAlternatives =
     {
       brandColor,
-      targetContrast ? 4.5,
       nSteps ? 3,
     }:
     if nix-colorizer == null then
@@ -752,7 +736,7 @@ rec {
       brandColorValidation =
         if policy == "integrated" && validationLib != null then
           lib.mapAttrs (
-            name: color:
+            _name: color:
             validateBrandColorAccessibility {
               brandColor = color;
               inherit validationLib;
@@ -834,23 +818,6 @@ rec {
       # Generate cache key from theme configuration
       # In Nix, actual caching is handled by the store, but we can create
       # deterministic keys for memoization within the same evaluation
-      cacheKey =
-        {
-          mode,
-          overrides ? { },
-          variant ? null,
-          brandGovernance ? null,
-        }:
-        let
-          overridesHash = builtins.hashString "sha256" (builtins.toJSON overrides);
-          variantStr = if variant != null then variant else "default";
-          brandHash =
-            if brandGovernance != null then
-              builtins.hashString "sha256" (builtins.toJSON brandGovernance)
-            else
-              "none";
-        in
-        "${mode}-${overridesHash}-${variantStr}-${brandHash}";
 
       # Apply color overrides to semantic colors
       # Merges user-provided overrides into the base semantic color mapping
@@ -886,7 +853,7 @@ rec {
           # Reduce saturation for less visual motion
           if nix-colorizer != null then
             lib.mapAttrs (
-              name: color:
+              _name: color:
               let
                 oklch = toColorizerOklch color;
                 reducedChroma = oklch.C * 0.7; # Reduce chroma by 30%
@@ -942,7 +909,6 @@ rec {
           # Generate cache key for this configuration
           # Note: In Nix, actual caching is handled by the store based on function inputs
           # This key is useful for debugging and potential future memoization
-          _cacheKey = cacheKey processedConfig;
 
           # Generate base theme (validation is integrated via validationOptions)
           baseTheme = generateTheme mode validationOptions;

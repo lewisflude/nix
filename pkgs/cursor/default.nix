@@ -4,7 +4,7 @@
   cursorVersion ? cursorInfo.version,
 }:
 let
-  inherit (pkgs) lib fetchurl stdenvNoCC;
+  inherit (pkgs) lib;
   cursorApp =
     if pkgs.stdenv.isLinux then
       (import ./linux.nix {

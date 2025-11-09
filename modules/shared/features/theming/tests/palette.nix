@@ -1,4 +1,4 @@
-{ _ }:
+{ }:
 let
   # Import palette for testing
   palette = import ../palette.nix { };

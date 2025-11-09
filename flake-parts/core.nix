@@ -1,7 +1,4 @@
 {
-  inputs,
-  self,
-  withSystem,
   ...
 }:
 {

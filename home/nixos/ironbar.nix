@@ -38,7 +38,7 @@
               tooltip = "Workspaces";
             }
             {
-              type = "window";
+              type = "focused";
               class = "label";
               tooltip = "Active window";
             }
@@ -90,7 +90,7 @@
             {
               type = "tray";
               class = "tray";
-              icon_size = 16;
+              icon_size = 20;
               tooltip = "System tray";
             }
           ];
