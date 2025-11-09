@@ -1,4 +1,7 @@
 { ... }:
 {
-  imports = [ ./java.nix ];
+  imports = [
+    ./java.nix
+    ./nix-ld.nix
+  ];
 }

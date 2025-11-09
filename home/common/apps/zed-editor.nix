@@ -159,23 +159,4 @@ in
 
     };
   };
-
-  # Override desktop entry to force XWayland (native Wayland GPUI support is incomplete/buggy)
-  xdg.desktopEntries.zed = {
-    name = "Zed";
-    genericName = "Text Editor";
-    comment = "A high-performance, multiplayer code editor.";
-    exec = "env -u WAYLAND_DISPLAY zeditor %U";
-    icon = "zed";
-    terminal = false;
-    categories = [ "Utility" "TextEditor" "Development" "IDE" ];
-    mimeType = [ "text/plain" "application/x-zerosize" "x-scheme-handler/zed" ];
-    startupNotify = true;
-    actions = {
-      NewWorkspace = {
-        name = "Open a new workspace";
-        exec = "env -u WAYLAND_DISPLAY zeditor --new %U";
-      };
-    };
-  };
 }

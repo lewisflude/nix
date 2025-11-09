@@ -22,6 +22,7 @@
     ../apps/atuin.nix
     ../apps/zellij.nix
     ../apps/core-tooling.nix
+    ../apps/gemini-cli.nix
 
     ../apps/packages.nix
 

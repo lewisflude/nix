@@ -12,7 +12,7 @@ let
   getPythonPackages = system: nixpkgs.legacyPackages.${system}.python312.pkgs;
 in
 {
-  mkFormatters = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt);
+  mkFormatters = nixpkgs.lib.genAttrs systems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
   mkChecks = nixpkgs.lib.genAttrs systems (
     system:
     let

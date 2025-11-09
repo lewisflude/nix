@@ -26,7 +26,6 @@ in
 {
   # Import system-level application theming modules
   imports = [
-    ./applications/waybar.nix
     ./applications/fuzzel.nix
     ./applications/ironbar.nix
     ./applications/mako.nix
@@ -54,9 +53,6 @@ in
 
     applications = {
       # Wayland/Linux desktop components
-      waybar = {
-        enable = mkEnableOption "Apply theme to Waybar (status bar)";
-      };
 
       fuzzel = {
         enable = mkEnableOption "Apply theme to Fuzzel (application launcher)";

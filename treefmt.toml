@@ -1,7 +1,7 @@
 # treefmt - unified code formatter configuration
 # https://github.com/numtide/treefmt
 
-[formatter.nixfmt]
+[formatter.nixfmt-rfc-style]
 command = "nixfmt"
 options = []
 includes = ["*.nix"]

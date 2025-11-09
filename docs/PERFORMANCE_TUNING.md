@@ -36,7 +36,7 @@ This document outlines performance optimizations applied to this Nix configurati
 - **Tier 2 (Priority 7-11)**: Application-specific caches
   - niri, helix, ghostty, yazi, ags
 - **Tier 3 (Priority 12-16)**: Specialized/optional caches
-  - zed, catppuccin, devenv, viperml, cuda-maintainers
+  - zed, devenv, viperml, cuda-maintainers
 
 **Expected Impact**: Significantly faster substitutions when packages are found in high-priority caches, avoiding unnecessary queries to low-priority caches
 

@@ -8,7 +8,7 @@ let
   mac-app-util = inputs.mac-app-util or null;
   nix-homebrew = inputs.nix-homebrew or null;
   sops-nix = inputs.sops-nix or null;
-  catppuccin = inputs.catppuccin or null;
+
   niri = inputs.niri or null;
   ironbar = inputs.ironbar or null;
   musnix = inputs.musnix or null;
@@ -55,7 +55,7 @@ let
       chaotic = attrs.chaotic or null;
       musnix = attrs.musnix or null;
       solaar = attrs.solaar or null;
-      catppuccin = attrs.catppuccin or null;
+
       nix-topology = attrs."nix-topology" or null;
       vpn-confinement = attrs."vpn-confinement" or null;
       isLinux = attrs.isLinux or false;
@@ -72,7 +72,7 @@ let
     ++ optionalModule (solaar != null) solaar.nixosModules.default
     ++ optionalModule (nix-topology != null) nix-topology.nixosModules.default
     ++ optionalModule (vpn-confinement != null) vpn-confinement.nixosModules.default
-    ++ optionalModule (isLinux && catppuccin != null) catppuccin.nixosModules.catppuccin;
+;
 
   mkHomeManagerConfig =
     {
@@ -90,7 +90,7 @@ let
       };
       sharedModules =
         optionalModule (sops-nix != null) sops-nix.homeManagerModules.sops
-        ++ optionalModule (catppuccin != null) catppuccin.homeModules.catppuccin
+
         # Note: chaotic.homeManagerModules.default sets nixpkgs.config, which conflicts with useGlobalPkgs
         # chaotic packages are still available via system-level overlays
         # ++ optionalModule (chaotic != null) chaotic.homeManagerModules.default
@@ -236,7 +236,7 @@ in
           chaotic
           musnix
           solaar
-          catppuccin
+
           ;
         nix-topology = inputs.nix-topology or null;
         vpn-confinement = inputs.vpn-confinement or null;

@@ -152,31 +152,7 @@ Apply different themes for different users:
 
 ## Integration with Existing Configurations
 
-### Example 7: Coexist with Catppuccin
 
-Keep Catppuccin for some apps, use Scientific Theme for others:
-
-```nix
-{
-  # Keep Catppuccin as default
-  catppuccin.enable = true;
-  catppuccin.flavor = "mocha";
-
-  # Apply Scientific Theme only to code editors
-  theming.scientific = {
-    enable = true;
-    mode = "dark";
-    applications = {
-      cursor.enable = true;
-      helix.enable = true;
-      zed.enable = true;
-      ghostty.enable = false;  # Use Catppuccin
-      gtk.enable = false;      # Use Catppuccin
-      niri.enable = false;     # Use Catppuccin
-    };
-  };
-}
-```
 
 ### Example 8: Gradual Migration
 
@@ -442,24 +418,7 @@ Theme only terminal applications:
 
 ## Migration Examples
 
-### Example 18: Migrate from Catppuccin
 
-Step-by-step migration:
-
-```nix
-{
-  # Step 1: Keep both enabled initially
-  catppuccin.enable = true;
-  host.features.desktop.scientificTheme.enable = true;
-
-  # Step 2: Manually select which to use in each app
-  # (In Cursor: Cmd+K Cmd+T -> Choose "Scientific Dark")
-  # (In Helix: :theme scientific-dark)
-
-  # Step 3: Once satisfied, disable Catppuccin
-  catppuccin.enable = false;
-}
-```
 
 ## Custom Theme Examples
 

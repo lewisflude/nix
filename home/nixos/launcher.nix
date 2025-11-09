@@ -7,24 +7,61 @@
 }:
 let
 
-  catppuccinPalette =
-    if lib.hasAttrByPath [ "catppuccin" "sources" "palette" ] config then
+      palette = {
 
-      (pkgs.lib.importJSON (config.catppuccin.sources.palette + "/palette.json"))
-      .${config.catppuccin.flavor}.colors
-    else if inputs ? catppuccin then
+        rosewater = "#f5e0dc";
 
-      let
-        catppuccinSrc = inputs.catppuccin.src or inputs.catppuccin.outPath or null;
-      in
-      if catppuccinSrc != null then
-        (pkgs.lib.importJSON (catppuccinSrc + "/palette.json")).mocha.colors
-      else
-        throw "Cannot find catppuccin source (input exists but src/outPath not found)"
-    else
-      throw "Cannot find catppuccin: input not available and config.catppuccin.sources.palette not set";
+        flamingo = "#f2cdcd";
 
-  palette = catppuccinPalette;
+        pink = "#f5c2e7";
+
+        mauve = "#cba6f7";
+
+        red = "#f38ba8";
+
+        maroon = "#eba0ac";
+
+        peach = "#fab387";
+
+        yellow = "#f9e2af";
+
+        green = "#a6e3a1";
+
+        teal = "#94e2d5";
+
+        sky = "#89dceb";
+
+        sapphire = "#74c7ec";
+
+        blue = "#89b4fa";
+
+        lavender = "#b4befe";
+
+        text = "#cdd6f4";
+
+        subtext1 = "#bac2de";
+
+        subtext0 = "#a6adc8";
+
+        overlay2 = "#9399b2";
+
+        overlay1 = "#7f849c";
+
+        overlay0 = "#6c7086";
+
+        surface2 = "#585b70";
+
+        surface1 = "#45475a";
+
+        surface0 = "#313244";
+
+        base = "#1e1e2e";
+
+        mantle = "#181825";
+
+        crust = "#11111b";
+
+      };
 in
 {
   programs.fuzzel = {

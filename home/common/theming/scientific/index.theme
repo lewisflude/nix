@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Scientific
+Comment=A scientific theme.
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Scientific
+IconTheme=Papirus-Dark
+CursorTheme=DMZ-White
+ButtonLayout=close,minimize,maximize:

@@ -460,23 +460,7 @@ inherit (platformLib) isLinux;
 
 ## Migration Path
 
-### From Catppuccin
 
-1. **Keep Both Initially**:
-
-   ```nix
-   catppuccin.enable = true;
-   host.features.desktop.scientificTheme.enable = true;
-   ```
-
-2. **Test Applications One by One**:
-   Manually switch themes in each app to verify appearance
-
-3. **Disable Catppuccin**:
-
-   ```nix
-   catppuccin.enable = false;
-   ```
 
 ### Gradual Migration
 
@@ -560,7 +544,7 @@ Comprehensive test coverage:
 - ? Colors meet accessibility guidelines
 - ? Configuration evaluates without errors on NixOS and Darwin
 - ? Documentation is complete and clear
-- ? Migration from Catppuccin is straightforward
+- ? Migration is straightforward
 - ? Users can easily customize colors
 - ? Theme supports both light and dark modes
 - ? Code follows existing repository patterns and conventions
