@@ -20,6 +20,7 @@ development = {
 ```
 
 **These languages are installed system-wide because:**
+
 - ? You use them constantly across all projects
 - ? Enables quick experiments and scratch scripts
 - ? LSPs always available for editor integration
@@ -28,6 +29,7 @@ development = {
 ### Layer 2: Dev Shells (Extensions & Overrides)
 
 Dev shells in this directory are **ADDITIVE**, not replacements:
+
 - They extend system tooling with project-specific additions
 - They configure environment variables and aliases
 - They only reinstall language runtimes when version overrides are needed
@@ -54,33 +56,41 @@ shells/
 These shells add project-specific tools and configuration:
 
 #### `nextjs` - Next.js Development
+
 ```bash
 nix develop .#nextjs
 ```
+
 - **Adds:** Tailwind CSS language server
 - **Uses from system:** Node.js, TypeScript, pnpm
 - **Configures:** Project aliases (dev, build, lint)
 
 #### `api-backend` - API Backend Development
+
 ```bash
 nix develop .#api-backend
 ```
+
 - **Adds:** PostgreSQL, Redis, HTTP clients (curl, httpie, jq)
 - **Uses from system:** Node.js, TypeScript, pnpm
 - **Configures:** Database URLs, auto-starts PostgreSQL
 
 #### `react-native` - React Native Mobile Development
+
 ```bash
 nix develop .#react-native
 ```
+
 - **Adds:** Watchman, CocoaPods (macOS), xcbuild (macOS)
 - **Uses from system:** Node.js, TypeScript, pnpm
 - **Configures:** React Native CLI aliases, environment variables
 
 #### `qmk` - QMK Keyboard Firmware
+
 ```bash
 nix develop .#qmk
 ```
+
 - **Complete environment:** QMK tools, ARM GCC, DFU utilities
 - **Self-contained:** Includes all necessary tooling
 
@@ -89,30 +99,38 @@ nix develop .#qmk
 For languages NOT in your system defaults:
 
 #### `go` - Go Development
+
 ```bash
 nix develop .#go
 ```
+
 - **Provides:** Go toolchain, gopls, golangci-lint, delve
 - **Reason:** Go is disabled by default in system config
 
 #### `web` - Web Development (HTML/CSS/Sass)
+
 ```bash
 nix develop .#web
 ```
+
 - **Adds:** Tailwind CSS language server, html-tidy, sass
 - **Uses from system:** Node.js, TypeScript
 
 #### `devops` - DevOps Tools
+
 ```bash
 nix develop .#devops
 ```
+
 - **Provides:** kubectl, OpenTofu, Terragrunt, k9s, cloud CLIs
 - **Specialized:** Complete DevOps toolset
 
 #### `love2d` - Love2D Game Development (Linux only)
+
 ```bash
 nix develop .#love2d
 ```
+
 - **Provides:** Love2D, Lua, Lua LSP, formatters, linters
 - **Complete environment:** Full game development setup
 
@@ -155,22 +173,25 @@ nix develop .#devops --command kubectl get pods
 ## ?? When to Use Each Approach
 
 ### Use System-Wide (Already Configured)
-? Daily-driver languages (Node.js, Python, Rust)  
-? Tools you use across all projects  
-? LSPs and formatters for your main languages  
+
+? Daily-driver languages (Node.js, Python, Rust)
+? Tools you use across all projects
+? LSPs and formatters for your main languages
 
 ### Use Dev Shells
-? Project-specific dependencies (databases, services)  
-? Non-default languages (Go, Lua, etc.)  
-? Version overrides (need Node 18 when system has Node 20)  
-? Project environment configuration  
-? Team collaboration (share shell via flake.nix)  
+
+? Project-specific dependencies (databases, services)
+? Non-default languages (Go, Lua, etc.)
+? Version overrides (need Node 18 when system has Node 20)
+? Project environment configuration
+? Team collaboration (share shell via flake.nix)
 
 ### When to Override Versions
 
 **Only reinstall language runtimes in shells when:**
 
 1. **Project requires specific version:**
+
 ```nix
 # Project needs Node 18, system has Node 20
 pkgs.mkShell {
@@ -179,6 +200,7 @@ pkgs.mkShell {
 ```
 
 2. **Testing across multiple versions:**
+
 ```nix
 # Matrix testing shell
 pkgs.mkShell {
@@ -187,6 +209,7 @@ pkgs.mkShell {
 ```
 
 3. **Contributing to project with pinned version:**
+
 ```nix
 # Open source project specifies exact versions
 pkgs.mkShell {
@@ -209,13 +232,13 @@ pkgs.mkShell {
     postgresql
     my-special-tool
   ];
-  
+
   shellHook = ''
     echo "?? My Project environment loaded (using system tooling)"
-    
+
     # Project aliases
     alias dev="npm run dev"
-    
+
     # Environment variables
     export MY_VAR="value"
   '';
@@ -241,16 +264,19 @@ kotlin = pkgs.mkShell {
 ## ?? Checking What's Available
 
 ### List all shells
+
 ```bash
 nix flake show | grep devShells
 ```
 
 ### Check what's in a shell
+
 ```bash
 nix develop .#nextjs --command env | grep -E "(PATH|NODE)"
 ```
 
 ### Compare shell vs system
+
 ```bash
 # In shell
 which node && node --version
@@ -293,6 +319,7 @@ which node && node --version
 ## ?? Contributing
 
 When adding new shells:
+
 1. Follow the additive pattern (extend, don't replace system tooling)
 2. Document the purpose and key tools
 3. Add examples to this README
