@@ -66,7 +66,10 @@ in
           meta.description = descriptions.${script-name} or "POG script: ${script-name}";
         };
       # Import devour-flake (lazy evaluation - only when the app is used)
-      devour-flake = import inputs.devour-flake { inherit pkgs; };
+      devour-flake = import inputs.devour-flake {
+        inherit pkgs;
+        inherit (pkgs) nix;
+      };
     in
     {
       # CLI applications for this system

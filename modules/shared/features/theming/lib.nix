@@ -502,4 +502,538 @@ rec {
       semantic."ansi-cyan".hex # bright cyan (reuse)
       semantic."ansi-bright-white".hex
     ];
+
+  # ============================================================================
+  # Brand Color Transformation Utilities
+  # ============================================================================
+  # Utilities for converting, validating, and transforming brand colors
+
+  # Convert hex color to OKLCH format
+  # Input: hex string (e.g., "#ff6b35" or "ff6b35")
+  # Output: { l, c, h, hex, hexRaw, rgb } color object
+  # Requires nix-colorizer for accurate conversion
+  hexToOklch =
+    hex:
+    if nix-colorizer != null then
+      let
+        rgb = hexToRgb hex;
+        # Convert RGB to sRGB (0.0-1.0)
+        srgb = {
+          r = rgb.r / 255.0;
+          g = rgb.g / 255.0;
+          b = rgb.b / 255.0;
+        };
+        # Convert sRGB to OKLCH using nix-colorizer
+        oklch = nix-colorizer.srgb.to.oklch srgb;
+      in
+      fromColorizerOklch oklch
+    else
+      throw "nix-colorizer is required for hexToOklch. Add nix-colorizer to flake inputs and specialArgs.";
+
+  # Validate brand color meets accessibility requirements
+  # Checks contrast against common background colors
+  # Returns: { passed, errors, warnings, suggestions }
+  validateBrandColorAccessibility =
+    {
+      brandColor,
+      validationLib ? null,
+      level ? "AA",
+      backgrounds ? [ ],
+    }:
+    if validationLib == null then
+      {
+        passed = true;
+        errors = [ ];
+        warnings = [ "Validation library not available. Cannot validate brand color accessibility." ];
+        suggestions = [ ];
+      }
+    else
+      let
+        # Default backgrounds to check against (if not provided)
+        defaultBackgrounds =
+          if backgrounds == [ ] then
+            [
+              {
+                name = "surface-base-light";
+                color = {
+                  rgb = {
+                    r = 255;
+                    g = 255;
+                    b = 255;
+                  };
+                };
+              }
+              {
+                name = "surface-base-dark";
+                color = {
+                  rgb = {
+                    r = 30;
+                    g = 31;
+                    b = 38;
+                  };
+                };
+              }
+              {
+                name = "text-primary-light";
+                color = {
+                  rgb = {
+                    r = 30;
+                    g = 31;
+                    b = 38;
+                  };
+                };
+              }
+              {
+                name = "text-primary-dark";
+                color = {
+                  rgb = {
+                    r = 192;
+                    g = 195;
+                    b = 209;
+                  };
+                };
+              }
+            ]
+          else
+            backgrounds;
+
+        # Check contrast for each background
+        contrastChecks = map (
+          bg:
+          let
+            result = validationLib.validateContrast {
+              textColor = brandColor;
+              backgroundColor = bg.color;
+              inherit level;
+              textSize = "normal";
+            };
+          in
+          {
+            background = bg.name;
+            result = result;
+          }
+        ) defaultBackgrounds;
+
+        # Collect all errors and warnings
+        allErrors = lib.concatLists (map (check: check.result.errors) contrastChecks);
+        allWarnings = lib.concatLists (map (check: check.result.warnings) contrastChecks);
+        passed = lib.all (check: check.result.passed) contrastChecks;
+
+        # Generate suggestions for improving accessibility
+        suggestions =
+          if !passed then
+            [
+              "Consider increasing lightness for better contrast on dark backgrounds"
+              "Consider adjusting chroma to improve visibility"
+              "Use brand color for decorative elements only if contrast is insufficient"
+            ]
+          else
+            [ ];
+      in
+      {
+        inherit
+          passed
+          errors
+          warnings
+          suggestions
+          ;
+        errors = allErrors;
+        warnings = allWarnings;
+      };
+
+  # Suggest accessible alternatives for a brand color
+  # Returns a list of color suggestions with improved accessibility
+  suggestAccessibleAlternatives =
+    {
+      brandColor,
+      targetContrast ? 4.5,
+      nSteps ? 3,
+    }:
+    if nix-colorizer == null then
+      [ ]
+    else
+      let
+        # Try lightening the color
+        lightenSteps = lib.genList (
+          i:
+          let
+            amount = (i + 1) * 0.05; # 0.05, 0.10, 0.15
+            adjusted = fromColorizerOklch (nix-colorizer.oklch.lighten (toColorizerOklch brandColor) amount);
+          in
+          {
+            method = "lighten";
+            amount = amount;
+            color = adjusted;
+          }
+        ) nSteps;
+
+        # Try increasing chroma
+        chromaSteps = lib.genList (
+          i:
+          let
+            oklch = toColorizerOklch brandColor;
+            amount = (i + 1) * 0.05; # 0.05, 0.10, 0.15
+            adjusted = fromColorizerOklch (oklch // { C = oklch.C + amount; });
+          in
+          {
+            method = "increase-chroma";
+            amount = amount;
+            color = adjusted;
+          }
+        ) nSteps;
+      in
+      lightenSteps ++ chromaSteps;
+
+  # Apply brand colors to theme based on governance policy
+  # This integrates brand colors into the theme according to the policy
+  # Supports both single brand colors and multiple brand layers
+  applyBrandColors =
+    {
+      theme,
+      brandGovernance,
+      validationLib ? null,
+    }:
+    let
+      policy = brandGovernance.policy or "functional-override";
+      decorativeBrandColors = brandGovernance.decorativeBrandColors or { };
+      brandColors = brandGovernance.brandColors or { };
+      brandLayers = brandGovernance.brandLayers or { };
+
+      # Convert decorative brand colors (hex strings) to OKLCH if needed
+      decorativeOklch =
+        if decorativeBrandColors != { } && nix-colorizer != null then
+          lib.mapAttrs (name: hex: hexToOklch hex) decorativeBrandColors
+        else
+          { };
+
+      # Process multiple brand layers
+      # Sort layers by priority (ascending, so lower priority is applied first)
+      sortedLayers = lib.sort (a: b: (a.value.priority or 0) < (b.value.priority or 0)) (
+        lib.mapAttrsToList (name: value: { inherit name value; }) brandLayers
+      );
+
+      # Merge all decorative colors from layers (in priority order)
+      allDecorativeFromLayers = lib.foldl (
+        acc: layer:
+        let
+          layerDecorative = layer.value.decorative or { };
+          # Convert hex to OKLCH if nix-colorizer is available
+          layerDecorativeOklch =
+            if layerDecorative != { } && nix-colorizer != null then
+              lib.mapAttrs (name: hex: hexToOklch hex) layerDecorative
+            else
+              { };
+        in
+        acc // layerDecorativeOklch
+      ) { } sortedLayers;
+
+      # Merge all functional colors from layers (in priority order)
+      allFunctionalFromLayers = lib.foldl (
+        acc: layer:
+        let
+          layerFunctional = layer.value.functional or { };
+        in
+        acc // layerFunctional
+      ) { } sortedLayers;
+
+      # Combine single brand colors with layer colors (layers take precedence)
+      allDecorative = decorativeOklch // allDecorativeFromLayers;
+      allFunctional = brandColors // allFunctionalFromLayers;
+
+      # Validate brand colors if policy is "integrated"
+      brandColorValidation =
+        if policy == "integrated" && validationLib != null then
+          lib.mapAttrs (
+            name: color:
+            validateBrandColorAccessibility {
+              brandColor = color;
+              inherit validationLib;
+              level = "AA";
+            }
+          ) allFunctional
+        else
+          { };
+
+      # Check if any brand colors fail validation
+      validationFailed = lib.any (result: !result.passed) (lib.attrValues brandColorValidation);
+
+      # Apply brand colors based on policy
+      appliedTheme =
+        if policy == "functional-override" then
+          # Brand colors are decorative only, add them to theme but don't override semantic colors
+          theme
+          // {
+            _brand = {
+              decorative = allDecorative;
+              layers = brandLayers;
+            };
+          }
+        else if policy == "separate-layer" then
+          # Brand colors exist as separate layer
+          theme
+          // {
+            _brand = {
+              decorative = allDecorative;
+              functional = { }; # Functional colors unchanged
+              layers = brandLayers;
+            };
+          }
+        else if policy == "integrated" then
+          # Brand colors replace functional colors (if validation passes)
+          if validationFailed then
+            throw "Brand color validation failed. Cannot integrate brand colors that don't meet accessibility requirements."
+          else
+            theme
+            // {
+              colors = theme.colors // allFunctional;
+              semantic = theme.semantic // allFunctional;
+              _brand = {
+                integrated = allFunctional;
+                decorative = allDecorative;
+                validation = brandColorValidation;
+                layers = brandLayers;
+              };
+            }
+        else
+          throw "Unknown brand governance policy: ${policy}";
+    in
+    appliedTheme;
+
+  # ============================================================================
+  # Theme Factory Pattern
+  # ============================================================================
+  # Provides composable theme creation with support for overrides, extensions,
+  # variants, validation hooks, and caching.
+
+  # Create a theme factory that provides composable theme creation
+  # This is the main entry point for advanced theme customization
+  #
+  # Usage:
+  #   factory = createThemeFactory {
+  #     inherit palette nix-colorizer validationLib;
+  #   };
+  #   theme = factory.create {
+  #     mode = "dark";
+  #     overrides = { "accent-primary" = customColor; };
+  #     variant = "high-contrast";
+  #   };
+  createThemeFactory =
+    {
+      palette,
+      nix-colorizer ? null,
+      validationLib ? null,
+    }:
+    let
+      # Generate cache key from theme configuration
+      # In Nix, actual caching is handled by the store, but we can create
+      # deterministic keys for memoization within the same evaluation
+      cacheKey =
+        {
+          mode,
+          overrides ? { },
+          variant ? null,
+          brandGovernance ? null,
+        }:
+        let
+          overridesHash = builtins.hashString "sha256" (builtins.toJSON overrides);
+          variantStr = if variant != null then variant else "default";
+          brandHash =
+            if brandGovernance != null then
+              builtins.hashString "sha256" (builtins.toJSON brandGovernance)
+            else
+              "none";
+        in
+        "${mode}-${overridesHash}-${variantStr}-${brandHash}";
+
+      # Apply color overrides to semantic colors
+      # Merges user-provided overrides into the base semantic color mapping
+      applyOverrides = baseSemantic: overrides: baseSemantic // overrides;
+
+      # Apply variant transformations to semantic colors
+      # Variants modify the base theme for accessibility or preference
+      applyVariant =
+        semantic: variant:
+        if variant == null || variant == "default" then
+          semantic
+        else if variant == "high-contrast" then
+          # Increase contrast by adjusting lightness differences
+          # This is a simplified implementation - can be enhanced
+          lib.mapAttrs (
+            name: color:
+            if lib.hasPrefix "text-" name then
+              # Lighten text colors for better contrast
+              if nix-colorizer != null then
+                fromColorizerOklch (nix-colorizer.oklch.lighten (toColorizerOklch color) 0.1)
+              else
+                adjustLightness color 0.1
+            else if lib.hasPrefix "surface-" name then
+              # Darken surfaces for better contrast
+              if nix-colorizer != null then
+                fromColorizerOklch (nix-colorizer.oklch.darken (toColorizerOklch color) 0.05)
+              else
+                adjustLightness color (-0.05)
+            else
+              color
+          ) semantic
+        else if variant == "reduced-motion" then
+          # Reduce saturation for less visual motion
+          if nix-colorizer != null then
+            lib.mapAttrs (
+              name: color:
+              let
+                oklch = toColorizerOklch color;
+                reducedChroma = oklch.C * 0.7; # Reduce chroma by 30%
+                adjusted = oklch // {
+                  C = reducedChroma;
+                };
+              in
+              fromColorizerOklch adjusted
+            ) semantic
+          else
+            semantic # Cannot reduce motion without nix-colorizer
+        else if variant == "color-blind-friendly" then
+          # Adjust hues to be more distinguishable for color-blind users
+          # This is a simplified implementation
+          semantic # Placeholder - would need specific transformations
+        else
+          throw "Unknown variant: ${variant}. Supported variants: high-contrast, reduced-motion, color-blind-friendly";
+
+      # Extension point: pre-generation hook
+      # Allows transformation of configuration before theme generation
+      runPreHooks =
+        config: hooks: if hooks == [ ] then config else lib.foldl (acc: hook: hook acc) config hooks;
+
+      # Extension point: post-generation hook
+      # Allows transformation of theme after generation
+      runPostHooks =
+        theme: hooks: if hooks == [ ] then theme else lib.foldl (acc: hook: hook acc) theme hooks;
+    in
+    {
+      # Create a theme with the factory
+      # This is the main factory method that orchestrates theme creation
+      create =
+        {
+          mode,
+          overrides ? { },
+          variant ? null,
+          validationOptions ? null,
+          brandGovernance ? null,
+          preHooks ? [ ],
+          postHooks ? [ ],
+        }:
+        let
+          # Run pre-generation hooks
+          processedConfig = runPreHooks {
+            inherit
+              mode
+              overrides
+              variant
+              brandGovernance
+              ;
+          } preHooks;
+
+          # Generate cache key for this configuration
+          # Note: In Nix, actual caching is handled by the store based on function inputs
+          # This key is useful for debugging and potential future memoization
+          _cacheKey = cacheKey processedConfig;
+
+          # Generate base theme (validation is integrated via validationOptions)
+          baseTheme = generateTheme mode validationOptions;
+
+          # Apply overrides to semantic colors
+          overriddenSemantic = applyOverrides baseTheme.colors processedConfig.overrides;
+
+          # Apply variant transformations
+          variantSemantic = applyVariant overriddenSemantic processedConfig.variant;
+
+          # Create theme with overridden colors
+          themeWithOverrides = baseTheme // {
+            colors = variantSemantic;
+            # Update deprecated semantic for backward compatibility
+            semantic = variantSemantic;
+            _internal = baseTheme._internal // {
+              semantic = variantSemantic;
+            };
+          };
+
+          # Apply brand colors if provided
+          themeWithBrand =
+            if processedConfig.brandGovernance != null then
+              applyBrandColors {
+                theme = themeWithOverrides;
+                brandGovernance = processedConfig.brandGovernance;
+                validationLib = validationLib;
+              }
+            else
+              themeWithOverrides;
+
+          # Run post-generation hooks (can include additional validation)
+          themeAfterHooks = runPostHooks themeWithBrand postHooks;
+
+          # Post-generation validation hook (if validationLib is available and enabled)
+          # This allows validation after all transformations are applied
+          finalTheme =
+            if validationLib != null && validationOptions != null && validationOptions.enable then
+              let
+                # Run additional validation on the final theme
+                postValidation = validationLib.validateTheme {
+                  theme = themeAfterHooks;
+                  level = validationOptions.level or "AA";
+                  useAPCA = validationOptions.useAPCA or false;
+                  strict = validationOptions.strictMode or false;
+                  textSize = "normal";
+                };
+
+                # If strict mode and validation failed, throw error
+                strict = validationOptions.strictMode or false;
+              in
+              if strict && !postValidation.passed then
+                throw "Post-generation theme validation failed (strict mode):\n${validationLib.generateReport postValidation}"
+              else
+                # Add validation results to theme metadata
+                themeAfterHooks // {
+                  _validation = {
+                    postGeneration = postValidation;
+                    report = validationLib.generateReport postValidation;
+                  };
+                }
+            else
+              themeAfterHooks;
+        in
+        finalTheme;
+
+      # Create a factory with default overrides applied to all themes
+      withDefaults = defaultOverrides: {
+        create =
+          config:
+          createThemeFactory
+            {
+              inherit palette nix-colorizer validationLib;
+            }
+            .create
+            (
+              config
+              // {
+                overrides = defaultOverrides // (config.overrides or { });
+              }
+            );
+      };
+
+      # Create a factory with a specific variant applied to all themes
+      withVariant = variant: {
+        create =
+          config:
+          createThemeFactory
+            {
+              inherit palette nix-colorizer validationLib;
+            }
+            .create
+            (
+              config
+              // {
+                variant = config.variant or variant;
+              }
+            );
+      };
+    };
 }
