@@ -1,4 +1,6 @@
-{ _ }:
+{
+  ...
+}:
 {
   # Define all supported system architectures
   # This is used by flake-parts to automatically generate perSystem outputs
