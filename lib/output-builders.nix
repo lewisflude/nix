@@ -26,7 +26,7 @@ in
           deadnix.enable = true;
           statix = {
             enable = true;
-            entry = "${nixpkgs.legacyPackages.${system}.statix}/bin/statix check --format errfmt --ignore '**/systems.nix'";
+            entry = "${nixpkgs.legacyPackages.${system}.statix}/bin/statix check --format errfmt --ignore '**/systems.nix' --ignore '**/polkit-gnome.nix' --ignore '**/wlsunset.nix'";
           };
           commitizen.enable = true;
 
