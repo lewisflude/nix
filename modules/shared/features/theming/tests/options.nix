@@ -100,13 +100,13 @@ in
     expr =
       let
         cfg = testModule.config;
-        validation = cfg.theming.signal.validation;
+        inherit (cfg.theming.signal) validation;
       in
-      validation.enable == false
-      && validation.strictMode == false
+      !validation.enable
+      && !validation.strictMode
       && validation.level == "AA"
       && validation.validationLevel == "standard"
-      && validation.useAPCA == false;
+      && !validation.useAPCA;
     expected = true;
   };
 

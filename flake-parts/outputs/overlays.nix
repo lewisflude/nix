@@ -2,17 +2,13 @@
   inputs,
   ...
 }:
-let
-  nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
-  inherit (nixpkgs) lib;
-in
 {
   # Flake overlays
   # Applied to nixpkgs when this flake is used as an input
   flake.overlays.default =
     final: prev:
     let
-      system = prev.stdenv.hostPlatform.system;
+      inherit (prev.stdenv.hostPlatform) system;
       overlaySet = import ../../overlays {
         inherit inputs system;
       };

@@ -7,13 +7,13 @@
 let
   inherit (lib) mkIf;
   cfg = config.theming.signal;
-  theme = themeContext.theme;
+  inherit (themeContext) theme;
 
   # Generate VS Code theme JSON
   generateVSCodeTheme =
     themeObj: mode:
     let
-      colors = themeObj.colors;
+      inherit (themeObj) colors;
       # Access internal palette for specific color variants if needed
       internalPalette = themeObj._internal or { accent = { }; };
     in

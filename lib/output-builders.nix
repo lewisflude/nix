@@ -6,7 +6,6 @@ let
   nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
   pre-commit-hooks = inputs.pre-commit-hooks or (throw "pre-commit-hooks input is required");
 
-  functionsLib = import ./functions.nix { inherit (nixpkgs) lib; };
   systems = builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
 
   getPythonPackages = system: nixpkgs.legacyPackages.${system}.python312.pkgs;

@@ -336,7 +336,7 @@ rec {
           bgrHex =
             color:
             let
-              rgb = color.rgb;
+              inherit (color) rgb;
               # Convert integer 0-255 to 2-digit hex string
               intToHex =
                 n:
@@ -623,7 +623,7 @@ rec {
           in
           {
             background = bg.name;
-            result = result;
+            inherit result;
           }
         ) defaultBackgrounds;
 
@@ -670,7 +670,7 @@ rec {
           in
           {
             method = "lighten";
-            amount = amount;
+            inherit amount;
             color = adjusted;
           }
         ) nSteps;
@@ -685,7 +685,7 @@ rec {
           in
           {
             method = "increase-chroma";
-            amount = amount;
+            inherit amount;
             color = adjusted;
           }
         ) nSteps;
@@ -710,7 +710,7 @@ rec {
       # Convert decorative brand colors (hex strings) to OKLCH if needed
       decorativeOklch =
         if decorativeBrandColors != { } && nix-colorizer != null then
-          lib.mapAttrs (name: hex: hexToOklch hex) decorativeBrandColors
+          lib.mapAttrs (_: hexToOklch) decorativeBrandColors
         else
           { };
 
@@ -728,7 +728,7 @@ rec {
           # Convert hex to OKLCH if nix-colorizer is available
           layerDecorativeOklch =
             if layerDecorative != { } && nix-colorizer != null then
-              lib.mapAttrs (name: hex: hexToOklch hex) layerDecorative
+              lib.mapAttrs (_: hexToOklch) layerDecorative
             else
               { };
         in
@@ -965,9 +965,8 @@ rec {
           themeWithBrand =
             if processedConfig.brandGovernance != null then
               applyBrandColors {
-                theme = themeWithOverrides;
-                brandGovernance = processedConfig.brandGovernance;
-                validationLib = validationLib;
+                inherit themeWithOverrides validationLib;
+                inherit (processedConfig) brandGovernance;
               }
             else
               themeWithOverrides;

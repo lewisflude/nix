@@ -309,7 +309,7 @@ let
   validateThemeCompleteness =
     theme:
     let
-      colors = theme.colors;
+      inherit (theme) colors;
       missing = lib.filter (token: !(colors ? ${token})) requiredSemanticTokens;
     in
     if missing == [ ] then
@@ -347,8 +347,8 @@ let
   validateThemeColors =
     theme:
     let
-      colors = theme.colors;
-      colorResults = lib.mapAttrsToList (name: color: validateColorStructure color) colors;
+      inherit (theme) colors;
+      colorResults = lib.mapAttrsToList (_: validateColorStructure) colors;
     in
     combineResults colorResults;
 
@@ -360,7 +360,7 @@ let
   criticalPairs =
     theme:
     let
-      colors = theme.colors;
+      inherit (theme) colors;
     in
     [
       # Primary text on base surface
@@ -409,11 +409,8 @@ let
         pair:
         let
           result = validateContrast {
-            textColor = pair.textColor;
-            backgroundColor = pair.backgroundColor;
-            inherit level;
-            textSize = pair.textSize;
-            inherit useAPCA;
+            inherit (pair) textColor backgroundColor textSize;
+            inherit level useAPCA;
           };
         in
         if result.passed then
@@ -481,16 +478,14 @@ let
 
   # Generate a machine-readable JSON report (as Nix attribute set)
   generateJSONReport = result: {
-    passed = result.passed;
-    errors = result.errors;
-    warnings = result.warnings;
+    inherit (result) passed errors warnings;
     errorCount = lib.length result.errors;
     warningCount = lib.length result.warnings;
   };
 
   # Generate summary statistics
   generateSummary = result: {
-    passed = result.passed;
+    inherit (result) passed;
     totalErrors = lib.length result.errors;
     totalWarnings = lib.length result.warnings;
   };

@@ -7,7 +7,7 @@
 let
   inherit (lib) mkIf;
   cfg = config.theming.signal;
-  theme = themeContext.theme;
+  inherit (themeContext) theme;
 in
 {
   config = mkIf (cfg.enable && cfg.applications.zellij.enable && theme != null) {

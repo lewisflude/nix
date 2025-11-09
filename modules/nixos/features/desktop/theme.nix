@@ -15,7 +15,7 @@ in
       (lib.mkIf cfg.signalTheme.enable {
         theming.signal = {
           enable = true;
-          mode = cfg.signalTheme.mode;
+          inherit (cfg.signalTheme) mode;
 
           applications = {
             # Enable all Wayland/Linux desktop components

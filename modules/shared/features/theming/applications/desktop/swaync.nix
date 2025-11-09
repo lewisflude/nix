@@ -7,8 +7,8 @@
 let
   inherit (lib) mkIf mkMerge;
   cfg = config.theming.signal;
-  theme = themeContext.theme;
-  colors = theme.colors;
+  inherit (themeContext) theme;
+  inherit (theme) colors;
 
   # Determine libadwaita color scheme from theme mode
   # libadwaita uses "prefer-dark", "prefer-light", or "default"

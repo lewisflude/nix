@@ -13,7 +13,7 @@ let
   theme = themeImport.generateTheme "dark";
 
   # Extract colors from theme
-  colors = theme.colors;
+  inherit (theme) colors;
 in
 {
   niri.colors = {

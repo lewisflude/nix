@@ -20,8 +20,7 @@ let
     nix-colorizer = config._module.args.nix-colorizer or null;
   };
   modeLib = import "${sharedThemingPath}/mode.nix" {
-    inherit lib;
-    config = config;
+    inherit lib config;
   };
   contextLib = import "${sharedThemingPath}/context.nix" { inherit lib; };
 
@@ -73,7 +72,7 @@ in
     {
       # Make theme context available to application modules via _module.args
       _module.args = {
-        themeContext = themeContext;
+        inherit themeContext;
         signalThemeLib = themeLib;
       };
     }

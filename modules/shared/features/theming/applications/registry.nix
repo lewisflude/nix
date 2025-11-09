@@ -1,6 +1,4 @@
 { lib }:
-let
-in
 rec {
   # Application metadata structure
   # Each application entry contains information about the application module
