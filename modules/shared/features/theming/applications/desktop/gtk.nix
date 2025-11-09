@@ -3,14 +3,12 @@
   lib,
   pkgs,
   themeContext ? null,
-  signalPalette ? null, # Backward compatibility
   ...
 }:
 let
   inherit (lib) mkIf;
   cfg = config.theming.signal;
-  # Use themeContext if available, otherwise fall back to signalPalette for backward compatibility
-  theme = themeContext.theme or signalPalette;
+  theme = themeContext.theme;
 
   # Determine if we're on Linux
   inherit (pkgs.stdenv) isLinux;
@@ -19,7 +17,7 @@ let
   generateGtkCss =
     palette:
     let
-      colors = palette.semantic;
+      colors = palette.colors;
     in
     ''
       /* Signal Color Theme - GTK Overrides */

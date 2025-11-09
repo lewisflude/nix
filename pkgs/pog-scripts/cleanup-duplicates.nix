@@ -9,7 +9,7 @@ pog.pog {
 
   flags = [
     {
-      name = "auto-confirm";
+      name = "auto_confirm";
       short = "y";
       bool = true;
       description = "Non-interactive mode (auto-confirm all prompts)";
@@ -68,13 +68,17 @@ pog.pog {
 
       if ${flag "dry_run"}; then
         debug "DRY RUN: Would run nix-store --gc"
-      elif ${flag "auto-confirm"} || ${confirm { prompt = "Continue with garbage collection?"; }}; then
-        debug "Running nix-store --gc..."
-        nix-store --gc 2>&1 | tail -5
-        echo ""
       else
-        yellow "Skipping garbage collection."
-        echo ""
+        if ${flag "auto_confirm"}; then
+          debug "Running nix-store --gc..."
+          nix-store --gc 2>&1 | tail -5
+          echo ""
+        else
+          ${confirm { prompt = "Continue with garbage collection?"; }}
+          debug "Running nix-store --gc..."
+          nix-store --gc 2>&1 | tail -5
+          echo ""
+        fi
       fi
 
 
@@ -90,9 +94,9 @@ pog.pog {
         [ -e "$path" ] || continue
         if ! is_referenced "$path"; then
           PATHS_TO_DELETE+=("$path")
-          debug "  Will delete: $(basename $path)"
+          debug "  Will delete: $(basename "$path")"
         else
-          debug "  Keep (referenced): $(basename $path)"
+          debug "  Keep (referenced): $(basename "$path")"
         fi
       done
 
@@ -102,9 +106,9 @@ pog.pog {
         [ -e "$path" ] || continue
         if ! is_referenced "$path"; then
           PATHS_TO_DELETE+=("$path")
-          debug "  Will delete: $(basename $path)"
+          debug "  Will delete: $(basename "$path")"
         else
-          debug "  Keep (referenced): $(basename $path)"
+          debug "  Keep (referenced): $(basename "$path")"
         fi
       done
 
@@ -114,9 +118,9 @@ pog.pog {
         [ -e "$path" ] || continue
         if ! is_referenced "$path"; then
           PATHS_TO_DELETE+=("$path")
-          debug "  Will delete: $(basename $path)"
+          debug "  Will delete: $(basename "$path")"
         else
-          debug "  Keep (referenced): $(basename $path)"
+          debug "  Keep (referenced): $(basename "$path")"
         fi
       done
 
@@ -126,9 +130,9 @@ pog.pog {
         [ -e "$path" ] || continue
         if ! is_referenced "$path"; then
           PATHS_TO_DELETE+=("$path")
-          debug "  Will delete: $(basename $path)"
+          debug "  Will delete: $(basename "$path")"
         else
-          debug "  Keep (referenced): $(basename $path)"
+          debug "  Keep (referenced): $(basename "$path")"
         fi
       done
 
@@ -138,9 +142,9 @@ pog.pog {
         [ -e "$path" ] || continue
         if ! is_referenced "$path"; then
           PATHS_TO_DELETE+=("$path")
-          debug "  Will delete: $(basename $path)"
+          debug "  Will delete: $(basename "$path")"
         else
-          debug "  Keep (referenced): $(basename $path)"
+          debug "  Keep (referenced): $(basename "$path")"
         fi
       done
 
@@ -150,9 +154,9 @@ pog.pog {
         [ -e "$path" ] || continue
         if ! is_referenced "$path"; then
           PATHS_TO_DELETE+=("$path")
-          debug "  Will delete: $(basename $path)"
+          debug "  Will delete: $(basename "$path")"
         else
-          debug "  Keep (referenced): $(basename $path)"
+          debug "  Keep (referenced): $(basename "$path")"
         fi
       done
 
@@ -162,9 +166,9 @@ pog.pog {
         [ -e "$path" ] || continue
         if ! is_referenced "$path"; then
           PATHS_TO_DELETE+=("$path")
-          debug "  Will delete: $(basename $path)"
+          debug "  Will delete: $(basename "$path")"
         else
-          debug "  Keep (referenced): $(basename $path)"
+          debug "  Keep (referenced): $(basename "$path")"
         fi
       done
 
@@ -174,9 +178,9 @@ pog.pog {
         [ -e "$path" ] || continue
         if ! is_referenced "$path"; then
           PATHS_TO_DELETE+=("$path")
-          debug "  Will delete: $(basename $path)"
+          debug "  Will delete: $(basename "$path")"
         else
-          debug "  Keep (referenced): $(basename $path)"
+          debug "  Keep (referenced): $(basename "$path")"
         fi
       done
 
@@ -191,24 +195,24 @@ pog.pog {
           [ "$path" = "$KEEP_LIB" ] && continue
           if ! is_referenced "$path"; then
             PATHS_TO_DELETE+=("$path")
-            debug "  Will delete: $(basename $path)"
+            debug "  Will delete: $(basename "$path")"
           else
-            debug "  Keep (referenced): $(basename $path)"
+            debug "  Keep (referenced): $(basename "$path")"
           fi
         done
       fi
 
 
       debug "Analyzing Linux firmware..."
-      for path in /nix/store/p3hcgmhfqi28s0ipk989557rfymzh0m8-linux-firmware-20250109-zstd; do
-        [ -e "$path" ] || continue
+      path="/nix/store/p3hcgmhfqi28s0ipk989557rfymzh0m8-linux-firmware-20250109-zstd"
+      if [ -e "$path" ]; then
         if ! is_referenced "$path"; then
           PATHS_TO_DELETE+=("$path")
-          debug "  Will delete: $(basename $path)"
+          debug "  Will delete: $(basename "$path")"
         else
-          debug "  Keep (referenced): $(basename $path)"
+          debug "  Keep (referenced): $(basename "$path")"
         fi
-      done
+      fi
 
 
       debug "Analyzing Zoom..."
@@ -216,9 +220,9 @@ pog.pog {
         [ -e "$path" ] || continue
         if ! is_referenced "$path"; then
           PATHS_TO_DELETE+=("$path")
-          debug "  Will delete: $(basename $path)"
+          debug "  Will delete: $(basename "$path")"
         else
-          debug "  Keep (referenced): $(basename $path)"
+          debug "  Keep (referenced): $(basename "$path")"
         fi
       done
 
@@ -228,15 +232,15 @@ pog.pog {
         [ -e "$path" ] || continue
         if ! is_referenced "$path"; then
           PATHS_TO_DELETE+=("$path")
-          debug "  Will delete: $(basename $path)"
+          debug "  Will delete: $(basename "$path")"
         else
-          debug "  Keep (referenced): $(basename $path)"
+          debug "  Keep (referenced): $(basename "$path")"
         fi
       done
 
       echo ""
       cyan "=== Summary ==="
-      echo "Found ''${
+      echo "Found ''${#PATHS_TO_DELETE[@]} paths to delete"
       echo ""
 
 
@@ -265,16 +269,15 @@ pog.pog {
         exit 0
       fi
 
-      if [ "''${
+      if [ ''${#PATHS_TO_DELETE[@]} -eq 0 ]; then
         green "No duplicates found to clean up"
         exit 0
       fi
 
-      if ! ${flag "auto-confirm"}; then
-        if ! ${confirm { prompt = "Do you want to proceed with deletion?"; }}; then
-          yellow "Aborted."
-          exit 0
-        fi
+      if ${flag "auto_confirm"}; then
+        : # Auto-confirmed, proceed
+      else
+        ${confirm { prompt = "Do you want to proceed with deletion?"; }}
       fi
 
       echo ""
@@ -284,7 +287,7 @@ pog.pog {
 
       for path in "''${PATHS_TO_DELETE[@]}"; do
         if [ -e "$path" ]; then
-          debug "Deleting: $(basename $path)"
+          debug "Deleting: $(basename "$path")"
           if nix-store --delete "$path" 2>/dev/null; then
             DELETED=$((DELETED + 1))
           else

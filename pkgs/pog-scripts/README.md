@@ -31,7 +31,7 @@ sudo nix run .#cleanup-duplicates
 sudo nix run .#cleanup-duplicates -- --dry_run
 
 # Non-interactive (auto-confirm)
-sudo nix run .#cleanup-duplicates -- --non_interactive
+sudo nix run .#cleanup-duplicates -- --auto_confirm
 
 # Help
 nix run .#cleanup-duplicates -- --help
@@ -39,7 +39,7 @@ nix run .#cleanup-duplicates -- --help
 
 **Flags:**
 
-- `-y, --non_interactive` - Auto-confirm all prompts
+- `-y, --auto_confirm` - Auto-confirm all prompts
 - `-d, --dry_run` - Show what would be deleted without making changes
 - `-v, --verbose` - Enable verbose output
 - `-h, --help` - Show help

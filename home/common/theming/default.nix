@@ -1,14 +1,11 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 let
   inherit (lib)
-    mkOption
     mkEnableOption
-    types
     mkIf
     mkMerge
     ;
@@ -33,7 +30,7 @@ let
   # Resolve mode (handles "auto" mode by detecting system preference)
   resolvedMode = modeLib.getResolvedMode cfg;
 
-  # Create theme context (replaces _module.args.signalPalette pattern)
+  # Create theme context
   themeContext = contextLib.createContext {
     inherit themeLib palette;
     mode = resolvedMode;
@@ -113,12 +110,10 @@ in
   config = mkIf cfg.enable (mkMerge [
     {
       # Make theme context available to application modules via _module.args
-      # This replaces the old signalPalette pattern with a more structured approach
-      _module.args.themeContext = themeContext;
-      # Backward compatibility: also provide signalPalette for old modules
-      # TODO: Remove this after all application modules are updated
-      _module.args.signalPalette = themeContext.theme;
-      _module.args.signalThemeLib = themeLib;
+      _module.args = {
+        themeContext = themeContext;
+        signalThemeLib = themeLib;
+      };
     }
 
     # Assertions and warnings

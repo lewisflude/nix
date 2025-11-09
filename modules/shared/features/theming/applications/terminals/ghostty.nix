@@ -1,23 +1,20 @@
 {
   config,
   lib,
-  pkgs,
   themeContext ? null,
-  signalPalette ? null, # Backward compatibility
   ...
 }:
 let
   inherit (lib) mkIf;
   cfg = config.theming.signal;
-  # Use themeContext if available, otherwise fall back to signalPalette for backward compatibility
-  theme = themeContext.theme or signalPalette;
+  theme = themeContext.theme;
 in
 {
   config = mkIf (cfg.enable && cfg.applications.ghostty.enable && theme != null) {
     programs.ghostty = {
       settings =
         let
-          colors = theme.colors or theme.semantic;
+          colors = theme.colors;
         in
         {
           # Background and foreground

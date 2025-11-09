@@ -8,18 +8,18 @@ Successfully implemented a comprehensive Signal color theming system based on OK
 
 ### Core Theme System
 
-- ? `modules/shared/theming/default.nix` - Main theme module with options
-- ? `modules/shared/theming/palette.nix` - 60+ OKLCH colors with hex values
-- ? `modules/shared/theming/lib.nix` - Helper functions and semantic mappings
+- ? `modules/shared/features/theming/default.nix` - Main theme module with options
+- ? `modules/shared/features/theming/palette.nix` - 60+ OKLCH colors with hex values
+- ? `modules/shared/features/theming/lib.nix` - Helper functions and semantic mappings
 
 ### Application Themes (6 applications)
 
-- ? `modules/shared/theming/applications/cursor.nix` - Cursor/VS Code theme
-- ? `modules/shared/theming/applications/helix.nix` - Helix editor theme
-- ? `modules/shared/theming/applications/zed.nix` - Zed editor theme
-- ? `modules/shared/theming/applications/ghostty.nix` - Ghostty terminal theme
-- ? `modules/shared/theming/applications/gtk.nix` - GTK applications (Linux)
-- ? `modules/shared/theming/applications/niri.nix` - Niri window manager (Linux)
+- ? `modules/shared/features/theming/applications/cursor.nix` - Cursor/VS Code theme
+- ? `modules/shared/features/theming/applications/helix.nix` - Helix editor theme
+- ? `modules/shared/features/theming/applications/zed.nix` - Zed editor theme
+- ? `modules/shared/features/theming/applications/ghostty.nix` - Ghostty terminal theme
+- ? `modules/shared/features/theming/applications/gtk.nix` - GTK applications (Linux)
+- ? `modules/shared/features/theming/applications/niri.nix` - Niri window manager (Linux)
 
 ### Integration
 
@@ -29,8 +29,8 @@ Successfully implemented a comprehensive Signal color theming system based on OK
 
 - ? `docs/SIGNAL_THEME.md` - Complete theme documentation
 - ? `docs/examples/signal-theme-usage.md` - 20 usage examples
-- ? `SIGNAL_THEME_IMPLEMENTATION.md` - Implementation details
-- ? `IMPLEMENTATION_COMPLETE.md` - This summary
+- ? `docs/SIGNAL_THEME_IMPLEMENTATION.md` - Implementation details
+- ? `docs/SIGNAL_THEME_IMPLEMENTATION_COMPLETE.md` - This summary
 
 ### Tests
 
@@ -164,7 +164,7 @@ ls -la ~/.config/gtk-4.0/gtk.css
 Test palette evaluation:
 
 ```bash
-nix eval --impure --expr 'let lib = (import <nixpkgs> {}).lib; palette = import ./modules/shared/theming/palette.nix { inherit lib; }; in palette.tonal.dark.base-L015.hex'
+nix eval --impure --expr 'let lib = (import <nixpkgs> {}).lib; palette = import ./modules/shared/features/theming/palette.nix { inherit lib; }; in palette.tonal.dark.base-L015.hex'
 # Should output: "#1e1f26"
 ```
 
@@ -242,7 +242,7 @@ Adjust settings if needed:
 
 ### 5. Extend (Optional)
 
-Add support for more applications by creating new modules in `modules/shared/theming/applications/`.
+Add support for more applications by creating new modules in `modules/shared/features/theming/applications/`.
 
 ## Support and Documentation
 
@@ -253,7 +253,7 @@ Add support for more applications by creating new modules in `modules/shared/the
 
 ### Implementation Details
 
-- `SIGNAL_THEME_IMPLEMENTATION.md` - Technical details
+- `docs/SIGNAL_THEME_IMPLEMENTATION.md` - Technical details
 
 ### Need Help?
 

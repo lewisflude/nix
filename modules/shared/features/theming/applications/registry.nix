@@ -1,6 +1,5 @@
 { lib }:
 let
-  inherit (lib) types;
 in
 rec {
   # Application metadata structure

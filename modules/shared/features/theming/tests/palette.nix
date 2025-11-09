@@ -1,7 +1,7 @@
-{ lib }:
+{ _ }: # deadnix: ignore
 let
   # Import palette for testing
-  palette = import ../palette.nix { inherit lib; };
+  palette = import ../palette.nix { };
 in
 {
   # Test palette structure

@@ -139,19 +139,18 @@ pog.pog {
         feature)
           echo "  1. Add feature options to modules/shared/host-options.nix"
           echo "  2. Implement the feature in $OUTPUT_FILE"
-          echo "  3. Enable in a host: host.features.$NAME_SNAKE.enable = true;"
+          echo "  3. Enable in a host: host.features.$NAME_SNAKE.enable = true"
           echo "  4. Test the configuration"
           echo ""
           yellow "💡 Add this to modules/shared/host-options.nix:"
           echo ""
           echo "    $NAME_SNAKE = {"
           echo "      enable = mkEnableOption \"$MODULE_NAME feature\";"
-          echo "
           echo "    };"
           ;;
         service)
           echo "  1. Customize the service in $OUTPUT_FILE"
-          echo "  2. Add to host configuration: services.$NAME_SNAKE.enable = true;"
+          echo "  2. Add to host configuration: services.$NAME_SNAKE.enable = true"
           echo "  3. Test the service"
           ;;
         overlay)
@@ -161,7 +160,7 @@ pog.pog {
           ;;
         test)
           echo "  1. Implement tests in $OUTPUT_FILE"
-          echo "  2. Run with: nix build .
+          echo "  2. Run with: nix build .#checks.x86_64-linux.test-name"
           ;;
       esac
 

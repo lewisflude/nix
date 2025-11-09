@@ -7,14 +7,7 @@ pog.pog {
   version = "1.0.0";
   description = "Analyze Nix store service usage to identify optimization opportunities";
 
-  flags = [
-    {
-      name = "verbose";
-      short = "v";
-      bool = true;
-      description = "Enable verbose output";
-    }
-  ];
+  flags = [ ];
 
   runtimeInputs = with pkgs; [
     coreutils
@@ -31,6 +24,7 @@ pog.pog {
 
       cyan "=== Currently Running Services ==="
       RUNNING_SERVICES=$(systemctl list-units --type=service --state=running --no-pager --no-legend 2>/dev/null | awk '{print $1}' | sed 's/\.service$//' || echo "")
+      debug "Analyzing running services..."
 
 
       echo ""
@@ -84,10 +78,10 @@ pog.pog {
 
       echo ""
       cyan "=== Service Status Summary ==="
-      echo "✅ Running services: ''${
-      echo "⚠️  Configured but not running: ''${
+      echo "✅ Running services: ''${#USED_SERVICES[@]}"
+      echo "⚠️  Configured but not running: ''${#UNUSED_SERVICES[@]}"
 
-      if [ ''${
+      if [ ''${#UNUSED_SERVICES[@]} -gt 0 ]; then
           echo ""
           echo "Services you could disable to save space:"
           for service in "''${UNUSED_SERVICES[@]}"; do
@@ -140,7 +134,7 @@ pog.pog {
 
       echo ""
       cyan "=== Ollama Analysis ==="
-      OLLAMA_VERSIONS=$(du -sh /nix/store/*ollama* 2>/dev/null | grep -E "ollama-[0-9]" | wc -l)
+      OLLAMA_VERSIONS=$(du -sh /nix/store/*ollama* 2>/dev/null | grep -cE "ollama-[0-9]" || echo "0")
       if [ "$OLLAMA_VERSIONS" -gt 1 ]; then
           echo "Found $OLLAMA_VERSIONS Ollama versions"
           du -sh /nix/store/*ollama* 2>/dev/null | grep -E "ollama-[0-9]" | head -5
@@ -159,7 +153,7 @@ pog.pog {
 
       echo ""
       cyan "=== Development Tools Analysis ==="
-      RUST_VERSIONS=$(du -sh /nix/store/*rustc* 2>/dev/null | grep -E "rustc-[0-9]" | wc -l)
+      RUST_VERSIONS=$(du -sh /nix/store/*rustc* 2>/dev/null | grep -cE "rustc-[0-9]" || echo "0")
       if [ "$RUST_VERSIONS" -gt 1 ]; then
           echo "Found $RUST_VERSIONS Rust versions"
           echo "💡 Tip: Consider using rustup in devShells instead of global rustc"
@@ -178,7 +172,7 @@ pog.pog {
       echo "1. ✅ Run cleanup script (already done!)"
       echo "2. Review services above - disable unused ones"
       echo "3. Consider disabling:"
-      if [ ''${
+      if [ ''${#UNUSED_SERVICES[@]} -gt 0 ]; then
           for service in "''${UNUSED_SERVICES[@]}"; do
               echo "   - $service"
           done
@@ -203,6 +197,6 @@ pog.pog {
       echo "  featureName.serviceName.enable = false;"
       echo ""
       echo "Then rebuild:"
-      echo "  sudo nixos-rebuild switch --flake ~/.config/nix
+      echo "  sudo nixos-rebuild switch --flake ~/.config/nix"
     '';
 }

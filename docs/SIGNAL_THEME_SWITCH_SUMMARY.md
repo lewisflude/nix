@@ -19,9 +19,9 @@ Successfully switched to the Signal OKLCH color theme across your entire NixOS/n
 
 **File:** `home/nixos/theme-constants.nix`
 
-- Allows Scientific theme to override on Linux
+- Allows Signal theme to override on Linux
 
-**File:** `modules/shared/theming/applications/niri.nix`
+**File:** `modules/shared/features/theming/applications/niri.nix`
 
 - Changed to use `lib.mkForce` to properly override theme constants
 - Signal theme now controls Niri colors
@@ -166,7 +166,7 @@ cat ~/.config/helix/config.toml | grep theme
 
 ```bash
 # Verify palette loads correctly
-nix eval --impure --expr 'let lib = (import <nixpkgs> {}).lib; palette = import ./modules/shared/theming/palette.nix { inherit lib; }; in palette.tonal.dark.base-L015.hex'
+nix eval --impure --expr 'let lib = (import <nixpkgs> {}).lib; palette = import ./modules/shared/features/theming/palette.nix { inherit lib; }; in palette.tonal.dark.base-L015.hex'
 
 # Should output: "#1e1f26"
 ```
@@ -176,7 +176,7 @@ nix eval --impure --expr 'let lib = (import <nixpkgs> {}).lib; palette = import 
 Edit `hosts/_common/features.nix`:
 
 ```nix
-scientificTheme = {
+signalTheme = {
   enable = true;
   mode = "light";  # Change this line
 };
@@ -201,7 +201,7 @@ For more information, see:
 
 - **Main Documentation**: `docs/SIGNAL_THEME.md`
 - **Usage Examples**: `docs/examples/signal-theme-usage.md`
-- **Implementation Details**: `SIGNAL_THEME_IMPLEMENTATION.md`
+- **Implementation Details**: `docs/SIGNAL_THEME_IMPLEMENTATION.md`
 
 ## Troubleshooting
 
@@ -230,7 +230,7 @@ darwin-rebuild switch --flake .#Lewiss-MacBook-Pro --show-trace
 
 Check the troubleshooting section in `docs/SIGNAL_THEME.md` or the usage examples in `docs/examples/signal-theme-usage.md`.
 
-## Summary
+## Final Status
 
 ? **Signal theme enabled**
 ? **Conflicts resolved**

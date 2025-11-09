@@ -3,7 +3,6 @@
   config ? null,
 }:
 let
-  inherit (lib) types;
 in
 rec {
   # Valid theme modes
@@ -41,7 +40,7 @@ rec {
   # 3. XDG config files
   # 4. Default to dark mode
   detectSystemMode =
-    config:
+    _config:
     # For now, default to dark mode
     # TODO: Implement actual system detection
     # This would require:

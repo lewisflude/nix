@@ -73,7 +73,8 @@ pog.pog {
 
 
           find "$REPO_ROOT/modules/shared" -name "default.nix" 2>/dev/null | while read -r file; do
-              local module_name=$(basename "$(dirname "$file")")
+              local module_name
+              module_name=$(basename "$(dirname "$file")")
               if [[ "$module_name" == "shared" ]]; then
                   module_name="shared_root"
               fi
@@ -93,7 +94,8 @@ pog.pog {
       EOF
 
           find "$REPO_ROOT/modules/darwin" -name "default.nix" 2>/dev/null | while read -r file; do
-              local module_name=$(basename "$(dirname "$file")")
+              local module_name
+              module_name=$(basename "$(dirname "$file")")
               if [[ "$module_name" == "darwin" ]]; then
                   module_name="darwin_root"
               fi
@@ -113,7 +115,8 @@ pog.pog {
       EOF
 
           find "$REPO_ROOT/modules/nixos" -name "default.nix" 2>/dev/null | while read -r file; do
-              local module_name=$(basename "$(dirname "$file")")
+              local module_name
+              module_name=$(basename "$(dirname "$file")")
               if [[ "$module_name" == "nixos" ]]; then
                   module_name="nixos_root"
               fi
@@ -169,20 +172,20 @@ pog.pog {
 
       EOF
 
-          echo "Shared Modules:" >> "$summary_file"
-          find "$REPO_ROOT/modules/shared" -name "*.nix" -not -name "default.nix" | wc -l | xargs echo "  Files:" >> "$summary_file"
-          find "$REPO_ROOT/modules/shared" -type d -name "*" | wc -l | xargs echo "  Directories:" >> "$summary_file"
-          echo "" >> "$summary_file"
-
-          echo "Darwin Modules:" >> "$summary_file"
-          find "$REPO_ROOT/modules/darwin" -name "*.nix" -not -name "default.nix" | wc -l | xargs echo "  Files:" >> "$summary_file"
-          find "$REPO_ROOT/modules/darwin" -type d -name "*" | wc -l | xargs echo "  Directories:" >> "$summary_file"
-          echo "" >> "$summary_file"
-
-          echo "NixOS Modules:" >> "$summary_file"
-          find "$REPO_ROOT/modules/nixos" -name "*.nix" -not -name "default.nix" | wc -l | xargs echo "  Files:" >> "$summary_file"
-          find "$REPO_ROOT/modules/nixos" -type d -name "*" | wc -l | xargs echo "  Directories:" >> "$summary_file"
-          echo "" >> "$summary_file"
+          {
+            echo "Shared Modules:"
+            find "$REPO_ROOT/modules/shared" -name "*.nix" -not -name "default.nix" | wc -l | xargs echo "  Files:"
+            find "$REPO_ROOT/modules/shared" -type d -name "*" | wc -l | xargs echo "  Directories:"
+            echo ""
+            echo "Darwin Modules:"
+            find "$REPO_ROOT/modules/darwin" -name "*.nix" -not -name "default.nix" | wc -l | xargs echo "  Files:"
+            find "$REPO_ROOT/modules/darwin" -type d -name "*" | wc -l | xargs echo "  Directories:"
+            echo ""
+            echo "NixOS Modules:"
+            find "$REPO_ROOT/modules/nixos" -name "*.nix" -not -name "default.nix" | wc -l | xargs echo "  Files:"
+            find "$REPO_ROOT/modules/nixos" -type d -name "*" | wc -l | xargs echo "  Directories:"
+            echo ""
+          } >> "$summary_file"
 
           green "✓ Summary created: $summary_file"
           cat "$summary_file"

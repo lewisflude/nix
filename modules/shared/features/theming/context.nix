@@ -10,8 +10,8 @@ rec {
       mode,
     }:
     let
-      # Validate inputs
-      _ =
+      # Validate inputs (evaluated for side effects)
+      _validation =
         if themeLib == null then
           throw "themeLib is required to create theme context"
         else if palette == null then
@@ -77,18 +77,4 @@ rec {
       result = builtins.tryEval (validateContext context);
     in
     result.success;
-
-  # Backward compatibility: Convert old signalPalette to themeContext
-  # This allows old application modules to work while they're being migrated
-  fromSignalPalette =
-    signalPalette:
-    if signalPalette == null then
-      null
-    else
-      {
-        theme = signalPalette;
-        mode = signalPalette.mode or "dark";
-        palette = signalPalette._internal.palette or null;
-        lib = signalPalette._internal.lib or null;
-      };
 }

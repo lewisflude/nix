@@ -1,544 +1,217 @@
 {
   config,
   lib,
-  pkgs,
   themeContext ? null,
-  signalPalette ? null, # Backward compatibility
-  signalThemeLib ? null, # Backward compatibility
   ...
 }:
 let
-  inherit (lib) mkIf mkForce;
+  inherit (lib) mkIf;
   cfg = config.theming.signal;
-
-  # Use themeContext if available, otherwise fall back to signalThemeLib for backward compatibility
-  # Ensure themeContext is an attribute set with a lib field, not a function
-  themeLib =
-    if themeContext != null && builtins.isAttrs themeContext && themeContext ? lib then
-      themeContext.lib
-    else
-      signalThemeLib;
+  themeLib = themeContext.lib;
 
   # Generate both light and dark palettes
-  # If themeLib is null, not an attribute set, or doesn't have generateTheme, we can't generate themes
-  darkPalette =
-    if themeLib != null && builtins.isAttrs themeLib && themeLib ? generateTheme then
-      themeLib.generateTheme "dark" { }
-    else
-      null;
-  lightPalette =
-    if themeLib != null && builtins.isAttrs themeLib && themeLib ? generateTheme then
-      themeLib.generateTheme "light" { }
-    else
-      null;
+  darkPalette = themeLib.generateTheme "dark" { };
+  lightPalette = themeLib.generateTheme "light" { };
 
   # Generate a single theme variant with complete Zed theme schema
   generateThemeVariant =
-    palette: mode:
+    palette: variantName:
     let
-      colors = palette.semantic;
+      colors = palette.colors;
     in
     {
-      name = "Signal ${lib.strings.toUpper (builtins.substring 0 1 mode)}${
-        builtins.substring 1 (builtins.stringLength mode) mode
-      }";
-      appearance = if mode == "light" then "light" else "dark";
-      style = {
-        # Accent colors for various UI highlights
-        accents = [
-          "${colors."syntax-error".hex}"
-          "${colors."ansi-green".hex}"
-          "${colors."accent-warning".hex}"
-          "${colors."syntax-keyword".hex}"
-          "${colors."syntax-constant".hex}"
-          "${colors."ansi-cyan".hex}"
-          "${colors."syntax-type".hex}"
-        ];
+      name = "Signal ${variantName}";
+      author = "Signal Theme";
+      semanticClass = "dark";
+      color = {
+        # Editor colors
+        "editor.background" = colors."surface-base".hex;
+        "editor.foreground" = colors."text-primary".hex;
+        "editor.lineHighlightBackground" = colors."surface-subtle".hex;
+        "editor.selectionBackground" = colors."accent-primary".hex + "40";
+        "editor.selectionHighlightBackground" = colors."accent-primary".hex + "20";
+        "editor.inactiveSelectionBackground" = colors."surface-emphasis".hex + "60";
+        "editor.findMatchBackground" = colors."accent-warning".hex + "60";
+        "editor.findMatchHighlightBackground" = colors."accent-warning".hex + "30";
+        "editor.wordHighlightBackground" = colors."accent-focus".hex + "20";
+        "editor.wordHighlightStrongBackground" = colors."accent-focus".hex + "40";
+        "editorLineNumber.foreground" = colors."text-tertiary".hex;
+        "editorLineNumber.activeForeground" = colors."text-secondary".hex;
+        "editorCursor.foreground" = colors."accent-primary".hex;
+        "editorWhitespace.foreground" = colors."divider-primary".hex;
+        "editorIndentGuide.background" = colors."divider-primary".hex;
+        "editorIndentGuide.activeBackground" = colors."divider-secondary".hex;
+        "editorRuler.foreground" = colors."divider-secondary".hex;
+        "editorBracketMatch.background" = colors."accent-focus".hex + "30";
+        "editorBracketMatch.border" = colors."accent-focus".hex;
 
-        # Border colors
-        border = "${colors."divider-primary".hex}";
-        "border.variant" = "${colors."divider-secondary".hex}";
-        "border.focused" = "${colors."accent-primary".hex}";
-        "border.selected" = "${colors."accent-primary".hex}";
-        "border.transparent" = "#00000000";
-        "border.disabled" = "${colors."text-tertiary".hex}";
+        # UI colors
+        "activityBar.background" = colors."surface-base".hex;
+        "activityBar.foreground" = colors."text-primary".hex;
+        "activityBar.border" = colors."divider-primary".hex;
+        "activityBar.activeBorder" = colors."accent-primary".hex;
+        "sideBar.background" = colors."surface-base".hex;
+        "sideBar.foreground" = colors."text-primary".hex;
+        "sideBar.border" = colors."divider-primary".hex;
+        "sideBarSectionHeader.background" = colors."surface-subtle".hex;
+        "sideBarSectionHeader.foreground" = colors."text-primary".hex;
+        "statusBar.background" = colors."surface-emphasis".hex;
+        "statusBar.foreground" = colors."text-primary".hex;
+        "statusBar.border" = colors."divider-primary".hex;
+        "statusBar.noFolderBackground" = colors."surface-emphasis".hex;
+        "titleBar.activeBackground" = colors."surface-base".hex;
+        "titleBar.activeForeground" = colors."text-primary".hex;
+        "titleBar.border" = colors."divider-primary".hex;
 
-        # Surface colors
-        "elevated_surface.background" = "${colors."surface-emphasis".hex}";
-        "surface.background" = "${colors."surface-subtle".hex}";
-        background = "${colors."surface-base".hex}";
+        # List and tree views
+        "list.activeSelectionBackground" = colors."accent-primary".hex;
+        "list.activeSelectionForeground" = colors."surface-base".hex;
+        "list.inactiveSelectionBackground" = colors."surface-emphasis".hex;
+        "list.hoverBackground" = colors."surface-subtle".hex;
+        "list.focusBackground" = colors."surface-emphasis".hex;
 
-        # Element colors
-        "element.background" = "${colors."surface-subtle".hex}";
-        "element.hover" = "${colors."divider-secondary".hex}";
-        "element.active" = "${colors."surface-emphasis".hex}";
-        "element.selected" = "${colors."surface-emphasis".hex}";
-        "element.disabled" = "${colors."surface-subtle".hex}";
+        # Panels
+        "panel.background" = colors."surface-base".hex;
+        "panel.border" = colors."divider-primary".hex;
+        "panelTitle.activeBorder" = colors."accent-primary".hex;
+        "panelTitle.activeForeground" = colors."text-primary".hex;
+        "panelTitle.inactiveForeground" = colors."text-secondary".hex;
 
-        # Drop target
-        "drop_target.background" = "${colors."accent-primary".hex}80";
+        # Terminal colors (ANSI)
+        "terminal.background" = colors."surface-base".hex;
+        "terminal.foreground" = colors."text-primary".hex;
+        "terminal.ansiBlack" = colors."ansi-black".hex;
+        "terminal.ansiRed" = colors."ansi-red".hex;
+        "terminal.ansiGreen" = colors."ansi-green".hex;
+        "terminal.ansiYellow" = colors."ansi-yellow".hex;
+        "terminal.ansiBlue" = colors."ansi-blue".hex;
+        "terminal.ansiMagenta" = colors."ansi-magenta".hex;
+        "terminal.ansiCyan" = colors."ansi-cyan".hex;
+        "terminal.ansiWhite" = colors."ansi-white".hex;
+        "terminal.ansiBrightBlack" = colors."ansi-bright-black".hex;
+        "terminal.ansiBrightRed" = colors."ansi-red".hex;
+        "terminal.ansiBrightGreen" = colors."ansi-green".hex;
+        "terminal.ansiBrightYellow" = colors."ansi-yellow".hex;
+        "terminal.ansiBrightBlue" = colors."ansi-blue".hex;
+        "terminal.ansiBrightMagenta" = colors."ansi-magenta".hex;
+        "terminal.ansiBrightCyan" = colors."ansi-cyan".hex;
+        "terminal.ansiBrightWhite" = colors."ansi-bright-white".hex;
 
-        # Ghost elements
-        "ghost_element.background" = "#00000000";
-        "ghost_element.hover" = "${colors."divider-secondary".hex}";
-        "ghost_element.active" = "${colors."surface-emphasis".hex}";
-        "ghost_element.selected" = "${colors."surface-emphasis".hex}";
-        "ghost_element.disabled" = "${colors."surface-subtle".hex}";
+        # Git colors
+        "gitDecoration.modifiedResourceForeground" = colors."accent-warning".hex;
+        "gitDecoration.deletedResourceForeground" = colors."accent-danger".hex;
+        "gitDecoration.untrackedResourceForeground" = colors."accent-info".hex;
+        "gitDecoration.conflictingResourceForeground" = colors."accent-danger".hex;
+        "gitDecoration.ignoredResourceForeground" = colors."text-tertiary".hex;
 
-        # Text colors
-        text = "${colors."text-primary".hex}";
-        "text.muted" = "${colors."text-secondary".hex}";
-        "text.placeholder" = "${colors."text-tertiary".hex}";
-        "text.disabled" = "${colors."text-tertiary".hex}";
-        "text.accent" = "${colors."accent-primary".hex}";
+        # Diff colors
+        "diffEditor.insertedTextBackground" = colors."ansi-green".hex + "20";
+        "diffEditor.removedTextBackground" = colors."ansi-red".hex + "20";
 
-        # Icon colors
-        icon = "${colors."text-primary".hex}";
-        "icon.muted" = "${colors."text-tertiary".hex}";
-        "icon.disabled" = "${colors."text-tertiary".hex}";
-        "icon.placeholder" = "${colors."text-secondary".hex}";
-        "icon.accent" = "${colors."accent-primary".hex}";
+        # Input controls
+        "input.background" = colors."surface-subtle".hex;
+        "input.border" = colors."divider-secondary".hex;
+        "input.foreground" = colors."text-primary".hex;
+        "inputOption.activeBorder" = colors."accent-primary".hex;
 
-        # UI component backgrounds
-        "status_bar.background" = "${colors."surface-emphasis".hex}";
-        "title_bar.background" = "${colors."surface-base".hex}";
-        "title_bar.inactive_background" = "${colors."surface-subtle".hex}";
-        "toolbar.background" = "${colors."surface-subtle".hex}";
-        "tab_bar.background" = "${colors."surface-subtle".hex}";
-        "tab.inactive_background" = "${colors."surface-subtle".hex}";
-        "tab.active_background" = "${colors."surface-base".hex}";
+        # Buttons
+        "button.background" = colors."accent-primary".hex;
+        "button.foreground" = colors."surface-base".hex;
+        "button.hoverBackground" = colors."accent-primary".hex;
 
-        # Search
-        "search.match_background" = "${colors."accent-warning".hex}66";
+        # Dropdown
+        "dropdown.background" = colors."surface-subtle".hex;
+        "dropdown.border" = colors."divider-secondary".hex;
+        "dropdown.foreground" = colors."text-primary".hex;
 
-        # Panel
-        "panel.background" = "${colors."surface-subtle".hex}";
-        "panel.focused_border" = "${colors."accent-primary".hex}";
-        "pane.focused_border" = null;
+        # Notifications
+        "notificationCenter.border" = colors."divider-secondary".hex;
+        "notifications.background" = colors."surface-subtle".hex;
+        "notifications.border" = colors."divider-secondary".hex;
+        "notifications.foreground" = colors."text-primary".hex;
 
-        # Scrollbar
-        "scrollbar.thumb.active_background" = "${colors."accent-primary".hex}ac";
-        "scrollbar.thumb.hover_background" = "${colors."text-primary".hex}4c";
-        "scrollbar.thumb.background" = "${colors."text-tertiary".hex}4c";
-        "scrollbar.thumb.border" = "${colors."divider-secondary".hex}";
-        "scrollbar.track.background" = "#00000000";
-        "scrollbar.track.border" = "${colors."divider-primary".hex}";
+        # Badge
+        "badge.background" = colors."accent-primary".hex;
+        "badge.foreground" = colors."surface-base".hex;
 
-        # Editor
-        "editor.foreground" = "${colors."text-primary".hex}";
-        "editor.background" = "${colors."surface-base".hex}";
-        "editor.gutter.background" = "${colors."surface-base".hex}";
-        "editor.subheader.background" = "${colors."surface-subtle".hex}";
-        "editor.active_line.background" = "${colors."surface-subtle".hex}bf";
-        "editor.highlighted_line.background" = "${colors."surface-subtle".hex}";
-        "editor.line_number" = "${colors."text-tertiary".hex}";
-        "editor.active_line_number" = "${colors."text-secondary".hex}";
-        "editor.hover_line_number" = "${colors."text-secondary".hex}";
-        "editor.invisible" = "${colors."text-tertiary".hex}";
-        "editor.wrap_guide" = "${colors."divider-primary".hex}0d";
-        "editor.active_wrap_guide" = "${colors."divider-primary".hex}1a";
-        "editor.document_highlight.read_background" = "${colors."accent-primary".hex}1a";
-        "editor.document_highlight.write_background" = "${colors."text-tertiary".hex}66";
+        # Tab colors
+        "tab.activeBackground" = colors."surface-base".hex;
+        "tab.activeForeground" = colors."text-primary".hex;
+        "tab.inactiveBackground" = colors."surface-subtle".hex;
+        "tab.inactiveForeground" = colors."text-secondary".hex;
+        "tab.border" = colors."divider-primary".hex;
+        "tab.activeBorder" = colors."accent-primary".hex;
+      };
 
-        # Terminal
-        "terminal.background" = "${colors."surface-base".hex}";
-        "terminal.foreground" = "${colors."text-primary".hex}";
-        "terminal.bright_foreground" = "${colors."text-primary".hex}";
-        "terminal.dim_foreground" = "${colors."surface-base".hex}";
-        "terminal.ansi.black" = "${colors."ansi-black".hex}";
-        "terminal.ansi.bright_black" = "${colors."ansi-bright-black".hex}";
-        "terminal.ansi.dim_black" = "${colors."text-primary".hex}";
-        "terminal.ansi.red" = "${colors."ansi-red".hex}";
-        "terminal.ansi.bright_red" = "${colors."ansi-red".hex}";
-        "terminal.ansi.dim_red" = "${colors."ansi-red".hex}80";
-        "terminal.ansi.green" = "${colors."ansi-green".hex}";
-        "terminal.ansi.bright_green" = "${colors."ansi-green".hex}";
-        "terminal.ansi.dim_green" = "${colors."ansi-green".hex}80";
-        "terminal.ansi.yellow" = "${colors."ansi-yellow".hex}";
-        "terminal.ansi.bright_yellow" = "${colors."ansi-yellow".hex}";
-        "terminal.ansi.dim_yellow" = "${colors."ansi-yellow".hex}80";
-        "terminal.ansi.blue" = "${colors."ansi-blue".hex}";
-        "terminal.ansi.bright_blue" = "${colors."ansi-blue".hex}";
-        "terminal.ansi.dim_blue" = "${colors."ansi-blue".hex}80";
-        "terminal.ansi.magenta" = "${colors."ansi-magenta".hex}";
-        "terminal.ansi.bright_magenta" = "${colors."ansi-magenta".hex}";
-        "terminal.ansi.dim_magenta" = "${colors."ansi-magenta".hex}80";
-        "terminal.ansi.cyan" = "${colors."ansi-cyan".hex}";
-        "terminal.ansi.bright_cyan" = "${colors."ansi-cyan".hex}";
-        "terminal.ansi.dim_cyan" = "${colors."ansi-cyan".hex}80";
-        "terminal.ansi.white" = "${colors."ansi-white".hex}";
-        "terminal.ansi.bright_white" = "${colors."ansi-bright-white".hex}";
-        "terminal.ansi.dim_white" = "${colors."text-secondary".hex}";
-
-        # Links
-        "link_text.hover" = "${colors."accent-primary".hex}";
-
-        # Version control
-        "version_control.added" = "${colors."ansi-green".hex}";
-        "version_control.modified" = "${colors."ansi-yellow".hex}";
-        "version_control.deleted" = "${colors."ansi-red".hex}";
-
-        # Status indicators
-        conflict = "${colors."accent-warning".hex}";
-        "conflict.background" = "${colors."accent-warning".hex}20";
-        "conflict.border" = "${colors."accent-warning".hex}40";
-
-        created = "${colors."ansi-green".hex}";
-        "created.background" = "${colors."ansi-green".hex}20";
-        "created.border" = "${colors."ansi-green".hex}40";
-
-        deleted = "${colors."ansi-red".hex}";
-        "deleted.background" = "${colors."ansi-red".hex}20";
-        "deleted.border" = "${colors."ansi-red".hex}40";
-
-        error = "${colors."syntax-error".hex}";
-        "error.background" = "${colors."syntax-error".hex}20";
-        "error.border" = "${colors."syntax-error".hex}40";
-
-        hidden = "${colors."text-tertiary".hex}";
-        "hidden.background" = "${colors."surface-base".hex}";
-        "hidden.border" = "${colors."divider-primary".hex}";
-
-        hint = "${colors."text-secondary".hex}";
-        "hint.background" = "${colors."accent-info".hex}20";
-        "hint.border" = "${colors."accent-info".hex}";
-
-        ignored = "${colors."text-tertiary".hex}";
-        "ignored.background" = "${colors."surface-base".hex}";
-        "ignored.border" = "${colors."divider-primary".hex}";
-
-        info = "${colors."accent-info".hex}";
-        "info.background" = "${colors."accent-info".hex}20";
-        "info.border" = "${colors."accent-info".hex}";
-
-        modified = "${colors."ansi-yellow".hex}";
-        "modified.background" = "${colors."ansi-yellow".hex}20";
-        "modified.border" = "${colors."ansi-yellow".hex}40";
-
-        predictive = "${colors."text-tertiary".hex}";
-        "predictive.background" = "${colors."ansi-green".hex}20";
-        "predictive.border" = "${colors."ansi-green".hex}40";
-
-        renamed = "${colors."accent-info".hex}";
-        "renamed.background" = "${colors."accent-info".hex}20";
-        "renamed.border" = "${colors."accent-info".hex}";
-
-        success = "${colors."ansi-green".hex}";
-        "success.background" = "${colors."ansi-green".hex}20";
-        "success.border" = "${colors."ansi-green".hex}40";
-
-        unreachable = "${colors."text-secondary".hex}";
-        "unreachable.background" = "${colors."surface-base".hex}";
-        "unreachable.border" = "${colors."divider-primary".hex}";
-
-        warning = "${colors."accent-warning".hex}";
-        "warning.background" = "${colors."accent-warning".hex}20";
-        "warning.border" = "${colors."accent-warning".hex}40";
-
-        # Players for collaborative editing
-        players = [
-          {
-            cursor = "${colors."accent-primary".hex}";
-            background = "${colors."accent-primary".hex}";
-            selection = "${colors."accent-primary".hex}3d";
-          }
-          {
-            cursor = "${colors."text-secondary".hex}";
-            background = "${colors."text-secondary".hex}";
-            selection = "${colors."text-secondary".hex}3d";
-          }
-          {
-            cursor = "${colors."syntax-type".hex}";
-            background = "${colors."syntax-type".hex}";
-            selection = "${colors."syntax-type".hex}3d";
-          }
-          {
-            cursor = "${colors."syntax-constant".hex}";
-            background = "${colors."syntax-constant".hex}";
-            selection = "${colors."syntax-constant".hex}3d";
-          }
-          {
-            cursor = "${colors."ansi-cyan".hex}";
-            background = "${colors."ansi-cyan".hex}";
-            selection = "${colors."ansi-cyan".hex}3d";
-          }
-          {
-            cursor = "${colors."ansi-red".hex}";
-            background = "${colors."ansi-red".hex}";
-            selection = "${colors."ansi-red".hex}3d";
-          }
-          {
-            cursor = "${colors."ansi-yellow".hex}";
-            background = "${colors."ansi-yellow".hex}";
-            selection = "${colors."ansi-yellow".hex}3d";
-          }
-          {
-            cursor = "${colors."ansi-green".hex}";
-            background = "${colors."ansi-green".hex}";
-            selection = "${colors."ansi-green".hex}3d";
-          }
-        ];
-
-        # Syntax highlighting
-        syntax = {
-          attribute = {
-            color = "${colors."syntax-type".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          boolean = {
-            color = "${colors."syntax-constant".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          comment = {
-            color = "${colors."syntax-comment".hex}";
-            font_style = "italic";
-            font_weight = null;
-          };
-          "comment.doc" = {
-            color = "${colors."text-secondary".hex}";
-            font_style = "italic";
-            font_weight = null;
-          };
-          constant = {
-            color = "${colors."syntax-constant".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          constructor = {
-            color = "${colors."syntax-type".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          embedded = {
-            color = "${colors."syntax-special".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          emphasis = {
-            color = "${colors."accent-primary".hex}";
-            font_style = "italic";
-            font_weight = null;
-          };
-          "emphasis.strong" = {
-            color = "${colors."accent-primary".hex}";
-            font_style = null;
-            font_weight = 700;
-          };
-          enum = {
-            color = "${colors."syntax-type".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "function" = {
-            color = "${colors."syntax-function-def".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "function.builtin" = {
-            color = "${colors."syntax-keyword".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "function.call" = {
-            color = "${colors."syntax-function-call".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          hint = {
-            color = "${colors."text-secondary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          keyword = {
-            color = "${colors."syntax-keyword".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          label = {
-            color = "${colors."accent-primary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          link_text = {
-            color = "${colors."accent-primary".hex}";
-            font_style = "italic";
-            font_weight = null;
-          };
-          link_uri = {
-            color = "${colors."accent-info".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          namespace = {
-            color = "${colors."syntax-type".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          number = {
-            color = "${colors."syntax-number".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          operator = {
-            color = "${colors."text-primary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          predictive = {
-            color = "${colors."text-tertiary".hex}";
-            font_style = "italic";
-            font_weight = null;
-          };
-          preproc = {
-            color = "${colors."syntax-keyword".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          primary = {
-            color = "${colors."text-primary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          property = {
-            color = "${colors."text-primary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          punctuation = {
-            color = "${colors."text-secondary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "punctuation.bracket" = {
-            color = "${colors."text-secondary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "punctuation.delimiter" = {
-            color = "${colors."text-secondary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "punctuation.list_marker" = {
-            color = "${colors."text-primary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "punctuation.markup" = {
-            color = "${colors."accent-primary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "punctuation.special" = {
-            color = "${colors."text-secondary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          selector = {
-            color = "${colors."syntax-type".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "selector.pseudo" = {
-            color = "${colors."syntax-keyword".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          string = {
-            color = "${colors."syntax-string".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "string.escape" = {
-            color = "${colors."syntax-special".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "string.regex" = {
-            color = "${colors."syntax-string".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "string.special" = {
-            color = "${colors."syntax-special".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "string.special.symbol" = {
-            color = "${colors."syntax-constant".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          tag = {
-            color = "${colors."syntax-keyword".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "text.literal" = {
-            color = "${colors."syntax-string".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          title = {
-            color = "${colors."syntax-function-def".hex}";
-            font_style = null;
-            font_weight = 700;
-          };
-          type = {
-            color = "${colors."syntax-type".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          variable = {
-            color = "${colors."text-primary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          "variable.special" = {
-            color = "${colors."accent-primary".hex}";
-            font_style = null;
-            font_weight = null;
-          };
-          variant = {
-            color = "${colors."syntax-type".hex}";
-            font_style = null;
-            font_weight = null;
-          };
+      syntax = {
+        # Keywords
+        keyword = {
+          color = colors."syntax-keyword".hex;
+        };
+        # Function definitions
+        "function-definition" = {
+          color = colors."syntax-function-def".hex;
+        };
+        # Function calls
+        "function-call" = {
+          color = colors."syntax-function-call".hex;
+        };
+        # Strings
+        string = {
+          color = colors."syntax-string".hex;
+        };
+        # Numbers and constants
+        number = {
+          color = colors."syntax-number".hex;
+        };
+        # Types
+        type = {
+          color = colors."syntax-type".hex;
+        };
+        # Variables (use default text color)
+        variable = {
+          color = colors."text-primary".hex;
+        };
+        # Comments
+        comment = {
+          color = colors."syntax-comment".hex;
+          fontStyle = "italic";
+        };
+        # Invalid/Error
+        invalid = {
+          color = colors."syntax-error".hex;
+          fontStyle = "bold underline";
+        };
+        # TODO/FIXME
+        "code-tag" = {
+          color = colors."syntax-special".hex;
+          fontStyle = "bold";
+        };
+        # Punctuation
+        punctuation = {
+          color = colors."text-secondary".hex;
+        };
+        # Operators
+        operator = {
+          color = colors."text-primary".hex;
         };
       };
     };
 
   # Generate the complete theme family with both light and dark variants
   generateZedTheme = {
-    "$schema" = "https://zed.dev/schema/themes/v0.2.0.json";
-    name = "Signal";
-    author = "Signal Color System";
     themes = [
-      (generateThemeVariant darkPalette "dark")
-      (generateThemeVariant lightPalette "light")
+      (generateThemeVariant darkPalette "Dark")
+      (generateThemeVariant lightPalette "Light")
     ];
   };
 in
 {
-  config =
-    mkIf (cfg.enable && cfg.applications.zed.enable && darkPalette != null && lightPalette != null)
-      {
-        # Generate and install the theme file with both light and dark variants
-        # Using home.file instead of xdg.configFile to allow manual theme management
-        home.file.".config/zed/themes/signal.json" = {
-          text = builtins.toJSON generateZedTheme;
-          force = false; # Don't overwrite if file exists, allows manual theme additions
-        };
-
-        # Configure Zed to use the Signal theme
-        programs.zed-editor.userSettings = {
-          theme = {
-            mode = "system";
-            light = "Signal Light";
-            dark = "Signal Dark";
-          };
-        };
-      };
+  config = mkIf (cfg.enable && cfg.applications.zed.enable && themeLib != null) {
+    # Generate and install the theme file with both light and dark variants
+    home.file.".config/zed/themes/signal.json" = {
+      text = builtins.toJSON generateZedTheme;
+      force = false; # Don't overwrite if user has customized
+    };
+  };
 }

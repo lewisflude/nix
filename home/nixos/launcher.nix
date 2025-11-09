@@ -1,7 +1,7 @@
 {
   pkgs,
   lib,
-  signalPalette ? null,
+  themeContext ? null,
   ...
 }:
 let
@@ -13,8 +13,7 @@ let
   fallbackTheme = themeImport.generateTheme "dark";
 
   # Use Signal theme if available, otherwise use fallback from shared palette
-  theme = if signalPalette != null then signalPalette else fallbackTheme;
-  semantic = theme.semantic;
+  inherit (themeContext.theme or fallbackTheme) colors;
 in
 {
   programs.fuzzel = {
@@ -43,13 +42,13 @@ in
         radius = 10;
       };
       colors = {
-        background = semantic."surface-base".hex + "ff";
-        text = semantic."text-primary".hex + "ff";
-        match = semantic."accent-special".hex + "ff";
-        selection = semantic."surface-emphasis".hex + "ff";
-        selection-text = semantic."text-primary".hex + "ff";
-        selection-match = semantic."accent-special".hex + "ff";
-        border = semantic."accent-focus".hex + "ff";
+        background = colors."surface-base".hex + "ff";
+        text = colors."text-primary".hex + "ff";
+        match = colors."accent-special".hex + "ff";
+        selection = colors."surface-emphasis".hex + "ff";
+        selection-text = colors."text-primary".hex + "ff";
+        selection-match = colors."accent-special".hex + "ff";
+        border = colors."accent-focus".hex + "ff";
       };
       dmenu = {
         exit-immediately-if-empty = true;

@@ -1,22 +1,19 @@
 {
   config,
   lib,
-  pkgs,
   themeContext ? null,
-  signalPalette ? null, # Backward compatibility
   ...
 }:
 let
-  inherit (lib) mkIf optionalString;
+  inherit (lib) mkIf;
   cfg = config.theming.signal;
-  # Use themeContext if available, otherwise fall back to signalPalette for backward compatibility
-  theme = themeContext.theme or signalPalette;
+  theme = themeContext.theme;
 
   # Generate VS Code theme JSON
   generateVSCodeTheme =
     themeObj: mode:
     let
-      colors = themeObj.colors or themeObj.semantic;
+      colors = themeObj.colors;
       # Access internal palette for specific color variants if needed
       internalPalette = themeObj._internal or { accent = { }; };
     in
