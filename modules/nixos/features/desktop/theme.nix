@@ -11,11 +11,11 @@ in
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
 
-      # System-level Scientific theme configuration (NixOS only)
-      (lib.mkIf cfg.scientificTheme.enable {
-        theming.scientific = {
+      # System-level Signal theme configuration (NixOS only)
+      (lib.mkIf cfg.signalTheme.enable {
+        theming.signal = {
           enable = true;
-          mode = cfg.scientificTheme.mode;
+          mode = cfg.signalTheme.mode;
 
           applications = {
             # Enable all Wayland/Linux desktop components

@@ -6,11 +6,9 @@
 }:
 let
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
-  scientific-theme = pkgs.callPackage ../../pkgs/scientific-theme.nix { };
+  signal-theme = pkgs.callPackage ../../pkgs/signal-theme.nix { };
 in
 {
-
-
 
   home = lib.optionalAttrs platformLib.isLinux {
     packages = with pkgs; [
@@ -25,8 +23,8 @@ in
   gtk = lib.mkIf platformLib.isLinux {
     enable = true;
     theme = {
-      name = "Scientific";
-      package = scientific-theme;
+      name = "Signal";
+      package = signal-theme;
     };
     iconTheme = {
       name = "Papirus-Dark";

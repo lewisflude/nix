@@ -324,7 +324,7 @@ in
   theming-palette = mkEvalTest "theming-palette" ''
     let
       lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
-      palette = import ../home/common/theming/palette.nix { inherit lib; };
+      palette = import ../modules/shared/features/theming/palette.nix { inherit lib; };
     in
       palette.tonal.dark.base-L015.hex == "#1e1f26"
   '';
@@ -332,13 +332,13 @@ in
   theming-lib = mkEvalTest "theming-lib" ''
     let
       lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
-      palette = import ../home/common/theming/palette.nix { inherit lib; };
-      themeLib = import ../home/common/theming/lib.nix { inherit lib palette; };
-      theme = themeLib.generateTheme "dark";
+      palette = import ../modules/shared/features/theming/palette.nix { inherit lib; };
+      themeLib = import ../modules/shared/features/theming/lib.nix { inherit lib palette; };
+      theme = themeLib.generateTheme "dark" {};
     in
       theme.mode == "dark"
-      && theme.semantic ? "surface-base"
-      && theme.semantic ? "text-primary"
+      && theme.colors ? "surface-base"
+      && theme.colors ? "text-primary"
   '';
 
   theming-module = mkEvalTest "theming-module" ''
@@ -349,7 +349,7 @@ in
           ../home/common/theming/default.nix
           {
             config = {
-              theming.scientific = {
+              theming.signal = {
                 enable = true;
                 mode = "dark";
                 applications = {
@@ -362,8 +362,8 @@ in
         ];
       };
     in
-      evalModule.config.theming.scientific.enable
-      && evalModule.config.theming.scientific.mode == "dark"
+      evalModule.config.theming.signal.enable
+      && evalModule.config.theming.signal.mode == "dark"
   '';
 
   theming-feature = mkEvalTest "theming-feature" ''
@@ -382,7 +382,7 @@ in
                 system = "x86_64-linux";
                 features.desktop = {
                   enable = true;
-                  scientificTheme = {
+                  signalTheme = {
                     enable = true;
                     mode = "dark";
                   };
@@ -394,8 +394,8 @@ in
         ];
       };
     in
-      evalModule.config.theming.scientific.enable
-      && evalModule.config.host.features.desktop.scientificTheme.enable
+      evalModule.config.theming.signal.enable
+      && evalModule.config.host.features.desktop.signalTheme.enable
   '';
 
   theming-unit-tests = mkEvalTest "theming-unit-tests" ''
@@ -413,5 +413,38 @@ in
       };
     in
       results.palette && results.hexFormat && results.darkTheme && results.lightTheme && results.semantic
+  '';
+
+  theming-comprehensive-tests = mkEvalTest "theming-comprehensive-tests" ''
+    let
+      lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
+      allTests = import ../modules/shared/features/theming/tests/default.nix { inherit lib; };
+
+      # Run all tests and check they pass
+      testResults = lib.mapAttrs (name: test: test.expr == test.expected) allTests;
+      allPassed = lib.all (result: result) (lib.attrValues testResults);
+    in
+      allPassed && builtins.length (lib.attrNames allTests) > 50
+  '';
+
+  theming-validation-tests = mkEvalTest "theming-validation-tests" ''
+    let
+      lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
+      validationLib = import ../modules/shared/features/theming/validation.nix { inherit lib; };
+
+      # Test white on black has high contrast
+      white = { hex = "#ffffff"; rgb = { r = 255; g = 255; b = 255; }; l = 1.0; c = 0.0; h = 0.0; };
+      black = { hex = "#000000"; rgb = { r = 0; g = 0; b = 0; }; l = 0.0; c = 0.0; h = 0.0; };
+      ratio = validationLib.wcagContrastRatio white black;
+
+      # Test validation passes for high contrast
+      result = validationLib.validateContrastWCAG {
+        textColor = white;
+        backgroundColor = black;
+        level = "AA";
+        textSize = "normal";
+      };
+    in
+      ratio >= 20.0 && result.passed
   '';
 }

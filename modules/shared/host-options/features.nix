@@ -60,9 +60,9 @@ in
       theming = mkEnableOption "system-wide theming";
       utilities = mkEnableOption "desktop utilities";
 
-      # Scientific theme options
-      scientificTheme = {
-        enable = mkEnableOption "scientific OKLCH color palette theme";
+      # Signal theme options
+      signalTheme = {
+        enable = mkEnableOption "Signal OKLCH color palette theme";
         mode = mkOption {
           type = types.enum [
             "light"

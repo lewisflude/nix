@@ -1,4 +1,4 @@
-# Comprehensive Evaluation: Scientific Theme Zed Implementation
+# Comprehensive Evaluation: Signal Theme Zed Implementation
 
 ## Executive Summary
 
@@ -102,7 +102,7 @@ generateZedTheme = {
 **Current:**
 
 ```nix
-home.file.".config/zed/themes/scientific.json" = {
+home.file.".config/zed/themes/signal.json" = {
   text = builtins.toJSON generateZedTheme;
   force = false; # Don't overwrite
 };
@@ -269,7 +269,7 @@ categorical = {
 
 ### ✅ Documentation Alignment
 
-**Expected semantics from `docs/SCIENTIFIC_THEME.md`:**
+**Expected semantics from `docs/SIGNAL_THEME.md`:**
 
 ```
 Primary text: Main text (text-primary) ✅
@@ -322,10 +322,10 @@ _module.args.scientificPalette = theme
 _module.args.scientificThemeLib = themeLib
 
 # Pattern 3: Home-manager integration
-home.file.".config/zed/themes/scientific.json" = { ... }
+home.file.".config/zed/themes/signal.json" = { ... }
 
 # Pattern 4: Null safety
-darkPalette = if scientificThemeLib != null then ... else null
+darkPalette = if signalThemeLib != null then ... else null
 ```
 
 All follow NixOS/home-manager conventions. ✅
@@ -418,8 +418,8 @@ Prevents:
 
 **What's Documented:**
 
-- ✅ `docs/SCIENTIFIC_THEME.md`: Comprehensive
-- ✅ `SCIENTIFIC_THEME_IMPLEMENTATION.md`: Complete
+- ✅ `docs/SIGNAL_THEME.md`: Comprehensive
+- ✅ `SIGNAL_THEME_IMPLEMENTATION.md`: Complete
 - ✅ In-code comments: Clear
 
 **What's NOT Documented:**
@@ -585,7 +585,7 @@ The Zed theme implementation is **excellent and ready for deployment**. It provi
 - ✅ Semantic consistency across applications
 - ✅ Proper Nix module architecture
 - ✅ Full WCAG AA compliance
-- ✅ Beautiful, scientifically-designed palette
+- ✅ Beautiful, Signal-designed palette
 
 **Recommendation:** Deploy as-is. The minor documentation gaps don't affect functionality.
 

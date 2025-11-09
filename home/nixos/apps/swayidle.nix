@@ -1,28 +1,20 @@
 {
   pkgs,
-  scientificPalette ? null,
+  lib,
+  signalPalette ? null,
   ...
 }:
 let
-  # Use scientific theme if available, fallback to neutral colors
-  colors =
-    if scientificPalette != null then
-      scientificPalette.semantic
-    else
-      {
-        "accent-focus" = {
-          hex = "#5a7dcf";
-        };
-        "accent-info" = {
-          hex = "#5aabb9";
-        };
-        "surface-base" = {
-          hex = "#1e1f26";
-        };
-        "text-primary" = {
-          hex = "#c0c3d1";
-        };
-      };
+  # Import shared palette (single source of truth) for fallback
+  themeHelpers = import ../../../modules/shared/features/theming/helpers.nix { inherit lib; };
+  themeImport = themeHelpers.importTheme {
+    repoRootPath = ../../..;
+  };
+  fallbackTheme = themeImport.generateTheme "dark";
+
+  # Use Signal theme if available, otherwise use fallback from shared palette
+  theme = if signalPalette != null then signalPalette else fallbackTheme;
+  colors = theme.semantic;
 in
 {
   services.swayidle = {

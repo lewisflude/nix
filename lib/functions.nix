@@ -83,6 +83,7 @@ let
       inherit (hostConfig) system;
       hostSystem = hostConfig.system;
       host = hostConfig;
+      nix-colorizer = inputs.nix-colorizer;
     }
     // lib.optionalAttrs includeUserFields {
       inherit (hostConfig) username useremail hostname;

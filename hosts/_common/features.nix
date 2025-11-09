@@ -114,8 +114,8 @@
     theming = true;
     utilities = false;
 
-    # Scientific OKLCH color theme
-    scientificTheme = {
+    # Signal OKLCH color theme
+    signalTheme = {
       enable = true;
       mode = "dark"; # Change to "light" if you prefer light mode
     };

@@ -2,13 +2,13 @@
   config,
   lib,
   pkgs,
-  scientificPalette ? null,
+  signalPalette ? null,
   ...
 }:
 let
   inherit (lib) mkIf;
-  cfg = config.theming.scientific;
-  theme = scientificPalette;
+  cfg = config.theming.signal;
+  theme = signalPalette;
 
   # Determine if we're on Linux
   inherit (pkgs.stdenv) isLinux;
@@ -20,7 +20,7 @@ let
       colors = palette.semantic;
     in
     ''
-      /* Scientific Color Theme - GTK Overrides */
+      /* Signal Color Theme - GTK Overrides */
 
       /* Base color definitions */
       @define-color theme_bg_color ${colors."surface-base".hex};

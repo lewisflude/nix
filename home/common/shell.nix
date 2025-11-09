@@ -22,15 +22,26 @@ let
   };
   inherit (shellHelpers) secretExportSnippet;
 
-  # Scientific Theme - Dark Mode Palette
+  # Import shared palette (single source of truth)
+  themeHelpers = import ../../modules/shared/features/theming/helpers.nix { inherit lib; };
+  themeImport = themeHelpers.importTheme {
+    repoRootPath = ../../..;
+  };
+  fallbackTheme = themeImport.generateTheme "dark";
+
+  # Use Signal theme if available, otherwise use fallback from shared palette
+  theme = config._module.args.signalPalette or fallbackTheme;
+  semantic = theme.semantic;
+
+  # Legacy palette access (for backward compatibility)
   palette = {
-    purple = "#a368cf"; # Lc75-h290 (Special)
-    blue = "#5a7dcf"; # Lc75-h240 (Focus)
-    surface = "#2d2e39"; # surface-Lc10
-    divider = "#454759"; # divider-Lc30
-    text = "#c0c3d1"; # text-Lc75
-    base = "#1e1f26"; # base-L015
-    red = "#d9574a"; # Lc75-h040 (Danger)
+    purple = semantic."accent-special".hex;
+    blue = semantic."accent-focus".hex;
+    surface = semantic."surface-emphasis".hex;
+    divider = semantic."divider-secondary".hex;
+    text = semantic."text-primary".hex;
+    base = semantic."surface-base".hex;
+    red = semantic."accent-danger".hex;
   };
 in
 {

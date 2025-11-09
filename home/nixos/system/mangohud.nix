@@ -3,94 +3,34 @@
   ...
 }:
 let
-  # Scientific Theme - Dark Mode Palette
-  # Based on OKLCH color space for perceptually uniform colors
-  palette = {
-    # Base and surfaces
-    base = "#1e1f26"; # base-L015
-    surface = "#25262f"; # surface-Lc05
-    surfaceEmph = "#2d2e39"; # surface-Lc10
-    divider = "#454759"; # divider-Lc30
-
-    # Text colors
-    text = "#c0c3d1"; # text-Lc75
-    textSecondary = "#9498ab"; # text-Lc60
-    textTertiary = "#6b6f82"; # text-Lc45
-
-    # Accent colors
-    blue = "#5a7dcf"; # Lc75-h240 (Focus)
-    purple = "#a368cf"; # Lc75-h290 (Special)
-    green = "#4db368"; # Lc75-h130 (Success)
-    red = "#d9574a"; # Lc75-h040 (Danger)
-    yellow = "#c9a93a"; # Lc75-h090 (Warning)
-    cyan = "#5aabb9"; # Lc75-h190 (Info)
-    orange = "#d59857"; # GA06 (Orange)
+  # Import shared palette (single source of truth)
+  themeHelpers = import ../../../modules/shared/features/theming/helpers.nix { inherit lib; };
+  themeImport = themeHelpers.importTheme {
+    repoRootPath = ../../..;
   };
 
-  hexToRgb =
-    hex:
-    let
-      hexClean = lib.removePrefix "#" hex;
+  # Generate dark mode theme
+  theme = themeImport.generateTheme "dark";
 
-      hexDigitToInt =
-        c:
-        if c == "0" then
-          0
-        else if c == "1" then
-          1
-        else if c == "2" then
-          2
-        else if c == "3" then
-          3
-        else if c == "4" then
-          4
-        else if c == "5" then
-          5
-        else if c == "6" then
-          6
-        else if c == "7" then
-          7
-        else if c == "8" then
-          8
-        else if c == "9" then
-          9
-        else if c == "a" || c == "A" then
-          10
-        else if c == "b" || c == "B" then
-          11
-        else if c == "c" || c == "C" then
-          12
-        else if c == "d" || c == "D" then
-          13
-        else if c == "e" || c == "E" then
-          14
-        else if c == "f" || c == "F" then
-          15
-        else
-          throw "Invalid hex digit: ${c}";
-      hexPairToInt =
-        pair: (hexDigitToInt (lib.substring 0 1 pair)) * 16 + (hexDigitToInt (lib.substring 1 1 pair));
-      r = (hexPairToInt (lib.substring 0 2 hexClean)) / 255.0;
-      g = (hexPairToInt (lib.substring 2 2 hexClean)) / 255.0;
-      b = (hexPairToInt (lib.substring 4 2 hexClean)) / 255.0;
-    in
-    "${toString r},${toString g},${toString b}";
+  # Extract colors from semantic mappings and convert to MangoHud format
+  semantic = theme.semantic;
 
+  # Use format conversion utility for normalized RGB strings (MangoHud format)
   colors = {
-    base = hexToRgb palette.base;
-    surface = hexToRgb palette.surface;
-    surfaceEmph = hexToRgb palette.surfaceEmph;
-    divider = hexToRgb palette.divider;
-    text = hexToRgb palette.text;
-    textSecondary = hexToRgb palette.textSecondary;
-    textTertiary = hexToRgb palette.textTertiary;
-    blue = hexToRgb palette.blue;
-    purple = hexToRgb palette.purple;
-    green = hexToRgb palette.green;
-    red = hexToRgb palette.red;
-    yellow = hexToRgb palette.yellow;
-    cyan = hexToRgb palette.cyan;
-    orange = hexToRgb palette.orange;
+    base = theme.formats.rgbNormalizedString semantic."surface-base";
+    surface = theme.formats.rgbNormalizedString semantic."surface-subtle";
+    surfaceEmph = theme.formats.rgbNormalizedString semantic."surface-emphasis";
+    divider = theme.formats.rgbNormalizedString semantic."divider-secondary";
+    text = theme.formats.rgbNormalizedString semantic."text-primary";
+    textSecondary = theme.formats.rgbNormalizedString semantic."text-secondary";
+    textTertiary = theme.formats.rgbNormalizedString semantic."text-tertiary";
+    blue = theme.formats.rgbNormalizedString semantic."accent-focus";
+    purple = theme.formats.rgbNormalizedString semantic."accent-special";
+    green = theme.formats.rgbNormalizedString semantic."accent-primary";
+    red = theme.formats.rgbNormalizedString semantic."accent-danger";
+    yellow = theme.formats.rgbNormalizedString semantic."accent-warning";
+    cyan = theme.formats.rgbNormalizedString semantic."accent-info";
+    orange = theme.formats.rgbNormalizedString semantic."syntax-type";
   };
 in
 {

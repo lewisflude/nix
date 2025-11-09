@@ -1,6 +1,7 @@
 /*
- * Scientific GTK Theme - GTK 4.0
- * Dark theme with perceptually uniform OKLCH colors
+ * Signal GTK Theme - GTK 4.0
+ * Signal: Perception, engineered.
+ * A dual-theme color system built on perceptual uniformity (Oklch) and accessibility (APCA).
  */
 
 /* Color Definitions */
@@ -38,7 +39,7 @@
 @define-color secondary_sidebar_bg_color #1e1f26;
 @define-color secondary_sidebar_fg_color #c0c3d1;
 
-/* Additional scientific palette colors */
+/* Additional Signal palette colors */
 @define-color borders #454759;
 @define-color special_color #a368cf;
 @define-color special_dim_color #7d49a3;

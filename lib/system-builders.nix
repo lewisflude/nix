@@ -198,6 +198,7 @@ in
         inherit (hostConfig) useremail;
         inherit (hostConfig) hostname;
         keysDirectory = "${self}/keys";
+        nix-colorizer = inputs.nix-colorizer;
       };
 
       # Module list follows flake-parts best practices:

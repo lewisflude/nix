@@ -1,6 +1,6 @@
-# Scientific Theme Usage Examples
+# Signal Theme Usage Examples
 
-This guide provides practical examples for using and customizing the Scientific Theme system.
+This guide provides practical examples for using and customizing the Signal Theme system.
 
 ## Basic Usage
 
@@ -14,7 +14,7 @@ The simplest way to enable the theme:
 {
   host.features.desktop = {
     enable = true;
-    scientificTheme = {
+    signalTheme = {
       enable = true;
       mode = "dark";
     };
@@ -39,7 +39,7 @@ For a light mode theme:
 {
   host.features.desktop = {
     enable = true;
-    scientificTheme = {
+    signalTheme = {
       enable = true;
       mode = "light";
     };
@@ -56,10 +56,10 @@ If you only want to theme certain applications:
 ```nix
 {
   # Disable the high-level feature flag
-  host.features.desktop.scientificTheme.enable = false;
+  host.features.desktop.signalTheme.enable = false;
 
   # Configure theme manually
-  theming.scientific = {
+  theming.signal = {
     enable = true;
     mode = "dark";
 
@@ -84,7 +84,7 @@ Apply theme only to Linux-specific applications:
 {
   host.features.desktop = {
     enable = true;
-    scientificTheme = {
+    signalTheme = {
       enable = true;
       mode = "dark";
     };
@@ -92,7 +92,7 @@ Apply theme only to Linux-specific applications:
 
   # GTK and Niri are automatically disabled on non-Linux systems
   # But you can be explicit:
-  theming.scientific.applications = {
+  theming.signal.applications = {
     gtk.enable = lib.mkForce (pkgs.stdenv.isLinux);
     niri.enable = lib.mkForce false; # Disable even on Linux
   };
@@ -107,7 +107,7 @@ If you need to tweak specific colors (advanced usage):
 
 ```nix
 {
-  theming.scientific = {
+  theming.signal = {
     enable = true;
     mode = "dark";
 
@@ -134,7 +134,7 @@ Apply different themes for different users:
 {
   # User 1: Dark theme
   home-manager.users.alice = {
-    theming.scientific = {
+    theming.signal = {
       enable = true;
       mode = "dark";
     };
@@ -142,7 +142,7 @@ Apply different themes for different users:
 
   # User 2: Light theme
   home-manager.users.bob = {
-    theming.scientific = {
+    theming.signal = {
       enable = true;
       mode = "light";
     };
@@ -152,8 +152,6 @@ Apply different themes for different users:
 
 ## Integration with Existing Configurations
 
-
-
 ### Example 8: Gradual Migration
 
 Migrate one application at a time:
@@ -162,7 +160,7 @@ Migrate one application at a time:
 
 ```nix
 {
-  theming.scientific = {
+  theming.signal = {
     enable = true;
     mode = "dark";
     applications = {
@@ -181,7 +179,7 @@ Migrate one application at a time:
 
 ```nix
 {
-  theming.scientific.applications = {
+  theming.signal.applications = {
     cursor.enable = true;
     helix.enable = true;  # Added
     # ... rest false
@@ -207,7 +205,7 @@ And so on...
     features.desktop = {
       enable = true;
       niri = true;  # Enable Niri compositor
-      scientificTheme = {
+      signalTheme = {
         enable = true;
         mode = "dark";
       };
@@ -233,7 +231,7 @@ And so on...
     username = "myuser";
     features.desktop = {
       enable = true;
-      scientificTheme = {
+      signalTheme = {
         enable = true;
         mode = "dark";
       };
@@ -259,7 +257,7 @@ nix develop
 
 # Check generated theme files
 ls -la ~/.config/Cursor/User/themes/
-cat ~/.config/Cursor/User/themes/scientific-dark.json | jq '.colors | keys'
+cat ~/.config/Cursor/User/themes/signal-dark.json | jq '.colors | keys'
 
 # Check Helix theme
 helix --health
@@ -267,7 +265,7 @@ helix --health
 
 ### Example 12: Verify Color Values
 
-Use the Scientific Theme library in a Nix REPL:
+Use the Signal Theme library in a Nix REPL:
 
 ```bash
 nix repl
@@ -287,7 +285,7 @@ palette.tonal.dark.base-L015
 ```nix
 {
   # Enable verbose output
-  theming.scientific = {
+  theming.signal = {
     enable = true;
     mode = "dark";
   };
@@ -299,7 +297,7 @@ palette.tonal.dark.base-L015
   }];
 
   # Verify theme palette is accessible
-  _module.args.scientificPalette = lib.mkForce (
+  _module.args.signalPalette = lib.mkForce (
     (import ./modules/shared/theming/lib.nix {
       inherit lib;
       palette = import ./modules/shared/theming/palette.nix { inherit lib; };
@@ -314,8 +312,8 @@ If theme files aren't updating, force a rebuild:
 
 ```bash
 # Remove existing theme files
-rm -rf ~/.config/Cursor/User/themes/scientific-*.json
-rm -rf ~/.config/zed/themes/scientific.json
+rm -rf ~/.config/Cursor/User/themes/signal-*.json
+rm -rf ~/.config/zed/themes/signal.json
 rm -rf ~/.config/gtk-3.0/gtk.css
 rm -rf ~/.config/gtk-4.0/gtk.css
 
@@ -342,7 +340,7 @@ Full-featured development setup:
         enable = true;
         niri = true;
         utilities = true;
-        scientificTheme = {
+        signalTheme = {
           enable = true;
           mode = "dark";
         };
@@ -370,7 +368,7 @@ Light mode for content creation:
     features = {
       desktop = {
         enable = true;
-        scientificTheme = {
+        signalTheme = {
           enable = true;
           mode = "light";  # Better for photo/video editing
         };
@@ -396,7 +394,7 @@ Theme only terminal applications:
     features = {
       desktop = {
         enable = true;
-        scientificTheme = {
+        signalTheme = {
           enable = true;
           mode = "dark";
         };
@@ -405,7 +403,7 @@ Theme only terminal applications:
   };
 
   # Disable GUI apps, keep terminal themed
-  theming.scientific.applications = {
+  theming.signal.applications = {
     cursor.enable = false;
     helix.enable = true;   # Terminal editor
     zed.enable = false;
@@ -418,8 +416,6 @@ Theme only terminal applications:
 
 ## Migration Examples
 
-
-
 ## Custom Theme Examples
 
 ### Example 19: Create a Custom Variant
@@ -428,7 +424,7 @@ Create a custom color variant by overriding multiple colors:
 
 ```nix
 {
-  theming.scientific = {
+  theming.signal = {
     enable = true;
     mode = "dark";
 
@@ -457,7 +453,7 @@ Create a higher contrast version:
 
 ```nix
 {
-  theming.scientific = {
+  theming.signal = {
     enable = true;
     mode = "dark";
 
@@ -494,4 +490,4 @@ These examples cover:
 - ? Troubleshooting techniques
 - ? Real-world use cases
 
-For more details, see the main [Scientific Theme documentation](../SCIENTIFIC_THEME.md).
+For more details, see the main [Signal Theme documentation](../SIGNAL_THEME.md).

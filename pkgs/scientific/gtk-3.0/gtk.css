@@ -1,6 +1,7 @@
 /*
- * Scientific GTK Theme - GTK 3.0
- * Dark theme with perceptually uniform OKLCH colors
+ * Signal GTK Theme - GTK 3.0
+ * Signal: Perception, engineered.
+ * A dual-theme color system built on perceptual uniformity (Oklch) and accessibility (APCA).
  */
 
 /* Color Definitions */
@@ -17,7 +18,7 @@
 @define-color error_color #d9574a;
 @define-color success_color #4db368;
 
-/* Additional scientific palette colors */
+/* Additional Signal palette colors */
 @define-color accent_color #a368cf;
 @define-color accent_dim_color #7d49a3;
 @define-color focus_color #5a7dcf;
