@@ -24,7 +24,10 @@ in
           nixfmt.enable = true;
           alejandra.enable = false;
           deadnix.enable = true;
-          statix.enable = true;
+          statix = {
+            enable = true;
+            entry = "${nixpkgs.legacyPackages.${system}.statix}/bin/statix check --format errfmt --ignore 'flake-parts/systems.nix'";
+          };
           commitizen.enable = true;
 
           trailing-whitespace = {
