@@ -82,6 +82,75 @@ in
           Example: { "accent-primary" = { l = 0.7; c = 0.2; h = 130; hex = "#4db368"; }; }
         '';
       };
+
+      # Multiple brand layers support
+      # Allows defining primary, secondary, and additional brand color sets
+      brandLayers = mkOption {
+        type = types.attrsOf (
+          types.submodule {
+            options = {
+              # Layer priority (higher priority layers override lower priority ones)
+              priority = mkOption {
+                type = types.int;
+                default = 0;
+                description = "Layer priority (higher = applied later, can override previous layers)";
+              };
+
+              # Decorative colors for this layer
+              decorative = mkOption {
+                type = types.attrsOf types.str;
+                default = { };
+                description = "Decorative brand colors for this layer";
+              };
+
+              # Functional colors for this layer (only used with integrated policy)
+              functional = mkOption {
+                type = types.attrsOf (
+                  types.submodule {
+                    options = {
+                      l = mkOption {
+                        type = types.float;
+                        description = "Lightness (0.0-1.0)";
+                      };
+                      c = mkOption {
+                        type = types.float;
+                        description = "Chroma (0.0-0.4+)";
+                      };
+                      h = mkOption {
+                        type = types.float;
+                        description = "Hue (0-360 degrees)";
+                      };
+                      hex = mkOption {
+                        type = types.str;
+                        description = "Hex color code";
+                      };
+                    };
+                  }
+                );
+                default = { };
+                description = "Functional brand colors for this layer (must meet accessibility requirements)";
+              };
+            };
+          }
+        );
+        default = { };
+        description = ''
+          Multiple brand layers for complex branding scenarios.
+          Each layer can have its own decorative and functional colors.
+          Layers are applied in priority order (higher priority = applied later).
+          Example:
+            brandLayers = {
+              primary = {
+                priority = 1;
+                decorative = { "brand-primary" = "#ff6b35"; };
+              };
+              secondary = {
+                priority = 0;
+                decorative = { "brand-secondary" = "#004e89"; };
+              };
+            };
+        '';
+      };
     };
 
     # Allow users to override specific colors (advanced usage)
@@ -175,6 +244,27 @@ in
           When enabled, both WCAG and APCA validations are performed.
         '';
       };
+    };
+
+    # Theme variant support
+    # Variants modify the base theme for accessibility or user preferences
+    variant = mkOption {
+      type = types.nullOr (
+        types.enum [
+          "default"
+          "high-contrast"
+          "reduced-motion"
+          "color-blind-friendly"
+        ]
+      );
+      default = null;
+      description = ''
+        Theme variant to apply:
+        - default: Standard theme (no modifications)
+        - high-contrast: Increased contrast for better visibility
+        - reduced-motion: Reduced saturation for less visual motion
+        - color-blind-friendly: Adjusted hues for better color-blind accessibility
+      '';
     };
   };
 }
