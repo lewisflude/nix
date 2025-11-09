@@ -1,4 +1,4 @@
-{ }:
+{ ... }:
 {
   services.wlsunset = {
     enable = true;
