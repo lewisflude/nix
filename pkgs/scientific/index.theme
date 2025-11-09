@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Scientific
+Comment=A dark, scientific theme with perceptually uniform colors
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Scientific
+MetacityTheme=Scientific
+IconTheme=Papirus-Dark
+CursorTheme=DMZ-White

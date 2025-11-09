@@ -1,18 +1,28 @@
 {
   pkgs,
-  config,
-  lib,
   scientificPalette ? null,
   ...
 }:
 let
   # Use scientific theme if available, fallback to neutral colors
-  colors = if scientificPalette != null then scientificPalette.semantic else {
-    "accent-focus" = { hex = "#5a7dcf"; };
-    "accent-info" = { hex = "#5aabb9"; };
-    "surface-base" = { hex = "#1e1f26"; };
-    "text-primary" = { hex = "#c0c3d1"; };
-  };
+  colors =
+    if scientificPalette != null then
+      scientificPalette.semantic
+    else
+      {
+        "accent-focus" = {
+          hex = "#5a7dcf";
+        };
+        "accent-info" = {
+          hex = "#5aabb9";
+        };
+        "surface-base" = {
+          hex = "#1e1f26";
+        };
+        "text-primary" = {
+          hex = "#c0c3d1";
+        };
+      };
 in
 {
   services.swayidle = {

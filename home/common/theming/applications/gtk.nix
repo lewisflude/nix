@@ -11,7 +11,7 @@ let
   theme = scientificPalette;
 
   # Determine if we're on Linux
-  isLinux = pkgs.stdenv.isLinux;
+  inherit (pkgs.stdenv) isLinux;
 
   # Generate GTK CSS overrides
   generateGtkCss =

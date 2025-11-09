@@ -82,6 +82,7 @@ in
               direnv
               nix-direnv
               nix-update
+              inputs.pre-commit-hooks.packages.${system}.pre-commit
             ]);
         };
       };

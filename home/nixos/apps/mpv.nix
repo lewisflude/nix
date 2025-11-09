@@ -1,19 +1,30 @@
 {
-  pkgs,
-  config,
-  lib,
   scientificPalette ? null,
   ...
 }:
 let
   # Use scientific theme if available, fallback to neutral colors
-  colors = if scientificPalette != null then scientificPalette.semantic else {
-    "text-primary" = { hex = "#c0c3d1"; };
-    "surface-base" = { hex = "#1e1f26"; };
-    "surface-emphasis" = { hex = "#2d2e39"; };
-    "accent-focus" = { hex = "#5a7dcf"; };
-    "accent-info" = { hex = "#5aabb9"; };
-  };
+  colors =
+    if scientificPalette != null then
+      scientificPalette.semantic
+    else
+      {
+        "text-primary" = {
+          hex = "#c0c3d1";
+        };
+        "surface-base" = {
+          hex = "#1e1f26";
+        };
+        "surface-emphasis" = {
+          hex = "#2d2e39";
+        };
+        "accent-focus" = {
+          hex = "#5a7dcf";
+        };
+        "accent-info" = {
+          hex = "#5aabb9";
+        };
+      };
 in
 {
 

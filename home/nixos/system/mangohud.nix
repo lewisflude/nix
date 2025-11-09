@@ -1,44 +1,35 @@
 {
-  pkgs,
-  inputs,
-  config,
   lib,
   ...
 }:
 let
+  # Scientific Theme - Dark Mode Palette
+  # Based on OKLCH color space for perceptually uniform colors
   palette = {
-    rosewater = "#f5e0dc";
-    flamingo = "#f2cdcd";
-    pink = "#f5c2e7";
-    mauve = "#cba6f7";
-    red = "#f38ba8";
-    maroon = "#eba0ac";
-    peach = "#fab387";
-    yellow = "#f9e2af";
-    green = "#a6e3a1";
-    teal = "#94e2d5";
-    sky = "#89dceb";
-    sapphire = "#74c7ec";
-    blue = "#89b4fa";
-    lavender = "#b4befe";
-    text = "#cdd6f4";
-    subtext1 = "#bac2de";
-    subtext0 = "#a6adc8";
-    overlay2 = "#9399b2";
-    overlay1 = "#7f849c";
-    overlay0 = "#6c7086";
-    surface2 = "#585b70";
-    surface1 = "#45475a";
-    surface0 = "#313244";
-    base = "#1e1e2e";
-    mantle = "#181825";
-    crust = "#11111b";
+    # Base and surfaces
+    base = "#1e1f26"; # base-L015
+    surface = "#25262f"; # surface-Lc05
+    surfaceEmph = "#2d2e39"; # surface-Lc10
+    divider = "#454759"; # divider-Lc30
+
+    # Text colors
+    text = "#c0c3d1"; # text-Lc75
+    textSecondary = "#9498ab"; # text-Lc60
+    textTertiary = "#6b6f82"; # text-Lc45
+
+    # Accent colors
+    blue = "#5a7dcf"; # Lc75-h240 (Focus)
+    purple = "#a368cf"; # Lc75-h290 (Special)
+    green = "#4db368"; # Lc75-h130 (Success)
+    red = "#d9574a"; # Lc75-h040 (Danger)
+    yellow = "#c9a93a"; # Lc75-h090 (Warning)
+    cyan = "#5aabb9"; # Lc75-h190 (Info)
+    orange = "#d59857"; # GA06 (Orange)
   };
 
   hexToRgb =
     hex:
     let
-
       hexClean = lib.removePrefix "#" hex;
 
       hexDigitToInt =
@@ -86,32 +77,20 @@ let
     "${toString r},${toString g},${toString b}";
 
   colors = {
-    base = hexToRgb palette.base.hex;
-    mantle = hexToRgb palette.mantle.hex;
-    crust = hexToRgb palette.crust.hex;
-    text = hexToRgb palette.text.hex;
-    subtext0 = hexToRgb palette.subtext0.hex;
-    subtext1 = hexToRgb palette.subtext1.hex;
-    overlay0 = hexToRgb palette.overlay0.hex;
-    overlay1 = hexToRgb palette.overlay1.hex;
-    overlay2 = hexToRgb palette.overlay2.hex;
-    surface0 = hexToRgb palette.surface0.hex;
-    surface1 = hexToRgb palette.surface1.hex;
-    surface2 = hexToRgb palette.surface2.hex;
-    blue = hexToRgb palette.blue.hex;
-    lavender = hexToRgb palette.lavender.hex;
-    sapphire = hexToRgb palette.sapphire.hex;
-    sky = hexToRgb palette.sky.hex;
-    teal = hexToRgb palette.teal.hex;
-    green = hexToRgb palette.green.hex;
-    yellow = hexToRgb palette.yellow.hex;
-    peach = hexToRgb palette.peach.hex;
-    maroon = hexToRgb palette.maroon.hex;
-    red = hexToRgb palette.red.hex;
-    mauve = hexToRgb palette.mauve.hex;
-    pink = hexToRgb palette.pink.hex;
-    flamingo = hexToRgb palette.flamingo.hex;
-    rosewater = hexToRgb palette.rosewater.hex;
+    base = hexToRgb palette.base;
+    surface = hexToRgb palette.surface;
+    surfaceEmph = hexToRgb palette.surfaceEmph;
+    divider = hexToRgb palette.divider;
+    text = hexToRgb palette.text;
+    textSecondary = hexToRgb palette.textSecondary;
+    textTertiary = hexToRgb palette.textTertiary;
+    blue = hexToRgb palette.blue;
+    purple = hexToRgb palette.purple;
+    green = hexToRgb palette.green;
+    red = hexToRgb palette.red;
+    yellow = hexToRgb palette.yellow;
+    cyan = hexToRgb palette.cyan;
+    orange = hexToRgb palette.orange;
   };
 in
 {
@@ -119,7 +98,7 @@ in
     text = ''
       fps_limit=0
       show_fps=1
-      fps_color=${colors.mauve},1
+      fps_color=${colors.purple},1
       fps_size=24
       fps_position=top-right
       gpu_stats=1
@@ -134,12 +113,12 @@ in
       cpu_color=${colors.red},1
       cpu_text_color=${colors.text},1
       ram=1
-      ram_color=${colors.peach},1
+      ram_color=${colors.orange},1
       ram_text_color=${colors.text},1
       frame_timing=1
-      frame_timing_color=${colors.lavender},1
+      frame_timing_color=${colors.cyan},1
       media_player=1
-      media_player_color=${colors.mauve},1
+      media_player_color=${colors.purple},1
       background_alpha=0.8
       background_color=${colors.base},1
       position=top-right

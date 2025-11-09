@@ -1,10 +1,8 @@
 {
   lib,
-  inputs,
   ...
 }:
 let
-
 
   # Helper: Check if a secret is available in systemConfig
   secretAvailable =
