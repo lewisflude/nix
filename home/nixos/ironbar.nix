@@ -68,7 +68,7 @@
               type = "script";
               class = "brightness";
               format = "?? {}%";
-              command = "brightnessctl -m | awk -F '[(),%]' '{print $6}'";
+              cmd = "brightnessctl -m | awk -F '[(),%]' '{print $6}'";
               interval = 1;
               on_click_left = "brightnessctl set 10%-";
               on_click_right = "brightnessctl set +10%";
