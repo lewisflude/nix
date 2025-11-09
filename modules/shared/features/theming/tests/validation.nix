@@ -4,7 +4,7 @@ let
   validationLib = import ../validation.nix { inherit lib; };
 
   # Import palette and theme for testing
-  palette = import ../palette.nix { inherit lib; };
+  palette = import ../palette.nix { };
   themeLib = import ../lib.nix {
     inherit lib palette;
     nix-colorizer = null;

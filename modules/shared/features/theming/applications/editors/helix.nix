@@ -1,22 +1,19 @@
 {
   config,
   lib,
-  pkgs,
   themeContext ? null,
-  signalPalette ? null, # Backward compatibility
   ...
 }:
 let
   inherit (lib) mkIf;
   cfg = config.theming.signal;
-  # Use themeContext if available, otherwise fall back to signalPalette for backward compatibility
-  theme = themeContext.theme or signalPalette;
+  theme = themeContext.theme;
 
   # Generate Helix theme
   generateHelixTheme =
     themeObj:
     let
-      colors = themeObj.colors or themeObj.semantic;
+      colors = themeObj.colors;
     in
     {
       # UI elements

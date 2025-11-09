@@ -1,6 +1,6 @@
 {
   lib,
-  signalPalette ? null,
+  themeContext ? null,
   ...
 }:
 let
@@ -12,8 +12,7 @@ let
   fallbackTheme = themeImport.generateTheme "dark";
 
   # Use Signal theme if available, otherwise use fallback from shared palette
-  theme = if signalPalette != null then signalPalette else fallbackTheme;
-  colors = theme.semantic;
+  inherit (themeContext.theme or fallbackTheme) colors;
 in
 {
 
@@ -56,5 +55,17 @@ in
     cache-secs=60
     demuxer-max-bytes=500M
     demuxer-max-back-bytes=500M
+
+
+    script-opts-append=stats-border_color=${theme.formats.bgrHexRaw colors."divider-primary"}
+    script-opts-append=stats-font_color=${theme.formats.bgrHexRaw colors."text-primary"}
+    script-opts-append=stats-plot_bg_border_color=${theme.formats.bgrHexRaw colors."accent-info"}
+    script-opts-append=stats-plot_bg_color=${theme.formats.bgrHexRaw colors."surface-base"}
+    script-opts-append=stats-plot_color=${theme.formats.bgrHexRaw colors."accent-focus"}
+
+
+    script-opts-append=uosc-color=foreground=${colors."accent-focus".hexRaw},foreground_text=${colors."surface-base".hexRaw},background=${colors."surface-base".hexRaw},background_text=${colors."text-primary".hexRaw},curtain=${
+      colors."surface-emphasis".hexRaw
+    },success=${colors."accent-primary".hexRaw},error=${colors."accent-danger".hexRaw}
   '';
 }

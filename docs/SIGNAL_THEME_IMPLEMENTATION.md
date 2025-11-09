@@ -20,7 +20,7 @@ All planned phases have been completed:
 ### File Structure
 
 ```
-modules/shared/theming/
+modules/shared/features/theming/
 ??? default.nix                      # Main module with options
 ??? palette.nix                      # Color definitions (OKLCH + hex)
 ??? lib.nix                          # Helper functions and semantic mappings
@@ -36,9 +36,9 @@ home/common/theming/
 ??? default.nix                      # Home-manager integration
 
 docs/
-??? SIGNAL_THEME.md              # Main documentation
+??? SIGNAL_THEME.md                  # Main documentation
 ??? examples/
-    ??? signal-theme-usage.md    # Usage examples
+    ??? signal-theme-usage.md        # Usage examples
 
 tests/
 ??? theming.nix                      # Comprehensive test suite
@@ -309,7 +309,7 @@ Added 6 evaluation tests:
 
 ```bash
 # Evaluate palette
-nix eval --impure --expr 'let lib = (import <nixpkgs> {}).lib; palette = import ./modules/shared/theming/palette.nix { inherit lib; }; in palette.tonal.dark.base-L015.hex'
+nix eval --impure --expr 'let lib = (import <nixpkgs> {}).lib; palette = import ./modules/shared/features/theming/palette.nix { inherit lib; }; in palette.tonal.dark.base-L015.hex'
 
 # Run specific test
 nix eval --show-trace .#checks.x86_64-linux.theming-palette
@@ -436,7 +436,7 @@ Each color is stored as:
 Theme is passed to application modules via `_module.args`:
 
 ```nix
-_module.args.signalPalette = theme;
+_module.args.themeContext = themeContext;
 ```
 
 ### Home Manager Integration
@@ -593,7 +593,7 @@ Restart editors and terminals to load the new theme.
 
 ```bash
 # Test palette evaluation
-nix eval --impure --expr 'let lib = (import <nixpkgs> {}).lib; palette = import ./modules/shared/theming/palette.nix { inherit lib; }; in palette.tonal.dark.base-L015.hex'
+nix eval --impure --expr 'let lib = (import <nixpkgs> {}).lib; palette = import ./modules/shared/features/theming/palette.nix { inherit lib; }; in palette.tonal.dark.base-L015.hex'
 
 # Expected output: "#1e1f26"
 ```

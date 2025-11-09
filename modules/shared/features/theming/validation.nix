@@ -309,8 +309,8 @@ let
   validateThemeCompleteness =
     theme:
     let
-      semantic = theme.colors or theme.semantic or { };
-      missing = lib.filter (token: !(semantic ? ${token})) requiredSemanticTokens;
+      colors = theme.colors;
+      missing = lib.filter (token: !(colors ? ${token})) requiredSemanticTokens;
     in
     if missing == [ ] then
       mkPassed { }
@@ -347,8 +347,8 @@ let
   validateThemeColors =
     theme:
     let
-      semantic = theme.colors or theme.semantic or { };
-      colorResults = lib.mapAttrsToList (name: color: validateColorStructure color) semantic;
+      colors = theme.colors;
+      colorResults = lib.mapAttrsToList (name: color: validateColorStructure color) colors;
     in
     combineResults colorResults;
 
@@ -360,35 +360,35 @@ let
   criticalPairs =
     theme:
     let
-      semantic = theme.colors or theme.semantic or { };
+      colors = theme.colors;
     in
     [
       # Primary text on base surface
       {
         name = "primary text on base surface";
-        textColor = semantic."text-primary" or null;
-        backgroundColor = semantic."surface-base" or null;
+        textColor = colors."text-primary" or null;
+        backgroundColor = colors."surface-base" or null;
         textSize = "normal";
       }
       # Secondary text on base surface
       {
         name = "secondary text on base surface";
-        textColor = semantic."text-secondary" or null;
-        backgroundColor = semantic."surface-base" or null;
+        textColor = colors."text-secondary" or null;
+        backgroundColor = colors."surface-base" or null;
         textSize = "normal";
       }
       # Primary accent on base surface (for buttons, links)
       {
         name = "primary accent on base surface";
-        textColor = semantic."accent-primary" or null;
-        backgroundColor = semantic."surface-base" or null;
+        textColor = colors."accent-primary" or null;
+        backgroundColor = colors."surface-base" or null;
         textSize = "normal";
       }
       # Danger accent on base surface
       {
         name = "danger accent on base surface";
-        textColor = semantic."accent-danger" or null;
-        backgroundColor = semantic."surface-base" or null;
+        textColor = colors."accent-danger" or null;
+        backgroundColor = colors."surface-base" or null;
         textSize = "normal";
       }
     ];

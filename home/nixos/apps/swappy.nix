@@ -2,7 +2,7 @@
   config,
   pkgs,
   lib,
-  signalPalette ? null,
+  themeContext ? null,
   ...
 }:
 let
@@ -14,8 +14,7 @@ let
   fallbackTheme = themeImport.generateTheme "dark";
 
   # Use Signal theme if available, otherwise use fallback from shared palette
-  theme = if signalPalette != null then signalPalette else fallbackTheme;
-  colors = theme.semantic;
+  inherit (themeContext.theme or fallbackTheme) colors;
 in
 {
   programs.swappy = {

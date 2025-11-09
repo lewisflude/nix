@@ -5,7 +5,6 @@
   validationLib ? null,
 }:
 let
-  inherit (lib) optionalAttrs;
 
   # Mathematical constants
   PI = 3.141592653589793;
@@ -162,16 +161,10 @@ rec {
         # Semantic tokens automatically adapt to light/dark mode and maintain accessibility
         colors = semantic;
 
-        # DEPRECATED: Legacy access for backward compatibility
-        # ?? WARNING: Use theme.colors instead. This will be removed in a future version.
-        semantic = semantic;
-
-        # DEPRECATED: Direct palette access
-        # ?? WARNING: Direct access to tonal, accent, and categorical palettes is discouraged.
-        # Use theme.colors (semantic tokens) instead.
-        # These may be removed in future versions to enforce strict semantic token abstraction.
-        #
-        # If you need these for internal theme generation, consider using a separate internal API.
+        # Internal palette access (for advanced use cases only)
+        # Direct access to tonal, accent, and categorical palettes is discouraged.
+        # Use theme.colors (semantic tokens) instead for all application theming.
+        # Internal access is provided for theme generation and advanced transformations only.
         _internal = {
           inherit
             tonal
@@ -337,6 +330,26 @@ rec {
               normalized = rgbNormalized color;
             in
             "${toString normalized.r},${toString normalized.g},${toString normalized.b}";
+          # BGR hex string #BBGGRR (for mpv script-opts, which uses Blue-Green-Red order)
+          # Converts RGB hex #RRGGBB to BGR hex #BBGGRR
+          # Example: #cdd6f4 (RGB) -> #f4d6cd (BGR)
+          bgrHex =
+            color:
+            let
+              rgb = color.rgb;
+              # Convert integer 0-255 to 2-digit hex string
+              intToHex =
+                n:
+                let
+                  hexDigits = "0123456789abcdef";
+                  high = builtins.floor (n / 16);
+                  low = n - (high * 16);
+                in
+                "${builtins.substring high 1 hexDigits}${builtins.substring low 1 hexDigits}";
+            in
+            "#${intToHex rgb.b}${intToHex rgb.g}${intToHex rgb.r}";
+          # BGR hex without # prefix (for mpv script-opts)
+          bgrHexRaw = color: lib.removePrefix "#" (bgrHex color);
           # OKLCH string
           oklch = color: "oklch(${toString color.l} ${toString color.c} ${toString color.h})";
         };
@@ -631,12 +644,7 @@ rec {
             [ ];
       in
       {
-        inherit
-          passed
-          errors
-          warnings
-          suggestions
-          ;
+        inherit passed suggestions;
         errors = allErrors;
         warnings = allWarnings;
       };
@@ -786,7 +794,6 @@ rec {
             theme
             // {
               colors = theme.colors // allFunctional;
-              semantic = theme.semantic // allFunctional;
               _brand = {
                 integrated = allFunctional;
                 decorative = allDecorative;
@@ -949,8 +956,6 @@ rec {
           # Create theme with overridden colors
           themeWithOverrides = baseTheme // {
             colors = variantSemantic;
-            # Update deprecated semantic for backward compatibility
-            semantic = variantSemantic;
             _internal = baseTheme._internal // {
               semantic = variantSemantic;
             };
@@ -991,7 +996,8 @@ rec {
                 throw "Post-generation theme validation failed (strict mode):\n${validationLib.generateReport postValidation}"
               else
                 # Add validation results to theme metadata
-                themeAfterHooks // {
+                themeAfterHooks
+                // {
                   _validation = {
                     postGeneration = postValidation;
                     report = validationLib.generateReport postValidation;

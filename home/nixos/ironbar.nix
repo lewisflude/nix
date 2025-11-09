@@ -13,8 +13,7 @@
       # Using monitors map for per-monitor configuration (use-case 2b from guide)
       monitors = {
         "DP-1" = {
-          # Bar-level options
-          name = "bar-dp1";
+          # Bar-level options (must come before module arrays)
           position = "top";
           height = 42;
           layer = "top";
@@ -31,7 +30,7 @@
             right = 0;
           };
 
-          # Start modules (left/top side)
+          # Start modules (left/top side) - must come after bar-level options
           start = [
             {
               type = "workspaces";
@@ -58,10 +57,12 @@
           # End modules (right/bottom side)
           end = [
             {
-              type = "sys-info";
+              type = "sys_info";
               class = "sys-info";
               tooltip = "System information";
-              format = "{{cpu}}% {{memory}}% {{temp}}?C";
+              format = [
+                "{cpu_percent}% {memory_percent}% {temp_c@CPUTIN}?C"
+              ];
             }
             {
               type = "brightness";

@@ -68,7 +68,7 @@ in
       # Import devour-flake (lazy evaluation - only when the app is used)
       devour-flake = import inputs.devour-flake {
         inherit pkgs;
-        inherit (pkgs) nix;
+        inherit (pkgs) nix findutils writeShellApplication;
       };
     in
     {
@@ -83,6 +83,7 @@ in
         # devour-flake: Build all flake outputs efficiently
         devour-flake = {
           type = "app";
+          meta.description = "Build all flake outputs efficiently";
           program = "${devour-flake}/bin/devour-flake";
         };
       };

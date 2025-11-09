@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ lib, ... }:
 let
   languageConfig = import ./zed-editor-languages.nix { inherit lib; };
   lspConfig = import ./zed-editor-lsp.nix { inherit lib; };

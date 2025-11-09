@@ -1,7 +1,7 @@
 { lib }:
 let
   # Import theme modules
-  palette = import ../palette.nix { inherit lib; };
+  palette = import ../palette.nix { };
   themeLib = import ../lib.nix {
     inherit lib palette;
     nix-colorizer = null;

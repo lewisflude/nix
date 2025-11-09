@@ -1,4 +1,4 @@
-{ ... }:
+{ _ }: # deadnix: ignore
 {
   services.wlsunset = {
     enable = true;

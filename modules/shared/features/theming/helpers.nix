@@ -21,9 +21,9 @@ let
       # Use builtins.path to get an absolute path, then construct the module paths
       repoRoot = builtins.path {
         path = repoRootPath;
-        filter = path: type: true;
+        filter = _: _: true;
       };
-      palette = import (repoRoot + "/modules/shared/features/theming/palette.nix") { inherit lib; };
+      palette = import (repoRoot + "/modules/shared/features/theming/palette.nix") { };
       themeLib = import (repoRoot + "/modules/shared/features/theming/lib.nix") {
         inherit lib palette nix-colorizer;
       };

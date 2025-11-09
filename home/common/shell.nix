@@ -30,18 +30,18 @@ let
   fallbackTheme = themeImport.generateTheme "dark";
 
   # Use Signal theme if available, otherwise use fallback from shared palette
-  theme = config._module.args.signalPalette or fallbackTheme;
-  semantic = theme.semantic;
+  theme = (config._module.args.themeContext or { theme = null; }).theme or fallbackTheme;
+  colors = theme.colors;
 
-  # Legacy palette access (for backward compatibility)
+  # Legacy palette access (for backward compatibility with existing shell config)
   palette = {
-    purple = semantic."accent-special".hex;
-    blue = semantic."accent-focus".hex;
-    surface = semantic."surface-emphasis".hex;
-    divider = semantic."divider-secondary".hex;
-    text = semantic."text-primary".hex;
-    base = semantic."surface-base".hex;
-    red = semantic."accent-danger".hex;
+    purple = colors."accent-special".hex;
+    blue = colors."accent-focus".hex;
+    surface = colors."surface-emphasis".hex;
+    divider = colors."divider-secondary".hex;
+    text = colors."text-primary".hex;
+    base = colors."surface-base".hex;
+    red = colors."accent-danger".hex;
   };
 in
 {

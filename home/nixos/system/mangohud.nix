@@ -12,25 +12,25 @@ let
   # Generate dark mode theme
   theme = themeImport.generateTheme "dark";
 
-  # Extract colors from semantic mappings and convert to MangoHud format
-  semantic = theme.semantic;
+  # Extract colors from theme and convert to MangoHud format
+  themeColors = theme.colors;
 
   # Use format conversion utility for normalized RGB strings (MangoHud format)
   colors = {
-    base = theme.formats.rgbNormalizedString semantic."surface-base";
-    surface = theme.formats.rgbNormalizedString semantic."surface-subtle";
-    surfaceEmph = theme.formats.rgbNormalizedString semantic."surface-emphasis";
-    divider = theme.formats.rgbNormalizedString semantic."divider-secondary";
-    text = theme.formats.rgbNormalizedString semantic."text-primary";
-    textSecondary = theme.formats.rgbNormalizedString semantic."text-secondary";
-    textTertiary = theme.formats.rgbNormalizedString semantic."text-tertiary";
-    blue = theme.formats.rgbNormalizedString semantic."accent-focus";
-    purple = theme.formats.rgbNormalizedString semantic."accent-special";
-    green = theme.formats.rgbNormalizedString semantic."accent-primary";
-    red = theme.formats.rgbNormalizedString semantic."accent-danger";
-    yellow = theme.formats.rgbNormalizedString semantic."accent-warning";
-    cyan = theme.formats.rgbNormalizedString semantic."accent-info";
-    orange = theme.formats.rgbNormalizedString semantic."syntax-type";
+    base = theme.formats.rgbNormalizedString themeColors."surface-base";
+    surface = theme.formats.rgbNormalizedString themeColors."surface-subtle";
+    surfaceEmph = theme.formats.rgbNormalizedString themeColors."surface-emphasis";
+    divider = theme.formats.rgbNormalizedString themeColors."divider-secondary";
+    text = theme.formats.rgbNormalizedString themeColors."text-primary";
+    textSecondary = theme.formats.rgbNormalizedString themeColors."text-secondary";
+    textTertiary = theme.formats.rgbNormalizedString themeColors."text-tertiary";
+    blue = theme.formats.rgbNormalizedString themeColors."accent-focus";
+    purple = theme.formats.rgbNormalizedString themeColors."accent-special";
+    green = theme.formats.rgbNormalizedString themeColors."accent-primary";
+    red = theme.formats.rgbNormalizedString themeColors."accent-danger";
+    yellow = theme.formats.rgbNormalizedString themeColors."accent-warning";
+    cyan = theme.formats.rgbNormalizedString themeColors."accent-info";
+    orange = theme.formats.rgbNormalizedString themeColors."syntax-type";
   };
 in
 {

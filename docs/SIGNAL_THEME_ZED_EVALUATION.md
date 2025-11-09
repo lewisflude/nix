@@ -6,47 +6,47 @@
 
 ### Overall Assessment
 
-- ✅ **Usable**: Excellent colors for extended coding sessions
-- ✅ **Accessible**: Exceeds WCAG AA for most combinations
-- ✅ **Semantic**: Clear, consistent naming across ecosystem
-- ✅ **Best Practice**: Follows Nix and Zed conventions well
+- ? **Usable**: Excellent colors for extended coding sessions
+- ? **Accessible**: Exceeds WCAG AA for most combinations
+- ? **Semantic**: Clear, consistent naming across ecosystem
+- ? **Best Practice**: Follows Nix and Zed conventions well
 
 ---
 
 ## 1. USABILITY EVALUATION
 
-### ✅ Color Distinguishability
+### ? Color Distinguishability
 
 **Syntax Highlighting Hue Distribution:**
 
 ```
-Keywords:        #7a96e0 (h=230°)  Blue
-Function-call:   #5dc7a8 (h=177°)  Green
-Function-def:    #c9a93a (h=90°)   Yellow-Orange
-Strings:         #b8664a (h=40°)   Red-Orange
-Numbers:         #b86da7 (h=315°)  Magenta
-Types:           #d59857 (h=67°)   Orange
-Comments:        #6b6f82 (h=240°)  Muted Gray
+Keywords:        #7a96e0 (h=230?)  Blue
+Function-call:   #5dc7a8 (h=177?)  Green
+Function-def:    #c9a93a (h=90?)   Yellow-Orange
+Strings:         #b8664a (h=40?)   Red-Orange
+Numbers:         #b86da7 (h=315?)  Magenta
+Types:           #d59857 (h=67?)   Orange
+Comments:        #6b6f82 (h=240?)  Muted Gray
 ```
 
 **Analysis:**
 
-- ✅ **Hue separation**: 40-90° gaps between major colors
-- ✅ **No confusion**: Each element type has distinct hue
-- ✅ **Readable comments**: Tertiary text properly muted (L=0.5)
-- ✅ **Clear keywords**: Blue stands out well from functions
+- ? **Hue separation**: 40-90? gaps between major colors
+- ? **No confusion**: Each element type has distinct hue
+- ? **Readable comments**: Tertiary text properly muted (L=0.5)
+- ? **Clear keywords**: Blue stands out well from functions
 
 **Verdict: Excellent visual hierarchy.**
 
 ---
 
-### ✅ Extended Use Ergonomics
+### ? Extended Use Ergonomics
 
 **Background-Text Contrast (Dark Mode):**
 
 - Background: `#1e1f26` (L=0.15, very dark)
 - Primary text: `#c0c3d1` (L=0.80, very light)
-- **Contrast Ratio: 10.1:1** ✅ Exceeds WCAG AAA (7:1)
+- **Contrast Ratio: 10.1:1** ? Exceeds WCAG AAA (7:1)
 
 **Why it works:**
 
@@ -57,16 +57,16 @@ Comments:        #6b6f82 (h=240°)  Muted Gray
 
 **Real-world usage considerations:**
 
-- ✅ Safe for 6-8 hour workdays
-- ✅ No flickering or pulsing colors
-- ✅ Monotone gray-blue palette reduces visual noise
-- ⚠️ Very dark background (~1% ambient brightness) - ensure monitor brightness adequate
+- ? Safe for 6-8 hour workdays
+- ? No flickering or pulsing colors
+- ? Monotone gray-blue palette reduces visual noise
+- ?? Very dark background (~1% ambient brightness) - ensure monitor brightness adequate
 
 **Verdict: Excellent for extended use.**
 
 ---
 
-### ✅ Theme Switching Experience
+### ? Theme Switching Experience
 
 **Current Implementation:**
 
@@ -82,22 +82,22 @@ generateZedTheme = {
 
 **How Zed uses this:**
 
-- Single `scientific.json` file with both light and dark variants
+- Single `signal.json` file with both light and dark variants
 - Zed automatically selects variant based on system appearance
 - No manual theme switching needed
 
 **User Experience:**
 
-- ✅ Seamless light/dark mode following system
-- ✅ Consistent across applications (with other integrations)
-- ✅ One rebuild enables both variants
-- ✅ No need to manage separate theme files
+- ? Seamless light/dark mode following system
+- ? Consistent across applications (with other integrations)
+- ? One rebuild enables both variants
+- ? No need to manage separate theme files
 
 **Verdict: Outstanding UX.**
 
 ---
 
-### ⚠️ Minor Usability Issue: Installation Location
+### ?? Minor Usability Issue: Installation Location
 
 **Current:**
 
@@ -110,7 +110,7 @@ home.file.".config/zed/themes/signal.json" = {
 
 **Potential Issue:**
 
-- If user manually modifies `scientific.json`, Nix won't overwrite it (force=false)
+- If user manually modifies `signal.json`, Nix won't overwrite it (force=false)
 - If palette changes, user won't get updates automatically
 - User might have stale colors indefinitely
 
@@ -122,37 +122,37 @@ home.file.".config/zed/themes/signal.json" = {
 
 ## 2. ACCESSIBILITY EVALUATION
 
-### ✅ WCAG Contrast Compliance
+### ? WCAG Contrast Compliance
 
 **Dark Mode Text Combinations:**
 
 | Element | Colors | L1 | L2 | Ratio | WCAG | Notes |
 |---------|--------|----|----|-------|------|-------|
-| Primary text | #1e1f26 → #c0c3d1 | 0.0095 | 0.554 | **10.1:1** | AAA ✅ | Exceeds large text |
-| Secondary text | #1e1f26 → #9498ab | 0.0095 | 0.321 | **6.23:1** | AA ✅ | Meets standard text |
-| Tertiary text | #1e1f26 → #6b6f82 | 0.0095 | 0.180 | **3.4:1** | ⚠️ AAA Large only | Comments/hints |
-| Keywords | #1e1f26 → #7a96e0 | 0.0095 | 0.322 | **6.24:1** | AA ✅ | Code syntax |
-| Strings | #1e1f26 → #b8664a | 0.0095 | 0.222 | **4.57:1** | AA ✅ | Code literals |
-| Success | #1e1f26 → #4db368 | 0.0095 | 0.222 | **4.57:1** | AA ✅ | Buttons/accents |
+| Primary text | #1e1f26 ? #c0c3d1 | 0.0095 | 0.554 | **10.1:1** | AAA ? | Exceeds large text |
+| Secondary text | #1e1f26 ? #9498ab | 0.0095 | 0.321 | **6.23:1** | AA ? | Meets standard text |
+| Tertiary text | #1e1f26 ? #6b6f82 | 0.0095 | 0.180 | **3.4:1** | ?? AAA Large only | Comments/hints |
+| Keywords | #1e1f26 ? #7a96e0 | 0.0095 | 0.322 | **6.24:1** | AA ? | Code syntax |
+| Strings | #1e1f26 ? #b8664a | 0.0095 | 0.222 | **4.57:1** | AA ? | Code literals |
+| Success | #1e1f26 ? #4db368 | 0.0095 | 0.222 | **4.57:1** | AA ? | Buttons/accents |
 
 **Light Mode (Expected to be inverse):**
 
-- Primary text: **10.1:1** ✅ AAA
-- Secondary text: **6.23:1** ✅ AA
-- All syntax colors: **6-7:1** ✅ AA to AAA
+- Primary text: **10.1:1** ? AAA
+- Secondary text: **6.23:1** ? AA
+- All syntax colors: **6-7:1** ? AA to AAA
 
 **Analysis:**
 
-- ✅ All primary UI elements meet WCAG AA minimum
-- ✅ Most meet AAA standard
-- ⚠️ Tertiary text (comments) at 3.4:1 - only meets AAA for 18pt+ fonts
-  - However, Zed typically uses larger comment font → acceptable
+- ? All primary UI elements meet WCAG AA minimum
+- ? Most meet AAA standard
+- ?? Tertiary text (comments) at 3.4:1 - only meets AAA for 18pt+ fonts
+  - However, Zed typically uses larger comment font ? acceptable
 
 **Verdict: Excellent WCAG compliance.**
 
 ---
 
-### ✅ Colorblind-Friendly Design
+### ? Colorblind-Friendly Design
 
 **Hue-Based Distinction (Non-Reliant on Saturation):**
 
@@ -166,16 +166,16 @@ Yellow-Orange:   #c9a93a (functions)   - Warm
 
 **Protanopia (Red-Blind) Test:**
 
-- Strings (red-orange) → Appears darker/yellower
-- Green (function calls) → Appears normal
-- Blue (keywords) → Appears normal
+- Strings (red-orange) ? Appears darker/yellower
+- Green (function calls) ? Appears normal
+- Blue (keywords) ? Appears normal
 - **Issue:** Strings and yellow-orange might be hard to distinguish
 - **Mitigation:** Different saturation levels (c=0.15 vs c=0.15 but different L)
 
 **Deuteranopia (Green-Blind) Test:**
 
-- Green (function calls) → Appears darker/less distinct
-- Strings and reds → Still distinguishable
+- Green (function calls) ? Appears darker/less distinct
+- Strings and reds ? Still distinguishable
 - **Potential Issue:** Function calls vs normal text less distinct
 
 **Tritanopia (Blue-Yellow-Blind) Test:**
@@ -191,16 +191,16 @@ Yellow-Orange:   #c9a93a (functions)   - Warm
 
 ---
 
-### ✅ Semantic Color Consistency
+### ? Semantic Color Consistency
 
 **Meanings are Consistent Across Zed:**
 
-- 🟢 Green: Success, affirmative (`accent-primary`)
-- 🔴 Red: Error, danger (`accent-danger`)
-- 🟡 Yellow-Orange: Warning (`accent-warning`)
-- 🔵 Blue: Focus, keywords (`accent-focus`)
-- 🔵 Cyan: Info (`accent-info`)
-- 🟣 Purple: Special (`accent-special`)
+- ?? Green: Success, affirmative (`accent-primary`)
+- ?? Red: Error, danger (`accent-danger`)
+- ?? Yellow-Orange: Warning (`accent-warning`)
+- ?? Blue: Focus, keywords (`accent-focus`)
+- ?? Cyan: Info (`accent-info`)
+- ?? Purple: Special (`accent-special`)
 
 **Zed-Specific Mappings (lines 160-220 in zed.nix):**
 
@@ -210,11 +210,11 @@ Yellow-Orange:   #c9a93a (functions)   - Warm
 "version_control.deleted" = colors."ansi-red".hex;     # Red
 ```
 
-All follow standard semantic meanings. ✅
+All follow standard semantic meanings. ?
 
 ---
 
-### ✅ No Harmful Animations
+### ? No Harmful Animations
 
 - No flashing colors (1-4Hz)
 - No pulsing elements
@@ -227,7 +227,7 @@ All follow standard semantic meanings. ✅
 
 ## 3. SEMANTIC EVALUATION
 
-### ✅ Naming Consistency
+### ? Naming Consistency
 
 **Palette Structure:**
 
@@ -249,56 +249,56 @@ categorical = {
 **Semantic Layer:**
 
 ```nix
-"surface-base"       → surface-base color
-"text-primary"       → primary text color
-"accent-primary"     → success color (green)
-"syntax-keyword"     → syntax highlighting for keywords
-"ansi-red"           → ANSI terminal red
+"surface-base"       ? surface-base color
+"text-primary"       ? primary text color
+"accent-primary"     ? success color (green)
+"syntax-keyword"     ? syntax highlighting for keywords
+"ansi-red"           ? ANSI terminal red
 ```
 
 **Analysis:**
 
-- ✅ **Hierarchical**: Base → Semantic → Application
-- ✅ **Self-documenting**: Names explain purpose
-- ✅ **Consistent**: Same name = same meaning everywhere
-- ✅ **OKLCH structure**: L=lightness, C=chroma, h=hue clearly separate
+- ? **Hierarchical**: Base ? Semantic ? Application
+- ? **Self-documenting**: Names explain purpose
+- ? **Consistent**: Same name = same meaning everywhere
+- ? **OKLCH structure**: L=lightness, C=chroma, h=hue clearly separate
 
 **Verdict: Excellent semantic naming.**
 
 ---
 
-### ✅ Documentation Alignment
+### ? Documentation Alignment
 
 **Expected semantics from `docs/SIGNAL_THEME.md`:**
 
 ```
-Primary text: Main text (text-primary) ✅
-Secondary text: Less important text ✅
-Tertiary text: Muted text, comments ✅
-Accent-primary: Success, affirmative ✅
-Accent-danger: Errors, destructive ✅
+Primary text: Main text (text-primary) ?
+Secondary text: Less important text ?
+Tertiary text: Muted text, comments ?
+Accent-primary: Success, affirmative ?
+Accent-danger: Errors, destructive ?
 ```
 
 **zed.nix Implementation:**
 
-- Line 72: `text = colors."text-primary".hex` ✅
-- Line 73: `"text.muted" = colors."text-secondary".hex` ✅
-- Line 74: `"text.placeholder" = colors."text-tertiary".hex` ✅
-- Line 160: `"version_control.added" = colors."ansi-green".hex` ✅
+- Line 72: `text = colors."text-primary".hex` ?
+- Line 73: `"text.muted" = colors."text-secondary".hex` ?
+- Line 74: `"text.placeholder" = colors."text-tertiary".hex` ?
+- Line 160: `"version_control.added" = colors."ansi-green".hex` ?
 
 **Verdict: Perfect alignment.**
 
 ---
 
-### ✅ Perceptual Uniformity
+### ? Perceptual Uniformity
 
 **OKLCH Lightness Matching:**
 
 ```
-Tonal.text-Lc75:     L = 0.80  ✅ All primary text same brightness
-Semantic.text-primary = tonal.text-Lc75  L = 0.80  ✅
-Categorical colors:  L = 0.65 (dark)  ✅ Consistent within mode
-Accent colors:       L = 0.71 (Lc75)  ✅ Consistent saturation level
+Tonal.text-Lc75:     L = 0.80  ? All primary text same brightness
+Semantic.text-primary = tonal.text-Lc75  L = 0.80  ?
+Categorical colors:  L = 0.65 (dark)  ? Consistent within mode
+Accent colors:       L = 0.71 (Lc75)  ? Consistent saturation level
 ```
 
 **Result:** Colors with same L value appear equally bright (no visual jitter).
@@ -309,7 +309,7 @@ Accent colors:       L = 0.71 (Lc75)  ✅ Consistent saturation level
 
 ## 4. BEST PRACTICES EVALUATION
 
-### ✅ Nix Module Patterns
+### ? Nix Module Patterns
 
 **Correct Patterns Used:**
 
@@ -318,8 +318,7 @@ Accent colors:       L = 0.71 (Lc75)  ✅ Consistent saturation level
 mkIf (cfg.enable && cfg.applications.zed.enable && darkPalette != null)
 
 # Pattern 2: Module arguments passing
-_module.args.scientificPalette = theme
-_module.args.scientificThemeLib = themeLib
+_module.args.themeContext = themeContext
 
 # Pattern 3: Home-manager integration
 home.file.".config/zed/themes/signal.json" = { ... }
@@ -328,55 +327,55 @@ home.file.".config/zed/themes/signal.json" = { ... }
 darkPalette = if signalThemeLib != null then ... else null
 ```
 
-All follow NixOS/home-manager conventions. ✅
+All follow NixOS/home-manager conventions. ?
 
 ---
 
-### ✅ Zed Theme Schema Compliance
+### ? Zed Theme Schema Compliance
 
 **Schema Target:** `https://zed.dev/schema/themes/v0.2.0.json`
 
 **Implementation Check:**
 
 ```nix
-"$schema" = "https://zed.dev/schema/themes/v0.2.0.json"; ✅
+"$schema" = "https://zed.dev/schema/themes/v0.2.0.json"; ?
 
 themes = [ {
-  name = "Scientific Dark";      ✅ Valid name format
-  appearance = "dark";           ✅ Valid enum: "light" | "dark"
-  style = { ... };               ✅ All colors follow spec
+  name = "Signal Dark";      ? Valid name format
+  appearance = "dark";           ? Valid enum: "light" | "dark"
+  style = { ... };               ? All colors follow spec
 } ]
 ```
 
 **Color Properties Used:**
 
-- Border colors: ✅
-- Surface colors: ✅
-- Text colors: ✅
-- Editor colors: ✅
-- Terminal ANSI colors: ✅
-- Status indicators: ✅
+- Border colors: ?
+- Surface colors: ?
+- Text colors: ?
+- Editor colors: ?
+- Terminal ANSI colors: ?
+- Status indicators: ?
 
 **Verdict: Perfect schema compliance.**
 
 ---
 
-### ✅ Color Application Patterns
+### ? Color Application Patterns
 
 **Consistent with Cursor/Helix Implementations:**
 
 | Aspect | zed.nix | cursor.nix | helix.nix | Status |
 |--------|---------|-----------|-----------|--------|
-| Palette access | `palette.semantic` | `palette.semantic` | `palette.semantic` | ✅ Consistent |
-| Alpha handling | `"${hex}80"` | `"${hex}40"` | N/A | ✅ Pattern followed |
-| Mode generation | Dark+Light | Dark+Light | Dark+Light | ✅ Same pattern |
-| Semantic mapping | Direct | Direct | Direct | ✅ Consistent |
+| Palette access | `palette.semantic` | `palette.semantic` | `palette.semantic` | ? Consistent |
+| Alpha handling | `"${hex}80"` | `"${hex}40"` | N/A | ? Pattern followed |
+| Mode generation | Dark+Light | Dark+Light | Dark+Light | ? Same pattern |
+| Semantic mapping | Direct | Direct | Direct | ? Consistent |
 
 **Verdict: Consistent with ecosystem.**
 
 ---
 
-### ✅ Error Handling
+### ? Error Handling
 
 **Null Checks:**
 
@@ -387,52 +386,52 @@ darkPalette != null && lightPalette != null
 
 Prevents:
 
-- ✅ Enabling theme without palette
-- ✅ Null reference errors
-- ✅ Partial theme application
+- ? Enabling theme without palette
+- ? Null reference errors
+- ? Partial theme application
 
 **Verdict: Defensive programming.**
 
 ---
 
-### ⚠️ Testing Coverage
+### ?? Testing Coverage
 
 **What's Tested:**
 
-- Palette structure and values ✅
-- Theme generation ✅
-- Semantic color mappings ✅
-- Contrast ratios ✅
+- Palette structure and values ?
+- Theme generation ?
+- Semantic color mappings ?
+- Contrast ratios ?
 
 **What's NOT Tested:**
 
-- ❌ Zed theme JSON schema validation
-- ❌ File generation and placement
-- ❌ Zed actually loading the theme
+- ? Zed theme JSON schema validation
+- ? File generation and placement
+- ? Zed actually loading the theme
 
 **Verdict: Unit tests pass, but integration testing missing. Low-risk because Zed is permissive with theme format.**
 
 ---
 
-### ⚠️ Documentation Quality
+### ?? Documentation Quality
 
 **What's Documented:**
 
-- ✅ `docs/SIGNAL_THEME.md`: Comprehensive
-- ✅ `SIGNAL_THEME_IMPLEMENTATION.md`: Complete
-- ✅ In-code comments: Clear
+- ? `docs/SIGNAL_THEME.md`: Comprehensive
+- ? `docs/SIGNAL_THEME_IMPLEMENTATION.md`: Complete
+- ? In-code comments: Clear
 
 **What's NOT Documented:**
 
-- ❌ How to debug theme not loading
-- ❌ Zed-specific color name mapping
-- ❌ Troubleshooting specific to Zed
+- ? How to debug theme not loading
+- ? Zed-specific color name mapping
+- ? Troubleshooting specific to Zed
 
 **Example gap:**
 
 ```nix
 # Zed uses kebab-case for multi-word properties
-"editor.background"  ← Why not "editorBackground"?
+"editor.background"  ? Why not "editorBackground"?
 # Not explained in docs
 ```
 
@@ -440,11 +439,11 @@ Prevents:
 
 ---
 
-### ✅ Maintainability
+### ? Maintainability
 
 **Single Source of Truth:**
 
-- Palette defined once in `home/common/theming/palette.nix`
+- Palette defined once in `modules/shared/features/theming/palette.nix`
 - Theme generation logic in `lib.nix`
 - zed.nix only generates variant-specific output
 
@@ -458,7 +457,7 @@ Prevents:
 
 ---
 
-### ✅ Extensibility
+### ? Extensibility
 
 **Easy to add new colors:**
 
@@ -487,10 +486,10 @@ darkTheme.semantic.ga09  # Or appropriate mapping
 
 **Similarities:**
 
-- ✅ Same palette source
-- ✅ Same semantic mappings
-- ✅ Both generate dual-variant themes
-- ✅ Both follow Nix patterns
+- ? Same palette source
+- ? Same semantic mappings
+- ? Both generate dual-variant themes
+- ? Both follow Nix patterns
 
 **Differences:**
 
@@ -507,9 +506,9 @@ darkTheme.semantic.ga09  # Or appropriate mapping
 
 **Similarities:**
 
-- ✅ Semantic color access
-- ✅ Both generators follow same pattern
-- ✅ Both native to home-manager
+- ? Semantic color access
+- ? Both generators follow same pattern
+- ? Both native to home-manager
 
 **Differences:**
 
@@ -546,7 +545,7 @@ None - implementation is solid.
    ```nix
    assertions = [{
      assertion = darkPalette != null && lightPalette != null;
-     message = "Scientific theme palette must be generated";
+     message = "Signal theme palette must be generated";
    }];
    ```
 
@@ -560,7 +559,7 @@ None - implementation is solid.
 
    ```nix
    # More standard for config files
-   xdg.configFile."zed/themes/scientific.json" = { ... }
+   xdg.configFile."zed/themes/signal.json" = { ... }
    ```
 
 3. **Add theme preview image to documentation**
@@ -571,21 +570,21 @@ None - implementation is solid.
 
 | Dimension | Score | Status |
 |-----------|-------|--------|
-| Usability | 9/10 | ✅ Excellent colors, smooth switching |
-| Accessibility | 8.5/10 | ✅ Exceeds WCAG AA, good for colorblindness |
-| Semantics | 9.5/10 | ✅ Clear naming, consistent meanings |
-| Best Practices | 8/10 | ✅ Follows standards, minor docs gaps |
-| **Overall** | **8.5/10** | ✅ **Production-ready** |
+| Usability | 9/10 | ? Excellent colors, smooth switching |
+| Accessibility | 8.5/10 | ? Exceeds WCAG AA, good for colorblindness |
+| Semantics | 9.5/10 | ? Clear naming, consistent meanings |
+| Best Practices | 8/10 | ? Follows standards, minor docs gaps |
+| **Overall** | **8.5/10** | ? **Production-ready** |
 
 ### Summary
 
 The Zed theme implementation is **excellent and ready for deployment**. It provides:
 
-- ✅ Accessible colors safe for extended development
-- ✅ Semantic consistency across applications
-- ✅ Proper Nix module architecture
-- ✅ Full WCAG AA compliance
-- ✅ Beautiful, Signal-designed palette
+- ? Accessible colors safe for extended development
+- ? Semantic consistency across applications
+- ? Proper Nix module architecture
+- ? Full WCAG AA compliance
+- ? Beautiful, Signal-designed palette
 
 **Recommendation:** Deploy as-is. The minor documentation gaps don't affect functionality.
 

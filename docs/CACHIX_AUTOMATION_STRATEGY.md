@@ -55,25 +55,33 @@ jobs:
 
 ---
 
-### ? **Already Configured: devenv**
+### ? **Already Configured: System-Level Cachix**
 
-**When**: Automatically when using `devenv` (via `devenv.nix`)
+**Where**: Cachix substituters are configured in `modules/shared/core.nix` for system builds.
 
 **Current Setup**:
 
 ```nix
-{
-  cachix.push = "lewisflude";
-  cachix.pull = [ "lewisflude" ];
-}
+# modules/shared/core.nix
+nix.settings = {
+  substituters = [
+    "https://lewisflude.cachix.org"
+    # ... other caches
+  ];
+  trusted-public-keys = [
+    "lewisflude.cachix.org-1:Y4J8FK/Rb7Es/PnsQxk2ZGPvSLup6ywITz8nimdVWXc="
+    # ... other keys
+  ];
+};
 ```
 
 **What it does**:
 
-- Auto-pushes builds when using `devenv shell` or `devenv up`
-- Auto-pulls from cache when available
+- Automatically pulls from cache during system builds (`nh os switch`, `darwin-rebuild switch`)
+- Works for all Nix operations on configured systems
+- No additional setup needed
 
-**Recommendation**: ? **Keep as-is** - This is perfect for development environments
+**Note**: For flake-level operations (like `nix build`), you can optionally add `nixConfig` to `flake.nix`, but this requires `--accept-flake-config` flag or setting `accept-flake-config = true` in `nix.conf`. The current approach in `modules/shared/core.nix` works for all system builds without requiring flags.
 
 ---
 

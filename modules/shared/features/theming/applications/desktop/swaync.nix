@@ -1,17 +1,14 @@
 {
   config,
   lib,
-  pkgs,
   themeContext ? null,
-  signalPalette ? null, # Backward compatibility
   ...
 }:
 let
   inherit (lib) mkIf mkMerge;
   cfg = config.theming.signal;
-  # Use themeContext if available, otherwise fall back to signalPalette for backward compatibility
-  theme = themeContext.theme or signalPalette;
-  colors = theme.colors or theme.semantic;
+  theme = themeContext.theme;
+  colors = theme.colors;
 
   # Determine libadwaita color scheme from theme mode
   # libadwaita uses "prefer-dark", "prefer-light", or "default"
