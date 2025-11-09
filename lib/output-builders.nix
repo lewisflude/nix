@@ -26,7 +26,7 @@ in
           deadnix.enable = true;
           statix = {
             enable = true;
-            entry = "${nixpkgs.legacyPackages.${system}.statix}/bin/statix check --format errfmt --ignore 'flake-parts/systems.nix'";
+            entry = "${nixpkgs.legacyPackages.${system}.statix}/bin/statix check --format errfmt --ignore '**/systems.nix'";
           };
           commitizen.enable = true;
 
