@@ -69,106 +69,48 @@ in
       };
     };
 
-    qbittorrent = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable qBittorrent BitTorrent client";
-      };
-
-      webUI = {
-        address = mkOption {
-          type = types.nullOr types.str;
-          default = null;
-          description = "WebUI bind address. Use '*' or '0.0.0.0' to bind to all interfaces. Defaults to '*' when VPN is enabled.";
-        };
-
-        username = mkOption {
-          type = types.nullOr types.str;
-          default = null;
-          description = "WebUI username.";
-        };
-
-        password = mkOption {
-          type = types.nullOr types.str;
-          default = null;
-          description = "WebUI password (PBKDF2 hash in @ByteArray format).";
-        };
-      };
-
-      categories = mkOption {
-        type = types.attrsOf types.str;
-        default = { };
-        description = "Category path mappings. Maps category names to their save paths. Example: { movies = \"/mnt/storage/movies\"; tv = \"/mnt/storage/tv\"; }";
-        example = {
-          movies = "/mnt/storage/movies";
-          tv = "/mnt/storage/tv";
-          music = "/mnt/storage/music";
-        };
-      };
-
-      bittorrent = mkOption {
-        type = types.attrsOf types.anything;
-        default = { };
-        description = "BitTorrent configuration options";
-      };
-
-      connection = mkOption {
-        type = types.attrsOf types.anything;
-        default = { };
-        description = "Connection configuration options (DHT, PEX, etc.)";
-      };
-
-      bittorrentAdvanced = mkOption {
-        type = types.attrsOf types.anything;
-        default = { };
-        description = "Advanced BitTorrent configuration options";
-      };
-
-      vpn = {
-        enable = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Enable VPN routing via network namespace";
-        };
-
-        interfaceName = mkOption {
-          type = types.str;
-          default = "qbittor0";
-          description = ''
-            WireGuard interface name for VPN routing.
-            Note: This is derived from the namespace as "<namespace>0" by VPN-Confinement.
-            The interface is automatically created by VPN-Confinement.
-          '';
-        };
-
-        namespace = mkOption {
-          type = types.str;
-          default = "qbittor";
-          description = ''
-            Network namespace name for VPN isolation.
-            The interface name will be automatically set to "<namespace>0" (e.g., "qbittor0").
-          '';
-        };
-
-        vethHostIP = mkOption {
-          type = types.str;
-          default = "10.200.200.1/24";
-          description = ''
-            IP address for veth-host interface.
-            Note: VPN-Confinement handles veth setup automatically - this option is reserved for future use.
-          '';
-        };
-
-        vethVPNIP = mkOption {
-          type = types.str;
-          default = "10.200.200.2/24";
-          description = ''
-            IP address for veth-vpn interface.
-            Note: VPN-Confinement handles veth setup automatically - this option is reserved for future use.
-          '';
+    qbittorrent = mkOption {
+      type = types.submodule {
+        options = {
+          enable = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Enable qBittorrent BitTorrent client";
+          };
+          webUI = mkOption {
+            type = types.nullOr (
+              types.submodule {
+                options = {
+                  address = mkOption {
+                    type = types.nullOr types.str;
+                    default = null;
+                    description = "WebUI bind address";
+                  };
+                  username = mkOption {
+                    type = types.nullOr types.str;
+                    default = null;
+                    description = "WebUI username";
+                  };
+                  password = mkOption {
+                    type = types.nullOr types.str;
+                    default = null;
+                    description = "WebUI password (PBKDF2 format)";
+                  };
+                };
+              }
+            );
+            default = null;
+            description = "WebUI configuration";
+          };
+          categories = mkOption {
+            type = types.nullOr (types.attrsOf types.str);
+            default = null;
+            description = "Category save paths";
+          };
         };
       };
+      default = { };
+      description = "qBittorrent configuration";
     };
 
     jellyfin = {
