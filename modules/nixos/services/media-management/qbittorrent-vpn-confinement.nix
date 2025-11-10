@@ -9,7 +9,10 @@ let
   cfg = config.host.services.mediaManagement;
   vpnEnabled = cfg.enable && cfg.qbittorrent.enable && cfg.qbittorrent.vpn.enable;
 
-  vpnNamespace = "qbittor";
+  # Use configurable namespace, fallback to hardcoded value for backwards compatibility
+  vpnNamespace = (cfg.qbittorrent.vpn or { }).namespace or "qbittor";
+  # Interface name is derived from namespace (VPN-Confinement pattern: <namespace>0)
+  vpnInterface = "${vpnNamespace}0";
   bittorrentPort = (cfg.qbittorrent.bittorrent or { }).port or 6881;
 
   protonvpnGateway = "10.2.0.1";
@@ -22,7 +25,7 @@ let
     set -euo pipefail
 
     namespace="${vpnNamespace}"
-    interface="qbittor0"
+    interface="${vpnInterface}"
     mtu="${toString defaultMTU}"
 
     # Wait for namespace to exist
@@ -95,10 +98,43 @@ let
   portForwardScript = pkgs.writeShellScript "protonvpn-port-forward-ns" ''
     set -euo pipefail
 
+    namespace="${vpnNamespace}"
+    interface="${vpnInterface}"
+    gateway="${protonvpnGateway}"
 
+    # Wait for namespace to exist
+    max_attempts=30
+    attempt=0
+    while [ $attempt -lt $max_attempts ]; do
+      if ${pkgs.iproute2}/bin/ip netns list | grep -q "^$namespace"; then
+        break
+      fi
+      sleep 1
+      attempt=$((attempt + 1))
+    done
 
+    if [ $attempt -eq $max_attempts ]; then
+      echo "ERROR: Namespace $namespace not found after $max_attempts attempts" >&2
+      exit 1
+    fi
 
-    ${pkgs.iproute2}/bin/ip route add ${protonvpnGateway}/32 dev qbittor0 2>/dev/null || true
+    # Wait for interface to exist in namespace
+    attempt=0
+    while [ $attempt -lt $max_attempts ]; do
+      if ${pkgs.iproute2}/bin/ip netns exec "$namespace" ${pkgs.iproute2}/bin/ip link show "$interface" >/dev/null 2>&1; then
+        break
+      fi
+      sleep 1
+      attempt=$((attempt + 1))
+    done
+
+    if [ $attempt -eq $max_attempts ]; then
+      echo "ERROR: Interface $interface not found in namespace $namespace" >&2
+      exit 1
+    fi
+
+    # Add route to gateway (may already exist, that's fine)
+    ${pkgs.iproute2}/bin/ip netns exec "$namespace" ${pkgs.iproute2}/bin/ip route add ${protonvpnGateway}/32 dev "$interface" 2>/dev/null || true
 
 
 

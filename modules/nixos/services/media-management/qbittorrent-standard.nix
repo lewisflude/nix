@@ -19,7 +19,10 @@ let
   cfg = config.host.services.mediaManagement;
   vpnEnabled = cfg.enable && cfg.qbittorrent.enable && cfg.qbittorrent.vpn.enable;
 
-  vpnNamespace = "qbittor";
+  # Use configurable namespace, fallback to hardcoded value for backwards compatibility
+  vpnNamespace = (cfg.qbittorrent.vpn or { }).namespace or "qbittor";
+  # Interface name is derived from namespace (VPN-Confinement pattern: <namespace>0)
+  vpnInterface = "${vpnNamespace}0";
   webUIPort = cfg.qbittorrent.webUI.port or 8080;
   torrentingPort = (cfg.qbittorrent.bittorrent or { }).port or 6881;
 in
@@ -426,14 +429,21 @@ in
 
       interfaceName = mkOption {
         type = types.str;
-        default = "wg-mullvad";
-        description = "WireGuard interface name for VPN routing";
+        default = "qbittor0";
+        description = ''
+          WireGuard interface name for VPN routing.
+          Note: This is derived from the namespace as "<namespace>0" by VPN-Confinement.
+          The interface is automatically created by VPN-Confinement.
+        '';
       };
 
       namespace = mkOption {
         type = types.str;
-        default = "wg-qbittorrent";
-        description = "Network namespace name for VPN isolation";
+        default = "qbittor";
+        description = ''
+          Network namespace name for VPN isolation.
+          The interface name will be automatically set to "<namespace>0" (e.g., "qbittor0").
+        '';
       };
 
       vethHostIP = mkOption {
@@ -572,13 +582,8 @@ in
               LimitLANPeers = true;
               DHTEnabled = (cfg.qbittorrent.connection or { }).dhtEnabled or true;
               PEXEnabled = (cfg.qbittorrent.connection or { }).pexEnabled or true;
-            }
-            // optionalAttrs vpnEnabled {
-              # Bind to VPN interface
-              Interface = "qbittor0";
-              InterfaceName = "qbittor0";
-              InterfaceAddress = ""; # Empty means use interface's IP
-              InterfaceListenIPv6 = false; # Disable IPv6 to prevent leaks
+              # Note: Interface binding is configured in BitTorrent.Session, not here
+              InterfaceListenIPv6 = if vpnEnabled then false else null; # Disable IPv6 when VPN is enabled to prevent leaks
             };
 
             Bittorrent = {
@@ -745,9 +750,8 @@ in
               };
             }
             // optionalAttrs vpnEnabled {
-              # Bind to VPN interface
-              Interface = "qbittor0";
-              InterfaceName = "qbittor0";
+              # Bind to VPN interface (only InterfaceName is used by qBittorrent)
+              InterfaceName = vpnInterface;
               InterfaceAddress = ""; # Empty means use interface's IP
             };
           };
@@ -773,7 +777,7 @@ in
 
 
 
-          ${pkgs.iproute2}/bin/ip route add 10.2.0.1/32 dev qbittor0 2>/dev/null || true
+          ${pkgs.iproute2}/bin/ip route add 10.2.0.1/32 dev ${vpnInterface} 2>/dev/null || true
         '';
 
         serviceConfig.Group = mkOverride 1000 cfg.group;
