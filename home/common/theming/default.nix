@@ -112,6 +112,10 @@ in
         inherit themeContext;
         signalThemeLib = themeLib;
       };
+
+      # Enable Zed theming by default when Signal theme is enabled
+      # This ensures themes are generated for Zed on all platforms (not just NixOS)
+      theming.signal.applications.zed.enable = lib.mkDefault true;
     }
 
     # Assertions and warnings

@@ -1,11 +1,44 @@
-{ lib, ... }:
+{
+  lib,
+  pkgs,
+  ...
+}:
 let
   standards = import ../features/development/language-standards.nix;
   makeIndentString = n: builtins.concatStringsSep "" (builtins.genList (_x: " ") n);
+
+  # Map command names to Nix packages
+  # Note: Some formatters are part of larger packages (e.g., goimports is in gotools)
+  lspPackages = with pkgs; [
+    nixd
+    nodePackages.typescript-language-server
+    vscode-langservers-extracted
+    # graphql-language-server - Not available in nixpkgs
+    # GraphQL LSP support disabled until a suitable package is found or added
+    yaml-language-server
+    taplo
+    marksman
+    gopls
+    rust-analyzer
+    pyright
+    llvmPackages.clang-unwrapped # Includes clangd
+  ];
+
+  formatterPackages = with pkgs; [
+    nixfmt-rfc-style
+    biome
+    yamlfmt
+    gotools # Includes goimports
+    clang-tools # Includes clang-format
+    black # Python formatter
+    rustfmt # Rust formatter
+    # taplo is already in lspPackages
+  ];
 in
 {
   programs.helix = {
     enable = true;
+    extraPackages = lspPackages ++ formatterPackages;
     languages = {
       language = lib.mapAttrsToList (
         name: value:
@@ -130,5 +163,13 @@ in
         };
       };
     };
+  };
+
+  # Create runtime directory to fix health check warnings
+  # Helix looks for runtime files in ~/.config/helix/runtime
+  # This directory can be empty - Helix will use the Nix store runtime as fallback
+  # Using home.file creates the directory structure automatically
+  home.file.".config/helix/runtime/.keep" = {
+    text = "";
   };
 }

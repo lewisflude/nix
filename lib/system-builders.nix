@@ -41,6 +41,9 @@ let
     ++ optionalModule (home-manager != null) home-manager.darwinModules.home-manager
     ++ optionalModule (sops-nix != null) sops-nix.darwinModules.sops
     # Darwin-specific integrations
+    # mac-app-util: Creates trampoline launchers for Nix-installed .app bundles,
+    # making them searchable in Spotlight and allowing Dock pinning across updates.
+    # See: modules/darwin/mac-app-util.nix
     ++ optionalModule (mac-app-util != null) mac-app-util.darwinModules.default
     ++ optionalModule (nix-homebrew != null) nix-homebrew.darwinModules.nix-homebrew;
 
@@ -170,6 +173,8 @@ in
           {
             home-manager = mkHomeManagerConfig {
               inherit hostConfig;
+              # mac-app-util home-manager module: Enables app launcher support
+              # for user-specific packages installed via home-manager
               extraSharedModules = optionalModule (mac-app-util != null) mac-app-util.homeManagerModules.default;
             };
           }

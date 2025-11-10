@@ -19,5 +19,6 @@
     ./backup.nix
     ./sops.nix
     ./atuin.nix
+    ./mac-app-util.nix
   ];
 }

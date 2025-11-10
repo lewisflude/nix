@@ -15,21 +15,28 @@ in
       settings =
         let
           inherit (theme) colors;
+          # Helper to get hex without # prefix (for theme colors)
+          hexRaw = color: lib.removePrefix "#" color.hex;
         in
         {
-          # Background and foreground
-          background = "${colors."surface-base".hex}";
-          foreground = "${colors."text-primary".hex}";
+          # Set colors directly (ghostty doesn't support nested theme definitions in Home Manager)
+          # Background and foreground (without # prefix)
+          background = hexRaw colors."surface-base";
+          foreground = hexRaw colors."text-primary";
 
-          # Cursor
-          cursor-color = "${colors."accent-primary".hex}";
-          cursor-text = "${colors."surface-base".hex}";
+          # Cursor colors (without # prefix)
+          "cursor-color" = hexRaw colors."accent-primary";
+          "cursor-text" = hexRaw colors."surface-base";
 
-          # Selection
-          selection-background = "${colors."accent-primary".hex}";
-          selection-foreground = "${colors."surface-base".hex}";
+          # Selection colors (without # prefix)
+          "selection-background" = hexRaw colors."divider-primary";
+          "selection-foreground" = hexRaw colors."text-primary";
 
-          # ANSI colors (0-7: normal colors)
+          # Split divider color (without # prefix)
+          "split-divider-color" = hexRaw colors."divider-primary";
+
+          # ANSI color palette (ghostty uses palette = N=COLOR format)
+          # Set as a list for repeatable configuration field
           palette = [
             "0=${colors."ansi-black".hex}"
             "1=${colors."ansi-red".hex}"

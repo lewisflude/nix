@@ -16,8 +16,9 @@ in
     # Note: cachix is handled via programs.cachix in cachix.nix
     # Note: yq is handled via programs.yq in yq.nix
     # Note: sops is handled in features/security/default.nix
+    # Note: musescore is installed via Homebrew cask (modules/darwin/apps.nix)
+    # to avoid duplicate entries in Spotlight/Launchpad
     pkgs.pgcli
-    pkgs.musescore
     pkgs.cursor-cli # Cursor CLI tool from nixpkgs
     pkgs.claude-code # Claude agentic coding CLI
   ]
