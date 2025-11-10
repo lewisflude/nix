@@ -102,7 +102,9 @@ in
           maxActiveCheckingTorrents = 1;
           maxActiveUploads = 0; # 0 = Infinite
           maxActiveTorrents = 0; # 0 = Infinite
-          diskCacheSize = -1; # -1 = Enable OS Cache (uses RAM)
+          diskCacheSize = 2048; # Disk cache in MB (2GB - optimal for high-speed downloads)
+          # Note: Changed from -1 (OS cache) to explicit size because -1 was showing 0 B buffer
+          # This ensures qBittorrent actually uses the cache for better I/O performance
           maxConnections = 2000; # Global maximum number of connections
           maxConnectionsPerTorrent = 200; # Maximum number of connections per torrent
           maxUploads = 200; # Global maximum number of upload slots

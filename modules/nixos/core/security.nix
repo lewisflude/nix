@@ -108,6 +108,11 @@
     };
     polkit.enable = true;
   };
+
+  # Note: speech-dispatcher (~1.67 GiB) is pulled in as a dependency
+  # To exclude it, we need to find what's pulling it in and disable that instead
+  # It appears as a user unit, possibly from desktop environment or accessibility features
+
   services.gnome.gnome-keyring.enable = true;
 
   systemd.tmpfiles.rules = [

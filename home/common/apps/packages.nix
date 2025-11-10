@@ -19,7 +19,7 @@ in
     # Note: musescore is installed via Homebrew cask (modules/darwin/apps.nix)
     # to avoid duplicate entries in Spotlight/Launchpad
     pkgs.pgcli
-    pkgs.cursor-cli # Cursor CLI tool from nixpkgs
+    pkgs.cursor-cli
     pkgs.claude-code # Claude agentic coding CLI
   ]
   ++ lib.optional (nx != null) nx

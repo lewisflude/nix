@@ -136,5 +136,17 @@
   boot.kernel.sysctl = {
     "net.ipv4.conf.all.forwarding" = 1;
     "net.ipv6.conf.all.forwarding" = lib.mkDefault 1;
+
+    # WireGuard performance optimizations
+    # Increase maximum buffer sizes for high-throughput VPN traffic
+    "net.core.rmem_max" = 16777216; # 16MB
+    "net.core.wmem_max" = 16777216; # 16MB
+
+    # TCP buffer sizes (min, default, max)
+    "net.ipv4.tcp_rmem" = "4096 87380 16777216";
+    "net.ipv4.tcp_wmem" = "4096 65536 16777216";
+
+    # Enable BBR congestion control for better throughput
+    "net.ipv4.tcp_congestion_control" = "bbr";
   };
 }
