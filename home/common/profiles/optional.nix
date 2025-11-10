@@ -2,7 +2,7 @@
 {
   imports = [
 
-    ../apps/cursor
+    # ../apps/cursor  # Disabled to save ~1.04 GiB
     ../apps/lazydocker.nix
     ../features/development
 

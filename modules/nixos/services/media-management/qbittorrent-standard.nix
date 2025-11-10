@@ -100,7 +100,13 @@ in
       diskCacheSize = mkOption {
         type = types.nullOr types.int;
         default = null;
-        description = "Disk cache size in MB. Set to -1 to enable OS cache (uses RAM). 0 disables cache.";
+        description = ''
+          Disk cache size in MB.
+          - Set to -1 to enable OS cache (uses RAM) - NOTE: May not work properly, showing 0 B buffer size
+          - Set to 0 to disable cache (not recommended - major performance bottleneck)
+          - Set to >0 for explicit cache size (recommended: 512-4096 MB for high-speed downloads)
+          Recommended: Use explicit size (e.g., 2048 MB) instead of -1 for reliable cache performance.
+        '';
       };
 
       maxConnections = mkOption {
@@ -370,7 +376,9 @@ in
             MaxActiveCheckingTorrents = (cfg.qbittorrent.bittorrent or { }).maxActiveCheckingTorrents or 1;
             MaxActiveUploads = (cfg.qbittorrent.bittorrent or { }).maxActiveUploads or 0; # 0 = Infinite
             MaxActiveTorrents = (cfg.qbittorrent.bittorrent or { }).maxActiveTorrents or 0; # 0 = Infinite
-            DiskCacheSize = (cfg.qbittorrent.bittorrent or { }).diskCacheSize or (-1); # -1 = Enable OS Cache
+            # Note: -1 (OS cache) may not work properly in some qBittorrent versions, showing 0 B buffer
+            # Explicit cache size (e.g., 2048 MB) is recommended for reliable performance
+            DiskCacheSize = (cfg.qbittorrent.bittorrent or { }).diskCacheSize or (-1); # -1 = Enable OS Cache (may not work)
             MaxConnections = (cfg.qbittorrent.bittorrent or { }).maxConnections or 2000;
             MaxConnectionsPerTorrent = (cfg.qbittorrent.bittorrent or { }).maxConnectionsPerTorrent or 200;
             MaxUploads = (cfg.qbittorrent.bittorrent or { }).maxUploads or 200;
