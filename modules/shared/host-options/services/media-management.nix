@@ -107,6 +107,24 @@ in
         };
       };
 
+      bittorrent = mkOption {
+        type = types.attrsOf types.anything;
+        default = { };
+        description = "BitTorrent configuration options";
+      };
+
+      connection = mkOption {
+        type = types.attrsOf types.anything;
+        default = { };
+        description = "Connection configuration options (DHT, PEX, etc.)";
+      };
+
+      bittorrentAdvanced = mkOption {
+        type = types.attrsOf types.anything;
+        default = { };
+        description = "Advanced BitTorrent configuration options";
+      };
+
       vpn = {
         enable = mkOption {
           type = types.bool;

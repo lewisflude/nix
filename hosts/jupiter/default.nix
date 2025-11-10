@@ -95,6 +95,31 @@ in
           lidarr = "/mnt/storage/music";
           readarr = "/mnt/storage/books";
         };
+
+        bittorrent = {
+          protocol = "TCP"; # Peer connection protocol: TCP
+          queueingEnabled = true;
+          maxActiveCheckingTorrents = 1;
+          maxActiveUploads = 0; # 0 = Infinite
+          maxActiveTorrents = 0; # 0 = Infinite
+          diskCacheSize = -1; # -1 = Enable OS Cache (uses RAM)
+          maxConnections = 2000; # Global maximum number of connections
+          maxConnectionsPerTorrent = 200; # Maximum number of connections per torrent
+          maxUploads = 200; # Global maximum number of upload slots
+          maxUploadsPerTorrent = 5; # Maximum number of upload slots per torrent
+        };
+
+        connection = {
+          dhtEnabled = true;
+          pexEnabled = true;
+        };
+
+        bittorrentAdvanced = {
+          utpMixedModeAlgorithm = "Prefer TCP";
+          uploadSlotsBehavior = "Fixed slots";
+          uploadChokingAlgorithm = "Fastest upload";
+        };
+
         vpn = {
           enable = true;
 
