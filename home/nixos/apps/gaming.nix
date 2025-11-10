@@ -16,7 +16,6 @@ in
       protonup-qt
       (sunshine.override { cudaSupport = true; })
       moonlight-qt
-      dwarf-fortress
     ])
     ++ [ steamRunUrl ];
 }

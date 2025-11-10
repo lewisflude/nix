@@ -68,6 +68,16 @@ pog.pog {
         if ${flag "dry_run"}; then
           debug "DRY RUN: Would run 'nix flake update'"
         else
+          # Export GITHUB_TOKEN if available for higher rate limits
+          if [ -r /run/secrets-for-users/GITHUB_TOKEN ]; then
+            debug "Using GITHUB_TOKEN for authentication"
+            export GITHUB_TOKEN="$(cat /run/secrets-for-users/GITHUB_TOKEN)"
+            # Also set access-tokens for nix
+            export NIX_CONFIG="access-tokens = github.com=$GITHUB_TOKEN"
+          else
+            yellow "⚠️  GITHUB_TOKEN not found, rate limits may apply"
+          fi
+
           nix flake update
           green "✅ Flake inputs updated"
         fi
@@ -81,7 +91,8 @@ pog.pog {
 
 
         PACKAGES=(
-          "modules/nixos/services/home-assistant/custom-components/home-llm.nix"
+          # home-llm removed from customComponents to reduce system size
+          # "modules/nixos/services/home-assistant/custom-components/home-llm.nix"
         )
 
         for pkg_file in "''${PACKAGES[@]}"; do
@@ -143,7 +154,8 @@ pog.pog {
 
         if ! ${flag "skip_packages"}; then
           PACKAGES=(
-            "modules/nixos/services/home-assistant/custom-components/home-llm.nix"
+            # home-llm removed from customComponents to reduce system size
+            # "modules/nixos/services/home-assistant/custom-components/home-llm.nix"
           )
           for pkg_file in "''${PACKAGES[@]}"; do
             if [ -f "$pkg_file" ]; then

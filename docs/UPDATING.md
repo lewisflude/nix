@@ -100,7 +100,7 @@ Your configuration currently has these manual git references:
 
 | Package | Owner/Repo | Current Version |
 |---------|-----------|-----------------|
-| home-llm | acon96/home-llm | v0.3.9 |
+| ~~home-llm~~ | ~~acon96/home-llm~~ | ~~v0.3.9~~ (removed - not in use) |
 
 ## 🔄 Recommended Workflow
 

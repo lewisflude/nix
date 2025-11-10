@@ -13,7 +13,6 @@ let
       "${platformLib.dataDir config.host.username}/sops-nix/key.txt"
     else
       "/var/lib/sops-nix/key.txt";
-  secretsGroup = if isDarwin then "wheel" else "sops-secrets";
   mkSecret =
     {
       mode ? (if isDarwin then "0640" else "0400"),
@@ -27,10 +26,10 @@ let
           "0440"
         else
           mode;
-      resolvedOwner = if isDarwin then config.host.username else "root";
-      # On darwin, use "wheel" for user-readable secrets since neededForUsers creates files in
-      # /run/secrets-for-users/ with wheel group, and the user needs to be in wheel to read them
-      resolvedGroup = if isDarwin then "wheel" else secretsGroup;
+      resolvedOwner = if isDarwin then config.host.username else config.host.username;
+      # On NixOS with neededForUsers, we need to set the owner to the user, not root
+      # This allows the user to read their own secrets
+      resolvedGroup = if isDarwin then "wheel" else "users";
     in
     {
       mode = resolvedMode;

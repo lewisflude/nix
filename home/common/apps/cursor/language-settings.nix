@@ -6,6 +6,7 @@ let
     black = "ms-python.black-formatter";
     rustfmt = "rust-lang.rust-analyzer";
     nixfmt = "jnoortheen.nix-ide";
+    nixfmt-rfc-style = "jnoortheen.nix-ide";
     goimports = "golang.go";
     yamlfmt = "redhat.vscode-yaml";
     taplo = "tamasfe.even-better-toml";
