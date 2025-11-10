@@ -220,7 +220,7 @@ Service modules in `modules/nixos/services/` handle the actual service configura
 
 - **Feature Modules**: High-level feature flags
 - **Service Modules**: Low-level service configuration
-- **Relationship**: Features can bridge to services (e.g., `media-management.nix` → `qbittorrent.nix`)
+- **Relationship**: Features can bridge to services (e.g., `media-management.nix` → `qbittorrent-standard.nix`)
 
 ### Overlays → Packages
 

@@ -72,6 +72,112 @@ in
         default = "TCP";
         description = "BitTorrent protocol to use.";
       };
+
+      queueingEnabled = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        description = "Enable torrent queueing.";
+      };
+
+      maxActiveCheckingTorrents = mkOption {
+        type = types.nullOr types.int;
+        default = null;
+        description = "Maximum number of active checking torrents.";
+      };
+
+      maxActiveUploads = mkOption {
+        type = types.nullOr types.int;
+        default = null;
+        description = "Maximum number of active uploads (0 for unlimited).";
+      };
+
+      maxActiveTorrents = mkOption {
+        type = types.nullOr types.int;
+        default = null;
+        description = "Maximum number of active torrents (0 for unlimited).";
+      };
+
+      diskCacheSize = mkOption {
+        type = types.nullOr types.int;
+        default = null;
+        description = "Disk cache size in MB. Set to -1 to enable OS cache (uses RAM). 0 disables cache.";
+      };
+
+      maxConnections = mkOption {
+        type = types.nullOr types.int;
+        default = null;
+        description = "Global maximum number of connections.";
+      };
+
+      maxConnectionsPerTorrent = mkOption {
+        type = types.nullOr types.int;
+        default = null;
+        description = "Maximum number of connections per torrent.";
+      };
+
+      maxUploads = mkOption {
+        type = types.nullOr types.int;
+        default = null;
+        description = "Global maximum number of upload slots.";
+      };
+
+      maxUploadsPerTorrent = mkOption {
+        type = types.nullOr types.int;
+        default = null;
+        description = "Maximum number of upload slots per torrent.";
+      };
+    };
+
+    connection = {
+      dhtEnabled = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        description = "Enable DHT (Distributed Hash Table).";
+      };
+
+      pexEnabled = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        description = "Enable PEX (Peer Exchange).";
+      };
+    };
+
+    bittorrentAdvanced = {
+      utpMixedModeAlgorithm = mkOption {
+        type = types.nullOr (
+          types.enum [
+            "TCP"
+            "UTP"
+            "Prefer TCP"
+            "Prefer UTP"
+          ]
+        );
+        default = null;
+        description = "UTP-TCP Mixed Mode Algorithm.";
+      };
+
+      uploadSlotsBehavior = mkOption {
+        type = types.nullOr (
+          types.enum [
+            "Fixed slots"
+            "Upload rate based"
+          ]
+        );
+        default = null;
+        description = "Upload slots behaviour.";
+      };
+
+      uploadChokingAlgorithm = mkOption {
+        type = types.nullOr (
+          types.enum [
+            "Round-robin"
+            "Fastest upload"
+            "Anti-leech"
+          ]
+        );
+        default = null;
+        description = "Upload choking algorithm.";
+      };
     };
 
     categories = mkOption {
@@ -188,19 +294,58 @@ in
           };
 
           Connection = {
-
             uTP_rate_limit_enabled = true;
-
             Bittorrent_rate_limit_utp = false;
-
             LimitLANPeers = true;
+            DHTEnabled = (cfg.qbittorrent.connection or { }).dhtEnabled or true;
+            PEXEnabled = (cfg.qbittorrent.connection or { }).pexEnabled or true;
           };
 
           Bittorrent = {
-
             Encryption = 1;
-
             AnonymousMode = false;
+            UTPMixedModeAlgorithm =
+              if (cfg.qbittorrent.bittorrentAdvanced or { }).utpMixedModeAlgorithm != null then
+                (
+                  if (cfg.qbittorrent.bittorrentAdvanced or { }).utpMixedModeAlgorithm == "TCP" then
+                    0
+                  else if (cfg.qbittorrent.bittorrentAdvanced or { }).utpMixedModeAlgorithm == "UTP" then
+                    1
+                  else if (cfg.qbittorrent.bittorrentAdvanced or { }).utpMixedModeAlgorithm == "Prefer TCP" then
+                    2
+                  else if (cfg.qbittorrent.bittorrentAdvanced or { }).utpMixedModeAlgorithm == "Prefer UTP" then
+                    3
+                  else
+                    2
+                )
+              else
+                2; # Default to "Prefer TCP"
+            UploadSlotsBehavior =
+              if (cfg.qbittorrent.bittorrentAdvanced or { }).uploadSlotsBehavior != null then
+                (
+                  if (cfg.qbittorrent.bittorrentAdvanced or { }).uploadSlotsBehavior == "Fixed slots" then
+                    0
+                  else if (cfg.qbittorrent.bittorrentAdvanced or { }).uploadSlotsBehavior == "Upload rate based" then
+                    1
+                  else
+                    0
+                )
+              else
+                0; # Default to "Fixed slots"
+            UploadChokingAlgorithm =
+              if (cfg.qbittorrent.bittorrentAdvanced or { }).uploadChokingAlgorithm != null then
+                (
+                  if (cfg.qbittorrent.bittorrentAdvanced or { }).uploadChokingAlgorithm == "Round-robin" then
+                    0
+                  else if (cfg.qbittorrent.bittorrentAdvanced or { }).uploadChokingAlgorithm == "Fastest upload" then
+                    1
+                  else if (cfg.qbittorrent.bittorrentAdvanced or { }).uploadChokingAlgorithm == "Anti-leech" then
+                    2
+                  else
+                    1
+                )
+              else
+                1; # Default to "Fastest upload"
           };
 
           Queueing = {
@@ -219,13 +364,19 @@ in
             TempPath = "${cfg.dataPath}/torrents/incomplete";
             FinishedTorrentExportDirectory = "${cfg.dataPath}/torrents/complete";
             BTProtocol = (cfg.qbittorrent.bittorrent or { }).protocol or "TCP";
-
             Preallocation = true;
-
             SubcategoriesEnabled = true;
+            QueueingSystemEnabled = (cfg.qbittorrent.bittorrent or { }).queueingEnabled or true;
+            MaxActiveCheckingTorrents = (cfg.qbittorrent.bittorrent or { }).maxActiveCheckingTorrents or 1;
+            MaxActiveUploads = (cfg.qbittorrent.bittorrent or { }).maxActiveUploads or 0; # 0 = Infinite
+            MaxActiveTorrents = (cfg.qbittorrent.bittorrent or { }).maxActiveTorrents or 0; # 0 = Infinite
+            DiskCacheSize = (cfg.qbittorrent.bittorrent or { }).diskCacheSize or (-1); # -1 = Enable OS Cache
+            MaxConnections = (cfg.qbittorrent.bittorrent or { }).maxConnections or 2000;
+            MaxConnectionsPerTorrent = (cfg.qbittorrent.bittorrent or { }).maxConnectionsPerTorrent or 200;
+            MaxUploads = (cfg.qbittorrent.bittorrent or { }).maxUploads or 200;
+            MaxUploadsPerTorrent = (cfg.qbittorrent.bittorrent or { }).maxUploadsPerTorrent or 5;
           }
           // (
-
             if vpnEnabled then
               {
                 InterfaceName = "qbittor0";
