@@ -26,9 +26,8 @@ in
           deadnix.enable = true;
           statix = {
             enable = true;
-            entry = "${
-              nixpkgs.legacyPackages.${system}.statix
-            }/bin/statix check --format errfmt --ignore '**/systems.nix' --ignore '**/palette.nix' --ignore '**/tests/palette.nix' --ignore '**/wlsunset.nix' --ignore '**/polkit-gnome.nix' --ignore '**/gemini-cli.nix'";
+            entry = "${nixpkgs.legacyPackages.${system}.statix}/bin/statix check --format errfmt";
+            # Ignores are configured in statix.toml
           };
           commitizen.enable = true;
 
