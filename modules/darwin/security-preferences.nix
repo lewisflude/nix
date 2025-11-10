@@ -38,28 +38,5 @@ in
         SleepDisabled = false;
       };
     };
-
-    system.defaults.CustomUserPreferences = {
-
-      "com.apple.security" = {
-        allowApplePersonalizedAdvertising = false;
-      };
-
-      "com.apple.Safari" = {
-
-        SendDoNotTrackHTTPHeader = true;
-        WebKitJavaScriptCanOpenWindowsAutomatically = false;
-        "com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptCanOpenWindowsAutomatically" = false;
-        UniversalSearchEnabled = false;
-        SuppressSearchSuggestions = true;
-        WarnAboutFraudulentWebsites = true;
-        WebAutomaticSpellingCorrectionEnabled = false;
-
-        IncludeInternalDebugMenu = true;
-        IncludeDevelopMenu = true;
-        WebKitDeveloperExtrasEnabledPreferenceKey = true;
-        "com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled" = true;
-      };
-    };
   };
 }

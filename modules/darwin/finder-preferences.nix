@@ -43,95 +43,9 @@ in
         QuitMenuItem = true;
         FXEnableExtensionChangeWarning = false;
 
+        # Use "Home" instead of "Other" - more reliable
         NewWindowTarget = "Home";
 
-      };
-
-      CustomUserPreferences."com.apple.finder" = {
-
-        AppleShowAllExtensions = true;
-        AppleShowAllFiles = false;
-        ShowPathbar = true;
-        ShowStatusBar = true;
-        FXPreferredViewStyle = "Nlsv";
-        ShowTabView = true;
-        ShowSidebar = true;
-
-        WarnOnEmptyTrash = false;
-        DisableAllAnimations = false;
-        ShowRecentTags = false;
-
-        StandardViewSettings = {
-          ListViewSettings = {
-            columns = {
-              name = {
-                width = 300;
-              };
-              size = {
-                width = 100;
-              };
-              kind = {
-                width = 150;
-              };
-              dateModified = {
-                width = 180;
-              };
-            };
-          };
-        };
-      };
-
-      CustomUserPreferences."com.apple.Spotlight" = {
-        orderedItems = [
-          {
-            enabled = true;
-            name = "APPLICATIONS";
-          }
-          {
-            enabled = true;
-            name = "SYSTEM_PREFS";
-          }
-          {
-            enabled = true;
-            name = "DIRECTORIES";
-          }
-          {
-            enabled = true;
-            name = "PDF";
-          }
-          {
-            enabled = true;
-            name = "DOCUMENTS";
-          }
-          {
-            enabled = false;
-            name = "MESSAGES";
-          }
-          {
-            enabled = false;
-            name = "CONTACT";
-          }
-          {
-            enabled = false;
-            name = "EVENT_TODO";
-          }
-          {
-            enabled = false;
-            name = "IMAGES";
-          }
-          {
-            enabled = false;
-            name = "BOOKMARKS";
-          }
-          {
-            enabled = false;
-            name = "MUSIC";
-          }
-          {
-            enabled = false;
-            name = "MOVIES";
-          }
-        ];
       };
     };
   };
