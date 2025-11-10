@@ -98,6 +98,103 @@ let
         background-color: @theme_bg_color;
         color: @theme_fg_color;
       }
+
+      /* Dialog windows - ensure authentication dialogs use theme colors */
+      dialog {
+        background-color: @dialog_bg_color;
+        color: @dialog_fg_color;
+      }
+
+      dialog window {
+        background-color: @dialog_bg_color;
+        color: @dialog_fg_color;
+      }
+
+      /* Entry fields (including password inputs) */
+      entry {
+        background-color: @view_bg_color;
+        color: @view_fg_color;
+        border: 1px solid @borders;
+        border-radius: 6px;
+        padding: 6px 10px;
+        min-height: 32px;
+      }
+
+      entry:focus {
+        border-color: @accent_color;
+        outline: 1px solid @accent_color;
+        outline-offset: -1px;
+      }
+
+      entry:disabled {
+        background-color: @insensitive_bg_color;
+        color: @insensitive_fg_color;
+        border-color: @borders;
+      }
+
+      /* Ensure polkit and pinentry dialogs are styled */
+      window.background {
+        background-color: @dialog_bg_color;
+        color: @dialog_fg_color;
+      }
+
+      /* Authentication dialog specific styling */
+      .polkit-dialog,
+      .polkit-dialog window,
+      .polkit-dialog .background {
+        background-color: @dialog_bg_color;
+        color: @dialog_fg_color;
+      }
+
+      /* Pinentry dialog styling */
+      .pinentry-dialog,
+      .pinentry-dialog window,
+      .pinentry-dialog .background {
+        background-color: @dialog_bg_color;
+        color: @dialog_fg_color;
+      }
+
+      /* Labels in dialogs */
+      dialog label,
+      dialog .label {
+        color: @dialog_fg_color;
+      }
+
+      /* Buttons in dialogs */
+      dialog button {
+        background-color: @card_bg_color;
+        color: @dialog_fg_color;
+        border: 1px solid @borders;
+        border-radius: 6px;
+        padding: 6px 12px;
+        min-height: 32px;
+      }
+
+      dialog button:hover {
+        background-color: @divider_color;
+        border-color: @accent_color;
+      }
+
+      dialog button:active {
+        background-color: @accent_color;
+        color: @accent_fg_color;
+      }
+
+      dialog button.suggested-action {
+        background-color: @accent_bg_color;
+        color: @accent_fg_color;
+        border-color: @accent_bg_color;
+      }
+
+      dialog button.suggested-action:hover {
+        background-color: @accent_color;
+      }
+
+      /* Ensure all windows inherit dialog colors when they're dialogs */
+      window:not(.csd) {
+        background-color: @dialog_bg_color;
+        color: @dialog_fg_color;
+      }
     '';
 in
 {
