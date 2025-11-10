@@ -68,25 +68,6 @@
           NowPlaying = true;
           Sound = true;
         };
-
-        CustomUserPreferences = {
-
-          "com.apple.screencapture" = {
-            location = "~/Desktop";
-            type = "png";
-            disable-shadow = true;
-            include-date = true;
-            show-thumbnail = true;
-          };
-
-          "com.apple.menuextra.battery" = {
-            ShowPercent = true;
-          };
-
-          "com.apple.TimeMachine" = {
-            DoNotOfferNewDisksForBackup = false;
-          };
-        };
         NSGlobalDomain = {
           NSAutomaticCapitalizationEnabled = false;
           NSAutomaticPeriodSubstitutionEnabled = false;
