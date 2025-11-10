@@ -38,6 +38,7 @@ let
       /* Borders */
       @define-color borders ${colors."divider-primary".hex};
       @define-color unfocused_borders ${colors."divider-primary".hex};
+      @define-color divider_color ${colors."divider-primary".hex};
 
       /* State colors */
       @define-color warning_color ${colors."accent-warning".hex};
@@ -138,12 +139,103 @@ let
         color: @dialog_fg_color;
       }
 
-      /* Authentication dialog specific styling */
+      /* Polkit authentication dialog styling - comprehensive selectors */
+      /* polkit-gnome uses various class names and structures */
+      /* Note: GTK CSS doesn't support :has() or complex attribute selectors,
+         so we use broad selectors that will catch polkit dialogs */
       .polkit-dialog,
       .polkit-dialog window,
-      .polkit-dialog .background {
+      .polkit-dialog .background,
+      window.polkit-dialog,
+      window.polkit-dialog window,
+      window.polkit-dialog .background,
+      /* Target the actual authentication agent dialogs */
+      .polkit-agent-dialog,
+      .polkit-agent-dialog window,
+      .polkit-agent-dialog .background,
+      window.polkit-agent-dialog,
+      /* Target common polkit dialog structures */
+      .polkit-dialog-widget,
+      .polkit-dialog-widget window,
+      .polkit-dialog-widget .background {
         background-color: @dialog_bg_color;
         color: @dialog_fg_color;
+      }
+
+      /* Style password entry fields in polkit dialogs */
+      /* These selectors will apply to all entry fields, which is fine */
+      .polkit-dialog entry,
+      .polkit-agent-dialog entry,
+      .polkit-dialog-widget entry,
+      window.polkit-dialog entry,
+      window.polkit-agent-dialog entry {
+        background-color: @view_bg_color;
+        color: @view_fg_color;
+        border: 1px solid @borders;
+        border-radius: 6px;
+        padding: 6px 10px;
+        min-height: 32px;
+      }
+
+      .polkit-dialog entry:focus,
+      .polkit-agent-dialog entry:focus,
+      .polkit-dialog-widget entry:focus,
+      window.polkit-dialog entry:focus,
+      window.polkit-agent-dialog entry:focus {
+        border-color: @accent_color;
+        outline: 1px solid @accent_color;
+        outline-offset: -1px;
+      }
+
+      /* Labels in polkit dialogs */
+      .polkit-dialog label,
+      .polkit-agent-dialog label,
+      .polkit-dialog-widget label,
+      window.polkit-dialog label,
+      window.polkit-agent-dialog label {
+        color: @dialog_fg_color;
+      }
+
+      /* Buttons in polkit dialogs */
+      .polkit-dialog button,
+      .polkit-agent-dialog button,
+      .polkit-dialog-widget button,
+      window.polkit-dialog button,
+      window.polkit-agent-dialog button {
+        background-color: @card_bg_color;
+        color: @dialog_fg_color;
+        border: 1px solid @borders;
+        border-radius: 6px;
+        padding: 6px 12px;
+        min-height: 32px;
+      }
+
+      .polkit-dialog button:hover,
+      .polkit-agent-dialog button:hover,
+      .polkit-dialog-widget button:hover,
+      window.polkit-dialog button:hover,
+      window.polkit-agent-dialog button:hover {
+        background-color: @divider_color;
+        border-color: @accent_color;
+      }
+
+      .polkit-dialog button:active,
+      .polkit-agent-dialog button:active,
+      .polkit-dialog-widget button:active,
+      window.polkit-dialog button:active,
+      window.polkit-agent-dialog button:active {
+        background-color: @accent_color;
+        color: @accent_fg_color;
+      }
+
+      .polkit-dialog button.suggested-action,
+      .polkit-agent-dialog button.suggested-action,
+      .polkit-dialog-widget button.suggested-action,
+      window.polkit-dialog button.suggested-action,
+      window.polkit-agent-dialog button.suggested-action {
+        background-color: @accent_bg_color;
+        color: @accent_fg_color;
+        border-color: @accent_bg_color;
       }
 
       /* Pinentry dialog styling */
@@ -191,9 +283,28 @@ let
       }
 
       /* Ensure all windows inherit dialog colors when they're dialogs */
+      /* Non-CSD windows (like polkit dialogs) will use dialog colors */
       window:not(.csd) {
         background-color: @dialog_bg_color;
         color: @dialog_fg_color;
+      }
+
+      /* Ensure password entry fields always get proper styling */
+      entry[visibility="password"],
+      entry[input-purpose="password"] {
+        background-color: @view_bg_color;
+        color: @view_fg_color;
+        border: 1px solid @borders;
+        border-radius: 6px;
+        padding: 6px 10px;
+        min-height: 32px;
+      }
+
+      entry[visibility="password"]:focus,
+      entry[input-purpose="password"]:focus {
+        border-color: @accent_color;
+        outline: 1px solid @accent_color;
+        outline-offset: -1px;
       }
     '';
 in
