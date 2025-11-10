@@ -12,6 +12,11 @@ in
     development = defaultFeatures.development // {
       docker = true;
       lua = true;
+      # Moved to devShells to reduce system size (~2-4GB savings)
+      # Use: nix develop .#rust or direnv with .envrc
+      rust = false; # Use: nix develop .#rust
+      python = false; # Use: nix develop .#python
+      node = false; # Use: nix develop .#node
     };
 
     gaming = defaultFeatures.gaming // {
@@ -61,7 +66,7 @@ in
 
     productivity = defaultFeatures.productivity // {
       enable = true;
-      office = true;
+      office = false; # Disabled: LibreOffice (~1.3GB) - not needed
       notes = true;
       email = true;
       calendar = true;

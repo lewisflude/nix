@@ -28,10 +28,15 @@ let
     development = import ./projects/development.nix { inherit pkgs lib system; };
     shell-selector = import ./utils/shell-selector.nix { inherit pkgs; };
 
-    # Language shells for non-default languages
-    # Note: node, python, rust are installed system-wide via development.* features
-    # These shells are only for languages NOT in your system defaults
+    # Language shells
+    # Note: rust, python, node are now in devShells (not system-wide) to reduce system size
+    # Use: nix develop .#rust or direnv with .envrc
 
+    rust = import ./projects/rust.nix { inherit pkgs lib system; };
+    python = import ./projects/python.nix { inherit pkgs lib system; };
+    node = import ./projects/node.nix { inherit pkgs lib system; };
+
+    # Language shells for non-default languages
     go = pkgs.mkShell {
       buildInputs =
         featureBuilders.mkShellPackages {

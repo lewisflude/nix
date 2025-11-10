@@ -37,7 +37,9 @@ in
     hardware = {
       graphics = {
         enable = true;
-        enable32Bit = true;
+        # enable32Bit is now controlled by gaming feature
+        # Only enable if gaming is enabled (set in gaming.nix)
+        enable32Bit = config.host.features.gaming.enable or false;
         extraPackages = [
           # NVIDIA driver package - provides GBM backend for Wayland compositors
           package
