@@ -57,7 +57,7 @@ in
       KAGI_API_KEY = mkSecret { allowUserRead = true; };
       OBSIDIAN_API_KEY = mkSecret { allowUserRead = true; };
       OPENAI_API_KEY = mkSecret { allowUserRead = true; };
-      "vpn-confinement-qbittorrent" = mkSecret { };
+      "protonvpn/private_key" = mkSecret { };
     };
   };
 

@@ -9,10 +9,7 @@
     ./lidarr.nix
     ./readarr.nix
     ./sabnzbd.nix
-
-    ./qbittorrent-standard.nix
-    ./qbittorrent-vpn-confinement.nix
-    ./qbittorrent-proxy.nix
+    ./qbittorrent.nix
     ./jellyfin.nix
     ./jellyseerr.nix
     ./flaresolverr.nix

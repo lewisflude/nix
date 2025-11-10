@@ -95,37 +95,6 @@ in
           lidarr = "/mnt/storage/music";
           readarr = "/mnt/storage/books";
         };
-
-        bittorrent = {
-          protocol = "TCP"; # TCP is preferred for VPN - more reliable than UTP over VPN tunnels
-          queueingEnabled = true;
-          maxActiveCheckingTorrents = 3; # Increased from 1 - allows faster torrent checking if storage is fast
-          maxActiveUploads = 0; # 0 = Infinite
-          maxActiveTorrents = 0; # 0 = Infinite
-          diskCacheSize = 2048; # Disk cache in MB (2GB - optimal for high-speed downloads)
-          # Note: Changed from -1 (OS cache) to explicit size because -1 was showing 0 B buffer
-          # This ensures qBittorrent actually uses the cache for better I/O performance
-          maxConnections = 2000; # Global maximum number of connections (optimal for most systems)
-          maxConnectionsPerTorrent = 200; # Maximum number of connections per torrent (good balance)
-          maxUploads = 200; # Global maximum number of upload slots
-          maxUploadsPerTorrent = 15; # Upload slots per torrent (balanced: 10-20 is optimal for high-speed)
-        };
-
-        connection = {
-          dhtEnabled = true;
-          pexEnabled = true;
-        };
-
-        bittorrentAdvanced = {
-          utpMixedModeAlgorithm = "Prefer TCP";
-          uploadSlotsBehavior = "Upload rate based"; # Changed from "Fixed slots" - dynamically allocates slots based on upload speed
-          uploadChokingAlgorithm = "Fastest upload";
-        };
-
-        vpn = {
-          enable = true;
-
-        };
       };
     };
 
