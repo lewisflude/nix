@@ -134,26 +134,39 @@ in
 
         interfaceName = mkOption {
           type = types.str;
-          default = "wg-mullvad";
-          description = "WireGuard interface name for VPN routing";
+          default = "qbittor0";
+          description = ''
+            WireGuard interface name for VPN routing.
+            Note: This is derived from the namespace as "<namespace>0" by VPN-Confinement.
+            The interface is automatically created by VPN-Confinement.
+          '';
         };
 
         namespace = mkOption {
           type = types.str;
-          default = "wg-qbittorrent";
-          description = "Network namespace name for VPN isolation";
+          default = "qbittor";
+          description = ''
+            Network namespace name for VPN isolation.
+            The interface name will be automatically set to "<namespace>0" (e.g., "qbittor0").
+          '';
         };
 
         vethHostIP = mkOption {
           type = types.str;
           default = "10.200.200.1/24";
-          description = "IP address for veth-host interface";
+          description = ''
+            IP address for veth-host interface.
+            Note: VPN-Confinement handles veth setup automatically - this option is reserved for future use.
+          '';
         };
 
         vethVPNIP = mkOption {
           type = types.str;
           default = "10.200.200.2/24";
-          description = "IP address for veth-vpn interface";
+          description = ''
+            IP address for veth-vpn interface.
+            Note: VPN-Confinement handles veth setup automatically - this option is reserved for future use.
+          '';
         };
       };
     };

@@ -97,7 +97,7 @@ in
         };
 
         bittorrent = {
-          protocol = "Both"; # Use both TCP and UTP for maximum peer connectivity (TCP preferred for VPN)
+          protocol = "TCP"; # TCP is preferred for VPN - more reliable than UTP over VPN tunnels
           queueingEnabled = true;
           maxActiveCheckingTorrents = 3; # Increased from 1 - allows faster torrent checking if storage is fast
           maxActiveUploads = 0; # 0 = Infinite
