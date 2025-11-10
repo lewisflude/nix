@@ -59,13 +59,15 @@ let
     # Apply sysctl settings to namespace for optimal WireGuard performance
     echo "Applying performance optimizations to namespace $namespace..."
 
-    # Network buffer optimizations
+    # Network buffer optimizations (IPv4)
     ${pkgs.iproute2}/bin/ip netns exec "$namespace" ${pkgs.procps}/bin/sysctl -w net.core.rmem_max=16777216 || true
     ${pkgs.iproute2}/bin/ip netns exec "$namespace" ${pkgs.procps}/bin/sysctl -w net.core.wmem_max=16777216 || true
+
+    # IPv4 TCP buffer sizes (min, default, max)
     ${pkgs.iproute2}/bin/ip netns exec "$namespace" ${pkgs.procps}/bin/sysctl -w net.ipv4.tcp_rmem="4096 87380 16777216" || true
     ${pkgs.iproute2}/bin/ip netns exec "$namespace" ${pkgs.procps}/bin/sysctl -w net.ipv4.tcp_wmem="4096 65536 16777216" || true
 
-    # BBR congestion control (if available)
+    # BBR congestion control (IPv4)
     ${pkgs.iproute2}/bin/ip netns exec "$namespace" ${pkgs.procps}/bin/sysctl -w net.ipv4.tcp_congestion_control=bbr 2>/dev/null || true
 
     # Set MTU if different from target (may already be set in WireGuard config)
@@ -125,7 +127,6 @@ in
       wireguardConfigFile = config.sops.secrets."vpn-confinement-qbittorrent".path;
       accessibleFrom = [
         "127.0.0.1/32"
-        "::1/128"
         "192.168.1.0/24"
         "192.168.0.0/24"
         "10.0.0.0/8"
