@@ -261,15 +261,7 @@ in
           # Disable UPnP/NAT-PMP when VPN is enabled - port forwarding is handled by
           # protonvpn-port-forwarding service using natpmpc directly to the gateway
           PortForwardingEnabled = !vpnEnabled;
-        }
-        // (
-          if vpnEnabled then
-            {
-              InterfaceName = "qbittor0";
-            }
-          else
-            { }
-        );
+        };
 
         Preferences = {
           WebUI = {
@@ -314,6 +306,11 @@ in
             LimitLANPeers = true;
             DHTEnabled = (cfg.qbittorrent.connection or { }).dhtEnabled or true;
             PEXEnabled = (cfg.qbittorrent.connection or { }).pexEnabled or true;
+          }
+          // optionalAttrs vpnEnabled {
+            # Bind to IPv4 only (0.0.0.0 means all IPv4 addresses on the interface)
+            # This prevents IPv6 leaks when combined with InterfaceName binding
+            InterfaceAddress = "0.0.0.0";
           };
 
           Bittorrent = {

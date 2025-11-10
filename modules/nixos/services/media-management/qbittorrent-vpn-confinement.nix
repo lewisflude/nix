@@ -70,6 +70,11 @@ let
     # BBR congestion control (IPv4)
     ${pkgs.iproute2}/bin/ip netns exec "$namespace" ${pkgs.procps}/bin/sysctl -w net.ipv4.tcp_congestion_control=bbr 2>/dev/null || true
 
+    # Disable IPv6 to prevent leaks when using VPN
+    ${pkgs.iproute2}/bin/ip netns exec "$namespace" ${pkgs.procps}/bin/sysctl -w net.ipv6.conf.all.disable_ipv6=1 || true
+    ${pkgs.iproute2}/bin/ip netns exec "$namespace" ${pkgs.procps}/bin/sysctl -w net.ipv6.conf.default.disable_ipv6=1 || true
+    ${pkgs.iproute2}/bin/ip netns exec "$namespace" ${pkgs.procps}/bin/sysctl -w net.ipv6.conf."$interface".disable_ipv6=1 || true
+
     # Set MTU if different from target (may already be set in WireGuard config)
     current_mtu=$(${pkgs.iproute2}/bin/ip netns exec "$namespace" ${pkgs.iproute2}/bin/ip link show "$interface" 2>/dev/null | ${pkgs.gawk}/bin/awk '/mtu/ {print $5}' || echo "")
     if [ -n "$current_mtu" ] && [ "$current_mtu" != "$mtu" ]; then
@@ -105,12 +110,14 @@ let
     while true; do
       date
 
-      ${pkgs.libnatpmp}/bin/natpmpc -a ${toString bittorrentPort} 0 udp 60 -g ${protonvpnGateway} || {
+      # Request port forwarding: -a <external_port> <internal_port> <protocol> <lifetime> -g <gateway>
+      # ProtonVPN assigns a random external port, but we need to specify the internal port explicitly
+      ${pkgs.libnatpmp}/bin/natpmpc -a 0 ${toString bittorrentPort} udp 60 -g ${protonvpnGateway} || {
         echo "ERROR: UDP port forwarding failed" >&2
         exit 1
       }
 
-      ${pkgs.libnatpmp}/bin/natpmpc -a ${toString bittorrentPort} 0 tcp 60 -g ${protonvpnGateway} || {
+      ${pkgs.libnatpmp}/bin/natpmpc -a 0 ${toString bittorrentPort} tcp 60 -g ${protonvpnGateway} || {
         echo "ERROR: TCP port forwarding failed" >&2
         exit 1
       }
