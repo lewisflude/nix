@@ -40,7 +40,7 @@ in
       address = mkOption {
         type = types.nullOr types.str;
         default = null;
-        description = "WebUI bind address. Use '*' or '0.0.0.0' to bind to all interfaces. Defaults to '*' when VPN is enabled.";
+        description = "WebUI bind address. Use '*' or '0.0.0.0' to bind to all IPv4 interfaces. Defaults to '*' when VPN is enabled.";
       };
 
       username = mkOption {
@@ -258,9 +258,18 @@ in
         };
 
         Network = {
-
-          PortForwardingEnabled = true;
-        };
+          # Disable UPnP/NAT-PMP when VPN is enabled - port forwarding is handled by
+          # protonvpn-port-forwarding service using natpmpc directly to the gateway
+          PortForwardingEnabled = !vpnEnabled;
+        }
+        // (
+          if vpnEnabled then
+            {
+              InterfaceName = "qbittor0";
+            }
+          else
+            { }
+        );
 
         Preferences = {
           WebUI = {

@@ -142,11 +142,16 @@
     "net.core.rmem_max" = 16777216; # 16MB
     "net.core.wmem_max" = 16777216; # 16MB
 
-    # TCP buffer sizes (min, default, max)
+    # TCP buffer sizes (min, default, max) - IPv4
     "net.ipv4.tcp_rmem" = "4096 87380 16777216";
     "net.ipv4.tcp_wmem" = "4096 65536 16777216";
 
-    # Enable BBR congestion control for better throughput
+    # TCP buffer sizes (min, default, max) - IPv6 (same as IPv4 for consistency)
+    "net.ipv6.tcp_rmem" = "4096 87380 16777216";
+    "net.ipv6.tcp_wmem" = "4096 65536 16777216";
+
+    # Enable BBR congestion control for better throughput (IPv4 and IPv6)
     "net.ipv4.tcp_congestion_control" = "bbr";
+    "net.ipv6.tcp_congestion_control" = "bbr";
   };
 }
