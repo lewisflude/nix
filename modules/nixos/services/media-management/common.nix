@@ -11,16 +11,30 @@ let
 in
 {
   config = mkIf cfg.enable {
-    users.users.${cfg.user} = {
-      isSystemUser = true;
-      inherit (cfg) group;
-      description = "Media services user";
+    users = {
+      users.${cfg.user} = {
+        isSystemUser = true;
+        inherit (cfg) group;
+        description = "Media services user";
 
-      home = "/var/lib/${cfg.user}";
-      createHome = true;
+        home = "/var/lib/${cfg.user}";
+        createHome = true;
+      };
+
+      # Quarantine user for qBittorrent with VPN routing
+      users.quarantine = {
+        isSystemUser = true;
+        group = "quarantine";
+        # Add to media group so it can access shared storage directories
+        extraGroups = [ cfg.group ];
+        description = "Quarantine user for qBittorrent with VPN routing";
+        home = "/var/lib/quarantine";
+        createHome = true;
+      };
+
+      groups.${cfg.group} = { };
+      groups.quarantine = { };
     };
-
-    users.groups.${cfg.group} = { };
 
     # Use native systemd.tmpfiles.rules format (standard NixOS pattern)
     # Format: "d <path> <mode> <user> <group> -"
@@ -69,7 +83,11 @@ in
             mode = "0775";
           }
         ];
+        mediaTmpfiles = map (dir: mkDirRule (dir // { inherit (cfg) user group; })) mediaDirs;
+        quarantineTmpfiles = [
+          "d /var/lib/quarantine 0755 quarantine quarantine -"
+        ];
       in
-      map (dir: mkDirRule (dir // { inherit (cfg) user group; })) mediaDirs;
+      mediaTmpfiles ++ quarantineTmpfiles;
   };
 }

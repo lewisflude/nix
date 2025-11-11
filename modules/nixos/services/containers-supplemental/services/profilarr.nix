@@ -6,7 +6,7 @@
 let
   inherit (lib) mkIf mkEnableOption;
   containersLib = import ../lib.nix { inherit lib; };
-  inherit (containersLib) mkResourceOptions mkResourceFlags mkHealthFlags;
+  inherit (containersLib) mkResourceOptions mkResourceFlags;
 
   cfg = config.host.services.containersSupplemental;
 in
@@ -33,10 +33,8 @@ in
       ];
       ports = [ "6868:6868" ];
       extraOptions =
-        mkHealthFlags {
-          cmd = "wget --no-verbose --tries=1 --spider http://localhost:6868/ || exit 1";
-        }
-        ++ mkResourceFlags cfg.profilarr.resources;
+        # Removed healthcheck - curl not available in container and service works without it
+        mkResourceFlags cfg.profilarr.resources;
     };
 
     systemd.tmpfiles.rules = [

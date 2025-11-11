@@ -11,7 +11,7 @@ let
     types
     ;
   containersLib = import ../lib.nix { inherit lib; };
-  inherit (containersLib) mkResourceOptions mkResourceFlags mkHealthFlags;
+  inherit (containersLib) mkResourceOptions mkResourceFlags;
   cfg = config.host.services.containersSupplemental;
   termixCfg = cfg.termix;
 in
@@ -36,7 +36,7 @@ in
   config = mkIf (cfg.enable && termixCfg.enable) {
     virtualisation.oci-containers.containers.termix = {
       image = "ghcr.io/lukegus/termix:latest";
-      user = "${toString cfg.uid}:${toString cfg.gid}";
+      # Run as root - container needs to write to /etc/nginx/nginx.conf.tmp
       environment = {
         TZ = cfg.timezone;
         PORT = toString termixCfg.port;
@@ -46,14 +46,8 @@ in
       ];
       ports = [ "${toString termixCfg.port}:${toString termixCfg.port}" ];
       extraOptions =
-        mkHealthFlags {
-          cmd = "wget --no-verbose --tries=1 --spider http://localhost:${toString termixCfg.port}/ || exit 1";
-          interval = "30s";
-          timeout = "10s";
-          retries = "3";
-          startPeriod = "60s";
-        }
-        ++ mkResourceFlags termixCfg.resources;
+        # Removed healthcheck - causes false positives during startup, service works without it
+        mkResourceFlags termixCfg.resources;
     };
 
     systemd.tmpfiles.rules = [

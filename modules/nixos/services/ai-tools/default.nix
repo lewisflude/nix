@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -8,6 +9,7 @@ let
     mkIf
     mkEnableOption
     mkOption
+    mkPackageOption
     types
     ;
   cfg = config.host.services.aiTools;
@@ -65,16 +67,42 @@ in
         default = true;
       };
 
+      package = mkPackageOption pkgs "open-webui" { };
+
       port = mkOption {
         type = types.port;
         default = 7000;
         description = "Port for Open WebUI";
       };
 
+      host = mkOption {
+        type = types.str;
+        default = "0.0.0.0";
+        description = "Host address to bind to";
+      };
+
+      openFirewall = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Whether to open the firewall for Open WebUI";
+      };
+
+      stateDir = mkOption {
+        type = types.str;
+        default = "/var/lib/open-webui";
+        description = "Directory for Open WebUI state";
+      };
+
       ollamaUrl = mkOption {
         type = types.str;
         default = "http://127.0.0.1:11434";
         description = "URL to Ollama backend";
+      };
+
+      environmentFile = mkOption {
+        type = types.nullOr types.path;
+        default = null;
+        description = "Path to environment file for sensitive configuration";
       };
     };
   };

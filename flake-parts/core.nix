@@ -1,6 +1,4 @@
-{
-  ...
-}:
+{ inputs, ... }:
 {
   # Main flake-parts entry point
   # Imports all modular components
@@ -16,6 +14,7 @@
     # Foundation
     ./systems.nix
     ./module-args.nix
+    inputs.process-compose-flake.flakeModule
     # perSystem: package setup
     ./per-system/pkgs.nix
     ./per-system/pog-overlay.nix
@@ -25,6 +24,7 @@
     ./per-system/devShells.nix
     ./per-system/apps.nix
     ./per-system/topology.nix
+    ./per-system/process-compose.nix
     # Flake-level outputs
     ./outputs/darwin.nix
     ./outputs/nixos.nix

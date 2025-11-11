@@ -121,7 +121,7 @@ in
       jellystat.enable = true;
       termix = {
         enable = true;
-        port = 8081;
+        port = 8083;
       };
       profilarr.enable = true;
       doplarr.enable = false;
