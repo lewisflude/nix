@@ -17,10 +17,10 @@ in
   options.services.protonvpnPortForwarding = {
     enable = mkEnableOption "ProtonVPN NAT-PMP port forwarding";
 
-    vpnNamespace = mkOption {
+    vpnInterface = mkOption {
       type = types.str;
-      default = "qbittor";
-      description = "VPN network namespace name";
+      default = "qbittor0";
+      description = "VPN WireGuard interface name";
     };
 
     vpnGateway = mkOption {
@@ -94,8 +94,11 @@ in
     systemd.services.protonvpn-port-forwarding = {
       description = "ProtonVPN NAT-PMP Port Forwarding";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
-      # Wait for VPN namespace to exist
+      after = [
+        "network.target"
+        "systemd-networkd.service"
+      ];
+      # Wait for network and WireGuard interface to be ready
       requires = [ "network-online.target" ];
       wants = [ "network-online.target" ];
 
@@ -118,21 +121,21 @@ in
             script = pkgs.writeShellScript "protonvpn-natpmp-loop" ''
               set -euo pipefail
 
-              NAMESPACE="${cfg.vpnNamespace}"
+              VPN_INTERFACE="${cfg.vpnInterface}"
               VPN_GATEWAY="${cfg.vpnGateway}"
               INTERNAL_PORT="${toString cfg.internalPort}"
               LEASE_TIME="${toString cfg.leaseTime}"
               RENEW_INTERVAL="${toString cfg.renewInterval}"
 
-              # Wait for VPN namespace to exist
-              echo "Waiting for VPN namespace '$NAMESPACE' to be available..."
+              # Wait for VPN interface to exist
+              echo "Waiting for VPN interface '$VPN_INTERFACE' to be available..."
               for i in {1..30}; do
-                if ${pkgs.iproute2}/bin/ip netns list | grep -q "^$NAMESPACE"; then
-                  echo "VPN namespace '$NAMESPACE' found"
+                if ${pkgs.iproute2}/bin/ip link show "$VPN_INTERFACE" >/dev/null 2>&1; then
+                  echo "VPN interface '$VPN_INTERFACE' found"
                   break
                 fi
                 if [ $i -eq 30 ]; then
-                  echo "ERROR: VPN namespace '$NAMESPACE' not found after 30 attempts"
+                  echo "ERROR: VPN interface '$VPN_INTERFACE' not found after 30 attempts"
                   exit 1
                 fi
                 sleep 1
@@ -141,12 +144,12 @@ in
               # Wait for VPN interface to be up
               echo "Waiting for VPN interface to be up..."
               for i in {1..30}; do
-                if ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iproute2}/bin/ip link show qbittor0 >/dev/null 2>&1; then
+                if ${pkgs.iproute2}/bin/ip link show "$VPN_INTERFACE" | grep -q "UP"; then
                   echo "VPN interface is up"
                   break
                 fi
                 if [ $i -eq 30 ]; then
-                  echo "ERROR: VPN interface not found after 30 attempts"
+                  echo "ERROR: VPN interface not up after 30 attempts"
                   exit 1
                 fi
                 sleep 1
@@ -236,14 +239,14 @@ in
                 # Request UDP port mapping
                 # Request any external port (0) -> internal port 6881
                 # Note: natpmpc -a format is: <public port> <private port> <protocol> [lifetime]
-                UDP_OUTPUT=$(${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.libnatpmp}/bin/natpmpc \
+                UDP_OUTPUT=$(${pkgs.libnatpmp}/bin/natpmpc \
                   -g "$VPN_GATEWAY" \
                   -a 0 "$INTERNAL_PORT" udp "$LEASE_TIME" 2>&1 || echo "")
 
                 # Request TCP port mapping
                 # Request any external port (0) -> internal port 6881
                 # Note: natpmpc -a format is: <public port> <private port> <protocol> [lifetime]
-                TCP_OUTPUT=$(${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.libnatpmp}/bin/natpmpc \
+                TCP_OUTPUT=$(${pkgs.libnatpmp}/bin/natpmpc \
                   -g "$VPN_GATEWAY" \
                   -a 0 "$INTERNAL_PORT" tcp "$LEASE_TIME" 2>&1 || echo "")
 
@@ -277,9 +280,7 @@ in
             '';
           in
           "${script}";
-        # Run in VPN namespace if possible, otherwise rely on ip netns exec in script
-        # Note: We can't use NetworkNamespace= because systemd doesn't know about custom namespaces
-        # So we use ip netns exec in the script itself
+        # Run NAT-PMP commands directly on the main network namespace
       };
     };
   };

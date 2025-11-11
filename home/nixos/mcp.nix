@@ -97,6 +97,19 @@ let
         "''${extra_args[@]}" -c "$OUT_LINK/bin/rustdocs_mcp_server" "$@"
     '';
   };
+  docsMcpWrapper = pkgs.writeShellApplication {
+    name = "docs-mcp-wrapper";
+    runtimeInputs = [
+      pkgs.coreutils
+      nodejs
+    ];
+    text = ''
+      set -euo pipefail
+      OPENAI_API_KEY="$(${pkgs.coreutils}/bin/cat ${systemConfig.sops.secrets.OPENAI_API_KEY.path})"
+      export OPENAI_API_KEY
+      exec ${nodejs}/bin/npx -y @arabold/docs-mcp-server@latest "$@"
+    '';
+  };
   mkAddJsonCmd =
     name: serverCfg:
     let
@@ -175,6 +188,7 @@ let
     ${nodejs}/bin/npx -y @modelcontextprotocol/server-filesystem@latest --help >/dev/null 2>&1 || true
     ${nodejs}/bin/npx -y @modelcontextprotocol/server-memory@latest --help >/dev/null 2>&1 || true
     ${nodejs}/bin/npx -y @modelcontextprotocol/server-sequential-thinking@latest --help >/dev/null 2>&1 || true
+    ${nodejs}/bin/npx -y @arabold/docs-mcp-server@latest --help >/dev/null 2>&1 || true
     ${nodejs}/bin/npx -y tritlo/lsp-mcp --help >/dev/null 2>&1 || true
     echo "[mcp-warm] Warm-up complete."
   '';
@@ -190,6 +204,7 @@ in
       gawk
       kagiWrapper
       openaiWrapper
+      docsMcpWrapper
       lua-language-server
       nodePackages.typescript-language-server
       nodePackages.typescript
@@ -314,6 +329,11 @@ in
         env = {
           UV_PYTHON = "${pkgs.python3}/bin/python3";
         };
+      };
+      docs-mcp-server = {
+        command = "${docsMcpWrapper}/bin/docs-mcp-wrapper";
+        args = [ ];
+        port = 6280;
       };
     };
   };

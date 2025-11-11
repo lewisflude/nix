@@ -37,59 +37,31 @@
 
   boot.loader.systemd-boot.configurationLimit = 5;
 
-  # VPN Confinement namespace for qBittorrent
-  vpnNamespaces.qbittor = {
+  # WireGuard VPN for qBittorrent with user-specific routing
+  services.wireguard-qbittorrent = {
     enable = true;
-    wireguardConfigFile = config.sops.templates.wireguard-config-file.path;
-    accessibleFrom = [
+    user = "media"; # qBittorrent runs as this user
+    privateKeyFile = config.sops.secrets."protonvpn/private_key".path;
+    peers = [
+      {
+        publicKey = "ronr+8v670J0CPb0xT5QLGMWDfE7+1g7HmC6YMdCIDk=";
+        allowedIPs = [
+          "0.0.0.0/0"
+          "::/0"
+        ];
+        endpoint = "138.199.7.129:51820";
+      }
+    ];
+    localNetworks = [
       "192.168.1.0/24" # Local network
-      "127.0.0.1" # Localhost
-    ];
-    portMappings = [
-      {
-        from = 8080;
-        to = 8080;
-        protocol = "tcp";
-      }
-      {
-        from = 6881;
-        to = 6881;
-        protocol = "both";
-      }
-    ];
-    openVPNPorts = [
-      {
-        port = 6881;
-        protocol = "both";
-      }
+      "127.0.0.1/32" # Localhost
+      "::1/128" # IPv6 localhost
     ];
   };
 
   # SOPS configuration for WireGuard VPN
-  sops = {
-    templates.wireguard-config-file = {
-      content = ''
-        [Interface]
-        # Bouncing = 4
-        # NetShield = 0
-        # Moderate NAT = off
-        # NAT-PMP (Port Forwarding) = on
-        # VPN Accelerator = off
-        PrivateKey = ${config.sops.placeholder."protonvpn/private_key"}
-        Address = 10.2.0.2/32
-        DNS = 10.2.0.1
-
-        [Peer]
-        # NL#89
-        PublicKey = +HCLUCm6PdbDIaKtEM3pOWBEKSB/UdpBwRY5cNl6ZnI=
-        AllowedIPs = 0.0.0.0/0, ::/0
-        Endpoint = 138.199.7.129:51820
-      '';
-      owner = config.host.services.mediaManagement.user;
-    };
-    secrets = {
-      "protonvpn/private_key".owner = lib.mkForce config.host.services.mediaManagement.user;
-    };
+  sops.secrets = {
+    "protonvpn/private_key".owner = config.host.services.mediaManagement.user;
   };
 
   # ProtonVPN NAT-PMP Port Forwarding
@@ -97,7 +69,7 @@
   # It runs in a loop, renewing the port mappings every 45 seconds (before the 60s lease expires)
   services.protonvpnPortForwarding = {
     enable = true;
-    vpnNamespace = "qbittor";
+    vpnInterface = "qbittor0";
     vpnGateway = "10.2.0.1"; # ProtonVPN DNS/gateway IP
     internalPort = 6881; # Port that qBittorrent listens on
     leaseTime = 60; # NAT-PMP lease time (ProtonVPN uses 60 seconds)
@@ -112,6 +84,12 @@
     #   # password can be provided here or will be read from SOPS secrets.yaml
     #   password = null; # Will try to read from SOPS if not provided
     # };
+  };
+
+  # Firewall configuration for systemd.network WireGuard
+  networking.firewall = {
+    allowedUDPPorts = [ 51820 ];
+    checkReversePath = "loose";
   };
 
 }
