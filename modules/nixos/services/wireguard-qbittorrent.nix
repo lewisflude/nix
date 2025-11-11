@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 let
@@ -104,15 +103,18 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Enable systemd-networkd
+    # Enable systemd-networkd for proper network management
     systemd.network.enable = true;
-    networking.useNetworkd = true;
 
-    # Allow WireGuard port
-    networking.firewall.allowedUDPPorts = [ 51820 ];
+    networking = {
+      useNetworkd = true;
 
-    # Configure reverse path filtering to allow VPN traffic
-    networking.firewall.checkReversePath = "loose";
+      # Allow WireGuard port
+      firewall.allowedUDPPorts = [ 51820 ];
+
+      # Configure reverse path filtering to allow VPN traffic
+      firewall.checkReversePath = "loose";
+    };
 
     systemd.network = {
       netdevs."50-${cfg.interfaceName}" = {
@@ -145,9 +147,7 @@ in
 
       networks."50-${cfg.interfaceName}" = {
         matchConfig.Name = cfg.interfaceName;
-
-        address = cfg.address;
-        dns = cfg.dns;
+        inherit (cfg) address dns;
 
         # DNS settings for systemd-resolved
         networkConfig = {
