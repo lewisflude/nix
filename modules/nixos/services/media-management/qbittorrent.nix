@@ -16,9 +16,8 @@ let
   qbittorrentCfg = cfg.qbittorrent or { };
   # VPN namespace interface IP - VPN-Confinement typically assigns 192.168.15.1 to namespace interfaces
   vpnNamespaceIP = "192.168.15.1";
-  # VPN WireGuard interface name and IP
+  # VPN WireGuard interface name
   vpnInterfaceName = "qbittor0";
-  vpnInterfaceIP = "10.2.0.2";
   webUI = qbittorrentCfg.webUI or null;
 in
 {
@@ -53,6 +52,24 @@ in
       default = null;
       description = "Category save paths";
     };
+
+    diskCacheSize = mkOption {
+      type = types.int;
+      default = 128;
+      description = ''
+        Disk cache size in MiB.
+        - 0 = disabled
+        - -1 = auto (qBittorrent decides)
+        - >0 = fixed size in MiB
+        Recommended: 64-128 MiB for good performance, up to 512 MiB for high-activity setups.
+      '';
+    };
+
+    diskCacheTTL = mkOption {
+      type = types.int;
+      default = 60;
+      description = "Disk cache TTL in seconds (how long to keep data in cache)";
+    };
   };
 
   config = mkIf (cfg.enable && qbittorrentCfg.enable) {
@@ -86,6 +103,11 @@ in
           max_active_torrents = 0;
           # Maximum active checking torrents (outstanding memory in MiB)
           checking_memory_use = 1;
+          # Disk cache size in MiB (0 = disabled, -1 = auto, >0 = fixed size)
+          # Recommended: 64-128 MiB for good performance, up to 512 MiB for high-activity setups
+          disk_cache = qbittorrentCfg.diskCacheSize or 128;
+          # Disk cache TTL in seconds (how long to keep data in cache)
+          disk_cache_ttl = qbittorrentCfg.diskCacheTTL or 60;
           # uTP-TCP mixed mode algorithm: 1 = Peer proportional
           # Rate limits TCP connections to their proportional share based on how many
           # connections are TCP, preventing uTP connections from being starved by TCP.
@@ -110,7 +132,7 @@ in
         BitTorrent = {
           Session = {
             Interface = vpnInterfaceName;
-            InterfaceAddress = vpnInterfaceIP;
+            # InterfaceAddress = vpnInterfaceIP;  # Allow binding to all IPv4 addresses
             InterfaceName = vpnInterfaceName;
             # Disable UPnP/NAT-PMP - we're using VPN port forwarding instead
             UseUPnP = false;
@@ -146,9 +168,21 @@ in
     };
 
     systemd.services.qbittorrent = {
-      vpnConfinement = {
-        enable = true;
-        vpnNamespace = "qbittor";
+      # Manually configure VPN confinement since vpnConfinement option isn't working
+      bindsTo = [ "qbittor.service" ];
+      after = [ "qbittor.service" ];
+
+      serviceConfig = {
+        NetworkNamespacePath = "/run/netns/qbittor";
+
+        InaccessiblePaths = [
+          "/run/nscd"
+          "/run/resolvconf"
+        ];
+
+        BindReadOnlyPaths = [
+          "/etc/netns/qbittor/resolv.conf:/etc/resolv.conf:norbind"
+        ];
       };
     };
   };
