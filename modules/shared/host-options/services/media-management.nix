@@ -81,11 +81,6 @@ in
             type = types.nullOr (
               types.submodule {
                 options = {
-                  address = mkOption {
-                    type = types.nullOr types.str;
-                    default = null;
-                    description = "WebUI bind address";
-                  };
                   username = mkOption {
                     type = types.nullOr types.str;
                     default = null;

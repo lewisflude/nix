@@ -83,9 +83,7 @@ in
       qbittorrent = {
         enable = true;
         webUI = {
-          address = "*";
           username = "lewis";
-
           password = "@ByteArray(J5lri+TddZR2AJqNVPndng==:no5T50n4CD9peISk6jZQ+Cb8qzv6DoV2MtOxE2oErywXVFngVDq/eySGpoNjUCFOHFdbifjwwHI4jlV2LH4ocQ==)";
         };
 
@@ -94,6 +92,9 @@ in
           sonarr = "/mnt/storage/tv";
           lidarr = "/mnt/storage/music";
           readarr = "/mnt/storage/books";
+          pc = "/mnt/storage/pc";
+          movies = "/mnt/storage/movies";
+          tv = "/mnt/storage/tv";
         };
       };
     };

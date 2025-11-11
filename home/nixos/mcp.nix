@@ -169,6 +169,7 @@ let
     ${pkgs.uv}/bin/uvx --from mcp-server-fetch mcp-server-fetch --help >/dev/null 2>&1 || true
     ${pkgs.uv}/bin/uvx --from mcp-server-git mcp-server-git --help >/dev/null 2>&1 || true
     ${pkgs.uv}/bin/uvx --from mcp-server-time mcp-server-time --help >/dev/null 2>&1 || true
+    ${pkgs.uv}/bin/uvx --from mcp-nixos mcp-nixos --help >/dev/null 2>&1 || true
     echo "[mcp-warm] Prefetching npx servers…"
     ${nodejs}/bin/npx -y @modelcontextprotocol/server-everything@latest --help >/dev/null 2>&1 || true
     ${nodejs}/bin/npx -y @modelcontextprotocol/server-filesystem@latest --help >/dev/null 2>&1 || true
@@ -301,6 +302,18 @@ in
           "default"
         ];
         port = 11440;
+      };
+      nixos = {
+        command = "${pkgs.uv}/bin/uvx";
+        args = [
+          "--from"
+          "mcp-nixos"
+          "mcp-nixos"
+        ];
+        port = 11441;
+        env = {
+          UV_PYTHON = "${pkgs.python3}/bin/python3";
+        };
       };
     };
   };

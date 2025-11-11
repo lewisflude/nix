@@ -30,5 +30,14 @@ in
 
       after = mkAfter (optional cfg.prowlarr.enable "prowlarr.service");
     };
+
+    # Handle legacy NzbDrone path migration (Sonarr was previously called NzbDrone)
+    # If /var/lib/sonarr/.config/NzbDrone exists as a file or symlink (but not a directory), remove it so tmpfiles can create it as a directory
+    system.activationScripts.sonarrNzbDroneMigration = lib.mkIf (cfg.enable && cfg.sonarr.enable) ''
+      if [ -e /var/lib/sonarr/.config/NzbDrone ] && [ ! -d /var/lib/sonarr/.config/NzbDrone ]; then
+        echo "Removing legacy NzbDrone file/symlink to allow directory creation..."
+        rm -f /var/lib/sonarr/.config/NzbDrone
+      fi
+    '';
   };
 }
