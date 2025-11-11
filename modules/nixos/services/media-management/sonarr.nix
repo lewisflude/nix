@@ -36,7 +36,6 @@ in
       # Override ExecStart to use the modern Sonarr directory instead of legacy NzbDrone
       # The NixOS module defaults to .config/NzbDrone, but Sonarr now uses .config/Sonarr
       serviceConfig.ExecStart = lib.mkForce [
-        ""
         "${config.services.sonarr.package}/bin/Sonarr"
         "-nobrowser"
         "-data=/var/lib/sonarr/.config/Sonarr"
