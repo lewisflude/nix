@@ -97,7 +97,6 @@ in
       after = [
         "network.target"
         "systemd-networkd.service"
-        "systemd-networkd-wait-online.service"
       ];
       # Wait for network to be ready (but not necessarily the VPN interface)
       requires = [ "network-online.target" ];

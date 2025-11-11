@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -103,76 +104,60 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Enable systemd-networkd for proper network management
-    systemd.network.enable = true;
-
     networking = {
-      useNetworkd = true;
-
       # Allow WireGuard port
       firewall.allowedUDPPorts = [ 51820 ];
 
       # Configure reverse path filtering to allow VPN traffic
       firewall.checkReversePath = "loose";
+
+      # Standard WireGuard interface using wg-quick
+      wireguard.interfaces.${cfg.interfaceName} = {
+        inherit (cfg) peers privateKeyFile;
+        ips = cfg.address;
+        listenPort = 51820;
+      };
     };
 
-    systemd.network = {
-      netdevs."50-${cfg.interfaceName}" = {
-        netdevConfig = {
-          Kind = "wireguard";
-          Name = cfg.interfaceName;
-        };
+    # User-specific routing via robust systemd service
+    systemd.services.wireguard-routing = {
+      description = "WireGuard routing for ${cfg.user}";
+      after = [
+        "network.target"
+        "wireguard-${cfg.interfaceName}.service"
+      ];
+      requires = [ "wireguard-${cfg.interfaceName}.service" ];
+      wantedBy = [ "multi-user.target" ];
 
-        wireguardConfig = {
-          ListenPort = 51820;
-          PrivateKeyFile = cfg.privateKeyFile;
-          FirewallMark = cfg.firewallMark;
-          RouteTable = cfg.routeTable;
-        };
-
-        wireguardPeers = map (
-          peer:
-          {
-            PublicKey = peer.publicKey;
-            AllowedIPs = peer.allowedIPs;
-          }
-          // lib.optionalAttrs (peer.endpoint != null) {
-            Endpoint = peer.endpoint;
-          }
-          // lib.optionalAttrs (peer.persistentKeepalive != null) {
-            PersistentKeepalive = peer.persistentKeepalive;
-          }
-        ) cfg.peers;
-      };
-
-      networks."50-${cfg.interfaceName}" = {
-        matchConfig.Name = cfg.interfaceName;
-        inherit (cfg) address dns;
-
-        # DNS settings for systemd-resolved
-        networkConfig = {
-          DNSDefaultRoute = true;
-        };
-
-        routingPolicyRules =
-          # Higher priority rule (30000): Route local networks through main table
-          (map (network: {
-            Family = "both";
-            To = network;
-            Table = "main";
-            User = cfg.user;
-            Priority = 30000;
-          }) cfg.localNetworks)
-          ++
-          # Lower priority rule (30001): Route all other traffic through VPN table
-          [
-            {
-              Family = "both";
-              Table = cfg.routeTable;
-              User = cfg.user;
-              Priority = 30001;
-            }
-          ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart =
+          let
+            userId = config.users.users.${cfg.user}.uid;
+            rules = [
+              # Route traffic from the specified user through the VPN routing table
+              "ip rule add from ${toString userId} table ${toString cfg.routeTable} priority 30001"
+            ]
+            ++ lib.concatMap (network: [
+              # Route traffic to local networks through main table (bypass VPN)
+              "ip rule add to ${network} table main priority 30000"
+            ]) cfg.localNetworks;
+          in
+          "${pkgs.bash}/bin/bash -c '${lib.concatStringsSep "; " rules} || true'";
+        ExecStop =
+          let
+            userId = config.users.users.${cfg.user}.uid;
+            rules = [
+              # Remove user routing rule
+              "ip rule del from ${toString userId} table ${toString cfg.routeTable} priority 30001"
+            ]
+            ++ lib.concatMap (network: [
+              # Remove local network bypass rules
+              "ip rule del to ${network} table main priority 30000"
+            ]) cfg.localNetworks;
+          in
+          "${pkgs.bash}/bin/bash -c '${lib.concatStringsSep "; " rules} || true'";
       };
     };
   };

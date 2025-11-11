@@ -18,13 +18,10 @@ let
       nix-colorizer ? null,
     }:
     let
-      # Use builtins.path to get an absolute path, then construct the module paths
-      repoRoot = builtins.path {
-        path = repoRootPath;
-        filter = _: _: true;
-      };
-      palette = import (repoRoot + "/modules/shared/features/theming/palette.nix") { };
-      themeLib = import (repoRoot + "/modules/shared/features/theming/lib.nix") {
+      # Import modules directly using relative paths
+      # This avoids issues with builtins.path creating invalid store references
+      palette = import (repoRootPath + "/modules/shared/features/theming/palette.nix") { };
+      themeLib = import (repoRootPath + "/modules/shared/features/theming/lib.nix") {
         inherit lib palette nix-colorizer;
       };
     in

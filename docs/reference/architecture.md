@@ -109,7 +109,44 @@ Hosts are defined in `hosts/<hostname>/default.nix`:
 - Separates Darwin and NixOS hosts
 - Provides helper functions for host access
 
-### 3. System Building
+### 3. Security and Networking Patterns
+
+#### Firewall Management
+
+Services declare their own firewall rules using `lib/firewall.nix`:
+
+```nix
+# In service modules
+networking.firewall.allowedTCPPorts = [ 8080 6881 ]; # qBittorrent WebUI and torrenting
+```
+
+**Core networking** (`modules/nixos/core/networking.nix`) only contains:
+
+- Essential system ports (SSH: 22, NTP: 123)
+- NetworkManager and systemd-resolved configuration
+- WireGuard performance optimizations
+
+**Service modules** declare their own firewall ports for proper separation of concerns.
+
+#### Secrets Management
+
+Sensitive credentials use SOPS encryption:
+
+```nix
+# In service modules
+sops.secrets."qbittorrent/webui/username" = {
+  neededForUsers = true;
+};
+
+# In configuration
+services.qbittorrent = {
+  # Uses config.sops.secrets."qbittorrent/webui/username".path
+};
+```
+
+All secrets are stored encrypted in `secrets/secrets.yaml` and decrypted at runtime.
+
+### 4. System Building
 
 `lib/system-builders.nix` orchestrates system construction:
 

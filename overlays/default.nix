@@ -33,6 +33,8 @@ let
         inherit (cursorPkgs) cursor;
       };
 
+    chaotic-packages = import ./chaotic-packages.nix;
+
     npm-packages = import ./npm-packages.nix;
 
     nh = mkOptionalOverlay (inputs ? nh && inputs.nh ? overlays) inputs.nh.overlays.default;
@@ -46,9 +48,10 @@ let
       inherit (prev) zed-editor;
     };
 
-    # Disabled: fenix generating invalid rust-lang.org URLs causing build failures
-    # fenix-overlay = mkOptionalOverlay (inputs ? fenix && inputs.fenix ? overlays) mkFenixOverlay;
-    fenix-overlay = _final: _prev: { }; # No-op overlay
+    # Re-enabled: fenix provides better Rust toolchains than nixpkgs
+    fenix-overlay = mkOptionalOverlay (
+      inputs ? fenix && inputs.fenix ? overlays
+    ) inputs.fenix.overlays.default;
 
     flake-git-tools = mkFlakePackage "lazygit" "lazygit" (prev: prev.lazygit);
 

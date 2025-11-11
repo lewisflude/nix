@@ -13,16 +13,15 @@ let
   cfg = config.theming.signal;
 
   # Import shared theming palette and library
-  sharedThemingPath = ../../../shared/features/theming;
-  palette = import "${sharedThemingPath}/palette.nix" { inherit lib; };
-  themeLib = import "${sharedThemingPath}/lib.nix" {
+  palette = import ../../../shared/features/theming/palette.nix { inherit lib; };
+  themeLib = import ../../../shared/features/theming/lib.nix {
     inherit lib palette;
     nix-colorizer = config._module.args.nix-colorizer or null;
   };
-  modeLib = import "${sharedThemingPath}/mode.nix" {
+  modeLib = import ../../../shared/features/theming/mode.nix {
     inherit lib config;
   };
-  contextLib = import "${sharedThemingPath}/context.nix" { inherit lib; };
+  contextLib = import ../../../shared/features/theming/context.nix { inherit lib; };
 
   # Resolve mode (handles "auto" mode by detecting system preference)
   resolvedMode = modeLib.getResolvedMode cfg;

@@ -33,6 +33,6 @@ _final: prev: {
 
   obs-studio = prev.obs-studio_git or prev.obs-studio;
 
-  zfs = prev.zfs_cachyos or prev.zfs;
-  zfsUnstable = prev.zfs_cachyos or prev.zfsUnstable;
+  # zfs_cachyos causes kernel module issues, use regular zfs
+  inherit (prev) zfs zfsUnstable;
 }
