@@ -45,6 +45,26 @@ in
       description = "Janitorr media cleanup automation configuration";
     };
 
+    jellystat = {
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable Jellystat statistics dashboard for Jellyfin";
+      };
+
+      port = mkOption {
+        type = types.int;
+        default = 3004;
+        description = "Port to expose Jellystat on";
+      };
+
+      useSops = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Use sops-nix for Jellystat secrets management";
+      };
+    };
+
     doplarr = {
       enable = mkOption {
         type = types.bool;

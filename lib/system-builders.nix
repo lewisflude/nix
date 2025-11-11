@@ -60,7 +60,6 @@ let
       solaar = attrs.solaar or null;
 
       nix-topology = attrs."nix-topology" or null;
-      vpn-confinement = attrs."vpn-confinement" or null;
     in
     # Core integration modules
     optionalModule (determinate != null) determinate.nixosModules.default
@@ -72,8 +71,7 @@ let
     ++ optionalModule (chaotic != null) chaotic.nixosModules.default
     ++ optionalModule (musnix != null) musnix.nixosModules.musnix
     ++ optionalModule (solaar != null) solaar.nixosModules.default
-    ++ optionalModule (nix-topology != null) nix-topology.nixosModules.default
-    ++ optionalModule (vpn-confinement != null) vpn-confinement.nixosModules.default;
+    ++ optionalModule (nix-topology != null) nix-topology.nixosModules.default;
 
   mkHomeManagerConfig =
     {

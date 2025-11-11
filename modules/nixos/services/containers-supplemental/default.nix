@@ -24,6 +24,7 @@ in
     ./services/janitorr.nix
     ./services/jellystat.nix
     ./services/termix.nix
+    ./services/profilarr.nix
   ];
 
   options.host.services.containersSupplemental = {

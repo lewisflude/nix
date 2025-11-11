@@ -123,6 +123,7 @@ in
         enable = true;
         port = 8081;
       };
+      profilarr.enable = true;
       doplarr.enable = false;
       comfyui.enable = false;
 

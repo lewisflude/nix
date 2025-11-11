@@ -14,10 +14,6 @@ let
     ;
   cfg = config.host.services.mediaManagement;
   qbittorrentCfg = cfg.qbittorrent or { };
-  # VPN namespace interface IP - VPN-Confinement typically assigns 192.168.15.1 to namespace interfaces
-  vpnNamespaceIP = "192.168.15.1";
-  # VPN WireGuard interface name
-  vpnInterfaceName = "qbittor0";
   webUI = qbittorrentCfg.webUI or null;
 in
 {
@@ -78,14 +74,14 @@ in
       inherit (cfg) user group;
       webuiPort = 8080;
       torrentingPort = 6881;
-      openFirewall = false; # VPN namespace handles firewall
+      openFirewall = false; # Firewall handled by WireGuard routing policy
       serverConfig = {
-        # Bind WebUI to VPN network namespace address (always use VPN IP, not "*")
+        # Bind WebUI to all interfaces (VPN routing is handled at network level)
         Preferences = {
           WebUI = {
-            Address = vpnNamespaceIP;
+            Address = "*";
             Port = 8080;
-            # WebUI access control - allow access from default network namespace and local network
+            # WebUI access control
             HostHeaderValidation = false;
             LocalHostAuth = false;
           }
@@ -128,12 +124,9 @@ in
           # Maximum number of upload slots per torrent
           max_uploads_per_torrent = 5;
         };
-        # Bind BitTorrent session to VPN interface
+        # BitTorrent configuration (interface binding handled by routing policy)
         BitTorrent = {
           Session = {
-            Interface = vpnInterfaceName;
-            # InterfaceAddress = vpnInterfaceIP;  # Allow binding to all IPv4 addresses
-            InterfaceName = vpnInterfaceName;
             # Disable UPnP/NAT-PMP - we're using VPN port forwarding instead
             UseUPnP = false;
             UsePEX = true;
@@ -167,23 +160,5 @@ in
       };
     };
 
-    systemd.services.qbittorrent = {
-      # Manually configure VPN confinement since vpnConfinement option isn't working
-      bindsTo = [ "qbittor.service" ];
-      after = [ "qbittor.service" ];
-
-      serviceConfig = {
-        NetworkNamespacePath = "/run/netns/qbittor";
-
-        InaccessiblePaths = [
-          "/run/nscd"
-          "/run/resolvconf"
-        ];
-
-        BindReadOnlyPaths = [
-          "/etc/netns/qbittor/resolv.conf:/etc/resolv.conf:norbind"
-        ];
-      };
-    };
   };
 }

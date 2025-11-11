@@ -79,7 +79,6 @@
     nix-topology = {
       url = "github:oddlama/nix-topology";
     };
-    vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
     nix-colorizer = {
       url = "github:nutsalhan87/nix-colorizer";
     };

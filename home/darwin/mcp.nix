@@ -30,6 +30,17 @@ in
         '';
         executable = true;
       };
+      "bin/docs-mcp-wrapper" = {
+        text = ''
+          if [ -r "${systemConfig.sops.secrets.OPENAI_API_KEY.path or ""}" ]; then
+            export OPENAI_API_KEY="$(${pkgs.coreutils}/bin/cat "${
+              systemConfig.sops.secrets.OPENAI_API_KEY.path or ""
+            }")"
+          fi
+          exec ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @arabold/docs-mcp-server@latest "$@"
+        '';
+        executable = true;
+      };
     };
     activation.setupClaudeMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] (
       let
@@ -157,6 +168,11 @@ in
         command = "${pkgs.uv}/bin/uvx";
         args = [ "mcp-nixos" ];
         port = 11441;
+      };
+      docs-mcp-server = {
+        command = "${config.home.homeDirectory}/bin/docs-mcp-wrapper";
+        args = [ ];
+        port = 6280;
       };
     };
   };
