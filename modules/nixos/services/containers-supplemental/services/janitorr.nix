@@ -169,7 +169,7 @@ in
       };
 
       systemd.tmpfiles.rules = [
-        "d ${cfg.configPath}/janitorr 0755 root root -"
+        "d ${cfg.configPath}/janitorr 0755 ${toString cfg.uid} ${toString cfg.gid} -"
         "d ${cfg.configPath}/janitorr/config 0755 ${toString cfg.uid} ${toString cfg.gid} -"
         "d ${cfg.configPath}/janitorr/logs 0755 ${toString cfg.uid} ${toString cfg.gid} -"
       ];

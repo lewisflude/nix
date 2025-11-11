@@ -9,11 +9,17 @@ let
     mkIf
     mkOption
     types
+    optionalAttrs
+    mapAttrs
     ;
   cfg = config.host.services.mediaManagement;
   qbittorrentCfg = cfg.qbittorrent or { };
   # VPN namespace interface IP - VPN-Confinement typically assigns 192.168.15.1 to namespace interfaces
   vpnNamespaceIP = "192.168.15.1";
+  # VPN WireGuard interface name and IP
+  vpnInterfaceName = "qbittor0";
+  vpnInterfaceIP = "10.2.0.2";
+  webUI = qbittorrentCfg.webUI or null;
 in
 {
   options.host.services.mediaManagement.qbittorrent = {
@@ -25,11 +31,6 @@ in
       type = types.nullOr (
         types.submodule {
           options = {
-            address = mkOption {
-              type = types.nullOr types.str;
-              default = null;
-              description = "WebUI bind address";
-            };
             username = mkOption {
               type = types.nullOr types.str;
               default = null;
@@ -54,75 +55,51 @@ in
     };
   };
 
-  config = mkIf (cfg.enable && qbittorrentCfg.enable) (
-    let
-      baseConfig = {
+  config = mkIf (cfg.enable && qbittorrentCfg.enable) {
+    services.qbittorrent = {
+      enable = true;
+      inherit (cfg) user group;
+      webuiPort = 8080;
+      torrentingPort = 6881;
+      openFirewall = false; # VPN namespace handles firewall
+      serverConfig = {
         # Bind WebUI to VPN network namespace address (always use VPN IP, not "*")
-        "WebUI\\Address" = vpnNamespaceIP;
-        "WebUI\\Port" = 8080;
-
-        # WebUI access control - allow access from default network namespace and local network
-        "WebUI\\HostHeaderValidation" = false;
-        "WebUI\\LocalHostAuth" = false;
+        Preferences = {
+          WebUI = {
+            Address = vpnNamespaceIP;
+            Port = 8080;
+            # WebUI access control - allow access from default network namespace and local network
+            HostHeaderValidation = false;
+            LocalHostAuth = false;
+          }
+          // optionalAttrs (webUI != null && webUI.username != null) {
+            Username = webUI.username;
+          }
+          // optionalAttrs (webUI != null && webUI.password != null) {
+            Password_PBKDF2 = webUI.password;
+          };
+        };
+        # Bind BitTorrent session to VPN interface
+        BitTorrent = {
+          Session = {
+            Interface = vpnInterfaceName;
+            InterfaceAddress = vpnInterfaceIP;
+            InterfaceName = vpnInterfaceName;
+          };
+        };
+      }
+      // optionalAttrs (qbittorrentCfg.categories != null) {
+        Category = mapAttrs (_: path: {
+          SavePath = path;
+        }) qbittorrentCfg.categories;
       };
+    };
 
-      webUIConfig = lib.optionalAttrs (qbittorrentCfg.webUI != null) (
-        lib.optionalAttrs (qbittorrentCfg.webUI.username != null) {
-          "WebUI\\Username" = qbittorrentCfg.webUI.username;
-        }
-        // lib.optionalAttrs (qbittorrentCfg.webUI.password != null) {
-          "WebUI\\Password_PBKDF2" = qbittorrentCfg.webUI.password;
-        }
-      );
-
-      categoriesConfig =
-        if qbittorrentCfg.categories != null then
-          builtins.listToAttrs (
-            lib.mapAttrsToList (name: path: {
-              name = "Category\\${name}\\SavePath";
-              value = path;
-            }) qbittorrentCfg.categories
-          )
-        else
-          { };
-
-      serverConfig = baseConfig // webUIConfig // categoriesConfig;
-    in
-    {
-      services.qbittorrent = {
+    systemd.services.qbittorrent = {
+      vpnConfinement = {
         enable = true;
-        inherit (cfg) user;
-        inherit (cfg) group;
-        webuiPort = 8080;
-        torrentingPort = 6881;
-        openFirewall = false; # VPN namespace handles firewall
-        inherit serverConfig;
+        vpnNamespace = "qbittor";
       };
-
-      systemd.services.qbittorrent = {
-        environment = {
-          TZ = cfg.timezone;
-        };
-
-        preStart = ''
-          mkdir -p ${cfg.dataPath}/torrents/complete || true
-          mkdir -p ${cfg.dataPath}/torrents/incomplete || true
-
-          chown -R ${cfg.user}:${cfg.group} ${cfg.dataPath}/torrents 2>/dev/null || true
-          chmod -R 775 ${cfg.dataPath}/torrents 2>/dev/null || true
-        '';
-
-        serviceConfig = {
-          ProtectSystem = false;
-          ProtectHome = false;
-        };
-
-        # VPN Confinement configuration
-        vpnConfinement = {
-          enable = true;
-          vpnNamespace = "qbittor";
-        };
-      };
-    }
-  );
+    };
+  };
 }

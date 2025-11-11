@@ -47,10 +47,7 @@ in
             path = "${cfg.dataPath}/media/tv";
             mode = "0775";
           }
-          {
-            path = "${cfg.dataPath}/media/music";
-            mode = "0775";
-          }
+          # Note: ${cfg.dataPath}/media/music is handled by navidrome service tmpfiles
           {
             path = "${cfg.dataPath}/media/books";
             mode = "0775";

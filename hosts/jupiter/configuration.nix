@@ -40,7 +40,7 @@
   # VPN Confinement namespace for qBittorrent
   vpnNamespaces.qbittor = {
     enable = true;
-    wireguardConfigFile = config.sops.templates."wireguard-config-file".path;
+    wireguardConfigFile = config.sops.templates.wireguard-config-file.path;
     accessibleFrom = [
       "192.168.1.0/24" # Local network
       "127.0.0.1" # Localhost
@@ -67,28 +67,28 @@
 
   # SOPS configuration for WireGuard VPN
   sops = {
-    templates."wireguard-config-file" = {
+    templates.wireguard-config-file = {
       content = ''
         [Interface]
-        # ProtonVPN WireGuard configuration
-        # Bouncing = 20
-        # NetShield = 1
+        # Bouncing = 4
+        # NetShield = 0
         # Moderate NAT = off
         # NAT-PMP (Port Forwarding) = on
-        # VPN Accelerator = on
+        # VPN Accelerator = off
         PrivateKey = ${config.sops.placeholder."protonvpn/private_key"}
         Address = 10.2.0.2/32
         DNS = 10.2.0.1
 
         [Peer]
+        # NL#89
         PublicKey = +HCLUCm6PdbDIaKtEM3pOWBEKSB/UdpBwRY5cNl6ZnI=
-        AllowedIPs = 0.0.0.0/0
+        AllowedIPs = 0.0.0.0/0, ::/0
         Endpoint = 138.199.7.129:51820
       '';
-      owner = "media";
+      owner = config.host.services.mediaManagement.user;
     };
     secrets = {
-      "protonvpn/private_key".owner = "media";
+      "protonvpn/private_key".owner = lib.mkForce config.host.services.mediaManagement.user;
     };
   };
 

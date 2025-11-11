@@ -7,7 +7,8 @@ _: {
       positionY = "top";
       layer = "overlay";
       control-center-layer = "top";
-      control-center-margin-top = 10;
+      # Position below ironbar: bar height (42px) + gap (10px) = 52px
+      control-center-margin-top = 52;
       control-center-margin-bottom = 0;
       control-center-margin-right = 10;
       control-center-margin-left = 0;

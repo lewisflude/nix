@@ -153,6 +153,11 @@ in
         args = [ "mcp-server-time" ];
         port = 11443;
       };
+      nixos = {
+        command = "${pkgs.uv}/bin/uvx";
+        args = [ "mcp-nixos" ];
+        port = 11441;
+      };
     };
   };
 }
