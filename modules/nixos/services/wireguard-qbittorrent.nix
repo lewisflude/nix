@@ -131,13 +131,14 @@ in
         wireguardPeers = map (
           peer:
           {
-            inherit (peer) publicKey allowedIPs;
+            PublicKey = peer.publicKey;
+            AllowedIPs = peer.allowedIPs;
           }
           // lib.optionalAttrs (peer.endpoint != null) {
-            inherit (peer) endpoint;
+            Endpoint = peer.endpoint;
           }
           // lib.optionalAttrs (peer.persistentKeepalive != null) {
-            inherit (peer) persistentKeepalive;
+            PersistentKeepalive = peer.persistentKeepalive;
           }
         ) cfg.peers;
       };

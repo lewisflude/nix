@@ -73,6 +73,28 @@ in
       };
     };
 
+    profilarr = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable Profilarr configuration management tool for Radarr/Sonarr";
+      };
+    };
+
+    termix = {
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable Termix terminal sharing service";
+      };
+
+      port = mkOption {
+        type = types.int;
+        default = 8081;
+        description = "Port to expose Termix on";
+      };
+    };
+
     comfyui = {
       enable = mkOption {
         type = types.bool;

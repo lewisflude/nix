@@ -102,6 +102,9 @@
     calcom = {
       enable = false;
     };
+    profilarr = {
+      enable = true;
+    };
   };
 
   desktop = {

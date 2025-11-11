@@ -20,6 +20,8 @@ in
       doplarr = cfg.doplarr or { };
       comfyui = cfg.comfyui or { };
       calcom = cfg.calcom or { };
+      profilarr = cfg.profilarr or { };
+      termix = cfg.termix or { };
     };
   };
 }
