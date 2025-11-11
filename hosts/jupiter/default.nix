@@ -118,6 +118,11 @@ in
       gid = 976;
       homarr.enable = true;
       wizarr.enable = true;
+      jellystat.enable = true;
+      termix = {
+        enable = true;
+        port = 8081;
+      };
       doplarr.enable = false;
       comfyui.enable = false;
 
