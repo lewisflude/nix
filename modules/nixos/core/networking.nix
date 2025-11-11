@@ -12,102 +12,19 @@
     networkmanager.dns = "systemd-resolved";
     firewall = {
       enable = true;
+
+      # Core system ports that are essential for basic system functionality
+      # These are not service-specific and should remain in core networking
       allowedTCPPorts = [
-        22
-        80
-        443
-        21
-        25
-        465
-        587
-        8096
-        5000
-        8123
-        6600
-        27015
-        27036
-        8080
-        9090
-        5555
-        8095
-        3030
-        7000
-        11434
-        6969
-        6881
-        7575
-        8008
-        8009
-        1900
-        2869
-        554
-        3689
-        5228
-        5900
-        3283
-        47990
-        563
-        5353
-        3456
-        5001
-        1188
-        2875
-        2880
-        7100
-        8191
-        9696
-        5055
-        5690
-        7878
-        8989
-        8200
-        8686
-        8787
-        8920
-        8888
-        5656
-        3001
-        8083
-        8090
+        22 # SSH - essential for system access
       ];
       allowedUDPPorts = [
-        5353
-        1900
-        8008
-        8009
-        7000
-        7100
-        554
-        5000
-        5001
-        123
-        5900
-        3283
+        123 # NTP - essential for time synchronization
       ];
-      allowedUDPPortRanges = [
-        {
-          from = 6000;
-          to = 7000;
-        }
-        {
-          from = 16384;
-          to = 16403;
-        }
-        {
-          from = 47998;
-          to = 48000;
-        }
-        {
-          from = 49152;
-          to = 65535;
-        }
-      ];
-      allowedTCPPortRanges = [
-        {
-          from = 49152;
-          to = 65535;
-        }
-      ];
+
+      # Service-specific firewall rules are declared by individual service modules
+      # using the firewall library helpers from lib/firewall.nix
+      # This ensures proper separation of concerns and maintainable configuration
     };
   };
   services = {

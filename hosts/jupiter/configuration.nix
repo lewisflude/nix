@@ -59,11 +59,6 @@
     ];
   };
 
-  # SOPS configuration for WireGuard VPN
-  sops.secrets = {
-    "protonvpn/private_key".owner = config.host.services.mediaManagement.user;
-  };
-
   # ProtonVPN NAT-PMP Port Forwarding
   # This service automatically maintains port forwarding mappings using NAT-PMP
   # It runs in a loop, renewing the port mappings every 45 seconds (before the 60s lease expires)

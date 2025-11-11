@@ -29,12 +29,17 @@ in
             username = mkOption {
               type = types.nullOr types.str;
               default = null;
-              description = "WebUI username";
+              description = "WebUI username (plain text or SOPS secret path)";
             };
             password = mkOption {
               type = types.nullOr types.str;
               default = null;
-              description = "WebUI password (PBKDF2 format)";
+              description = "WebUI password (PBKDF2 format, plain text or SOPS secret path)";
+            };
+            useSops = mkOption {
+              type = types.bool;
+              default = false;
+              description = "Whether to use SOPS secrets for WebUI credentials";
             };
           };
         }
@@ -69,6 +74,22 @@ in
   };
 
   config = mkIf (cfg.enable && qbittorrentCfg.enable) {
+    # Declare firewall rules for qBittorrent
+    networking.firewall.allowedTCPPorts = [
+      8080
+      6881
+    ];
+
+    # SOPS secrets for WebUI credentials
+    sops.secrets = mkIf (webUI != null && webUI.useSops) {
+      "qbittorrent/webui/username" = {
+        neededForUsers = true;
+      };
+      "qbittorrent/webui/password" = {
+        neededForUsers = true;
+      };
+    };
+
     services.qbittorrent = {
       enable = true;
       inherit (cfg) user group;
@@ -86,10 +107,12 @@ in
             LocalHostAuth = false;
           }
           // optionalAttrs (webUI != null && webUI.username != null) {
-            Username = webUI.username;
+            Username =
+              if webUI.useSops then config.sops.secrets."qbittorrent/webui/username".path else webUI.username;
           }
           // optionalAttrs (webUI != null && webUI.password != null) {
-            Password_PBKDF2 = webUI.password;
+            Password_PBKDF2 =
+              if webUI.useSops then config.sops.secrets."qbittorrent/webui/password".path else webUI.password;
           };
           # Torrent queueing
           queueing_enabled = true;

@@ -29,7 +29,7 @@ let
       resolvedOwner = if isDarwin then config.host.username else config.host.username;
       # On NixOS with neededForUsers, we need to set the owner to the user, not root
       # This allows the user to read their own secrets
-      resolvedGroup = if isDarwin then "wheel" else "users";
+      resolvedGroup = if isDarwin then "wheel" else "sops-secrets";
     in
     {
       mode = resolvedMode;

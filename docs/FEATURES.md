@@ -27,6 +27,61 @@ Feature Module (modules/nixos/features/gaming.nix)
 NixOS Configuration
 ```
 
+## Security and Networking Patterns
+
+This configuration follows modern NixOS security and networking best practices:
+
+### Firewall Management
+
+**Separation of Concerns**: Service modules declare their own firewall ports instead of centralized configuration.
+
+```nix
+# Service modules declare their own ports
+networking.firewall.allowedTCPPorts = [ 8080 ]; # WebUI
+networking.firewall.allowedTCPPorts = [ 6881 ]; # Torrenting
+```
+
+**Core Networking**: Only essential system ports are managed centrally:
+
+- SSH (22) - System access
+- NTP (123) - Time synchronization
+
+### Secrets Management
+
+**SOPS Integration**: Sensitive credentials are encrypted using SOPS:
+
+```nix
+# Service configuration
+qbittorrent = {
+  webUI = {
+    useSops = true; # Enable SOPS for credentials
+  };
+};
+
+# Secrets stored encrypted in secrets/secrets.yaml
+qbittorrent:
+  webui:
+    username: ENC[...]
+    password: ENC[...]
+```
+
+**Migration Path**: Services support both plain credentials and SOPS secrets during transition.
+
+### VPN Routing
+
+**Declarative Routing**: WireGuard VPN routing uses NixOS abstractions:
+
+```nix
+# Instead of manual ip rule commands
+networking.routingPolicyRules = [
+  {
+    from = userId;
+    table = routeTable;
+    priority = 30001;
+  }
+];
+```
+
 ## Available Features
 
 ### Development (`host.features.development`)
