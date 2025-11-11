@@ -136,12 +136,7 @@ Overlays can modify package builds, causing cache misses and local rebuilds. Thi
    - **Rationale**: Provides easy access to latest Nx tooling
    - **Removal**: Can be removed when packages are added to nixpkgs upstream
 
-2. **chaotic-packages.nix**: Aliases bleeding-edge packages from Chaotic-Nyx
-   - **Impact**: None (pure aliases to existing packages)
-   - **Rationale**: Simplifies access to bleeding-edge versions (e.g., helix_git → helix)
-   - **Removal**: Can be removed if bleeding-edge versions are not needed
-
-3. **localPkgs**: Custom packages from `pkgs/` directory
+2. **localPkgs**: Custom packages from `pkgs/` directory
    - **Impact**: Minimal (only packages actually used are included)
    - **Rationale**: Provides packages not yet in nixpkgs (cursor, ghostty)
    - **Removal**: Individual packages can be removed as they are upstreamed

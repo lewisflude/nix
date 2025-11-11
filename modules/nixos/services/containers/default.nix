@@ -14,27 +14,12 @@ let
 in
 {
   imports = [
-    ./media-management.nix
     ./productivity.nix
     ./secrets.nix
   ];
 
   options.host.services.containers = {
     enable = mkEnableOption "container services";
-
-    mediaManagement = {
-      enable = mkEnableOption "media management stack (Arr apps)";
-      dataPath = mkOption {
-        type = types.str;
-        default = "/mnt/storage";
-        description = "Path to media storage directory";
-      };
-      configPath = mkOption {
-        type = types.str;
-        default = "/var/lib/containers/media-management";
-        description = "Path to store container configurations";
-      };
-    };
 
     productivity = {
       enable = mkEnableOption "productivity stack (AI tools)";
@@ -87,17 +72,8 @@ in
           "d ${path}/config 0755 ${toString cfg.uid} ${toString cfg.gid} -"
         ];
 
-        mediaRules =
-          if cfg.mediaManagement.enable then
-            mkContainerDirs cfg.mediaManagement.configPath
-            ++ [
-              "d ${cfg.mediaManagement.dataPath} 0755 ${toString cfg.uid} ${toString cfg.gid} -"
-            ]
-          else
-            [ ];
-
         prodRules = if cfg.productivity.enable then mkContainerDirs cfg.productivity.configPath else [ ];
       in
-      mediaRules ++ prodRules;
+      prodRules;
   };
 }

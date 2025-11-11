@@ -32,7 +32,7 @@ It's THE solution for cleaning up your server and freeing up space before you ru
 
 ### Nix Integration
 
-This repository provisions `application.yml` for you under `${configPath}/janitorr/config/application.yml` whenever `host.services.containers.mediaManagement.janitorr.enable = true`.
+This repository provisions `application.yml` for you under `${configPath}/janitorr/config/application.yml` whenever `host.services.containersSupplemental.janitorr.enable = true`.
 Secrets are injected at activation via `sops-nix`; populate the following entries in `secrets/secrets.yaml`:
 
 - `janitorr-sonarr-api-key`
@@ -46,7 +46,7 @@ Secrets are injected at activation via `sops-nix`; populate the following entrie
 - `janitorr-jellystat-api-key`
 - `janitorr-streamystats-api-key` (optional)
 
-You can further customise the generated YAML via `host.services.containers.mediaManagement.janitorr.extraConfig`.
+You can further customise the generated YAML via `host.services.containersSupplemental.janitorr.extraConfig`.
 
 ## Features
 

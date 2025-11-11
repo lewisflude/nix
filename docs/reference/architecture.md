@@ -202,7 +202,7 @@ mkOverlays = {inputs, system}:
 
 1. Core overlays (unstable, localPkgs)
 2. Application overlays (npm-packages, flake package integrations)
-3. Platform-specific overlays (niri, chaotic-packages, etc.)
+3. Platform-specific overlays (niri, etc.)
 
 **Key Point**: Overlays are applied **before** modules are evaluated, so modules receive packages with overlays already applied.
 

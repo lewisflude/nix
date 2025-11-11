@@ -42,20 +42,24 @@ in
 
   # Configure swaylock colors via Home Manager settings (best practice)
   # This is the correct way to theme swaylock - not via command-line args
-  programs.swaylock.settings = {
-    # Signal theme colors (swaylock expects hex without # prefix)
-    ring-color = colors."accent-focus".hexRaw;
-    key-hl-color = colors."accent-info".hexRaw;
-    line-color = "00000000"; # Transparent
-    inside-color = "${colors."surface-base".hexRaw}88"; # With alpha (~53% opacity)
-    separator-color = "00000000"; # Transparent
-    text-color = colors."text-primary".hexRaw;
+  programs.swaylock = {
+    enable = true;
+    package = pkgs.swaylock-effects;
+    settings = {
+      # Signal theme colors (swaylock expects hex without # prefix)
+      ring-color = colors."accent-focus".hexRaw;
+      key-hl-color = colors."accent-info".hexRaw;
+      line-color = "00000000"; # Transparent
+      inside-color = "${colors."surface-base".hexRaw}88"; # With alpha (~53% opacity)
+      separator-color = "00000000"; # Transparent
+      text-color = colors."text-primary".hexRaw;
 
-    # Visual settings
-    font-size = 24;
-    indicator-idle-visible = false;
-    indicator-radius = 100;
-    indicator-thickness = 7;
-    show-failed-attempts = true;
+      # Visual settings
+      font-size = 24;
+      indicator-idle-visible = false;
+      indicator-radius = 100;
+      indicator-thickness = 7;
+      show-failed-attempts = true;
+    };
   };
 }

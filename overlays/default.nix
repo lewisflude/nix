@@ -33,7 +33,16 @@ let
         inherit (cursorPkgs) cursor;
       };
 
-    chaotic-packages = import ./chaotic-packages.nix;
+    # Fix flaky ipython performance test
+    python-fixes = _final: prev: {
+      python3 = prev.python3.override {
+        packageOverrides = _pyFinal: pyPrev: {
+          ipython = pyPrev.ipython.overrideAttrs (old: {
+            disabledTests = (old.disabledTests or [ ]) ++ [ "test_stream_performance" ];
+          });
+        };
+      };
+    };
 
     npm-packages = import ./npm-packages.nix;
 

@@ -27,12 +27,6 @@ in
       description = "Lidarr API key (use sops for production)";
     };
 
-    whisparrApiKey = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-      description = "Whisparr API key (use sops for production)";
-    };
-
     discordToken = mkOption {
       type = types.nullOr types.str;
       default = null;

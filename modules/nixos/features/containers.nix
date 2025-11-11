@@ -17,20 +17,6 @@ in
   options.host.features.containers = {
     enable = mkEnableOption "container services";
 
-    mediaManagement = {
-      enable = mkEnableOption "media management stack";
-      dataPath = mkOption {
-        type = types.str;
-        default = "/mnt/storage";
-        description = "Path to media storage directory";
-      };
-      configPath = mkOption {
-        type = types.str;
-        default = "/var/lib/containers/media-management";
-        description = "Path to store container configurations";
-      };
-    };
-
     productivity = {
       enable = mkEnableOption "productivity stack";
       configPath = mkOption {
@@ -45,12 +31,6 @@ in
 
     host.services.containers = {
       enable = true;
-
-      mediaManagement = mkIf cfg.mediaManagement.enable {
-        enable = true;
-        inherit (cfg.mediaManagement) dataPath;
-        inherit (cfg.mediaManagement) configPath;
-      };
 
       productivity = mkIf cfg.productivity.enable {
         enable = true;

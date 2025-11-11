@@ -12,7 +12,7 @@ in
   home.packages =
     (with pkgs; [
 
-      mangohud
+      mangohud_git # Chaotic Nyx bleeding-edge version
       protonup-qt
       (sunshine.override { cudaSupport = true; })
       moonlight-qt
