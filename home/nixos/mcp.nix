@@ -337,41 +337,59 @@ in
       };
     };
   };
-  systemd.user.services.mcp-claude-register = lib.mkIf isLinux {
-    Unit = {
-      Description = "Register MCP servers for Claude CLI (idempotent)";
-      After = [ "graphical-session.target" ];
-      PartOf = [ "graphical-session.target" ];
+  systemd.user.services = lib.mkIf isLinux {
+    mcp-claude-register = {
+      Unit = {
+        Description = "Register MCP servers for Claude CLI (idempotent)";
+        After = [ "graphical-session.target" ];
+        PartOf = [ "graphical-session.target" ];
+      };
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${registerScript}";
+        Environment = [
+          "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
+        ];
+        TimeoutStartSec = "300";
+        Restart = "on-failure";
+        RestartSec = "30";
+      };
+      Install = {
+        WantedBy = [ "default.target" ];
+      };
     };
-    Service = {
-      Type = "oneshot";
-      ExecStart = "${registerScript}";
-      Environment = [
-        "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
-      ];
-      TimeoutStartSec = "300";
-      Restart = "on-failure";
-      RestartSec = "30";
+    mcp-warm = {
+      Unit = {
+        Description = "Warm MCP servers (build binaries, prefetch packages)";
+        After = [ "network-online.target" ];
+      };
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${warmScript}";
+        TimeoutStartSec = "900";
+        Environment = [
+          "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
+        ];
+      };
+      Install = {
+        WantedBy = [ "default.target" ];
+      };
     };
-    Install = {
-      WantedBy = [ "default.target" ];
-    };
-  };
-  systemd.user.services.mcp-warm = lib.mkIf isLinux {
-    Unit = {
-      Description = "Warm MCP servers (build binaries, prefetch packages)";
-      After = [ "network-online.target" ];
-    };
-    Service = {
-      Type = "oneshot";
-      ExecStart = "${warmScript}";
-      TimeoutStartSec = "900";
-      Environment = [
-        "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
-      ];
-    };
-    Install = {
-      WantedBy = [ "default.target" ];
+    docs-mcp-http = {
+      Unit = {
+        Description = "Docs MCP Server HTTP Interface";
+        After = [ "network-online.target" ];
+      };
+      Service = {
+        ExecStart = "${docsMcpWrapper}/bin/docs-mcp-wrapper --protocol http --host 0.0.0.0 --port 6280";
+        Restart = "on-failure";
+        Environment = [
+          "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
+        ];
+      };
+      Install = {
+        WantedBy = [ "default.target" ];
+      };
     };
   };
 }

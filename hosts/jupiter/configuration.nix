@@ -89,6 +89,7 @@
   # Firewall configuration for systemd.network WireGuard
   networking.firewall = {
     allowedUDPPorts = [ 51820 ];
+    allowedTCPPorts = [ 6280 ]; # Docs MCP Server HTTP interface
     checkReversePath = "loose";
   };
 
