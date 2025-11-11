@@ -92,4 +92,26 @@
     };
   };
 
+  # ProtonVPN NAT-PMP Port Forwarding
+  # This service automatically maintains port forwarding mappings using NAT-PMP
+  # It runs in a loop, renewing the port mappings every 45 seconds (before the 60s lease expires)
+  services.protonvpnPortForwarding = {
+    enable = true;
+    vpnNamespace = "qbittor";
+    vpnGateway = "10.2.0.1"; # ProtonVPN DNS/gateway IP
+    internalPort = 6881; # Port that qBittorrent listens on
+    leaseTime = 60; # NAT-PMP lease time (ProtonVPN uses 60 seconds)
+    renewInterval = 45; # Renew every 45 seconds (before lease expires)
+
+    # Optional: Automatically update qBittorrent when a new port is assigned
+    # Set updateQBittorrent = true and configure qbittorrent options to enable
+    updateQBittorrent = false;
+    # qbittorrent = {
+    #   webuiUrl = "http://192.168.15.1:8080";
+    #   username = "lewis";
+    #   # password can be provided here or will be read from SOPS secrets.yaml
+    #   password = null; # Will try to read from SOPS if not provided
+    # };
+  };
+
 }

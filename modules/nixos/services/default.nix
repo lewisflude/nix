@@ -13,5 +13,6 @@
     ./samba.nix
     ./ssh.nix
     ./cockpit.nix
+    ./protonvpn-port-forwarding.nix
   ];
 }
