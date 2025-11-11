@@ -74,6 +74,10 @@ let
     niri = mkOptionalOverlay (
       isLinux && inputs ? niri && inputs.niri ? overlays
     ) inputs.niri.overlays.niri;
+
+    # Chaotic Nyx overlay: Not needed here
+    # - For NixOS: chaotic.nixosModules.default provides the overlay at system level
+    # - For darwin: chaotic.homeManagerModules.default is used (requires useGlobalPkgs = false)
   };
 in
 overlaySet
