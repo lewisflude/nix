@@ -38,6 +38,7 @@ in
 {
   programs.helix = {
     enable = true;
+    package = pkgs.helix_git; # Chaotic Nyx bleeding-edge version
     extraPackages = lspPackages ++ formatterPackages;
     languages = {
       language = lib.mapAttrsToList (

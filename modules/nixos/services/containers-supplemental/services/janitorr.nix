@@ -108,7 +108,7 @@ in
           throw "Janitorr requires useSops enabled to reference secrets.";
 
       baseConfig =
-        (import ../../containers/janitorr-config.nix {
+        (import ../janitorr-config.nix {
           inherit lib;
           inherit placeholders;
           janitorrCfg = cfg.janitorr;

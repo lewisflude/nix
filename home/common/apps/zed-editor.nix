@@ -42,6 +42,7 @@ in
 {
   programs.zed-editor = {
     enable = true;
+    package = pkgs.zed-editor_git; # Chaotic Nyx bleeding-edge version
 
     # Add nixd to extraPackages so it's in PATH for language server
     extraPackages = [ pkgs.nixd ];

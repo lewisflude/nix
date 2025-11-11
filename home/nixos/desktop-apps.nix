@@ -7,13 +7,13 @@ let
 in
 {
   home.packages = with pkgs; [
-    mpv
+    mpv # mpv_git not available in Chaotic, using stable
     gimp
-    discord
-    telegram-desktop
+    discord-krisp # Chaotic Nyx version with Krisp noise suppression
+    telegram-desktop_git # Chaotic Nyx bleeding-edge version
     file-roller
     # Note: libnotify is handled in core-tooling.nix
-    swaylock-effects
+    # Note: swaylock-effects is handled in apps/swayidle.nix via programs.swaylock
     xfce.thunar
     font-awesome
     asepriteFixed

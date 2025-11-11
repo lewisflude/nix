@@ -20,16 +20,16 @@ All previously problematic overlays have been removed in favor of using upstream
 Current overlays are low-impact (aliases and new packages only):
 
 - `npm-packages.nix` - Adds new packages (nx-latest)
-- `chaotic-packages.nix` - Pure aliases to existing bleeding-edge packages
-- `localPkgs` - Custom packages not yet in nixpkgs (cursor, ghostty)
+- `localPkgs` - Custom packages not yet in nixpkgs (cursor)
+
+Note: Chaotic Nyx bleeding-edge packages (helix_git, zed-editor_git, etc.) are now accessed via official Chaotic modules instead of custom overlays. See `docs/CHAOTIC_SETUP.md` for details.
 
 ## Overlays Under Evaluation
 
 **None currently** - All overlays are either:
 
-1. Custom packages not in nixpkgs (cursor, ghostty)
-2. Pure aliases with no build modifications (chaotic-packages)
-3. New package additions (npm-packages)
+1. Custom packages not in nixpkgs (cursor)
+2. New package additions (npm-packages)
 
 ---
 

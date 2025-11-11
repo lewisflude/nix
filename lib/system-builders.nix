@@ -89,10 +89,7 @@ let
       };
       sharedModules =
         optionalModule (sops-nix != null) sops-nix.homeManagerModules.sops
-
-        # Note: chaotic.homeManagerModules.default sets nixpkgs.config, which conflicts with useGlobalPkgs
-        # chaotic packages are still available via system-level overlays
-        # ++ optionalModule (chaotic != null) chaotic.homeManagerModules.default
+        ++ optionalModule (chaotic != null) chaotic.homeManagerModules.default
         ++ optionalModule (
           ironbar != null && ironbar ? homeManagerModules
         ) ironbar.homeManagerModules.default

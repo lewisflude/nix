@@ -13,6 +13,7 @@
     ./features/media-management.nix
     ./features/ai-tools.nix
     ./features/containers-supplemental.nix
+    ./features/chaotic-kernel.nix
 
     ./core
     ./hardware

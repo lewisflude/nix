@@ -284,8 +284,9 @@ Previous overlays that caused cache misses have been removed:
 Remaining overlays are low-impact (aliases and new packages only):
 
 - `npm-packages.nix` - Adds new packages (nx-latest)
-- `chaotic-packages.nix` - Pure aliases to existing bleeding-edge packages
-- `localPkgs` - Custom packages not yet in nixpkgs (cursor, ghostty)
+- `localPkgs` - Custom packages not yet in nixpkgs (cursor)
+
+Note: Chaotic Nyx bleeding-edge packages are now accessed via official `chaotic.nixosModules.default` and `chaotic.homeManagerModules.default` instead of custom overlays. See `docs/CHAOTIC_SETUP.md` for details.
 
 ### Future Overlay Additions
 
