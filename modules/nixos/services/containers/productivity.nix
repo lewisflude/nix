@@ -4,55 +4,18 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkAfter;
+  inherit (lib) mkIf;
   cfg = config.host.services.containers;
   prodCfg = cfg.productivity;
 in
 {
   config = mkIf (cfg.enable && prodCfg.enable) {
+    # Note: Ollama and Open WebUI removed - use host.features.aiTools instead
+    # Ollama: services.ollama (native NixOS module)
+    # Open WebUI: services.open-webui (native NixOS module)
+    # See: modules/nixos/services/ai-tools/ and modules/nixos/features/ai-tools.nix
+
     virtualisation.oci-containers.containers = {
-
-      ollama = {
-
-        image = "ollama/ollama:0.1.48";
-
-        environment = {
-          OLLAMA_KEEP_ALIVE = "24h";
-
-          HOME = "/data";
-        };
-
-        volumes = [ "${prodCfg.configPath}/ollama:/data/.ollama" ];
-
-        extraOptions = [
-          "--network=host"
-          "--device=nvidia.com/gpu=all"
-
-          "--memory=16g"
-          "--cpus=8"
-        ];
-      };
-
-      openwebui = {
-
-        image = "ghcr.io/open-webui/open-webui:0.3.13-cuda";
-
-        environment = {
-          TZ = cfg.timezone;
-          OLLAMA_BASE_URL = "http://localhost:11434";
-        };
-
-        volumes = [ "${prodCfg.configPath}/openwebui:/app/backend/data" ];
-        ports = [ "7000:8080" ];
-
-        extraOptions = [
-          "--device=nvidia.com/gpu=all"
-
-          "--memory=8g"
-          "--cpus=4"
-        ];
-
-      };
 
       comfyui-nvidia = {
 
@@ -110,27 +73,11 @@ in
     });
 
     systemd.tmpfiles.rules = [
-      "d ${prodCfg.configPath}/ollama 0755 ${toString cfg.uid} ${toString cfg.gid} -"
-      "d ${prodCfg.configPath}/openwebui 0755 ${toString cfg.uid} ${toString cfg.gid} -"
       "d ${prodCfg.configPath}/comfyui 0755 ${toString cfg.uid} ${toString cfg.gid} -"
       "d ${prodCfg.configPath}/basedir 0755 ${toString cfg.uid} ${toString cfg.gid} -"
     ];
 
     systemd.services = {
-      podman-openwebui = {
-        after = mkAfter [ "podman-ollama.service" ];
-        serviceConfig = {
-          RestartSec = "30s";
-          StartLimitBurst = 10;
-          StartLimitIntervalSec = 600;
-        };
-      };
-
-      podman-ollama.serviceConfig = {
-        RestartSec = "10s";
-        StartLimitBurst = 10;
-        StartLimitIntervalSec = 600;
-      };
       podman-comfyui-nvidia.serviceConfig = {
         RestartSec = "10s";
         StartLimitBurst = 10;

@@ -75,10 +75,24 @@ in
 
   config = mkIf (cfg.enable && qbittorrentCfg.enable) {
     # Declare firewall rules for qBittorrent
-    networking.firewall.allowedTCPPorts = [
-      8080
-      6881
-    ];
+    networking.firewall = {
+      allowedTCPPorts = [
+        8080
+        6881
+      ];
+
+      # qBittorrent runs as the quarantine user (routes through VPN)
+      # Add firewall mark for WebUI traffic to bypass VPN if wireguard-qbittorrent is enabled
+      # This allows local access to the WebUI while torrent traffic stays on VPN
+      extraCommands = mkIf config.services.wireguard-qbittorrent.enable ''
+        iptables -t mangle -A OUTPUT -p tcp --sport 8080 -m owner --uid-owner quarantine -j MARK --set-mark ${toString config.services.wireguard-qbittorrent.webUIMark}
+        ip6tables -t mangle -A OUTPUT -p tcp --sport 8080 -m owner --uid-owner quarantine -j MARK --set-mark ${toString config.services.wireguard-qbittorrent.webUIMark}
+      '';
+      extraStopCommands = mkIf config.services.wireguard-qbittorrent.enable ''
+        iptables -t mangle -D OUTPUT -p tcp --sport 8080 -m owner --uid-owner quarantine -j MARK --set-mark ${toString config.services.wireguard-qbittorrent.webUIMark} || true
+        ip6tables -t mangle -D OUTPUT -p tcp --sport 8080 -m owner --uid-owner quarantine -j MARK --set-mark ${toString config.services.wireguard-qbittorrent.webUIMark} || true
+      '';
+    };
 
     # SOPS secrets for WebUI credentials
     sops.secrets = mkIf (webUI != null && webUI.useSops) {
@@ -90,9 +104,14 @@ in
       };
     };
 
+    # Set umask for qBittorrent service to ensure group-writable files
+    systemd.services.qbittorrent.serviceConfig.UMask = "0002";
+
     services.qbittorrent = {
       enable = true;
-      inherit (cfg) user group;
+      # Run qBittorrent as the quarantine user (VPN routing) with media group (file access)
+      user = "quarantine";
+      group = "media";
       webuiPort = 8080;
       torrentingPort = 6881;
       openFirewall = false; # Firewall handled by WireGuard routing policy
