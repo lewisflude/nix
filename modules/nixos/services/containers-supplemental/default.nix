@@ -22,6 +22,8 @@ in
     ./services/comfyui.nix
     ./services/calcom.nix
     ./services/janitorr.nix
+    ./services/jellystat.nix
+    ./services/termix.nix
   ];
 
   options.host.services.containersSupplemental = {
