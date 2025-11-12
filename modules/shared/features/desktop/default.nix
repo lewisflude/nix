@@ -37,7 +37,6 @@ in
         "audio"
         "video"
         "input"
-        "networkmanager"
       ]
       ++ optional cfg.niri "render";
     })
