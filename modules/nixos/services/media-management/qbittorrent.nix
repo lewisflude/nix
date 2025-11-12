@@ -76,7 +76,8 @@ in
   config = mkIf (cfg.enable && qbittorrentCfg.enable) {
     # Declare firewall rules for qBittorrent
     # Traffic is bound to VLAN 2 interface (192.168.2.249)
-    networking.firewall = {
+    # Open ports on VLAN 2 interface specifically
+    networking.firewall.interfaces.vlan2 = {
       allowedTCPPorts = [
         8080 # WebUI (accessible on VLAN 2)
         62000 # Torrent port (accessible on VLAN 2)
@@ -109,6 +110,13 @@ in
       serverConfig = {
         # Bind qBittorrent to VLAN 2 interface only
         Preferences = {
+          # Connection settings - bind ALL traffic to VLAN 2 interface
+          Connection = {
+            # Interface name to bind to (vlan2)
+            InterfaceName = "vlan2";
+            # Interface address to bind to
+            InterfaceAddress = "192.168.2.249";
+          };
           WebUI = {
             # Bind to VLAN 2 static IP (192.168.2.249)
             Address = "192.168.2.249";

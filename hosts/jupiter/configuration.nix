@@ -45,4 +45,10 @@
   # ProtonVPN NAT-PMP port forwarding
   services.protonvpn-natpmp.enable = true;
 
+  # Caddy reverse proxy
+  host.services.caddy = {
+    enable = true;
+    email = "lewis@lewisflude.com";
+  };
+
 }

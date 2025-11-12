@@ -21,6 +21,7 @@ in
     pkgs.pgcli
     pkgs.cursor-cli
     pkgs.claude-code # Claude agentic coding CLI
+    pkgs.seahorse # GNOME password and encryption key manager (PGP/GPG GUI)
   ]
   ++ lib.optional (nx != null) nx
   ++ platformLib.platformPackages [ ] [ pkgs.xcodebuild ];
