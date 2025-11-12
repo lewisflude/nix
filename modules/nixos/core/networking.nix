@@ -8,8 +8,10 @@
   networking = {
     hostName = hostname;
     enableIPv6 = true;
-    networkmanager.enable = true;
-    networkmanager.dns = "systemd-resolved";
+    # Use systemd-networkd for advanced routing
+    useNetworkd = true;
+    useDHCP = false; # DHCP configured per-interface in systemd.network
+    networkmanager.enable = false;
     firewall = {
       enable = true;
 
@@ -27,6 +29,48 @@
       # This ensures proper separation of concerns and maintainable configuration
     };
   };
+
+  # systemd-networkd - declarative, advanced routing capabilities
+  systemd.network = {
+    enable = true;
+
+    # Main interface configuration (VLAN 1 - Default network)
+    networks."10-main" = {
+      matchConfig.Name = "eno2";
+      DHCP = "yes";
+      # Configure this interface to create VLAN interfaces
+      networkConfig = {
+        # Create vlan2 interface on this physical interface
+        VLAN = [ "vlan2" ];
+      };
+    };
+
+    # VLAN 2 - Secondary network (routed through UDM)
+    netdevs."10-vlan2" = {
+      netdevConfig = {
+        Name = "vlan2";
+        Kind = "vlan";
+      };
+      vlanConfig = {
+        Id = 2;
+        # VLAN will be created on the interface that has this netdev referenced
+        # Typically referenced from the main network's VLAN setting
+      };
+    };
+
+    # VLAN 2 interface configuration
+    networks."20-vlan2" = {
+      matchConfig.Name = "vlan2";
+      DHCP = "no";
+      # Static IP for VLAN 2 - allows services to bind to specific interface
+      address = [
+        "192.168.2.249/24"
+      ];
+      gateway = [ "192.168.2.1" ];
+      dns = [ "192.168.2.1" ];
+    };
+  };
+
   services = {
     resolved.enable = true;
     avahi = {
@@ -54,8 +98,8 @@
     "net.ipv4.conf.all.forwarding" = 1;
     "net.ipv6.conf.all.forwarding" = lib.mkDefault 1;
 
-    # WireGuard performance optimizations
-    # Increase maximum buffer sizes for high-throughput VPN traffic
+    # Network performance optimizations
+    # Increase maximum buffer sizes for high-throughput traffic
     "net.core.rmem_max" = 16777216; # 16MB
     "net.core.wmem_max" = 16777216; # 16MB
 

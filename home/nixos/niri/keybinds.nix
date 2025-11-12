@@ -25,12 +25,14 @@ in
 
     "F13".action.spawn = [ terminal ];
 
-    "Print".action.spawn = [
-      uwsm
-      "app"
-      "--"
-      (lib.getExe pkgs.chromium)
-    ];
+    "Print" = {
+      allow-inhibiting = false;
+      action.spawn = [
+        "sh"
+        "-c"
+        ''grim - | swappy-fixed -f -''
+      ];
+    };
     "Mod+Shift+Slash".action.show-hotkey-overlay = { };
     "Mod+Escape" = {
       allow-inhibiting = false;
@@ -139,7 +141,7 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''grim -g "$(slurp)" - | ${config.home.homeDirectory}/bin/swappy-fixed -f -''
+        ''grim -g "$(slurp)" - | swappy-fixed -f -''
       ];
     };
     "Shift+Print" = {
@@ -147,7 +149,7 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''grim -g "$(slurp -w)" - | ${config.home.homeDirectory}/bin/swappy-fixed -f -''
+        ''grim -g "$(slurp -w)" - | swappy-fixed -f -''
       ];
     };
     "Ctrl+Print" = {
@@ -155,7 +157,7 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''grim - | ${config.home.homeDirectory}/bin/swappy-fixed -f -''
+        ''grim - | swappy-fixed -f -''
       ];
     };
     "Alt+Print" = {
