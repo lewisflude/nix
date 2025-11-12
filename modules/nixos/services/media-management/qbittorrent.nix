@@ -75,23 +75,12 @@ in
 
   config = mkIf (cfg.enable && qbittorrentCfg.enable) {
     # Declare firewall rules for qBittorrent
+    # Traffic is bound to VLAN 2 interface (192.168.2.249)
     networking.firewall = {
       allowedTCPPorts = [
-        8080
-        6881
+        8080 # WebUI (accessible on VLAN 2)
+        62000 # Torrent port (accessible on VLAN 2)
       ];
-
-      # qBittorrent runs as the quarantine user (routes through VPN)
-      # Add firewall mark for WebUI traffic to bypass VPN if wireguard-qbittorrent is enabled
-      # This allows local access to the WebUI while torrent traffic stays on VPN
-      extraCommands = mkIf config.services.wireguard-qbittorrent.enable ''
-        iptables -t mangle -A OUTPUT -p tcp --sport 8080 -m owner --uid-owner quarantine -j MARK --set-mark ${toString config.services.wireguard-qbittorrent.webUIMark}
-        ip6tables -t mangle -A OUTPUT -p tcp --sport 8080 -m owner --uid-owner quarantine -j MARK --set-mark ${toString config.services.wireguard-qbittorrent.webUIMark}
-      '';
-      extraStopCommands = mkIf config.services.wireguard-qbittorrent.enable ''
-        iptables -t mangle -D OUTPUT -p tcp --sport 8080 -m owner --uid-owner quarantine -j MARK --set-mark ${toString config.services.wireguard-qbittorrent.webUIMark} || true
-        ip6tables -t mangle -D OUTPUT -p tcp --sport 8080 -m owner --uid-owner quarantine -j MARK --set-mark ${toString config.services.wireguard-qbittorrent.webUIMark} || true
-      '';
     };
 
     # SOPS secrets for WebUI credentials
@@ -109,17 +98,20 @@ in
 
     services.qbittorrent = {
       enable = true;
-      # Run qBittorrent as the quarantine user (VPN routing) with media group (file access)
-      user = "quarantine";
+      # Run qBittorrent with media group for file access
+      user = "qbittorrent";
       group = "media";
       webuiPort = 8080;
-      torrentingPort = 6881;
-      openFirewall = false; # Firewall handled by WireGuard routing policy
+      torrentingPort = 62000;
+      # Add --confirm-legal-notice flag to prevent service from exiting
+      extraArgs = [ "--confirm-legal-notice" ];
+      openFirewall = false; # Firewall handled explicitly above
       serverConfig = {
-        # Bind WebUI to all interfaces (VPN routing is handled at network level)
+        # Bind qBittorrent to VLAN 2 interface only
         Preferences = {
           WebUI = {
-            Address = "*";
+            # Bind to VLAN 2 static IP (192.168.2.249)
+            Address = "192.168.2.249";
             Port = 8080;
             # WebUI access control
             HostHeaderValidation = false;
@@ -166,19 +158,21 @@ in
           # Maximum number of upload slots per torrent
           max_uploads_per_torrent = 5;
         };
-        # BitTorrent configuration (interface binding handled by routing policy)
+        # BitTorrent configuration - bind to VLAN 2 interface
         BitTorrent = {
           Session = {
-            # Disable UPnP/NAT-PMP - we're using VPN port forwarding instead
+            Interface = "vlan2";
+            InterfaceName = "vlan2";
+            Port = 6881;
             UseUPnP = false;
             UsePEX = true;
             UseDHT = true;
             # Torrent queueing system
             QueueingSystemEnabled = true;
             # Maximum active uploads (0 = infinite)
-            MaxActiveUploads = 0;
+            MaxActiveUploads = 200;
             # Maximum active torrents (0 = infinite)
-            MaxActiveTorrents = 0;
+            MaxActiveTorrents = 200;
             # Global maximum number of connections
             MaxConnections = 2000;
             # Maximum number of connections per torrent
@@ -187,10 +181,6 @@ in
             MaxUploads = 200;
             # Maximum number of upload slots per torrent
             MaxUploadsPerTorrent = 5;
-            # uTP-TCP mixed mode algorithm: Proportional (Peer proportional)
-            # Rate limits TCP connections to their proportional share based on how many
-            # connections are TCP, preventing uTP connections from being starved by TCP.
-            # Values: "PreferTCP" or "Proportional"
             uTPMixedMode = "Proportional";
           };
         };

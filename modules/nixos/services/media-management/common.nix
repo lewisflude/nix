@@ -21,19 +21,7 @@ in
         createHome = true;
       };
 
-      # Quarantine user for qBittorrent with VPN routing
-      users.quarantine = {
-        isSystemUser = true;
-        group = "quarantine";
-        # Add to media group so it can access shared storage directories
-        extraGroups = [ cfg.group ];
-        description = "Quarantine user for qBittorrent with VPN routing";
-        home = "/var/lib/quarantine";
-        createHome = true;
-      };
-
       groups.${cfg.group} = { };
-      groups.quarantine = { };
     };
 
     # Use native systemd.tmpfiles.rules format (standard NixOS pattern)
@@ -84,10 +72,7 @@ in
           }
         ];
         mediaTmpfiles = map (dir: mkDirRule (dir // { inherit (cfg) user group; })) mediaDirs;
-        quarantineTmpfiles = [
-          "d /var/lib/quarantine 0755 quarantine quarantine -"
-        ];
       in
-      mediaTmpfiles ++ quarantineTmpfiles;
+      mediaTmpfiles;
   };
 }

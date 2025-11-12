@@ -10,10 +10,9 @@
 
     ./home-assistant.nix
     ./music-assistant.nix
+    ./protonvpn-natpmp.nix
     ./samba.nix
     ./ssh.nix
     ./cockpit.nix
-    ./protonvpn-port-forwarding.nix
-    ./wireguard-qbittorrent.nix
   ];
 }
