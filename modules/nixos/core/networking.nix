@@ -63,11 +63,26 @@
       matchConfig.Name = "vlan2";
       DHCP = "no";
       # Static IP for VLAN 2 - allows services to bind to specific interface
+      # Services that bind to this interface (like qBittorrent) will route through it
       address = [
         "192.168.2.249/24"
       ];
-      gateway = [ "192.168.2.1" ];
-      dns = [ "192.168.2.1" ];
+      # Policy routing: traffic from this interface goes through VPN gateway
+      routingPolicyRules = [
+        {
+          From = "192.168.2.249/32";
+          Table = 2;
+          Priority = 100;
+        }
+      ];
+      # Custom routing table for VPN traffic
+      routes = [
+        {
+          Gateway = "192.168.2.1";
+          Destination = "0.0.0.0/0";
+          Table = 2;
+        }
+      ];
     };
   };
 

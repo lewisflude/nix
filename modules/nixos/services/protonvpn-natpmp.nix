@@ -21,7 +21,7 @@ in
 
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${pkgs.bash}/bin/bash -c 'while true; do ${pkgs.natpmp}/bin/natpmpc -g 10.2.0.1 -a 1 62000 tcp 3600; sleep 45; done'";
+        ExecStart = "${pkgs.bash}/bin/bash -c 'while true; do ${pkgs.libnatpmp}/bin/natpmpc -g 10.2.0.1 -a 1 62000 tcp 3600; sleep 45; done'";
         Restart = "always";
       };
     };
