@@ -10,11 +10,10 @@ let
   dockerEnabled = virtualisation.docker or virtualisation.enableDocker or false;
   linuxPackages =
     if dockerEnabled then
-      with pkgs;
       [
-        docker-client
-        docker-compose
-        docker-credential-helpers
+        pkgs.docker-client
+        pkgs.docker-compose
+        pkgs.docker-credential-helpers
       ]
     else
       [ ];

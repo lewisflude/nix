@@ -9,29 +9,29 @@ let
 
   # Map command names to Nix packages
   # Note: Some formatters are part of larger packages (e.g., goimports is in gotools)
-  lspPackages = with pkgs; [
-    nixd
-    nodePackages.typescript-language-server
-    vscode-langservers-extracted
+  lspPackages = [
+    pkgs.nixd
+    pkgs.nodePackages.typescript-language-server
+    pkgs.vscode-langservers-extracted
     # graphql-language-server - Not available in nixpkgs
     # GraphQL LSP support disabled until a suitable package is found or added
-    yaml-language-server
-    taplo
-    marksman
-    gopls
-    rust-analyzer
-    pyright
-    llvmPackages.clang-unwrapped # Includes clangd
+    pkgs.yaml-language-server
+    pkgs.taplo
+    pkgs.marksman
+    pkgs.gopls
+    pkgs.rust-analyzer
+    pkgs.pyright
+    pkgs.llvmPackages.clang-unwrapped # Includes clangd
   ];
 
-  formatterPackages = with pkgs; [
-    nixfmt-rfc-style
-    biome
-    yamlfmt
-    gotools # Includes goimports
-    clang-tools # Includes clang-format
-    black # Python formatter
-    rustfmt # Rust formatter
+  formatterPackages = [
+    pkgs.nixfmt-rfc-style
+    pkgs.biome
+    pkgs.yamlfmt
+    pkgs.gotools # Includes goimports
+    pkgs.clang-tools # Includes clang-format
+    pkgs.black # Python formatter
+    pkgs.rustfmt # Rust formatter
     # taplo is already in lspPackages
   ];
 in
