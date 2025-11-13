@@ -45,6 +45,19 @@
   # ProtonVPN NAT-PMP port forwarding
   services.protonvpn-natpmp.enable = true;
 
+  # Dante SOCKS proxy for routing traffic through vlan2 (VPN)
+  services.dante-proxy = {
+    enable = true;
+    port = 1080;
+    interface = "vlan2";
+    listenAddress = "127.0.0.1"; # Localhost only for security
+    allowedClients = [
+      "127.0.0.1/32" # Localhost
+      "192.168.0.0/16" # Local network
+    ];
+    openFirewall = false; # Localhost only, no need to open firewall
+  };
+
   # Caddy reverse proxy
   host.services.caddy = {
     enable = true;

@@ -87,7 +87,15 @@
   };
 
   services = {
-    resolved.enable = true;
+    resolved = {
+      enable = true;
+      # Disable fallback DNS - use only DHCP-provided DNS servers
+      fallbackDns = [ ];
+      # Prefer DNS servers from DHCP over fallback servers
+      extraConfig = ''
+        DNSStubListener=yes
+      '';
+    };
     avahi = {
       enable = true;
       nssmdns4 = true;

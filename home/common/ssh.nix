@@ -14,6 +14,17 @@ _: {
 
         # Add keys to agent automatically
         addKeysToAgent = "yes";
+
+        # Send terminal environment variables (fixes backspace on embedded devices)
+        sendEnv = [ "TERM" ];
+      };
+
+      "192.168.1.1" = {
+        # Use simple terminal type for embedded devices (routers, switches, etc.)
+        extraOptions = {
+          RequestTTY = "yes";
+          SetEnv = "TERM=vt100";
+        };
       };
 
       "github.com" = {
