@@ -9,10 +9,14 @@ let
   };
 in
 {
+  programs.mangohud = {
+    enable = true;
+    package = pkgs.mangohud_git; # Chaotic Nyx bleeding-edge version
+    enableSessionWide = false; # Only enable when needed via env var
+  };
+
   home.packages =
     (with pkgs; [
-
-      mangohud_git # Chaotic Nyx bleeding-edge version
       protonup-qt
       (sunshine.override { cudaSupport = true; })
       moonlight-qt
