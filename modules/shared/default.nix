@@ -3,7 +3,6 @@
     ./host-options/core.nix
     ./host-options/features.nix
     ./host-options/services/media-management.nix
-    ./host-options/services/ai-tools.nix
     ./host-options/services/containers-supplemental.nix
     ./core.nix
     ./shell.nix
