@@ -1,10 +1,10 @@
 { lib }:
 let
 
-  isLinux = system: lib.hasInfix "linux" system;
-  isDarwin = system: lib.hasInfix "darwin" system;
-  isAarch64 = system: lib.hasInfix "aarch64" system;
-  isX86_64 = system: lib.hasInfix "x86_64" system;
+  isLinux = system: lib.hasSuffix "-linux" system || system == "linux";
+  isDarwin = system: lib.hasSuffix "-darwin" system || system == "darwin";
+  isAarch64 = system: lib.hasPrefix "aarch64-" system || system == "aarch64";
+  isX86_64 = system: lib.hasPrefix "x86_64-" system || system == "x86_64";
 
   ifLinux = system: value: lib.optionalAttrs (isLinux system) value;
   ifDarwin = system: value: lib.optionalAttrs (isDarwin system) value;

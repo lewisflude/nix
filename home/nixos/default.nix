@@ -1,7 +1,7 @@
 { ... }:
 {
   imports = [
-    ./system
+    ./hardware-tools
     ./browser.nix
     ./launcher.nix
     ./swaync.nix

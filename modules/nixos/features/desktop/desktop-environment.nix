@@ -10,7 +10,6 @@ in
 {
   config = lib.mkIf cfg.enable {
     environment.pathsToLink = [ "/share/wayland-sessions" ];
-    time.timeZone = "Europe/London";
     programs.niri.enable = true;
     programs.uwsm = {
       enable = true;
