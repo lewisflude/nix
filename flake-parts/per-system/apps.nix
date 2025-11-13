@@ -55,8 +55,6 @@ in
             "new-module" = "Scaffold new NixOS/home-manager modules";
             "setup-cachix" = "Configure Cachix binary cache";
             "update-all" = "Update all flake dependencies";
-            "cleanup-duplicates" = "Remove old/unused package versions from Nix store";
-            "analyze-services" = "Analyze Nix store service usage";
             "visualize-modules" = "Generate module dependency graphs";
           };
           pogScript = pkgsWithPog.callPackage ../../pkgs/pog-scripts/${script-name}.nix scriptArgs;
@@ -78,8 +76,6 @@ in
         new-module = mkPogApp "new-module";
         setup-cachix = mkPogApp "setup-cachix";
         update-all = mkPogApp "update-all";
-        cleanup-duplicates = mkPogApp "cleanup-duplicates";
-        analyze-services = mkPogApp "analyze-services";
         visualize-modules = mkPogApp "visualize-modules";
         # devour-flake: Build all flake outputs efficiently
         devour-flake = {
