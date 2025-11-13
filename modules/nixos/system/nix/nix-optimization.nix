@@ -91,14 +91,14 @@ in
           '';
         };
       };
-      systemPackages = with pkgs; [
-        (writeShellScriptBin "nix-optimize" ''
+      systemPackages = [
+        (pkgs.writeShellScriptBin "nix-optimize" ''
           exec /etc/nix-optimization/optimize-store.sh "$@"
         '')
-        (writeShellScriptBin "nix-clean" ''
+        (pkgs.writeShellScriptBin "nix-clean" ''
           exec /etc/nix-optimization/quick-clean.sh "$@"
         '')
-        (writeShellScriptBin "nix-analyze" ''
+        (pkgs.writeShellScriptBin "nix-analyze" ''
           exec /etc/nix-optimization/analyze-store.sh "$@"
         '')
       ];

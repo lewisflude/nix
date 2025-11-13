@@ -11,19 +11,18 @@ in
 {
   home = {
     packages =
-      with pkgs;
       [
-        git
-        curl
-        jq
+        pkgs.git
+        pkgs.curl
+        pkgs.jq
       ]
       ++
         platformLib.platformPackages
           [
-            linux-specific-package
+            pkgs.linux-specific-package
           ]
           [
-            darwin-specific-package
+            pkgs.darwin-specific-package
           ];
     file = {
       ".example-config" = {

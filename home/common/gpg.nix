@@ -8,9 +8,9 @@ let
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
 in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     # Note: gnupg is automatically installed by programs.gpg.enable = true
-    (platformLib.platformPackage pinentry-gnome3 pinentry_mac)
+    (platformLib.platformPackage pkgs.pinentry-gnome3 pkgs.pinentry_mac)
   ];
   programs.gpg = {
     enable = true;

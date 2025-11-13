@@ -43,30 +43,29 @@ in
         extraPackages = [
           # NVIDIA driver package - provides GBM backend for Wayland compositors
           package
-        ]
-        ++ (with pkgs; [
+
           # NVIDIA VA-API bridge for hardware video acceleration
-          nvidia-vaapi-driver
+          pkgs.nvidia-vaapi-driver
 
           # Wayland EGL support for GPU access from Wayland compositors
-          egl-wayland
+          pkgs.egl-wayland
 
           # Mesa EGL libraries for general OpenGL/EGL support
           # Note: niri uses the same nixpkgs via flake follows, so Mesa versions stay in sync
-          mesa
-          libglvnd
+          pkgs.mesa
+          pkgs.libglvnd
 
           # Vulkan and graphics debugging tools
-          vulkan-tools
-          mesa-demos # includes glxinfo / eglinfo
+          pkgs.vulkan-tools
+          pkgs.mesa-demos # includes glxinfo / eglinfo
 
           # VA-API (Video Acceleration API) support
-          libva # VA-API loader
-          libva-utils # vainfo for checking VA-API support
+          pkgs.libva # VA-API loader
+          pkgs.libva-utils # vainfo for checking VA-API support
 
           # NVIDIA codec headers for encoding/decoding
-          nv-codec-headers
-        ]);
+          pkgs.nv-codec-headers
+        ];
       };
       nvidia = {
         # DRM kernel modesetting - REQUIRED for Wayland compositors

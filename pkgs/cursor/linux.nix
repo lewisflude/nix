@@ -20,33 +20,33 @@ let
     inherit pname src;
     version = cursorVersion;
   };
-  runtimeLibs = with pkgs; [
-    libglvnd
-    vulkan-loader
-    libdrm
-    wayland
-    libxkbcommon
-    xorg.libX11
-    xorg.libXext
-    xorg.libXcursor
-    xorg.libXi
-    xorg.libXrandr
-    xorg.libXdamage
-    xorg.libXcomposite
-    xorg.libXfixes
-    xorg.libXrender
-    xorg.libXxf86vm
-    xorg.libxcb
-    xorg.libxkbfile
-    alsa-lib
-    pipewire
-    libpulseaudio
-    nss
-    nspr
-    libkrb5
-    cups
-    libuuid
-    libsecret
+  runtimeLibs = [
+    pkgs.libglvnd
+    pkgs.vulkan-loader
+    pkgs.libdrm
+    pkgs.wayland
+    pkgs.libxkbcommon
+    pkgs.xorg.libX11
+    pkgs.xorg.libXext
+    pkgs.xorg.libXcursor
+    pkgs.xorg.libXi
+    pkgs.xorg.libXrandr
+    pkgs.xorg.libXdamage
+    pkgs.xorg.libXcomposite
+    pkgs.xorg.libXfixes
+    pkgs.xorg.libXrender
+    pkgs.xorg.libXxf86vm
+    pkgs.xorg.libxcb
+    pkgs.xorg.libxkbfile
+    pkgs.alsa-lib
+    pkgs.pipewire
+    pkgs.libpulseaudio
+    pkgs.nss
+    pkgs.nspr
+    pkgs.libkrb5
+    pkgs.cups
+    pkgs.libuuid
+    pkgs.libsecret
   ];
   desktopItem = makeDesktopItem {
     name = "cursor";

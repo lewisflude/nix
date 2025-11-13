@@ -4,22 +4,22 @@
   ...
 }:
 {
-  home.packages = with pkgs; [
+  home.packages = [
     # Formatters
-    nixfmt-rfc-style
-    biome
-    taplo
-    yamlfmt
-    gotools # Includes goimports
-    clang-tools # Includes clang-format
+    pkgs.nixfmt-rfc-style
+    pkgs.biome
+    pkgs.taplo
+    pkgs.yamlfmt
+    pkgs.gotools # Includes goimports
+    pkgs.clang-tools # Includes clang-format
 
     # Language servers
-    marksman
+    pkgs.marksman
 
     # Linters
-    luaPackages.luacheck
+    pkgs.luaPackages.luacheck
 
-    (lib.lowPrio lua)
+    (lib.lowPrio pkgs.lua)
   ]
 
   ;

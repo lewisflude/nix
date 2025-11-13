@@ -15,23 +15,17 @@ in
 {
   config = mkIf cfg.enable (mkMerge [
     (optionalAttrs isLinux {
-      environment.systemPackages = optionals cfg.utilities (
-        with pkgs;
-        [
-          grim
-          slurp
-          wl-clipboard
-
-          wlr-randr
-          brightnessctl
-
-          xdg-utils
-
-          argyllcms
-          colord-gtk
-          wl-gammactl
-        ]
-      );
+      environment.systemPackages = optionals cfg.utilities [
+        pkgs.grim
+        pkgs.slurp
+        pkgs.wl-clipboard
+        pkgs.wlr-randr
+        pkgs.brightnessctl
+        pkgs.xdg-utils
+        pkgs.argyllcms
+        pkgs.colord-gtk
+        pkgs.wl-gammactl
+      ];
 
       users.users.${config.host.username}.extraGroups = [
         "audio"

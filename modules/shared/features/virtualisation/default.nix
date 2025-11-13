@@ -63,19 +63,20 @@ in
         optional cfg.docker "docker" ++ optional cfg.qemu "libvirtd" ++ optional cfg.virtualbox "vboxusers";
 
       environment.systemPackages =
-        with pkgs;
         optionals cfg.qemu [
-          virt-manager
-          qemu
-          qemu_kvm
+          pkgs.virt-manager
+          pkgs.qemu
+          pkgs.qemu_kvm
         ]
         ++ optionals cfg.podman [
-          podman-compose
-          buildah
-          skopeo
+          pkgs.podman-compose
+          pkgs.buildah
+          pkgs.skopeo
         ]
         ++ optionals cfg.docker [
-          docker-client
+          pkgs.docker-client
+          pkgs.docker-compose
+          pkgs.docker-credential-helpers
         ];
     })
 

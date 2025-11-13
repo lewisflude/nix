@@ -43,10 +43,10 @@ pog.pog {
     }
   ];
 
-  runtimeInputs = with pkgs; [
-    coreutils
-    gnused
-    gum
+  runtimeInputs = [
+    pkgs.coreutils
+    pkgs.gnused
+    pkgs.gum
   ];
 
   script =

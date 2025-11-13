@@ -5,6 +5,9 @@
   inputs,
   ...
 }:
+let
+  constants = import ../../lib/constants.nix;
+in
 {
 
   nix =
@@ -37,7 +40,7 @@
       dseditgroup -o edit -a ${config.host.username} -t user wheel
     fi
   '';
-  time.timeZone = lib.mkForce "Europe/London";
+  time.timeZone = lib.mkForce constants.defaults.timezone;
 
   host.features.restic = {
     enable = true;

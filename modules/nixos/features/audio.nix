@@ -26,25 +26,18 @@ in
     security.rtkit.enable = true;
 
     environment.systemPackages =
-      with pkgs;
-
       (optionals cfg.production [
-
-        audacity
-        helm
-        lsp-plugins
-
+        pkgs.audacity
+        pkgs.helm
+        pkgs.lsp-plugins
       ])
 
       ++ (optionals audioNixCfg.enable (
-
-        (optional audioNixCfg.bitwig bitwig-studio-stable-latest)
+        (optional audioNixCfg.bitwig pkgs.bitwig-studio-stable-latest)
 
         ++ (optionals audioNixCfg.plugins [
-
-          neuralnote
-          paulxstretch
-
+          pkgs.neuralnote
+          pkgs.paulxstretch
         ])
       ));
 

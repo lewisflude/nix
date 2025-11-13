@@ -22,7 +22,6 @@ in
     ];
 
     environment.systemPackages =
-      with pkgs;
       optionals pkgs.stdenv.isLinux [
 
       ]
@@ -55,7 +54,7 @@ in
 
       };
 
-      home.packages = with pkgs; [
+      home.packages = [
 
       ];
     };

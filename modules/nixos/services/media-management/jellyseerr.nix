@@ -7,6 +7,7 @@ let
   inherit (lib) mkEnableOption mkIf mkAfter;
   inherit (lib.lists) optional;
   cfg = config.host.services.mediaManagement;
+  constants = import ../../../../lib/constants.nix;
 in
 {
   options.host.services.mediaManagement.jellyseerr.enable =
@@ -19,7 +20,7 @@ in
     services.jellyseerr = {
       enable = true;
       openFirewall = true;
-      port = 5055;
+      port = constants.ports.services.jellyseerr;
     };
 
     systemd.services.jellyseerr = {

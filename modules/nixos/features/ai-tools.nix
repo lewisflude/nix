@@ -16,6 +16,7 @@ let
   inherit (lib.strings) concatMapStringsSep;
 
   cfg = config.host.features.aiTools;
+  constants = import ../../../lib/constants.nix;
 in
 {
   # Additional options not in shared/host-options/features.nix
@@ -55,7 +56,7 @@ in
 
       ollamaUrl = mkOption {
         type = types.str;
-        default = "http://127.0.0.1:11434";
+        default = "http://127.0.0.1:${toString constants.ports.services.ollama}";
         description = "URL to Ollama backend";
       };
 
@@ -85,7 +86,7 @@ in
         OLLAMA_KEEP_ALIVE = "24h";
       };
       host = "127.0.0.1";
-      port = 11434;
+      port = constants.ports.services.ollama;
     };
 
     # Enable NVIDIA container toolkit if using CUDA
@@ -114,7 +115,7 @@ in
         ''
           # Wait for Ollama to be ready
           for i in {1..30}; do
-            if curl -s http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
+            if curl -s http://127.0.0.1:${toString constants.ports.services.ollama}/api/tags >/dev/null 2>&1; then
               break
             fi
             sleep 2

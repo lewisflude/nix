@@ -13,8 +13,8 @@ in {
   ];
 
   config = lib.mkIf config.services.mcp.enable {
-    home.packages = with pkgs; [
-      uv
+    home.packages = [
+      pkgs.uv
     ] ++ (lib.optionals (servers.nodejs != null) [ servers.nodejs ]);
 
     services.mcp = {

@@ -122,11 +122,12 @@ in
               features.virtualisation.enable = true;
               features.virtualisation.docker = true;
             };
+            hostSystem = "x86_64-linux";
           }
         ];
       };
     in
-      (evalModule ../modules/nixos/features/virtualisation.nix).config.host.features.virtualisation.enable
+      (evalModule ../modules/shared/features/virtualisation/default.nix).config.host.features.virtualisation.enable
   '';
 
   feature-media-management = mkEvalTest "feature-media-management" ''
@@ -245,7 +246,7 @@ in
       (evalModules [
         ../modules/nixos/features/gaming.nix
         ../modules/shared/features/development/default.nix
-        ../modules/nixos/features/virtualisation.nix
+        ../modules/shared/features/virtualisation/default.nix
         ../modules/shared/features/security/default.nix
       ]).config.host.features.gaming.enable
   '';

@@ -1,13 +1,13 @@
 { pkgs, ... }:
 pkgs.mkShell {
-  buildInputs = with pkgs; [
-    qmk
-    gcc-arm-embedded
-    dfu-util
-    avrdude
-    python3
-    python3Packages.pip
-    python3Packages.setuptools
+  buildInputs = [
+    pkgs.qmk
+    pkgs.gcc-arm-embedded
+    pkgs.dfu-util
+    pkgs.avrdude
+    pkgs.python3
+    pkgs.python3Packages.pip
+    pkgs.python3Packages.setuptools
   ];
 
   shellHook = ''

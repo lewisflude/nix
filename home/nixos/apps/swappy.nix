@@ -38,8 +38,8 @@ in
     };
   };
   home.file."Pictures/Screenshots/.keep".text = "";
-  home.packages = with pkgs; [
-    (writeShellApplication {
+  home.packages = [
+    (pkgs.writeShellApplication {
       name = "swappy-fixed";
       runtimeInputs = [
         pkgs.swappy

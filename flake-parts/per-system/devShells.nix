@@ -49,16 +49,16 @@ in
           shellHook = config.checks.pre-commit-check.shellHook or "";
           buildInputs =
             (config.checks.pre-commit-check.enabledPackages or [ ])
-            ++ (with pkgs; [
-              jq
-              yq
-              git
-              gh
-              direnv
-              nix-direnv
-              nix-update
+            ++ [
+              pkgs.jq
+              pkgs.yq
+              pkgs.git
+              pkgs.gh
+              pkgs.direnv
+              pkgs.nix-direnv
+              pkgs.nix-update
               inputs.pre-commit-hooks.packages.${system}.pre-commit
-            ]);
+            ];
         };
       };
     };
