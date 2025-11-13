@@ -83,6 +83,14 @@ in
       qbittorrent = {
         enable = true;
 
+        # Storage optimization: SSD for incomplete downloads, HDD for final storage
+        incompleteDownloadPath = "/mnt/nvme/qbittorrent/incomplete";
+        diskCacheSize = 512; # Increased from 128 MiB for better write buffering
+        maxActiveTorrents = 150; # Reduced from 200 to avoid HDD saturation with Jellyfin
+        maxActiveUploads = 75; # Reduced to prevent HDD thrashing during streaming
+        maxUploads = 150; # Increased from 200 for better seeding
+        maxUploadsPerTorrent = 10; # Increased from 5 for improved seed ratio
+
         # VPN Configuration
         vpn = {
           enable = true;
@@ -99,7 +107,7 @@ in
           password = "@ByteArray(J5lri+TddZR2AJqNVPndng==:no5T50n4CD9peISk6jZQ+Cb8qzv6DoV2MtOxE2oErywXVFngVDq/eySGpoNjUCFOHFdbifjwwHI4jlV2LH4ocQ==)";
         };
 
-        # Category Mappings
+        # Category Mappings (final download destinations on HDD)
         categories = {
           radarr = "/mnt/storage/movies";
           sonarr = "/mnt/storage/tv";

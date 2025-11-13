@@ -41,7 +41,6 @@ in
     ../../../shared/features/theming/applications/desktop/ironbar-nixos.nix
     ../../../shared/features/theming/applications/desktop/mako.nix
     ../../../shared/features/theming/applications/desktop/swaync.nix
-    ../../../shared/features/theming/applications/desktop/swappy.nix
   ];
 
   # Define NixOS-specific application options
@@ -60,10 +59,6 @@ in
 
     swaync = {
       enable = mkEnableOption "Apply theme to SwayNC (notification center)";
-    };
-
-    swappy = {
-      enable = mkEnableOption "Apply theme to Swappy (screenshot annotation)";
     };
   };
 

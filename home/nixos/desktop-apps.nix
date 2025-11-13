@@ -16,15 +16,12 @@ in
     font-awesome
     asepriteFixed
     wl-screenrec
-  ];
 
-  programs.thunar = {
-    enable = true;
-    plugins = with pkgs.xfce; [
-      thunar-archive-plugin
-      thunar-volman
-    ];
-  };
+    # Thunar file manager with plugins
+    xfce.thunar
+    xfce.thunar-archive-plugin
+    xfce.thunar-volman
+  ];
 
   services.cliphist = {
     enable = true;

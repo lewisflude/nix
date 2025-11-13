@@ -4,12 +4,19 @@
 
 set -euo pipefail
 
-# Configuration
+# Configuration (from environment or defaults)
 NAMESPACE="${NAMESPACE:-qbt}"
 VPN_GATEWAY="${VPN_GATEWAY:-10.2.0.1}"
-LEASE_DURATION=60  # seconds
+QBT_PORT="${QBT_PORT:-62000}"  # qBittorrent BitTorrent port (from Nix config)
+LEASE_DURATION=3600  # seconds (60 minutes matches typical NAT-PMP lease time)
 QBITTORRENT_CONFIG="/var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf"
+PORTFORWARD_STATE="/var/lib/protonvpn-portforward.state"  # Store current public port (requires root)
 LOG_PREFIX="[ProtonVPN-PortForward]"
+
+# Tool paths (can be overridden by systemd environment variables)
+IP="${IP_BIN:-$(command -v ip)}"
+GREP="${GREP_BIN:-$(command -v grep)}"
+NATPMPC="${NATPMPC_BIN:-$(command -v natpmpc)}"
 
 # Logging
 log_info() {
@@ -26,7 +33,7 @@ log_success() {
 
 # Check if namespace exists
 check_namespace() {
-    if ! ip netns list | grep -q "^${NAMESPACE}"; then
+    if ! "${IP}" netns list | "${GREP}" -q "^${NAMESPACE}"; then
         log_error "Namespace '${NAMESPACE}' does not exist"
         return 1
     fi
@@ -35,28 +42,32 @@ check_namespace() {
 
 # Check if natpmpc is available
 check_natpmpc() {
-    if ! command -v natpmpc >/dev/null 2>&1; then
-        log_error "natpmpc not found. Install with: nix-shell -p libnatpmp"
+    if [[ ! -x "${NATPMPC}" ]]; then
+        log_error "natpmpc not found at ${NATPMPC}"
         return 1
     fi
-    log_info "natpmpc found"
+    log_info "natpmpc found at ${NATPMPC}"
 }
 
-# Check VPN connectivity with retries
+# Check VPN connectivity with retries (run on host, not in namespace)
 check_vpn() {
-    log_info "Checking VPN connectivity..."
+    log_info "Checking VPN connectivity via NAT-PMP..."
 
-    local max_attempts=10
+    local max_attempts=5
     local attempt=1
     local wait_time=2
 
-    # Wait for WireGuard handshake to complete
+    # Wait for WireGuard handshake to complete (try NAT-PMP as connectivity test)
+    # NOTE: natpmpc must run on the HOST, not in the namespace
     while [[ $attempt -le $max_attempts ]]; do
-        log_info "Attempt $attempt/$max_attempts: Testing gateway connectivity..."
+        log_info "Attempt $attempt/$max_attempts: Testing NAT-PMP connectivity..."
 
-        # Check if gateway is reachable
-        if ip netns exec "$NAMESPACE" ping -c 1 -W 3 "$VPN_GATEWAY" >/dev/null 2>&1; then
-            log_success "VPN gateway $VPN_GATEWAY is reachable"
+        # Try to get public IP via NAT-PMP on the HOST
+        local natpmp_output
+        natpmp_output=$("${NATPMPC}" -g "$VPN_GATEWAY" 2>&1)
+
+        if echo "$natpmp_output" | "${GREP}" -q "Public IP address"; then
+            log_success "VPN gateway $VPN_GATEWAY is reachable via NAT-PMP"
             return 0
         fi
 
@@ -72,27 +83,45 @@ check_vpn() {
     return 1
 }
 
-# Query NAT-PMP for port forwarding
+# Query NAT-PMP for port forwarding (run on host, not in namespace)
 get_forwarded_port() {
-    log_info "Querying NAT-PMP for forwarded port..."
+    log_info "Querying NAT-PMP for port forwarding on port $QBT_PORT..."
 
-    # Request port mapping (0 0 = any internal/external port)
-    # Protocol: tcp (1), Duration: $LEASE_DURATION seconds
+    # ProtonVPN requires explicit ports (does not support port 0 wildcard)
+    # Use qBittorrent's configured torrent port (passed from Nix config)
+
+    # Request port mapping with explicit port
+    # Protocol: tcp, Duration: $LEASE_DURATION seconds
+    # NOTE: natpmpc must run on the HOST, not in the namespace
     local output
-    output=$(ip netns exec "$NAMESPACE" natpmpc -a 0 0 tcp "$LEASE_DURATION" -g "$VPN_GATEWAY" 2>&1)
+    output=$("${NATPMPC}" -a "$QBT_PORT" "$QBT_PORT" tcp "$LEASE_DURATION" -g "$VPN_GATEWAY" 2>&1)
 
-    if echo "$output" | grep -q "Mapped public port"; then
-        local port
-        port=$(echo "$output" | grep "Mapped public port" | grep -oP 'Mapped public port \K[0-9]+')
+    if echo "$output" | "${GREP}" -q "Mapped public port"; then
+        # Extract public port from response
+        local public_port
+        public_port=$(echo "$output" | "${GREP}" "Mapped public port" | "${GREP}" -oP 'Mapped public port \K[0-9]+')
 
-        if [[ -n "$port" && "$port" -gt 0 ]]; then
-            log_success "NAT-PMP assigned port: $port"
-            echo "$port"
+        if [[ -n "$public_port" && "$public_port" -gt 0 ]]; then
+            log_success "NAT-PMP mapped public port $public_port to local port $QBT_PORT"
+
+            # Save public port to state file for tracking/monitoring
+            cat > "$PORTFORWARD_STATE" << STATEEOF
+# ProtonVPN Port Forwarding State
+TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+PUBLIC_PORT=$public_port
+PRIVATE_PORT=$QBT_PORT
+NAMESPACE=$NAMESPACE
+VPN_GATEWAY=$VPN_GATEWAY
+STATEEOF
+            chmod 644 "$PORTFORWARD_STATE"
+
+            # Return the private port (qBittorrent should continue using configured port)
+            echo "$QBT_PORT"
             return 0
         fi
     fi
 
-    log_error "Failed to get port from NAT-PMP"
+    log_error "Failed to get port mapping from NAT-PMP"
     log_error "Output: $output"
     return 1
 }
@@ -158,7 +187,7 @@ verify_port() {
 
     sleep 5  # Give qBittorrent time to start listening
 
-    if ip netns exec "$NAMESPACE" ss -tuln | grep -q ":${expected_port} "; then
+    if "${IP}" netns exec "$NAMESPACE" ss -tuln | "${GREP}" -q ":${expected_port} "; then
         log_success "qBittorrent is listening on port $expected_port"
         return 0
     else
@@ -183,22 +212,14 @@ main() {
         exit 1
     fi
 
-    # Check if current port matches (use proper escaping for grep)
-    CURRENT_PORT=$(grep '^Session\\Port=' "$QBITTORRENT_CONFIG" 2>/dev/null | cut -d'=' -f2 || echo "")
-
-    if [[ "$CURRENT_PORT" == "$PORT" ]]; then
-        log_info "Port already set to $PORT, no update needed"
-        exit 0
+    # Port is now managed by Nix configuration, not by this script
+    # Just verify qBittorrent is listening on the configured port
+    if verify_port "$PORT"; then
+        log_info "Port mapping successful, qBittorrent is listening on $PORT"
+    else
+        # Not a fatal error - NAT-PMP mapping succeeded even if qBittorrent isn't listening yet
+        log_info "qBittorrent not yet listening on $PORT (may be starting up)"
     fi
-
-    # Update configuration
-    update_qbittorrent_port "$PORT" || exit 1
-
-    # Restart service
-    restart_qbittorrent || exit 1
-
-    # Verify
-    verify_port "$PORT" || exit 1
 
     log_success "Port forwarding setup complete! Using port: $PORT"
     echo "$PORT"  # Output port for scripts/automation

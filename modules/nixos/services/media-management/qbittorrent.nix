@@ -66,13 +66,13 @@ in
 
     diskCacheSize = mkOption {
       type = types.int;
-      default = 128;
+      default = 512;
       description = ''
         Disk cache size in MiB.
         - 0 = disabled
         - -1 = auto (qBittorrent decides)
         - >0 = fixed size in MiB
-        Recommended: 64-128 MiB for good performance, up to 512 MiB for high-activity setups.
+        Recommended: 512-1024 MiB for HDD-heavy setups with SSD incomplete staging.
       '';
     };
 
@@ -80,6 +80,40 @@ in
       type = types.int;
       default = 60;
       description = "Disk cache TTL in seconds (how long to keep data in cache)";
+    };
+
+    incompleteDownloadPath = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        Path to store incomplete downloads.
+        Recommended: Fast SSD path (e.g., /mnt/nvme/qbittorrent/incomplete) for staging before Radarr/Sonarr moves to final location.
+        Final download paths are configured per-category.
+      '';
+    };
+
+    maxActiveTorrents = mkOption {
+      type = types.int;
+      default = 150;
+      description = "Maximum active torrents (recommended: 150 for HDD-based storage to avoid saturation)";
+    };
+
+    maxActiveUploads = mkOption {
+      type = types.int;
+      default = 75;
+      description = "Maximum active uploads (recommended: 75 to prevent HDD thrashing with Jellyfin streaming)";
+    };
+
+    maxUploads = mkOption {
+      type = types.int;
+      default = 150;
+      description = "Maximum upload slots (recommended: 150 for balanced seeding)";
+    };
+
+    maxUploadsPerTorrent = mkOption {
+      type = types.int;
+      default = 10;
+      description = "Maximum upload slots per torrent (recommended: 10 to improve seeding)";
     };
 
     torrentPort = mkOption {
@@ -130,12 +164,12 @@ in
       openFirewall = false; # Firewall handled explicitly above
       serverConfig = {
         Preferences = {
-          # Connection settings - bind based on VPN configuration
-          Connection = mkIf (qbittorrentCfg.vpn.enable or false) {
-            # When VPN is enabled, bind to VPN namespace interface
-            InterfaceName = "${qbittorrentCfg.vpn.namespace}0";
-            # Let qBittorrent auto-detect the VPN interface address
-            InterfaceAddress = "";
+          # Connection settings - NO explicit binding in VPN namespace
+          # The namespace itself constrains all traffic through VPN
+          Connection = { };
+          # Storage settings - staging incomplete on SSD, final on HDD via categories
+          Saving = optionalAttrs (qbittorrentCfg.incompleteDownloadPath != null) {
+            SavePath = qbittorrentCfg.incompleteDownloadPath;
           };
           WebUI = {
             # Bind WebUI to specified address or all interfaces
@@ -155,15 +189,15 @@ in
           };
           # Torrent queueing
           queueing_enabled = true;
-          # Maximum active uploads (0 = infinite)
-          max_active_uploads = 0;
-          # Maximum active torrents (0 = infinite)
-          max_active_torrents = 0;
+          # Maximum active uploads (optimized for HDD + Jellyfin streaming)
+          max_active_uploads = qbittorrentCfg.maxActiveUploads or 75;
+          # Maximum active torrents (optimized for HDD capacity)
+          max_active_torrents = qbittorrentCfg.maxActiveTorrents or 150;
           # Maximum active checking torrents (outstanding memory in MiB)
           checking_memory_use = 1;
           # Disk cache size in MiB (0 = disabled, -1 = auto, >0 = fixed size)
-          # Recommended: 64-128 MiB for good performance, up to 512 MiB for high-activity setups
-          disk_cache = qbittorrentCfg.diskCacheSize or 128;
+          # Optimized for SSD staging of incomplete downloads
+          disk_cache = qbittorrentCfg.diskCacheSize or 512;
           # Disk cache TTL in seconds (how long to keep data in cache)
           disk_cache_ttl = qbittorrentCfg.diskCacheTTL or 60;
           # uTP-TCP mixed mode algorithm: 1 = Peer proportional
@@ -181,10 +215,10 @@ in
           max_connec = 2000;
           # Maximum number of connections per torrent
           max_connec_per_torrent = 200;
-          # Global maximum number of upload slots
-          max_uploads = 200;
-          # Maximum number of upload slots per torrent
-          max_uploads_per_torrent = 5;
+          # Global maximum number of upload slots (optimized for balanced seeding)
+          max_uploads = qbittorrentCfg.maxUploads or 150;
+          # Maximum number of upload slots per torrent (improved from 5 to 10)
+          max_uploads_per_torrent = qbittorrentCfg.maxUploadsPerTorrent or 10;
         };
         # BitTorrent configuration
         BitTorrent = {
@@ -195,24 +229,22 @@ in
             UseDHT = true;
             # Torrent queueing system
             QueueingSystemEnabled = true;
-            # Maximum active uploads (0 = infinite)
-            MaxActiveUploads = 200;
-            # Maximum active torrents (0 = infinite)
-            MaxActiveTorrents = 200;
+            # Maximum active uploads (optimized for HDD + Jellyfin streaming)
+            MaxActiveUploads = qbittorrentCfg.maxActiveUploads or 75;
+            # Maximum active torrents (optimized for HDD capacity)
+            MaxActiveTorrents = qbittorrentCfg.maxActiveTorrents or 150;
             # Global maximum number of connections
             MaxConnections = 2000;
             # Maximum number of connections per torrent
             MaxConnectionsPerTorrent = 200;
-            # Global maximum number of upload slots
-            MaxUploads = 200;
-            # Maximum number of upload slots per torrent
-            MaxUploadsPerTorrent = 5;
+            # Global maximum number of upload slots (optimized for balanced seeding)
+            MaxUploads = qbittorrentCfg.maxUploads or 150;
+            # Maximum number of upload slots per torrent (improved from 5 to 10)
+            MaxUploadsPerTorrent = qbittorrentCfg.maxUploadsPerTorrent or 10;
             uTPMixedMode = "Proportional";
-          }
-          // optionalAttrs (qbittorrentCfg.vpn.enable or false) {
-            # Bind BitTorrent traffic to VPN namespace interface
-            Interface = "${qbittorrentCfg.vpn.namespace}0";
-            InterfaceName = "${qbittorrentCfg.vpn.namespace}0";
+            # NOTE: Do NOT bind to specific interface in VPN namespace
+            # The namespace itself constrains all traffic through VPN
+            # Explicit bindings cause ephemeral port conflicts with trackers
           };
         };
       }
