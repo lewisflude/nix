@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -50,6 +51,11 @@ in
         assertion = config.vpnNamespaces != null;
         message = "VPN-Confinement module is required but not available. Ensure vpn-confinement input is configured.";
       }
+    ];
+
+    # Ensure WireGuard tools are available (required by VPN-Confinement startup script)
+    environment.systemPackages = with pkgs; [
+      wireguard-tools
     ];
 
     # Configure SOPS secret for WireGuard configuration
