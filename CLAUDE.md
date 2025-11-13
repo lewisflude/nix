@@ -38,14 +38,16 @@ These are modern CLI tools built with pog library:
 
 Located in `scripts/`:
 
-**qBittorrent Diagnostics:**
+**qBittorrent & VPN:**
 
 - `scripts/diagnose-qbittorrent-seeding.sh` - Comprehensive qBittorrent seeding diagnostics
 - `scripts/test-qbittorrent-seeding-health.sh` - Full health check with API integration
 - `scripts/test-qbittorrent-connectivity.sh` - Network connectivity verification
-- `scripts/protonvpn-natpmp-portforward.sh` - Automated NAT-PMP port forwarding for qBittorrent
+- `scripts/protonvpn-natpmp-portforward.sh` - Automated NAT-PMP port forwarding
 - `scripts/monitor-protonvpn-portforward.sh` - Monitor VPN and port forwarding status
-- `scripts/verify-qbittorrent-vpn.sh` - Comprehensive verification following setup guide
+- `scripts/verify-qbittorrent-vpn.sh` - Complete verification following setup guide
+- `scripts/test-vpn-port-forwarding.sh` - Quick port forwarding status check
+- `scripts/monitor-hdd-storage.sh` - Monitor HDD storage usage and health
 
 **SSH Performance:**
 
@@ -219,6 +221,9 @@ in
 - **Features**: `docs/FEATURES.md`
 - **DX Guide**: `docs/DX_GUIDE.md`
 - **Contributing**: `CONTRIBUTING.md`
+- **qBittorrent Setup**: `docs/QBITTORRENT_GUIDE.md` - Complete setup, optimization, and troubleshooting
+- **ProtonVPN Port Forwarding**: `docs/PROTONVPN_PORT_FORWARDING_SETUP.md` - Detailed VPN configuration
+- **Refactoring Patterns**: `docs/reference/REFACTORING_EXAMPLES.md` - Examples of over-engineering to avoid
 
 ## Important Notes
 
