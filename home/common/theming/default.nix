@@ -50,6 +50,7 @@ in
     # Desktop environment (Linux)
     ../../../modules/shared/features/theming/applications/desktop/gtk.nix
     ../../../modules/shared/features/theming/applications/desktop/ironbar-home.nix
+    ../../../modules/shared/features/theming/applications/desktop/swappy.nix
 
     # Command-line tools
     ../../../modules/shared/features/theming/applications/cli/bat.nix
@@ -102,6 +103,10 @@ in
 
     zellij = {
       enable = mkEnableOption "Apply theme to zellij (terminal multiplexer)";
+    };
+
+    swappy = {
+      enable = mkEnableOption "Apply theme to swappy (screenshot editor)";
     };
   };
 

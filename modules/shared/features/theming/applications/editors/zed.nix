@@ -49,7 +49,7 @@ let
         "border.variant" = colors."divider-secondary".hex + "ff";
         "border.focused" = colors."accent-focus".hex + "ff";
         "border.selected" = colors."accent-primary".hex + "ff";
-        "border.transparent" = "#00000000";
+        "border.transparent" = colors."border-transparent".hex;
         "border.disabled" = withAlpha colors."divider-primary" "80";
 
         # Surface properties
@@ -68,7 +68,7 @@ let
         accents = [ ];
 
         # Ghost element properties
-        "ghost_element.background" = "#00000000";
+        "ghost_element.background" = colors."surface-transparent".hex;
         "ghost_element.hover" = colors."surface-subtle".hex + "ff";
         "ghost_element.active" = colors."surface-emphasis".hex + "ff";
         "ghost_element.selected" = colors."surface-emphasis".hex + "ff";
@@ -109,7 +109,7 @@ let
         "scrollbar.thumb.background" = withAlpha colors."divider-primary" "4c";
         "scrollbar.thumb.hover_background" = colors."surface-subtle".hex + "ff";
         "scrollbar.thumb.border" = colors."surface-subtle".hex + "ff";
-        "scrollbar.track.background" = "#00000000";
+        "scrollbar.track.background" = colors."transparent".hex;
         "scrollbar.track.border" = colors."divider-primary".hex + "ff";
 
         # Editor properties
