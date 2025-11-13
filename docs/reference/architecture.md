@@ -500,6 +500,161 @@ Tests are organized in `tests/`:
 - **Discoverability**: Clear schema for available options
 - **Validation**: Centralized validation logic
 
+## Home-Manager vs System Configuration Guidelines
+
+Understanding the boundary between home-manager and system-level configuration is critical for maintainable Nix configurations.
+
+### System-Level Configuration (NixOS/nix-darwin)
+
+These belong in `modules/nixos/` or `modules/darwin/`:
+
+- **System Services**: systemd services (NixOS), launchd services (Darwin)
+- **Kernel Configuration**: Kernel modules, boot parameters, kernel packages
+- **Hardware Configuration**: Graphics drivers, hardware-specific settings
+- **System Daemons**: Services that run as root or system users
+- **Network Configuration**: System-wide networking, firewall, DNS
+- **User/Group Management**: System users and groups
+- **Container Runtimes**: Docker daemon, Podman system service
+- **Boot Configuration**: Bootloader, initrd, kernel parameters
+- **System-Wide Policies**: Security policies, system limits
+
+**Examples**:
+```nix
+# ✅ CORRECT: System-level in modules/nixos/features/virtualisation.nix
+virtualisation.podman = {
+  enable = true;
+  dockerCompat = true;
+};
+
+# ✅ CORRECT: Graphics drivers in modules/nixos/features/desktop/graphics.nix
+hardware.graphics = {
+  enable = true;
+  extraPackages = [ pkgs.mesa pkgs.nvidia-vaapi-driver ];
+};
+```
+
+### Home-Manager Configuration
+
+These belong in `home/common/` or `home/{nixos,darwin}/`:
+
+- **User Applications**: Command-line tools, desktop applications
+- **User Services**: systemd --user services (NixOS), user-level Launch Agents (Darwin)
+- **Dotfiles**: User configuration files (~/.config/)
+- **Development Tools**: Language servers, formatters, linters
+- **Desktop Applications**: Browsers, editors, terminal emulators
+- **User-Level Services**: Tray applets, user notification daemons
+- **Shell Configuration**: Shell aliases, functions, environment variables
+- **Editor Configuration**: Vim, Emacs, Helix, VS Code settings
+
+**Examples**:
+```nix
+# ✅ CORRECT: User tools in home/nixos/hardware-tools/audio.nix
+home.packages = [
+  pkgs.pwvucontrol  # User audio mixer
+  pkgs.playerctl    # Media player control
+];
+
+# ✅ CORRECT: User service in home/nixos/hardware-tools/audio.nix
+systemd.user.services.setup-audio-routing = {
+  # User-level systemd service
+};
+```
+
+### Gray Areas (Context Dependent)
+
+Some components span both layers:
+
+**GPG/SSH**:
+- **System**: Key storage directories, agent sockets, PAM integration
+- **Home**: User keys, agent configuration, user-specific settings
+
+**Audio**:
+- **System**: PipeWire/PulseAudio daemon, hardware configuration
+- **Home**: User audio mixers, per-user routing rules
+
+**Containers**:
+- **System**: Container runtime (Podman/Docker daemon)
+- **Home**: User-facing CLI tools (docker, podman-compose) - *use carefully*
+
+### Common Antipatterns
+
+#### ❌ WRONG: Container Tools in Home-Manager
+
+```nix
+# ❌ WRONG: home/nixos/system/podman.nix (DELETED)
+home.packages = [
+  pkgs.podman
+  pkgs.podman-compose
+];
+```
+
+**Why Wrong**: Container runtimes require system privileges and are already configured at system-level.
+
+**Fix**: Remove from home-manager, use system configuration:
+```nix
+# ✅ CORRECT: modules/nixos/features/virtualisation.nix
+virtualisation.podman.enable = true;
+```
+
+#### ❌ WRONG: System Packages Duplicated in Home
+
+```nix
+# ❌ WRONG: home/nixos/system/graphics.nix (DELETED)
+home.packages = [
+  pkgs.vulkan-tools
+  pkgs.mesa-demos
+];
+```
+
+**Why Wrong**: System graphics libraries already installed at system-level.
+
+**Fix**: Remove from home-manager, packages available via system config:
+```nix
+# ✅ CORRECT: modules/nixos/features/desktop/graphics.nix
+hardware.graphics.extraPackages = [ pkgs.vulkan-tools pkgs.mesa-demos ];
+```
+
+#### ❌ WRONG: Hardcoded Values in Feature Modules
+
+```nix
+# ❌ WRONG: Timezone in modules/nixos/features/desktop/desktop-environment.nix
+time.timeZone = "Europe/London";
+```
+
+**Why Wrong**: Inflexible, prevents per-host configuration.
+
+**Fix**: Set per-host or use constants:
+```nix
+# ✅ CORRECT: hosts/jupiter/default.nix
+{ lib, ... }:
+let
+  constants = import ../../lib/constants.nix;
+in
+{
+  time.timeZone = constants.defaults.timezone;
+}
+```
+
+### Decision Tree
+
+When adding a package or service, ask:
+
+1. **Does it require root/system privileges?** → System-level
+2. **Does it run as a system daemon?** → System-level
+3. **Is it hardware configuration?** → System-level
+4. **Is it a user application?** → Home-Manager
+5. **Does it configure dotfiles?** → Home-Manager
+6. **Is it a tray applet or user service?** → Home-Manager
+
+### Module Placement Guidelines
+
+When creating or modifying modules:
+
+1. **System Services**: `modules/nixos/services/` or `modules/darwin/`
+2. **User Applications**: `home/common/apps/` or `home/{nixos,darwin}/apps/`
+3. **Features**: `modules/shared/features/` or `modules/nixos/features/`
+4. **Hardware**: `modules/nixos/hardware/`
+
 ## Further Reading
 
 - [Feature Module Guide](./FEATURES.md) - How to create and use features
