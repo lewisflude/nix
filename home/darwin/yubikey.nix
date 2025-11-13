@@ -1,8 +1,2 @@
-{ pkgs, ... }:
-{
-  home.packages = with pkgs; [
-    terminal-notifier
-    yubikey-manager
-    pcsc-tools
-  ];
-}
+# Yubikey packages are now managed in home/common/features/security/default.nix
+_: { }
