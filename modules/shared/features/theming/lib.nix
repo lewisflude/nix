@@ -105,6 +105,45 @@ rec {
       "ansi-white" = tonal.text-Lc75;
       "ansi-bright-black" = tonal.text-Lc45;
       "ansi-bright-white" = if mode == "light" then tonal.base-L100 else tonal.text-Lc75;
+
+      # Transparent colors (for UI elements that need full transparency)
+      "transparent" = {
+        l = 0.0;
+        c = 0.0;
+        h = 0.0;
+        hex = "#00000000";
+        hexRaw = "00000000";
+        rgb = {
+          r = 0;
+          g = 0;
+          b = 0;
+        };
+      };
+      # Semantic aliases for transparent
+      "surface-transparent" = {
+        l = 0.0;
+        c = 0.0;
+        h = 0.0;
+        hex = "#00000000";
+        hexRaw = "00000000";
+        rgb = {
+          r = 0;
+          g = 0;
+          b = 0;
+        };
+      };
+      "border-transparent" = {
+        l = 0.0;
+        c = 0.0;
+        h = 0.0;
+        hex = "#00000000";
+        hexRaw = "00000000";
+        rgb = {
+          r = 0;
+          g = 0;
+          b = 0;
+        };
+      };
     };
 
   # Generate a complete theme object for a given mode
