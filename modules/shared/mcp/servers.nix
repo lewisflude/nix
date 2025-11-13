@@ -1,29 +1,39 @@
+# Common MCP Server Definitions
+#
+# This module provides pre-configured MCP server definitions that are shared
+# across NixOS and nix-darwin platforms. Servers are defined with proper paths,
+# arguments, and port allocations from centralized constants.
+#
+# Architecture:
+# - commonServers: Attribute set of ready-to-use server configurations
+# - ports: Centralized port assignments from lib/constants.nix
+# - nodejs: Platform-specific Node.js version
+#
+# Included Servers:
+# - fetch: HTTP fetching and web scraping
+# - memory: Persistent memory and context management
+# - general-filesystem: File system operations
+# - nixos: NixOS configuration management
+# - git: Git repository operations
+#
+# Usage:
+#   servers = import ./servers.nix { inherit pkgs config systemConfig lib platformLib; };
+#   services.mcp.servers = servers.commonServers // { custom-server = {...}; };
 { pkgs, config, systemConfig, lib, platformLib }:
 
 let
+  # Import centralized constants
+  constants = import ../../../lib/constants.nix;
+
   uvx = "${pkgs.uv}/bin/uvx";
   nodejs = platformLib.getVersionedPackage pkgs platformLib.versions.nodejs;
   codeDirectory = "${config.home.homeDirectory}/Code";
 
-  # Common MCP server ports
-  ports = {
-    kagi = 11431;
-    fetch = 11432;
-    git = 11433;
-    github = 11434;
-    memory = 11436;
-    sequential-thinking-darwin = 11438;
-    sequential-thinking-nixos = 11437;
-    openai = 11439;
-    rust-docs = 11440;
-    nixos = 11441;
-    general-filesystem = 11442;
-    time-darwin = 11443;
-    time-nixos = 11445;
-    docs = 6280;
-  };
+  # Use ports from constants for consistency
+  ports = constants.ports.mcp;
 
 in {
+  # Export Node.js and ports for use by consumers
   inherit nodejs ports;
 
   # Common server configurations that can be used across platforms
@@ -59,7 +69,7 @@ in {
         "${config.home.homeDirectory}/.config"
         "${config.home.homeDirectory}/Documents"
       ];
-      port = ports.general-filesystem;
+      port = ports.filesystem;
     };
 
     nixos = {
