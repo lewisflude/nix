@@ -4,12 +4,12 @@
 
 set -euo pipefail
 
-NAMESPACE="qbittor"
+NAMESPACE="qbt"
 WEBUI_IP="192.168.15.1"
 WEBUI_PORT=8080
 WEBUI_URL="http://${WEBUI_IP}:${WEBUI_PORT}"
 TORRENT_PORT=6881
-VPN_INTERFACE="qbittor0"
+VPN_INTERFACE="qbt0"
 
 # Colors for output
 RED='\033[0;31m'

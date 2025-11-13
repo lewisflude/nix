@@ -88,6 +88,9 @@
       url = "github:srid/devour-flake";
       flake = false;
     };
+    vpn-confinement = {
+      url = "github:Maroka-chan/VPN-Confinement";
+    };
   };
 
   outputs =

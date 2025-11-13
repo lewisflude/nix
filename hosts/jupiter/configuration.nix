@@ -37,13 +37,15 @@
 
   boot.loader.systemd-boot.configurationLimit = 5;
 
+  # WireGuard tools (required for VPN-Confinement)
+  environment.systemPackages = with pkgs; [
+    wireguard-tools
+  ];
+
   # Firewall configuration
   networking.firewall = {
     allowedTCPPorts = [ 6280 ]; # Docs MCP Server HTTP interface
   };
-
-  # ProtonVPN NAT-PMP port forwarding
-  services.protonvpn-natpmp.enable = true;
 
   # Dante SOCKS proxy for routing traffic through vlan2 (VPN)
   services.dante-proxy = {

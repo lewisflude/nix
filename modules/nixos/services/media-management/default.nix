@@ -10,6 +10,8 @@
     ./readarr.nix
     ./sabnzbd.nix
     ./qbittorrent.nix
+    ./qbittorrent-vpn-confinement.nix
+    ./protonvpn-portforward.nix
     ./jellyfin.nix
     ./jellyseerr.nix
     ./flaresolverr.nix

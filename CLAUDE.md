@@ -39,21 +39,21 @@ These are modern CLI tools built with pog library:
 Located in `scripts/`:
 
 **qBittorrent Diagnostics:**
+
 - `scripts/diagnose-qbittorrent-seeding.sh` - Comprehensive qBittorrent seeding diagnostics
 - `scripts/test-qbittorrent-seeding-health.sh` - Full health check with API integration
 - `scripts/test-qbittorrent-connectivity.sh` - Network connectivity verification
-- `scripts/update-qbittorrent-protonvpn-port.sh` - Update qBittorrent port with VPN forwarding
-
-**ProtonVPN Port Forwarding:**
-- `scripts/get-protonvpn-forwarded-port.sh` - NAT-PMP based port detection
-- `scripts/find-protonvpn-forwarded-port.sh` - Scan for correct forwarded port
-- `scripts/test-protonvpn-port-forwarding.sh` - Test if port forwarding is working
+- `scripts/protonvpn-natpmp-portforward.sh` - Automated NAT-PMP port forwarding for qBittorrent
+- `scripts/monitor-protonvpn-portforward.sh` - Monitor VPN and port forwarding status
+- `scripts/verify-qbittorrent-vpn.sh` - Comprehensive verification following setup guide
 
 **SSH Performance:**
+
 - `scripts/test-ssh-performance.sh` - Comprehensive SSH performance benchmarking
 - `scripts/diagnose-ssh-slowness.sh` - SSH connection troubleshooting
 
 **Network Testing:**
+
 - `scripts/test-vlan2-speed.sh` - Network speed testing through VLAN 2
 - `scripts/test-sped.sh` - Simple speed test wrapper
 

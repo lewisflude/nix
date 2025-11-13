@@ -82,11 +82,24 @@ in
 
       qbittorrent = {
         enable = true;
+
+        # VPN Configuration
+        vpn = {
+          enable = true;
+          namespace = "qbt";
+          torrentPort = 62000; # Will be updated by NAT-PMP
+          webUIBindAddress = "*"; # Accessible from any interface
+        };
+
+        # WebUI Configuration
         webUI = {
+          port = 8080;
+          bindAddress = "*"; # Accessible from any interface (192.168.1.210:8080)
           username = "lewis";
           password = "@ByteArray(J5lri+TddZR2AJqNVPndng==:no5T50n4CD9peISk6jZQ+Cb8qzv6DoV2MtOxE2oErywXVFngVDq/eySGpoNjUCFOHFdbifjwwHI4jlV2LH4ocQ==)";
         };
 
+        # Category Mappings
         categories = {
           radarr = "/mnt/storage/movies";
           sonarr = "/mnt/storage/tv";
