@@ -2,7 +2,7 @@
 
 Utility scripts for managing NixOS configuration and services.
 
-## ProtonVPN Port Forwarding Scripts
+## qBittorrent & ProtonVPN Scripts
 
 ### `protonvpn-natpmp-portforward.sh`
 
@@ -27,7 +27,7 @@ NAMESPACE=qbt VPN_GATEWAY=10.2.0.1 ./scripts/protonvpn-natpmp-portforward.sh
 5. Verifies port is listening
 
 **Systemd Integration:**
-When enabled in your configuration, this runs automatically via systemd timer every 45 minutes.
+Runs automatically via systemd timer every 45 minutes when VPN is enabled.
 
 ### `test-vpn-port-forwarding.sh`
 
@@ -112,29 +112,50 @@ Interactive verification script following the setup guide checklist.
 3. **qBittorrent**: Service status, configuration, port binding
 4. **Summary**: Next steps and automation tips
 
-Use this script after deploying VPN-confined qBittorrent to verify everything is working correctly.
+### `monitor-hdd-storage.sh`
 
-## Other Scripts
+Monitor HDD storage usage and health for media services.
 
-### Build & Profiling
+**Usage:**
 
-- `utils/profile-build.sh` - Profile system build time
-- `utils/profile-evaluation.sh` - Profile Nix evaluation
-- `utils/profile-modules.sh` - Profile module load times
+```bash
+# One-time report
+./scripts/monitor-hdd-storage.sh
 
-### Testing
+# Continuous monitoring
+./scripts/monitor-hdd-storage.sh --continuous --interval 10
+```
 
-- `utils/test-caches.sh` - Test binary cache connectivity
-- `utils/test-cache-substitution.sh` - Test cache substitution
+**Checks:**
+
+- Disk space usage (SSD staging, HDD storage)
+- HDD I/O utilization
+- Service status
+- Temperature readings (if available)
+
+For complete qBittorrent setup and troubleshooting, see `docs/QBITTORRENT_GUIDE.md`.
+
+## Network Performance Scripts
+
+### qBittorrent Diagnostics
+
 - `diagnose-qbittorrent-seeding.sh` - Diagnose seeding issues
 - `test-qbittorrent-connectivity.sh` - Test qBittorrent connectivity
 - `test-qbittorrent-seeding-health.sh` - Check seeding health
 
-### Network
+### SSH Performance
 
-- `diagnose-ssh-slowness.sh` - Diagnose SSH performance
-- `test-ssh-performance.sh` - Test SSH speed
+- `diagnose-ssh-slowness.sh` - Diagnose SSH performance issues
+- `test-ssh-performance.sh` - Comprehensive SSH speed testing
+
+### Network Testing
+
 - `test-vlan2-speed.sh` - Test VLAN2 network speed
+- `test-sped.sh` - Simple speed test wrapper
+
+### System Validation
+
+- `validate-config.sh` - Validate Nix configuration before rebuild
 
 ## Requirements
 
