@@ -10,7 +10,7 @@ in
 
   features = defaultFeatures // {
     development = defaultFeatures.development // {
-      docker = true;
+      docker = false;
       lua = true;
       # Moved to devShells to reduce system size (~2-4GB savings)
       # Use: nix develop .#rust or direnv with .envrc
@@ -27,7 +27,7 @@ in
 
     virtualisation = defaultFeatures.virtualisation // {
       enable = true;
-      docker = true;
+      docker = false;
       podman = true;
     };
 
