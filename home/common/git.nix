@@ -4,22 +4,20 @@
   pkgs,
   ...
 }:
-let
-  constants = import ../../lib/constants.nix;
-in
 {
   programs.git = {
     enable = true;
     lfs.enable = true;
-    signing = {
-      key = constants.keys.gpg.primary;
-      signByDefault = true;
-    };
+    # Note: GPG signing is disabled by default. Configure per-user if needed.
+    # signing = {
+    #   key = "YOUR_GPG_KEY_ID";
+    #   signByDefault = true;
+    # };
     settings = {
       user = {
         name = username;
         email = useremail;
-        signingkey = constants.keys.gpg.primary;
+        # signingkey = "YOUR_GPG_KEY_ID";
       };
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
@@ -32,8 +30,9 @@ in
         program = "${pkgs.gnupg}/bin/gpg";
         format = "openpgp";
       };
-      commit.gpgsign = true;
-      tag.gpgsign = true;
+      # GPG signing disabled by default. Enable per-user if you have a key configured.
+      # commit.gpgsign = true;
+      # tag.gpgsign = true;
       alias = {
         br = "branch";
         co = "checkout";

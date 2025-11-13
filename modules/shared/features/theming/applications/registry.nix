@@ -100,7 +100,7 @@ rec {
     swappy = {
       name = "swappy";
       displayName = "Swappy";
-      platform = "nixos";
+      platform = "home";
       category = "desktop";
       description = "Swappy screenshot annotation tool theme";
       dependencies = [ ];

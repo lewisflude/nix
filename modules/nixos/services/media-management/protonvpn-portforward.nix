@@ -52,6 +52,12 @@ in
       default = "10.2.0.1";
       description = "ProtonVPN gateway IP address for NAT-PMP queries";
     };
+
+    torrentPort = mkOption {
+      type = types.port;
+      default = qbittorrentCfg.torrentPort or 62000;
+      description = "BitTorrent port to forward (inherited from qBittorrent configuration)";
+    };
   };
 
   config =
@@ -84,10 +90,11 @@ in
             Type = "oneshot";
             ExecStart = "${portforwardScript}/bin/protonvpn-portforward";
 
-            # Environment
+            # Environment - pass configuration to script
             Environment = [
               "NAMESPACE=${qbittorrentCfg.vpn.portForwarding.namespace}"
               "VPN_GATEWAY=${qbittorrentCfg.vpn.portForwarding.gateway}"
+              "QBT_PORT=${toString qbittorrentCfg.vpn.portForwarding.torrentPort}"
             ];
 
             # Timeout settings
@@ -130,6 +137,11 @@ in
         environment.systemPackages = [
           # NAT-PMP tools for manual testing and debugging
           pkgs.libnatpmp
+
+          # Port forwarding status helper
+          (pkgs.writeShellScriptBin "show-protonvpn-port" (
+            builtins.readFile ../../../../scripts/show-protonvpn-port.sh
+          ))
 
           # Diagnostic scripts
           (pkgs.writeShellScriptBin "monitor-protonvpn-portforward" (

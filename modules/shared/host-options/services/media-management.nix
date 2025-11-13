@@ -77,6 +77,41 @@ in
             default = true;
             description = "Enable qBittorrent BitTorrent client";
           };
+          incompleteDownloadPath = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "Path to store incomplete downloads (recommended: fast SSD for staging before Radarr/Sonarr moves to final location)";
+          };
+          diskCacheSize = mkOption {
+            type = types.int;
+            default = 512;
+            description = "Disk cache size in MiB (recommended: 512-1024 for HDD-heavy setups with SSD incomplete staging)";
+          };
+          diskCacheTTL = mkOption {
+            type = types.int;
+            default = 60;
+            description = "Disk cache TTL in seconds";
+          };
+          maxActiveTorrents = mkOption {
+            type = types.int;
+            default = 150;
+            description = "Maximum active torrents (recommended: 150 for HDD-based storage to avoid saturation)";
+          };
+          maxActiveUploads = mkOption {
+            type = types.int;
+            default = 75;
+            description = "Maximum active uploads (recommended: 75 to prevent HDD thrashing with Jellyfin streaming)";
+          };
+          maxUploads = mkOption {
+            type = types.int;
+            default = 150;
+            description = "Maximum upload slots (recommended: 150 for balanced seeding)";
+          };
+          maxUploadsPerTorrent = mkOption {
+            type = types.int;
+            default = 10;
+            description = "Maximum upload slots per torrent (recommended: 10 to improve seeding)";
+          };
           vpn = mkOption {
             type = types.nullOr (
               types.submodule {

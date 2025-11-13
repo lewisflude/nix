@@ -23,7 +23,6 @@ in
             ironbar.enable = lib.mkDefault true;
             mako.enable = lib.mkDefault true;
             swaync.enable = lib.mkDefault true;
-            swappy.enable = lib.mkDefault true;
           };
         };
       })

@@ -109,7 +109,7 @@ in
         # qBittorrent (VPN namespace)
         "torrent.blmt.io" = {
           extraConfig = ''
-            reverse_proxy 192.168.1.210:8080 {
+            reverse_proxy 192.168.15.1:8080 {
               header_up X-Real-IP {remote_host}
               header_up X-Forwarded-For {remote_host}
               header_up X-Forwarded-Proto {scheme}

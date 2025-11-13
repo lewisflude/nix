@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (lib) mkIf removePrefix;
+  inherit (lib) mkIf;
   cfg = config.theming.signal;
   inherit (themeContext) theme;
 in
@@ -13,13 +13,14 @@ in
   config = mkIf (cfg.enable && cfg.applications.swappy.enable && theme != null) {
     # Swappy theme configuration
     # Swappy uses INI-style configuration with hex color values
-    programs.swappy.settings.Default = {
+    xdg.configFile."swappy/config".text = ''
+      [Default]
       # Fill color with 50% opacity (80 in hex = 128/255 ≈ 50%)
-      fill_color = "${theme.colors."surface-base".hex}80";
+      fill_color=${theme.colors."surface-base".hex}80
       # Line color with full opacity
-      line_color = "${theme.colors."accent-focus".hex}ff";
+      line_color=${theme.colors."accent-focus".hex}ff
       # Text color with full opacity
-      text_color = "${theme.colors."text-primary".hex}ff";
-    };
+      text_color=${theme.colors."text-primary".hex}ff
+    '';
   };
 }

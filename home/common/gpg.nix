@@ -6,7 +6,6 @@
 }:
 let
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
-  constants = import ../../lib/constants.nix;
 in
 {
   home.packages = with pkgs; [
@@ -20,9 +19,10 @@ in
       # Cache the Yubikey PIN for 24 hours
       card-timeout = "86400";
     };
-    settings = {
-      default-key = constants.keys.gpg.primary;
-    };
+    # Note: default-key should be configured per-user via git or gpg config
+    # settings = {
+    #   default-key = "YOUR_GPG_KEY_ID";
+    # };
   };
   services.gpg-agent = {
     enable = true;
@@ -40,7 +40,9 @@ in
     '';
   };
 
-  home.file.".gnupg/sshcontrol".text = ''
-    ${constants.keys.gpg.sshControl}
-  '';
+  # SSH control file for GPG agent
+  # Configure your SSH keys in ~/.gnupg/sshcontrol manually or via config
+  # home.file.".gnupg/sshcontrol".text = ''
+  #   YOUR_SSH_KEY_KEYGRIP
+  # '';
 }
