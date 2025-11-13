@@ -15,6 +15,7 @@ let
   cfg = config.host.services.mediaManagement;
   qbittorrentCfg = cfg.qbittorrent or { };
   webUI = qbittorrentCfg.webUI or null;
+  constants = import ../../../../lib/constants.nix;
 in
 {
   options.host.services.mediaManagement.qbittorrent = {
@@ -43,7 +44,7 @@ in
             };
             port = mkOption {
               type = types.port;
-              default = 8080;
+              default = constants.ports.services.qbittorrent;
               description = "WebUI port";
             };
             bindAddress = mkOption {
@@ -129,7 +130,7 @@ in
     # When VPN is disabled, both WebUI and torrent ports need to be open
     networking.firewall = {
       allowedTCPPorts = [
-        (webUI.port or 8080)
+        (webUI.port or constants.ports.services.qbittorrent)
       ] # WebUI always accessible
       ++ lib.optionals (!(qbittorrentCfg.vpn.enable or false)) [
         qbittorrentCfg.torrentPort # Torrent port only when VPN disabled
@@ -157,7 +158,7 @@ in
       # Run qBittorrent with media group for file access
       user = "qbittorrent";
       group = "media";
-      webuiPort = webUI.port or 8080;
+      webuiPort = webUI.port or constants.ports.services.qbittorrent;
       torrentingPort = qbittorrentCfg.torrentPort;
       # Add --confirm-legal-notice flag to prevent service from exiting
       extraArgs = [ "--confirm-legal-notice" ];
@@ -174,7 +175,7 @@ in
           WebUI = {
             # Bind WebUI to specified address or all interfaces
             Address = webUI.bindAddress or "*";
-            Port = webUI.port or 8080;
+            Port = webUI.port or constants.ports.services.qbittorrent;
             # WebUI access control
             HostHeaderValidation = false;
             LocalHostAuth = false;

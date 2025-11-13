@@ -57,10 +57,10 @@ in
     # - wireguard-tools: required by VPN-Confinement startup script
     # - libnatpmp: required for ProtonVPN NAT-PMP port forwarding
     # - iproute2: required for ip command in NAT-PMP script
-    environment.systemPackages = with pkgs; [
-      wireguard-tools
-      libnatpmp
-      iproute2
+    environment.systemPackages = [
+      pkgs.wireguard-tools
+      pkgs.libnatpmp
+      pkgs.iproute2
     ];
 
     # Configure SOPS secret for WireGuard configuration

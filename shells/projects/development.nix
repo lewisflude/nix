@@ -1,30 +1,30 @@
 { pkgs, ... }:
 pkgs.mkShell {
-  buildInputs = with pkgs; [
+  buildInputs = [
 
-    cmake
-    gnumake
-    pkg-config
+    pkgs.cmake
+    pkgs.gnumake
+    pkgs.pkg-config
 
-    openssl
-    libsecret
-    libiconv
+    pkgs.openssl
+    pkgs.libsecret
+    pkgs.libiconv
 
-    git
-    gh
-    git-lfs
+    pkgs.git
+    pkgs.gh
+    pkgs.git-lfs
 
-    rustup
+    pkgs.rustup
 
-    cachix
-    nix-tree
-    nix-du
-    nix-update
-    nix-prefetch-github
+    pkgs.cachix
+    pkgs.nix-tree
+    pkgs.nix-du
+    pkgs.nix-update
+    pkgs.nix-prefetch-github
 
-    yaml-language-server
+    pkgs.yaml-language-server
 
-    pgcli
+    pkgs.pgcli
   ];
 
   shellHook = ''

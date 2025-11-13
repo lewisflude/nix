@@ -66,8 +66,8 @@ in
       # "zha"  # Removed: ~50-100MB, not using Zigbee
       "isal"
     ];
-    customComponents = with pkgs; [
-      home-assistant-custom-components.localtuya
+    customComponents = [
+      pkgs.home-assistant-custom-components.localtuya
       # home-llm  # Removed: custom LLM component, not needed
     ];
     openFirewall = true;

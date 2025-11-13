@@ -3,14 +3,14 @@
   ...
 }:
 pkgs.mkShell {
-  buildInputs = with pkgs; [
+  buildInputs = [
     # System provides: node, pnpm, typescript
     # Add API backend-specific tools
-    postgresql
-    redis
-    curl
-    jq
-    httpie
+    pkgs.postgresql
+    pkgs.redis
+    pkgs.curl
+    pkgs.jq
+    pkgs.httpie
   ];
   shellHook = ''
     echo "🔧 API Backend development environment loaded (using system Node.js)"

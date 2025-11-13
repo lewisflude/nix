@@ -13,9 +13,9 @@ let
   featureBuilders = import ../lib/feature-builders.nix {
     inherit lib packageSets;
   };
-  commonTools = with pkgs; [
-    pre-commit
-    git
+  commonTools = [
+    pkgs.pre-commit
+    pkgs.git
   ];
   devShellsCommon = {
     # Project-specific shells
@@ -58,13 +58,12 @@ let
     # Web-specific tools (extends system node/typescript)
     web = pkgs.mkShell {
       buildInputs =
-        with pkgs;
         [
           # System provides: node, typescript, pnpm
           # Add web-specific tools only
-          tailwindcss-language-server
-          html-tidy
-          sass
+          pkgs.tailwindcss-language-server
+          pkgs.html-tidy
+          pkgs.sass
         ]
         ++ commonTools;
       shellHook = ''
@@ -77,18 +76,17 @@ let
     # DevOps tools (specialized environment)
     devops = pkgs.mkShell {
       buildInputs =
-        with pkgs;
         [
-          kubectl
-          opentofu
-          terragrunt
-          docker-compose
-          k9s
-          google-cloud-sdk
-          azure-cli
+          pkgs.kubectl
+          pkgs.opentofu
+          pkgs.terragrunt
+          pkgs.docker-compose
+          pkgs.k9s
+          pkgs.google-cloud-sdk
+          pkgs.azure-cli
         ]
         ++ (lib.optionals pkgs.stdenv.isLinux [
-          helm
+          pkgs.helm
         ]);
       shellHook = ''
         echo "🛠️  DevOps environment loaded"
@@ -100,14 +98,13 @@ let
   devShellsLinuxOnly = platformLib.ifLinux {
     love2d = pkgs.mkShell {
       buildInputs =
-        with pkgs;
         [
-          love
-          lua
-          lua-language-server
-          stylua
-          selene
-          luaPackages.luacheck
+          pkgs.love
+          pkgs.lua
+          pkgs.lua-language-server
+          pkgs.stylua
+          pkgs.selene
+          pkgs.luaPackages.luacheck
         ]
         ++ commonTools;
       shellHook = ''
@@ -136,29 +133,29 @@ let
     config-root = toString ../.;
   };
   defaultShell = pkgs.mkShell {
-    buildInputs = with pkgs; [
+    buildInputs = [
 
-      nixfmt-rfc-style
-      deadnix
-      statix
-      treefmt
-      nix-tree
-      nix-diff
-      nvd
+      pkgs.nixfmt-rfc-style
+      pkgs.deadnix
+      pkgs.statix
+      pkgs.treefmt
+      pkgs.nix-tree
+      pkgs.nix-diff
+      pkgs.nvd
 
-      mdbook
-      graphviz
+      pkgs.mdbook
+      pkgs.graphviz
 
-      git
-      pre-commit
-      gh
-      jq
+      pkgs.git
+      pkgs.pre-commit
+      pkgs.gh
+      pkgs.jq
 
-      ripgrep
-      fd
-      bat
-      eza
-      direnv
+      pkgs.ripgrep
+      pkgs.fd
+      pkgs.bat
+      pkgs.eza
+      pkgs.direnv
       updateAllScript
     ];
 

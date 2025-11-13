@@ -98,17 +98,17 @@ ADD_CMDS
 
 in {
   home = {
-    packages = with pkgs; [
-      uv
+    packages = [
+      pkgs.uv
       servers.nodejs
-      coreutils
-      gawk
+      pkgs.coreutils
+      pkgs.gawk
       wrappers.kagiWrapper
       wrappers.openaiWrapper
       wrappers.docsMcpWrapper
-      lua-language-server
-      nodePackages.typescript-language-server
-      nodePackages.typescript
+      pkgs.lua-language-server
+      pkgs.nodePackages.typescript-language-server
+      pkgs.nodePackages.typescript
     ];
 
     activation.mcpWarm = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

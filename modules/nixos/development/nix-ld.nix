@@ -24,25 +24,25 @@ in
       enable = true;
 
       # Provide common libraries that dynamically linked binaries might need
-      libraries = with pkgs; [
+      libraries = [
         # C/C++ standard libraries
-        stdenv.cc.cc.lib
-        zlib
+        pkgs.stdenv.cc.cc.lib
+        pkgs.zlib
 
         # Common system libraries
-        openssl
-        curl
-        libz
+        pkgs.openssl
+        pkgs.curl
+        pkgs.libz
 
         # Development libraries
-        libgcc
-        glibc
+        pkgs.libgcc
+        pkgs.glibc
 
         # Additional libraries for build tools
-        xorg.libX11
-        xorg.libXcursor
-        xorg.libXrandr
-        xorg.libXi
+        pkgs.xorg.libX11
+        pkgs.xorg.libXcursor
+        pkgs.xorg.libXrandr
+        pkgs.xorg.libXi
       ];
     };
   };

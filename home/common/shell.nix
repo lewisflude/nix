@@ -367,8 +367,8 @@ in
 
       DIRENV_LOG_FORMAT = "";
     };
-    packages = with pkgs; [
-      zoxide
+    packages = [
+      pkgs.zoxide
     ];
   };
 
