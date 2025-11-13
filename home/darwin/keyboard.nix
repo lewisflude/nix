@@ -743,9 +743,7 @@ let
 in
 {
 
-  home.packages = with pkgs; [
-
-  ];
+  home.packages = [ ];
 
   home.file."Library/Application Support/Vial/definitions/mnk88.json".text = vialJson;
 }
