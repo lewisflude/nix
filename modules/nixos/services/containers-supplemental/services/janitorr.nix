@@ -163,7 +163,7 @@ in
           interval = "5s";
           timeout = "10s";
           retries = "3";
-          startPeriod = "30s";
+          startPeriod = "45s";
         }
         ++ mkResourceFlags cfg.janitorr.resources;
       };
