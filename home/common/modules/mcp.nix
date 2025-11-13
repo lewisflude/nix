@@ -54,9 +54,6 @@ let
 
   cfg = config.services.mcp;
 
-  # Import centralized constants for validation
-  constants = import ../../lib/constants.nix;
-
   # Submodule type for MCP server configuration
   # Supports both CLI servers (command-based) and remote servers (URL-based)
   mcpServerType = types.submodule {
@@ -75,18 +72,22 @@ let
 
       args = mkOption {
         type = types.listOf types.str;
-        default = [];
+        default = [ ];
         description = lib.mdDoc ''
           Additional arguments to pass to the MCP server (for CLI servers).
 
           These are passed to the command in order.
         '';
-        example = [ "--from" "mcp-server-fetch" "mcp-server-fetch" ];
+        example = [
+          "--from"
+          "mcp-server-fetch"
+          "mcp-server-fetch"
+        ];
       };
 
       env = mkOption {
         type = types.attrsOf types.str;
-        default = {};
+        default = { };
         description = lib.mdDoc ''
           Environment variables to set for the MCP server (for CLI servers).
 
@@ -112,7 +113,7 @@ let
 
       headers = mkOption {
         type = types.attrsOf types.str;
-        default = {};
+        default = { };
         description = lib.mdDoc ''
           HTTP headers to send to the remote MCP server (for remote servers).
 
@@ -140,7 +141,7 @@ let
 
       extraArgs = mkOption {
         type = types.listOf types.str;
-        default = [];
+        default = [ ];
         description = lib.mdDoc ''
           Additional arguments (optional, not used in config generation).
 
@@ -154,7 +155,7 @@ let
   mcpTargetType = types.submodule {
     options = {
       directory = mkOption {
-        type = types.str;  # Using str to support interpolation with config.home.homeDirectory
+        type = types.str; # Using str to support interpolation with config.home.homeDirectory
         description = lib.mdDoc ''
           The directory to store the MCP configuration.
 
@@ -183,17 +184,22 @@ let
 
   # Generate MCP configuration JSON for a server
   # Handles both CLI servers (command-based) and remote servers (URL-based)
-  mkMcpConfig = _name: serverCfg:
+  mkMcpConfig =
+    _name: serverCfg:
     # Remote server configuration
     if serverCfg.url != null then
-      { inherit (serverCfg) url; }
-      // (optionalAttrs (serverCfg.headers != {}) { inherit (serverCfg) headers; })
+      {
+        inherit (serverCfg) url;
+      }
+      // (optionalAttrs (serverCfg.headers != { }) { inherit (serverCfg) headers; })
 
     # CLI server configuration
     else if serverCfg.command != null then
-      { inherit (serverCfg) command; }
-      // (optionalAttrs (serverCfg.args != []) { inherit (serverCfg) args; })
-      // (optionalAttrs (serverCfg.env != {}) { inherit (serverCfg) env; })
+      {
+        inherit (serverCfg) command;
+      }
+      // (optionalAttrs (serverCfg.args != [ ]) { inherit (serverCfg) args; })
+      // (optionalAttrs (serverCfg.env != { }) { inherit (serverCfg) env; })
 
     # Invalid configuration
     else
@@ -209,31 +215,29 @@ let
   # Helper to detect port conflicts
   findPortConflicts =
     let
-      serversWithPorts = filterAttrs (_name: server: server.port != null) cfg.servers;
-      portList = mapAttrsToList (_name: server: server.port) serversWithPorts;
+      portList = mapAttrsToList (_name: server: server.port) (
+        filterAttrs (_name: server: server.port != null) cfg.servers
+      );
       uniquePorts = unique portList;
     in
-      length portList != length uniquePorts;
+    length portList != length uniquePorts;
 
   # Helper to collect conflicting ports
   getConflictingPorts =
     let
-      serversWithPorts = filterAttrs (_name: server: server.port != null) cfg.servers;
-      portToServers = foldl'
-        (acc: name:
-          let
-            port = cfg.servers.${name}.port;
-          in
-            if port == null then acc
-            else acc // { ${toString port} = (acc.${toString port} or []) ++ [ name ]; }
-        )
-        {}
-        (attrNames cfg.servers);
+      portToServers = foldl' (
+        acc: name:
+        let
+          inherit (cfg.servers.${name}) port;
+        in
+        if port == null then
+          acc
+        else
+          acc // { ${toString port} = (acc.${toString port} or [ ]) ++ [ name ]; }
+      ) { } (attrNames (filterAttrs (_name: server: server.port != null) cfg.servers));
       conflicts = filterAttrs (_port: servers: length servers > 1) portToServers;
     in
-      mapAttrsToList
-        (port: servers: "Port ${port}: ${concatStringsSep ", " servers}")
-        conflicts;
+    mapAttrsToList (port: servers: "Port ${port}: ${concatStringsSep ", " servers}") conflicts;
 
   # MCP port range from constants
   mcpPortMin = 6200;
@@ -247,25 +251,25 @@ let
     let
       serversWithPorts = filterAttrs (_name: server: server.port != null) cfg.servers;
     in
-      filter
-        (name: !mcpPortInRange cfg.servers.${name}.port)
-        (attrNames serversWithPorts);
+    filter (name: !mcpPortInRange cfg.servers.${name}.port) (attrNames serversWithPorts);
 
 in
 {
   options.services.mcp = {
-    enable = mkEnableOption (lib.mdDoc ''
-      MCP (Model Context Protocol) server configuration.
+    enable = mkEnableOption (
+      lib.mdDoc ''
+        MCP (Model Context Protocol) server configuration.
 
-      When enabled, this module generates MCP configuration files for target
-      applications and optionally registers servers with the Claude CLI.
+        When enabled, this module generates MCP configuration files for target
+        applications and optionally registers servers with the Claude CLI.
 
-      Provides cross-platform support for NixOS and nix-darwin.
-    '');
+        Provides cross-platform support for NixOS and nix-darwin.
+      ''
+    );
 
     targets = mkOption {
       type = types.attrsOf mcpTargetType;
-      default = {};
+      default = { };
       description = lib.mdDoc ''
         MCP targets to configure.
 
@@ -289,7 +293,7 @@ in
 
     servers = mkOption {
       type = types.attrsOf mcpServerType;
-      default = {};
+      default = { };
       description = lib.mdDoc ''
         MCP servers to configure.
 
@@ -331,7 +335,7 @@ in
         assertion = !findPortConflicts;
         message = ''
           MCP server port conflicts detected:
-          ${concatStringsSep "\n  " (getConflictingPorts)}
+          ${concatStringsSep "\n  " getConflictingPorts}
 
           Each MCP server must use a unique port number.
           See lib/constants.nix for the MCP port allocation (6200-6299).
@@ -340,7 +344,7 @@ in
 
       # Validate all ports are in the MCP range
       {
-        assertion = getOutOfRangePorts == [];
+        assertion = getOutOfRangePorts == [ ];
         message = ''
           MCP servers with ports outside the reserved range (${toString mcpPortMin}-${toString mcpPortMax}):
           ${concatStringsSep ", " getOutOfRangePorts}
@@ -352,7 +356,7 @@ in
 
       # Validate at least one target is configured
       {
-        assertion = cfg.targets != {};
+        assertion = cfg.targets != { };
         message = ''
           MCP is enabled but no targets are configured.
 

@@ -1,6 +1,8 @@
 {
   lib,
   pkgs,
+  inputs,
+  hostSystem,
   ...
 }:
 let
@@ -38,7 +40,7 @@ in
 {
   programs.helix = {
     enable = true;
-    package = pkgs.helix_git; # Chaotic Nyx bleeding-edge version
+    package = inputs.helix.packages.${hostSystem}.default; # Official Helix flake
     extraPackages = lspPackages ++ formatterPackages;
     languages = {
       language = lib.mapAttrsToList (
