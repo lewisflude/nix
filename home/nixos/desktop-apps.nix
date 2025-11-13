@@ -7,18 +7,25 @@ let
 in
 {
   home.packages = with pkgs; [
-    mpv # mpv_git not available in Chaotic, using stable
     gimp
     discord-krisp # Chaotic Nyx version with Krisp noise suppression
     telegram-desktop_git # Chaotic Nyx bleeding-edge version
     file-roller
     # Note: libnotify is handled in core-tooling.nix
     # Note: swaylock-effects is handled in apps/swayidle.nix via programs.swaylock
-    xfce.thunar
     font-awesome
     asepriteFixed
     wl-screenrec
   ];
+
+  programs.thunar = {
+    enable = true;
+    plugins = with pkgs.xfce; [
+      thunar-archive-plugin
+      thunar-volman
+    ];
+  };
+
   services.cliphist = {
     enable = true;
   };
