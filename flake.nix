@@ -6,6 +6,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     process-compose-flake.url = "github:Platonic-Systems/process-compose-flake";
     services-flake.url = "github:juspay/services-flake";
@@ -46,8 +47,6 @@
       url = "github:JakeStanger/ironbar";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Note: Using ironbar flake only for home-manager module, package comes from nixpkgs
-    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     musnix = {
       url = "github:musnix/musnix";
     };
@@ -90,6 +89,14 @@
     };
     vpn-confinement = {
       url = "github:Maroka-chan/VPN-Confinement";
+    };
+    zed = {
+      url = "github:zed-industries/zed";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    helix = {
+      url = "github:helix-editor/helix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 

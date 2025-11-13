@@ -110,6 +110,21 @@
         "url": "https://flakehub.com/f/ipetkov/crane/0"
       }
     },
+    "crane_2": {
+      "locked": {
+        "lastModified": 1762538466,
+        "narHash": "sha256-8zrIPl6J+wLm9MH5ksHcW7BUHo7jSNOu0/hA0ohOOaM=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "0cea393fffb39575c46b7a0318386467272182fe",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -352,6 +367,21 @@
         "owner": "edolstra",
         "repo": "flake-compat",
         "rev": "b4a34015c698c7793d592d66adbab377907a2be8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
+    "flake-compat_12": {
+      "locked": {
+        "lastModified": 1761588595,
+        "narHash": "sha256-XKUZz9zewJNUj46b4AJdiRZJAvSZ0Dqj2BNfXvFlJC4=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "f387cd2afec9419c8ee37694406ca490c3f34ee5",
         "type": "github"
       },
       "original": {
@@ -770,6 +800,27 @@
       "original": {
         "owner": "hercules-ci",
         "repo": "gitignore.nix",
+        "type": "github"
+      }
+    },
+    "helix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay_3"
+      },
+      "locked": {
+        "lastModified": 1762973522,
+        "narHash": "sha256-CFyvvZvKDkTFF7niIQp5hhks5OR1u10H3e89chURCkg=",
+        "owner": "helix-editor",
+        "repo": "helix",
+        "rev": "948ac05aa0db64e0e5d00710db36eb244076e988",
+        "type": "github"
+      },
+      "original": {
+        "owner": "helix-editor",
+        "repo": "helix",
         "type": "github"
       }
     },
@@ -1648,6 +1699,7 @@
         "fenix": "fenix_2",
         "flake-parts": "flake-parts_2",
         "flakehub": "flakehub",
+        "helix": "helix",
         "home-manager": "home-manager_2",
         "homebrew-j178": "homebrew-j178",
         "ironbar": "ironbar",
@@ -1668,7 +1720,8 @@
         "services-flake": "services-flake",
         "solaar": "solaar",
         "sops-nix": "sops-nix",
-        "vpn-confinement": "vpn-confinement"
+        "vpn-confinement": "vpn-confinement",
+        "zed": "zed"
       }
     },
     "rust-analyzer-src": {
@@ -1764,6 +1817,48 @@
       "inputs": {
         "nixpkgs": [
           "chaotic",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1762915112,
+        "narHash": "sha256-d9j1g8nKmYDHy+/bIOPQTh9IwjRliqaTM0QLHMV92Ic=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "aa1e85921cfa04de7b6914982a94621fbec5cc02",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_3": {
+      "inputs": {
+        "nixpkgs": [
+          "helix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1759631821,
+        "narHash": "sha256-V8A1L0FaU/aSXZ1QNJScxC12uP4hANeRBgI4YdhHeRM=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "1d7cbdaad90f8a5255a89a6eddd8af24dc89cafe",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_4": {
+      "inputs": {
+        "nixpkgs": [
+          "zed",
           "nixpkgs"
         ]
       },
@@ -2043,6 +2138,29 @@
       "original": {
         "owner": "Supreeeme",
         "repo": "xwayland-satellite",
+        "type": "github"
+      }
+    },
+    "zed": {
+      "inputs": {
+        "crane": "crane_2",
+        "flake-compat": "flake-compat_12",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay_4"
+      },
+      "locked": {
+        "lastModified": 1763049986,
+        "narHash": "sha256-0NW+028r1mDIb0FRX6rxwWiGETPs/+nokLRFCACIAlo=",
+        "owner": "zed-industries",
+        "repo": "zed",
+        "rev": "cb7bd5fe19097003190542deeff7208f166ddfc9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zed-industries",
+        "repo": "zed",
         "type": "github"
       }
     }
