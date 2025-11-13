@@ -37,11 +37,6 @@
 
   boot.loader.systemd-boot.configurationLimit = 5;
 
-  # WireGuard tools (required for VPN-Confinement)
-  environment.systemPackages = with pkgs; [
-    wireguard-tools
-  ];
-
   # Firewall configuration
   networking.firewall = {
     allowedTCPPorts = [ 6280 ]; # Docs MCP Server HTTP interface
