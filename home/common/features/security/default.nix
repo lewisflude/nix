@@ -13,22 +13,21 @@ in
 {
   config = lib.mkIf cfg.enable {
     home.packages =
-      with pkgs;
       [
-        age
-        sops
+        pkgs.age
+        pkgs.sops
       ]
       ++ lib.optionals cfg.yubikey (
         [
-          yubikey-manager
-          yubikey-personalization
-          pcsc-tools
+          pkgs.yubikey-manager
+          pkgs.yubikey-personalization
+          pkgs.pcsc-tools
         ]
         ++ lib.optionals isDarwin [
-          terminal-notifier
+          pkgs.terminal-notifier
         ]
         ++ lib.optionals isLinux [
-          yubioath-flutter
+          pkgs.yubioath-flutter
         ]
       );
     # Note: GPG is configured in home/common/gpg.nix, imported via profiles/base.nix

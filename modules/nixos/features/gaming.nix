@@ -28,36 +28,32 @@ in
     };
 
     services.udev = mkIf cfg.enable {
-      packages = with pkgs; [
-        game-devices-udev-rules
+      packages = [
+        pkgs.game-devices-udev-rules
       ];
     };
 
     hardware.uinput.enable = mkIf cfg.enable true;
 
     environment.systemPackages =
-      with pkgs;
       [
-
-        protonup-qt
-        wine
-        winetricks
+        # System-level gaming tools
+        pkgs.protonup-qt
       ]
 
       ++ optionals cfg.steam [
-        steamcmd
-        steam-run
-
-        gamescope
+        pkgs.steamcmd
+        pkgs.steam-run
+        pkgs.gamescope
       ]
 
       ++ optionals cfg.performance [
         # Note: mangohud is configured via home-manager programs.mangohud
-        gamemode
+        pkgs.gamemode
       ]
 
       ++ optionals cfg.lutris [
-        lutris
+        pkgs.lutris
       ]
 
       ++ optionals cfg.emulators [

@@ -9,10 +9,10 @@ let
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
 in
 {
-  environment.systemPackages = with pkgs; [
-    curl
-    wget
-    git
+  environment.systemPackages = [
+    pkgs.curl
+    pkgs.wget
+    pkgs.git
   ];
   services.example = {
     enable = true;

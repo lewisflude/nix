@@ -11,7 +11,6 @@ let
         cfg,
         pkgs,
       }:
-      with pkgs;
       lib.concatLists [
 
         (lib.optionals (cfg.buildTools or false) packageSets.buildTools)
@@ -47,7 +46,6 @@ let
         pkgs,
         platformLib,
       }:
-      with pkgs;
       packageSets.devUtilities
       ++ lib.optionals (cfg.debugTools or false) packageSets.debugTools
 
@@ -87,7 +85,6 @@ let
         pythonVersion ? versions.python,
         nodeVersion ? versions.nodejs,
       }:
-      with pkgs;
       lib.concatLists [
 
         (lib.optionals (cfg.rust or false) packageSets.rustToolchain)
@@ -98,18 +95,18 @@ let
           in
           [
             (python.withPackages (
-              python-pkgs: with python-pkgs; [
-                pip
-                virtualenv
-                pytest
-                black
-                isort
-                mypy
-                ruff
+              python-pkgs: [
+                python-pkgs.pip
+                python-pkgs.virtualenv
+                python-pkgs.pytest
+                python-pkgs.black
+                python-pkgs.isort
+                python-pkgs.mypy
+                python-pkgs.ruff
               ]
             ))
 
-            poetry
+            pkgs.poetry
           ]
         ))
 

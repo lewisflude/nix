@@ -4,9 +4,9 @@
   ...
 }:
 {
-  home.packages = with pkgs; [
-    platform-specific-tool
-    platform-specific-app
+  home.packages = [
+    pkgs.platform-specific-tool
+    pkgs.platform-specific-app
   ];
   programs.example = {
     enable = true;

@@ -17,30 +17,28 @@ in
   config = mkIf cfg.enable (mkMerge [
     (optionalAttrs isLinux {
       environment.systemPackages =
-        with pkgs;
         optionals (cfg.audio.enable && cfg.audio.production) [
-          audacity
-          helm
-          lsp-plugins
+          pkgs.audacity
+          pkgs.helm
+          pkgs.lsp-plugins
         ]
         ++ optionals (cfg.audio.enable && audioNixCfg.enable) (
-          (optional audioNixCfg.bitwig bitwig-studio-stable-latest)
+          (optional audioNixCfg.bitwig pkgs.bitwig-studio-stable-latest)
           ++ (optionals audioNixCfg.plugins [
-            neuralnote
-            paulxstretch
+            pkgs.neuralnote
+            pkgs.paulxstretch
           ])
         )
         ++ optionals (cfg.video.enable && cfg.video.editing) [
-          kdenlive
-          ffmpeg
-          handbrake
-
-          imagemagick
-          gimp
+          pkgs.kdenlive
+          pkgs.ffmpeg
+          pkgs.handbrake
+          pkgs.imagemagick
+          pkgs.gimp
         ]
         # Note: obs-studio is configured via home-manager programs.obs-studio
         ++ optionals (cfg.video.enable && cfg.video.streaming) [
-          v4l2loopback
+          pkgs.v4l2loopback
         ];
 
       musnix = mkIf (cfg.audio.enable && cfg.audio.realtime) {

@@ -30,6 +30,7 @@
       ollama = 11434;
       openWebui = 7000;
       cockpit = 9090;
+      dante = 1080; # SOCKS proxy
 
       # Media management services
       jellyfin = 8096;

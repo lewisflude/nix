@@ -4,12 +4,15 @@
   pkgs,
   ...
 }:
+let
+  constants = import ../../../lib/constants.nix;
+in
 {
 
   _module.args = lib.mkIf (config == null) { };
   services.cockpit = {
     enable = true;
-    port = 9090;
+    port = constants.ports.services.cockpit;
     openFirewall = true;
 
     allowed-origins = [
@@ -31,8 +34,4 @@
       };
     };
   };
-
-  environment.systemPackages = with pkgs; [
-
-  ];
 }

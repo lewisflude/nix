@@ -9,15 +9,14 @@ let
 in
 pkgs.mkShell {
   buildInputs =
-    with pkgs;
     [
       # System provides: node, pnpm, typescript
       # Add React Native-specific tools
-      watchman
+      pkgs.watchman
     ]
     ++ lib.optionals platformLib.isDarwin [
-      cocoapods
-      xcbuild
+      pkgs.cocoapods
+      pkgs.xcbuild
     ];
   shellHook = ''
     echo "📱 React Native development environment loaded (using system Node.js)"

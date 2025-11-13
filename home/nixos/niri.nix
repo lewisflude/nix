@@ -21,19 +21,19 @@ let
 in
 {
   home.packages =
-    (with pkgs; [
-      grim
-      slurp
-      wl-clipboard
-      wlr-randr
-      wayland-utils
-      brightnessctl
+    [
+      pkgs.grim
+      pkgs.slurp
+      pkgs.wl-clipboard
+      pkgs.wlr-randr
+      pkgs.wayland-utils
+      pkgs.brightnessctl
       # Note: xdg-utils is handled in core-tooling.nix
       xwayland-satellite
-      argyllcms
-      colord-gtk
-      wl-gammactl
-    ])
+      pkgs.argyllcms
+      pkgs.colord-gtk
+      pkgs.wl-gammactl
+    ]
     ++ [
       inputs.awww.packages.${system}.awww
     ];

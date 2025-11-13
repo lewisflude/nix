@@ -33,10 +33,10 @@ pog.pog {
     }
   ];
 
-  runtimeInputs = with pkgs; [
-    cachix
-    jq
-    nix
+  runtimeInputs = [
+    pkgs.cachix
+    pkgs.jq
+    pkgs.nix
   ];
 
   script =

@@ -25,7 +25,7 @@ let
 
 in {
   home = {
-    packages = with pkgs; [ uv ];
+    packages = [ pkgs.uv ];
 
     file = {
       "bin/kagi-mcp-wrapper" = {

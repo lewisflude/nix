@@ -17,8 +17,8 @@ let
   screenLocker = lib.getExe pkgs.swaylock-effects;
 in
 {
-  home.packages = with pkgs; [
-    hyprpicker
+  home.packages = [
+    pkgs.hyprpicker
     # Note: jq is handled via programs.jq in apps/jq.nix
   ];
   programs.niri.settings.binds = {

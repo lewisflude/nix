@@ -3,10 +3,10 @@
   ...
 }:
 pkgs.mkShell {
-  buildInputs = with pkgs; [
+  buildInputs = [
     # System provides: node, pnpm, typescript, typescript-language-server
     # Add Next.js-specific tools only
-    tailwindcss-language-server
+    pkgs.tailwindcss-language-server
   ];
   shellHook = ''
     echo "⚡ Next.js development environment loaded (using system Node.js)"
