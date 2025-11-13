@@ -17,6 +17,7 @@
     ./apps/wofi.nix
     ./apps/gaming.nix
     ./apps/mpv.nix
+    ./apps/obs.nix
   ];
 
 }

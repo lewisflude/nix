@@ -38,11 +38,7 @@ in
           imagemagick
           gimp
         ]
-        ++
-          optionals ((cfg.video.enable && cfg.video.streaming) || (cfg.streaming.enable && cfg.streaming.obs))
-            [
-              obs-studio
-            ]
+        # Note: obs-studio is configured via home-manager programs.obs-studio
         ++ optionals (cfg.video.enable && cfg.video.streaming) [
           v4l2loopback
         ];

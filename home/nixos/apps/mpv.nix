@@ -16,57 +16,60 @@ let
   inherit (theme) colors;
 in
 {
+  programs.mpv = {
+    enable = true;
 
-  xdg.configFile."mpv/config".text = ''
+    # Use extraConfig for complex configuration with script-opts-append
+    extraConfig = ''
+      # Wayland output
+      vo=wayland
+      gpu-context=wayland
+      hwdec=auto-safe
 
+      # OSD colors
+      osd-color=${colors."text-primary".hex}
+      osd-border-color=${colors."surface-base".hex}
+      osd-shadow-color=${colors."surface-emphasis".hex}
+      osd-back-color=${colors."surface-base".hex}cc
 
-    vo=wayland
-    gpu-context=wayland
-    hwdec=auto-safe
+      # Subtitle colors
+      sub-color=${colors."text-primary".hex}
+      sub-border-color=${colors."surface-base".hex}
+      sub-shadow-color=${colors."surface-emphasis".hex}
+      sub-back-color=${colors."surface-base".hex}cc
 
+      # OSD bar styling
+      osd-bar-align-y=0.9
+      osd-bar-w=100
+      osd-bar-h=2
+      osd-bar-border-size=1
+      osd-bar-pos-y=0.9
+      osd-bar-color=${colors."accent-focus".hex}
+      osd-bar-border-color=${colors."accent-info".hex}
 
-    osd-color=${colors."text-primary".hex}
-    osd-border-color=${colors."surface-base".hex}
-    osd-shadow-color=${colors."surface-emphasis".hex}
-    osd-back-color=${colors."surface-base".hex}cc
+      # OSD text styling
+      osd-font-size=24
+      osd-duration=2000
+      osd-margin-x=40
+      osd-margin-y=40
 
+      # Cache settings
+      cache=yes
+      cache-secs=60
+      demuxer-max-bytes=500M
+      demuxer-max-back-bytes=500M
 
-    sub-color=${colors."text-primary".hex}
-    sub-border-color=${colors."surface-base".hex}
-    sub-shadow-color=${colors."surface-emphasis".hex}
-    sub-back-color=${colors."surface-base".hex}cc
+      # Stats overlay theming
+      script-opts-append=stats-border_color=${theme.formats.bgrHexRaw colors."divider-primary"}
+      script-opts-append=stats-font_color=${theme.formats.bgrHexRaw colors."text-primary"}
+      script-opts-append=stats-plot_bg_border_color=${theme.formats.bgrHexRaw colors."accent-info"}
+      script-opts-append=stats-plot_bg_color=${theme.formats.bgrHexRaw colors."surface-base"}
+      script-opts-append=stats-plot_color=${theme.formats.bgrHexRaw colors."accent-focus"}
 
-
-    osd-bar-align-y=0.9
-    osd-bar-w=100
-    osd-bar-h=2
-    osd-bar-border-size=1
-    osd-bar-pos-y=0.9
-    osd-bar-color=${colors."accent-focus".hex}
-    osd-bar-border-color=${colors."accent-info".hex}
-
-
-    osd-font-size=24
-    osd-duration=2000
-    osd-margin-x=40
-    osd-margin-y=40
-
-
-    cache=yes
-    cache-secs=60
-    demuxer-max-bytes=500M
-    demuxer-max-back-bytes=500M
-
-
-    script-opts-append=stats-border_color=${theme.formats.bgrHexRaw colors."divider-primary"}
-    script-opts-append=stats-font_color=${theme.formats.bgrHexRaw colors."text-primary"}
-    script-opts-append=stats-plot_bg_border_color=${theme.formats.bgrHexRaw colors."accent-info"}
-    script-opts-append=stats-plot_bg_color=${theme.formats.bgrHexRaw colors."surface-base"}
-    script-opts-append=stats-plot_color=${theme.formats.bgrHexRaw colors."accent-focus"}
-
-
-    script-opts-append=uosc-color=foreground=${colors."accent-focus".hexRaw},foreground_text=${colors."surface-base".hexRaw},background=${colors."surface-base".hexRaw},background_text=${colors."text-primary".hexRaw},curtain=${
-      colors."surface-emphasis".hexRaw
-    },success=${colors."accent-primary".hexRaw},error=${colors."accent-danger".hexRaw}
-  '';
+      # uosc script theming
+      script-opts-append=uosc-color=foreground=${colors."accent-focus".hexRaw},foreground_text=${colors."surface-base".hexRaw},background=${colors."surface-base".hexRaw},background_text=${colors."text-primary".hexRaw},curtain=${
+        colors."surface-emphasis".hexRaw
+      },success=${colors."accent-primary".hexRaw},error=${colors."accent-danger".hexRaw}
+    '';
+  };
 }

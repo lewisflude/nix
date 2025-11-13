@@ -52,7 +52,7 @@ in
       ]
 
       ++ optionals cfg.performance [
-        mangohud
+        # Note: mangohud is configured via home-manager programs.mangohud
         gamemode
       ]
 
