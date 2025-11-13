@@ -43,11 +43,15 @@ in
       };
       volumes = [
         "${cfg.configPath}/termix:/app/data"
+        # Mount SSH directory to allow Termix to access SSH keys
+        # Note: Termix will need to be configured to use these keys in the UI
+        "/home/${config.host.username}/.ssh:/root/.ssh:ro"
       ];
       ports = [ "${toString termixCfg.port}:${toString termixCfg.port}" ];
       extraOptions =
         # Removed healthcheck - causes false positives during startup, service works without it
-        mkResourceFlags termixCfg.resources;
+        # Use host network mode so Termix can access host SSH service
+        [ "--network=host" ] ++ mkResourceFlags termixCfg.resources;
     };
 
     systemd.tmpfiles.rules = [
