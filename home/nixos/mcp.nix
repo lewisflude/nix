@@ -19,7 +19,15 @@
 # See also:
 # - modules/shared/mcp/: Shared module definitions
 # - home/darwin/mcp.nix: macOS-specific configuration
-{ pkgs, config, systemConfig, lib, system, hostSystem, ... }:
+{
+  pkgs,
+  config,
+  systemConfig,
+  lib,
+  system,
+  hostSystem,
+  ...
+}:
 
 let
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
@@ -29,13 +37,29 @@ let
   constants = import ../../lib/constants.nix;
 
   # Import shared MCP utilities
-  servers = import ../../modules/shared/mcp/servers.nix { inherit pkgs config systemConfig lib platformLib; };
-  wrappers = import ../../modules/shared/mcp/wrappers.nix { inherit pkgs systemConfig lib platformLib; };
+  servers = import ../../modules/shared/mcp/servers.nix {
+    inherit
+      pkgs
+      config
+      systemConfig
+      lib
+      platformLib
+      ;
+  };
+  wrappers = import ../../modules/shared/mcp/wrappers.nix {
+    inherit
+      pkgs
+      systemConfig
+      lib
+      platformLib
+      ;
+  };
 
   inherit (lib) concatStringsSep mapAttrsToList escapeShellArg;
 
   # MCP registration helper
-  mkAddJsonCmd = name: serverCfg:
+  mkAddJsonCmd =
+    name: serverCfg:
     let
       json = builtins.toJSON (
         {
@@ -58,43 +82,43 @@ let
   addCommands = concatStringsSep "\n" (mapAttrsToList mkAddJsonCmd config.services.mcp.servers);
 
   registerScript = pkgs.writeShellScript "mcp-register" ''
-    set -uo pipefail
-    echo "[mcp] Starting Claude MCP registration…"
-    export PATH="${pkgs.coreutils}/bin:${pkgs.findutils}/bin:${pkgs.gawk}/bin:${pkgs.jq}/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:$PATH"
-    export MCP_TIMEOUT="''${MCP_TIMEOUT:-${constants.timeouts.mcp.registration}}"
-    if ! command -v claude >/dev/null 2>&1; then
-      echo "[mcp] WARNING: 'claude' CLI not found in PATH, skipping registration"
-      exit 0
-    fi
-    DRY_RUN="''${MCP_DRY_RUN:-0}"
-    declare -a DECLARED=( ${concatStringsSep " " declaredNames} )
-    echo "[mcp] Declared servers: ${concatStringsSep " " declaredNames}"
-    if [ "$DRY_RUN" = "1" ]; then
-      echo "[mcp] DRY-RUN: would run:"
-      cat <<'ADD_CMDS'
-${addCommands}
-ADD_CMDS
-    else
-      while IFS= read -r line; do
-        line="''${line%%$'\r'}"
-        [ -z "$line" ] && continue
-        case "$line" in
-          *)
-            echo "[mcp] -> $line"
-            if ! bash -lc "$line" >/dev/null 2>&1; then
-              echo "[mcp] WARN: add failed, will evaluate health after list"
-            fi
-            ;;
-        esac
-      done <<'ADD_CMDS'
-${addCommands}
-ADD_CMDS
-    fi
-    echo "[mcp] Skipping health prune (using add-json mirroring)"
-    echo "[mcp] Skipping unmanaged prune"
-    echo "[mcp] Final state (MCP_TIMEOUT=$MCP_TIMEOUT):"
-    claude mcp list || echo "[mcp] WARNING: claude mcp list failed"
-    echo "[mcp] Claude MCP registration complete."
+        set -uo pipefail
+        echo "[mcp] Starting Claude MCP registration…"
+        export PATH="${pkgs.coreutils}/bin:${pkgs.findutils}/bin:${pkgs.gawk}/bin:${pkgs.jq}/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:$PATH"
+        export MCP_TIMEOUT="''${MCP_TIMEOUT:-${constants.timeouts.mcp.registration}}"
+        if ! command -v claude >/dev/null 2>&1; then
+          echo "[mcp] WARNING: 'claude' CLI not found in PATH, skipping registration"
+          exit 0
+        fi
+        DRY_RUN="''${MCP_DRY_RUN:-0}"
+        declare -a DECLARED=( ${concatStringsSep " " declaredNames} )
+        echo "[mcp] Declared servers: ${concatStringsSep " " declaredNames}"
+        if [ "$DRY_RUN" = "1" ]; then
+          echo "[mcp] DRY-RUN: would run:"
+          cat <<'ADD_CMDS'
+    ${addCommands}
+    ADD_CMDS
+        else
+          while IFS= read -r line; do
+            line="''${line%%$'\r'}"
+            [ -z "$line" ] && continue
+            case "$line" in
+              *)
+                echo "[mcp] -> $line"
+                if ! bash -lc "$line" >/dev/null 2>&1; then
+                  echo "[mcp] WARN: add failed, will evaluate health after list"
+                fi
+                ;;
+            esac
+          done <<'ADD_CMDS'
+    ${addCommands}
+    ADD_CMDS
+        fi
+        echo "[mcp] Skipping health prune (using add-json mirroring)"
+        echo "[mcp] Skipping unmanaged prune"
+        echo "[mcp] Final state (MCP_TIMEOUT=$MCP_TIMEOUT):"
+        claude mcp list || echo "[mcp] WARNING: claude mcp list failed"
+        echo "[mcp] Claude MCP registration complete."
   '';
 
   warmScript = pkgs.writeShellScript "mcp-warm" ''
@@ -120,7 +144,8 @@ ADD_CMDS
     echo "[mcp-warm] Warm-up complete."
   '';
 
-in {
+in
+{
   home = {
     packages = [
       pkgs.uv
@@ -215,7 +240,7 @@ in {
           "-F"
           "default"
         ];
-        port = servers.ports.rust-docs;
+        port = servers.ports.rustdocs;
       };
     };
   };
