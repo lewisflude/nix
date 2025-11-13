@@ -5,7 +5,6 @@
     ./containers
 
     ./media-management
-    ./ai-tools
     ./containers-supplemental
 
     ./home-assistant.nix
