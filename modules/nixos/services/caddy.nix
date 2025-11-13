@@ -266,6 +266,18 @@ in
           '';
         };
 
+        # Termix (SSH Management)
+        "termix.blmt.io" = {
+          extraConfig = ''
+            reverse_proxy localhost:8083 {
+              header_up X-Real-IP {remote_host}
+              header_up X-Forwarded-For {remote_host}
+              header_up X-Forwarded-Proto {scheme}
+            }
+            encode zstd gzip
+          '';
+        };
+
         # SABnzbd (Usenet)
         "usenet.blmt.io" = {
           extraConfig = ''
