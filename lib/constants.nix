@@ -7,6 +7,7 @@
     mcp = {
       # Core MCP servers
       github = 6230;
+      git = 6233;
       kagi = 6240;
       openai = 6250;
       docs = 6280;

@@ -1,32 +1,78 @@
+# MCP Configuration for macOS (nix-darwin)
+#
+# This module configures MCP (Model Context Protocol) servers for macOS systems
+# using nix-darwin and home-manager. It provides activation hooks for registration
+# and wrapper scripts for secret management.
+#
+# Features:
+# - Automatic MCP server registration with Claude CLI
+# - Integration with Cursor and Claude Code applications
+# - SOPS secret management for API keys
+# - Platform-specific wrapper scripts for Darwin
+#
+# Differences from NixOS:
+# - Uses home.file for wrappers instead of writeShellApplication
+# - Uses home-manager activation hooks instead of systemd services
+# - GitHub server runs via Docker container
+#
+# See also:
+# - modules/shared/mcp/: Shared module definitions
+# - home/nixos/mcp.nix: NixOS-specific configuration
 { pkgs, config, systemConfig, lib, system, ... }:
 
 let
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
   claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
 
+  # Import centralized constants
+  constants = import ../../lib/constants.nix;
+
   # Import shared MCP utilities
   servers = import ../../modules/shared/mcp/servers.nix { inherit pkgs config systemConfig lib platformLib; };
   wrappers = import ../../modules/shared/mcp/wrappers.nix { inherit pkgs systemConfig lib platformLib; };
 
-  # Darwin-specific wrapper for kagi (using home.file instead of writeShellApplication)
+  inherit (lib)
+    concatStringsSep
+    mapAttrsToList
+    escapeShellArg
+    optionalString
+    ;
+
+  # Darwin-specific wrapper for Kagi (using home.file instead of writeShellApplication)
+  # This is required because Darwin has different file permission requirements
   kagiWrapperScript = ''
+    #!/usr/bin/env bash
+    set -euo pipefail
+
     if [ -r "${systemConfig.sops.secrets.KAGI_API_KEY.path or ""}" ]; then
       export KAGI_API_KEY="$(${pkgs.coreutils}/bin/cat "${systemConfig.sops.secrets.KAGI_API_KEY.path or ""}")"
     fi
-    exec ${pkgs.uv}/bin/uvx kagimcp "$@"
+
+    export UV_PYTHON="${pkgs.python3}/bin/python3"
+    exec ${pkgs.uv}/bin/uvx --from kagimcp kagimcp "$@"
   '';
 
+  # Darwin-specific wrapper for Docs MCP server
   docsWrapperScript = ''
+    #!/usr/bin/env bash
+    set -euo pipefail
+
     if [ -r "${systemConfig.sops.secrets.OPENAI_API_KEY.path or ""}" ]; then
       export OPENAI_API_KEY="$(${pkgs.coreutils}/bin/cat "${systemConfig.sops.secrets.OPENAI_API_KEY.path or ""}")"
     fi
+
     exec ${servers.nodejs}/bin/npx -y @arabold/docs-mcp-server@latest "$@"
   '';
 
 in {
   home = {
-    packages = [ pkgs.uv ];
+    # Install required packages
+    packages = [
+      pkgs.uv
+      servers.nodejs
+    ];
 
+    # Create wrapper scripts with proper permissions
     file = {
       "bin/kagi-mcp-wrapper" = {
         text = kagiWrapperScript;
@@ -38,53 +84,65 @@ in {
       };
     };
 
+    # Register MCP servers with Claude CLI on activation
     activation.setupClaudeMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] (
       let
         cfg = config.services.mcp;
-        mcpAddCommands = lib.concatStringsSep "\n        " (
-          lib.mapAttrsToList (
+
+        # Generate Claude CLI add commands for each server
+        mcpAddCommands = concatStringsSep "\n        " (
+          mapAttrsToList (
             name: serverCfg:
             let
-              command = lib.escapeShellArg serverCfg.command;
-              argsStr = lib.concatStringsSep " " (map lib.escapeShellArg serverCfg.args);
-              argsPart = lib.optionalString (argsStr != "") "-- ${argsStr}";
-              envVars = lib.concatStringsSep " " (
-                lib.mapAttrsToList (
-                  key: value: "export ${lib.escapeShellArg key}=${lib.escapeShellArg value};"
+              command = escapeShellArg serverCfg.command;
+              argsStr = concatStringsSep " " (map escapeShellArg serverCfg.args);
+              argsPart = optionalString (argsStr != "") "-- ${argsStr}";
+              envVars = concatStringsSep " " (
+                mapAttrsToList (
+                  key: value: "export ${escapeShellArg key}=${escapeShellArg value};"
                 ) serverCfg.env
               );
             in
-            ''${envVars} claude mcp add ${lib.escapeShellArg name} -s user ${command} ${argsPart} || echo "Failed to add ${name} server"''
+            ''${envVars} claude mcp add ${escapeShellArg name} -s user ${command} ${argsPart} || echo "Failed to add ${name} server"''
           ) cfg.servers
         );
       in
       ''
         if command -v claude >/dev/null 2>&1; then
-          echo "Registering MCP servers with Claude Code..."
+          echo "[mcp] Registering MCP servers with Claude Code..."
+
+          # Clean up old configuration files
           ${pkgs.findutils}/bin/find ~/.config/claude -name "*.json" -delete 2>/dev/null || true
+
           $DRY_RUN_CMD ${pkgs.writeShellScript "setup-claude-mcp" ''
-            echo "Removing existing MCP servers..."
+            set -euo pipefail
+
+            echo "[mcp] Removing existing MCP servers..."
             for server in ${
-              lib.concatStringsSep " " (lib.mapAttrsToList (name: _: lib.escapeShellArg name) cfg.servers)
+              concatStringsSep " " (mapAttrsToList (name: _: escapeShellArg name) cfg.servers)
             }; do
               claude mcp remove "$server" -s user 2>/dev/null || true
               claude mcp remove "$server" -s project 2>/dev/null || true
               claude mcp remove "$server" 2>/dev/null || true
             done
-            echo "Running MCP server registration commands..."
+
+            echo "[mcp] Running MCP server registration commands..."
             ${mcpAddCommands}
-            echo "Claude MCP server registration complete"
+
+            echo "[mcp] Claude MCP server registration complete"
           ''}
         else
-          echo "Claude CLI not found, skipping MCP server registration"
+          echo "[mcp] WARNING: Claude CLI not found, skipping MCP server registration"
         fi
       ''
     );
   };
 
+  # Configure MCP service
   services.mcp = {
     enable = true;
 
+    # Target applications
     targets = {
       cursor = {
         directory = "${config.home.homeDirectory}/.cursor";
@@ -96,14 +154,23 @@ in {
       };
     };
 
+    # Server configurations
     servers = servers.commonServers // {
-      # Override time port for darwin
-      time = servers.commonServers.fetch // {
-        args = [ "mcp-server-time" ];
+      # Override time server for Darwin (platform-specific port)
+      time = {
+        command = "${pkgs.uv}/bin/uvx";
+        args = [
+          "--from"
+          "mcp-server-time"
+          "mcp-server-time"
+        ];
         port = servers.ports.time-darwin;
+        env = {
+          UV_PYTHON = "${pkgs.python3}/bin/python3";
+        };
       };
 
-      # Override sequential-thinking port for darwin
+      # Override sequential-thinking for Darwin (platform-specific port)
       sequential-thinking = {
         command = "${servers.nodejs}/bin/npx";
         args = [
@@ -113,20 +180,21 @@ in {
         port = servers.ports.sequential-thinking-darwin;
       };
 
-      # Darwin-specific servers
+      # Darwin-specific Kagi server (uses home.file wrapper)
       kagi = {
         command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
-        args = [ ];
+        args = [];
         port = servers.ports.kagi;
       };
 
+      # Darwin-specific Docs MCP server (uses home.file wrapper)
       docs-mcp-server = {
         command = "${config.home.homeDirectory}/bin/docs-mcp-wrapper";
-        args = [ ];
+        args = [];
         port = servers.ports.docs;
       };
 
-      # Darwin uses docker for github
+      # Darwin uses Docker for GitHub MCP server
       github = {
         command = "${pkgs.docker}/bin/docker";
         args = [
