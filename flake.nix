@@ -90,14 +90,6 @@
     vpn-confinement = {
       url = "github:Maroka-chan/VPN-Confinement";
     };
-    zed = {
-      url = "github:zed-industries/zed";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    helix = {
-      url = "github:helix-editor/helix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =

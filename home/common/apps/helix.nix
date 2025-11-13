@@ -1,8 +1,6 @@
 {
   lib,
   pkgs,
-  inputs,
-  hostSystem,
   ...
 }:
 let
@@ -40,7 +38,6 @@ in
 {
   programs.helix = {
     enable = true;
-    package = inputs.helix.packages.${hostSystem}.default; # Official Helix flake
     extraPackages = lspPackages ++ formatterPackages;
     languages = {
       language = lib.mapAttrsToList (

@@ -2,8 +2,6 @@
   config,
   lib,
   pkgs,
-  inputs,
-  hostSystem,
   ...
 }:
 let
@@ -44,7 +42,6 @@ in
 {
   programs.zed-editor = {
     enable = true;
-    package = inputs.zed.packages.${hostSystem}.default; # Official Zed flake
 
     # Add nixd to extraPackages so it's in PATH for language server
     extraPackages = [ pkgs.nixd ];
