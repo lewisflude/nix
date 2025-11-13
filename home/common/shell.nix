@@ -47,34 +47,7 @@ in
 {
   xdg.enable = true;
   programs = {
-    fzf = {
-      enable = true;
-      enableZshIntegration = true;
-      defaultOptions = [
-        "--height 40%"
-        "--layout=reverse"
-        "--border"
-      ];
-      defaultCommand = lib.mkDefault (
-        if pkgs ? fd then
-          "${lib.getExe pkgs.fd} --hidden --strip-cwd-prefix --exclude .git"
-        else if pkgs ? ripgrep then
-          "${lib.getExe pkgs.ripgrep} --files --hidden --follow --glob '!.git'"
-        else
-          null
-      );
-      fileWidgetCommand = lib.mkDefault (
-        if pkgs ? fd then
-          "${lib.getExe pkgs.fd} --type f --hidden --strip-cwd-prefix --exclude .git"
-        else
-          null
-      );
-    };
-    direnv = {
-      enable = true;
-      nix-direnv.enable = true;
-      enableZshIntegration = true;
-    };
+    # FZF is configured in home/common/apps/fzf.nix
     zsh = {
       enable = true;
       enableCompletion = true;
@@ -290,7 +263,7 @@ in
           export NIX_FLAKE="${config.home.homeDirectory}/.config/nix"
 
 
-          export NH_CLEAN_ARGS="''${NH_CLEAN_ARGS:---keep-since 4d --keep 3}"
+          # NH_CLEAN_ARGS is set in home/common/nh.nix
           zsh-defer -c 'export YSU_MESSAGE_POSITION="after"'
           zsh-defer -c 'export YSU_HARDCORE=1'
 
@@ -390,7 +363,7 @@ in
   home = {
     sessionVariables = {
       EDITOR = "hx";
-      NH_FLAKE = "${config.home.homeDirectory}/.config/nix";
+      # NH_FLAKE is set in home/common/nh.nix
 
       DIRENV_LOG_FORMAT = "";
     };

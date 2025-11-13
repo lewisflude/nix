@@ -29,10 +29,6 @@ in
     };
 
     programs = {
-      direnv = {
-        enable = true;
-        nix-direnv.enable = true;
-      };
       git = mkIf cfg.git {
         enable = true;
         lfs.enable = true;

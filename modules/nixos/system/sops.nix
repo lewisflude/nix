@@ -4,6 +4,8 @@
   ...
 }:
 let
+  # Import shared secret names from the shared module
+  # These match the secrets defined in modules/shared/sops.nix with allowUserRead = true
   sharedSecrets = [
     "CIRCLECI_TOKEN"
     "GITHUB_TOKEN"
@@ -18,6 +20,8 @@ in
 
   users.users.${username}.extraGroups = [ "sops-secrets" ];
 
+  # Configure NixOS-specific SOPS settings for secrets already defined in modules/shared/sops.nix
+  # The shared module defines the secrets themselves; this module adds NixOS-specific permissions
   sops.secrets =
     lib.genAttrs sharedSecrets (_: {
       neededForUsers = true;
