@@ -253,8 +253,8 @@ print_summary() {
         print_error "Found $ISSUES issue(s) that need attention."
         echo ""
         echo "Troubleshooting:"
-        echo "  - Check service status: systemctl status qbittorrent vpn-qbt"
-        echo "  - View logs: journalctl -u qbittorrent -u vpn-qbt -f"
+        echo "  - Check service status: systemctl status qbittorrent qbt"
+        echo "  - View logs: journalctl -u qbittorrent -u qbt -f"
         echo "  - Verify SOPS secrets: sops -d /run/secrets/vpn-confinement-qbittorrent"
     fi
 }
