@@ -199,6 +199,6 @@ journalctl -u protonvpn-portforward.service -f
 
 **VPN namespace issues:**
 
-- Check VPN service: `systemctl status vpn-qbt`
+- Check VPN service: `systemctl status qbt`
 - View WireGuard status: `sudo ip netns exec qbt wg show`
 - Verify SOPS secrets are decrypted: `ls -la /run/secrets/`
