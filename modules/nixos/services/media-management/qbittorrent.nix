@@ -107,8 +107,8 @@ in
 
     maxUploads = mkOption {
       type = types.int;
-      default = 150;
-      description = "Maximum upload slots (recommended: 150 for balanced seeding)";
+      default = 300;
+      description = "Maximum upload slots (recommended: 300 for better slot allocation across many torrents)";
     };
 
     maxUploadsPerTorrent = mkOption {
@@ -213,13 +213,21 @@ in
           # Values: 0 = Round-robin, 1 = Fastest upload, 2 = Anti-leech
           upload_choking_algorithm = 1;
           # Global maximum number of connections
-          max_connec = 2000;
+          # Optimized: Reduced from 2000 to 600 to prevent router/gateway overload
+          # and reduce VPN namespace overhead while still supporting 150 active torrents
+          max_connec = 600;
           # Maximum number of connections per torrent
-          max_connec_per_torrent = 200;
+          # Optimized: Reduced from 200 to 80 for better peer management
+          max_connec_per_torrent = 80;
           # Global maximum number of upload slots (optimized for balanced seeding)
-          max_uploads = qbittorrentCfg.maxUploads or 150;
+          max_uploads = qbittorrentCfg.maxUploads or 300;
           # Maximum number of upload slots per torrent (improved from 5 to 10)
           max_uploads_per_torrent = qbittorrentCfg.maxUploadsPerTorrent or 10;
+          # Advanced libtorrent buffer settings for better throughput
+          # Send buffer watermark: 1024 KB (1 MB) reduces pipeline stalls during uploads
+          send_buf_watermark = 1024;
+          # Send buffer low watermark: 128 KB minimum buffer target for good seeding
+          send_buf_low_watermark = 128;
         };
         # BitTorrent configuration
         BitTorrent = {
@@ -250,11 +258,14 @@ in
             # Maximum active torrents (optimized for HDD capacity)
             MaxActiveTorrents = qbittorrentCfg.maxActiveTorrents or 150;
             # Global maximum number of connections
-            MaxConnections = 2000;
+            # Optimized: Reduced from 2000 to 600 to prevent router/gateway overload
+            MaxConnections = 600;
             # Maximum number of connections per torrent
-            MaxConnectionsPerTorrent = 200;
+            # Optimized: Reduced from 200 to 80 for better peer management
+            MaxConnectionsPerTorrent = 80;
             # Global maximum number of upload slots (optimized for balanced seeding)
-            MaxUploads = qbittorrentCfg.maxUploads or 150;
+            # Increased default to 300 for better slot allocation across many torrents
+            MaxUploads = qbittorrentCfg.maxUploads or 300;
             # Maximum number of upload slots per torrent (improved from 5 to 10)
             MaxUploadsPerTorrent = qbittorrentCfg.maxUploadsPerTorrent or 10;
           }

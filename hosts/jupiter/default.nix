@@ -85,10 +85,10 @@ in
 
         # Storage optimization: SSD for incomplete downloads, HDD for final storage
         incompleteDownloadPath = "/mnt/nvme/qbittorrent/incomplete";
-        diskCacheSize = 512; # Increased from 128 MiB for better write buffering
+        diskCacheSize = 512; # MiB - Optimized for SSD write protection and 64GB RAM
         maxActiveTorrents = 150; # Reduced from 200 to avoid HDD saturation with Jellyfin
         maxActiveUploads = 75; # Reduced to prevent HDD thrashing during streaming
-        maxUploads = 150; # Increased from 200 for better seeding
+        maxUploads = 300; # Increased from 150 for better slot allocation across torrents
         maxUploadsPerTorrent = 10; # Increased from 5 for improved seed ratio
 
         # VPN Configuration
