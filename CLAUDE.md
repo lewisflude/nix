@@ -30,9 +30,7 @@ This is a cross-platform Nix configuration supporting:
 These are modern CLI tools built with pog library:
 
 - `nix run .#new-module` - Create new modules interactively
-- `nix run .#update-all` - Update all dependencies
-- `nix run .#cleanup-duplicates` - Remove old package versions
-- `nix run .#analyze-services` - Analyze service usage
+- `nix run .#update-all` - Update flake inputs and ZSH plugins
 - `nix run .#visualize-modules` - Generate module dependency graphs
 - `nix run .#setup-cachix` - Configure Cachix binary cache
 
@@ -40,12 +38,26 @@ These are modern CLI tools built with pog library:
 
 Located in `scripts/`:
 
-- `scripts/utils/profile-build.sh` - Build profiling
-- `scripts/utils/profile-evaluation.sh` - Evaluation profiling
-- `scripts/utils/profile-modules.sh` - Module profiling
-- `scripts/utils/test-caches.sh` - Test cache connectivity
-- `scripts/utils/test-cache-substitution.sh` - Test cache substitution
-- `scripts/build/nix-monitor.sh` - System monitoring
+**qBittorrent Diagnostics:**
+- `scripts/diagnose-qbittorrent-seeding.sh` - Comprehensive qBittorrent seeding diagnostics
+- `scripts/test-qbittorrent-seeding-health.sh` - Full health check with API integration
+- `scripts/test-qbittorrent-connectivity.sh` - Network connectivity verification
+- `scripts/update-qbittorrent-protonvpn-port.sh` - Update qBittorrent port with VPN forwarding
+
+**ProtonVPN Port Forwarding:**
+- `scripts/get-protonvpn-forwarded-port.sh` - NAT-PMP based port detection
+- `scripts/find-protonvpn-forwarded-port.sh` - Scan for correct forwarded port
+- `scripts/test-protonvpn-port-forwarding.sh` - Test if port forwarding is working
+
+**SSH Performance:**
+- `scripts/test-ssh-performance.sh` - Comprehensive SSH performance benchmarking
+- `scripts/diagnose-ssh-slowness.sh` - SSH connection troubleshooting
+
+**Network Testing:**
+- `scripts/test-vlan2-speed.sh` - Network speed testing through VLAN 2
+- `scripts/test-sped.sh` - Simple speed test wrapper
+
+See `scripts/README.md` for detailed documentation of each script.
 
 ## Best Practices
 
