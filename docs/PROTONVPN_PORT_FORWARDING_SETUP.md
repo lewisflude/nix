@@ -1,0 +1,427 @@
+# ProtonVPN Port Forwarding Setup - Complete
+
+## Quick Verification
+
+**One-liner to check everything:**
+
+```bash
+./scripts/test-vpn-port-forwarding.sh
+```
+
+**Manual quick checks:**
+
+```bash
+# 1. Get ProtonVPN port
+sudo ip netns exec qbt natpmpc -a 1 0 tcp 60 -g 10.2.0.1 | grep "Mapped public port"
+
+# 2. Get qBittorrent port
+sudo grep "Session\\Port" /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf
+
+# 3. Compare ports
+echo "ProtonVPN: $(sudo ip netns exec qbt natpmpc -a 1 0 tcp 60 -g 10.2.0.1 2>/dev/null | grep 'Mapped public port' | awk '{print $4}')"
+echo "qBittorrent: $(sudo grep 'Session\\Port' /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf | cut -d'=' -f2)"
+
+# 4. Check listening
+sudo ip netns exec qbt ss -tulnp | grep qbittorrent
+
+# 5. Check service
+systemctl status protonvpn-portforward.service
+```
+
+## Overview
+
+Automated NAT-PMP port forwarding for qBittorrent running in a VPN-confined namespace with ProtonVPN.
+
+## Architecture
+
+```
+???????????????????????????????????????????????????????????????
+? Host Network (192.168.1.0/24)                              ?
+?                                                             ?
+?  ????????????????????????????????????????????????????????  ?
+?  ? VPN Namespace: qbt                                   ?  ?
+?  ?                                                       ?  ?
+?  ?  ?????????????????????????????????????????????????   ?  ?
+?  ?  ? WireGuard (wg0): 10.2.0.2/32                  ?   ?  ?
+?  ?  ? Gateway: 10.2.0.1                              ?   ?  ?
+?  ?  ? ProtonVPN Endpoint: 138.199.7.129:51820       ?   ?  ?
+?  ?  ?????????????????????????????????????????????????   ?  ?
+?  ?                                                       ?  ?
+?  ?  ?????????????????????????????????????????????????   ?  ?
+?  ?  ? qBittorrent                                    ?   ?  ?
+?  ?  ? - Interface binding: qbt0                      ?   ?  ?
+?  ?  ? - Torrent port: Dynamic (via NAT-PMP)         ?   ?  ?
+?  ?  ? - WebUI: 8080 (bridged to host)               ?   ?  ?
+?  ?  ?????????????????????????????????????????????????   ?  ?
+?  ????????????????????????????????????????????????????????  ?
+?                                                             ?
+?  ????????????????????????????????????????????????????????  ?
+?  ? Systemd Timer: protonvpn-portforward.timer          ?  ?
+?  ? - Runs every: 45 minutes                             ?  ?
+?  ? - Queries NAT-PMP for forwarded port                 ?  ?
+?  ? - Updates qBittorrent configuration                  ?  ?
+?  ? - Restarts qBittorrent if port changed               ?  ?
+?  ????????????????????????????????????????????????????????  ?
+???????????????????????????????????????????????????????????????
+```
+
+## Components
+
+### 1. VPN-Confinement Module
+
+**File**: `modules/nixos/services/media-management/qbittorrent-vpn-confinement.nix`
+
+Configures the VPN namespace using the VPN-Confinement flake input.
+
+**Features**:
+
+- Creates isolated network namespace `qbt`
+- Configures WireGuard interface from SOPS secrets
+- Sets up port mappings for WebUI access
+- Opens torrent ports in VPN namespace firewall
+
+### 2. Port Forwarding Automation Module
+
+**File**: `modules/nixos/services/media-management/protonvpn-portforward.nix`
+
+Manages automated NAT-PMP port forwarding.
+
+**Features**:
+
+- Systemd service for port forwarding updates
+- Systemd timer for periodic renewal (every 45 minutes)
+- Automatic qBittorrent configuration updates
+- System-wide monitoring commands
+
+### 3. Automation Script
+
+**File**: `scripts/protonvpn-natpmp-portforward.sh`
+
+Main script that handles port forwarding workflow.
+
+**Workflow**:
+
+1. Checks VPN namespace exists and is reachable
+2. Queries NAT-PMP gateway (10.2.0.1) for forwarded port
+3. Compares with current qBittorrent configuration
+4. Updates qBittorrent config if port changed
+5. Restarts qBittorrent service
+6. Verifies port is listening
+
+### 4. Monitoring Script
+
+**File**: `scripts/monitor-protonvpn-portforward.sh`
+
+Comprehensive health check for VPN and port forwarding.
+
+**Checks**:
+
+- VPN namespace status
+- WireGuard interface and connectivity
+- NAT-PMP port assignment
+- qBittorrent service status
+- Configuration correctness
+- Port binding verification
+- Recent service logs
+
+### 5. Verification Script
+
+**File**: `scripts/verify-qbittorrent-vpn.sh`
+
+Interactive verification following the setup guide checklist.
+
+**Phases**:
+
+- Phase 1: Basic connectivity (namespace, WireGuard, routing, gateway)
+- Phase 2: NAT-PMP port forwarding
+- Phase 3: qBittorrent configuration
+- Phase 4: Summary and next steps
+
+## Configuration
+
+### Enable Port Forwarding (Default)
+
+Port forwarding is automatically enabled when VPN confinement is active:
+
+```nix
+host.services.mediaManagement.qbittorrent.vpn = {
+  enable = true;
+  namespace = "qbt";
+  torrentPort = 62000;  # Initial port, will be updated by NAT-PMP
+};
+```
+
+### Customize Port Forwarding
+
+```nix
+host.services.mediaManagement.qbittorrent.vpn.portForwarding = {
+  enable = true;              # Default: true
+  renewInterval = "45min";    # How often to renew (NAT-PMP leases ~60min)
+  gateway = "10.2.0.1";       # ProtonVPN gateway
+};
+```
+
+## Usage
+
+### Quick Status Check
+
+```bash
+# Run quick verification (fastest)
+./scripts/test-vpn-port-forwarding.sh
+
+# Exit code 0 = all checks passed
+# Exit code 1 = issues found
+```
+
+### Manual Port Update
+
+```bash
+# Run port forwarding manually
+sudo systemctl start protonvpn-portforward.service
+
+# Check results
+journalctl -u protonvpn-portforward.service -n 20
+```
+
+### Monitor Status
+
+```bash
+# Run comprehensive monitoring
+monitor-protonvpn-portforward
+# or
+./scripts/monitor-protonvpn-portforward.sh
+
+# Exit code 0 = all checks passed
+# Exit code N = number of failed checks
+```
+
+### Initial Verification
+
+```bash
+# Run verification checklist
+verify-qbittorrent-vpn
+# or
+./scripts/verify-qbittorrent-vpn.sh
+```
+
+### Check Automation
+
+```bash
+# Timer status
+systemctl status protonvpn-portforward.timer
+systemctl list-timers | grep protonvpn
+
+# Service logs
+journalctl -u protonvpn-portforward.service -f
+
+# Recent executions
+journalctl -u protonvpn-portforward.service --since "24 hours ago"
+```
+
+## Verification Checklist
+
+### ? Phase 1: VPN Connectivity
+
+- [ ] Namespace `qbt` exists
+- [ ] WireGuard interface has IP 10.2.0.2/32
+- [ ] Can ping VPN gateway 10.2.0.1
+- [ ] External IP shows ProtonVPN address (not real IP)
+
+```bash
+sudo ip netns list | grep qbt
+sudo ip netns exec qbt ip addr show
+sudo ip netns exec qbt ping -c 3 10.2.0.1
+sudo ip netns exec qbt curl -s https://api.ipify.org
+```
+
+### ? Phase 2: Port Forwarding
+
+- [ ] `natpmpc` is available
+- [ ] NAT-PMP query succeeds
+- [ ] Port is assigned (typically 49152-65535)
+- [ ] Timer is active and scheduled
+
+```bash
+which natpmpc
+sudo ip netns exec qbt natpmpc -a 0 0 tcp 60 -g 10.2.0.1
+systemctl status protonvpn-portforward.timer
+```
+
+### ? Phase 3: qBittorrent
+
+- [ ] Service is running
+- [ ] Config file exists
+- [ ] Port matches NAT-PMP assignment
+- [ ] Interface binding is `qbt0`
+- [ ] qBittorrent is listening on assigned port
+
+```bash
+systemctl status qbittorrent
+sudo grep "Session\\Port" /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf
+sudo grep "InterfaceName" /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf
+sudo ip netns exec qbt ss -tuln | grep <PORT>
+```
+
+### ? Phase 4: External Connectivity
+
+- [ ] Port is open externally (test at <https://www.yougetsignal.com/tools/open-ports/>)
+- [ ] Torrents show incoming peer connections
+- [ ] Trackers report correct port
+
+## Troubleshooting
+
+### NAT-PMP Fails
+
+**Symptoms**: `readnatpmpresponseorretry returned -7 (FAILED)`
+
+**Solutions**:
+
+1. Check VPN connectivity: `sudo ip netns exec qbt ping 10.2.0.1`
+2. Verify route exists: `sudo ip netns exec qbt ip route | grep 10.2.0`
+3. Check WireGuard handshake: `sudo ip netns exec qbt wg show`
+4. Verify ProtonVPN account has port forwarding enabled
+
+### Port Not Updating
+
+**Symptoms**: qBittorrent still uses old port
+
+**Solutions**:
+
+1. Check service logs: `journalctl -u protonvpn-portforward.service -n 50`
+2. Verify config permissions: `ls -la /var/lib/qBittorrent/`
+3. Run manual update: `sudo systemctl start protonvpn-portforward.service`
+4. Check qBittorrent logs: `journalctl -u qbittorrent -n 50`
+
+### Timer Not Running
+
+**Symptoms**: Port forwarding doesn't renew automatically
+
+**Solutions**:
+
+1. Check timer status: `systemctl status protonvpn-portforward.timer`
+2. Enable timer: `sudo systemctl enable protonvpn-portforward.timer`
+3. Start timer: `sudo systemctl start protonvpn-portforward.timer`
+4. Check next run: `systemctl list-timers | grep protonvpn`
+
+### VPN Namespace Not Found
+
+**Symptoms**: `ERROR: Namespace 'qbt' does not exist`
+
+**Solutions**:
+
+1. Check namespace service: `systemctl status qbt.service`
+2. List namespaces: `sudo ip netns list`
+3. Restart VPN: `sudo systemctl restart qbt.service`
+4. Check SOPS secrets: `ls -la /run/secrets/ | grep vpn`
+
+## Migration from Old Setup
+
+The following components have been **removed** and **replaced**:
+
+### ? Removed
+
+- `modules/nixos/services/protonvpn-natpmp.nix` - Old service (ran from host)
+- `services.protonvpn-natpmp.enable = true;` - Old configuration
+- `scripts/get-protonvpn-forwarded-port.sh` - Outdated script
+- `scripts/test-protonvpn-port-forwarding.sh` - Outdated script
+- `scripts/find-protonvpn-forwarded-port.sh` - Outdated script
+
+### ? New Implementation
+
+- `modules/nixos/services/media-management/protonvpn-portforward.nix` - New module
+- `scripts/protonvpn-natpmp-portforward.sh` - Full automation script
+- `scripts/monitor-protonvpn-portforward.sh` - Monitoring script
+- `scripts/verify-qbittorrent-vpn.sh` - Verification script
+- Automatic systemd timer-based renewal
+- Proper VPN namespace execution
+
+### Key Differences
+
+| Old | New |
+|-----|-----|
+| Ran from host network | Runs inside VPN namespace |
+| Simple while loop | Proper systemd service + timer |
+| No config updates | Automatically updates qBittorrent |
+| No verification | Comprehensive monitoring |
+| No error handling | Full error handling and logging |
+
+## Files Modified
+
+### Core Configuration
+
+- `flake.nix` - Added VPN-Confinement input
+- `hosts/jupiter/configuration.nix` - Removed old service
+- `hosts/jupiter/default.nix` - Enabled VPN for qBittorrent
+
+### Modules
+
+- `modules/nixos/services/default.nix` - Removed old import
+- `modules/nixos/services/media-management/default.nix` - Added new import
+- `modules/nixos/services/media-management/protonvpn-portforward.nix` - New module
+- `modules/nixos/services/media-management/qbittorrent-vpn-confinement.nix` - VPN setup
+- `modules/nixos/services/media-management/qbittorrent.nix` - Updated for VPN
+
+### Scripts (New)
+
+- `scripts/protonvpn-natpmp-portforward.sh` - Automation
+- `scripts/monitor-protonvpn-portforward.sh` - Monitoring
+- `scripts/verify-qbittorrent-vpn.sh` - Verification
+
+### Scripts (Updated)
+
+- `scripts/diagnose-qbittorrent-seeding.sh` - Updated namespace `qbt`
+- `scripts/test-qbittorrent-seeding-health.sh` - Updated namespace `qbt`
+- `scripts/test-qbittorrent-connectivity.sh` - Updated namespace `qbt`
+
+### Documentation
+
+- `scripts/README.md` - Added new scripts documentation
+- `docs/QBITTORRENT_VPN_MIGRATION_COMPLETE.md` - Updated namespaces
+- `docs/QBITTORRENT_SEEDING_TROUBLESHOOTING.md` - Updated namespaces
+- `CLAUDE.md` - Updated scripts list
+
+## Success Criteria
+
+? **Port forwarding is working correctly when:**
+
+1. ? NAT-PMP query returns a valid port
+2. ? qBittorrent config file shows the same port
+3. ? qBittorrent is listening on the assigned port
+4. ? External port checker confirms port is open
+5. ? Torrents show incoming peer connections
+6. ? Traffic only goes through VPN (no leaks)
+7. ? Port forwarding persists across service restarts
+8. ? NAT-PMP lease renews automatically every ~45 min
+9. ? Timer shows next scheduled run
+10. ? Monitoring script reports 0 issues
+
+## Next Steps
+
+1. **Rebuild system** to apply all changes:
+
+   ```bash
+   nh os switch
+   ```
+
+2. **Run verification**:
+
+   ```bash
+   ./scripts/verify-qbittorrent-vpn.sh
+   ```
+
+3. **Monitor for 24 hours** to ensure renewals work:
+
+   ```bash
+   watch -n 300 'systemctl list-timers | grep protonvpn'
+   journalctl -u protonvpn-portforward.service -f
+   ```
+
+4. **Test torrents**:
+   - Add a test torrent (Ubuntu ISO, etc.)
+   - Verify incoming connections in qBittorrent WebUI
+   - Check port at <https://www.yougetsignal.com/tools/open-ports/>
+
+5. **Set up monitoring** (optional):
+   - Add to cron or systemd timer for daily health checks
+   - Monitor qBittorrent seeding ratios
+   - Track port changes over time

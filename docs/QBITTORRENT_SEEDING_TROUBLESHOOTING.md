@@ -8,8 +8,8 @@ qBittorrent is not seeding despite being configured and running in a VPN namespa
 
 Your qBittorrent setup:
 
-- **VPN Namespace**: `qbittor`
-- **VPN Interface**: `qbittor0` (IP: `10.2.0.2`)
+- **VPN Namespace**: `qbt`
+- **VPN Interface**: `qbt0` (IP: `10.2.0.2`)
 - **Torrent Port**: `6881` (TCP and UDP)
 - **WebUI Port**: `8080` (accessible via reverse proxy at <https://torrent.blmt.io>)
 - **VPN Provider**: ProtonVPN
@@ -23,7 +23,7 @@ The VPN namespace may have a default DROP policy that blocks incoming connection
 **Check:**
 
 ```bash
-sudo ip netns exec qbittor iptables -L INPUT -n -v
+sudo ip netns exec qbt iptables -L INPUT -n -v
 ```
 
 **Look for:**
@@ -75,7 +75,7 @@ Even if port forwarding is enabled, the port must be accessible from the interne
 **Test:**
 
 1. Visit: <https://www.yougetsignal.com/tools/open-ports/>
-2. Enter your VPN external IP (get it with: `sudo ip netns exec qbittor curl -s https://ipv4.icanhazip.com`)
+2. Enter your VPN external IP (get it with: `sudo ip netns exec qbt curl -s https://ipv4.icanhazip.com`)
 3. Enter port: `6881`
 4. Click "Check"
 
@@ -105,14 +105,14 @@ This will check:
 
 ```bash
 # Check default policy
-sudo ip netns exec qbittor iptables -L INPUT -n | head -5
+sudo ip netns exec qbt iptables -L INPUT -n | head -5
 
 # Check for rules on port 6881
-sudo ip netns exec qbittor iptables -L INPUT -n -v | grep 6881
+sudo ip netns exec qbt iptables -L INPUT -n -v | grep 6881
 
 # If no rules exist and policy is DROP, add them:
-sudo ip netns exec qbittor iptables -I INPUT -p tcp --dport 6881 -j ACCEPT
-sudo ip netns exec qbittor iptables -I INPUT -p udp --dport 6881 -j ACCEPT
+sudo ip netns exec qbt iptables -I INPUT -p tcp --dport 6881 -j ACCEPT
+sudo ip netns exec qbt iptables -I INPUT -p udp --dport 6881 -j ACCEPT
 ```
 
 ### Step 3: Verify Port Forwarding
@@ -120,7 +120,7 @@ sudo ip netns exec qbittor iptables -I INPUT -p udp --dport 6881 -j ACCEPT
 1. Get external IP:
 
    ```bash
-   sudo ip netns exec qbittor curl -s https://ipv4.icanhazip.com
+   sudo ip netns exec qbt curl -s https://ipv4.icanhazip.com
    ```
 
 2. Test port accessibility:
@@ -133,7 +133,7 @@ Access WebUI at <https://torrent.blmt.io> and check:
 
 - **Connection** ? **Port used for incoming connections**: Should be `6881`
 - **Connection** ? **UPnP / NAT-PMP**: Should be **disabled** (using VPN port forwarding)
-- **BitTorrent** ? **Interface**: Should be `qbittor0` or `any`
+- **BitTorrent** ? **Interface**: Should be `qbt0` or `any`
 - **BitTorrent** ? **Interface address**: Should be `10.2.0.2` or empty
 - **Speed** ? **Upload rate limit**: Should be `0` (unlimited) or high enough
 - **BitTorrent** ? **Maximum uploads**: Should be > 0
@@ -145,8 +145,8 @@ Access WebUI at <https://torrent.blmt.io> and check:
 If VPN namespace firewall is blocking connections:
 
 ```bash
-sudo ip netns exec qbittor iptables -I INPUT -p tcp --dport 6881 -j ACCEPT
-sudo ip netns exec qbittor iptables -I INPUT -p udp --dport 6881 -j ACCEPT
+sudo ip netns exec qbt iptables -I INPUT -p tcp --dport 6881 -j ACCEPT
+sudo ip netns exec qbt iptables -I INPUT -p udp --dport 6881 -j ACCEPT
 ```
 
 **Note:** These rules will be lost on reboot. The VPN confinement module should handle this automatically.
@@ -161,7 +161,7 @@ sudo ip netns exec qbittor iptables -I INPUT -p udp --dport 6881 -j ACCEPT
 
    ```nix
    # In hosts/jupiter/configuration.nix
-   vpnNamespaces.qbittor = {
+   vpnNamespaces.qbt = {
      # ... existing config ...
      openVPNPorts = [
        {
@@ -177,7 +177,7 @@ sudo ip netns exec qbittor iptables -I INPUT -p udp --dport 6881 -j ACCEPT
 Check that qBittorrent is using the correct port and interface. The configuration should match:
 
 - Listen port: `6881`
-- Interface: `qbittor0`
+- Interface: `qbt0`
 - Interface address: `10.2.0.2`
 
 ## Permanent Solution

@@ -3,9 +3,9 @@
 
 set -euo pipefail
 
-NAMESPACE="qbittor"
+NAMESPACE="qbt"
 PORT=6881
-VPN_INTERFACE="qbittor0"
+VPN_INTERFACE="qbt0"
 VPN_IP="10.2.0.2"
 
 echo "=========================================="

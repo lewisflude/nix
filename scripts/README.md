@@ -1,223 +1,204 @@
-# Utility Scripts
+# Scripts Directory
 
-This directory contains specialized diagnostic and automation scripts for this Nix configuration.
+Utility scripts for managing NixOS configuration and services.
 
-## qBittorrent Diagnostics & Management
+## ProtonVPN Port Forwarding Scripts
 
-### `diagnose-qbittorrent-seeding.sh` (299 lines)
+### `protonvpn-natpmp-portforward.sh`
 
-Comprehensive diagnostic tool for qBittorrent seeding issues with ProtonVPN integration.
-
-**Features:**
-- Service status checking
-- VPN namespace verification
-- Port binding analysis
-- qBittorrent API calls for configuration checking
-- Firewall rule verification
-- TCP/UDP/ICMP connectivity tests
-- Actionable troubleshooting recommendations
+Automated NAT-PMP port forwarding for qBittorrent via ProtonVPN.
 
 **Usage:**
+
 ```bash
-./scripts/diagnose-qbittorrent-seeding.sh
+# Run manually (uses defaults from env or config)
+./scripts/protonvpn-natpmp-portforward.sh
+
+# Or with custom values
+NAMESPACE=qbt VPN_GATEWAY=10.2.0.1 ./scripts/protonvpn-natpmp-portforward.sh
 ```
 
-### `test-qbittorrent-seeding-health.sh` (395 lines)
+**What it does:**
 
-Full health check system with detailed metrics and API integration.
+1. Checks VPN namespace and connectivity
+2. Queries NAT-PMP for forwarded port
+3. Updates qBittorrent configuration
+4. Restarts qBittorrent service
+5. Verifies port is listening
 
-**Features:**
-- Upload ratio calculations
-- Per-torrent statistics
-- Tracker error detection
-- Seeding torrent analysis
-- Structured pass/fail/warning output
+**Systemd Integration:**
+When enabled in your configuration, this runs automatically via systemd timer every 45 minutes.
+
+### `test-vpn-port-forwarding.sh`
+
+Quick one-liner verification for port forwarding status.
 
 **Usage:**
+
 ```bash
-./scripts/test-qbittorrent-seeding-health.sh
+# Run quick verification
+./scripts/test-vpn-port-forwarding.sh
+
+# Or with custom settings
+NAMESPACE=qbt VPN_GATEWAY=10.2.0.1 ./scripts/test-vpn-port-forwarding.sh
 ```
 
-### `test-qbittorrent-connectivity.sh` (153 lines)
+**Quick Checks:**
 
-Focused network connectivity verification for qBittorrent.
+1. ProtonVPN assigned port (via NAT-PMP)
+2. qBittorrent configured port
+3. Port matching verification
+4. qBittorrent listening status
+5. Port forwarding service status
+6. External IP verification
+7. qBittorrent service status
 
-**Features:**
-- TCP/UDP connectivity tests
-- Port binding validation
-- Routing verification
-- VPN namespace checks
+**Returns:**
+
+- Exit code 0: All checks passed
+- Exit code 1: Issues found (shows troubleshooting steps)
+
+**Use when:**
+
+- You want a fast status check
+- After making configuration changes
+- Before testing torrents
+- To verify automation is working
+
+### `monitor-protonvpn-portforward.sh`
+
+Comprehensive monitoring script for VPN namespace and port forwarding status.
 
 **Usage:**
+
 ```bash
-./scripts/test-qbittorrent-connectivity.sh
+# Run monitoring
+./scripts/monitor-protonvpn-portforward.sh
+
+# Or with custom namespace
+NAMESPACE=qbt ./scripts/monitor-protonvpn-portforward.sh
 ```
 
-### `update-qbittorrent-protonvpn-port.sh` (175 lines)
+**Checks:**
 
-Automated port updating for qBittorrent based on ProtonVPN port forwarding.
+1. VPN namespace exists
+2. WireGuard interface status
+3. VPN connectivity (gateway ping, external IP)
+4. NAT-PMP port forwarding
+5. qBittorrent service status
+6. qBittorrent configuration (port, interface binding)
+7. Listening ports in namespace
+8. Recent service logs
 
-**Features:**
-- NAT-PMP port detection
-- qBittorrent API configuration updates
-- Firewall rule updates (iptables)
-- Fallback to manual discovery instructions
+**Exit codes:**
+
+- `0`: All checks passed
+- `>0`: Number of failed checks
+
+### `verify-qbittorrent-vpn.sh`
+
+Interactive verification script following the setup guide checklist.
 
 **Usage:**
+
 ```bash
-./scripts/update-qbittorrent-protonvpn-port.sh
+./scripts/verify-qbittorrent-vpn.sh
 ```
 
-## ProtonVPN Port Forwarding
+**Phases:**
 
-### `get-protonvpn-forwarded-port.sh` (57 lines)
+1. **Basic Connectivity**: Namespace, WireGuard, routing, gateway, external IP
+2. **NAT-PMP**: Port forwarding queries and assignments
+3. **qBittorrent**: Service status, configuration, port binding
+4. **Summary**: Next steps and automation tips
 
-Simple NAT-PMP based port detection for ProtonVPN.
+Use this script after deploying VPN-confined qBittorrent to verify everything is working correctly.
 
-**Usage:**
+## Other Scripts
+
+### Build & Profiling
+
+- `utils/profile-build.sh` - Profile system build time
+- `utils/profile-evaluation.sh` - Profile Nix evaluation
+- `utils/profile-modules.sh` - Profile module load times
+
+### Testing
+
+- `utils/test-caches.sh` - Test binary cache connectivity
+- `utils/test-cache-substitution.sh` - Test cache substitution
+- `diagnose-qbittorrent-seeding.sh` - Diagnose seeding issues
+- `test-qbittorrent-connectivity.sh` - Test qBittorrent connectivity
+- `test-qbittorrent-seeding-health.sh` - Check seeding health
+
+### Network
+
+- `diagnose-ssh-slowness.sh` - Diagnose SSH performance
+- `test-ssh-performance.sh` - Test SSH speed
+- `test-vlan2-speed.sh` - Test VLAN2 network speed
+
+## Requirements
+
+Most scripts require:
+
+- `bash` (standard)
+- `iproute2` for network namespace operations
+- `libnatpmp` for NAT-PMP queries (`natpmpc` command)
+- `systemd` for service management
+- `curl` for external connectivity tests
+
+Install missing dependencies:
+
 ```bash
-./scripts/get-protonvpn-forwarded-port.sh
+nix-shell -p libnatpmp
 ```
 
-### `find-protonvpn-forwarded-port.sh` (77 lines)
+## Automation
 
-Port scanning tool to find the correct forwarded port.
+The ProtonVPN port forwarding can be automated via systemd timer. Enable in your NixOS configuration:
 
-**Features:**
-- Tests multiple port ranges (6881-6890, 49152-49160, 50000-50004)
-- Provides manual instructions as fallback
-
-**Usage:**
-```bash
-./scripts/find-protonvpn-forwarded-port.sh
+```nix
+host.services.mediaManagement.qbittorrent.vpn.portForwarding = {
+  enable = true;  # Default: true when VPN is enabled
+  renewInterval = "45min";  # Default: 45 minutes
+  gateway = "10.2.0.1";  # Default: ProtonVPN gateway
+};
 ```
 
-### `test-protonvpn-port-forwarding.sh` (97 lines)
+Check timer status:
 
-Tests if a specific port is accessible externally.
-
-**Features:**
-- Uses yougetsignal.com API for external port checking
-- Verifies which port qBittorrent is actually listening on
-
-**Usage:**
 ```bash
-./scripts/test-protonvpn-port-forwarding.sh [PORT]
+systemctl status protonvpn-portforward.timer
+systemctl list-timers | grep protonvpn
 ```
 
-## SSH Performance & Diagnostics
+View logs:
 
-### `test-ssh-performance.sh` (217 lines)
-
-Comprehensive SSH performance benchmarking tool.
-
-**Features:**
-- Connection timing tests
-- Authentication latency measurement
-- Connection multiplexing/reuse testing
-- Command execution latency (10 samples with min/max/avg)
-- Ping latency analysis
-- Performance grading (Excellent/Good/Acceptable/Slow)
-- ControlMaster socket checking
-
-**Usage:**
 ```bash
-./scripts/test-ssh-performance.sh <hostname>
+journalctl -u protonvpn-portforward.service -f
 ```
 
-### `diagnose-ssh-slowness.sh` (104 lines)
+## Troubleshooting
 
-SSH connection troubleshooting focused on identifying bottlenecks.
+**Port forwarding not working:**
 
-**Features:**
-- DNS resolution timing
-- Verbose connection analysis
-- Optimization recommendations
-- Comparison of default vs optimized SSH options
+1. Run verification: `./scripts/verify-qbittorrent-vpn.sh`
+2. Check monitoring: `./scripts/monitor-protonvpn-portforward.sh`
+3. View logs: `journalctl -u protonvpn-portforward -u qbittorrent -f`
 
-**Usage:**
-```bash
-./scripts/diagnose-ssh-slowness.sh <hostname>
-```
+**NAT-PMP errors:**
 
-## Network Speed Testing
+- Ensure VPN namespace exists: `ip netns list`
+- Check VPN connectivity: `sudo ip netns exec qbt ping 10.2.0.1`
+- Verify `natpmpc` is installed: `which natpmpc`
 
-### `test-vlan2-speed.sh` (243 lines)
+**qBittorrent not updating:**
 
-Detailed network speed testing specifically for VLAN 2.
+- Check config permissions: `ls -la /var/lib/qBittorrent/`
+- Verify service can write: `systemctl cat qbittorrent.service | grep ReadWrite`
+- Check service status: `systemctl status qbittorrent`
 
-**Features:**
-- Download speed testing (multiple test files, averaged results)
-- Upload speed testing (10MB file to httpbin.org)
-- Latency measurements
-- Gateway connectivity verification
-- DNS resolution tests
-- Performance grading
+**VPN namespace issues:**
 
-**Usage:**
-```bash
-./scripts/test-vlan2-speed.sh
-```
-
-### `test-sped.sh` (33 lines)
-
-Simple wrapper for speed testing tools.
-
-**Features:**
-- speedtest-cli integration
-- fast.com speed test
-- Basic port connectivity check
-
-**Usage:**
-```bash
-./scripts/test-sped.sh
-```
-
-**Note:** This is a minimal wrapper with limited error handling.
-
-## Script Workflows
-
-### qBittorrent Seeding Issues
-
-1. Start with `diagnose-qbittorrent-seeding.sh` for comprehensive overview
-2. Use `test-qbittorrent-seeding-health.sh` for detailed metrics
-3. If port issues found, run `update-qbittorrent-protonvpn-port.sh`
-4. Verify with `test-qbittorrent-connectivity.sh`
-
-### ProtonVPN Port Discovery
-
-1. Try `get-protonvpn-forwarded-port.sh` for quick NAT-PMP detection
-2. If that fails, use `find-protonvpn-forwarded-port.sh` to scan ranges
-3. Verify port is externally accessible with `test-protonvpn-port-forwarding.sh`
-
-### SSH Connection Problems
-
-1. Run `diagnose-ssh-slowness.sh` first to identify issues
-2. Use `test-ssh-performance.sh` for detailed benchmarking
-3. Apply recommendations from diagnostics
-
-## Dependencies
-
-These scripts require various system tools:
-
-- **curl** - HTTP requests
-- **jq** - JSON parsing (implicit in some scripts)
-- **systemctl** - systemd service management
-- **ip** - Network namespace/interface management
-- **iptables** - Firewall management
-- **ss** - Socket statistics
-- **nc/netcat** - UDP connectivity testing
-- **ping** - ICMP connectivity
-- **natpmpc** - NAT-PMP port mapping (optional)
-- **speedtest-cli**, **fast-cli** - Speed testing
-- **dig** - DNS resolution
-- **bc** - Mathematical calculations
-
-All dependencies are typically included in NixOS configurations.
-
-## Notes
-
-- Most scripts require sudo/root permissions for network namespace operations
-- Scripts are designed for NixOS with systemd
-- qBittorrent scripts assume service is running in VPN network namespace
-- Color output is used throughout for better readability
+- Check VPN service: `systemctl status vpn-qbt`
+- View WireGuard status: `sudo ip netns exec qbt wg show`
+- Verify SOPS secrets are decrypted: `ls -la /run/secrets/`

@@ -77,10 +77,50 @@ in
             default = true;
             description = "Enable qBittorrent BitTorrent client";
           };
+          vpn = mkOption {
+            type = types.nullOr (
+              types.submodule {
+                options = {
+                  enable = mkOption {
+                    type = types.bool;
+                    default = false;
+                    description = "Enable VPN namespace for qBittorrent";
+                  };
+                  namespace = mkOption {
+                    type = types.str;
+                    default = "qbt";
+                    description = "VPN namespace name (max 7 chars)";
+                  };
+                  torrentPort = mkOption {
+                    type = types.port;
+                    default = 62000;
+                    description = "BitTorrent port";
+                  };
+                  webUIBindAddress = mkOption {
+                    type = types.str;
+                    default = "*";
+                    description = "WebUI bind address";
+                  };
+                };
+              }
+            );
+            default = null;
+            description = "VPN configuration";
+          };
           webUI = mkOption {
             type = types.nullOr (
               types.submodule {
                 options = {
+                  port = mkOption {
+                    type = types.port;
+                    default = 8080;
+                    description = "WebUI port";
+                  };
+                  bindAddress = mkOption {
+                    type = types.str;
+                    default = "*";
+                    description = "WebUI bind address";
+                  };
                   username = mkOption {
                     type = types.nullOr types.str;
                     default = null;

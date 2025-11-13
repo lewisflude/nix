@@ -106,10 +106,10 @@ in
           '';
         };
 
-        # qBittorrent (Local on VLAN 2)
+        # qBittorrent (VPN namespace)
         "torrent.blmt.io" = {
           extraConfig = ''
-            reverse_proxy 192.168.2.249:8080 {
+            reverse_proxy 192.168.1.210:8080 {
               header_up X-Real-IP {remote_host}
               header_up X-Forwarded-For {remote_host}
               header_up X-Forwarded-Proto {scheme}

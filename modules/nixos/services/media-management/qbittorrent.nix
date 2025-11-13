@@ -41,6 +41,16 @@ in
               default = false;
               description = "Whether to use SOPS secrets for WebUI credentials";
             };
+            port = mkOption {
+              type = types.port;
+              default = 8080;
+              description = "WebUI port";
+            };
+            bindAddress = mkOption {
+              type = types.str;
+              default = "*";
+              description = "WebUI bind address (* for all interfaces, or specific IP)";
+            };
           };
         }
       );
@@ -71,16 +81,27 @@ in
       default = 60;
       description = "Disk cache TTL in seconds (how long to keep data in cache)";
     };
+
+    torrentPort = mkOption {
+      type = types.port;
+      default = 62000;
+      description = "Port for BitTorrent traffic";
+    };
   };
 
   config = mkIf (cfg.enable && qbittorrentCfg.enable) {
-    # Declare firewall rules for qBittorrent
-    # Traffic is bound to VLAN 2 interface (192.168.2.249)
-    # Open ports on VLAN 2 interface specifically
-    networking.firewall.interfaces.vlan2 = {
+    # Firewall configuration
+    # When VPN is enabled, only WebUI port needs to be open on host
+    # When VPN is disabled, both WebUI and torrent ports need to be open
+    networking.firewall = {
       allowedTCPPorts = [
-        8080 # WebUI (accessible on VLAN 2)
-        62000 # Torrent port (accessible on VLAN 2)
+        (webUI.port or 8080)
+      ] # WebUI always accessible
+      ++ lib.optionals (!(qbittorrentCfg.vpn.enable or false)) [
+        qbittorrentCfg.torrentPort # Torrent port only when VPN disabled
+      ];
+      allowedUDPPorts = lib.optionals (!(qbittorrentCfg.vpn.enable or false)) [
+        qbittorrentCfg.torrentPort # Torrent port only when VPN disabled
       ];
     };
 
@@ -102,25 +123,24 @@ in
       # Run qBittorrent with media group for file access
       user = "qbittorrent";
       group = "media";
-      webuiPort = 8080;
-      torrentingPort = 62000;
+      webuiPort = webUI.port or 8080;
+      torrentingPort = qbittorrentCfg.torrentPort;
       # Add --confirm-legal-notice flag to prevent service from exiting
       extraArgs = [ "--confirm-legal-notice" ];
       openFirewall = false; # Firewall handled explicitly above
       serverConfig = {
-        # Bind qBittorrent to VLAN 2 interface only
         Preferences = {
-          # Connection settings - bind ALL traffic to VLAN 2 interface
-          Connection = {
-            # Interface name to bind to (vlan2)
-            InterfaceName = "vlan2";
-            # Interface address to bind to
-            InterfaceAddress = "192.168.2.249";
+          # Connection settings - bind based on VPN configuration
+          Connection = mkIf (qbittorrentCfg.vpn.enable or false) {
+            # When VPN is enabled, bind to VPN namespace interface
+            InterfaceName = "${qbittorrentCfg.vpn.namespace}0";
+            # Let qBittorrent auto-detect the VPN interface address
+            InterfaceAddress = "";
           };
           WebUI = {
-            # Bind to VLAN 2 static IP (192.168.2.249)
-            Address = "192.168.2.249";
-            Port = 8080;
+            # Bind WebUI to specified address or all interfaces
+            Address = webUI.bindAddress or "*";
+            Port = webUI.port or 8080;
             # WebUI access control
             HostHeaderValidation = false;
             LocalHostAuth = false;
@@ -166,13 +186,11 @@ in
           # Maximum number of upload slots per torrent
           max_uploads_per_torrent = 5;
         };
-        # BitTorrent configuration - bind to VLAN 2 interface
+        # BitTorrent configuration
         BitTorrent = {
           Session = {
-            Interface = "vlan2";
-            InterfaceName = "vlan2";
-            Port = 6881;
-            UseUPnP = false;
+            Port = qbittorrentCfg.torrentPort;
+            UseUPnP = false; # Disabled when using VPN
             UsePEX = true;
             UseDHT = true;
             # Torrent queueing system
@@ -190,6 +208,11 @@ in
             # Maximum number of upload slots per torrent
             MaxUploadsPerTorrent = 5;
             uTPMixedMode = "Proportional";
+          }
+          // optionalAttrs (qbittorrentCfg.vpn.enable or false) {
+            # Bind BitTorrent traffic to VPN namespace interface
+            Interface = "${qbittorrentCfg.vpn.namespace}0";
+            InterfaceName = "${qbittorrentCfg.vpn.namespace}0";
           };
         };
       }
