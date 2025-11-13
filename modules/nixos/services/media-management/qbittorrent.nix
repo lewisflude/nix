@@ -225,8 +225,16 @@ in
           Session = {
             Port = qbittorrentCfg.torrentPort;
 
+            # Automatic port forwarding (disabled in VPN mode)
+            # When VPN is enabled, UPnP and NAT-PMP are disabled because:
+            # 1. VPN gateways don't support these protocols
+            # 2. External NAT-PMP automation (protonvpn-portforward.service) handles port forwarding
+            # 3. This prevents "no router found" errors in logs
+            # When VPN is disabled, enable UPnP for automatic port forwarding on local router
+            UseUPnP = if (qbittorrentCfg.vpn.enable or false) then false else true;
+            UseNATPMP = if (qbittorrentCfg.vpn.enable or false) then false else true;
+
             # Protocol settings
-            UseUPnP = if (qbittorrentCfg.vpn.enable or false) then false else true; # UPnP only works without VPN
             UsePEX = true; # Peer exchange for better peer discovery
             UseDHT = true; # DHT for trackerless torrents
 
