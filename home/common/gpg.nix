@@ -6,6 +6,7 @@
 }:
 let
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+  constants = import ../../lib/constants.nix;
 in
 {
   home.packages = with pkgs; [
@@ -20,7 +21,7 @@ in
       card-timeout = "86400";
     };
     settings = {
-      default-key = "48B34CF9C735A6AE";
+      default-key = constants.keys.gpg.primary;
     };
   };
   services.gpg-agent = {
@@ -40,6 +41,6 @@ in
   };
 
   home.file.".gnupg/sshcontrol".text = ''
-    495B10388160753867D2B6F7CAED2ED08F4D4323
+    ${constants.keys.gpg.sshControl}
   '';
 }

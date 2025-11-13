@@ -1,47 +1,43 @@
-{
-  pkgs,
-  config,
-  systemConfig,
-  lib,
-  system,
-  ...
-}:
+{ pkgs, config, systemConfig, lib, system, ... }:
+
 let
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
   claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
-  codeDirectory = "${config.home.homeDirectory}/Code";
-  dexWebProject = "${codeDirectory}/dex-web";
-in
-{
+
+  # Import shared MCP utilities
+  servers = import ../../modules/shared/mcp/servers.nix { inherit pkgs config systemConfig lib platformLib; };
+  wrappers = import ../../modules/shared/mcp/wrappers.nix { inherit pkgs systemConfig lib platformLib; };
+
+  # Darwin-specific wrapper for kagi (using home.file instead of writeShellApplication)
+  kagiWrapperScript = ''
+    if [ -r "${systemConfig.sops.secrets.KAGI_API_KEY.path or ""}" ]; then
+      export KAGI_API_KEY="$(${pkgs.coreutils}/bin/cat "${systemConfig.sops.secrets.KAGI_API_KEY.path or ""}")"
+    fi
+    exec ${pkgs.uv}/bin/uvx kagimcp "$@"
+  '';
+
+  docsWrapperScript = ''
+    if [ -r "${systemConfig.sops.secrets.OPENAI_API_KEY.path or ""}" ]; then
+      export OPENAI_API_KEY="$(${pkgs.coreutils}/bin/cat "${systemConfig.sops.secrets.OPENAI_API_KEY.path or ""}")"
+    fi
+    exec ${servers.nodejs}/bin/npx -y @arabold/docs-mcp-server@latest "$@"
+  '';
+
+in {
   home = {
-    packages = with pkgs; [
-      uv
-      # python3 # Removed - uv handles Python installation
-    ];
+    packages = with pkgs; [ uv ];
+
     file = {
       "bin/kagi-mcp-wrapper" = {
-        text = ''
-          if [ -r "${systemConfig.sops.secrets.KAGI_API_KEY.path or ""}" ]; then
-            export KAGI_API_KEY="$(${pkgs.coreutils}/bin/cat "${
-              systemConfig.sops.secrets.KAGI_API_KEY.path or ""
-            }")"
-          fi
-          exec ${pkgs.uv}/bin/uvx kagimcp "$@"
-        '';
+        text = kagiWrapperScript;
         executable = true;
       };
       "bin/docs-mcp-wrapper" = {
-        text = ''
-          if [ -r "${systemConfig.sops.secrets.OPENAI_API_KEY.path or ""}" ]; then
-            export OPENAI_API_KEY="$(${pkgs.coreutils}/bin/cat "${
-              systemConfig.sops.secrets.OPENAI_API_KEY.path or ""
-            }")"
-          fi
-          exec ${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx -y @arabold/docs-mcp-server@latest "$@"
-        '';
+        text = docsWrapperScript;
         executable = true;
       };
     };
+
     activation.setupClaudeMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] (
       let
         cfg = config.services.mcp;
@@ -85,8 +81,10 @@ in
       ''
     );
   };
+
   services.mcp = {
     enable = true;
+
     targets = {
       cursor = {
         directory = "${config.home.homeDirectory}/.cursor";
@@ -97,42 +95,38 @@ in
         fileName = "claude_desktop_config.json";
       };
     };
-    servers = {
-      kagi = {
-        command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
-        args = [ ];
-        port = 11431;
+
+    servers = servers.commonServers // {
+      # Override time port for darwin
+      time = servers.commonServers.fetch // {
+        args = [ "mcp-server-time" ];
+        port = servers.ports.time-darwin;
       };
-      fetch = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [ "mcp-server-fetch" ];
-        port = 11432;
-      };
-      git = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "mcp-server-git"
-          "--repository"
-          dexWebProject
-        ];
-        port = 11433;
-      };
-      memory = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-memory"
-        ];
-        port = 11436;
-      };
+
+      # Override sequential-thinking port for darwin
       sequential-thinking = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
+        command = "${servers.nodejs}/bin/npx";
         args = [
           "-y"
           "@modelcontextprotocol/server-sequential-thinking"
         ];
-        port = 11438;
+        port = servers.ports.sequential-thinking-darwin;
       };
+
+      # Darwin-specific servers
+      kagi = {
+        command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
+        args = [ ];
+        port = servers.ports.kagi;
+      };
+
+      docs-mcp-server = {
+        command = "${config.home.homeDirectory}/bin/docs-mcp-wrapper";
+        args = [ ];
+        port = servers.ports.docs;
+      };
+
+      # Darwin uses docker for github
       github = {
         command = "${pkgs.docker}/bin/docker";
         args = [
@@ -143,36 +137,10 @@ in
           "GITHUB_TOKEN"
           "ghcr.io/github/github-mcp-server"
         ];
-        port = 11434;
+        port = servers.ports.github;
         env = {
           GITHUB_TOKEN = systemConfig.sops.secrets.GITHUB_TOKEN.path or "";
         };
-      };
-      general-filesystem = {
-        command = "${platformLib.getVersionedPackage pkgs platformLib.versions.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-filesystem"
-          "${codeDirectory}"
-          "${config.home.homeDirectory}/.config"
-          "${config.home.homeDirectory}/Documents"
-        ];
-        port = 11442;
-      };
-      time = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [ "mcp-server-time" ];
-        port = 11443;
-      };
-      nixos = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [ "mcp-nixos" ];
-        port = 11441;
-      };
-      docs-mcp-server = {
-        command = "${config.home.homeDirectory}/bin/docs-mcp-wrapper";
-        args = [ ];
-        port = 6280;
       };
     };
   };

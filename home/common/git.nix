@@ -4,19 +4,22 @@
   pkgs,
   ...
 }:
+let
+  constants = import ../../lib/constants.nix;
+in
 {
   programs.git = {
     enable = true;
     lfs.enable = true;
     signing = {
-      key = "48B34CF9C735A6AE";
+      key = constants.keys.gpg.primary;
       signByDefault = true;
     };
     settings = {
       user = {
         name = username;
         email = useremail;
-        signingkey = "48B34CF9C735A6AE";
+        signingkey = constants.keys.gpg.primary;
       };
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
