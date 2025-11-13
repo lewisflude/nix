@@ -6,7 +6,8 @@
     ../apps/lazydocker.nix
     ../features/development
 
-    ../apps/docker.nix
+    # Docker packages now handled by system-level virtualisation module
+    # ../apps/docker.nix
 
     ./desktop.nix
 

@@ -4,6 +4,9 @@
   config,
   ...
 }:
+let
+  constants = import ../../lib/constants.nix;
+in
 {
 
   imports = [
@@ -31,7 +34,7 @@
       shell = pkgs.zsh;
     };
   };
-  time.timeZone = lib.mkForce "Europe/London";
+  time.timeZone = lib.mkForce constants.defaults.timezone;
   security.sudo = {
     enable = true;
     wheelNeedsPassword = false;
@@ -41,13 +44,13 @@
 
   # Firewall configuration
   networking.firewall = {
-    allowedTCPPorts = [ 6280 ]; # Docs MCP Server HTTP interface
+    allowedTCPPorts = [ constants.ports.mcp.docs ]; # Docs MCP Server HTTP interface
   };
 
   # Dante SOCKS proxy for routing traffic through vlan2 (VPN)
   services.dante-proxy = {
     enable = true;
-    port = 1080;
+    port = constants.ports.services.dante;
     interface = "vlan2";
     listenAddress = "127.0.0.1"; # Localhost only for security
     allowedClients = [

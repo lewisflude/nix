@@ -29,11 +29,11 @@ pog.pog {
     }
   ];
 
-  runtimeInputs = with pkgs; [
-    git
-    nix
-    nvfetcher
-    gum
+  runtimeInputs = [
+    pkgs.git
+    pkgs.nix
+    pkgs.nvfetcher
+    pkgs.gum
   ];
 
   script =

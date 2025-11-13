@@ -11,12 +11,12 @@ in
 {
 
   home = lib.optionalAttrs platformLib.isLinux {
-    packages = with pkgs; [
-      nwg-look
+    packages = [
+      pkgs.nwg-look
 
-      iosevka-bin
-      nerd-fonts.iosevka
-      gtk4
+      pkgs.iosevka-bin
+      pkgs.nerd-fonts.iosevka
+      pkgs.gtk4
     ];
   };
 

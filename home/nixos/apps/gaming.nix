@@ -15,11 +15,13 @@ in
     enableSessionWide = false; # Only enable when needed via env var
   };
 
-  home.packages =
-    (with pkgs; [
-      protonup-qt
-      (sunshine.override { cudaSupport = true; })
-      moonlight-qt
-    ])
-    ++ [ steamRunUrl ];
+  home.packages = [
+    # User-facing gaming applications
+    # Note: protonup-qt is provided at system level
+    # Note: sunshine service is configured at system level
+    pkgs.moonlight-qt
+    pkgs.wine
+    pkgs.winetricks
+    steamRunUrl
+  ];
 }

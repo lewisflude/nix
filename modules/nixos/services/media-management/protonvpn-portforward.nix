@@ -18,15 +18,15 @@ let
   # Port forwarding script with qBittorrent API integration
   portforwardScript = pkgs.writeShellApplication {
     name = "protonvpn-portforward";
-    runtimeInputs = with pkgs; [
-      libnatpmp
-      iproute2
-      systemd
-      gnugrep
-      gnused
-      coreutils
-      curl
-      iptables
+    runtimeInputs = [
+      pkgs.libnatpmp
+      pkgs.iproute2
+      pkgs.systemd
+      pkgs.gnugrep
+      pkgs.gnused
+      pkgs.coreutils
+      pkgs.curl
+      pkgs.iptables
     ];
     text = builtins.readFile ../../../../scripts/protonvpn-natpmp-portforward.sh;
   };

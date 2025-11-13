@@ -13,9 +13,9 @@ let
   featureBuilders = import ../../lib/feature-builders.nix {
     inherit lib packageSets;
   };
-  commonTools = with pkgs; [
-    pre-commit
-    git
+  commonTools = [
+    pkgs.pre-commit
+    pkgs.git
   ];
 in
 pkgs.mkShell {

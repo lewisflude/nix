@@ -24,10 +24,10 @@ pog.pog {
     }
   ];
 
-  runtimeInputs = with pkgs; [
-    coreutils
-    graphviz
-    findutils
+  runtimeInputs = [
+    pkgs.coreutils
+    pkgs.graphviz
+    pkgs.findutils
   ];
 
   script =

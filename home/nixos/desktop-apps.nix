@@ -6,21 +6,21 @@ let
   });
 in
 {
-  home.packages = with pkgs; [
-    gimp
-    discord-krisp # Chaotic Nyx version with Krisp noise suppression
-    telegram-desktop_git # Chaotic Nyx bleeding-edge version
-    file-roller
+  home.packages = [
+    pkgs.gimp
+    pkgs.discord-krisp # Chaotic Nyx version with Krisp noise suppression
+    pkgs.telegram-desktop_git # Chaotic Nyx bleeding-edge version
+    pkgs.file-roller
     # Note: libnotify is handled in core-tooling.nix
     # Note: swaylock-effects is handled in apps/swayidle.nix via programs.swaylock
-    font-awesome
+    pkgs.font-awesome
     asepriteFixed
-    wl-screenrec
+    pkgs.wl-screenrec
 
     # Thunar file manager with plugins
-    xfce.thunar
-    xfce.thunar-archive-plugin
-    xfce.thunar-volman
+    pkgs.xfce.thunar
+    pkgs.xfce.thunar-archive-plugin
+    pkgs.xfce.thunar-volman
   ];
 
   services.cliphist = {

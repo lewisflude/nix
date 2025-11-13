@@ -5,10 +5,10 @@
   ...
 }:
 {
-  environment.systemPackages = with pkgs; [
-    systemd
-    udev
-    linux-firmware
+  environment.systemPackages = [
+    pkgs.systemd
+    pkgs.udev
+    pkgs.linux-firmware
   ];
   systemd.services.example = {
     description = "Example service";

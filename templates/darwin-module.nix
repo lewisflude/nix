@@ -8,9 +8,9 @@
     dock.autohide = true;
     finder.FXPreferredViewStyle = "clmv";
   };
-  environment.systemPackages = with pkgs; [
-    terminal-notifier
-    reattach-to-user-namespace
+  environment.systemPackages = [
+    pkgs.terminal-notifier
+    pkgs.reattach-to-user-namespace
   ];
   homebrew = {
     enable = true;

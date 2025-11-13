@@ -9,31 +9,28 @@ let
 in
 {
   home.packages =
-    with pkgs;
     [
-      clipse
-
-      comma
-      devenv
+      pkgs.clipse
+      pkgs.comma
+      pkgs.devenv
       # Note: eza is handled via programs.eza in apps/eza.nix
-      rsync
-      trash-cli
-      fd
-      dust
-      procs
-      gping
-      tldr
-      p7zip
-      pigz
-
-      git-extras
+      pkgs.rsync
+      pkgs.trash-cli
+      pkgs.fd
+      pkgs.dust
+      pkgs.procs
+      pkgs.gping
+      pkgs.tldr
+      pkgs.p7zip
+      pkgs.pigz
+      pkgs.git-extras
     ]
     ++
       platformLib.platformPackages
         [
-          networkmanager
-          lsof
-          wtype
+          pkgs.networkmanager
+          pkgs.lsof
+          pkgs.wtype
         ]
         [ ]; # Linux packages, Darwin packages
   programs.ghostty = {
