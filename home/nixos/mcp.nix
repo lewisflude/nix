@@ -1,8 +1,32 @@
+# MCP Configuration for NixOS
+#
+# This module configures MCP (Model Context Protocol) servers for NixOS systems.
+# It provides systemd user services for registration, warming, and HTTP servers,
+# along with home-manager activation hooks for configuration management.
+#
+# Features:
+# - Automatic MCP server registration with Claude CLI
+# - Server warm-up (pre-fetching and caching)
+# - HTTP server for docs-mcp-server
+# - Integration with Cursor and Claude Code applications
+# - SOPS secret management for API keys
+#
+# Systemd Services:
+# - mcp-claude-register: Registers servers with Claude CLI (oneshot)
+# - mcp-warm: Pre-fetches and builds MCP server dependencies (oneshot)
+# - docs-mcp-http: HTTP interface for docs-mcp-server (daemon)
+#
+# See also:
+# - modules/shared/mcp/: Shared module definitions
+# - home/darwin/mcp.nix: macOS-specific configuration
 { pkgs, config, systemConfig, lib, system, hostSystem, ... }:
 
 let
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+
+  # Import centralized constants
+  constants = import ../../lib/constants.nix;
 
   # Import shared MCP utilities
   servers = import ../../modules/shared/mcp/servers.nix { inherit pkgs config systemConfig lib platformLib; };
@@ -37,7 +61,7 @@ let
     set -uo pipefail
     echo "[mcp] Starting Claude MCP registration…"
     export PATH="${pkgs.coreutils}/bin:${pkgs.findutils}/bin:${pkgs.gawk}/bin:${pkgs.jq}/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:$PATH"
-    export MCP_TIMEOUT="''${MCP_TIMEOUT:-60000}"
+    export MCP_TIMEOUT="''${MCP_TIMEOUT:-${constants.timeouts.mcp.registration}}"
     if ! command -v claude >/dev/null 2>&1; then
       echo "[mcp] WARNING: 'claude' CLI not found in PATH, skipping registration"
       exit 0
@@ -209,9 +233,9 @@ in {
         Environment = [
           "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
         ];
-        TimeoutStartSec = "300";
+        TimeoutStartSec = "${constants.timeouts.service.start}";
         Restart = "on-failure";
-        RestartSec = "30";
+        RestartSec = "${constants.timeouts.service.restart}";
       };
       Install = {
         WantedBy = [ "default.target" ];
@@ -226,7 +250,7 @@ in {
       Service = {
         Type = "oneshot";
         ExecStart = "${warmScript}";
-        TimeoutStartSec = "900";
+        TimeoutStartSec = "${constants.timeouts.mcp.warmup}";
         Environment = [
           "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
         ];
@@ -242,7 +266,7 @@ in {
         After = [ "network-online.target" ];
       };
       Service = {
-        ExecStart = "${wrappers.docsMcpWrapper}/bin/docs-mcp-wrapper --protocol http --host 0.0.0.0 --port 6280";
+        ExecStart = "${wrappers.docsMcpWrapper}/bin/docs-mcp-wrapper --protocol http --host 0.0.0.0 --port ${toString constants.ports.mcp.docs}";
         Restart = "on-failure";
         Environment = [
           "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
