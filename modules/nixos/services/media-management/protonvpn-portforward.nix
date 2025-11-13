@@ -128,6 +128,10 @@ in
 
         # Monitoring and diagnostic scripts
         environment.systemPackages = [
+          # NAT-PMP tools for manual testing and debugging
+          pkgs.libnatpmp
+
+          # Diagnostic scripts
           (pkgs.writeShellScriptBin "monitor-protonvpn-portforward" (
             builtins.readFile ../../../../scripts/monitor-protonvpn-portforward.sh
           ))
