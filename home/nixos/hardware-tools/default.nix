@@ -7,8 +7,6 @@
     ./audio.nix
     ./networking.nix
     ./yubikey-tools.nix
-    ./graphics.nix
-    ./podman.nix
     ./gnome-keyring.nix
   ];
 }
