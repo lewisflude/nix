@@ -7,11 +7,10 @@
 let
   inherit (lib)
     mkIf
-    mkEnableOption
+    mkAfter
     mkOption
     mkPackageOption
     types
-    mkAfter
     ;
   inherit (lib.lists) optional;
   inherit (lib.strings) concatMapStringsSep;
@@ -19,9 +18,8 @@ let
   cfg = config.host.features.aiTools;
 in
 {
+  # Additional options not in shared/host-options/features.nix
   options.host.features.aiTools = {
-    enable = mkEnableOption "native AI tools stack (Ollama, Open WebUI)";
-
     user = mkOption {
       type = types.str;
       default = "aitools";
@@ -34,45 +32,8 @@ in
       description = "Group to run AI tools services as";
     };
 
-    ollama = {
-      enable = mkEnableOption "Ollama LLM backend" // {
-        default = true;
-      };
-
-      acceleration = mkOption {
-        type = types.nullOr (
-          types.enum [
-            "rocm"
-            "cuda"
-          ]
-        );
-        default = null;
-        description = "GPU acceleration type (null for CPU-only)";
-      };
-
-      models = mkOption {
-        type = types.listOf types.str;
-        default = [ ];
-        description = "List of models to pre-download";
-        example = [
-          "llama2"
-          "mistral"
-        ];
-      };
-    };
-
     openWebui = {
-      enable = mkEnableOption "Open WebUI interface for LLMs" // {
-        default = true;
-      };
-
       package = mkPackageOption pkgs "open-webui" { };
-
-      port = mkOption {
-        type = types.port;
-        default = 7000;
-        description = "Port for Open WebUI";
-      };
 
       host = mkOption {
         type = types.str;
@@ -128,7 +89,9 @@ in
     };
 
     # Enable NVIDIA container toolkit if using CUDA
-    hardware.nvidia-container-toolkit.enable = mkIf (cfg.ollama.enable && cfg.ollama.acceleration == "cuda") true;
+    hardware.nvidia-container-toolkit.enable = mkIf (
+      cfg.ollama.enable && cfg.ollama.acceleration == "cuda"
+    ) true;
 
     # Pre-download Ollama models
     systemd.services.ollama-models = mkIf (cfg.ollama.enable && cfg.ollama.models != [ ]) {
