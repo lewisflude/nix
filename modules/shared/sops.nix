@@ -26,7 +26,7 @@ let
           "0440"
         else
           mode;
-      resolvedOwner = if isDarwin then config.host.username else config.host.username;
+      resolvedOwner = config.host.username;
       # On NixOS with neededForUsers, we need to set the owner to the user, not root
       # This allows the user to read their own secrets
       resolvedGroup = if isDarwin then "wheel" else "sops-secrets";
