@@ -11,40 +11,39 @@ let
 in
 {
   home.packages =
-    with pkgs;
     [
-      curl
-      wget
+      pkgs.curl
+      pkgs.wget
       # Note: yq is handled via programs.yq in home/common/apps/yq.nix
 
-      coreutils
+      pkgs.coreutils
 
-      libnotify
-      tree
+      pkgs.libnotify
+      pkgs.tree
 
       # Note: cachix is handled via programs.cachix in home/common/apps/cachix.nix
-      nix-tree
-      nix-du
-      nix-update
-      nix-prefetch-github
-      nvfetcher
-      nix-output-monitor
+      pkgs.nix-tree
+      pkgs.nix-du
+      pkgs.nix-update
+      pkgs.nix-prefetch-github
+      pkgs.nvfetcher
+      pkgs.nix-output-monitor
     ]
     ++ lib.optional (nx != null) nx
     ++ [
-      yaml-language-server
+      pkgs.yaml-language-server
     ]
     ++
       platformLib.platformPackages
         [
-          xdg-utils
+          pkgs.xdg-utils
         ]
         [
           # Linux packages
-          xcodebuild
+          pkgs.xcodebuild
         ] # Darwin packages
     ++ [
-      gnutar
-      gzip
+      pkgs.gnutar
+      pkgs.gzip
     ];
 }

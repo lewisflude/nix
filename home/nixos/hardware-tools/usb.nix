@@ -1,9 +1,9 @@
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    usbutils
-    evhz
-    piper
+  home.packages = [
+    pkgs.usbutils
+    pkgs.evhz
+    pkgs.piper
   ];
   services.udiskie = {
     enable = true;

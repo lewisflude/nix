@@ -16,9 +16,9 @@ let
   };
 in
 {
-  home.packages = with pkgs; [
-    vial
-    via
+  home.packages = [
+    pkgs.vial
+    pkgs.via
   ];
 
   xdg.enable = true;
