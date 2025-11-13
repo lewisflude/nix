@@ -15,6 +15,7 @@ let
   qbittorrentCfg = cfg.qbittorrent or { };
   vpnCfg = qbittorrentCfg.vpn or { };
 
+  # Port forwarding script with qBittorrent API integration
   portforwardScript = pkgs.writeShellApplication {
     name = "protonvpn-portforward";
     runtimeInputs = with pkgs; [
@@ -25,9 +26,46 @@ let
       gnused
       coreutils
       curl
+      iptables
     ];
     text = builtins.readFile ../../../../scripts/protonvpn-natpmp-portforward.sh;
   };
+
+  # Firewall updater script - dynamically opens the forwarded port
+  firewallScript = pkgs.writeShellScript "update-qbt-firewall" ''
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    NAMESPACE="''${1:-qbt}"
+    NEW_PORT="''${2:-0}"
+
+    if [[ "$NEW_PORT" -eq 0 ]]; then
+      echo "Error: Port not provided"
+      exit 1
+    fi
+
+    echo "Updating firewall for port $NEW_PORT in namespace $NAMESPACE..."
+
+    # Remove old port rules (if any exist for ports that aren't the new port)
+    ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables-save | \
+      grep -E "qbt0.*dpt:[0-9]+" | grep -v "dpt:$NEW_PORT" | \
+      sed 's/^-A /-D /' | while read rule; do
+        ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables $rule 2>/dev/null || true
+      done || true  # Don't fail if no old rules exist
+
+    # Add rules for new port if they don't exist
+    if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -C INPUT -p tcp --dport "$NEW_PORT" -i qbt0 -j ACCEPT 2>/dev/null; then
+      ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -I INPUT -p tcp --dport "$NEW_PORT" -i qbt0 -j ACCEPT
+      echo "Added TCP rule for port $NEW_PORT"
+    fi
+
+    if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -C INPUT -p udp --dport "$NEW_PORT" -i qbt0 -j ACCEPT 2>/dev/null; then
+      ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -I INPUT -p udp --dport "$NEW_PORT" -i qbt0 -j ACCEPT
+      echo "Added UDP rule for port $NEW_PORT"
+    fi
+
+    echo "Firewall updated successfully for port $NEW_PORT"
+  '';
 in
 {
   options.host.services.mediaManagement.qbittorrent.vpn.portForwarding = {
@@ -52,12 +90,6 @@ in
       default = "10.2.0.1";
       description = "ProtonVPN gateway IP address for NAT-PMP queries";
     };
-
-    torrentPort = mkOption {
-      type = types.port;
-      default = qbittorrentCfg.torrentPort or 62000;
-      description = "BitTorrent port to forward (inherited from qBittorrent configuration)";
-    };
   };
 
   config =
@@ -70,31 +102,34 @@ in
       )
       {
         # Systemd service to update port forwarding
-        # Note: This service is only triggered by the timer, not started directly on boot
         systemd.services.protonvpn-portforward = {
-          description = "ProtonVPN NAT-PMP Port Forwarding for qBittorrent";
+          description = "ProtonVPN NAT-PMP Port Forwarding with qBittorrent Integration";
           after = [
             "network-online.target"
             "${vpnCfg.namespace}.service"
             "qbittorrent.service"
+            "configure-qbt-routes.service"
           ];
           wants = [
             "network-online.target"
             "${vpnCfg.namespace}.service"
           ];
 
-          # Don't use 'requisite' - it prevents the service from being defined if dependency is missing
-          # The script will check if namespace exists and fail gracefully
-
           serviceConfig = {
             Type = "oneshot";
+
+            # Main script that queries NAT-PMP and updates qBittorrent
             ExecStart = "${portforwardScript}/bin/protonvpn-portforward";
+
+            # Update firewall with the new port
+            ExecStartPost = "${pkgs.bash}/bin/bash -c '${firewallScript} ${qbittorrentCfg.vpn.portForwarding.namespace} $(cat /var/lib/protonvpn-portforward.state | grep PUBLIC_PORT | cut -d= -f2)'";
 
             # Environment - pass configuration to script
             Environment = [
               "NAMESPACE=${qbittorrentCfg.vpn.portForwarding.namespace}"
               "VPN_GATEWAY=${qbittorrentCfg.vpn.portForwarding.gateway}"
-              "QBT_PORT=${toString qbittorrentCfg.vpn.portForwarding.torrentPort}"
+              "NATPMPC_BIN=${pkgs.libnatpmp}/bin/natpmpc"
+              "CURL_BIN=${pkgs.curl}/bin/curl"
             ];
 
             # Timeout settings
@@ -102,11 +137,11 @@ in
 
             # Security
             PrivateTmp = true;
-            NoNewPrivileges = false; # Needed for ip netns exec
+            NoNewPrivileges = false; # Needed for ip netns exec and iptables
             ProtectSystem = "strict";
             ProtectHome = true;
             ReadWritePaths = [
-              "/var/lib/qBittorrent" # Need to update config
+              "/var/lib" # Need to write state file
             ];
 
             # Network
@@ -135,10 +170,13 @@ in
 
         # Monitoring and diagnostic scripts
         environment.systemPackages = [
-          # NAT-PMP tools for manual testing and debugging
+          # NAT-PMP tools for manual testing
           pkgs.libnatpmp
 
-          # Port forwarding status helper
+          # Port forwarding automation script (can be run manually)
+          portforwardScript
+
+          # Helper to show current port
           (pkgs.writeShellScriptBin "show-protonvpn-port" (
             builtins.readFile ../../../../scripts/show-protonvpn-port.sh
           ))

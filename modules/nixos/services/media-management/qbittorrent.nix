@@ -224,9 +224,16 @@ in
         BitTorrent = {
           Session = {
             Port = qbittorrentCfg.torrentPort;
-            UseUPnP = false; # Disabled when using VPN
-            UsePEX = true;
-            UseDHT = true;
+
+            # Protocol settings
+            UseUPnP = if (qbittorrentCfg.vpn.enable or false) then false else true; # UPnP only works without VPN
+            UsePEX = true; # Peer exchange for better peer discovery
+            UseDHT = true; # DHT for trackerless torrents
+
+            # uTP/TCP mixed mode: Proportional balances both protocols
+            # Prevents TCP from starving uTP connections
+            uTPMixedMode = "Proportional";
+
             # Torrent queueing system
             QueueingSystemEnabled = true;
             # Maximum active uploads (optimized for HDD + Jellyfin streaming)
@@ -241,10 +248,13 @@ in
             MaxUploads = qbittorrentCfg.maxUploads or 150;
             # Maximum number of upload slots per torrent (improved from 5 to 10)
             MaxUploadsPerTorrent = qbittorrentCfg.maxUploadsPerTorrent or 10;
-            uTPMixedMode = "Proportional";
-            # NOTE: Do NOT bind to specific interface in VPN namespace
-            # The namespace itself constrains all traffic through VPN
-            # Explicit bindings cause ephemeral port conflicts with trackers
+          }
+          # VPN Interface binding - ONLY when VPN is enabled
+          # This ensures all BitTorrent traffic uses the VPN interface
+          // optionalAttrs (qbittorrentCfg.vpn.enable or false) {
+            Interface = "qbt0";
+            InterfaceName = "qbt0";
+            InterfaceAddress = "10.2.0.2";
           };
         };
       }

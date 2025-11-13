@@ -44,24 +44,6 @@ in
       description = "Log file path inside the container. Set to null to disable file logging.";
     };
 
-    leavingSoonDir = mkOption {
-      type = types.str;
-      default = "/mnt/storage/leaving-soon";
-      description = "Container path where Janitorr creates leaving-soon symlinks.";
-    };
-
-    mediaServerLeavingSoonDir = mkOption {
-      type = types.str;
-      default = "/mnt/storage/leaving-soon";
-      description = "Media server path that should match Jellyfin/Emby volume mapping.";
-    };
-
-    freeSpaceCheckDir = mkOption {
-      type = types.str;
-      default = "/mnt/storage";
-      description = "Directory Janitorr uses to determine free disk space.";
-    };
-
     dataPath = mkOption {
       type = types.str;
       default = "/mnt/storage";

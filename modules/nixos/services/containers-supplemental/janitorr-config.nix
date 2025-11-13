@@ -72,9 +72,6 @@ in
   application = {
     dry-run = true;
     leaving-soon = "21d";
-    leaving-soon-dir = janitorrCfg.leavingSoonDir;
-    media-server-leaving-soon-dir = janitorrCfg.mediaServerLeavingSoonDir;
-    free-space-check-dir = janitorrCfg.freeSpaceCheckDir;
 
     media-deletion = {
       enabled = true;

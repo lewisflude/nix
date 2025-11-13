@@ -65,8 +65,25 @@ in
 
     # Configure SOPS secret for WireGuard configuration
     sops.secrets.${vpnCfg.wireguardConfig} = {
-      restartUnits = [ "vpn-${vpnCfg.namespace}.service" ];
+      restartUnits = [ "${vpnCfg.namespace}.service" ];
     };
+
+    # Create custom nsswitch.conf for the namespace that bypasses systemd-resolved
+    # This fixes DNS resolution by ensuring libc queries /etc/resolv.conf directly
+    # instead of trying to use systemd-resolved (which is inaccessible due to security restrictions)
+    environment.etc."netns/${vpnCfg.namespace}/nsswitch.conf".text = ''
+      # Simplified NSS configuration for VPN namespace
+      # Bypasses systemd-resolved and uses DNS directly from resolv.conf
+      passwd:    files
+      group:     files
+      shadow:    files
+      hosts:     files dns
+      networks:  files
+      ethers:    files
+      services:  files
+      protocols: files
+      rpc:       files
+    '';
 
     # Configure VPN namespace for qBittorrent
     vpnNamespaces.${vpnCfg.namespace} = {
@@ -102,89 +119,42 @@ in
       ];
     };
 
-    # Configure systemd services and timers for qBittorrent VPN and NAT-PMP
-    systemd = {
-      services = {
-        # Configure qBittorrent service for VPN namespace
-        qbittorrent = {
-          vpnConfinement = {
-            enable = true;
-            vpnNamespace = vpnCfg.namespace;
-          };
-          # Ensure qbittorrent service depends on network setup
-          wants = [ "network-online.target" ];
+    # Configure systemd services for qBittorrent VPN
+    systemd.services = {
+      # Configure qBittorrent service for VPN namespace
+      qbittorrent = {
+        vpnConfinement = {
+          enable = true;
+          vpnNamespace = vpnCfg.namespace;
         };
+        # Ensure qbittorrent service depends on network setup
+        wants = [ "network-online.target" ];
 
-        # Add route to VPN gateway network for NAT-PMP connectivity
-        # The WireGuard interface is point-to-point (/32), so we need an explicit
-        # route to the gateway's subnet to ensure responses from 10.2.0.1 are properly routed back
-        "configure-qbt-routes" = {
-          description = "Configure routes for qBittorrent VPN namespace";
-          after = [ "qbittorrent.service" ];
-          wantedBy = [ "multi-user.target" ];
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = "yes";
-            ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${vpnCfg.namespace} ${pkgs.iproute2}/bin/ip route add 10.2.0.0/24 dev ${vpnCfg.namespace}0";
-            # Don't fail if route already exists
-            SuccessExitStatus = [
-              0
-              2
-            ];
-          };
-        };
-
-        # Systemd service for ProtonVPN NAT-PMP port forwarding
-        # Discovers the forwarded port and saves it for monitoring/logging
-        # NOTE: natpmpc MUST run on the host, not in the namespace (UDP responses don't reach namespace)
-        "protonvpn-natpmp" = {
-          description = "ProtonVPN NAT-PMP Port Forwarding Discovery";
-          after = [ "vpn-${vpnCfg.namespace}.service" ];
-          before = [ "qbittorrent.service" ];
-          wantedBy = [ "multi-user.target" ];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = "yes";
-
-            # Run with elevated privileges to access natpmpc
-            User = "root";
-
-            # Path to the script (4 levels up to repo root: modules/nixos/services/media-management -> repo root)
-            ExecStart = "${pkgs.bash}/bin/bash ${../../../../scripts/protonvpn-natpmp-portforward.sh}";
-
-            # Environment variables for the script
-            # Use absolute paths for tools since PATH expansion can be unreliable in systemd
-            Environment = [
-              "NAMESPACE=${vpnCfg.namespace}"
-              "VPN_GATEWAY=10.2.0.1"
-              "QBT_PORT=${toString vpnCfg.torrentPort}"
-              "IP_BIN=${pkgs.iproute2}/bin/ip"
-              "GREP_BIN=${pkgs.gnugrep}/bin/grep"
-              "NATPMPC_BIN=${pkgs.libnatpmp}/bin/natpmpc"
-            ];
-
-            # Restart if it fails, but with a delay to allow VPN to fully establish
-            Restart = "on-failure";
-            RestartSec = "10s";
-            StartLimitIntervalSec = "60";
-            StartLimitBurst = "3";
-          };
+        # Bind-mount custom nsswitch.conf to fix DNS resolution
+        # This ensures the service uses the simplified NSS config that bypasses systemd-resolved
+        serviceConfig = {
+          BindReadOnlyPaths = [
+            "/etc/netns/${vpnCfg.namespace}/nsswitch.conf:/etc/nsswitch.conf:norbind"
+          ];
         };
       };
 
-      # Timer to periodically refresh the NAT-PMP port mapping
-      # ProtonVPN port mappings expire after 3600 seconds (1 hour)
-      # Refresh every 50 minutes to stay within the lease time
-      timers."protonvpn-natpmp" = {
-        description = "Periodic ProtonVPN NAT-PMP Port Forwarding Refresh";
-        wantedBy = [ "timers.target" ];
-
-        timerConfig = {
-          # Run 50 minutes after boot, then every 50 minutes
-          OnBootSec = "50min";
-          OnUnitActiveSec = "50min";
-          Unit = "protonvpn-natpmp.service";
+      # Add route to VPN gateway network for NAT-PMP connectivity
+      # The WireGuard interface is point-to-point (/32), so we need an explicit
+      # route to the gateway's subnet to ensure responses from 10.2.0.1 are properly routed back
+      "configure-qbt-routes" = {
+        description = "Configure routes for qBittorrent VPN namespace";
+        after = [ "qbittorrent.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = "yes";
+          ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${vpnCfg.namespace} ${pkgs.iproute2}/bin/ip route add 10.2.0.0/24 dev ${vpnCfg.namespace}0";
+          # Don't fail if route already exists
+          SuccessExitStatus = [
+            0
+            2
+          ];
         };
       };
     };

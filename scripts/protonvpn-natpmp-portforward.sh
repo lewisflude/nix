@@ -113,17 +113,19 @@ get_current_port() {
 update_qbittorrent_port() {
     local new_port="$1"
 
-    log_info "Updating qBittorrent listening port to ${new_port}..."
+    log_info "Updating qBittorrent listening port to ${new_port} and VPN interface binding..."
 
     local set_prefs_url="http://${QBITTORRENT_HOST}/api/v2/app/setPreferences"
     local response
 
+    # Update port AND interface binding to ensure VPN confinement
+    # Interface name must match the veth pair interface name (qbt0)
     response=$(ip netns exec "${NAMESPACE}" "${CURL}" -s -m 10 -b "${COOKIE_FILE}" -X POST "${set_prefs_url}" \
-        --data "json={\"listen_port\": ${new_port}}" 2>&1 || echo "ERROR")
+        --data "json={\"listen_port\": ${new_port}, \"current_interface_name\": \"qbt0\", \"current_interface_address\": \"10.2.0.2\"}" 2>&1 || echo "ERROR")
 
     # Success = empty response or "Ok."
     if [[ -z "${response}" ]] || [[ "${response}" == "Ok." ]]; then
-        log_success "qBittorrent port updated to ${new_port}"
+        log_success "qBittorrent port updated to ${new_port} with VPN interface binding"
         return 0
     fi
 
