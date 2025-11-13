@@ -25,9 +25,10 @@
 # - Remote servers (HTTP protocol with url/headers)
 #
 # See also:
-# - modules/shared/mcp/service.nix: Service option definitions
-# - home/nixos/mcp.nix: NixOS-specific implementation
-# - home/darwin/mcp.nix: Darwin-specific implementation
+# - modules/shared/mcp/servers.nix: Common server definitions (library)
+# - modules/shared/mcp/wrappers.nix: Secret-aware wrappers (library)
+# - home/nixos/mcp.nix: NixOS-specific configuration
+# - home/darwin/mcp.nix: Darwin-specific configuration
 {
   config,
   lib,
@@ -43,9 +44,18 @@ let
     mapAttrs
     mapAttrsToList
     concatStringsSep
+    filterAttrs
+    length
+    unique
+    filter
+    foldl'
+    attrNames
     ;
 
   cfg = config.services.mcp;
+
+  # Import centralized constants for validation
+  constants = import ../../lib/constants.nix;
 
   # Submodule type for MCP server configuration
   # Supports both CLI servers (command-based) and remote servers (URL-based)
@@ -60,6 +70,7 @@ let
           This should be an absolute path to ensure reproducibility.
           Mutually exclusive with `url`.
         '';
+        example = ''"''${pkgs.uv}/bin/uvx"'';
       };
 
       args = mkOption {
@@ -70,6 +81,7 @@ let
 
           These are passed to the command in order.
         '';
+        example = [ "--from" "mcp-server-fetch" "mcp-server-fetch" ];
       };
 
       env = mkOption {
@@ -79,7 +91,11 @@ let
           Environment variables to set for the MCP server (for CLI servers).
 
           Variables are exported before the server command is executed.
+          Secrets should be handled via SOPS and wrapper scripts.
         '';
+        example = {
+          UV_PYTHON = "/nix/store/.../bin/python3";
+        };
       };
 
       url = mkOption {
@@ -91,6 +107,7 @@ let
           Example: `http://localhost:3000/mcp`
           Mutually exclusive with `command`.
         '';
+        example = "http://localhost:3000/mcp";
       };
 
       headers = mkOption {
@@ -101,6 +118,9 @@ let
 
           Example: `{ Authorization = "Bearer token"; }`
         '';
+        example = {
+          Authorization = "Bearer token";
+        };
       };
 
       port = mkOption {
@@ -111,7 +131,11 @@ let
 
           This is used for documentation and port conflict detection,
           but is not included in the generated configuration files.
+
+          MCP servers should use ports in the range 6200-6299.
+          See `lib/constants.nix` for port allocation.
         '';
+        example = 6280;
       };
 
       extraArgs = mkOption {
@@ -130,16 +154,21 @@ let
   mcpTargetType = types.submodule {
     options = {
       directory = mkOption {
-        type = types.path;
+        type = types.str;  # Using str to support interpolation with config.home.homeDirectory
         description = lib.mdDoc ''
           The directory to store the MCP configuration.
 
           This directory will be created if it doesn't exist.
+          Typically application config directories like:
+          - `~/.cursor` for Cursor editor
+          - `~/.config/claude` for Claude Code
         '';
+        example = "/home/user/.cursor";
       };
 
       fileName = mkOption {
         type = types.str;
+        default = "mcp.json";
         description = lib.mdDoc ''
           The file name to store the MCP configuration.
 
@@ -147,6 +176,7 @@ let
           - Cursor: `mcp.json`
           - Claude Code: `claude_desktop_config.json`
         '';
+        example = "mcp.json";
       };
     };
   };
@@ -174,10 +204,64 @@ let
     mcpServers = mapAttrs mkMcpConfig cfg.servers;
   };
 
+  # Validation helpers
+
+  # Helper to detect port conflicts
+  findPortConflicts =
+    let
+      serversWithPorts = filterAttrs (_name: server: server.port != null) cfg.servers;
+      portList = mapAttrsToList (_name: server: server.port) serversWithPorts;
+      uniquePorts = unique portList;
+    in
+      length portList != length uniquePorts;
+
+  # Helper to collect conflicting ports
+  getConflictingPorts =
+    let
+      serversWithPorts = filterAttrs (_name: server: server.port != null) cfg.servers;
+      portToServers = foldl'
+        (acc: name:
+          let
+            port = cfg.servers.${name}.port;
+          in
+            if port == null then acc
+            else acc // { ${toString port} = (acc.${toString port} or []) ++ [ name ]; }
+        )
+        {}
+        (attrNames cfg.servers);
+      conflicts = filterAttrs (_port: servers: length servers > 1) portToServers;
+    in
+      mapAttrsToList
+        (port: servers: "Port ${port}: ${concatStringsSep ", " servers}")
+        conflicts;
+
+  # MCP port range from constants
+  mcpPortMin = 6200;
+  mcpPortMax = 6299;
+
+  # Validate MCP port range
+  mcpPortInRange = port: port >= mcpPortMin && port <= mcpPortMax;
+
+  # Helper to find servers with out-of-range ports
+  getOutOfRangePorts =
+    let
+      serversWithPorts = filterAttrs (_name: server: server.port != null) cfg.servers;
+    in
+      filter
+        (name: !mcpPortInRange cfg.servers.${name}.port)
+        (attrNames serversWithPorts);
+
 in
 {
   options.services.mcp = {
-    enable = mkEnableOption (lib.mdDoc "MCP (Model Context Protocol) servers");
+    enable = mkEnableOption (lib.mdDoc ''
+      MCP (Model Context Protocol) server configuration.
+
+      When enabled, this module generates MCP configuration files for target
+      applications and optionally registers servers with the Claude CLI.
+
+      Provides cross-platform support for NixOS and nix-darwin.
+    '');
 
     targets = mkOption {
       type = types.attrsOf mcpTargetType;
@@ -192,11 +276,11 @@ in
       example = lib.literalExpression ''
         {
           "cursor" = {
-            directory = "/Users/''${config.home.username}/.cursor";
+            directory = "''${config.home.homeDirectory}/.cursor";
             fileName = "mcp.json";
           };
-          "claude" = {
-            directory = "/Users/''${config.home.username}/Library/Application Support/Claude";
+          "claude-code" = {
+            directory = "''${config.home.homeDirectory}/.config/claude";
             fileName = "claude_desktop_config.json";
           };
         }
@@ -211,33 +295,27 @@ in
 
         Each server can be either a CLI server (with command/args/env)
         or a remote server (with url/headers).
+
+        Common servers are available in `modules/shared/mcp/servers.nix`.
+        Secret-aware wrappers are available in `modules/shared/mcp/wrappers.nix`.
       '';
       example = lib.literalExpression ''
         {
           # CLI server example
-          kagi = {
-            command = "uvx";
-            args = [ "kagimcp" ];
+          fetch = {
+            command = "''${pkgs.uv}/bin/uvx";
+            args = [ "--from" "mcp-server-fetch" "mcp-server-fetch" ];
+            port = 6260;
             env = {
-              KAGI_API_KEY = "YOUR_API_KEY_HERE";
-              KAGI_SUMMARIZER_ENGINE = "YOUR_ENGINE_CHOICE_HERE";
+              UV_PYTHON = "''${pkgs.python3}/bin/python3";
             };
           };
 
           # Remote server example
-          python-server = {
-            command = "python";
-            args = [ "mcp-server.py" ];
-            env = {
-              API_KEY = "value";
-            };
-          };
-
-          # HTTP server example
           remote-server = {
             url = "http://localhost:3000/mcp";
             headers = {
-              API_KEY = "value";
+              Authorization = "Bearer token";
             };
           };
         }
@@ -246,6 +324,48 @@ in
   };
 
   config = mkIf cfg.enable {
+    # Validate configuration
+    assertions = [
+      # Validate no port conflicts exist
+      {
+        assertion = !findPortConflicts;
+        message = ''
+          MCP server port conflicts detected:
+          ${concatStringsSep "\n  " (getConflictingPorts)}
+
+          Each MCP server must use a unique port number.
+          See lib/constants.nix for the MCP port allocation (6200-6299).
+        '';
+      }
+
+      # Validate all ports are in the MCP range
+      {
+        assertion = getOutOfRangePorts == [];
+        message = ''
+          MCP servers with ports outside the reserved range (${toString mcpPortMin}-${toString mcpPortMax}):
+          ${concatStringsSep ", " getOutOfRangePorts}
+
+          MCP server ports must be in the range ${toString mcpPortMin}-${toString mcpPortMax}.
+          See lib/constants.nix for port allocation.
+        '';
+      }
+
+      # Validate at least one target is configured
+      {
+        assertion = cfg.targets != {};
+        message = ''
+          MCP is enabled but no targets are configured.
+
+          You must configure at least one target application (e.g., cursor, claude-code).
+          Example:
+            services.mcp.targets.cursor = {
+              directory = "''${config.home.homeDirectory}/.cursor";
+              fileName = "mcp.json";
+            };
+        '';
+      }
+    ];
+
     # Generate MCP configuration files in ~/.mcp-generated/
     home.file = builtins.listToAttrs (
       mapAttrsToList (name: target: {
