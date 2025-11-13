@@ -1,10 +1,10 @@
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    pwvucontrol
-    pulsemixer
-    pamixer
-    playerctl
+  home.packages = [
+    pkgs.pwvucontrol
+    pkgs.pulsemixer
+    pkgs.pamixer
+    pkgs.playerctl
   ];
   systemd.user.services.setup-audio-routing = {
     Unit = {
