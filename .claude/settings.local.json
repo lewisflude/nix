@@ -28,7 +28,8 @@
       "Bash(./scripts/auto-format-nix.sh)",
       "Bash(./scripts/load-context.sh:*)",
       "Bash(sudo cat:*)",
-      "Bash(gpg --list-secret-keys:*)"
+      "Bash(gpg --list-secret-keys:*)",
+      "Bash(treefmt)"
     ],
     "deny": [
       "Read(**/.env)",

@@ -6,5 +6,8 @@
 
     # Optional profile (additional tools and features)
     ./profiles/optional.nix
+
+    # SOPS configuration for user-level secrets
+    ./sops.nix
   ];
 }
