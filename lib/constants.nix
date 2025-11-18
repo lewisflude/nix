@@ -55,6 +55,7 @@
       comfyui = 8188;
       janitorr = 8485;
       profilarr = 3001;
+      cleanuparr = 11011;
 
       # Productivity
       calcom = 3000; # Note: Conflicts with jellystat
@@ -111,8 +112,14 @@
 
     # DNS servers
     dns = {
-      cloudflare = [ "1.1.1.1" "1.0.0.1" ];
-      google = [ "8.8.8.8" "8.8.4.4" ];
+      cloudflare = [
+        "1.1.1.1"
+        "1.0.0.1"
+      ];
+      google = [
+        "8.8.8.8"
+        "8.8.4.4"
+      ];
     };
   };
 

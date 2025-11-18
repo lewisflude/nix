@@ -81,6 +81,14 @@ in
       };
     };
 
+    cleanuparr = mkOption {
+      type = types.attrsOf types.anything;
+      default = {
+        enable = false;
+      };
+      description = "Cleanuparr download queue cleanup automation configuration";
+    };
+
     termix = {
       enable = mkOption {
         type = types.bool;
