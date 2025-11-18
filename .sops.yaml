@@ -12,6 +12,7 @@ creation_rules:
     age:
       - "age1dn3panz9kx6g6petqm8lyund72gslwt29p6grlq9cf5t3cd68gcqxlv289"
       - "age15q885zhzw0x5kk75upc30cql3nhkj7ugrxr0gs80tds988acgetszzd4px"
+      - "age16n0u0yyq4rnasr02a2e09x9pnsqx0ztynzkaada4x2k8haqne53svfd8zp"
   # User secrets - prioritize age for convenience, include Darwin key
   - path_regex: secrets/user\.yaml$
     age:

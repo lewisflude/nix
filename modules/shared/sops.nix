@@ -39,26 +39,26 @@ let
     };
 in
 {
-  sops = lib.mkIf (isLinux || isDarwin) {
-    age = {
-      keyFile = keyFilePath;
-      generateKey = true;
+  sops = lib.mkIf (isLinux || isDarwin) (
+    {
+      age = {
+        keyFile = keyFilePath;
+        generateKey = true;
+      };
+      defaultSopsFile = ../../secrets/secrets.yaml;
+      secrets = {
+        CIRCLECI_TOKEN = mkSecret { allowUserRead = true; };
+        GITHUB_TOKEN = mkSecret { allowUserRead = true; };
+        LATITUDE = mkSecret { };
+        LONGITUDE = mkSecret { };
+        HOME_ASSISTANT_BASE_URL = mkSecret { };
+        KAGI_API_KEY = mkSecret { allowUserRead = true; };
+        OBSIDIAN_API_KEY = mkSecret { allowUserRead = true; };
+        OPENAI_API_KEY = mkSecret { allowUserRead = true; };
+      };
     }
-    // lib.optionalAttrs isLinux {
-      sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-    };
-    defaultSopsFile = ../../secrets/secrets.yaml;
-    secrets = {
-      CIRCLECI_TOKEN = mkSecret { allowUserRead = true; };
-      GITHUB_TOKEN = mkSecret { allowUserRead = true; };
-      LATITUDE = mkSecret { };
-      LONGITUDE = mkSecret { };
-      HOME_ASSISTANT_BASE_URL = mkSecret { };
-      KAGI_API_KEY = mkSecret { allowUserRead = true; };
-      OBSIDIAN_API_KEY = mkSecret { allowUserRead = true; };
-      OPENAI_API_KEY = mkSecret { allowUserRead = true; };
-    };
-  };
+    // lib.optionalAttrs isLinux { sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ]; }
+  );
 
   assertions = lib.optionals (isLinux || isDarwin) [
     {
