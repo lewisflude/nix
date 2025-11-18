@@ -66,4 +66,10 @@ in
     email = "lewis@lewisflude.com";
   };
 
+  # Open-WebUI configuration (enabled via host.features.aiTools)
+  services.open-webui = {
+    port = constants.ports.services.openWebui; # 7000
+    openFirewall = true;
+  };
+
 }

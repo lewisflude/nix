@@ -94,17 +94,15 @@ let
             python = pkgs.${pythonVersion};
           in
           [
-            (python.withPackages (
-              python-pkgs: [
-                python-pkgs.pip
-                python-pkgs.virtualenv
-                python-pkgs.pytest
-                python-pkgs.black
-                python-pkgs.isort
-                python-pkgs.mypy
-                python-pkgs.ruff
-              ]
-            ))
+            (python.withPackages (python-pkgs: [
+              python-pkgs.pip
+              python-pkgs.virtualenv
+              python-pkgs.pytest
+              python-pkgs.black
+              python-pkgs.isort
+              python-pkgs.mypy
+              python-pkgs.ruff
+            ]))
 
             pkgs.poetry
           ]
