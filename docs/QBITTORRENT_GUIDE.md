@@ -39,7 +39,7 @@ Complete guide for qBittorrent with ProtonVPN in a network namespace.
 │                                                      │
 │  ┌───────────────────────────────────────────────┐  │
 │  │ Systemd Timer: protonvpn-portforward.timer   │  │
-│  │ - Runs every: 45 minutes                     │  │
+│  │ - Runs every: 45 seconds                     │  │
 │  │ - Auto-updates port forwarding               │  │
 │  └───────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────┘
@@ -86,6 +86,7 @@ Downloads Flow:
 ```
 
 **Benefits:**
+
 - Faster download speeds (SSD = 500+ MB/s vs HDD = 100-150 MB/s)
 - Better Jellyfin reliability (no contention with downloads)
 - Extended HDD lifespan (fewer random I/O patterns)
@@ -119,16 +120,19 @@ host.services.mediaManagement.qbittorrent = {
 #### 2. Network Configuration
 
 **VPN Confinement**: Remains unchanged
+
 ```
 qBittorrent → WireGuard (qbt namespace) → ProtonVPN → Internet
 ```
 
 **Port Forwarding**: Automated via NAT-PMP
+
 ```
 ProtonVPN (3600s lease) → Refreshed every 45 minutes → Dynamic port
 ```
 
 **Key Settings:**
+
 - DHT: Enabled (peer discovery)
 - PEX: Enabled (peer distribution)
 - UPnP: Disabled (conflicts with VPN)
@@ -141,11 +145,13 @@ ProtonVPN (3600s lease) → Refreshed every 45 minutes → Dynamic port
 ### Quick Verification
 
 **One-liner to check everything:**
+
 ```bash
 ./scripts/test-vpn-port-forwarding.sh
 ```
 
 **Manual quick checks:**
+
 ```bash
 # 1. Check service status
 systemctl status qbittorrent
@@ -163,6 +169,7 @@ curl -s http://localhost:8080/api/v2/app/webapiVersion
 ### Phase 1: Service Verification (5 minutes)
 
 #### Service Status Check
+
 ```bash
 # All should show "active (running)"
 systemctl status qbittorrent
@@ -172,12 +179,14 @@ systemctl status sonarr
 ```
 
 ✅ Checklist:
+
 - [ ] qBittorrent: `active (running)`
 - [ ] Jellyfin: `active (running)`
 - [ ] Radarr: `active (running)`
 - [ ] Sonarr: `active (running)`
 
 #### Service Logs Check
+
 ```bash
 # Check for startup errors
 journalctl -u qbittorrent -n 50 --no-pager | grep -i "error\|warning\|critical" || echo "No errors found"
@@ -189,6 +198,7 @@ journalctl -u qbittorrent -n 50 --no-pager | grep -i "error\|warning\|critical" 
 ### Phase 2: Storage Configuration (5 minutes)
 
 #### Directory Structure
+
 ```bash
 # Verify SSD staging directory
 ls -ld /mnt/nvme/qbittorrent/incomplete
@@ -202,6 +212,7 @@ stat /mnt/nvme/qbittorrent/incomplete
 - [ ] Permissions allow write (755 or 775)
 
 #### Disk Space Check
+
 ```bash
 # Check SSD space
 df -h /mnt/nvme/qbittorrent/incomplete
@@ -214,6 +225,7 @@ df -h /mnt/storage
 - [ ] HDD has at least 200GB free
 
 #### Category Directories
+
 ```bash
 # Verify category directories
 ls -ld /mnt/storage/{movies,tv,music,books,pc}
@@ -224,6 +236,7 @@ ls -ld /mnt/storage/{movies,tv,music,books,pc}
 ### Phase 3: VPN & Port Forwarding (5 minutes)
 
 #### VPN Namespace Verification
+
 ```bash
 # Verify namespace exists
 sudo ip netns list | grep qbt
@@ -236,6 +249,7 @@ sudo ip netns exec qbt curl -s https://api.ipify.org
 - [ ] IP address is ProtonVPN (not ISP)
 
 #### Port Forwarding Verification
+
 ```bash
 # Run comprehensive monitoring
 ./scripts/monitor-protonvpn-portforward.sh
@@ -248,6 +262,7 @@ sudo ip netns exec qbt natpmpc -a 1 0 tcp 60 -g 10.2.0.1 | grep "Mapped public p
 - [ ] Timer is running: `systemctl status protonvpn-portforward.timer`
 
 #### qBittorrent Configuration
+
 ```bash
 # Verify port is listening
 sudo ip netns exec qbt ss -tuln | grep qbittorrent
@@ -260,17 +275,20 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
 
 #### Radarr/Sonarr Configuration
 
-**Radarr** (http://192.168.1.210:7878):
+**Radarr** (<http://192.168.1.210:7878>):
+
 1. Go to **Settings → Download Clients**
 2. Verify qBittorrent client configured
 3. Test connection
 
-**Sonarr** (http://192.168.1.210:8989):
+**Sonarr** (<http://192.168.1.210:8989>):
+
 1. Go to **Settings → Download Clients**
 2. Verify qBittorrent client configured
 3. Test connection
 
 #### Download Test
+
 ```bash
 # Add a test torrent (Linux ISO, etc.)
 # Verify:
@@ -286,6 +304,7 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
 ### Phase 5: Performance Baseline (10 minutes)
 
 #### Metrics Collection
+
 ```bash
 # One-time report
 ./scripts/monitor-hdd-storage.sh
@@ -295,6 +314,7 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
 ```
 
 **Record baselines:**
+
 - [ ] SSD usage for staging
 - [ ] HDD usage for final storage
 - [ ] HDD I/O utilization (should be <40%)
@@ -320,6 +340,7 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
 **Symptoms:** 4K movies buffer while qBittorrent seeds
 
 **Solutions:**
+
 1. Reduce `maxActiveTorrents` to 100-120
 2. Reduce `maxActiveUploads` to 50
 3. Temporarily pause some torrents while streaming
@@ -329,6 +350,7 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
 **Symptoms:** No incoming peer connections
 
 **Quick Verification:**
+
 ```bash
 # Run verification script
 ./scripts/verify-qbittorrent-vpn.sh
@@ -337,6 +359,7 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
 **Common Causes:**
 
 1. **VPN Namespace Issues**
+
    ```bash
    # Check namespace exists
    sudo ip netns list | grep qbt
@@ -346,6 +369,7 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
    ```
 
 2. **NAT-PMP Fails**
+
    ```bash
    # Check service logs
    journalctl -u protonvpn-portforward.service -n 50
@@ -354,6 +378,7 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
    ```
 
 3. **Timer Not Running**
+
    ```bash
    # Check timer status
    systemctl status protonvpn-portforward.timer
@@ -367,11 +392,13 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
 **Diagnostic Steps:**
 
 1. **Run Comprehensive Check**
+
    ```bash
    ./scripts/diagnose-qbittorrent-seeding.sh
    ```
 
 2. **Check VPN Firewall**
+
    ```bash
    # Verify iptables allows connections
    sudo ip netns exec qbt iptables -L INPUT -n -v
@@ -387,11 +414,14 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
 **Symptoms:** `/mnt/nvme/qbittorrent/incomplete` >80% full
 
 **Solutions:**
+
 1. Check Radarr/Sonarr completed download handling is enabled
 2. List stalled downloads:
+
    ```bash
    ls -lh /mnt/nvme/qbittorrent/incomplete/
    ```
+
 3. Manually move/remove stalled files
 4. Reduce concurrent downloads
 
@@ -400,12 +430,15 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
 **Symptoms:** Only 50-100 MB/s on fast connection
 
 **Solutions:**
+
 1. Check connection limits in qBittorrent UI
 2. Verify peer count (high = faster)
 3. Test ISP throttling:
+
    ```bash
    ./scripts/test-sped.sh
    ```
+
 4. Ensure VPN doesn't have bandwidth limits
 
 ### Diagnostic Scripts
@@ -430,6 +463,7 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
 ### VPN Namespace Troubleshooting
 
 **Namespace doesn't exist:**
+
 ```bash
 # Check service
 systemctl status qbt.service
@@ -439,6 +473,7 @@ sudo systemctl restart qbt.service
 ```
 
 **Can't reach gateway:**
+
 ```bash
 # Check WireGuard status
 sudo ip netns exec qbt wg show
@@ -474,6 +509,7 @@ sudo smartctl -H /dev/sd[abc]
 ### Monthly Tasks
 
 1. **Archive Old Media**
+
    ```bash
    # Check space usage
    du -sh /mnt/storage/* | sort -hr
@@ -547,6 +583,7 @@ host.services.mediaManagement.qbittorrent = {
 If issues occur after configuration changes:
 
 ### Rollback NixOS Configuration
+
 ```bash
 # Revert to previous generation
 sudo nixos-rebuild switch --rollback
@@ -557,6 +594,7 @@ sudo nixos-rebuild switch --profile /nix/var/nix/profiles/system --switch-genera
 ```
 
 ### Restore qBittorrent Config Only
+
 ```bash
 # Stop service
 sudo systemctl stop qbittorrent
