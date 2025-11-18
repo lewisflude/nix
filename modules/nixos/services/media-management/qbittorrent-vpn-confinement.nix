@@ -130,12 +130,17 @@ in
         # Ensure qbittorrent service depends on network setup
         wants = [ "network-online.target" ];
 
-        # Bind-mount custom nsswitch.conf to fix DNS resolution
-        # This ensures the service uses the simplified NSS config that bypasses systemd-resolved
+        # NOTE: Custom nsswitch.conf is available at /etc/netns/${vpnCfg.namespace}/nsswitch.conf
+        # but we don't bind-mount it due to NixOS store path issues after rebuilds.
+        # The VPN namespace already has proper DNS configured via /etc/resolv.conf,
+        # and the simplified nsswitch.conf is available if manual configuration is needed.
+        #
+        # If DNS issues occur, you can manually bind-mount with:
+        # BindReadOnlyPaths = [ "/etc/netns/${vpnCfg.namespace}/nsswitch.conf:/etc/nsswitch.conf:norbind" ]
+        # But be aware this may require `systemctl restart qbittorrent.service` after rebuilds.
         serviceConfig = {
-          BindReadOnlyPaths = [
-            "/etc/netns/${vpnCfg.namespace}/nsswitch.conf:/etc/nsswitch.conf:norbind"
-          ];
+          # Service will use default nsswitch.conf with DNS from VPN's resolv.conf
+          # This is more robust across NixOS rebuilds than bind-mounting
         };
       };
 

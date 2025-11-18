@@ -44,7 +44,10 @@ in
   config = mkIf (cfg.enable && cfg.cleanuparr.enable) {
     virtualisation.oci-containers.containers.cleanuparr = {
       image = "ghcr.io/cleanuparr/cleanuparr:latest";
-      user = "${toString cfg.uid}:${toString cfg.gid}";
+      # NOTE: Removed 'user' setting to allow container to run as root.
+      # The container's entrypoint needs to chown files in /app during startup.
+      # PUID/PGID environment variables are still set for the application's
+      # internal user management after initial setup.
       environment = {
         PORT = toString cfg.cleanuparr.port;
         PUID = toString cfg.uid;
