@@ -72,7 +72,8 @@ in
       ];
     masApps = {
       "Kagi Search" = 1622835804;
-      "Xcode" = 497799835;
+      # Note: Xcode should be installed manually from App Store or using: mas install 497799835
+      # Automated installation via mas often fails due to size and App Store service issues
       "Yubico Authenticator" = 1497506650;
       "Keka" = 470158793;
     };
