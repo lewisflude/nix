@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nix --version:*)",
+      "Bash(nix flake metadata:*)",
+      "Bash(nix flake show:*)",
+      "Bash(nix flake check:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -28,9 +28,10 @@
     sops-nix = {
       url = "github:Mic92/sops-nix";
     };
-    mac-app-util = {
-      url = "github:hraban/mac-app-util";
-    };
+    # Temporarily disabled due to upstream SBCL build failure
+    # mac-app-util = {
+    #   url = "github:hraban/mac-app-util";
+    # };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     homebrew-j178 = {
       url = "github:j178/homebrew-tap";
