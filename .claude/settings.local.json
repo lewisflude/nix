@@ -1,12 +1,66 @@
 {
   "permissions": {
     "allow": [
-      "Bash(nix --version:*)",
-      "Bash(nix flake metadata:*)",
-      "Bash(nix flake show:*)",
-      "Bash(nix flake check:*)"
+      "Bash(nix:*)",
+      "Bash(git:*)",
+      "Bash(nh:*)",
+      "Bash(home-manager:*)",
+      "Bash(ls:*)",
+      "Bash(tree:*)",
+      "Bash(which:*)",
+      "Bash(echo:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(./scripts/:*)",
+      "WebSearch",
+      "WebFetch(domain:code.claude.com)"
     ],
-    "deny": [],
-    "ask": []
-  }
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Edit(**/.env)",
+      "Edit(**/.env.*)",
+      "Read(**/secrets/**)",
+      "Edit(**/secrets/**)",
+      "Read(**/*secret*)",
+      "Edit(**/*secret*)",
+      "Read(**/*credentials*)",
+      "Edit(**/*credentials*)",
+      "Bash(nh os switch:*)",
+      "Bash(nh os boot:*)",
+      "Bash(sudo nixos-rebuild:*)",
+      "Bash(sudo darwin-rebuild:*)",
+      "Bash(darwin-rebuild switch:*)",
+      "Bash(darwin-rebuild activate:*)",
+      "Bash(nixos-rebuild switch:*)",
+      "Bash(nixos-rebuild boot:*)",
+      "Bash(rm -rf:*)",
+      "Bash(sudo rm:*)"
+    ],
+    "ask": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -fd:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$FILE_PATH\" == *.nix ]]; then nix fmt \"$FILE_PATH\" 2>/dev/null || true; fi"
+          }
+        ]
+      }
+    ]
+  },
+  "env": {},
+  "model": "claude-sonnet-4-5-20250929",
+  "cleanupPeriodDays": 30
 }
