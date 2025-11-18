@@ -28,7 +28,7 @@ in
         pkgs.seahorse # GNOME password and encryption key manager (PGP/GPG GUI) - Linux only
       ]
       [
-        pkgs.xcodebuild
+        # Darwin packages - xcodebuild moved to home/darwin/
       ];
 
   programs.htop.enable = true;
