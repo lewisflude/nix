@@ -2,6 +2,64 @@
 
 Utility scripts for managing NixOS configuration and services.
 
+## Claude Code Hook Scripts
+
+These scripts are used by Claude Code hooks (see `.claude/settings.json`) to enforce code quality and safety standards.
+
+### `block-dangerous-commands.sh`
+
+**Hook**: PreToolUse (Bash)
+**Purpose**: Blocks dangerous commands before execution
+
+**Blocked operations**:
+- System rebuilds (`nh os switch`, `nixos-rebuild`, `darwin-rebuild`)
+- Destructive file operations (`rm -rf`, `mv to /dev/null`)
+- Git force operations (`git push --force`, `git reset --hard`)
+- Production host access (patterns: `prod*`, `production*`, `*-prod`, `*-production`)
+
+**Exit codes**:
+- `0`: Command allowed
+- `2`: Command blocked (shown to Claude)
+
+### `auto-format-nix.sh`
+
+**Hook**: PostToolUse (Write|Edit)
+**Purpose**: Automatically formats Nix files after editing
+
+**Behavior**:
+- Runs `nixfmt` on all `.nix` files after Write/Edit operations
+- Blocks (exit 2) if formatting fails (indicates syntax errors)
+- Skips non-Nix files silently
+
+**Requirements**: `nixfmt` must be in PATH (available in `nix develop`)
+
+### `strict-lint-check.sh`
+
+**Hook**: PostToolUse (Write|Edit)
+**Purpose**: Enforces code quality standards and architectural guidelines
+
+**Checks**:
+- **statix**: Nix antipattern detection
+- **deadnix**: Unused code detection
+- **with pkgs;**: Antipattern from CLAUDE.md
+- **Module placement**: Validates system vs home-manager separation
+
+**Exit codes**:
+- `0`: All checks passed
+- `2`: Issues found (blocks Claude, requires fixes)
+
+### `load-context.sh`
+
+**Hook**: SessionStart
+**Purpose**: Loads project context when Claude Code starts
+
+**Output** (added to Claude's context):
+- Current git branch
+- Last 3 commits
+- Working tree status
+
+**Performance**: Minimal overhead (~100ms)
+
 ## qBittorrent & ProtonVPN Scripts
 
 ### `protonvpn-natpmp-portforward.sh`
