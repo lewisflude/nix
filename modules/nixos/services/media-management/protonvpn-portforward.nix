@@ -75,8 +75,8 @@ in
 
     renewInterval = mkOption {
       type = types.str;
-      default = "45min";
-      description = "How often to renew the port forwarding lease (NAT-PMP leases expire after ~60min)";
+      default = "45s";
+      description = "How often to renew the port forwarding lease (ProtonVPN official: 60s lease, 45s renewal)";
     };
 
     namespace = mkOption {
@@ -160,8 +160,8 @@ in
           after = [ "${vpnCfg.namespace}.service" ];
 
           timerConfig = {
-            OnBootSec = "3min"; # Run 3 minutes after boot (give VPN time to establish)
-            OnUnitActiveSec = qbittorrentCfg.vpn.portForwarding.renewInterval; # Renew every 45 minutes
+            OnBootSec = "1min"; # Run 1 minute after boot (give VPN time to establish)
+            OnUnitActiveSec = qbittorrentCfg.vpn.portForwarding.renewInterval; # Renew every 45 seconds (per ProtonVPN official docs)
             Unit = "protonvpn-portforward.service";
             Persistent = true; # Run missed timers on boot
             AccuracySec = "1min"; # Allow some jitter

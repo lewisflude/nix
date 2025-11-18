@@ -11,26 +11,33 @@
 **Manual quick checks:**
 
 ```bash
-# 1. Get ProtonVPN port
+# 1. Get ProtonVPN port (UDP)
+sudo ip netns exec qbt natpmpc -a 1 0 udp 60 -g 10.2.0.1 | grep "Mapped public port"
+
+# 2. Get ProtonVPN port (TCP) - should match UDP
 sudo ip netns exec qbt natpmpc -a 1 0 tcp 60 -g 10.2.0.1 | grep "Mapped public port"
 
-# 2. Get qBittorrent port
+# 3. Get qBittorrent port
 sudo grep "Session\\Port" /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf
 
-# 3. Compare ports
+# 4. Compare ports
 echo "ProtonVPN: $(sudo ip netns exec qbt natpmpc -a 1 0 tcp 60 -g 10.2.0.1 2>/dev/null | grep 'Mapped public port' | awk '{print $4}')"
 echo "qBittorrent: $(sudo grep 'Session\\Port' /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf | cut -d'=' -f2)"
 
-# 4. Check listening
+# 5. Check listening
 sudo ip netns exec qbt ss -tulnp | grep qbittorrent
 
-# 5. Check service
+# 6. Check service
 systemctl status protonvpn-portforward.service
 ```
 
 ## Overview
 
-Automated NAT-PMP port forwarding for qBittorrent running in a VPN-confined namespace with ProtonVPN.
+Automated NAT-PMP port forwarding for qBittorrent running in a VPN-confined namespace with ProtonVPN. This implementation follows ProtonVPN's official documentation exactly:
+
+- **Lease Duration**: 60 seconds
+- **Renewal Interval**: 45 seconds (75% of lease duration)
+- **Protocol Support**: Both UDP and TCP port mappings
 
 ## Architecture
 
@@ -102,11 +109,12 @@ Main script that handles port forwarding workflow.
 **Workflow**:
 
 1. Checks VPN namespace exists and is reachable
-2. Queries NAT-PMP gateway (10.2.0.1) for forwarded port
-3. Compares with current qBittorrent configuration
-4. Updates qBittorrent config if port changed
-5. Restarts qBittorrent service
-6. Verifies port is listening
+2. Queries NAT-PMP gateway (10.2.0.1) for forwarded port (both UDP and TCP)
+3. Verifies both protocols receive the same port assignment
+4. Compares with current qBittorrent configuration
+5. Updates qBittorrent config if port changed
+6. Updates VPN namespace firewall rules for new port
+7. Verifies port is listening
 
 ### 4. Monitoring Script
 
@@ -156,7 +164,7 @@ host.services.mediaManagement.qbittorrent.vpn = {
 ```nix
 host.services.mediaManagement.qbittorrent.vpn.portForwarding = {
   enable = true;              # Default: true
-  renewInterval = "45min";    # How often to renew (NAT-PMP leases ~60min)
+  renewInterval = "45s";      # How often to renew (ProtonVPN official: 60s lease, 45s renewal)
   gateway = "10.2.0.1";       # ProtonVPN gateway
 };
 ```
@@ -237,13 +245,17 @@ sudo ip netns exec qbt curl -s https://api.ipify.org
 ### ? Phase 2: Port Forwarding
 
 - [ ] `natpmpc` is available
-- [ ] NAT-PMP query succeeds
+- [ ] NAT-PMP query succeeds for both UDP and TCP
 - [ ] Port is assigned (typically 49152-65535)
+- [ ] Both protocols receive the same port
 - [ ] Timer is active and scheduled
 
 ```bash
 which natpmpc
-sudo ip netns exec qbt natpmpc -a 0 0 tcp 60 -g 10.2.0.1
+# Test UDP mapping
+sudo ip netns exec qbt natpmpc -a 1 0 udp 60 -g 10.2.0.1
+# Test TCP mapping
+sudo ip netns exec qbt natpmpc -a 1 0 tcp 60 -g 10.2.0.1
 systemctl status protonvpn-portforward.timer
 ```
 

@@ -7,7 +7,7 @@ set -euo pipefail
 # Configuration (from environment or defaults)
 NAMESPACE="${NAMESPACE:-qbt}"
 VPN_GATEWAY="${VPN_GATEWAY:-10.2.0.1}"
-LEASE_DURATION=3600  # seconds (60 minutes)
+LEASE_DURATION=60  # seconds (60 seconds per ProtonVPN official docs)
 QBITTORRENT_HOST="${QBITTORRENT_HOST:-127.0.0.1:8080}"
 QBITTORRENT_USERNAME="${QBITTORRENT_USERNAME:-admin}"
 QBITTORRENT_PASSWORD="${QBITTORRENT_PASSWORD:-admin}"
@@ -42,25 +42,45 @@ check_natpmpc() {
 get_forwarded_port() {
     log_info "Querying ProtonVPN NAT-PMP for port assignment..."
 
-    # Request port mapping (ProtonVPN assigns a random port)
+    # Request BOTH UDP and TCP port mappings (required per ProtonVPN documentation)
     # Use internal port 1, external port 0 (let ProtonVPN assign)
     # MUST run inside VPN namespace to reach gateway
-    local output
-    output=$(ip netns exec "${NAMESPACE}" "${NATPMPC}" -a 1 0 tcp "$LEASE_DURATION" -g "$VPN_GATEWAY" 2>&1 || true)
+    local udp_output
+    local tcp_output
 
-    if echo "$output" | grep -q "Mapped public port"; then
-        local public_port
-        public_port=$(echo "$output" | grep -oP 'Mapped public port \K[0-9]+' || echo "0")
+    log_info "Requesting UDP port mapping..."
+    udp_output=$(ip netns exec "${NAMESPACE}" "${NATPMPC}" -a 1 0 udp "$LEASE_DURATION" -g "$VPN_GATEWAY" 2>&1 || true)
 
-        if [[ "$public_port" -gt 0 ]]; then
-            log_success "ProtonVPN assigned port: $public_port"
-            echo "$public_port"
+    log_info "Requesting TCP port mapping..."
+    tcp_output=$(ip netns exec "${NAMESPACE}" "${NATPMPC}" -a 1 0 tcp "$LEASE_DURATION" -g "$VPN_GATEWAY" 2>&1 || true)
+
+    # ProtonVPN should assign the same port for both protocols
+    local udp_port=0
+    local tcp_port=0
+
+    if echo "$udp_output" | grep -q "Mapped public port"; then
+        udp_port=$(echo "$udp_output" | grep -oP 'Mapped public port \K[0-9]+' || echo "0")
+    fi
+
+    if echo "$tcp_output" | grep -q "Mapped public port"; then
+        tcp_port=$(echo "$tcp_output" | grep -oP 'Mapped public port \K[0-9]+' || echo "0")
+    fi
+
+    # Verify both protocols got the same port
+    if [[ "$udp_port" -gt 0 ]] && [[ "$tcp_port" -gt 0 ]]; then
+        if [[ "$udp_port" == "$tcp_port" ]]; then
+            log_success "ProtonVPN assigned port: $tcp_port (UDP+TCP)"
+            echo "$tcp_port"
             return 0
+        else
+            log_error "Port mismatch: UDP=$udp_port, TCP=$tcp_port"
+            return 1
         fi
     fi
 
     log_error "Failed to get port from NAT-PMP"
-    log_error "NAT-PMP output: $output"
+    log_error "UDP output: $udp_output"
+    log_error "TCP output: $tcp_output"
     return 1
 }
 
