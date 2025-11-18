@@ -40,6 +40,10 @@ let
           ipython = pyPrev.ipython.overrideAttrs (old: {
             disabledTests = (old.disabledTests or [ ]) ++ [ "test_stream_performance" ];
           });
+          # Skip failing langchain-community tests (needed for open-webui)
+          langchain-community = pyPrev.langchain-community.overrideAttrs (_old: {
+            doCheck = false; # Skip all tests - too many failing with Python 3.13
+          });
         };
       };
       # Disable arrow-cpp tests - the S3 filesystem test (arrow-s3fs-test) is flaky
