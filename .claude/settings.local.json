@@ -15,8 +15,12 @@
       "Bash(curl:*)",
       "Bash(wget:*)",
       "Bash(./scripts/:*)",
+      "Edit",
+      "Write",
+      "NotebookEdit",
+      "SlashCommand",
       "WebSearch",
-      "WebFetch(domain:code.claude.com)"
+      "WebFetch"
     ],
     "deny": [
       "Read(**/.env)",
