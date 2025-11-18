@@ -39,39 +39,41 @@ let
     };
 in
 {
-  sops = lib.mkIf (isLinux || isDarwin) (
-    {
-      age = {
-        keyFile = keyFilePath;
-        generateKey = true;
-      };
-      defaultSopsFile = ../../secrets/secrets.yaml;
-      secrets = {
-        CIRCLECI_TOKEN = mkSecret { allowUserRead = true; };
-        GITHUB_TOKEN = mkSecret { allowUserRead = true; };
-        LATITUDE = mkSecret { };
-        LONGITUDE = mkSecret { };
-        HOME_ASSISTANT_BASE_URL = mkSecret { };
-        KAGI_API_KEY = mkSecret { allowUserRead = true; };
-        OBSIDIAN_API_KEY = mkSecret { allowUserRead = true; };
-        OPENAI_API_KEY = mkSecret { allowUserRead = true; };
-      };
-    }
-    // lib.optionalAttrs isLinux { sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ]; }
-  );
+  sops = lib.mkIf (isLinux || isDarwin) {
+    age = {
+      # Use mkForce for keyFile and generateKey to ensure consistency across modules
+      keyFile = lib.mkForce keyFilePath;
+      generateKey = lib.mkForce true;
+      # On Linux, use SSH host keys; on Darwin, explicitly disable to prevent auto-detection
+      sshKeyPaths = if isLinux then [ "/etc/ssh/ssh_host_ed25519_key" ] else [ ];
+    };
+    # On Linux, use RSA key for gnupg; on Darwin, disable to prevent auto-detection
+    gnupg.sshKeyPaths = if isLinux then [ "/etc/ssh/ssh_host_rsa_key" ] else [ ];
+    defaultSopsFile = ../../secrets/secrets.yaml;
+    secrets = {
+      CIRCLECI_TOKEN = mkSecret { allowUserRead = true; };
+      GITHUB_TOKEN = mkSecret { allowUserRead = true; };
+      LATITUDE = mkSecret { };
+      LONGITUDE = mkSecret { };
+      HOME_ASSISTANT_BASE_URL = mkSecret { };
+      KAGI_API_KEY = mkSecret { allowUserRead = true; };
+      OBSIDIAN_API_KEY = mkSecret { allowUserRead = true; };
+      OPENAI_API_KEY = mkSecret { allowUserRead = true; };
+    };
+  };
 
   assertions = lib.optionals (isLinux || isDarwin) [
     {
-      assertion = config.sops.secrets != { } -> config.sops.age.keyFile != null;
+      assertion = lib.length (lib.attrNames config.sops.secrets) > 0 -> config.sops.age.keyFile != null;
       message = "SOPS secrets are defined but no age key file is specified";
     }
     {
-      assertion = config.sops.secrets != { } -> config.sops.defaultSopsFile != null;
+      assertion = lib.length (lib.attrNames config.sops.secrets) > 0 -> config.sops.defaultSopsFile != null;
       message = "SOPS secrets are defined but no default SOPS file is specified";
     }
     {
       assertion =
-        config.sops.secrets != { } -> builtins.pathExists (toString config.sops.defaultSopsFile);
+        lib.length (lib.attrNames config.sops.secrets) > 0 -> builtins.pathExists (toString config.sops.defaultSopsFile);
       message = "SOPS default file does not exist: ${toString config.sops.defaultSopsFile}";
     }
   ];
