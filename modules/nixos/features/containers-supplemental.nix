@@ -22,6 +22,7 @@ in
       calcom = cfg.calcom or { };
       profilarr = cfg.profilarr or { };
       termix = cfg.termix or { };
+      cleanuparr = cfg.cleanuparr or { };
     };
   };
 }

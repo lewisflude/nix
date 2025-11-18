@@ -128,7 +128,7 @@ in
         models = [ "llama2" ];
       };
       openWebui = {
-        enable = true;
+        enable = false;
       };
     };
 
@@ -194,6 +194,11 @@ in
             };
           };
         };
+      };
+
+      cleanuparr = {
+        enable = true;
+        dataPath = "/mnt/storage";
       };
 
       calcom = {

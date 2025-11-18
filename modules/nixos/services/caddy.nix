@@ -338,6 +338,18 @@ in
           '';
         };
 
+        # Cleanuparr (Download Queue Cleanup)
+        "cleanuparr.blmt.io" = {
+          extraConfig = ''
+            reverse_proxy localhost:11011 {
+              header_up X-Real-IP {remote_host}
+              header_up X-Forwarded-For {remote_host}
+              header_up X-Forwarded-Proto {scheme}
+            }
+            encode zstd gzip
+          '';
+        };
+
         # Komga (Comics)
         "comics.blmt.io" = {
           extraConfig = ''
