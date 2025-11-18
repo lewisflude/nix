@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 let
@@ -9,7 +8,6 @@ let
     mkIf
     mkAfter
     mkOption
-    mkPackageOption
     types
     ;
   inherit (lib.lists) optional;
@@ -34,36 +32,13 @@ in
     };
 
     openWebui = {
-      package = mkPackageOption pkgs "open-webui" { };
-
-      host = mkOption {
-        type = types.str;
-        default = "0.0.0.0";
-        description = "Host address to bind to";
-      };
-
-      openFirewall = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Whether to open the firewall for Open WebUI";
-      };
-
-      stateDir = mkOption {
-        type = types.str;
-        default = "/var/lib/open-webui";
-        description = "Directory for Open WebUI state";
-      };
-
       ollamaUrl = mkOption {
         type = types.str;
         default = "http://127.0.0.1:${toString constants.ports.services.ollama}";
-        description = "URL to Ollama backend";
-      };
-
-      environmentFile = mkOption {
-        type = types.nullOr types.path;
-        default = null;
-        description = "Path to environment file for sensitive configuration";
+        description = ''
+          URL to Ollama backend.
+          Configure other options directly via `services.open-webui.*`
+        '';
       };
     };
   };
@@ -126,21 +101,14 @@ in
         '';
     };
 
-    # Configure Open WebUI
+    # Configure Open WebUI with sensible defaults
+    # Users can override via services.open-webui.* for advanced configuration
     services.open-webui = mkIf cfg.openWebui.enable {
       enable = true;
-      inherit (cfg.openWebui)
-        package
-        port
-        host
-        stateDir
-        openFirewall
-        ;
       environment = {
         OLLAMA_BASE_URL = cfg.openWebui.ollamaUrl;
         WEBUI_AUTH = "True";
       };
-      inherit (cfg.openWebui) environmentFile;
     };
 
     # Override Open WebUI user/group to match aiTools configuration

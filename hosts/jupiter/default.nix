@@ -129,7 +129,6 @@ in
       };
       openWebui = {
         enable = true;
-        port = 7000;
       };
     };
 
