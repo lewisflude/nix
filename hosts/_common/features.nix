@@ -77,8 +77,7 @@
       models = [ ];
     };
     openWebui = {
-      enable = true;
-      port = 7000;
+      enable = false;
     };
   };
 
