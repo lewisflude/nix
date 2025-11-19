@@ -9,6 +9,7 @@
 
   determinate-nix.customSettings = {
     flake-registry = "/etc/nix/flake-registry.json";
+    "sandbox" = "relaxed";
   };
 
   environment.etc."nix/nix.custom.conf" = {
@@ -55,7 +56,9 @@
       narinfo-cache-negative-ttl = 1
 
 
-      sandbox = true
+      # Sandbox must be disabled on macOS when using certain derivations (like fish 4.x)
+      # that specify their own sandbox profiles, which conflicts with Nix's sandbox.
+      # sandbox = false
 
 
       connect-timeout = 5
