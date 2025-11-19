@@ -11,6 +11,7 @@ This module provides declarative configuration for a complete media management s
 - **Sonarr** (port 8989) - TV show collection manager
 - **Lidarr** (port 8686) - Music collection manager
 - **Readarr** (port 8787) - Book/ebook collection manager
+- **Listenarr** (port 5000) - Audiobook collection manager (OCI container)
 
 ### Download Clients
 
@@ -55,6 +56,7 @@ This enables all services with default settings.
     # Disable services you don't need
     lidarr.enable = false;
     readarr.enable = false;
+    listenarr.enable = false;
   };
 }
 ```
@@ -90,6 +92,7 @@ Native services store their data in standard NixOS locations:
 - `/var/lib/sonarr`
 - `/var/lib/lidarr`
 - `/var/lib/readarr`
+- `/var/lib/listenarr` (OCI container volume)
 - `/var/lib/sabnzbd`
 - `/var/lib/jellyfin`
 - `/var/lib/jellyseerr`
@@ -104,7 +107,8 @@ Configure via `dataPath` option (default: `/mnt/storage`):
 │   ├── movies/
 │   ├── tv/
 │   ├── music/
-│   └── books/
+│   ├── books/
+│   └── audiobooks/
 └── usenet/
 ```
 
@@ -199,6 +203,7 @@ media-management/
 ├── sonarr.nix          # Sonarr configuration
 ├── lidarr.nix          # Lidarr configuration
 ├── readarr.nix         # Readarr configuration
+├── listenarr.nix       # Listenarr audiobook management (OCI container)
 ├── sabnzbd.nix         # SABnzbd configuration
 ├── jellyfin.nix        # Jellyfin configuration
 ├── jellyseerr.nix      # Jellyseerr configuration

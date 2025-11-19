@@ -40,6 +40,7 @@
       radarr = 7878;
       lidarr = 8686;
       readarr = 8787;
+      listenarr = 5000;
       prowlarr = 9696;
       qbittorrent = 8080;
       sabnzbd = 8082;

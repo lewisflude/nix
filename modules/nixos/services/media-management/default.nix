@@ -8,6 +8,7 @@
     ./sonarr.nix
     ./lidarr.nix
     ./readarr.nix
+    ./listenarr.nix
     ./sabnzbd.nix
     ./qbittorrent.nix
     ./qbittorrent-vpn-confinement.nix

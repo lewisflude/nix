@@ -12,12 +12,14 @@ These scripts are used by Claude Code hooks (see `.claude/settings.json`) to enf
 **Purpose**: Blocks dangerous commands before execution
 
 **Blocked operations**:
+
 - System rebuilds (`nh os switch`, `nixos-rebuild`, `darwin-rebuild`)
 - Destructive file operations (`rm -rf`, `mv to /dev/null`)
 - Git force operations (`git push --force`, `git reset --hard`)
 - Production host access (patterns: `prod*`, `production*`, `*-prod`, `*-production`)
 
 **Exit codes**:
+
 - `0`: Command allowed
 - `2`: Command blocked (shown to Claude)
 
@@ -27,6 +29,7 @@ These scripts are used by Claude Code hooks (see `.claude/settings.json`) to enf
 **Purpose**: Automatically formats Nix files after editing
 
 **Behavior**:
+
 - Runs `nixfmt` on all `.nix` files after Write/Edit operations
 - Blocks (exit 2) if formatting fails (indicates syntax errors)
 - Skips non-Nix files silently
@@ -39,12 +42,14 @@ These scripts are used by Claude Code hooks (see `.claude/settings.json`) to enf
 **Purpose**: Enforces code quality standards and architectural guidelines
 
 **Checks**:
+
 - **statix**: Nix antipattern detection
 - **deadnix**: Unused code detection
 - **with pkgs;**: Antipattern from CLAUDE.md
 - **Module placement**: Validates system vs home-manager separation
 
 **Exit codes**:
+
 - `0`: All checks passed
 - `2`: Issues found (blocks Claude, requires fixes)
 
@@ -54,6 +59,7 @@ These scripts are used by Claude Code hooks (see `.claude/settings.json`) to enf
 **Purpose**: Loads project context when Claude Code starts
 
 **Output** (added to Claude's context):
+
 - Current git branch
 - Last 3 commits
 - Working tree status
@@ -210,6 +216,43 @@ For complete qBittorrent setup and troubleshooting, see `docs/QBITTORRENT_GUIDE.
 
 - `test-vlan2-speed.sh` - Test VLAN2 network speed
 - `test-sped.sh` - Simple speed test wrapper
+
+### Audio & Gaming
+
+#### `diagnose-steam-audio.sh`
+
+Comprehensive diagnostic tool for Steam/Proton audio issues with PipeWire.
+
+**Usage:**
+
+```bash
+# Run diagnostics (Steam can be running or stopped)
+./scripts/diagnose-steam-audio.sh
+```
+
+**Checks:**
+
+1. PipeWire, PipeWire-Pulse, and WirePlumber service status
+2. PulseAudio socket existence and permissions
+3. Available audio sinks in PipeWire
+4. Default sink configuration
+5. WirePlumber device status
+6. Steam process environment variables
+7. Session audio environment variables
+8. Test audio playback
+
+**Common Issues:**
+
+- **Games don't appear in audio mixer:** Missing `SDL_AUDIODRIVER=pulseaudio` or wrong `PULSE_SERVER`
+- **No sound in games but other apps work:** Games using ALSA directly instead of PulseAudio
+- **Intermittent audio failures:** No explicit default sink configured in WirePlumber
+
+**Fixes:**
+
+1. Restart Steam: `steam -shutdown && steam`
+2. Add to game launch options: `SDL_AUDIODRIVER=pulseaudio %command%`
+3. Check logs: `~/.local/share/Steam/logs/`
+4. Enable debug logging: `PULSE_LOG=99 <game>`
 
 ### System Validation
 
