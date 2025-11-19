@@ -79,6 +79,7 @@ in
       timezone = "Europe/London";
 
       unpackerr.enable = false;
+      listenarr.enable = true;
 
       qbittorrent = {
         enable = true;
@@ -113,6 +114,7 @@ in
           sonarr = "/mnt/storage/tv";
           lidarr = "/mnt/storage/music";
           readarr = "/mnt/storage/books";
+          listenarr = "/mnt/storage/audiobooks";
           pc = "/mnt/storage/pc";
           movies = "/mnt/storage/movies";
           tv = "/mnt/storage/tv";

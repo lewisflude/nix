@@ -18,6 +18,31 @@ in
       raopOpenFirewall = true;
       wireplumber = {
         configPackages = [
+          # Explicitly set default sink for Steam/Proton games
+          # This ensures games always connect to the correct audio device on launch
+          # Uses the "Speakers" virtual sink created by apogee-speakers-loopback service
+          (pkgs.writeTextDir "share/wireplumber/main.lua.d/50-default-devices.lua" ''
+            -- Set explicit default sink for Steam/Proton compatibility
+            -- Without this, games may fail to initialize audio or pick wrong device
+            default_policy.policy["audio.default.sink"] = "Speakers"
+          '')
+          # Set priorities to ensure consistent default device for Wine/Proton
+          (pkgs.writeTextDir "share/wireplumber/main.lua.d/51-device-priority.lua" ''
+            -- Give Apogee Symphony Desktop highest priority to ensure it's always the default
+            -- This fixes intermittent Wine/Proton audio failures caused by device enumeration races
+            table.insert(alsa_monitor.rules, {
+              matches = {
+                {
+                  { "node.name", "matches", "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-*" },
+                },
+              },
+              apply_properties = {
+                ["priority.driver"] = 2000,
+                ["priority.session"] = 2000,
+                ["node.pause-on-idle"] = false,
+              },
+            })
+          '')
           (pkgs.writeTextDir "share/wireplumber/main.lua.d/99-alsa-lowlatency.lua" ''
             alsa_monitor.rules = {
               {
@@ -31,7 +56,28 @@ in
               },
             }
           '')
+          # Prevent Apogee Symphony from suspending during screen lock
+          # Professional audio interfaces should maintain active state to avoid:
+          # - Sample rate changes, driver reinitialization, and audio session interruptions
+          (pkgs.writeTextDir "share/wireplumber/main.lua.d/99-apogee-no-suspend.lua" ''
+            -- Disable suspend for Apogee Symphony interface
+            rule = {
+              matches = {
+                {
+                  { "node.name", "matches", "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-.*" },
+                },
+              },
+              apply_properties = {
+                ["session.suspend-timeout-seconds"] = 0,
+              },
+            }
+            table.insert(alsa_monitor.rules, rule)
+          '')
         ];
+        # Bluetooth codec configuration
+        # Note: Some configurations may affect codec availability in pavucontrol.
+        # If A2DP codecs disappear, consider removing or adjusting these settings.
+        # See: https://nixos.wiki/wiki/PipeWire#Bluetooth_Configuration
         extraConfig."10-bluez" = {
           "monitor.bluez.properties" = {
             "bluez5.enable-sbc-xq" = true;
@@ -54,16 +100,22 @@ in
           "context.modules" = [
             {
               name = "libpipewire-module-protocol-pulse";
-              args = {
-                "pulse.min.req" = "32/48000";
-                "pulse.default.req" = "256/48000";
-                "pulse.max.req" = "8192/48000";
-                "pulse.min.quantum" = "32/48000";
-                "pulse.max.quantum" = "8192/48000";
-                "pulse.suspend-timeout" = 5;
-              };
+              args = { };
             }
           ];
+          # PulseAudio backend configuration for low-latency operation
+          # Values should not be lower than main pipewire quantum settings
+          "pulse.properties" = {
+            "pulse.min.req" = "128/48000";
+            "pulse.default.req" = "256/48000";
+            "pulse.max.req" = "8192/48000";
+            "pulse.min.quantum" = "128/48000";
+            "pulse.max.quantum" = "8192/48000";
+          };
+          "stream.properties" = {
+            "node.latency" = "128/48000";
+            "resample.quality" = 4; # 4 = balanced quality/performance
+          };
         };
         pipewire = {
           "99-silent-bell.conf" = {
@@ -81,6 +133,8 @@ in
               }
             ];
           };
+          # Core PipeWire configuration optimized for professional audio
+          # Balanced between low-latency and stability for Apogee Symphony Desktop
           "context.properties" = {
             "link.max-buffers" = 16;
             "log.level" = 2;
@@ -90,19 +144,14 @@ in
               48000
               96000
             ];
-            "default.clock.quantum" = 256;
-            "default.clock.min-quantum" = 32;
-            "default.clock.max-quantum" = 8192;
+            # Buffer settings: quantum=128 provides ~2.7ms latency at 48kHz
+            # This is a good balance for pro audio work without risking underruns
+            # Increase quantum if you experience audio dropouts/crackles
+            "default.clock.quantum" = 128;
+            "default.clock.min-quantum" = 32; # Allow apps to request lower latency
+            "default.clock.max-quantum" = 8192; # Allow apps to request higher stability
             "core.daemon" = true;
             "core.realtime" = true;
-          };
-          "92-low-latency" = {
-            "context.properties" = {
-              "default.clock.rate" = 48000;
-              "default.clock.quantum" = 128;
-              "default.clock.min-quantum" = 256;
-              "default.clock.max-quantum" = 256;
-            };
           };
           "99-alsa-compat.conf" = {
             "context.properties" = {
