@@ -62,6 +62,14 @@ let
     # Chaotic Nyx overlay: Not needed here
     # - For NixOS: chaotic.nixosModules.default provides the overlay at system level
     # - For darwin: chaotic.homeManagerModules.default is used (requires useGlobalPkgs = false)
+
+    # Optimization: Disable direnv tests that require fish shell
+    # Tests fail on Darwin when fish is not available in build environment
+    direnv-optimization = _final: prev: {
+      direnv = prev.direnv.overrideAttrs (_old: {
+        doCheck = false;
+      });
+    };
   };
 in
 overlaySet
