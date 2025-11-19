@@ -10,7 +10,7 @@ _: {
         # Use only explicitly configured keys (faster authentication)
         # Prevents SSH from trying all keys in ~/.ssh/
         identitiesOnly = true;
-        identityFile = [ "~/.ssh/id_ed25519" ];
+        # identityFile = [ "~/.ssh/id_ed25519" ];
 
         # Add keys to agent automatically
         addKeysToAgent = "yes";
