@@ -80,16 +80,9 @@ let
       hostConfig,
       extraSharedModules ? [ ],
     }:
-    let
-      # For darwin, we need to use chaotic.homeManagerModules.default which requires useGlobalPkgs = false
-      # For NixOS, chaotic.nixosModules.default provides the overlay at system level, so we can use useGlobalPkgs = true
-      isDarwin = lib.hasInfix "darwin" hostConfig.system;
-      useChaoticHomeManager = isDarwin && chaotic != null;
-    in
     {
-      # Set useGlobalPkgs = false for darwin when chaotic is present to allow chaotic.homeManagerModules.default
-      # This is necessary because chaotic's Home Manager module sets nixpkgs.overlays
-      useGlobalPkgs = !useChaoticHomeManager;
+      # useGlobalPkgs=true shares system packages (more efficient, consistent overlays)
+      useGlobalPkgs = true;
       useUserPackages = true;
       verbose = true;
       backupFileExtension = "backup";
@@ -99,13 +92,6 @@ let
       };
       sharedModules =
         optionalModule (sops-nix != null) sops-nix.homeManagerModules.sops
-        # For darwin: Use chaotic.homeManagerModules.default (requires useGlobalPkgs = false)
-        # For NixOS: Chaotic overlay is provided by chaotic.nixosModules.default at system level
-        ++ optionalModule useChaoticHomeManager chaotic.homeManagerModules.default
-        # When useGlobalPkgs = false, Home Manager creates its own pkgs and needs nixpkgs.config
-        ++ optionalModule useChaoticHomeManager {
-          nixpkgs.config = functionsLib.mkPkgsConfig;
-        }
         ++ optionalModule (
           ironbar != null && ironbar ? homeManagerModules
         ) ironbar.homeManagerModules.default
