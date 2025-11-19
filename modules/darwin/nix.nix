@@ -55,12 +55,6 @@
       narinfo-cache-positive-ttl = 30
       narinfo-cache-negative-ttl = 1
 
-
-      # Sandbox must be disabled on macOS when using certain derivations (like fish 4.x)
-      # that specify their own sandbox profiles, which conflicts with Nix's sandbox.
-      # sandbox = false
-
-
       connect-timeout = 5
 
 
