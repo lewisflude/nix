@@ -68,12 +68,14 @@ in
       message = "SOPS secrets are defined but no age key file is specified";
     }
     {
-      assertion = lib.length (lib.attrNames config.sops.secrets) > 0 -> config.sops.defaultSopsFile != null;
+      assertion =
+        lib.length (lib.attrNames config.sops.secrets) > 0 -> config.sops.defaultSopsFile != null;
       message = "SOPS secrets are defined but no default SOPS file is specified";
     }
     {
       assertion =
-        lib.length (lib.attrNames config.sops.secrets) > 0 -> builtins.pathExists (toString config.sops.defaultSopsFile);
+        lib.length (lib.attrNames config.sops.secrets) > 0
+        -> builtins.pathExists (toString config.sops.defaultSopsFile);
       message = "SOPS default file does not exist: ${toString config.sops.defaultSopsFile}";
     }
   ];
