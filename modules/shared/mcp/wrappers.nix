@@ -28,7 +28,7 @@ let
     mapAttrsToList
     ;
 
-  nodejs = platformLib.getVersionedPackage pkgs platformLib.versions.nodejs;
+  # Note: nodejs package directly from pkgs (no version wrapper needed)
   uvx = "${pkgs.uv}/bin/uvx";
 
   # Generic secret wrapper builder
