@@ -32,14 +32,10 @@ in
   ++ [
     pkgs.yaml-language-server
   ]
-  ++
-    platformLib.platformPackages
-      [
-        pkgs.xdg-utils # Linux packages
-      ]
-      [
-        # Darwin packages - xcodebuild moved to home/darwin/
-      ]
+  # Linux-only packages
+  ++ lib.optionals pkgs.stdenv.isLinux [
+    pkgs.xdg-utils
+  ]
   ++ [
     pkgs.gnutar
     pkgs.gzip
