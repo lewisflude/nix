@@ -44,7 +44,14 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@v8
 
       - name: Check formatting
-        run: nix fmt -- --fail-on-change
+        run: |
+          nix fmt
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ Files are not properly formatted. Please run 'nix fmt' and commit the changes."
+            git diff
+            exit 1
+          fi
+          echo "✅ All files are properly formatted."
 
   # Build key configurations to ensure they work
   build-configs:
