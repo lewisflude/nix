@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 let
 
   vialJson = builtins.toJSON {

@@ -9,9 +9,8 @@ let
 in
 {
   config = lib.mkIf cfg.enable {
-    home.packages =
-      lib.optionals cfg.utilities [
-        pkgs.xdg-utils
-      ];
+    home.packages = lib.optionals cfg.utilities [
+      pkgs.xdg-utils
+    ];
   };
 }

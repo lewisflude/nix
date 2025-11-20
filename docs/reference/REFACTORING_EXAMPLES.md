@@ -7,6 +7,7 @@ This document shows specific over-engineered patterns with simplified alternativ
 ### CURRENT PATTERN (Over-Engineered)
 
 **Step 1: Define Feature Options** (`host-options/features.nix`)
+
 ```nix
 mediaManagement = {
   enable = mkEnableOption "native media management stack";
@@ -28,6 +29,7 @@ mediaManagement = {
 ```
 
 **Step 2: Bridge Layer** (`features/media-management.nix`)
+
 ```nix
 config = mkIf cfg.enable {
   host.services.mediaManagement = {
@@ -51,6 +53,7 @@ config = mkIf cfg.enable {
 ```
 
 **Step 3: Service Implementation** (`services/media-management/default.nix`)
+
 ```nix
 imports = [
   ./options.nix  # Redefines same options!
@@ -71,6 +74,7 @@ imports = [
 ```
 
 **Step 4: Individual Service Module** (`services/media-management/prowlarr.nix`)
+
 ```nix
 {
   options.host.services.mediaManagement.prowlarr = {
@@ -93,6 +97,7 @@ imports = [
 ```
 
 **Problems:**
+
 - 4 files to define one feature group
 - Step 2 (bridge) is pure passthrough with no logic
 - Options defined in TWO places (host-options + services)
@@ -101,12 +106,13 @@ imports = [
 ### SIMPLIFIED PATTERN
 
 **Single Module** (`modules/nixos/features/media-management.nix`)
+
 ```nix
 { config, lib, pkgs, ... }:
 let
   inherit (lib) mkEnableOption mkOption types mkIf optionals;
   cfg = config.host.features.mediaManagement;
-  
+
   serviceDefaults = {
     prowlarr = { enable = true; };
     radarr = { enable = true; };
@@ -133,7 +139,7 @@ in {
       default = "Europe/London";
       description = "Timezone for services";
     };
-    
+
     # Service options as submodules
     services = mkOption {
       type = types.attrsOf (types.submodule {
@@ -175,13 +181,14 @@ in {
     };
 
     # ... repeat for each service, but now they're clearly visible here
-    # This is much easier to modify or add to than finding files scattered 
+    # This is much easier to modify or add to than finding files scattered
     # across services/media-management/
   };
 }
 ```
 
 **Benefits:**
+
 - Single file: All logic in one place
 - No bridge layer: Direct feature → implementation
 - No repeated options: Defined once
@@ -195,6 +202,7 @@ in {
 ### CURRENT PATTERN (Over-Engineered)
 
 **11 separate files:**
+
 ```
 services/media-management/
 ├── prowlarr.nix    (34 lines)
@@ -211,6 +219,7 @@ services/media-management/
 ```
 
 Each follows same pattern (example prowlarr.nix):
+
 ```nix
 {
   options.host.services.mediaManagement.prowlarr = {
@@ -239,13 +248,14 @@ Each follows same pattern (example prowlarr.nix):
 ### SIMPLIFIED PATTERN
 
 **Single file with attrsOf submodules:**
+
 ```nix
 # modules/nixos/services/media-management.nix
 { config, lib, pkgs, ... }:
 let
   inherit (lib) mkEnableOption mkOption types mkIf;
   cfg = config.host.services.mediaManagement;
-  
+
   # Service definitions
   serviceDefinitions = {
     prowlarr = {
@@ -267,7 +277,7 @@ in {
     timezone = mkOption { type = types.str; default = "Europe/London"; };
     user = mkOption { type = types.str; default = "media"; };
     group = mkOption { type = types.str; default = "media"; };
-    
+
     # Single submodule type for all services
     services = mkOption {
       type = types.attrsOf (types.submodule {
@@ -323,6 +333,7 @@ in {
 ```
 
 **Benefits:**
+
 - Single file: 250-300 lines vs. 548 lines across 13 files
 - No boilerplate repetition
 - Service configuration centralized and visible
@@ -336,6 +347,7 @@ in {
 ### CURRENT PATTERN (Over-Engineered)
 
 `containers-supplemental/lib.nix`:
+
 ```nix
 _: let inherit (builtins) toString; in
 {
@@ -374,6 +386,7 @@ _: let inherit (builtins) toString; in
 ```
 
 Then imported in every service:
+
 ```nix
 containersLib = import ../lib.nix { inherit lib; };
 inherit (containersLib) mkResourceOptions mkResourceFlags mkHealthFlags;
@@ -384,6 +397,7 @@ inherit (containersLib) mkResourceOptions mkResourceFlags mkHealthFlags;
 ### SIMPLIFIED PATTERN
 
 Inline in homarr.nix:
+
 ```nix
 options.host.services.containersSupplemental.homarr = {
   enable = mkEnableOption "Homarr dashboard" // { default = true; };
@@ -420,6 +434,7 @@ config = mkIf (cfg.enable && cfg.homarr.enable) {
 ```
 
 **Benefits:**
+
 - Removed 50 lines of utility functions
 - Explicit, readable container configuration
 - No abstract function names to remember
@@ -432,6 +447,7 @@ config = mkIf (cfg.enable && cfg.homarr.enable) {
 ### CURRENT PATTERN
 
 **In `host-options/features.nix`:**
+
 ```nix
 mediaManagement = {
   enable = mkEnableOption "...";
@@ -441,6 +457,7 @@ mediaManagement = {
 ```
 
 **In `services/media-management/options.nix`:**
+
 ```nix
 options.host.services.mediaManagement = {
   enable = mkEnableOption "...";
@@ -454,6 +471,7 @@ options.host.services.mediaManagement = {
 ### SIMPLIFIED PATTERN
 
 Define once, import elsewhere:
+
 ```nix
 # modules/shared/lib.nix
 {
@@ -466,6 +484,7 @@ Define once, import elsewhere:
 ```
 
 Then use in:
+
 ```nix
 # modules/nixos/features/media-management.nix
 options.host.features.mediaManagement = mediaLib.mediaManagementOptions;
@@ -475,6 +494,7 @@ options.host.services.mediaManagement = mediaLib.mediaManagementOptions;
 ```
 
 **Benefits:**
+
 - Single source of truth
 - Changes in one place
 - No drift risk
@@ -486,6 +506,7 @@ options.host.services.mediaManagement = mediaLib.mediaManagementOptions;
 ### CURRENT PATTERN
 
 `features/ai-tools.nix`:
+
 ```nix
 {
   config,
@@ -514,7 +535,8 @@ in
 
 Delete bridge module, implement feature directly or use service layer.
 
-**Option A: Feature implements directly (no service layer)**
+#### Option A: Feature implements directly (no service layer)
+
 ```nix
 # modules/nixos/features/ai-tools.nix
 {
@@ -526,7 +548,7 @@ let
 in {
   options.host.features.aiTools = {
     enable = mkEnableOption "AI tools and LLMs";
-    
+
     ollama = {
       enable = mkEnableOption "Ollama LLM backend";
       acceleration = mkOption {
@@ -534,7 +556,7 @@ in {
         default = null;
       };
     };
-    
+
     openWebui = {
       enable = mkEnableOption "Open WebUI";
       port = mkOption { type = types.int; default = 7000; };
@@ -552,13 +574,15 @@ in {
 }
 ```
 
-**Option B: Service layer is primary (no feature bridge)**
+#### Option B: Service layer is primary (no feature bridge)
+
 ```nix
 # modules/nixos/services/ai-tools.nix directly includes all logic
 # Users configure host.services.aiTools directly (not via features)
 ```
 
 **Benefits:**
+
 - No pointless indirection
 - Fewer files
 - Clearer data flow

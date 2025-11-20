@@ -11,9 +11,11 @@ This refactoring removed significant over-engineering from the Nix configuration
 ## Changes by Component
 
 ### 1. Theming System (85% reduction)
+
 **Before**: 1,049 lines | **After**: 152 lines | **Removed**: 897 lines
 
-#### What Was Removed:
+#### What Was Removed
+
 - Custom OKLCH color space math (PI, degree/radian conversion)
 - Manual hex ↔ RGB ↔ OKLCH conversion functions
 - Theme factory pattern with hooks, variants, and caching
@@ -21,13 +23,15 @@ This refactoring removed significant over-engineering from the Nix configuration
 - Validation integration framework
 - Color manipulation functions (duplicate of nix-colorizer)
 
-#### What Was Kept:
+#### What Was Kept
+
 - `getPalette` - simple light/dark mode selection
 - `getSemanticColors` - semantic color token mappings
 - `generateTheme` - basic theme object creation
 - Essential format helpers (hex, rgb, bgrHex for mpv)
 
-#### Rationale:
+#### Rationale
+
 The palette.nix already provides all color data with hex, rgb, and OKLCH values. The lib.nix was re-implementing conversion logic that already exists in the palette and in the nix-colorizer input.
 
 **File**: `modules/shared/features/theming/lib.nix`
@@ -35,9 +39,11 @@ The palette.nix already provides all color data with hex, rgb, and OKLCH values.
 ---
 
 ### 2. Validators Library (83% reduction)
+
 **Before**: 115 lines | **After**: 20 lines | **Removed**: 95 lines
 
-#### What Was Removed:
+#### What Was Removed
+
 - 25+ unused validation functions:
   - `isValidUsername`, `isValidEmail`, `isValidIPv4`
   - `isValidDirectory`, `isValidFile`, `isValidTimezone`
@@ -45,12 +51,14 @@ The palette.nix already provides all color data with hex, rgb, and OKLCH values.
   - `hasRequiredFields`, `assertRequiredFields`
 - Redundant regex validation (NixOS types already validate)
 
-#### What Was Kept:
+#### What Was Kept
+
 - `isValidPort` - actually useful for service configuration
 - `mkAssertion` - standard assertion format helper
 - `assertValidPort` - port validation with assertions
 
-#### Rationale:
+#### Rationale
+
 The NixOS module system already handles validation via `types.submodule`, `types.port`, `types.str`, etc. Adding regex validation on top is redundant. Most validators were never used.
 
 **File**: `lib/validators.nix`
@@ -58,22 +66,26 @@ The NixOS module system already handles validation via `types.submodule`, `types
 ---
 
 ### 3. Constants File (45% reduction)
+
 **Before**: 147 lines | **After**: 81 lines | **Removed**: 66 lines
 
-#### What Was Removed:
+#### What Was Removed
+
 - `paths` - unused path constants
 - `resources.container` - single-use container limits (memoryLimit, cpuShares)
 - `resources.ollama.gpuLayers` - used only once, belongs in module
 - `network` - DNS servers and subnet ranges (can be inline)
 - `ids` - UIDs/GIDs used only once
 
-#### What Was Kept:
+#### What Was Kept
+
 - `ports.mcp.*` - MCP server port assignments (widely used)
 - `ports.services.*` - Service port assignments (prevents conflicts)
 - `timeouts.*` - MCP and service timeouts (used in multiple places)
 - `defaults` - timezone, locale, stateVersion (global defaults)
 
-#### Rationale:
+#### Rationale
+
 Constants should only centralize values used in multiple places. Single-use "constants" create unnecessary indirection without benefit.
 
 **File**: `lib/constants.nix`
@@ -81,28 +93,33 @@ Constants should only centralize values used in multiple places. Single-use "con
 ---
 
 ### 4. Platform Functions (62% reduction)
+
 **Before**: 229 lines | **After**: 86 lines | **Removed**: 143 lines
 
-#### What Was Removed:
+#### What Was Removed
+
 - `platformPackages`, `platformModules`, `platformConfig`, `platformPackage` - wrapper functions
 - `ifLinux`, `ifDarwin` - use `lib.optionalAttrs` directly
 - `versions.nodejs`, `getVersionedPackage` - just use `pkgs.nodejs`
 - `isAarch64`, `isX86_64` - rarely used
 - `systemRebuildCommand` - unused
 
-#### What Was Kept:
+#### What Was Kept
+
 - `homeDir`, `configDir`, `dataDir`, `cacheDir` - cross-platform path helpers (actually useful!)
 - `isLinux`, `isDarwin` - simple platform detection
 - `platformStateVersion` - maps platform to state version
 - `mkHomeManagerExtraSpecialArgs` - builds special args for home-manager
 - `mkPkgsConfig`, `mkOverlays` - package configuration
 
-#### Rationale:
+#### Rationale
+
 Most wrapper functions just add indirection. Users can call `lib.optionalAttrs (pkgs.stdenv.isLinux) [...]` directly. The path helpers are genuinely useful because macOS and Linux have different directory structures.
 
 **File**: `lib/functions.nix`
 
-#### Migration Pattern:
+#### Migration Pattern
+
 ```nix
 # Before
 platformLib.platformPackages [ pkgs.linux-only ] [ ]
@@ -114,13 +131,16 @@ lib.optionals pkgs.stdenv.isLinux [ pkgs.linux-only ]
 ---
 
 ### 5. Overlays (21% reduction)
+
 **Before**: 75 lines | **After**: 59 lines | **Removed**: 16 lines
 
-#### What Was Removed:
+#### What Was Removed
+
 - `mkOptionalOverlay` - conditional overlay helper
 - `mkFlakePackage` - complex package fallback logic
 
-#### What Changed:
+#### What Changed
+
 Replaced helper functions with direct conditionals:
 
 ```nix
@@ -131,7 +151,8 @@ mkOptionalOverlay (cond) overlay
 if cond then overlay else (_final: _prev: { })
 ```
 
-#### Rationale:
+#### Rationale
+
 The helper functions saved 1-2 lines per overlay but added cognitive overhead. Direct conditionals are more explicit and easier to understand.
 
 **File**: `overlays/default.nix`
@@ -143,6 +164,7 @@ The helper functions saved 1-2 lines per overlay but added cognitive overhead. D
 ### For Modules Using Removed Functions
 
 #### Platform Package Selection
+
 ```nix
 # ❌ Old (removed)
 platformLib.platformPackages
@@ -155,6 +177,7 @@ lib.optionals pkgs.stdenv.isLinux [ pkgs.linux-pkg ]
 ```
 
 #### Platform Detection
+
 ```nix
 # ❌ Old (removed)
 platformLib.isLinux
@@ -164,6 +187,7 @@ pkgs.stdenv.isLinux
 ```
 
 #### Package Version Selection
+
 ```nix
 # ❌ Old (removed)
 platformLib.getVersionedPackage pkgs platformLib.versions.nodejs
@@ -177,26 +201,31 @@ pkgs.nodejs
 ## Modern Nix Best Practices Applied
 
 ### 1. Explicit Over Implicit
+
 - Use `lib.optionalAttrs` and `lib.optionals` directly
 - Avoid wrapper functions that hide simple operations
 - Reference packages directly (`pkgs.nodejs` not `getVersionedPackage`)
 
 ### 2. Standard Library First
+
 - Use `lib.*` functions instead of custom helpers
 - Use `pkgs.stdenv.isLinux` instead of custom `isLinux`
 - Leverage NixOS module system types for validation
 
 ### 3. Minimal Overlays
+
 - Only overlay when you must modify packages
 - Prefer direct package references over overlay indirection
 - Remove unnecessary overlay complexity
 
 ### 4. Avoid Premature Abstraction
+
 - Don't create abstractions for single-use cases
 - Constants should only centralize multi-use values
 - Remove "just in case" code
 
 ### 5. No `with pkgs;`
+
 - Use explicit `pkgs.packageName` references
 - Better error messages and IDE support
 - Clearer dependency tracking
@@ -206,18 +235,21 @@ pkgs.nodejs
 ## Benefits
 
 ### For Developers
+
 - **Easier to understand**: Less indirection, more explicit code
 - **Faster to navigate**: Fewer layers of abstraction
 - **Better errors**: Direct calls produce clearer error messages
 - **Less to learn**: Use stdlib functions everyone knows
 
 ### For the Codebase
+
 - **Smaller evaluation**: ~1,200 fewer lines to process
 - **Fewer dependencies**: Removed unused abstractions
 - **More maintainable**: Standard patterns are easier to update
 - **Better documentation**: Explicit code is self-documenting
 
 ### For Performance
+
 - **Faster evaluation**: Less code to parse and evaluate
 - **Better caching**: Simpler dependency graphs
 - **Reduced complexity**: Fewer function calls per evaluation
@@ -247,21 +279,27 @@ pkgs.nodejs
 These were identified but not addressed in this refactoring:
 
 ### 1. Host Configuration Splitting
+
 **Issue**: `hosts/jupiter/default.nix` is 240+ lines of nested configuration
 **Recommendation**: Split into separate files by feature area
+
 - `jupiter/features/media.nix`
 - `jupiter/services/qbittorrent.nix`
 - `jupiter/containers.nix`
 
 ### 2. Container Service Factory
+
 **Issue**: `modules/nixos/services/containers-supplemental/` has 1,413 lines for 11 services
 **Recommendation**: Create `mkContainerService` function to reduce duplication
+
 - Would reduce from ~1,400 lines to ~300 lines
 - Each service is 90% identical boilerplate
 
 ### 3. Feature Builders
+
 **Issue**: `lib/feature-builders.nix` has builders that are just flatMap operations
 **Recommendation**: Write package lists inline in modules
+
 ```nix
 # Instead of mkHomePackages builder
 home.packages = lib.optionals cfg.rust [ pkgs.rustc pkgs.cargo ]
@@ -269,12 +307,15 @@ home.packages = lib.optionals cfg.rust [ pkgs.rustc pkgs.cargo ]
 ```
 
 ### 4. Unused Flake Inputs
+
 **Candidates for removal** (verify first):
+
 - `jsonresume-nix` - documented but no implementation found
 - `devour-flake` - only used in apps, check if needed
 - `awww` - verify usage
 
 ### 5. MCP Wrapper Abstraction
+
 **Issue**: `mkSecretWrapper` saves only ~3 lines per wrapper
 **Recommendation**: Write wrappers directly for easier debugging
 
@@ -295,21 +336,22 @@ After applying this refactoring:
 ## Lessons Learned
 
 ### What Worked
+
 - Path helpers (`homeDir`, `configDir`, `dataDir`) - genuinely useful
 - Port constants - prevent conflicts across services
 - Simple is better than clever
 
 ### What Didn't Work
+
 - Custom wrapper functions around stdlib - just use stdlib
 - Constants for single-use values - premature optimization
 - Theme factory pattern - YAGNI (You Aren't Gonna Need It)
 - Generic secret wrappers - harder to debug
 
 ### Modern Nix Wisdom
+>
 > "Nix modules are composable. Your helpers probably aren't as composable as you think."
-
 > "If you're wrapping a stdlib function, you're probably doing it wrong."
-
 > "Abstractions should pay for themselves. If it saves <5 lines and is used <3 times, inline it."
 
 ---
@@ -326,6 +368,7 @@ After applying this refactoring:
 ## Conclusion
 
 This refactoring demonstrates that **explicit, simple code beats clever abstractions**. By removing over-engineering, we've made the codebase:
+
 - More approachable for new contributors
 - Easier to debug and maintain
 - Faster to evaluate

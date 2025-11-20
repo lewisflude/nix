@@ -20,23 +20,22 @@ let
   xwayland-satellite = xwayland-satellite-unstable;
 in
 {
-  home.packages =
-    [
-      pkgs.grim
-      pkgs.slurp
-      pkgs.wl-clipboard
-      pkgs.wlr-randr
-      pkgs.wayland-utils
-      pkgs.brightnessctl
-      # Note: xdg-utils is handled in core-tooling.nix
-      xwayland-satellite
-      pkgs.argyllcms
-      pkgs.colord-gtk
-      pkgs.wl-gammactl
-    ]
-    ++ [
-      inputs.awww.packages.${system}.awww
-    ];
+  home.packages = [
+    pkgs.grim
+    pkgs.slurp
+    pkgs.wl-clipboard
+    pkgs.wlr-randr
+    pkgs.wayland-utils
+    pkgs.brightnessctl
+    # Note: xdg-utils is handled in core-tooling.nix
+    xwayland-satellite
+    pkgs.argyllcms
+    pkgs.colord-gtk
+    pkgs.wl-gammactl
+  ]
+  ++ [
+    inputs.awww.packages.${system}.awww
+  ];
   imports = [
     ./niri/keybinds.nix
   ];

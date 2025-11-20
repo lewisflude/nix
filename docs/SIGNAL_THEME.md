@@ -372,7 +372,7 @@ The Signal Theme system provides clear governance for handling conflicts between
 
 #### Policy Options
 
-**1. Functional Colors Override Brand (Default)**
+##### 1. Functional Colors Override Brand (Default)
 
 - Semantic colors (e.g., `accent-danger` for errors) maintain their functional meaning
 - Brand colors are applied only as decorative elements
@@ -392,7 +392,7 @@ theming.signal = {
 };
 ```
 
-**2. Brand Colors as Separate Layer**
+##### 2. Brand Colors as Separate Layer
 
 - Functional colors and brand colors coexist
 - Brand colors are explicitly marked as decorative-only
@@ -411,7 +411,7 @@ theming.signal = {
 };
 ```
 
-**3. Brand Integration (Advanced)**
+##### 3. Brand Integration (Advanced)
 
 - Brand colors can be integrated into the Signal palette
 - Must maintain accessibility compliance
