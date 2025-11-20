@@ -105,3 +105,62 @@ jobs:
 
       - name: Test dev shell
         run: nix develop --command echo "Dev shell works"
+
+  # Pre-commit checks (linting, deadnix, statix, etc.)
+  pre-commit:
+    name: Pre-commit Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v21
+
+      - name: Setup Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v13
+
+      - name: Run pre-commit checks
+        run: nix build .#checks.x86_64-linux.pre-commit-check --print-out-paths --no-link
+
+  # Push builds to Cachix (only on main branch to save CI minutes)
+  cachix-push:
+    name: Push to Cachix
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [flake-check, formatting, build-configs]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v21
+
+      - name: Setup Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v13
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v14
+        with:
+          name: lewisflude
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          # Skip push if token is not available (optional setup)
+          skipPush: ${{ secrets.CACHIX_AUTH_TOKEN == '' }}
+
+      - name: Build and push to Cachix
+        if: secrets.CACHIX_AUTH_TOKEN != ''
+        run: |
+          # Build key derivations and push to cache
+          # This helps speed up future builds and local rebuilds
+          echo "Building and pushing to Cachix..."
+
+          # Build formatters (useful for local development)
+          nix build .#formatter.x86_64-linux --no-link || true
+
+          # Build pre-commit checks (useful for local development)
+          nix build .#checks.x86_64-linux.pre-commit-check --no-link || true
+
+          # Build dev shell (useful for local development)
+          nix build .#devShells.x86_64-linux.default --no-link || true
+
+          echo "✅ Builds pushed to Cachix cache"
