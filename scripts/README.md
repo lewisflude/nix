@@ -258,6 +258,121 @@ Comprehensive diagnostic tool for Steam/Proton audio issues with PipeWire.
 
 - `validate-config.sh` - Validate Nix configuration before rebuild
 
+## Backup Scripts
+
+### `backup-preview.sh`
+
+Preview what will be backed up to Samsung Drive before running the actual backup.
+
+**Usage:**
+
+```bash
+./scripts/backup-preview.sh
+```
+
+**Shows:**
+
+- All directories that will be backed up
+- Size of each directory
+- File counts
+- Total backup size
+- Available space on Samsung Drive
+
+**What's included:**
+
+- **Music & Audio Production:**
+  - Ableton Projects (`~/Music/Ableton/`) - ~41GB
+  - Sample Library (`~/Music/Sample Library/`) - ~150MB
+  - FastGarage Project
+  - Music Projects
+  - Guitar1 Project (from Desktop)
+  - ModularPolyGrandJam Project
+
+- **Ableton Application Support:**
+  - Preferences, database, and Live configuration (`~/Library/Application Support/Ableton/`)
+
+- **Max/MSP Projects:**
+  - Max 8 and Max 9 projects
+
+- **Development & Creative Projects:**
+  - Code Projects (`~/Code/`) - ~61GB
+  - Obsidian vaults
+  - Unreal Projects
+
+- **Audio Plugin Libraries & Samples:**
+  - Toontrack Superior Drummer 3 (`~/Library/Application Support/Toontrack/Superior3/`) - ~224GB
+  - FabFilter Plugin Presets (`~/Library/Application Support/FabFilter/`) - ~14MB
+  - Sonarworks SoundID Reference (`~/Library/Application Support/Sonarworks/`) - ~126MB
+
+- **Application Data & Workspaces:**
+  - Obsidian Application Support (`~/Library/Application Support/obsidian/`)
+  - Cursor Workspace Data (`~/Library/Application Support/Cursor/`) - ~2.1GB
+
+- **Security & Configuration:**
+  - SSH Keys (`~/.ssh/`)
+  - GPG Keys (`~/.gnupg/`)
+  - Existing Backups (`~/Backups/`) - ~2.3GB
+
+**What's excluded (already in iCloud):**
+
+- Photos (synced to iCloud)
+- Most Documents (synced to iCloud)
+- Desktop files (synced to iCloud, except Ableton projects)
+
+### `backup-to-samsung-drive.sh`
+
+Back up important files to Samsung Drive using rsync.
+
+**Usage:**
+
+```bash
+# Run the backup
+./scripts/backup-to-samsung-drive.sh
+```
+
+**Features:**
+
+- Uses `rsync` for efficient incremental backups
+- Preserves file attributes and permissions
+- Creates timestamped backup directories
+- Generates detailed logs
+- Shows progress for each backup operation
+- Skips directories that don't exist
+
+**Backup location:**
+
+```
+/Volumes/Samsung Drive/Backups/<hostname>/
+```
+
+**Logs:**
+
+Each backup creates a timestamped log file:
+
+```
+/Volumes/Samsung Drive/Backups/<hostname>/backup_YYYYMMDD_HHMMSS.log
+```
+
+**Requirements:**
+
+- Samsung Drive must be mounted at `/Volumes/Samsung Drive`
+- `rsync` (standard on macOS)
+
+**Example output:**
+
+```
+=== Starting Backup to Samsung Drive ===
+📦 Backing up Ableton Projects (41G)...
+✓ Completed: Ableton Projects
+📦 Backing up Sample Library (150M)...
+✓ Completed: Sample Library
+...
+=== Backup Summary ===
+Successful backups: 21
+Total backup size: ~330 GB
+✓ All backups completed successfully!
+```
+
 ## Requirements
 
 Most scripts require:
