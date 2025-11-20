@@ -45,9 +45,12 @@ jobs:
 
       - name: Check formatting
         run: |
-          nix fmt
+          # Format all Nix files using the flake formatter
+          # Find all .nix files and format them
+          find . -name "*.nix" -type f ! -path "./.direnv/*" ! -path "./result*" ! -path "./flake.lock" -exec nix fmt {} \;
+          # Check if any files were modified
           if [ -n "$(git status --porcelain)" ]; then
-            echo "❌ Files are not properly formatted. Please run 'nix fmt' and commit the changes."
+            echo "❌ Files are not properly formatted. Please run 'nix fmt <file>' for each file and commit the changes."
             git diff
             exit 1
           fi
