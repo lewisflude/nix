@@ -186,66 +186,6 @@ in
       '';
     };
 
-    # Theme validation options
-    validation = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = ''
-          Enable automatic theme validation during generation.
-          When enabled, the theme will be validated for completeness and accessibility.
-        '';
-      };
-
-      strictMode = mkOption {
-        type = types.bool;
-        default = false;
-        description = ''
-          Enable strict validation mode.
-          When enabled, theme generation will fail if validation errors are found.
-          When disabled, validation errors are reported as warnings.
-        '';
-      };
-
-      level = mkOption {
-        type = types.enum [
-          "AA"
-          "AAA"
-        ];
-        default = "AA";
-        description = ''
-          WCAG contrast level to validate against:
-          - AA: Minimum contrast for normal use (4.5:1 for normal text, 3:1 for large text)
-          - AAA: Enhanced contrast for better accessibility (7:1 for normal text, 4.5:1 for large text)
-        '';
-      };
-
-      validationLevel = mkOption {
-        type = types.enum [
-          "basic"
-          "standard"
-          "strict"
-        ];
-        default = "standard";
-        description = ''
-          Validation thoroughness level:
-          - basic: Only check theme completeness (required tokens exist)
-          - standard: Check completeness and critical accessibility pairs (default)
-          - strict: Full validation including all color pairs and structure checks
-        '';
-      };
-
-      useAPCA = mkOption {
-        type = types.bool;
-        default = false;
-        description = ''
-          Also validate using APCA (Advanced Perceptual Contrast Algorithm).
-          APCA provides more perceptually accurate contrast measurements than WCAG.
-          When enabled, both WCAG and APCA validations are performed.
-        '';
-      };
-    };
-
     # Theme variant support
     # Variants modify the base theme for accessibility or user preferences
     variant = mkOption {
