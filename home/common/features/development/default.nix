@@ -2,16 +2,13 @@
   lib,
   pkgs,
   host,
-  hostSystem,
   ...
 }:
 let
   inherit (lib) mkIf;
   cfg = host.features.development;
-  platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
   packageSets = import ../../../../lib/package-sets.nix {
     inherit pkgs;
-    inherit (platformLib) versions;
   };
   featureBuilders = import ../../../../lib/feature-builders.nix {
     inherit lib packageSets;
@@ -25,7 +22,7 @@ in
 
   config = mkIf cfg.enable {
     home.packages = featureBuilders.mkHomePackages {
-      inherit cfg pkgs platformLib;
+      inherit cfg pkgs;
     };
 
     programs = {

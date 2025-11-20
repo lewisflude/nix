@@ -7,29 +7,49 @@ let
   isDarwin = system: lib.hasSuffix "-darwin" system;
 
   # Cross-platform path helpers (actually useful!)
-  homeDir = system: username:
-    if isDarwin system then "/Users/${username}" else "/home/${username}";
+  homeDir = system: username: if isDarwin system then "/Users/${username}" else "/home/${username}";
 
-  configDir = system: username:
-    "${homeDir system username}/.config";
+  configDir = system: username: "${homeDir system username}/.config";
 
-  dataDir = system: username:
-    if isDarwin system
-    then "${homeDir system username}/Library/Application Support"
-    else "${homeDir system username}/.local/share";
+  dataDir =
+    system: username:
+    if isDarwin system then
+      "${homeDir system username}/Library/Application Support"
+    else
+      "${homeDir system username}/.local/share";
 
-  cacheDir = system: username:
-    if isDarwin system
-    then "${homeDir system username}/Library/Caches"
-    else "${homeDir system username}/.cache";
+  cacheDir =
+    system: username:
+    if isDarwin system then
+      "${homeDir system username}/Library/Caches"
+    else
+      "${homeDir system username}/.cache";
 
   # Platform-specific state version
-  platformStateVersion = system:
-    if isDarwin system then 6 else "25.05";
+  platformStateVersion = system: if isDarwin system then 6 else "25.05";
+
+  # Platform-specific package selection
+  # Selects a single package based on platform
+  platformPackage =
+    system: linuxPkg: darwinPkg:
+    if isDarwin system then darwinPkg else linuxPkg;
+
+  # Platform-specific package list selection
+  # Selects a list of packages based on platform
+  platformPackages =
+    system: linuxPkgs: darwinPkgs:
+    if isDarwin system then darwinPkgs else linuxPkgs;
 
   # Build home-manager special args
-  mkHomeManagerExtraSpecialArgs = { inputs, hostConfig, includeUserFields ? true }:
-    inputs // hostConfig // {
+  mkHomeManagerExtraSpecialArgs =
+    {
+      inputs,
+      hostConfig,
+      includeUserFields ? true,
+    }:
+    inputs
+    // hostConfig
+    // {
       inherit inputs;
       inherit (hostConfig) system;
       hostSystem = hostConfig.system;
@@ -52,8 +72,7 @@ let
   };
 
   # Build overlays list from overlay set
-  mkOverlays = { inputs, system }:
-    lib.attrValues (import ../overlays { inherit inputs system; });
+  mkOverlays = { inputs, system }: lib.attrValues (import ../overlays { inherit inputs system; });
 
   # withSystem: Curry system-dependent functions
   withSystem = system: {
@@ -65,6 +84,8 @@ let
     dataDir = dataDir system;
     cacheDir = cacheDir system;
     platformStateVersion = platformStateVersion system;
+    platformPackage = platformPackage system;
+    platformPackages = platformPackages system;
   };
 
 in
@@ -78,6 +99,8 @@ in
     dataDir
     cacheDir
     platformStateVersion
+    platformPackage
+    platformPackages
     mkHomeManagerExtraSpecialArgs
     mkPkgsConfig
     mkOverlays

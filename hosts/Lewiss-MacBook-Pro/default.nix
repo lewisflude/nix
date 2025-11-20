@@ -9,6 +9,9 @@ in
   hostname = "Lewiss-MacBook-Pro";
 
   features = defaultFeatures // {
+    restic = defaultFeatures.restic // {
+      enable = true;
+    };
     productivity = defaultFeatures.productivity // {
       enable = true;
       notes = true;

@@ -44,7 +44,7 @@ let
       {
         cfg,
         pkgs,
-        platformLib,
+      # platformLib, # Unused
       }:
       packageSets.devUtilities
       ++ lib.optionals (cfg.debugTools or false) packageSets.debugTools
@@ -81,38 +81,29 @@ let
       {
         cfg,
         pkgs,
-        versions,
-
-        pythonVersion ? versions.python,
-        nodeVersion ? versions.nodejs,
       }:
       lib.concatLists [
 
         (lib.optionals (cfg.rust or false) packageSets.rustToolchain)
 
-        (lib.optionals (cfg.python or false) (
-          let
-            python = pkgs.${pythonVersion};
-          in
-          [
-            (python.withPackages (python-pkgs: [
-              python-pkgs.pip
-              python-pkgs.virtualenv
-              python-pkgs.pytest
-              python-pkgs.black
-              python-pkgs.isort
-              python-pkgs.mypy
-              python-pkgs.ruff
-            ]))
-
-            pkgs.poetry
-          ]
-        ))
+        (lib.optionals (cfg.python or false) [
+          pkgs.python3.withPackages
+          (python-pkgs: [
+            python-pkgs.pip
+            python-pkgs.virtualenv
+            python-pkgs.pytest
+            python-pkgs.black
+            python-pkgs.isort
+            python-pkgs.mypy
+            python-pkgs.ruff
+          ])
+          pkgs.poetry
+        ])
 
         (lib.optionals (cfg.go or false) packageSets.goToolchain)
 
         (lib.optionals (cfg.node or false) [
-          pkgs.${nodeVersion}
+          pkgs.nodejs
         ])
       ];
 

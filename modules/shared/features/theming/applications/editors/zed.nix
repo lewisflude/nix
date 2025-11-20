@@ -49,7 +49,7 @@ let
         "border.variant" = colors."divider-secondary".hex + "ff";
         "border.focused" = colors."accent-focus".hex + "ff";
         "border.selected" = colors."accent-primary".hex + "ff";
-        "border.transparent" = colors."border-transparent".hex;
+        "border.transparent" = colors."transparent".hex;
         "border.disabled" = withAlpha colors."divider-primary" "80";
 
         # Surface properties
@@ -68,7 +68,7 @@ let
         accents = [ ];
 
         # Ghost element properties
-        "ghost_element.background" = colors."surface-transparent".hex;
+        "ghost_element.background" = colors."transparent".hex;
         "ghost_element.hover" = colors."surface-subtle".hex + "ff";
         "ghost_element.active" = colors."surface-emphasis".hex + "ff";
         "ghost_element.selected" = colors."surface-emphasis".hex + "ff";

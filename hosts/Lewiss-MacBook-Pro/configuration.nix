@@ -43,16 +43,23 @@ in
   time.timeZone = lib.mkForce constants.defaults.timezone;
 
   host.features.restic = {
-    enable = true;
     backups.macbook-home = {
       enable = true;
-      path = "/Users/${config.host.username}/.config/nix";
+      path = "/Users/${config.host.username}";
       repository = "rest:http://jupiter.local:8000/macos-${config.host.hostname}";
       passwordFile = "/Users/${config.host.username}/.config/restic/password";
       timer = "daily";
       user = config.host.username;
-      initialize = false;
+      initialize = true;
       createWrapper = false;
+      extraOptions = [
+        "--exclude=.Cache"
+        "--exclude=Library/Caches"
+        "--exclude=Downloads"
+        "--exclude=.Trash"
+        "--exclude=.DS_Store"
+        "--exclude=**/.cache"
+      ];
     };
   };
 }
