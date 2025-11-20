@@ -8,16 +8,15 @@ let
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
 in
 pkgs.mkShell {
-  buildInputs =
-    [
-      # System provides: node, pnpm, typescript
-      # Add React Native-specific tools
-      pkgs.watchman
-    ]
-    ++ lib.optionals platformLib.isDarwin [
-      pkgs.cocoapods
-      pkgs.xcbuild
-    ];
+  buildInputs = [
+    # System provides: node, pnpm, typescript
+    # Add React Native-specific tools
+    pkgs.watchman
+  ]
+  ++ lib.optionals platformLib.isDarwin [
+    pkgs.cocoapods
+    pkgs.xcbuild
+  ];
   shellHook = ''
     echo "📱 React Native development environment loaded (using system Node.js)"
     echo "Node version: $(node --version)"

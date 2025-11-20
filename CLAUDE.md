@@ -98,6 +98,7 @@ When creating or modifying modules, follow these rules to maintain proper separa
 Place in `modules/nixos/` or `modules/darwin/`:
 
 **Required for System Level**:
+
 - System services (systemd, launchd)
 - Kernel modules and drivers
 - Hardware configuration
@@ -108,6 +109,7 @@ Place in `modules/nixos/` or `modules/darwin/`:
 - Boot configuration
 
 **Examples**:
+
 ```nix
 # ✅ CORRECT: modules/nixos/features/virtualisation.nix
 virtualisation.podman.enable = true;
@@ -121,6 +123,7 @@ hardware.graphics.extraPackages = [ pkgs.mesa ];
 Place in `home/common/apps/` or `home/{nixos,darwin}/`:
 
 **Required for Home-Manager**:
+
 - User applications and CLI tools
 - User services (systemd --user)
 - Dotfiles and user configuration
@@ -131,6 +134,7 @@ Place in `home/common/apps/` or `home/{nixos,darwin}/`:
 - Editor configurations
 
 **Examples**:
+
 ```nix
 # ✅ CORRECT: home/nixos/hardware-tools/audio.nix
 home.packages = [ pkgs.pwvucontrol pkgs.playerctl ];
@@ -142,32 +146,41 @@ programs.helix.enable = true;
 ### Common Antipatterns to Avoid
 
 #### ❌ WRONG: Container Tools in Home-Manager
+
 ```nix
 # ❌ WRONG - Don't do this
 home.packages = [ pkgs.podman pkgs.podman-compose ];
 ```
+
 **Fix**: Container runtimes belong at system-level.
 
 #### ❌ WRONG: System Packages Duplicated in Home
+
 ```nix
 # ❌ WRONG - Don't do this
 home.packages = [ pkgs.vulkan-tools pkgs.mesa-demos ];
 ```
+
 **Fix**: Graphics libraries should only be in system config.
 
 #### ❌ WRONG: Hardcoded Values in Modules
+
 ```nix
 # ❌ WRONG - Don't do this
 time.timeZone = "Europe/London";
 ```
+
 **Fix**: Use per-host configuration or constants from `lib/constants.nix`.
 
 #### ❌ WRONG: Using 'with pkgs;'
+
 ```nix
 # ❌ WRONG - Antipattern
 home.packages = with pkgs; [ curl wget tree ];
 ```
+
 **Fix**: Use explicit package references:
+
 ```nix
 # ✅ CORRECT - Modern pattern
 home.packages = [ pkgs.curl pkgs.wget pkgs.tree ];
@@ -194,6 +207,7 @@ When adding a package or service:
 ### Using New Infrastructure
 
 **Constants**:
+
 ```nix
 let
   constants = import ../lib/constants.nix;
@@ -204,6 +218,7 @@ in
 ```
 
 **Validators**:
+
 ```nix
 let
   validators = import ../lib/validators.nix { inherit lib; };

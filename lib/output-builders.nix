@@ -23,7 +23,11 @@ in
         hooks = {
           nixfmt.enable = true;
           alejandra.enable = false;
-          deadnix.enable = true;
+          deadnix = {
+            enable = true;
+            # Configuration is in .deadnix.toml at project root
+            # This enables no_lambda_arg to work with statix's preference for { ... } patterns
+          };
           statix = {
             enable = true;
             entry = "${nixpkgs.legacyPackages.${system}.statix}/bin/statix check --format errfmt";

@@ -10,20 +10,19 @@ let
 in
 {
   home = {
-    packages =
-      [
-        pkgs.git
-        pkgs.curl
-        pkgs.jq
-      ]
-      ++
-        platformLib.platformPackages
-          [
-            pkgs.linux-specific-package
-          ]
-          [
-            pkgs.darwin-specific-package
-          ];
+    packages = [
+      pkgs.git
+      pkgs.curl
+      pkgs.jq
+    ]
+    ++
+      platformLib.platformPackages
+        [
+          pkgs.linux-specific-package
+        ]
+        [
+          pkgs.darwin-specific-package
+        ];
     file = {
       ".example-config" = {
         text = ''
