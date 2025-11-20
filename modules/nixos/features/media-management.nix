@@ -19,6 +19,7 @@ in
       sonarr = cfg.sonarr or { };
       lidarr = cfg.lidarr or { };
       readarr = cfg.readarr or { };
+      listenarr = cfg.listenarr or { };
       sabnzbd = cfg.sabnzbd or { };
       qbittorrent = cfg.qbittorrent or { };
       jellyfin = cfg.jellyfin or { };
