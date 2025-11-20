@@ -18,6 +18,7 @@ Audio plugins on macOS are stored in several locations:
 - **VST**: `/Library/Audio/Plug-Ins/VST/`
 - **VST3**: `/Library/Audio/Plug-Ins/VST3/`
 - **Audio Units**: `/Library/Audio/Plug-Ins/Components/`
+- **AAX (Pro Tools)**: `/Library/Application Support/Avid/Audio/Plug-Ins/`
 
 ### User-Specific Plugins
 
