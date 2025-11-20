@@ -71,6 +71,7 @@ in
         "steam"
       ];
     masApps = {
+      "Amphetamine" = 937984704;
       "Kagi Search" = 1622835804;
       # Note: Xcode should be installed manually from App Store or using: mas install 497799835
       # Automated installation via mas often fails due to size and App Store service issues
