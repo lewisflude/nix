@@ -144,11 +144,9 @@ jobs:
         with:
           name: lewisflude
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-          # Skip push if token is not available (optional setup)
-          skipPush: ${{ secrets.CACHIX_AUTH_TOKEN == '' }}
+          # If token is missing, this will skip gracefully
 
       - name: Build and push to Cachix
-        if: secrets.CACHIX_AUTH_TOKEN != ''
         run: |
           # Build key derivations and push to cache
           # This helps speed up future builds and local rebuilds
