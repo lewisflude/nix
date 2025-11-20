@@ -20,12 +20,10 @@ This directory contains historical and redundant documentation that has been arc
 - `SIZE_REDUCTION_SUMMARY.md` - Reduction summary
 - `TOP_5_SIZE_REDUCTIONS.md` - Top reductions
 
-**Current documentation:** See `docs/ANALYZING_SYSTEM_SIZE.md` for current system size optimization guide.
+**Note:** System size optimization is now covered in `docs/PERFORMANCE_TUNING.md`.
 
 ### Cachix Documentation
-- `CACHIX_FLAKEHUB_SETUP.md` - FlakeHub setup guide
-
-**Current documentation:** See `docs/CACHIX_AUTOMATION_STRATEGY.md` for Cachix configuration.
+- `CACHIX_FLAKEHUB_SETUP.md` - FlakeHub setup guide (archived but still accessible)
 
 ## Why Archive?
 
