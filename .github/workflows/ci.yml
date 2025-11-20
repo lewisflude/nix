@@ -123,9 +123,9 @@ jobs:
       - name: Run pre-commit checks
         run: nix build .#checks.x86_64-linux.pre-commit-check --print-out-paths --no-link
 
-  # Push builds to Cachix (only on main branch to save CI minutes)
-  cachix-push:
-    name: Push to Cachix
+  # Push NixOS builds to Cachix (only on main branch to save CI minutes)
+  cachix-push-nixos:
+    name: Push NixOS to Cachix
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [flake-check, formatting, build-configs]
@@ -144,21 +144,57 @@ jobs:
         with:
           name: lewisflude
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-          # If token is missing, this will skip gracefully
 
-      - name: Build and push to Cachix
+      - name: Build and push NixOS to Cachix
         run: |
-          # Build key derivations and push to cache
-          # This helps speed up future builds and local rebuilds
-          echo "Building and pushing to Cachix..."
+          # Build NixOS system configuration (jupiter - x86_64-linux)
+          # This caches the full system build so rebuilds on jupiter are much faster
+          echo "Building NixOS configuration (jupiter)..."
+          nix build .#nixosConfigurations.jupiter.config.system.build.toplevel --no-link || true
 
-          # Build formatters (useful for local development)
+          # Build dev tools (useful for local development)
+          echo "Building dev tools..."
           nix build .#formatter.x86_64-linux --no-link || true
-
-          # Build pre-commit checks (useful for local development)
           nix build .#checks.x86_64-linux.pre-commit-check --no-link || true
-
-          # Build dev shell (useful for local development)
           nix build .#devShells.x86_64-linux.default --no-link || true
 
-          echo "✅ Builds pushed to Cachix cache"
+          echo "✅ NixOS builds pushed to Cachix cache"
+          echo "💡 When you rebuild on jupiter, Nix will pull from this cache!"
+
+  # Push Darwin builds to Cachix (only on main branch, requires macOS runner)
+  cachix-push-darwin:
+    name: Push Darwin to Cachix
+    runs-on: macos-14
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [flake-check, formatting]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v21
+
+      - name: Setup Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v13
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v14
+        with:
+          name: lewisflude
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build and push Darwin to Cachix
+        run: |
+          # Build Darwin system configuration (Lewiss-MacBook-Pro - aarch64-darwin)
+          # This caches the full system build so rebuilds on your Mac are much faster
+          echo "Building Darwin configuration (Lewiss-MacBook-Pro)..."
+          nix build .#darwinConfigurations.Lewiss-MacBook-Pro.system --no-link || true
+
+          # Build dev tools for Darwin
+          echo "Building dev tools..."
+          nix build .#formatter.aarch64-darwin --no-link || true
+          nix build .#checks.aarch64-darwin.pre-commit-check --no-link || true
+          nix build .#devShells.aarch64-darwin.default --no-link || true
+
+          echo "✅ Darwin builds pushed to Cachix cache"
+          echo "💡 When you rebuild on your Mac, Nix will pull from this cache!"
