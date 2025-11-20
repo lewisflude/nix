@@ -41,6 +41,9 @@ in
         );
     };
 
+    # Open firewall port for REST server
+    networking.firewall.allowedTCPPorts = lib.mkIf cfg.restServer.enable [ cfg.restServer.port ];
+
     users.users.restic = lib.mkIf (backupsWithWrappers != { }) {
       isNormalUser = true;
     };
