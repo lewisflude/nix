@@ -59,16 +59,28 @@ copy_directory() {
     local source="$1"
     local dest="$2"
     local description="$3"
+    local use_ssh="${4:-false}"
 
-    local source_expanded=$(expand_path "$source")
+    local source_expanded
     local dest_expanded=$(expand_path "$dest")
 
-    if [[ ! -d "${source_expanded}" ]]; then
-        echo -e "${YELLOW}⚠ Skipping ${description}: ${source_expanded} does not exist${NC}"
-        return 0
+    if [[ "$use_ssh" == "true" ]]; then
+        source_expanded="$source"
+        # For SSH, we can't check if directory exists easily, so we'll try and let rsync handle it
+    else
+        source_expanded=$(expand_path "$source")
+        if [[ ! -d "${source_expanded}" ]]; then
+            echo -e "${YELLOW}⚠ Skipping ${description}: ${source_expanded} does not exist${NC}"
+            return 0
+        fi
     fi
 
-    local size=$(du -sh "${source_expanded}" 2>/dev/null | cut -f1 || echo "unknown")
+    # Try to get size (works for local, may not work for SSH)
+    local size="unknown"
+    if [[ "$use_ssh" != "true" ]]; then
+        size=$(du -sh "${source_expanded}" 2>/dev/null | cut -f1 || echo "unknown")
+    fi
+
     echo -e "${BLUE}📥 Copying ${description} (${size})...${NC}"
     echo "   Source: ${source_expanded}"
     echo "   Dest:   ${dest_expanded}"
@@ -77,6 +89,7 @@ copy_directory() {
     mkdir -p "$(dirname "${dest_expanded}")"
 
     # Copy with rsync for better progress and error handling
+    # rsync automatically handles SSH paths
     if rsync -av --progress "${source_expanded}/" "${dest_expanded}/" 2>&1 | grep -v "^$" | head -20; then
         echo -e "${GREEN}✅ Copied ${description}${NC}"
         return 0
@@ -100,6 +113,7 @@ check_root() {
 migrate_plugins() {
     local source_base="$1"
     local dest_base="$2"
+    local use_ssh="${3:-false}"
 
     echo -e "${CYAN}========================================${NC}"
     echo -e "${CYAN}Audio Plugin Migration${NC}"
@@ -126,19 +140,32 @@ migrate_plugins() {
     echo -e "${BLUE}========================================${NC}"
 
     for location in "${PLUGIN_LOCATIONS[@]}"; do
-        local source_path="${source_base}${location#~/}"
+        local source_path
         local dest_path="${dest_base}${location#~/}"
 
-        # Expand paths
-        source_path=$(expand_path "$source_path")
+        # Handle SSH vs local paths
+        if [[ "$use_ssh" == "true" ]]; then
+            # For SSH, construct remote path
+            if [[ "$location" == ~/* ]]; then
+                # User location: user@host:~/Library/...
+                source_path="${source_base}${location#~/}"
+            else
+                # System location: user@host:/Library/...
+                source_path="${source_base}${location}"
+            fi
+        else
+            source_path="${source_base}${location#~/}"
+            source_path=$(expand_path "$source_path")
+        fi
+
         dest_path=$(expand_path "$dest_path")
 
-        # Check if we need root for system plugins
-        if [[ "$location" == "/Library"* ]]; then
+        # Check if we need root for system plugins (skip for SSH)
+        if [[ "$location" == "/Library"* ]] && [[ "$use_ssh" != "true" ]]; then
             check_root "$location" || continue
         fi
 
-        if copy_directory "$source_path" "$dest_path" "$(basename "$location") plugins"; then
+        if copy_directory "$source_path" "$dest_path" "$(basename "$location") plugins" "$use_ssh"; then
             ((success_count++))
         else
             ((fail_count++))
@@ -152,14 +179,20 @@ migrate_plugins() {
     echo -e "${BLUE}========================================${NC}"
 
     for location in "${APP_SUPPORT_LOCATIONS[@]}"; do
-        local source_path="${source_base}${location#~/}"
+        local source_path
         local dest_path="${dest_base}${location#~/}"
 
-        # Expand paths
-        source_path=$(expand_path "$source_path")
+        # Handle SSH vs local paths
+        if [[ "$use_ssh" == "true" ]]; then
+            source_path="${source_base}${location#~/}"
+        else
+            source_path="${source_base}${location#~/}"
+            source_path=$(expand_path "$source_path")
+        fi
+
         dest_path=$(expand_path "$dest_path")
 
-        if copy_directory "$source_path" "$dest_path" "$(basename "$location") data"; then
+        if copy_directory "$source_path" "$dest_path" "$(basename "$location") data" "$use_ssh"; then
             ((success_count++))
         else
             ((fail_count++))
@@ -198,6 +231,9 @@ Examples:
     # Migrate from another Mac via network share
     $0 /Volumes/Other\ Mac /Users/username
 
+    # Migrate from another Mac via SSH
+    $0 user@hostname.local:/Users/user /Users/username
+
     # Migrate system plugins (requires sudo)
     sudo $0 /Volumes/External\ Drive /
 
@@ -226,9 +262,20 @@ if [[ -z "$SOURCE_MAC" ]]; then
     exit 1
 fi
 
-if [[ ! -d "$SOURCE_MAC" ]]; then
-    echo -e "${RED}Error: Source path does not exist: ${SOURCE_MAC}${NC}" >&2
-    exit 1
+# Check if source is SSH path (user@host:path format)
+if [[ "$SOURCE_MAC" =~ ^[^/]+@[^:]+: ]]; then
+    echo -e "${BLUE}Detected SSH source path${NC}"
+    # For SSH sources, we'll use rsync directly with SSH
+    SSH_SOURCE=true
+else
+    SSH_SOURCE=false
+    if [[ ! -d "$SOURCE_MAC" ]]; then
+        echo -e "${RED}Error: Source path does not exist: ${SOURCE_MAC}${NC}" >&2
+        echo ""
+        echo -e "${YELLOW}Tip: You can use SSH format: user@host:/path${NC}"
+        echo -e "${YELLOW}Example: lewisflude@Lewiss-MacBook-Pro.local:/Users/lewisflude${NC}"
+        exit 1
+    fi
 fi
 
-migrate_plugins "$SOURCE_MAC" "$DEST_MAC"
+migrate_plugins "$SOURCE_MAC" "$DEST_MAC" "$SSH_SOURCE"
