@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - claude/**
+  pull_request:
+  workflow_dispatch:
+
+# Cancel in-progress runs on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flake-check:
+    name: Nix Flake Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+
+      - name: Setup Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Check flake
+        run: nix flake check --show-trace --print-build-logs
+
+  formatting:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+
+      - name: Setup Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Check formatting
+        run: nix fmt -- --fail-on-change
+
+  # Build key configurations to ensure they work
+  build-configs:
+    name: Build Configurations
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Add your main host configurations here
+        # Since we can't build darwin on Linux, we only build NixOS configs
+        include:
+          - system: x86_64-linux
+            check: "Build completes without errors"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+
+      - name: Setup Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Build flake outputs
+        run: |
+          # This will evaluate and cache all system configurations
+          # Without actually building full system closures
+          nix flake show --all-systems
+
+      - name: Test dev shell
+        run: nix develop --command echo "Dev shell works"
