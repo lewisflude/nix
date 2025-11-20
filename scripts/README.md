@@ -373,6 +373,67 @@ Total backup size: ~330 GB
 ✓ All backups completed successfully!
 ```
 
+### `restore-from-samsung-drive.sh`
+
+Restore important files from Samsung Drive backup to a new host.
+
+**Usage:**
+
+```bash
+# Run the restore
+./scripts/restore-from-samsung-drive.sh
+```
+
+**Features:**
+
+- Lists available backups from all hostnames
+- Interactive selection of which backup to restore
+- Confirmation prompt before restoring (safety check)
+- Uses `rsync` to restore files preserving attributes
+- Restores all items that were backed up:
+  - Music production files
+  - Code projects
+  - Audio plugin libraries
+  - Application data
+  - Security keys (SSH, GPG)
+- Shows progress for each restore operation
+- Skips items that don't exist in backup
+
+**Restore process:**
+
+1. Lists all available backups (by hostname)
+2. Prompts you to select which backup to restore
+3. Shows warning and asks for confirmation
+4. Restores files to their original locations
+5. Shows summary of successful/failed restores
+
+**Example output:**
+
+```
+=== Restore from Samsung Drive ===
+
+Available backups:
+  1. Lewiss-MacBook-Pro (330G)
+
+Select backup to restore from [hostname]: Lewiss-MacBook-Pro
+Selected backup: Lewiss-MacBook-Pro
+
+⚠ WARNING: This will restore files from backup to your current system.
+Existing files may be overwritten.
+
+Continue? [y/N]: y
+
+=== Starting Restore ===
+📥 Restoring Ableton Projects (41G)...
+✓ Completed: Ableton Projects
+...
+=== Restore Summary ===
+Successful restores: 21
+✓ All restores completed successfully!
+```
+
+**Note:** The restore script will overwrite existing files. Make sure you want to restore before confirming.
+
 ## Requirements
 
 Most scripts require:
