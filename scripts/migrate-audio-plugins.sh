@@ -22,6 +22,7 @@ declare -a PLUGIN_LOCATIONS=(
     "/Library/Audio/Plug-Ins/VST"
     "/Library/Audio/Plug-Ins/VST3"
     "/Library/Audio/Plug-Ins/Components"
+    "/Library/Application Support/Avid/Audio/Plug-Ins"  # AAX plugins (Pro Tools)
 
     # User plugins
     "~/Library/Audio/Plug-Ins/VST"
@@ -51,6 +52,42 @@ expand_path() {
         echo "${path/\~/$HOME}"
     else
         echo "$path"
+    fi
+}
+
+# Function to construct source path for user plugins
+# Handles cases where source_base might be a volume root
+construct_user_source_path() {
+    local source_base="$1"
+    local user_location="$2"  # e.g., ~/Library/...
+    local use_ssh="$3"
+
+    if [[ "$use_ssh" == "true" ]]; then
+        # For SSH, just append the path
+        echo "${source_base}${user_location#~/}"
+    else
+        # For local paths, check if source_base looks like a volume root
+        # If it ends with a volume name (no /Users/...), try to find the user
+        if [[ "$source_base" =~ ^/Volumes/ ]] && [[ ! "$source_base" =~ /Users/ ]]; then
+            # Try to find the first user directory
+            local users_dir="${source_base}/Users"
+            if [[ -d "$users_dir" ]]; then
+                # Find the first non-shared user directory (skip Shared, .localized, etc.)
+                local user_dir=$(find "$users_dir" -maxdepth 1 -type d -not -name "Shared" -not -name ".*" -not -name "Users" | head -1)
+                if [[ -n "$user_dir" ]]; then
+                    echo "${user_dir}${user_location#~/}"
+                else
+                    # Fallback: try current username
+                    echo "${source_base}/Users/${USER}${user_location#~/}"
+                fi
+            else
+                # No Users directory, try current username
+                echo "${source_base}/Users/${USER}${user_location#~/}"
+            fi
+        else
+            # Source base already includes user path or is root
+            echo "${source_base}${user_location#~/}"
+        fi
     fi
 }
 
@@ -207,6 +244,18 @@ migrate_plugins() {
     echo -e "${BLUE}Destination:${NC} ${dest_base}"
     echo ""
 
+    # Detect and show user directory if source is a volume root
+    if [[ "$use_ssh" != "true" ]] && [[ "$source_base" =~ ^/Volumes/ ]] && [[ ! "$source_base" =~ /Users/ ]]; then
+        local users_dir="${source_base}/Users"
+        if [[ -d "$users_dir" ]]; then
+            local user_dir=$(find "$users_dir" -maxdepth 1 -type d -not -name "Shared" -not -name ".*" -not -name "Users" 2>/dev/null | head -1)
+            if [[ -n "$user_dir" ]]; then
+                echo -e "${CYAN}Detected user directory: ${user_dir}${NC}"
+            fi
+        fi
+    fi
+    echo ""
+
     # Confirm before proceeding
     read -p "$(echo -e ${CYAN}Continue with migration? [y/N]: ${NC})" confirm
     if [[ ! "${confirm}" =~ ^[Yy]$ ]]; then
@@ -238,14 +287,21 @@ migrate_plugins() {
                 source_path="${source_base}${location}"
             fi
         else
-            source_path="${source_base}${location#~/}"
+            # For local paths, handle user vs system locations
+            if [[ "$location" == ~/* ]]; then
+                # User location - use helper to find correct user path
+                source_path=$(construct_user_source_path "$source_base" "$location" "$use_ssh")
+            else
+                # System location
+                source_path="${source_base}${location}"
+            fi
             source_path=$(expand_path "$source_path")
         fi
 
         dest_path=$(expand_path "$dest_path")
 
-        # Check if we need root for system plugins (skip for SSH)
-        if [[ "$location" == "/Library"* ]] && [[ "$use_ssh" != "true" ]]; then
+        # Check if we need root for system plugins (skip for SSH and AAX plugins)
+        if [[ "$location" == "/Library"* ]] && [[ "$location" != "/Library/Application Support"* ]] && [[ "$use_ssh" != "true" ]]; then
             check_root "$location" || continue
         fi
 
@@ -270,7 +326,8 @@ migrate_plugins() {
         if [[ "$use_ssh" == "true" ]]; then
             source_path="${source_base}${location#~/}"
         else
-            source_path="${source_base}${location#~/}"
+            # Use helper to find correct user path for Application Support
+            source_path=$(construct_user_source_path "$source_base" "$location" "$use_ssh")
             source_path=$(expand_path "$source_path")
         fi
 
