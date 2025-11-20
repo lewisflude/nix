@@ -1,75 +1,59 @@
-{
-  inputs,
-  system,
-}:
+# Package overlays
+# Simplified - only essential customizations
+{ inputs, system }:
 let
   isLinux = system == "x86_64-linux" || system == "aarch64-linux";
-
-  # Helper: Create an optional overlay that only applies if condition is true
-  mkOptionalOverlay = cond: overlay: if cond then overlay else (_final: _prev: { });
-
-  # Helper: Get package from flake input packages if available, otherwise use prev
-  mkFlakePackage =
-    inputName: packageName: fallback: _final: prev:
-    let
-      hasInput = inputs ? ${inputName};
-      hasPackages = hasInput && inputs.${inputName} ? packages;
-      hasSystem = hasPackages && inputs.${inputName}.packages ? ${system};
-      hasPackage = hasSystem && inputs.${inputName}.packages.${system} ? default;
-    in
-    {
-      ${packageName} =
-        if hasPackage then inputs.${inputName}.packages.${system}.default else fallback prev;
-    };
-
-  overlaySet = {
-    localPkgs =
-      _final: prev:
-      let
-        cursorPkgs = prev.callPackage (../pkgs + "/cursor") { };
-      in
-      {
-        # Only expose cursor app, cursor-cli should come from nixpkgs
-        inherit (cursorPkgs) cursor;
-      };
-
-    npm-packages = import ./npm-packages.nix;
-
-    nh = mkOptionalOverlay (inputs ? nh && inputs.nh ? overlays) inputs.nh.overlays.default;
-
-    nix-topology = mkOptionalOverlay (
-      inputs ? nix-topology && inputs.nix-topology ? overlays
-    ) inputs.nix-topology.overlays.default;
-
-    # Use stable zed-editor from nixpkgs instead of flake input
-    flake-editors = _final: prev: {
-      inherit (prev) zed-editor;
-    };
-
-    # Re-enabled: fenix provides better Rust toolchains than nixpkgs
-    fenix-overlay = mkOptionalOverlay (
-      inputs ? fenix && inputs.fenix ? overlays
-    ) inputs.fenix.overlays.default;
-
-    flake-git-tools = mkFlakePackage "lazygit" "lazygit" (prev: prev.lazygit);
-
-    flake-cli-tools = mkFlakePackage "atuin" "atuin" (prev: prev.atuin);
-
-    niri = mkOptionalOverlay (
-      isLinux && inputs ? niri && inputs.niri ? overlays
-    ) inputs.niri.overlays.niri;
-
-    # Chaotic Nyx overlay: Not needed here
-    # - For NixOS: chaotic.nixosModules.default provides the overlay at system level
-    # - For darwin: chaotic.homeManagerModules.default is used (requires useGlobalPkgs = false)
-
-    # Optimization: Disable direnv tests that require fish shell
-    # Tests fail on Darwin when fish is not available in build environment
-    direnv-optimization = _final: prev: {
-      direnv = prev.direnv.overrideAttrs (_old: {
-        doCheck = false;
-      });
-    };
-  };
 in
-overlaySet
+{
+  # Local custom packages
+  localPkgs = _final: prev: {
+    cursor = prev.callPackage (../pkgs + "/cursor") { };
+  };
+
+  # Custom NPM packages
+  npm-packages = import ./npm-packages.nix;
+
+  # Nix helper tool overlay
+  nh = if inputs ? nh && inputs.nh ? overlays
+    then inputs.nh.overlays.default
+    else (_final: _prev: { });
+
+  # Network topology visualization
+  nix-topology = if inputs ? nix-topology && inputs.nix-topology ? overlays
+    then inputs.nix-topology.overlays.default
+    else (_final: _prev: { });
+
+  # Use stable zed-editor from nixpkgs
+  flake-editors = _final: prev: {
+    inherit (prev) zed-editor;
+  };
+
+  # Rust toolchains from fenix (better than nixpkgs)
+  fenix-overlay = if inputs ? fenix && inputs.fenix ? overlays
+    then inputs.fenix.overlays.default
+    else (_final: _prev: { });
+
+  # Lazygit from flake input
+  flake-git-tools = _final: prev:
+    if inputs ? lazygit && inputs.lazygit ? packages && inputs.lazygit.packages ? ${system}
+    then { lazygit = inputs.lazygit.packages.${system}.default; }
+    else { inherit (prev) lazygit; };
+
+  # Atuin from flake input
+  flake-cli-tools = _final: prev:
+    if inputs ? atuin && inputs.atuin ? packages && inputs.atuin.packages ? ${system}
+    then { atuin = inputs.atuin.packages.${system}.default; }
+    else { inherit (prev) atuin; };
+
+  # Niri compositor (Linux only)
+  niri = if isLinux && inputs ? niri && inputs.niri ? overlays
+    then inputs.niri.overlays.niri
+    else (_final: _prev: { });
+
+  # Optimization: Disable direnv tests that fail on Darwin
+  direnv-optimization = _final: prev: {
+    direnv = prev.direnv.overrideAttrs (_old: {
+      doCheck = false;
+    });
+  };
+}

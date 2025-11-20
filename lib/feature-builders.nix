@@ -68,7 +68,8 @@ let
 
       ++ lib.optionals (cfg.nix or false) (packageSets.nixTools ++ packageSets.languageFormatters.general)
 
-      ++ lib.optionals (cfg.docker or false) (platformLib.platformPackages packageSets.dockerTools [ ])
+      # Docker tools only on Linux (daemon requires system-level config)
+      ++ lib.optionals (cfg.docker or false && pkgs.stdenv.isLinux) packageSets.dockerTools
 
       ++ lib.optionals (cfg.kubernetes or false) packageSets.kubernetesTools
 
