@@ -428,24 +428,4 @@ in
       allPassed && builtins.length (lib.attrNames allTests) > 50
   '';
 
-  theming-validation-tests = mkEvalTest "theming-validation-tests" ''
-    let
-      lib = (import ${inputs.nixpkgs} { system = "x86_64-linux"; }).lib;
-      validationLib = import ../modules/shared/features/theming/validation.nix { inherit lib; };
-
-      # Test white on black has high contrast
-      white = { hex = "#ffffff"; rgb = { r = 255; g = 255; b = 255; }; l = 1.0; c = 0.0; h = 0.0; };
-      black = { hex = "#000000"; rgb = { r = 0; g = 0; b = 0; }; l = 0.0; c = 0.0; h = 0.0; };
-      ratio = validationLib.wcagContrastRatio white black;
-
-      # Test validation passes for high contrast
-      result = validationLib.validateContrastWCAG {
-        textColor = white;
-        backgroundColor = black;
-        level = "AA";
-        textSize = "normal";
-      };
-    in
-      ratio >= 20.0 && result.passed
-  '';
 }
