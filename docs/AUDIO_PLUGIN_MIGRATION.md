@@ -15,10 +15,19 @@ Audio plugins on macOS are stored in several locations:
 
 ### System-Wide Plugins (All Users)
 
+**Standard Locations:**
+
 - **VST**: `/Library/Audio/Plug-Ins/VST/`
 - **VST3**: `/Library/Audio/Plug-Ins/VST3/`
 - **Audio Units**: `/Library/Audio/Plug-Ins/Components/`
 - **AAX (Pro Tools)**: `/Library/Application Support/Avid/Audio/Plug-Ins/`
+
+**Additional Locations (Less Common):**
+
+- `/usr/local/lib/vst/` - Unix-style VST installations
+- `/usr/local/lib/vst3/` - Unix-style VST3 installations
+- `/opt/local/lib/vst/` - MacPorts VST installations
+- `/opt/local/lib/vst3/` - MacPorts VST3 installations
 
 ### User-Specific Plugins
 
@@ -118,6 +127,17 @@ After migration:
 - [ ] DAW recognizes all plugins
 - [ ] Plugins load without errors
 - [ ] Presets load correctly
+
+## Additional Plugin Locations
+
+Some plugins may be installed in non-standard locations:
+
+- **Custom DAW folders**: Some DAWs allow custom plugin search paths
+- **External drives**: Sample libraries and some plugins may be on external drives
+- **Homebrew/MacPorts**: Plugins installed via package managers may be in `/usr/local/` or `/opt/`
+- **Custom installations**: Some vendors install plugins in custom locations
+
+If you have plugins in custom locations, you may need to manually copy them or add the paths to your DAW's plugin search directories.
 
 ## Troubleshooting
 
