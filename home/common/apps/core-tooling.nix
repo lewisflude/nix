@@ -6,7 +6,7 @@
 }:
 let
   helpers = import ./_helpers.nix { inherit lib system; };
-  inherit (helpers) platformLib getNxPackage;
+  inherit (helpers) getNxPackage;
   nx = getNxPackage pkgs;
 in
 {

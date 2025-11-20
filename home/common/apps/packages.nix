@@ -1,13 +1,8 @@
 {
   pkgs,
   lib,
-  system,
   ...
 }:
-let
-  helpers = import ./_helpers.nix { inherit lib system; };
-  inherit (helpers) platformLib;
-in
 {
   home.packages = [
     # Note: coreutils, libnotify, tree, nix-tree, nix-du, yaml-language-server,

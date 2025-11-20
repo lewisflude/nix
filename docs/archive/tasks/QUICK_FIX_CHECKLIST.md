@@ -18,6 +18,7 @@ git rm home/nixos/system/graphics.nix
 ```
 
 **Edit** `home/nixos/system/default.nix`:
+
 ```nix
 {
   imports = [
@@ -40,6 +41,7 @@ git rm home/nixos/system/graphics.nix
 **Edit** `modules/nixos/features/desktop/desktop-environment.nix`:
 
 Remove line 13:
+
 ```nix
 time.timeZone = "Europe/London";  # DELETE THIS LINE
 ```
@@ -49,11 +51,13 @@ time.timeZone = "Europe/London";  # DELETE THIS LINE
 **Edit** `modules/shared/sops.nix:29`:
 
 **Before**:
+
 ```nix
 resolvedOwner = if isDarwin then config.host.username else config.host.username;
 ```
 
 **After**:
+
 ```nix
 resolvedOwner = config.host.username;
 ```
@@ -109,12 +113,14 @@ but actually contains user-level hardware interaction tools."
 **Edit** `lib/functions.nix:4-6`:
 
 **Before**:
+
 ```nix
 isLinux = system: lib.hasInfix "linux" system;
 isDarwin = system: lib.hasInfix "darwin" system;
 ```
 
 **After**:
+
 ```nix
 isLinux = system: lib.hasSuffix "-linux" system || system == "linux";
 isDarwin = system: lib.hasSuffix "-darwin" system || system == "darwin";
@@ -178,6 +184,7 @@ After completing these quick fixes:
 ## 🆘 If Something Breaks
 
 ### Podman doesn't work
+
 ```bash
 # Verify system config is enabled
 grep -r "virtualisation.podman.enable" hosts/
@@ -187,6 +194,7 @@ grep -r "virtualisation.podman.enable" hosts/
 ```
 
 ### Graphics tools missing
+
 ```bash
 # They should be in system packages
 which vulkaninfo
@@ -197,6 +205,7 @@ grep -r "hardware.graphics" modules/nixos/features/desktop/graphics.nix
 ```
 
 ### Time zone wrong
+
 ```bash
 # Check your host config
 grep "timeZone" hosts/jupiter/configuration.nix
@@ -206,6 +215,7 @@ timedatectl set-timezone Europe/London
 ```
 
 ### Rollback Everything
+
 ```bash
 # NixOS
 sudo nixos-rebuild switch --rollback

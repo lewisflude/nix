@@ -30,17 +30,20 @@ This document outlines a comprehensive plan to address architectural issues, ant
 **Action**: DELETE entire file
 
 **Rationale**:
+
 - Podman is already properly configured at system-level in `modules/nixos/features/virtualisation.nix:28-32`
 - Container tools require system privileges and should never be user packages
 - The conditional check is fragile and accessing system config incorrectly
 
 **Steps**:
+
 1. Delete `home/nixos/system/podman.nix`
 2. Remove import from `home/nixos/system/default.nix:11`
 3. Verify podman still works: `podman --version`
 4. Check that system-level podman config is active: `systemctl status podman.socket`
 
 **Verification**:
+
 ```bash
 # Podman should work via system config only
 podman ps
@@ -55,16 +58,19 @@ podman-compose --version
 **Action**: DELETE entire file
 
 **Rationale**:
+
 - 100% duplication of packages already in `modules/nixos/features/desktop/graphics.nix:43-68`
 - System graphics libraries should not be in home-manager
 - Wastes ~200MB+ of build time and disk space
 
 **Steps**:
+
 1. Delete `home/nixos/system/graphics.nix`
 2. Remove import from `home/nixos/system/default.nix:10`
 3. Verify graphics tools still available: `vulkan-tools`, `vainfo`, `glxinfo`
 
 **Verification**:
+
 ```bash
 # All these should still work via system packages
 vulkaninfo
@@ -81,21 +87,25 @@ eglinfo
 **Action**: DELETE line 13
 
 **Current Code**:
+
 ```nix
 time.timeZone = "Europe/London";
 ```
 
 **Rationale**:
+
 - Timezone should be per-host configuration, not feature-level
 - Already properly configured in `hosts/jupiter/default.nix` (implicitly via system defaults)
 - Creates inflexibility for multi-timezone setups
 
 **Steps**:
+
 1. Remove line 13 from `modules/nixos/features/desktop/desktop-environment.nix`
 2. Verify timezone is set in host configs or system defaults
 3. For multi-host setups, ensure each host explicitly sets timezone
 
 **Verification**:
+
 ```bash
 timedatectl
 # Should show: Time zone: Europe/London (GMT, +0000)
@@ -109,16 +119,19 @@ timedatectl
 **Action**: Simplify redundant conditional
 
 **Current Code**:
+
 ```nix
 resolvedOwner = if isDarwin then config.host.username else config.host.username;
 ```
 
 **Fixed Code**:
+
 ```nix
 resolvedOwner = config.host.username;
 ```
 
 **Rationale**:
+
 - Both branches are identical
 - Confusing and suggests there was intended platform difference
 - Simplifies code
@@ -133,11 +146,13 @@ resolvedOwner = config.host.username;
 ### Task 2.1: Refactor MCP Configuration to Reduce Duplication
 
 **Files**:
+
 - `home/nixos/mcp.nix` (256 lines)
 - `home/darwin/mcp.nix` (148 lines)
 - `home/common/modules/mcp.nix` (167 lines)
 
 **Problem**:
+
 - Registration script logic duplicated
 - Platform differences minimal (mostly port numbers)
 - Difficult to maintain consistency
@@ -149,6 +164,7 @@ resolvedOwner = config.host.username;
 **New File**: `home/common/lib/mcp-registration.nix`
 
 Extract common registration logic:
+
 ```nix
 { lib, pkgs }:
 {
@@ -167,11 +183,13 @@ Extract common registration logic:
 #### 2.1.2: Update Platform-Specific Files
 
 **`home/nixos/mcp.nix`**:
+
 - Import shared registration helper
 - Only define NixOS-specific overrides (ports, wrappers)
 - Reduce to ~100 lines
 
 **`home/darwin/mcp.nix`**:
+
 - Import shared registration helper
 - Only define Darwin-specific overrides (Docker github, file-based wrappers)
 - Reduce to ~60 lines
@@ -186,17 +204,20 @@ Extract common registration logic:
 **Proposed**: `home/nixos/hardware-tools/`
 
 **Rationale**:
+
 - Name "system" implies system-level config but it's in home-manager
 - Actually contains user-level tools for hardware/system interaction
 - Causes conceptual confusion
 
 **Steps**:
+
 1. Rename directory: `git mv home/nixos/system home/nixos/hardware-tools`
 2. Update all imports in `home/nixos/default.nix:4`
 3. Update any documentation references
 4. Commit with message: `refactor: rename home/nixos/system to hardware-tools for clarity`
 
 **Files to update**:
+
 - `home/nixos/default.nix:4` - import path
 - Any documentation mentioning this path
 
@@ -205,9 +226,11 @@ Extract common registration logic:
 ### Task 2.3: Fix Parameter Passing Antipattern
 
 **Files**:
+
 - `home/common/apps/docker.nix:3-6`
 
 **Current Code**:
+
 ```nix
 {
   pkgs,
@@ -219,11 +242,13 @@ Extract common registration logic:
 ```
 
 **Problem**:
+
 - Attempting to pass module system config as function parameter with default
 - Should use `config.virtualisation` inside the module
 - Not how NixOS/home-manager module system works
 
 **Fixed Approach**:
+
 ```nix
 {
   pkgs,
@@ -248,22 +273,26 @@ in
 **File**: `lib/functions.nix:4-6`
 
 **Current Code**:
+
 ```nix
 isLinux = system: lib.hasInfix "linux" system;
 isDarwin = system: lib.hasInfix "darwin" system;
 ```
 
 **Problem**:
+
 - `hasInfix` could match unintended strings (e.g., "notlinux-something")
 - Less precise than suffix matching
 
 **Improved Code**:
+
 ```nix
 isLinux = system: lib.hasSuffix "-linux" system || system == "linux";
 isDarwin = system: lib.hasSuffix "-darwin" system || system == "darwin";
 ```
 
 **Rationale**:
+
 - More precise matching
 - Handles both "x86_64-linux" and "linux" formats
 - Prevents false positives
@@ -278,11 +307,13 @@ isDarwin = system: lib.hasSuffix "-darwin" system || system == "darwin";
 Some modules unconditionally install packages without checking feature flags.
 
 **Examples to Review**:
+
 - `home/nixos/desktop-apps.nix` - should check `config.host.features.desktop.enable`
 - `home/common/apps/packages.nix` - review if conditional logic needed
 - `home/darwin/apps.nix` - unconditional packages
 
 **Pattern to Apply**:
+
 ```nix
 { config, lib, pkgs, ... }:
 let
@@ -296,6 +327,7 @@ in
 ```
 
 **Action Items**:
+
 1. Audit all `home/*/apps/*.nix` files
 2. Add feature flag checks where appropriate
 3. Document which packages are "always installed" vs conditional
@@ -314,18 +346,22 @@ in
 **Strategy**: Gradual migration, prioritize high-traffic files
 
 **Phase 1 - High Priority Files** (1-2 hours):
+
 - `home/common/apps/*.nix` - Core applications
 - `home/nixos/system/*.nix` - Hardware tools
 - `modules/shared/features/*.nix` - Feature modules
 
 **Phase 2 - Medium Priority** (1-2 hours):
+
 - `modules/nixos/features/*.nix`
 - `modules/darwin/*.nix`
 
 **Phase 3 - Low Priority** (ongoing):
+
 - Legacy/stable modules that rarely change
 
 **Before**:
+
 ```nix
 home.packages = with pkgs; [
   vulkan-tools
@@ -335,6 +371,7 @@ home.packages = with pkgs; [
 ```
 
 **After**:
+
 ```nix
 home.packages = [
   pkgs.vulkan-tools
@@ -350,12 +387,14 @@ home.packages = [
 ### Task 3.2: Flatten Profile Import Hierarchy
 
 **Files**:
+
 - `home/common/default.nix`
 - `home/common/profiles/full.nix`
 - `home/common/profiles/base.nix`
 - `home/common/profiles/optional.nix`
 
 **Current Structure**:
+
 ```
 home/common/default.nix
   └─ imports profiles/full.nix
@@ -364,11 +403,13 @@ home/common/default.nix
 ```
 
 **Problem**:
+
 - Extra indirection with minimal value
 - `default.nix` just imports one file
 - Could be simpler
 
 **Proposed Structure** (Option A - Flatten):
+
 ```
 home/common/default.nix
   ├─ imports profiles/base.nix (core tools)
@@ -376,6 +417,7 @@ home/common/default.nix
 ```
 
 **Proposed Structure** (Option B - Eliminate Profiles):
+
 ```
 home/common/default.nix
   ├─ imports shell.nix
@@ -387,6 +429,7 @@ home/common/default.nix
 **Decision Point**: Evaluate if profile abstraction adds value for your workflow.
 
 **Implementation**:
+
 1. Review with team/users if profiles are actually used differently
 2. If profiles are always identical: Option B (eliminate)
 3. If profiles provide value: Option A (flatten one level)
@@ -398,12 +441,14 @@ home/common/default.nix
 **Pattern**: Hardcoded ports, timeouts, sizes scattered throughout
 
 **Examples**:
+
 - `home/nixos/mcp.nix:145` - port 6280
 - Various timeout values
 - Service ports in `modules/nixos/services/`
 
 **Action**:
 Create `lib/constants.nix`:
+
 ```nix
 {
   ports = {
@@ -436,6 +481,7 @@ Create `lib/constants.nix`:
 ```
 
 **Usage**:
+
 ```nix
 let
   constants = import ../../../lib/constants.nix;
@@ -454,6 +500,7 @@ in
 **Purpose**: Centralize common validation patterns
 
 **Content**:
+
 ```nix
 { lib }:
 {
@@ -478,6 +525,7 @@ in
 ```
 
 **Usage in Modules**:
+
 ```nix
 let
   validators = import ../../lib/validators.nix { inherit lib; };
@@ -498,11 +546,13 @@ in
 **Current Issue**: Inconsistent error message formats
 
 **Examples**:
+
 - Some use "ERROR: ..."
 - Some use "[component] message"
 - Some use bare messages
 
 **Standard Format**:
+
 ```nix
 assertions = [
   {
@@ -532,6 +582,7 @@ assertions = [
 **Pattern**: Standardize module documentation
 
 **Template**:
+
 ```nix
 # Module: <name>
 # Purpose: <one-line description>
@@ -555,6 +606,7 @@ assertions = [
 **Pattern**: Same packages defined in multiple places
 
 **Example - Audio Production Tools**:
+
 ```nix
 # modules/nixos/features/audio.nix
 # modules/shared/features/media/audio.nix
@@ -562,6 +614,7 @@ assertions = [
 ```
 
 **Action**:
+
 1. Identify common package groups
 2. Extract to `lib/package-sets.nix` (already exists, enhance)
 3. Reference from modules
@@ -575,6 +628,7 @@ assertions = [
 **Action**: Ensure all custom functions have type documentation
 
 **Example**:
+
 ```nix
 # Type: String -> Bool
 isLinux = system: lib.hasSuffix "-linux" system;
@@ -592,12 +646,14 @@ platformPackages = system: linuxPkgs: darwinPkgs: ...;
 **Purpose**: Document how to test module changes
 
 **Content**:
+
 - How to test NixOS modules: `nixos-rebuild build-vm`
 - How to test home-manager: `home-manager build`
 - Quick validation commands
 - Common test scenarios
 
 **Create Example Tests**:
+
 ```nix
 # tests/modules/desktop-test.nix
 {
@@ -619,6 +675,7 @@ platformPackages = system: linuxPkgs: darwinPkgs: ...;
 **Pattern**: Sort and organize imports consistently
 
 **Standard Order**:
+
 1. Feature modules (highest level)
 2. Service modules
 3. Hardware modules
@@ -626,6 +683,7 @@ platformPackages = system: linuxPkgs: darwinPkgs: ...;
 5. Configuration files
 
 **Example**:
+
 ```nix
 {
   imports = [
@@ -657,6 +715,7 @@ platformPackages = system: linuxPkgs: darwinPkgs: ...;
 **Add Section**: "Home-Manager vs System Configuration"
 
 **Content**:
+
 ```markdown
 ## Home-Manager vs System Configuration Guidelines
 
@@ -696,6 +755,7 @@ platformPackages = system: linuxPkgs: darwinPkgs: ...;
 **Add Section**: "Module Placement Guidelines"
 
 **Content**:
+
 ```markdown
 ## Module Placement Guidelines
 
@@ -722,6 +782,7 @@ Is it a tray applet? → Home-Manager module
 **New File**: `docs/TROUBLESHOOTING.md`
 
 **Sections**:
+
 1. Package not found after rebuild
 2. Service not starting
 3. Home-Manager activation fails
@@ -768,6 +829,7 @@ echo "✅ Validation complete"
 **Create**: `.github/workflows/build-test.yml` or equivalent
 
 **Test Matrix**:
+
 - NixOS build (jupiter host)
 - Darwin build (MacBook host)
 - Home-Manager standalone
@@ -779,6 +841,7 @@ echo "✅ Validation complete"
 **Document**: `docs/ROLLBACK.md`
 
 **Content**:
+
 - How to rollback NixOS: `sudo nixos-rebuild switch --rollback`
 - How to rollback home-manager: `home-manager generations`
 - How to access previous generation
@@ -789,6 +852,7 @@ echo "✅ Validation complete"
 ## Implementation Roadmap
 
 ### Week 1: Critical Fixes
+
 - [ ] Task 1.1: Delete podman.nix
 - [ ] Task 1.2: Delete graphics.nix
 - [ ] Task 1.3: Remove hardcoded timezone
@@ -799,6 +863,7 @@ echo "✅ Validation complete"
 **Estimated**: 2-3 hours
 
 ### Week 2: High Priority
+
 - [ ] Task 2.1: Refactor MCP configuration
 - [ ] Task 2.2: Rename system directory
 - [ ] Task 2.3: Fix parameter passing
@@ -808,6 +873,7 @@ echo "✅ Validation complete"
 **Estimated**: 4-5 hours
 
 ### Week 3-4: Medium Priority
+
 - [ ] Task 3.1: Migrate from `with pkgs;` (Phase 1)
 - [ ] Task 3.2: Flatten profile hierarchy
 - [ ] Task 3.3: Extract constants
@@ -817,6 +883,7 @@ echo "✅ Validation complete"
 **Estimated**: 5-6 hours
 
 ### Ongoing: Low Priority
+
 - [ ] Task 4.1-4.5: Polish and documentation
 - [ ] Task 3.1: Continue `with pkgs;` migration (Phase 2-3)
 
@@ -827,6 +894,7 @@ echo "✅ Validation complete"
 ## Success Metrics
 
 ### Quantitative
+
 - [ ] **0** boundary violations (home-manager installing system packages)
 - [ ] **<50** uses of `with pkgs;` (down from 80+)
 - [ ] **0** hardcoded values (all in constants)
@@ -834,6 +902,7 @@ echo "✅ Validation complete"
 - [ ] **<5min** rebuild time improvement (from reduced duplication)
 
 ### Qualitative
+
 - [ ] Clear separation of concerns
 - [ ] Consistent code style
 - [ ] Easy to onboard new contributors
