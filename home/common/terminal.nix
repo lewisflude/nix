@@ -25,17 +25,16 @@ in
       pkgs.pigz
       pkgs.git-extras
     ]
-    ++
-      platformLib.platformPackages
-        [
-          pkgs.networkmanager
-          pkgs.lsof
-          pkgs.wtype
-        ]
-        [ ]; # Linux packages, Darwin packages
+    # Linux-only packages
+    ++ lib.optionals pkgs.stdenv.isLinux [
+      pkgs.networkmanager
+      pkgs.lsof
+      pkgs.wtype
+    ];
+
   programs.ghostty = {
     enable = true;
-    package = if platformLib.isLinux then pkgs.ghostty else null;
+    package = if pkgs.stdenv.isLinux then pkgs.ghostty else null;
     enableZshIntegration = true;
     settings = {
       font-family = "Iosevka Nerd Font";

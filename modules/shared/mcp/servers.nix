@@ -26,7 +26,7 @@ let
   constants = import ../../../lib/constants.nix;
 
   uvx = "${pkgs.uv}/bin/uvx";
-  nodejs = platformLib.getVersionedPackage pkgs platformLib.versions.nodejs;
+  nodejs = pkgs.nodejs;
   codeDirectory = "${config.home.homeDirectory}/Code";
 
   # Use ports from constants for consistency

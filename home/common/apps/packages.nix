@@ -22,14 +22,10 @@ in
     pkgs.cursor-cli
     pkgs.claude-code # Claude agentic coding CLI
   ]
-  ++
-    platformLib.platformPackages
-      [
-        pkgs.seahorse # GNOME password and encryption key manager (PGP/GPG GUI) - Linux only
-      ]
-      [
-        # Darwin packages - xcodebuild moved to home/darwin/
-      ];
+  # Linux-only packages
+  ++ lib.optionals pkgs.stdenv.isLinux [
+    pkgs.seahorse # GNOME password and encryption key manager (PGP/GPG GUI)
+  ];
 
   programs.htop.enable = true;
   programs.btop.enable = true;
