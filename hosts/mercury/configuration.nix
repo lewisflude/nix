@@ -43,7 +43,7 @@ in
   time.timeZone = lib.mkForce constants.defaults.timezone;
 
   host.features.restic = {
-    enable = true;
+    enable = lib.mkForce true;
     backups.macbook-home = {
       enable = true;
       path = "/Users/${config.host.username}/.config/nix";
