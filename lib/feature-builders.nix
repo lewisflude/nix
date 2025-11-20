@@ -44,7 +44,6 @@ let
       {
         cfg,
         pkgs,
-      # platformLib, # Unused
       }:
       packageSets.devUtilities
       ++ lib.optionals (cfg.debugTools or false) packageSets.debugTools

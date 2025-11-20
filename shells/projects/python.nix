@@ -4,7 +4,6 @@
   ...
 }:
 let
-  # platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
   packageSets = import ../../lib/package-sets.nix {
     inherit pkgs;
   };

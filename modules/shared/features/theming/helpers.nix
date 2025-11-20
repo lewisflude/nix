@@ -7,7 +7,6 @@ let
   #   themeHelpers = import ../../modules/shared/features/theming/helpers.nix { inherit lib; };
   #   themeImport = themeHelpers.importTheme {
   #     repoRootPath = ../..;
-  #     nix-colorizer = config._module.args.nix-colorizer or null;
   #   };
   #   theme = themeImport.generateTheme "dark";
   importTheme =
