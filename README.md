@@ -57,7 +57,7 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 | Topic | Link | Description |
 |-------|------|-------------|
 | **🚀 Quick Start** | See [Quick Start](#-quick-start) above | Get up and running in 5 minutes |
-| **🗄️ Cachix & FlakeHub** | [`docs/CACHIX_FLAKEHUB_SETUP.md`](docs/CACHIX_FLAKEHUB_SETUP.md) | Set up binary cache and flake publishing |
+| **🗄️ Cachix & FlakeHub** | [`docs/archive/CACHIX_FLAKEHUB_SETUP.md`](docs/archive/CACHIX_FLAKEHUB_SETUP.md) | Set up binary cache and flake publishing (archived) |
 | **🎨 Developer Experience** | [`docs/DX_GUIDE.md`](docs/DX_GUIDE.md) | DX tooling, commits, and best practices |
 | **🔄 Continuous Integration** | [`docs/CI.md`](docs/CI.md) | GitHub Actions workflows and CI setup |
 | **🏗️ Architecture** | [`docs/reference/architecture.md`](docs/reference/architecture.md) | System design and patterns |
@@ -65,11 +65,8 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 | **⌨️ Keyboard Layout** | [`docs/reference/keyboard-keymap.md`](docs/reference/keyboard-keymap.md) | WKL F13 TKL ergonomic keymap for software engineers |
 | **🔄 Updating** | [`docs/UPDATING.md`](docs/UPDATING.md) | How to update dependencies and inputs |
 | **💬 Code Review** | [`docs/CONVENTIONAL_COMMENTS.md`](docs/CONVENTIONAL_COMMENTS.md) | Conventional comments for reviews |
-| **🔍 Build Profiling** | [`docs/BUILD_PROFILING.md`](docs/BUILD_PROFILING.md) | Tools for profiling builds |
 | **📊 Performance Tuning** | [`docs/PERFORMANCE_TUNING.md`](docs/PERFORMANCE_TUNING.md) | Performance optimizations and configurations |
 | **📈 Performance Monitoring** | [`docs/reference/performance-monitoring.md`](docs/reference/performance-monitoring.md) | Monitoring and tracking performance metrics |
-| **🔍 Cache Behavior** | [`docs/SUBSTITUTER_QUERY_BEHAVIOR.md`](docs/SUBSTITUTER_QUERY_BEHAVIOR.md) | How Nix queries binary caches |
-| **⚡ Cache Error Impact** | [`docs/CACHE_ERROR_IMPACT.md`](docs/CACHE_ERROR_IMPACT.md) | How cache errors affect build performance |
 | **🤝 Contributing** | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to contribute to this repo |
 
 ## 🎯 Common Tasks
@@ -79,7 +76,7 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 - **Update dependencies:** See [Updating Guide](docs/UPDATING.md) or run `nix run .#update-all`
 - **Format code:** `nix fmt` or `treefmt` for all files, automatic via pre-commit hooks
 - **Write good commits:** See [DX Guide → Conventional Commits](docs/DX_GUIDE.md#conventional-commits)
-- **Troubleshoot issues:** See [Build Profiling](docs/BUILD_PROFILING.md) or [Performance Tuning](docs/PERFORMANCE_TUNING.md)
+- **Troubleshoot issues:** See [Performance Tuning](docs/PERFORMANCE_TUNING.md)
 
 ## 🛠️ Maintenance
 
@@ -123,7 +120,7 @@ cachix use lewisflude-nix
 
 Rebuilds will be **10-30 seconds** instead of 10-20 minutes!
 
-**Setup guide:** [`docs/CACHIX_FLAKEHUB_SETUP.md`](docs/CACHIX_FLAKEHUB_SETUP.md)
+**Setup guide:** [`docs/archive/CACHIX_FLAKEHUB_SETUP.md`](docs/archive/CACHIX_FLAKEHUB_SETUP.md)
 
 ### FlakeHub - Flake Publishing
 
@@ -137,7 +134,7 @@ This configuration can be published to FlakeHub for easy discovery and versioned
 }
 ```
 
-**Setup guide:** [`docs/CACHIX_FLAKEHUB_SETUP.md`](docs/CACHIX_FLAKEHUB_SETUP.md)
+**Setup guide:** [`docs/archive/CACHIX_FLAKEHUB_SETUP.md`](docs/archive/CACHIX_FLAKEHUB_SETUP.md)
 
 ---
 
