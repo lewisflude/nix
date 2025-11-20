@@ -46,7 +46,8 @@ in
     backups.macbook-home = {
       enable = true;
       path = "/Users/${config.host.username}";
-      repository = "rest:http://jupiter.local:8000/macos-${config.host.hostname}";
+      # Use IPv4 address to avoid IPv6 connectivity issues
+      repository = "rest:http://${constants.hosts.jupiter.ipv4}:8000/macos-${config.host.hostname}";
       passwordFile = "/Users/${config.host.username}/.config/restic/password";
       timer = "daily";
       user = config.host.username;

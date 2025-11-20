@@ -41,9 +41,6 @@ let
     inherit
       pkgs
       config
-      systemConfig
-      lib
-      platformLib
       ;
   };
   wrappers = import ../../modules/shared/mcp/wrappers.nix {

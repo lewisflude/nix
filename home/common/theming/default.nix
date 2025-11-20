@@ -17,7 +17,6 @@ let
   themeHelpers = import ../../../modules/shared/features/theming/helpers.nix { inherit lib; };
   themeImport = themeHelpers.importTheme {
     repoRootPath = ../../..;
-    nix-colorizer = config._module.args.nix-colorizer or null;
   };
   inherit (themeImport) palette themeLib;
   modeLib = import ../../../modules/shared/features/theming/mode.nix {
