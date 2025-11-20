@@ -4,9 +4,6 @@
 
 set -euo pipefail
 
-BACKUP_ROOT="/Volumes/Samsung Drive"
-BACKUP_DIR="${BACKUP_ROOT}/Backups"
-
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -15,31 +12,136 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Check if Samsung Drive is mounted
-if [[ ! -d "${BACKUP_ROOT}" ]]; then
-    echo -e "${RED}Error: Samsung Drive is not mounted at ${BACKUP_ROOT}${NC}" >&2
+# Function to detect Samsung Drive
+detect_samsung_drive() {
+    # Allow override via environment variable
+    if [[ -n "${SAMSUNG_DRIVE_PATH:-}" ]] && [[ -d "${SAMSUNG_DRIVE_PATH}" ]]; then
+        echo "${SAMSUNG_DRIVE_PATH}"
+        return 0
+    fi
+
+    # Try the default macOS mount point first
+    local default_path="/Volumes/Samsung Drive"
+    if [[ -d "${default_path}" ]]; then
+        echo "${default_path}"
+        return 0
+    fi
+
+    # Auto-detect by searching for drives with "Samsung" in the name
+    if [[ -d "/Volumes" ]]; then
+        local found_drive=""
+        for volume in /Volumes/*; do
+            if [[ -d "${volume}" ]]; then
+                local volume_name=$(basename "${volume}")
+                # Case-insensitive search for "Samsung" in volume name
+                if [[ "${volume_name}" =~ [Ss]amsung ]]; then
+                    # Check if it has the Backups directory (confirm it's the right drive)
+                    if [[ -d "${volume}/Backups" ]]; then
+                        found_drive="${volume}"
+                        break
+                    fi
+                fi
+            fi
+        done
+
+        if [[ -n "${found_drive}" ]]; then
+            echo "${found_drive}"
+            return 0
+        fi
+    fi
+
+    # If we're on Linux, check common mount points
+    if [[ -d "/mnt" ]]; then
+        # Check /mnt/samsung* patterns
+        for mount_point in /mnt/samsung*; do
+            # Skip if glob didn't match (bash returns literal pattern)
+            [[ ! -e "${mount_point}" ]] && continue
+            if [[ -d "${mount_point}" ]] && [[ -d "${mount_point}/Backups" ]]; then
+                echo "${mount_point}"
+                return 0
+            fi
+        done
+        
+        # Check /media/*/Samsung* patterns
+        if [[ -d "/media" ]]; then
+            for user_dir in /media/*; do
+                [[ ! -d "${user_dir}" ]] && continue
+                for mount_point in "${user_dir}"/Samsung*; do
+                    # Skip if glob didn't match
+                    [[ ! -e "${mount_point}" ]] && continue
+                    if [[ -d "${mount_point}" ]] && [[ -d "${mount_point}/Backups" ]]; then
+                        echo "${mount_point}"
+                        return 0
+                    fi
+                done
+            done
+        fi
+    fi
+
+    return 1
+}
+
+# Detect Samsung Drive
+BACKUP_ROOT=""
+if ! BACKUP_ROOT=$(detect_samsung_drive); then
+    echo -e "${RED}Error: Samsung Drive not found${NC}" >&2
+    echo -e "${YELLOW}Please ensure the Samsung Drive is mounted.${NC}" >&2
+    echo "" >&2
+    echo -e "${CYAN}On macOS, check:${NC}" >&2
+    echo "  ls /Volumes/" >&2
+    echo "" >&2
+    echo -e "${CYAN}On Linux, check:${NC}" >&2
+    echo "  ls /mnt/ && ls /media/*/" >&2
+    echo "" >&2
+    echo -e "${CYAN}You can also set SAMSUNG_DRIVE_PATH environment variable:${NC}" >&2
+    echo "  export SAMSUNG_DRIVE_PATH=\"/path/to/drive\"" >&2
+    echo "  $0" >&2
     exit 1
 fi
+
+BACKUP_DIR="${BACKUP_ROOT}/Backups"
+
+# Verify Backups directory exists
+if [[ ! -d "${BACKUP_DIR}" ]]; then
+    echo -e "${RED}Error: Backups directory not found at ${BACKUP_DIR}${NC}" >&2
+    echo -e "${YELLOW}Found Samsung Drive at: ${BACKUP_ROOT}${NC}" >&2
+    echo -e "${YELLOW}But expected Backups directory is missing.${NC}" >&2
+    exit 1
+fi
+
+echo -e "${GREEN}✓ Found Samsung Drive at: ${CYAN}${BACKUP_ROOT}${NC}"
 
 # Function to list available backups
 list_backups() {
     echo -e "${BLUE}Available backups:${NC}"
-    if [[ -d "${BACKUP_DIR}" ]]; then
-        local count=0
-        for backup in "${BACKUP_DIR}"/*; do
-            if [[ -d "${backup}" ]]; then
-                ((count++))
-                local hostname=$(basename "${backup}")
-                local size=$(du -sh "${backup}" 2>/dev/null | cut -f1)
-                echo -e "  ${GREEN}${count}.${NC} ${CYAN}${hostname}${NC} (${size})"
-            fi
-        done
-        if [[ ${count} -eq 0 ]]; then
-            echo -e "${YELLOW}  No backups found${NC}"
-            return 1
+    
+    if [[ ! -d "${BACKUP_DIR}" ]]; then
+        echo -e "${YELLOW}  No backups directory found${NC}" >&2
+        return 1
+    fi
+
+    local count=0
+    # Use nullglob to handle empty directories, and handle spaces in filenames
+    shopt -s nullglob
+    for backup in "${BACKUP_DIR}"/*; do
+        # Skip if glob didn't match (shouldn't happen with nullglob, but be safe)
+        [[ ! -e "${backup}" ]] && continue
+        if [[ -d "${backup}" ]]; then
+            local hostname
+            hostname=$(basename "${backup}" 2>/dev/null || echo "${backup##*/}")
+            # Skip hidden files/directories
+            [[ "${hostname}" =~ ^\. ]] && continue
+            
+            # Increment count (use || true to prevent set -e from exiting on 0 result)
+            ((count++)) || true
+            # Show backup immediately
+            echo -e "  ${GREEN}${count}.${NC} ${CYAN}${hostname}${NC}"
         fi
-    else
-        echo -e "${YELLOW}  No backups directory found${NC}"
+    done
+    shopt -u nullglob
+
+    if [[ ${count} -eq 0 ]]; then
+        echo -e "${YELLOW}  No backups found${NC}" >&2
         return 1
     fi
     return 0
