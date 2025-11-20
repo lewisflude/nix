@@ -1,36 +1,31 @@
 {
   pkgs,
   lib,
-  system,
   ...
 }:
-let
-  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
-in
 {
-  home.packages =
-    [
-      pkgs.clipse
-      pkgs.comma
-      pkgs.devenv
-      # Note: eza is handled via programs.eza in apps/eza.nix
-      pkgs.rsync
-      pkgs.trash-cli
-      pkgs.fd
-      pkgs.dust
-      pkgs.procs
-      pkgs.gping
-      pkgs.tldr
-      pkgs.p7zip
-      pkgs.pigz
-      pkgs.git-extras
-    ]
-    # Linux-only packages
-    ++ lib.optionals pkgs.stdenv.isLinux [
-      pkgs.networkmanager
-      pkgs.lsof
-      pkgs.wtype
-    ];
+  home.packages = [
+    pkgs.clipse
+    pkgs.comma
+    pkgs.devenv
+    # Note: eza is handled via programs.eza in apps/eza.nix
+    pkgs.rsync
+    pkgs.trash-cli
+    pkgs.fd
+    pkgs.dust
+    pkgs.procs
+    pkgs.gping
+    pkgs.tldr
+    pkgs.p7zip
+    pkgs.pigz
+    pkgs.git-extras
+  ]
+  # Linux-only packages
+  ++ lib.optionals pkgs.stdenv.isLinux [
+    pkgs.networkmanager
+    pkgs.lsof
+    pkgs.wtype
+  ];
 
   programs.ghostty = {
     enable = true;

@@ -13,6 +13,7 @@
 Your Nix configuration contains **significant over-engineering** across multiple areas. While the system is functional and well-documented, it suffers from unnecessary abstraction layers, premature optimization, and complexity that doesn't provide proportional value.
 
 **Key Findings:**
+
 - **5,597 lines** dedicated to a theming system that implements color science from scratch
 - **Three-layer abstraction pattern** creating duplicate option definitions
 - **14 flake-parts files** where a single `flake.nix` would suffice
@@ -43,6 +44,7 @@ Your Nix configuration contains **significant over-engineering** across multiple
 You've implemented a **complete color science library in pure Nix**:
 
 #### `/modules/shared/features/theming/validation.nix` (523 lines)
+
 ```nix
 # Custom hex-to-RGB conversion (lines 4-44 in palette.nix)
 hexDigitToInt = c:
@@ -53,6 +55,7 @@ hexDigitToInt = c:
 ```
 
 **Implements from scratch:**
+
 - ✗ WCAG 2.1 contrast ratio calculations
 - ✗ APCA (Advanced Perceptual Contrast Algorithm)
 - ✗ sRGB to linear RGB conversion
@@ -61,12 +64,14 @@ hexDigitToInt = c:
 - ✗ Accessibility validation for critical color pairs
 
 #### `/modules/shared/features/theming/palette.nix` (594 lines)
+
 - Complete OKLCH color system
 - 100+ predefined colors with lightness, chroma, hue values
 - Tonal, accent, and categorical palettes for light/dark modes
 - Custom color format converters (hex, RGB, BGR for mpv)
 
-#### Application-specific theming modules:
+#### Application-specific theming modules
+
 - GTK (335 lines)
 - Helix editor (320 lines)
 - Zed editor (535 lines)
@@ -77,6 +82,7 @@ hexDigitToInt = c:
 ### Reality Check
 
 **What you actually need:**
+
 ```nix
 # A simple color palette
 colors = {
@@ -91,6 +97,7 @@ programs.kitty.settings.background = colors.bg;
 ```
 
 **What you built:**
+
 - A design system that implements algorithms most professional tools don't bother with
 - 40+ test cases for palette structure (tests/theming.nix: 344 lines)
 - 493 lines of example documentation
@@ -99,6 +106,7 @@ programs.kitty.settings.background = colors.bg;
 ### Modern Nix Best Practice
 
 From the Nix community: **Use existing theming solutions** like:
+
 - `nix-colors` flake (community-maintained palettes)
 - `stylix` (automatic theming across your system)
 - Base16 themes (industry standard)
@@ -106,6 +114,7 @@ From the Nix community: **Use existing theming solutions** like:
 ### Recommendation
 
 **Delete 90% of this.** Replace with:
+
 1. A simple `theme.nix` with color definitions (50-100 lines)
 2. Or use `nix-colors` / `stylix` from nixpkgs
 3. Keep only the application integration files if needed
@@ -124,7 +133,9 @@ From the Nix community: **Use existing theming solutions** like:
 To enable a service, you must define options in **THREE places**:
 
 #### Layer 1: Host Options
+
 **File:** `modules/shared/host-options/services/media-management.nix` (240 lines)
+
 ```nix
 options.host.features.mediaManagement = {
   enable = mkEnableOption "native media management services";
@@ -135,7 +146,9 @@ options.host.features.mediaManagement = {
 ```
 
 #### Layer 2: Bridge Module (Pure Passthrough!)
+
 **File:** `modules/nixos/features/media-management.nix` (33 lines)
+
 ```nix
 config = mkIf cfg.enable {
   host.services.mediaManagement = {
@@ -148,13 +161,16 @@ config = mkIf cfg.enable {
 ```
 
 #### Layer 3: Actual Implementation
+
 **Directory:** `modules/nixos/services/media-management/` (13 files, 548 lines)
+
 - Each service in its own 30-50 line file
 - Actual systemd service definitions
 
 ### What Modern Nix Looks Like
 
 **Standard pattern (one file, ~200-300 lines):**
+
 ```nix
 # modules/nixos/media-management.nix
 { config, lib, pkgs, ... }:
@@ -184,6 +200,7 @@ in {
 ### Recommendation
 
 **Collapse to one file:**
+
 1. Delete `modules/shared/host-options/services/media-management.nix`
 2. Delete `modules/nixos/features/media-management.nix`
 3. Merge all 13 service files into `modules/nixos/services/media-management.nix`
@@ -203,6 +220,7 @@ in {
 #### `lib/system-builders.nix` (263 lines)
 
 **Custom builder pattern:**
+
 ```nix
 mkDarwinSystem = hostName: hostConfig: { homebrew-j178 }:
   darwin.lib.darwinSystem {
@@ -226,6 +244,7 @@ Just call `darwin.lib.darwinSystem` directly in your flake outputs. No wrapper n
 #### `lib/feature-builders.nix` (130 lines)
 
 **What it does:**
+
 ```nix
 mkSystemPackages = { cfg, pkgs }:
   lib.concatLists [
@@ -236,6 +255,7 @@ mkSystemPackages = { cfg, pkgs }:
 ```
 
 **Standard Nix:**
+
 ```nix
 # Just do this in your module config directly
 environment.systemPackages = lib.optionals cfg.rust [ pkgs.rustc pkgs.cargo ]
@@ -245,6 +265,7 @@ environment.systemPackages = lib.optionals cfg.rust [ pkgs.rustc pkgs.cargo ]
 #### `lib/validators.nix` (21 lines)
 
 **The entire file:**
+
 ```nix
 isValidPort = port: lib.isInt port && port >= 1 && port <= 65535;
 
@@ -259,6 +280,7 @@ This is a 21-line file to validate... integers. Just use `types.port` from nixpk
 #### `lib/constants.nix` (82 lines)
 
 **Centralizes values used... once each:**
+
 ```nix
 ports.services.jellyfin = 8096;
 timeouts.mcp.warmup = "900";
@@ -308,7 +330,7 @@ flake-parts/
     └── topology.nix (15 lines)
 ```
 
-**Total: ~303 lines across 14 files**
+#### Total: ~303 lines across 14 files
 
 ### Modern Flake Best Practice
 
@@ -316,6 +338,7 @@ From **jade.fyi** research:
 > "The most flexible way of building large systems with Nix is to merely use flakes as an entry point."
 
 **Standard approach:**
+
 ```nix
 # flake.nix
 {
@@ -336,6 +359,7 @@ From **jade.fyi** research:
 ### The Cost of Fragmentation
 
 Each file adds:
+
 - Mental overhead (which file has X?)
 - Import ordering dependencies (documented in core.nix:6-11)
 - Harder to understand the full flake structure
@@ -343,6 +367,7 @@ Each file adds:
 ### Recommendation
 
 **Consolidate to single `flake.nix`:**
+
 1. Move all flake-parts/* content directly into `flake.nix`
 2. Keep package definitions in `pkgs/` (good separation)
 3. Keep module definitions in `modules/` (good separation)
@@ -359,16 +384,19 @@ Each file adds:
 ### Examples
 
 #### Container Supplemental Services
+
 **Location:** `modules/nixos/services/containers-supplemental/`
 **Total:** 12 files for 11 simple services
 
 Each file is 30-50 lines:
+
 - `homarr.nix` (40 lines)
 - `wizarr.nix` (35 lines)
 - `jellystat.nix` (45 lines)
 - ... 9 more nearly identical files
 
 **Pattern repeated in each:**
+
 ```nix
 { config, lib, pkgs, ... }:
 let
@@ -385,6 +413,7 @@ in {
 ```
 
 **Better approach:**
+
 ```nix
 # modules/nixos/services/containers-supplemental.nix
 # One file, ~200 lines, all services together
@@ -393,6 +422,7 @@ in {
 ### Recommendation
 
 **Consolidate micro-modules:**
+
 1. `containers-supplemental/` → single file
 2. `media-management/` → single file (already covered in #2)
 
@@ -408,11 +438,13 @@ in {
 ### The Meta-Problem
 
 You have custom CLI tools to manage the complexity:
+
 - `new-module.nix` (172 lines) - Interactive module scaffolding
 - `visualize-modules.nix` - Generate dependency graphs
 - `update-all.nix` - Update flake inputs
 
 **Template system** (`templates/`) because manual creation is too hard:
+
 - `service-module.nix`
 - `nixos-module.nix`
 - `home-common-module.nix`
@@ -427,6 +459,7 @@ If your system requires **scaffolding tools and templates** to create modules, i
 ### Recommendation
 
 After simplifying the module system:
+
 1. Keep `update-all.nix` (genuinely useful)
 2. Consider removing scaffolding tools (unnecessary after simplification)
 3. Remove templates (won't be needed)
@@ -438,7 +471,9 @@ After simplifying the module system:
 Not everything is over-engineered! These are **well-designed:**
 
 ### ✅ Overlays (`overlays/default.nix`)
+
 Clean, minimal, purpose-driven:
+
 ```nix
 {
   localPkgs = _final: prev: {
@@ -452,15 +487,19 @@ Clean, minimal, purpose-driven:
 ```
 
 ### ✅ Scripts Directory
+
 Practical utilities without abstraction:
+
 - `scripts/diagnose-qbittorrent-seeding.sh`
 - `scripts/test-ssh-performance.sh`
 - Documented in `scripts/README.md`
 
 ### ✅ Host Configurations
+
 Clean, declarative host definitions in `hosts/`
 
 ### ✅ Home-Manager Apps
+
 Individual app configs in `home/common/apps/` are appropriately sized
 
 ---
@@ -497,7 +536,8 @@ Individual app configs in `home/common/apps/` are appropriately sized
 
 Based on research from jade.fyi, Determinate Systems, and NixOS community:
 
-### ✅ DO:
+### ✅ DO
+
 - Use flakes as **entry points** for dependency pinning
 - Compose with **Nix language functions** and nixpkgs utilities
 - Keep modules **cohesive** (related options together)
@@ -505,7 +545,8 @@ Based on research from jade.fyi, Determinate Systems, and NixOS community:
 - Apply `callPackage` pattern for composability
 - Use standard `types` from nixpkgs
 
-### ❌ DON'T:
+### ❌ DON'T
+
 - Put substantial code in `flake.nix` - move to separate files
 - Create custom abstractions for simple operations
 - Split cohesive modules into many micro-files
@@ -524,21 +565,25 @@ Your configuration is **functionally correct but structurally over-engineered**.
 **Recommended Action Plan:**
 
 **Phase 1 (This Week):**
+
 - Delete theming validation (keep only palette)
 - Collapse media-management to one file
 - Remove lib/validators.nix and lib/feature-builders.nix
 
 **Phase 2 (This Month):**
+
 - Replace theming with nix-colors or simple palette
 - Consolidate flake-parts into flake.nix
 - Merge container micro-modules
 
 **Phase 3 (When Motivated):**
+
 - Remove system-builders.nix
 - Audit and reduce constants.nix
 - Clean up documentation
 
 **Expected Result:**
+
 - **~8,000-10,000 fewer lines** (30-37% reduction)
 - **Easier to understand and modify**
 - **Faster evaluation times**
@@ -554,6 +599,7 @@ The goal isn't to remove all abstraction—it's to **keep abstractions that prov
 ### ✅ Completed Refactorings
 
 **Phase 1: Validation System Removal** (Commit: c60d72d)
+
 - ✅ Deleted `modules/shared/features/theming/validation.nix` (523 lines)
 - ✅ Deleted `modules/shared/features/theming/tests/validation.nix`
 - ✅ Deleted `lib/validators.nix` (21 lines)
@@ -566,6 +612,7 @@ The goal isn't to remove all abstraction—it's to **keep abstractions that prov
 ### 📋 Next Steps
 
 See `REFACTORING_PROGRESS.md` for:
+
 - Detailed action plan for remaining items
 - Step-by-step safe refactoring guides
 - Risk assessment for each change

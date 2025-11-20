@@ -519,6 +519,7 @@ These belong in `modules/nixos/` or `modules/darwin/`:
 - **System-Wide Policies**: Security policies, system limits
 
 **Examples**:
+
 ```nix
 # ✅ CORRECT: System-level in modules/nixos/features/virtualisation.nix
 virtualisation.podman = {
@@ -547,6 +548,7 @@ These belong in `home/common/` or `home/{nixos,darwin}/`:
 - **Editor Configuration**: Vim, Emacs, Helix, VS Code settings
 
 **Examples**:
+
 ```nix
 # ✅ CORRECT: User tools in home/nixos/hardware-tools/audio.nix
 home.packages = [
@@ -565,14 +567,17 @@ systemd.user.services.setup-audio-routing = {
 Some components span both layers:
 
 **GPG/SSH**:
+
 - **System**: Key storage directories, agent sockets, PAM integration
 - **Home**: User keys, agent configuration, user-specific settings
 
 **Audio**:
+
 - **System**: PipeWire/PulseAudio daemon, hardware configuration
 - **Home**: User audio mixers, per-user routing rules
 
 **Containers**:
+
 - **System**: Container runtime (Podman/Docker daemon)
 - **Home**: User-facing CLI tools (docker, podman-compose) - *use carefully*
 
@@ -591,6 +596,7 @@ home.packages = [
 **Why Wrong**: Container runtimes require system privileges and are already configured at system-level.
 
 **Fix**: Remove from home-manager, use system configuration:
+
 ```nix
 # ✅ CORRECT: modules/nixos/features/virtualisation.nix
 virtualisation.podman.enable = true;
@@ -609,6 +615,7 @@ home.packages = [
 **Why Wrong**: System graphics libraries already installed at system-level.
 
 **Fix**: Remove from home-manager, packages available via system config:
+
 ```nix
 # ✅ CORRECT: modules/nixos/features/desktop/graphics.nix
 hardware.graphics.extraPackages = [ pkgs.vulkan-tools pkgs.mesa-demos ];
@@ -624,6 +631,7 @@ time.timeZone = "Europe/London";
 **Why Wrong**: Inflexible, prevents per-host configuration.
 
 **Fix**: Set per-host or use constants:
+
 ```nix
 # ✅ CORRECT: hosts/jupiter/default.nix
 { lib, ... }:

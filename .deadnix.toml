@@ -1,0 +1,16 @@
+# Deadnix configuration
+# Global configuration for deadnix linting
+
+# Ignore unused lambda arguments (like `_` or `{ ... }:` patterns)
+# This is necessary because:
+# 1. Statix prefers `{ ... }:` over `{ }:` for empty patterns
+# 2. Home Manager modules receive standard args (system, pkgs, lib, config) even if unused
+# 3. Using `{ ... }:` is the idiomatic Nix pattern for accepting any arguments
+no_lambda_arg = true
+
+# Ignore unused let bindings that are commonly used for future extensibility
+# or are part of a pattern that's intentionally kept for consistency
+no_lambda_pattern = false
+
+# Ignore unused let bindings
+no_let = false

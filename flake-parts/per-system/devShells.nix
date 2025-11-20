@@ -47,18 +47,16 @@ in
         # Default dev shell with pre-commit hooks
         default = pkgs.mkShell {
           shellHook = config.checks.pre-commit-check.shellHook or "";
-          buildInputs =
-            (config.checks.pre-commit-check.enabledPackages or [ ])
-            ++ [
-              pkgs.jq
-              pkgs.yq
-              pkgs.git
-              pkgs.gh
-              pkgs.direnv
-              pkgs.nix-direnv
-              pkgs.nix-update
-              inputs.pre-commit-hooks.packages.${system}.pre-commit
-            ];
+          buildInputs = (config.checks.pre-commit-check.enabledPackages or [ ]) ++ [
+            pkgs.jq
+            pkgs.yq
+            pkgs.git
+            pkgs.gh
+            pkgs.direnv
+            pkgs.nix-direnv
+            pkgs.nix-update
+            inputs.pre-commit-hooks.packages.${system}.pre-commit
+          ];
         };
       };
     };

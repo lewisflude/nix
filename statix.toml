@@ -1,12 +1,26 @@
 # Statix configuration
 # Files that use { ... } or { } patterns for functions that accept any arguments
 # These are valid Nix patterns but statix flags them as "empty patterns"
+#
+# Pattern-based ignores:
+# - **/systems.nix: System enumeration files use empty patterns by design
+# - **/palette.nix: Theme palette files use empty patterns
+# - **/*-conferencing.nix: Video conferencing modules (minimal config, no args needed)
+# - **/keyboard.nix: Keyboard config files (minimal config, no args needed)
 
 ignore = [
+  # System and palette files
   "**/systems.nix",
   "**/palette.nix",
   "**/tests/palette.nix",
+
+  # Service-specific files with minimal config
   "**/wlsunset.nix",
   "**/polkit-gnome.nix",
   "**/gemini-cli.nix",
+
+  # Home Manager modules that don't use standard args
+  # These use { ... } to accept any args from the module system
+  "**/video-conferencing.nix",
+  "**/keyboard.nix",
 ]

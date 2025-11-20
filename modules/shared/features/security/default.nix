@@ -73,12 +73,11 @@ in
 
         services.gnome.gnome-keyring.enable = true;
 
-        environment.systemPackages =
-          optionals cfg.yubikey [
-            pkgs.yubikey-manager
-            pkgs.yubikey-personalization
-            pkgs.yubioath-flutter
-          ];
+        environment.systemPackages = optionals cfg.yubikey [
+          pkgs.yubikey-manager
+          pkgs.yubikey-personalization
+          pkgs.yubioath-flutter
+        ];
 
         users.users.${config.host.username}.extraGroups = optional cfg.yubikey "uucp";
       })

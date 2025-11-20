@@ -86,8 +86,7 @@ let
         (lib.optionals (cfg.rust or false) packageSets.rustToolchain)
 
         (lib.optionals (cfg.python or false) [
-          pkgs.python3.withPackages
-          (python-pkgs: [
+          (pkgs.python3.withPackages (python-pkgs: [
             python-pkgs.pip
             python-pkgs.virtualenv
             python-pkgs.pytest
@@ -95,7 +94,7 @@ let
             python-pkgs.isort
             python-pkgs.mypy
             python-pkgs.ruff
-          ])
+          ]))
           pkgs.poetry
         ])
 

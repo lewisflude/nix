@@ -18,18 +18,21 @@
 # See also:
 # - modules/shared/mcp/: Shared module definitions
 # - home/nixos/mcp.nix: NixOS-specific configuration
-{ pkgs, config, systemConfig, lib, system, ... }:
+{
+  pkgs,
+  config,
+  systemConfig,
+  lib,
+  system,
+  ...
+}:
 
 let
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
   claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
 
-  # Import centralized constants
-  constants = import ../../lib/constants.nix;
-
   # Import shared MCP utilities
-  servers = import ../../modules/shared/mcp/servers.nix { inherit pkgs config systemConfig lib platformLib; };
-  wrappers = import ../../modules/shared/mcp/wrappers.nix { inherit pkgs systemConfig lib platformLib; };
+  servers = import ../../modules/shared/mcp/servers.nix { inherit pkgs config; };
 
   inherit (lib)
     concatStringsSep
@@ -45,7 +48,9 @@ let
     set -euo pipefail
 
     if [ -r "${systemConfig.sops.secrets.KAGI_API_KEY.path or ""}" ]; then
-      export KAGI_API_KEY="$(${pkgs.coreutils}/bin/cat "${systemConfig.sops.secrets.KAGI_API_KEY.path or ""}")"
+      export KAGI_API_KEY="$(${pkgs.coreutils}/bin/cat "${
+        systemConfig.sops.secrets.KAGI_API_KEY.path or ""
+      }")"
     fi
 
     export UV_PYTHON="${pkgs.python3}/bin/python3"
@@ -58,13 +63,16 @@ let
     set -euo pipefail
 
     if [ -r "${systemConfig.sops.secrets.OPENAI_API_KEY.path or ""}" ]; then
-      export OPENAI_API_KEY="$(${pkgs.coreutils}/bin/cat "${systemConfig.sops.secrets.OPENAI_API_KEY.path or ""}")"
+      export OPENAI_API_KEY="$(${pkgs.coreutils}/bin/cat "${
+        systemConfig.sops.secrets.OPENAI_API_KEY.path or ""
+      }")"
     fi
 
     exec ${servers.nodejs}/bin/npx -y @arabold/docs-mcp-server@latest "$@"
   '';
 
-in {
+in
+{
   home = {
     # Install required packages
     packages = [
@@ -98,9 +106,7 @@ in {
               argsStr = concatStringsSep " " (map escapeShellArg serverCfg.args);
               argsPart = optionalString (argsStr != "") "-- ${argsStr}";
               envVars = concatStringsSep " " (
-                mapAttrsToList (
-                  key: value: "export ${escapeShellArg key}=${escapeShellArg value};"
-                ) serverCfg.env
+                mapAttrsToList (key: value: "export ${escapeShellArg key}=${escapeShellArg value};") serverCfg.env
               );
             in
             ''${envVars} claude mcp add ${escapeShellArg name} -s user ${command} ${argsPart} || echo "Failed to add ${name} server"''
@@ -183,14 +189,14 @@ in {
       # Darwin-specific Kagi server (uses home.file wrapper)
       kagi = {
         command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
-        args = [];
+        args = [ ];
         port = servers.ports.kagi;
       };
 
       # Darwin-specific Docs MCP server (uses home.file wrapper)
       docs-mcp-server = {
         command = "${config.home.homeDirectory}/bin/docs-mcp-wrapper";
-        args = [];
+        args = [ ];
         port = servers.ports.docs;
       };
 

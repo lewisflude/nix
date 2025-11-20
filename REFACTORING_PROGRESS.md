@@ -11,6 +11,7 @@
 ### 1. Removed Validation System (911 lines) 🔴 CRITICAL
 
 **Deleted:**
+
 - `modules/shared/features/theming/validation.nix` (523 lines)
   - WCAG 2.1 contrast ratio calculations
   - APCA (Advanced Perceptual Contrast Algorithm)
@@ -24,6 +25,7 @@
 **Why:** Enterprise-grade color science algorithms implemented in pure Nix to validate a statically-defined palette that never changes. This is the type of validation that belongs in design tools, not configuration management.
 
 **Impact:**
+
 - **-911 lines** of unnecessary code
 - **Faster evaluation** (no color science calculations)
 - **Simpler mental model** (no validation complexity)
@@ -38,6 +40,7 @@
 ### 2. Three-Layer Media Management Pattern 🔴 CRITICAL
 
 **Current Structure:**
+
 ```
 Layer 1: modules/shared/host-options/services/media-management.nix (240 lines)
          └─> host.features.mediaManagement options (user-facing)
@@ -55,6 +58,7 @@ Layer 4: modules/nixos/services/media-management/*.nix (15 files)
 **Problem:** Layer 2 is pure abstraction adding zero value. Layer 3 duplicates Layer 1 options.
 
 **Solution:**
+
 1. Delete `modules/nixos/features/media-management.nix` (passthrough layer)
 2. Update service modules to read from `host.features.mediaManagement` directly
 3. Remove `host.services.mediaManagement` options (duplicate of Layer 1)
@@ -72,6 +76,7 @@ Layer 4: modules/nixos/services/media-management/*.nix (15 files)
 **Location:** `modules/shared/features/theming/options.nix`
 
 **Current Complexity:**
+
 - 3 governance policies (functional-override, separate-layer, integrated)
 - `brandLayers` with priority system
 - Duplicate color type definitions (l, c, h, hex) repeated 3 times
@@ -80,6 +85,7 @@ Layer 4: modules/nixos/services/media-management/*.nix (15 files)
 **Usage:** Only referenced in assertions (lines 79-90 in theming/default.nix)
 
 **Modern Approach:**
+
 ```nix
 # Simple color overrides (if even needed)
 colorOverrides = {
@@ -89,6 +95,7 @@ colorOverrides = {
 ```
 
 **Solution:**
+
 1. Replace entire `brandGovernance` section with simple `colorOverrides`
 2. Remove `overrides` option (marked DEPRECATED)
 3. Update assertions to match simplified model
@@ -104,12 +111,14 @@ colorOverrides = {
 **Location:** `lib/feature-builders.nix` (130 lines)
 
 **Used By:**
+
 - `home/common/features/development/default.nix`
 - `modules/shared/features/development/default.nix`
 - `shells/default.nix`
 - `shells/projects/*.nix`
 
 **What It Does:**
+
 ```nix
 mkHomePackages = { cfg, pkgs }:
   lib.concatLists [
@@ -120,6 +129,7 @@ mkHomePackages = { cfg, pkgs }:
 ```
 
 **Modern Approach:**
+
 ```nix
 # Inline in consuming modules
 home.packages = lib.optionals cfg.rust [ pkgs.rustc pkgs.cargo ]
@@ -127,6 +137,7 @@ home.packages = lib.optionals cfg.rust [ pkgs.rustc pkgs.cargo ]
 ```
 
 **Solution:**
+
 1. Inline the logic into the 6 consuming files
 2. Delete `lib/feature-builders.nix`
 
@@ -141,6 +152,7 @@ home.packages = lib.optionals cfg.rust [ pkgs.rustc pkgs.cargo ]
 **Location:** `flake-parts/` (14 files, ~303 lines)
 
 **Structure:**
+
 ```
 flake-parts/
 ├── core.nix (35 lines) - Just imports the others
@@ -154,6 +166,7 @@ flake-parts/
 > "Use flakes as entry points, not composition tools. The Nix language and nixpkgs utilities handle internal composition."
 
 **Solution:**
+
 1. Consolidate all flake-parts/* into main `flake.nix`
 2. Keep package definitions in `pkgs/` (good separation)
 3. Keep module definitions in `modules/` (good separation)
@@ -169,6 +182,7 @@ flake-parts/
 **Location:** `modules/nixos/services/containers-supplemental/` (12 files)
 
 **Pattern:** Each 30-50 line file follows identical structure:
+
 ```nix
 { config, lib, pkgs, ... }:
 let cfg = config.host.services.containersSupplement.serviceName;
@@ -184,6 +198,7 @@ in {
 ```
 
 **Solution:**
+
 1. Merge all services into single `containers-supplemental.nix` (~250-300 lines)
 2. Group related services together with comments
 
@@ -196,11 +211,13 @@ in {
 ## 📊 Summary Statistics
 
 ### Completed
+
 - **Files deleted:** 4
 - **Lines removed:** 911
 - **Complexity reduced:** 🔴 CRITICAL issue resolved
 
 ### Remaining (Recommended Order)
+
 1. **Merge container-supplemental** (LOW risk, ~200 lines saved)
 2. **Simplify brand governance** (LOW risk, ~120 lines saved)
 3. **Inline feature-builders** (LOW risk, ~100 lines saved)
@@ -208,6 +225,7 @@ in {
 5. **Consolidate flake-parts** (MEDIUM risk, better structure)
 
 ### Potential Total Impact
+
 - **Files:** 345 → ~315 (-30 files, -9%)
 - **Lines:** 26,949 → ~25,200 (-1,749 lines, -6.5%)
 - **Plus previous:** Total ~2,660 lines removed (-10%)
@@ -296,6 +314,7 @@ git commit -m "refactor: consolidate flake-parts into main flake"
 ### What NOT to Remove
 
 These are **good engineering** and should stay:
+
 - ✅ Overlays (`overlays/default.nix`) - Clean, purposeful
 - ✅ Scripts directory - Practical utilities
 - ✅ Host configurations - Well-structured
@@ -305,6 +324,7 @@ These are **good engineering** and should stay:
 ### Testing Strategy
 
 After each refactoring:
+
 ```bash
 # 1. Syntax check
 nix flake check
@@ -324,11 +344,13 @@ git bisect good <last-known-good-commit>
 ### Rollback Plan
 
 Each commit is atomic and can be reverted:
+
 ```bash
 git revert <commit-hash>
 ```
 
 Or reset to before refactoring:
+
 ```bash
 git reset --hard 5972689  # Before refactoring started
 ```
@@ -338,6 +360,7 @@ git reset --hard 5972689  # Before refactoring started
 ## 🎯 Success Criteria
 
 A successful refactoring:
+
 1. ✅ Removes unnecessary abstraction layers
 2. ✅ Makes codebase easier to understand
 3. ✅ Reduces line count and file count

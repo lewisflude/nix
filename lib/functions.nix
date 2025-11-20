@@ -67,7 +67,12 @@ let
   mkPkgsConfig = {
     allowUnfree = true;
     allowUnfreePredicate = _: true;
-    allowBrokenPredicate = pkg: lib.hasPrefix "zfs-kernel" (toString (pkg.name or ""));
+    allowBrokenPredicate =
+      pkg:
+      let
+        name = toString (pkg.name or "");
+      in
+      lib.hasPrefix "zfs-kernel" name || name == "postgresql-test-hook";
     allowUnsupportedSystem = false;
   };
 

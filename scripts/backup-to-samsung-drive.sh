@@ -51,12 +51,20 @@ backup_dir() {
     log "   Source: ${source}"
     log "   Dest:   ${dest}"
 
+    # Create destination directory if it doesn't exist
+    mkdir -p "${dest}"
+
     # Use rsync with progress and preserve attributes
     if rsync -avh --progress --delete "${source}/" "${dest}/" >> "${LOG_FILE}" 2>&1; then
         log "${GREEN}✓ Completed: ${description}${NC}"
         return 0
     else
         log "${RED}✗ Failed: ${description}${NC}"
+        # Show last few lines of error from log
+        log "${YELLOW}Error details:${NC}"
+        tail -10 "${LOG_FILE}" | grep -E "(rsync|error|failed)" | tail -5 | while IFS= read -r line; do
+            log "   ${line}"
+        done
         return 1
     fi
 }

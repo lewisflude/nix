@@ -1,8 +1,30 @@
 # MCP Server Wrapper Scripts
 #
-# Secure wrappers for MCP servers that inject SOPS-managed secrets at runtime.
-# Secrets are read from SOPS paths (not embedded in Nix store).
-{ pkgs, systemConfig, lib, platformLib }:
+# This module provides secure wrapper scripts for MCP servers that require
+# secret credentials (API keys, tokens, etc.). Wrappers read secrets from
+# SOPS-managed paths and inject them as environment variables.
+#
+# Architecture:
+# - mkSecretWrapper: Generic wrapper builder for SOPS secrets
+# - Individual wrappers: Kagi, OpenAI, GitHub, Docs, Rust docs
+# - NixOS-specific: rustdocsWrapper with Nix shell integration
+#
+# Security:
+# - Secrets are read at runtime from SOPS paths (not embedded in Nix store)
+# - All wrappers use absolute paths for reproducibility
+# - Proper error handling with set -euo pipefail
+#
+# Example:
+#   kagiWrapper = mkSecretWrapper {
+#     name = "kagi-mcp-wrapper";
+#     secretName = "KAGI_API_KEY";
+#     command = "exec ${uvx} --from kagimcp kagimcp \"$@\"";
+#   };
+{
+  pkgs,
+  systemConfig,
+  lib,
+}:
 
 let
   inherit (lib)
@@ -13,8 +35,25 @@ let
   # Note: nodejs package directly from pkgs (no version wrapper needed)
   uvx = "${pkgs.uv}/bin/uvx";
 
-  # Generic wrapper builder - reads SOPS secret and executes command
-  mkSecretWrapper = { name, secretName, command, extraEnv ? {} }:
+  # Generic secret wrapper builder
+  #
+  # Creates a shell wrapper that:
+  # 1. Reads a secret from SOPS
+  # 2. Exports it as an environment variable
+  # 3. Executes the wrapped command
+  #
+  # Parameters:
+  # - name: Name of the wrapper script
+  # - secretName: Name of the SOPS secret (must exist in systemConfig.sops.secrets)
+  # - command: Command to execute after setting up the environment
+  # - extraEnv: Additional environment variables to set (optional)
+  mkSecretWrapper =
+    {
+      name,
+      secretName,
+      command,
+      extraEnv ? { },
+    }:
     pkgs.writeShellApplication {
       inherit name;
       runtimeInputs = [ pkgs.coreutils ];
@@ -22,9 +61,7 @@ let
         set -euo pipefail
 
         # Export additional environment variables
-        ${concatStringsSep "\n" (mapAttrsToList (k: v:
-          ''export ${k}="${v}"''
-        ) extraEnv)}
+        ${concatStringsSep "\n" (mapAttrsToList (k: v: ''export ${k}="${v}"'') extraEnv)}
 
         # Read secret from SOPS and export
         ${secretName}="$(${pkgs.coreutils}/bin/cat ${systemConfig.sops.secrets.${secretName}.path})"
@@ -35,8 +72,14 @@ let
       '';
     };
 
-in {
-  # Kagi MCP server (search, summarization, and assistant)
+in
+{
+  # Kagi MCP Server Wrapper
+  #
+  # Wraps the Kagi MCP server with KAGI_API_KEY secret injection.
+  # Kagi provides search, summarization, and assistant capabilities.
+  #
+  # Usage: kagi-mcp-wrapper [args...]
   kagiWrapper = mkSecretWrapper {
     name = "kagi-mcp-wrapper";
     secretName = "KAGI_API_KEY";
@@ -57,14 +100,17 @@ in {
         export RUSTDOCFLAGS="--cfg=docsrs"
       fi
 
-      exec ${nodejs}/bin/npx -y @mzxrai/mcp-openai "$@"
+      exec ${pkgs.nodejs}/bin/npx -y @mzxrai/mcp-openai "$@"
     '';
   };
 
   # GitHub MCP server (repositories, issues, PRs)
   githubWrapper = pkgs.writeShellApplication {
     name = "github-mcp-wrapper";
-    runtimeInputs = [ pkgs.coreutils nodejs ];
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.nodejs
+    ];
     text = ''
       set -euo pipefail
 
@@ -73,7 +119,7 @@ in {
       export GITHUB_TOKEN
 
       # Execute GitHub MCP server
-      exec ${nodejs}/bin/npx -y @modelcontextprotocol/server-github@latest "$@"
+      exec ${pkgs.nodejs}/bin/npx -y @modelcontextprotocol/server-github@latest "$@"
     '';
   };
 
@@ -82,7 +128,7 @@ in {
     name = "docs-mcp-wrapper";
     secretName = "OPENAI_API_KEY";
     command = ''
-      exec ${nodejs}/bin/npx -y @arabold/docs-mcp-server@latest "$@"
+      exec ${pkgs.nodejs}/bin/npx -y @arabold/docs-mcp-server@latest "$@"
     '';
   };
 
@@ -90,7 +136,10 @@ in {
   # Supports MCP_NIX_SHELL and MCP_EXTRA_NIX_PKGS environment variables
   rustdocsWrapper = pkgs.writeShellApplication {
     name = "rustdocs-mcp-wrapper";
-    runtimeInputs = [ pkgs.coreutils pkgs.nix ];
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.nix
+    ];
     text = ''
       set -euo pipefail
 
