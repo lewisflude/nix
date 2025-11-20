@@ -338,6 +338,18 @@ in
           '';
         };
 
+        # Listenarr (Audiobooks)
+        "listenarr.blmt.io" = {
+          extraConfig = ''
+            reverse_proxy localhost:5000 {
+              header_up X-Real-IP {remote_host}
+              header_up X-Forwarded-For {remote_host}
+              header_up X-Forwarded-Proto {scheme}
+            }
+            encode zstd gzip
+          '';
+        };
+
         # Cleanuparr (Download Queue Cleanup)
         "cleanuparr.blmt.io" = {
           extraConfig = ''

@@ -61,6 +61,19 @@ in
       };
     };
 
+    listenarr = {
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable Listenarr audiobook management";
+      };
+      publicUrl = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Public URL for Listenarr (optional, used by Discord bot)";
+      };
+    };
+
     sabnzbd = {
       enable = mkOption {
         type = types.bool;

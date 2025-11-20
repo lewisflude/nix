@@ -41,6 +41,8 @@ in
         ])
       ));
 
-    users.users.${config.host.username}.extraGroups = optional cfg.enable "audio";
+    # Note: PipeWire uses a Polkit-like security model and does not require
+    # users to be in the 'audio' group. This is only needed for legacy ALSA applications.
+    # users.users.${config.host.username}.extraGroups = optional cfg.enable "audio";
   };
 }

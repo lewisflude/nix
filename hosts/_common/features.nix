@@ -49,6 +49,9 @@
     readarr = {
       enable = true;
     };
+    listenarr = {
+      enable = false;
+    };
     sabnzbd = {
       enable = true;
     };
