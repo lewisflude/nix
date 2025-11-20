@@ -1,6 +1,6 @@
 # Nix Configuration
 
-[![CI](https://github.com/lewisflude/nix-config/workflows/CI/badge.svg)](https://github.com/lewisflude/nix-config/actions/workflows/ci.yml)
+[![CI](https://github.com/lewisflude/nix/workflows/CI/badge.svg)](https://github.com/lewisflude/nix/actions/workflows/ci.yml)
 [![Nix Flake](https://img.shields.io/badge/nix-flake-blue.svg)](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake.html)
 [![NixOS 24.11](https://img.shields.io/badge/NixOS-24.11-blue.svg)](https://nixos.org)
 
@@ -59,6 +59,7 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 | **🚀 Quick Start** | See [Quick Start](#-quick-start) above | Get up and running in 5 minutes |
 | **🗄️ Cachix & FlakeHub** | [`docs/CACHIX_FLAKEHUB_SETUP.md`](docs/CACHIX_FLAKEHUB_SETUP.md) | Set up binary cache and flake publishing |
 | **🎨 Developer Experience** | [`docs/DX_GUIDE.md`](docs/DX_GUIDE.md) | DX tooling, commits, and best practices |
+| **🔄 Continuous Integration** | [`docs/CI.md`](docs/CI.md) | GitHub Actions workflows and CI setup |
 | **🏗️ Architecture** | [`docs/reference/architecture.md`](docs/reference/architecture.md) | System design and patterns |
 | **⚙️ Features** | [`docs/FEATURES.md`](docs/FEATURES.md) | Feature-based configuration system |
 | **⌨️ Keyboard Layout** | [`docs/reference/keyboard-keymap.md`](docs/reference/keyboard-keymap.md) | WKL F13 TKL ergonomic keymap for software engineers |
