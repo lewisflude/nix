@@ -90,11 +90,95 @@ copy_directory() {
 
     # Copy with rsync for better progress and error handling
     # rsync automatically handles SSH paths
-    if rsync -av --progress "${source_expanded}/" "${dest_expanded}/" 2>&1 | grep -v "^$" | head -20; then
+    # Use a temporary file to capture output and check exit code properly
+    local temp_output=$(mktemp)
+    local rsync_exit=0
+
+    # Run rsync with options:
+    # -a: archive mode (preserves permissions, timestamps, etc.)
+    # -v: verbose
+    # --progress: show progress
+    # --partial: keep partially transferred files (allows resuming)
+    # --partial-dir: store partial files in a hidden directory
+    # --human-readable: show sizes in human-readable format
+    if rsync -av --progress --partial --partial-dir=".rsync-partial" "${source_expanded}/" "${dest_expanded}/" > "$temp_output" 2>&1; then
+        rsync_exit=0
+    else
+        rsync_exit=$?
+    fi
+
+    # Show output (filter empty lines and limit to last 30 lines for readability)
+    grep -v "^$" "$temp_output" | tail -30
+
+    # Clean up temp file
+    rm -f "$temp_output"
+
+    # Check exit code
+    if [[ $rsync_exit -eq 0 ]]; then
         echo -e "${GREEN}✅ Copied ${description}${NC}"
         return 0
     else
-        echo -e "${RED}❌ Failed to copy ${description}${NC}" >&2
+        echo -e "${RED}❌ Failed to copy ${description} (exit code: ${rsync_exit})${NC}" >&2
+        case $rsync_exit in
+            1)
+                echo -e "${YELLOW}   Error: Syntax or usage error${NC}" >&2
+                ;;
+            2)
+                echo -e "${YELLOW}   Error: Protocol incompatibility${NC}" >&2
+                ;;
+            3)
+                echo -e "${YELLOW}   Error: File selection errors (e.g., file not found)${NC}" >&2
+                ;;
+            4)
+                echo -e "${YELLOW}   Error: Requested action not supported${NC}" >&2
+                ;;
+            5)
+                echo -e "${YELLOW}   Error: Error starting client-server protocol${NC}" >&2
+                ;;
+            10)
+                echo -e "${YELLOW}   Error: Socket I/O error${NC}" >&2
+                ;;
+            11)
+                echo -e "${YELLOW}   Error: File I/O error (check disk space and permissions)${NC}" >&2
+                ;;
+            12)
+                echo -e "${YELLOW}   Error: rsync protocol data stream error${NC}" >&2
+                ;;
+            13)
+                echo -e "${YELLOW}   Error: Diagnostics error${NC}" >&2
+                ;;
+            14)
+                echo -e "${YELLOW}   Error: IPC (code) error${NC}" >&2
+                ;;
+            20)
+                echo -e "${YELLOW}   Error: Received SIGUSR1 or SIGINT${NC}" >&2
+                ;;
+            21)
+                echo -e "${YELLOW}   Error: Waitpid() error${NC}" >&2
+                ;;
+            22)
+                echo -e "${YELLOW}   Error: Alloc core memory error${NC}" >&2
+                ;;
+            23)
+                echo -e "${YELLOW}   Error: Partial transfer due to error${NC}" >&2
+                echo -e "${YELLOW}   Some files may have been copied. You can re-run to resume.${NC}" >&2
+                ;;
+            24)
+                echo -e "${YELLOW}   Error: Partial transfer due to vanished source files${NC}" >&2
+                ;;
+            25)
+                echo -e "${YELLOW}   Error: File system limits exceeded${NC}" >&2
+                ;;
+            30)
+                echo -e "${YELLOW}   Error: Timeout in data send/receive${NC}" >&2
+                ;;
+            35)
+                echo -e "${YELLOW}   Error: Timeout waiting for daemon connection${NC}" >&2
+                ;;
+            *)
+                echo -e "${YELLOW}   Check the output above for specific error messages${NC}" >&2
+                ;;
+        esac
         return 1
     fi
 }
