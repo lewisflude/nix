@@ -18,13 +18,19 @@ DEST_MAC="${2:-$HOME}"
 
 # Plugin locations to migrate
 declare -a PLUGIN_LOCATIONS=(
-    # System-wide plugins
+    # System-wide plugins (standard locations)
     "/Library/Audio/Plug-Ins/VST"
     "/Library/Audio/Plug-Ins/VST3"
     "/Library/Audio/Plug-Ins/Components"
     "/Library/Application Support/Avid/Audio/Plug-Ins"  # AAX plugins (Pro Tools)
 
-    # User plugins
+    # Additional system locations (less common)
+    "/usr/local/lib/vst"
+    "/usr/local/lib/vst3"
+    "/opt/local/lib/vst"
+    "/opt/local/lib/vst3"
+
+    # User plugins (standard locations)
     "~/Library/Audio/Plug-Ins/VST"
     "~/Library/Audio/Plug-Ins/VST3"
     "~/Library/Audio/Plug-Ins/Components"
@@ -300,8 +306,13 @@ migrate_plugins() {
 
         dest_path=$(expand_path "$dest_path")
 
-        # Check if we need root for system plugins (skip for SSH and AAX plugins)
-        if [[ "$location" == "/Library"* ]] && [[ "$location" != "/Library/Application Support"* ]] && [[ "$use_ssh" != "true" ]]; then
+        # Check if we need root for system plugins
+        # Skip root check for: SSH, AAX plugins, /usr/local, /opt (usually user-writable)
+        if [[ "$location" == "/Library"* ]] && \
+           [[ "$location" != "/Library/Application Support"* ]] && \
+           [[ "$location" != "/usr/local"* ]] && \
+           [[ "$location" != "/opt"* ]] && \
+           [[ "$use_ssh" != "true" ]]; then
             check_root "$location" || continue
         fi
 
@@ -383,9 +394,11 @@ Options:
     destination_path - Path to destination (default: current user home)
 
 Notes:
-    - System-wide plugins require sudo privileges
+    - System-wide plugins in /Library/ require sudo privileges
+    - Plugins in /usr/local/ and /opt/ are usually user-writable (no sudo needed)
     - Most plugins will need re-activation on the new Mac
     - Large sample libraries may need to be migrated separately
+    - Custom plugin locations not in the standard paths will be skipped
 
 EOF
 }
