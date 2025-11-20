@@ -434,6 +434,101 @@ Successful restores: 21
 
 **Note:** The restore script will overwrite existing files. Make sure you want to restore before confirming.
 
+### `migrate-audio-plugins.sh`
+
+Migrate audio plugins (VST, Audio Units, VST3) and their associated data from one Mac to another.
+
+**Usage:**
+
+```bash
+# Migrate from external drive to current user
+./scripts/migrate-audio-plugins.sh /Volumes/External\ Drive /Users/username
+
+# Migrate from another Mac via network share
+./scripts/migrate-audio-plugins.sh /Volumes/Other\ Mac /Users/username
+
+# Migrate system plugins (requires sudo)
+sudo ./scripts/migrate-audio-plugins.sh /Volumes/External\ Drive /
+```
+
+**What it migrates:**
+
+- **Plugin binaries:**
+  - System-wide: `/Library/Audio/Plug-Ins/VST/`, `/Library/Audio/Plug-Ins/VST3/`, `/Library/Audio/Plug-Ins/Components/`
+  - User-specific: `~/Library/Audio/Plug-Ins/VST/`, `~/Library/Audio/Plug-Ins/VST3/`, `~/Library/Audio/Plug-Ins/Components/`
+
+- **Plugin data & presets:**
+  - FabFilter presets and settings
+  - Toontrack (Superior Drummer, etc.)
+  - Native Instruments
+  - iZotope
+  - Waves
+  - Plugin Alliance
+  - Universal Audio
+  - Sonarworks
+  - Avid (Pro Tools)
+  - Steinberg (Cubase, Nuendo)
+  - PreSonus (Studio One)
+
+**Features:**
+
+- Copies plugin binaries from both system and user locations
+- Migrates plugin presets, settings, and configurations
+- Shows progress for each operation
+- Skips directories that don't exist
+- Provides summary of successful/failed migrations
+
+**Important notes:**
+
+- **System-wide plugins require sudo** - Run with `sudo` to migrate plugins in `/Library/Audio/Plug-Ins/`
+- **Re-activation required** - Most commercial plugins need to be re-authorized on the new Mac
+- **Plugin managers** - Use vendor-specific tools (Native Access, Waves Central, etc.) to re-authorize
+- **iLok licenses** - Transfer via iLok License Manager if applicable
+- **DAW rescan** - Rescan plugins in your DAW after migration
+
+**Example output:**
+
+```
+========================================
+Audio Plugin Migration
+========================================
+
+Source: /Volumes/External Drive
+Destination: /Users/username
+
+Continue with migration? [y/N]: y
+
+========================================
+Plugin Binaries
+========================================
+📥 Copying VST plugins (2.1G)...
+✅ Copied VST plugins
+📥 Copying Components plugins (1.8G)...
+✅ Copied Components plugins
+...
+
+========================================
+Plugin Data & Presets
+========================================
+📥 Copying FabFilter data (14M)...
+✅ Copied FabFilter data
+...
+
+========================================
+Migration Summary
+========================================
+✅ Successful: 15
+❌ Failed: 0
+
+⚠ Important Next Steps:
+1. Re-authorize plugins using vendor plugin managers
+2. Transfer iLok licenses if applicable
+3. Rescan plugins in your DAW
+4. Verify all plugins load correctly
+```
+
+**See also:** `docs/AUDIO_PLUGIN_MIGRATION.md` for detailed migration guide and troubleshooting.
+
 ## Requirements
 
 Most scripts require:
