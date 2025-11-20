@@ -1,6 +1,5 @@
 {
   pkgs,
-  versions,
 }:
 let
   packageSets = {
@@ -39,7 +38,7 @@ let
         ];
 
     pythonToolchain = pkgs: [
-      (pkgs.${versions.python}.withPackages (python-pkgs: [
+      (pkgs.python3.withPackages (python-pkgs: [
         python-pkgs.pip
         python-pkgs.virtualenv
         python-pkgs.black
@@ -58,7 +57,7 @@ let
     ];
 
     nodeToolchain = pkgs: [
-      pkgs.${versions.nodejs}
+      pkgs.nodejs
       pkgs.nodePackages.pnpm
       pkgs.nodePackages.typescript
     ];

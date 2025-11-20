@@ -12,7 +12,6 @@ let
   platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
   packageSets = import ../../../../lib/package-sets.nix {
     inherit pkgs;
-    inherit (platformLib) versions;
   };
   featureBuilders = import ../../../../lib/feature-builders.nix {
     inherit lib packageSets;

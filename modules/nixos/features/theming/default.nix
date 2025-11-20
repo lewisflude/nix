@@ -16,7 +16,6 @@ let
   palette = import ../../../shared/features/theming/palette.nix { inherit lib; };
   themeLib = import ../../../shared/features/theming/lib.nix {
     inherit lib palette;
-    nix-colorizer = config._module.args.nix-colorizer or null;
   };
   modeLib = import ../../../shared/features/theming/mode.nix {
     inherit lib config;

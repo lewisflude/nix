@@ -1,14 +1,18 @@
 # Simplified Theme Library
 # Provides essential theming functions without over-engineering
-{ lib, palette }:
+{
+  lib,
+  palette,
+# nix-colorizer ? null,
+}:
 rec {
   # Get palette for specific mode (light or dark)
-  getPalette = mode: paletteType:
-    if mode == "light" then paletteType.light else paletteType.dark;
+  getPalette = mode: paletteType: if mode == "light" then paletteType.light else paletteType.dark;
 
   # Generate semantic color mappings based on mode
   # These provide human-readable names for common UI elements
-  getSemanticColors = mode:
+  getSemanticColors =
+    mode:
     let
       tonal = getPalette mode palette.tonal;
       accent = getPalette mode palette.accent;
@@ -69,13 +73,18 @@ rec {
         h = 0.0;
         hex = "#00000000";
         hexRaw = "00000000";
-        rgb = { r = 0; g = 0; b = 0; };
+        rgb = {
+          r = 0;
+          g = 0;
+          b = 0;
+        };
       };
     };
 
   # Generate a complete theme object for a given mode
   # This is the main API for creating themes
-  generateTheme = mode: _validationOptions:
+  generateTheme =
+    mode: _validationOptions:
     let
       tonal = getPalette mode palette.tonal;
       accent = getPalette mode palette.accent;
@@ -90,22 +99,31 @@ rec {
 
       # Internal palette access (for advanced use cases)
       _internal = {
-        inherit tonal accent categorical semantic;
+        inherit
+          tonal
+          accent
+          categorical
+          semantic
+          ;
       };
 
       # Helper functions
-      withAlpha = color: alpha:
+      withAlpha =
+        color: alpha:
         let
           clampedAlpha = lib.trivial.max 0.0 (lib.trivial.min 1.0 alpha);
           alphaInt = builtins.floor (clampedAlpha * 255.0);
-          toHex = n:
-            let hexDigits = "0123456789abcdef";
-            in "${builtins.substring (n / 16) 1 hexDigits}${builtins.substring (lib.mod n 16) 1 hexDigits}";
+          toHex =
+            n:
+            let
+              hexDigits = "0123456789abcdef";
+            in
+            "${builtins.substring (n / 16) 1 hexDigits}${builtins.substring (lib.mod n 16) 1 hexDigits}";
         in
         "${color.hex}${toHex alphaInt}";
 
       # Format conversion utilities
-      formats = {
+      formats = rec {
         hex = color: color.hex;
         hexRaw = color: color.hexRaw;
         rgb = color: color.rgb;
@@ -116,22 +134,29 @@ rec {
           b = color.rgb.b / 255.0;
         };
         # BGR format for mpv and similar tools
-        bgrHex = color:
+        bgrHex =
+          color:
           let
-            toHex = n:
-              let hexDigits = "0123456789abcdef";
-              in "${builtins.substring (n / 16) 1 hexDigits}${builtins.substring (lib.mod n 16) 1 hexDigits}";
+            toHex =
+              n:
+              let
+                hexDigits = "0123456789abcdef";
+              in
+              "${builtins.substring (n / 16) 1 hexDigits}${builtins.substring (lib.mod n 16) 1 hexDigits}";
           in
           "#${toHex color.rgb.b}${toHex color.rgb.g}${toHex color.rgb.r}";
-        bgrHexRaw = color: lib.removePrefix "#" (formats.bgrHex color);
+        bgrHexRaw = color: lib.removePrefix "#" (bgrHex color);
         oklch = color: "oklch(${toString color.l} ${toString color.c} ${toString color.h})";
       };
     };
 
   # Get all ANSI terminal colors as a list
-  getAnsiColorsList = mode:
-    let semantic = getSemanticColors mode;
-    in [
+  getAnsiColorsList =
+    mode:
+    let
+      semantic = getSemanticColors mode;
+    in
+    [
       semantic."ansi-black".hex
       semantic."ansi-red".hex
       semantic."ansi-green".hex

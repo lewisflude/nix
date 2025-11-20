@@ -8,7 +8,6 @@ let
   platformLib = (import ../lib/functions.nix { inherit lib; }).withSystem system;
   packageSets = import ../lib/package-sets.nix {
     inherit pkgs;
-    inherit (platformLib) versions;
   };
   featureBuilders = import ../lib/feature-builders.nix {
     inherit lib packageSets;
@@ -44,7 +43,6 @@ let
             go = true;
           };
           inherit pkgs;
-          inherit (platformLib) versions;
         }
         ++ commonTools;
       shellHook = ''
@@ -57,15 +55,14 @@ let
 
     # Web-specific tools (extends system node/typescript)
     web = pkgs.mkShell {
-      buildInputs =
-        [
-          # System provides: node, typescript, pnpm
-          # Add web-specific tools only
-          pkgs.tailwindcss-language-server
-          pkgs.html-tidy
-          pkgs.sass
-        ]
-        ++ commonTools;
+      buildInputs = [
+        # System provides: node, typescript, pnpm
+        # Add web-specific tools only
+        pkgs.tailwindcss-language-server
+        pkgs.html-tidy
+        pkgs.sass
+      ]
+      ++ commonTools;
       shellHook = ''
         echo "🌐 Web development environment loaded (using system Node.js)"
         echo "Node version: $(node --version)"
@@ -75,19 +72,18 @@ let
 
     # DevOps tools (specialized environment)
     devops = pkgs.mkShell {
-      buildInputs =
-        [
-          pkgs.kubectl
-          pkgs.opentofu
-          pkgs.terragrunt
-          pkgs.docker-compose
-          pkgs.k9s
-          pkgs.google-cloud-sdk
-          pkgs.azure-cli
-        ]
-        ++ (lib.optionals pkgs.stdenv.isLinux [
-          pkgs.helm
-        ]);
+      buildInputs = [
+        pkgs.kubectl
+        pkgs.opentofu
+        pkgs.terragrunt
+        pkgs.docker-compose
+        pkgs.k9s
+        pkgs.google-cloud-sdk
+        pkgs.azure-cli
+      ]
+      ++ (lib.optionals pkgs.stdenv.isLinux [
+        pkgs.helm
+      ]);
       shellHook = ''
         echo "🛠️  DevOps environment loaded"
         echo "kubectl version: $(kubectl version --client --short)"
@@ -95,18 +91,17 @@ let
       '';
     };
   };
-  devShellsLinuxOnly = platformLib.ifLinux {
+  devShellsLinuxOnly = lib.optionalAttrs platformLib.isLinux {
     love2d = pkgs.mkShell {
-      buildInputs =
-        [
-          pkgs.love
-          pkgs.lua
-          pkgs.lua-language-server
-          pkgs.stylua
-          pkgs.selene
-          pkgs.luaPackages.luacheck
-        ]
-        ++ commonTools;
+      buildInputs = [
+        pkgs.love
+        pkgs.lua
+        pkgs.lua-language-server
+        pkgs.stylua
+        pkgs.selene
+        pkgs.luaPackages.luacheck
+      ]
+      ++ commonTools;
       shellHook = ''
         echo "🎮 Love2D game development environment loaded"
         echo "Love2D version: $(love --version 2>/dev/null || echo 'not available')"

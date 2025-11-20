@@ -4,7 +4,6 @@
   systemConfig,
   system,
   hostSystem,
-  host,
   lib,
   inputs,
   ...
@@ -148,7 +147,7 @@ in
       };
       shellAliases = lib.mkMerge [
         {
-          switch = platformLib.systemRebuildCommand { hostName = host.hostname; };
+          switch = if isLinux then "nh os switch" else "nh darwin switch";
           edit = "sudo -e";
           ls = "eza";
           l = "eza -l";

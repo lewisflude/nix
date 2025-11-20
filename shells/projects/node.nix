@@ -1,14 +1,12 @@
 {
   pkgs,
   lib,
-  system,
   ...
 }:
 let
-  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+  # platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
   packageSets = import ../../lib/package-sets.nix {
     inherit pkgs;
-    inherit (platformLib) versions;
   };
   featureBuilders = import ../../lib/feature-builders.nix {
     inherit lib packageSets;
@@ -25,7 +23,6 @@ pkgs.mkShell {
         node = true;
       };
       inherit pkgs;
-      inherit (platformLib) versions;
     }
     ++ commonTools;
   shellHook = ''

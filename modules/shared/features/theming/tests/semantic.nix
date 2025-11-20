@@ -4,8 +4,6 @@ let
   palette = import ../palette.nix { };
   themeLib = import ../lib.nix {
     inherit lib palette;
-    nix-colorizer = null;
-    validationLib = null;
   };
 
   # Generate themes for testing

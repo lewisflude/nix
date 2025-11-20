@@ -17,6 +17,7 @@
     ./yubikey.nix
 
     ./backup.nix
+    ./restic.nix
     ./sops.nix
     ./atuin.nix
     ./mac-app-util.nix

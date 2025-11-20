@@ -17,22 +17,26 @@
 # - git: Git repository operations
 #
 # Usage:
-#   servers = import ./servers.nix { inherit pkgs config systemConfig lib platformLib; };
+#   servers = import ./servers.nix { inherit pkgs config; };
 #   services.mcp.servers = servers.commonServers // { custom-server = {...}; };
-{ pkgs, config, systemConfig, lib, platformLib }:
+{
+  pkgs,
+  config,
+}:
 
 let
   # Import centralized constants
   constants = import ../../../lib/constants.nix;
 
   uvx = "${pkgs.uv}/bin/uvx";
-  nodejs = pkgs.nodejs;
+  inherit (pkgs) nodejs;
   codeDirectory = "${config.home.homeDirectory}/Code";
 
   # Use ports from constants for consistency
   ports = constants.ports.mcp;
 
-in {
+in
+{
   # Export Node.js and ports for use by consumers
   inherit nodejs ports;
 

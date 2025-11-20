@@ -19,14 +19,12 @@ in
   imports = [
     ./common
   ]
-  ++
-    platformLib.platformModules
-      [
-        ./nixos
-      ]
-      [
-        ./darwin
-      ];
+  ++ lib.optionals platformLib.isLinux [
+    ./nixos
+  ]
+  ++ lib.optionals platformLib.isDarwin [
+    ./darwin
+  ];
   programs = {
     home-manager.enable = true;
     git.enable = true;
