@@ -24,14 +24,12 @@
   config,
   systemConfig,
   lib,
-  system,
   hostSystem,
   ...
 }:
 
 let
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
-  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
 
   # Import centralized constants
   constants = import ../../lib/constants.nix;
@@ -48,7 +46,6 @@ let
       pkgs
       systemConfig
       lib
-      platformLib
       ;
   };
 

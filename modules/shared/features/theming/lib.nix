@@ -133,6 +133,12 @@ rec {
           g = color.rgb.g / 255.0;
           b = color.rgb.b / 255.0;
         };
+        rgbNormalizedString =
+          color:
+          let
+            norm = rgbNormalized color;
+          in
+          "${toString norm.r},${toString norm.g},${toString norm.b}";
         # BGR format for mpv and similar tools
         bgrHex =
           color:
