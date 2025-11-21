@@ -28,9 +28,11 @@
     sops-nix = {
       url = "github:Mic92/sops-nix";
     };
-    mac-app-util = {
-      url = "github:hraban/mac-app-util";
-    };
+    # TEMPORARY: Disabled due to upstream SBCL/GitLab Common Lisp API issue
+    # Re-enable once https://gitlab.common-lisp.net/iterate/iterate is fixed
+    # mac-app-util = {
+    #   url = "github:hraban/mac-app-util";
+    # };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     homebrew-j178 = {
       url = "github:j178/homebrew-tap";

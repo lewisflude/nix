@@ -1,14 +1,8 @@
 {
   pkgs,
   lib,
-  system,
   ...
 }:
-let
-  helpers = import ./_helpers.nix { inherit lib system; };
-  inherit (helpers) getNxPackage;
-  nx = getNxPackage pkgs;
-in
 {
   home.packages = [
     pkgs.curl
@@ -27,9 +21,7 @@ in
     pkgs.nix-prefetch-github
     pkgs.nvfetcher
     pkgs.nix-output-monitor
-  ]
-  ++ lib.optional (nx != null) nx
-  ++ [
+
     pkgs.yaml-language-server
   ]
   # Linux-only packages
