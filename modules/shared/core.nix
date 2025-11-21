@@ -26,14 +26,14 @@ in
     settings = lib.mkMerge [
       {
         warn-dirty = false;
-        trusted-users = [
+        trusted-users = lib.mkDefault [
           "root"
           config.host.username
         ];
-        max-jobs = 16;
-        max-substitution-jobs = 28;
-        http-connections = 64;
-        always-allow-substitutes = true;
+        max-jobs = lib.mkDefault 16;
+        max-substitution-jobs = lib.mkDefault 28;
+        http-connections = lib.mkDefault 64;
+        always-allow-substitutes = lib.mkDefault true;
         experimental-features = [
           "nix-command"
           "flakes"
