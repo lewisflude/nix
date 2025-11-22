@@ -1,7 +1,0 @@
-{
-  "name": "nx-package",
-  "version": "1.0.0",
-  "dependencies": {
-    "nx": "^21.5.3"
-  }
-}
