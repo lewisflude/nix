@@ -22,8 +22,7 @@ let
     };
     inherit hosts;
   };
-in
-{
+
   # Shared resources available as module arguments
   # These eliminate fragile relative imports throughout the codebase
   constants = import ../lib/constants.nix;
@@ -34,7 +33,8 @@ in
     inherit lib;
     palette = import ../modules/shared/features/theming/palette.nix { };
   };
-
+in
+{
   # Module arguments available to all flake-parts modules
   # These can be referenced in any module using the same attribute names
   _module.args = {

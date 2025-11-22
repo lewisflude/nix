@@ -13,11 +13,11 @@ let
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
 
-  sources = import ./_sources/generated.nix {
+  sources = import ../../_sources/generated.nix {
     inherit (pkgs) fetchgit;
   };
 
-  shellHelpers = import ./lib/shell-helpers.nix {
+  shellHelpers = import ../../lib/shell-helpers.nix {
     inherit lib config inputs;
   };
   inherit (shellHelpers) secretExportSnippet;

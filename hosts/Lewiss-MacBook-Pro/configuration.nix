@@ -6,8 +6,6 @@
   constants,
   ...
 }:
-let
-in
 {
 
   nix =
