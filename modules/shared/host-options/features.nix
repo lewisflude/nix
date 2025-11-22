@@ -32,61 +32,25 @@ in
       };
       nix = mkEnableOption "Nix development tools";
 
-      docker = mkEnableOption "Docker and containerization" // {
-        default = false;
-      };
-      kubernetes = mkEnableOption "Kubernetes and container orchestration";
-      git = mkEnableOption "Git and version control tools" // {
-        default = true;
-      };
-      buildTools = mkEnableOption "Build tools (make, cmake, pkg-config, etc.)";
-      debugTools = mkEnableOption "Debug tools (lldb, gdb)";
-
-      vscode = mkEnableOption "VS Code editor";
-      helix = mkEnableOption "Helix editor";
-      neovim = mkEnableOption "Neovim editor" // {
-        default = false;
-      };
+      docker = mkEnableOption "Docker and containerization";
+      git = mkEnableOption "Git and version control tools";
     };
 
     gaming = {
-      enable = mkEnableOption "gaming platforms and optimizations" // {
-        default = false;
-      };
-      steam = mkEnableOption "Steam gaming platform" // {
-        default = false;
-      };
-      lutris = mkEnableOption "Lutris game manager";
-      emulators = mkEnableOption "game console emulators";
-      performance = mkEnableOption "gaming performance optimizations" // {
-        default = false;
-      };
+      enable = mkEnableOption "gaming platforms and optimizations";
+      steam = mkEnableOption "Steam gaming platform";
+      performance = mkEnableOption "gaming performance optimizations";
     };
 
     virtualisation = {
-      enable = mkEnableOption "virtual machines and containers" // {
-        default = false;
-      };
-      docker = mkEnableOption "Docker containers" // {
-        default = false;
-      };
-      podman = mkEnableOption "Podman containers" // {
-        default = false;
-      };
-      qemu = mkEnableOption "QEMU virtual machines";
-      virtualbox = mkEnableOption "VirtualBox VMs";
+      enable = mkEnableOption "virtual machines and containers";
+      docker = mkEnableOption "Docker containers";
+      podman = mkEnableOption "Podman containers";
     };
 
     homeServer = {
-      enable = mkEnableOption "home server and self-hosting" // {
-        default = false;
-      };
-      homeAssistant = mkEnableOption "Home Assistant smart home";
-      mediaServer = mkEnableOption "Plex/Jellyfin media server";
-      fileSharing = mkEnableOption "Samba/NFS file sharing" // {
-        default = false;
-      };
-      backups = mkEnableOption "automated backup systems";
+      enable = mkEnableOption "home server and self-hosting";
+      fileSharing = mkEnableOption "Samba/NFS file sharing";
     };
 
     desktop = {
@@ -205,24 +169,11 @@ in
     };
 
     productivity = {
-      enable = mkEnableOption "productivity and office tools" // {
-        default = false;
-      };
-      office = mkEnableOption "LibreOffice suite" // {
-        default = false;
-      };
-      notes = mkEnableOption "note-taking (Obsidian)" // {
-        default = false;
-      };
-      email = mkEnableOption "email clients" // {
-        default = false;
-      };
-      calendar = mkEnableOption "calendar applications" // {
-        default = false;
-      };
-      resume = mkEnableOption "resume generation and management" // {
-        default = false;
-      };
+      enable = mkEnableOption "productivity and office tools";
+      notes = mkEnableOption "note-taking (Obsidian)";
+      email = mkEnableOption "email clients";
+      calendar = mkEnableOption "calendar applications";
+      resume = mkEnableOption "resume generation and management";
     };
 
     media = {
@@ -231,16 +182,9 @@ in
       };
 
       audio = {
-        enable = mkEnableOption "audio production and music" // {
-          default = false;
-        };
-        production = mkEnableOption "DAW and audio tools" // {
-          default = false;
-        };
-        realtime = mkEnableOption "real-time audio optimizations (musnix)" // {
-          default = false;
-        };
-        streaming = mkEnableOption "audio streaming";
+        enable = mkEnableOption "audio production and music";
+        production = mkEnableOption "DAW and audio tools";
+        realtime = mkEnableOption "real-time audio optimizations (musnix)";
 
         audioNix = {
           enable = mkOption {
@@ -262,30 +206,12 @@ in
           };
         };
       };
-
-      video = {
-        enable = mkEnableOption "video production and editing";
-        editing = mkEnableOption "Video editing tools (Kdenlive, etc.)";
-        streaming = mkEnableOption "Video streaming tools (OBS, etc.)";
-      };
-
-      streaming = {
-        enable = mkEnableOption "Streaming and recording tools";
-        obs = mkEnableOption "OBS Studio for streaming/recording";
-      };
     };
 
     security = {
-      enable = mkEnableOption "security and privacy tools" // {
-        default = true;
-      };
-      yubikey = mkEnableOption "YubiKey hardware support" // {
-        default = true;
-      };
-      gpg = mkEnableOption "GPG/PGP encryption" // {
-        default = true;
-      };
-      firewall = mkEnableOption "advanced firewall";
+      enable = mkEnableOption "security and privacy tools";
+      yubikey = mkEnableOption "YubiKey hardware support";
+      gpg = mkEnableOption "GPG/PGP encryption";
     };
 
     aiTools = {
