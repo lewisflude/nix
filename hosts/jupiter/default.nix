@@ -1,16 +1,11 @@
-let
-  defaultFeatures = import ../_common/features.nix;
-in
 {
-
   username = "lewis";
   useremail = "lewis@lewisflude.com";
   system = "x86_64-linux";
   hostname = "jupiter";
 
-  features = defaultFeatures // {
-    development = defaultFeatures.development // {
-      docker = false;
+  features = {
+    development = {
       lua = true;
       # Moved to devShells to reduce system size (~2-4GB savings)
       # Use: nix develop .#rust or direnv with .envrc
@@ -19,64 +14,50 @@ in
       node = false; # Use: nix develop .#node
     };
 
-    gaming = defaultFeatures.gaming // {
+    gaming = {
       enable = true;
       steam = true;
       performance = true;
     };
 
-    virtualisation = defaultFeatures.virtualisation // {
+    virtualisation = {
       enable = true;
-      docker = false;
       podman = true;
     };
 
-    homeServer = defaultFeatures.homeServer // {
+    homeServer = {
       enable = true;
       fileSharing = true;
     };
 
-    desktop = defaultFeatures.desktop // {
+    desktop = {
       niri = true;
       utilities = true;
     };
 
-    restic = defaultFeatures.restic // {
+    restic = {
       enable = true;
-      restServer = defaultFeatures.restic.restServer // {
-        enable = true;
-        port = 8000;
-      };
+      restServer.enable = true;
     };
 
-    media = defaultFeatures.media // {
+    media = {
       enable = true;
 
-      audio = defaultFeatures.media.audio // {
+      audio = {
         enable = true;
         realtime = true;
-        production = false;
-        audioNix = {
-          enable = false;
-          bitwig = true;
-          plugins = true;
-        };
       };
     };
 
-    productivity = defaultFeatures.productivity // {
+    productivity = {
       enable = true;
-      office = false; # Disabled: LibreOffice (~1.3GB) - not needed
       notes = true;
       email = true;
       calendar = true;
-      resume = false;
     };
 
-    mediaManagement = defaultFeatures.mediaManagement // {
+    mediaManagement = {
       enable = true;
-      dataPath = "/mnt/storage";
-      timezone = "Europe/London";
 
       unpackerr.enable = false;
       listenarr.enable = true;
@@ -122,32 +103,23 @@ in
       };
     };
 
-    aiTools = defaultFeatures.aiTools // {
+    aiTools = {
       enable = true;
       ollama = {
-        enable = true;
         acceleration = "cuda";
         models = [ "llama2" ];
       };
-      openWebui = {
-        enable = false;
-      };
     };
 
-    containersSupplemental = defaultFeatures.containersSupplemental // {
+    containersSupplemental = {
       enable = true;
       uid = 985;
       gid = 976;
-      homarr.enable = true;
-      wizarr.enable = true;
       jellystat.enable = true;
       termix = {
         enable = true;
         port = 8083;
       };
-      profilarr.enable = true;
-      doplarr.enable = false;
-      comfyui.enable = false;
 
       janitorr = {
         enable = true;
