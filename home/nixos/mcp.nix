@@ -157,23 +157,21 @@ in
   };
 
   # Configure mcps.nix servers
-  # NOTE: All mcps.nix servers are currently disabled due to package availability issues
-  # The mcps overlay is not properly providing pkgs.mcp-servers
+  # NOTE: Servers requiring pkgs.mcp-servers are disabled due to overlay issues
+  # The mcps overlay is not properly providing pkgs.mcp-servers package
+  # Servers that require it: filesystem, git, github, fetch, sequential-thinking, time, LSPs
   programs.claude-code = {
     enable = true;
 
     mcps = {
-      # All disabled due to missing pkgs.mcp-servers
-      git.enable = true;
-      filesystem.enable = true;
-      github = {
-        enable = true;
-        tokenFilepath = systemConfig.sops.secrets.GITHUB_TOKEN.path;
-      };
+      # Disabled: require pkgs.mcp-servers which is not provided by overlay
+      git.enable = false;
+      filesystem.enable = false;
+      github.enable = false;
       fetch.enable = false;
       sequential-thinking.enable = false;
       time.enable = false;
-      lsp-typescript.enable = true;
+      lsp-typescript.enable = false;
       lsp-nix.enable = false;
       lsp-rust.enable = false;
       lsp-python.enable = false;
