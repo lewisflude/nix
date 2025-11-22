@@ -7,7 +7,9 @@ let
 in
 {
   options.host.features.mediaManagement = {
-    enable = mkEnableOption "native media management services";
+    enable = mkEnableOption "native media management services" // {
+      default = false;
+    };
 
     dataPath = mkOption {
       type = types.str;

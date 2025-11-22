@@ -7,7 +7,9 @@ let
 in
 {
   options.host.features.containersSupplemental = {
-    enable = mkEnableOption "supplemental container services";
+    enable = mkEnableOption "supplemental container services" // {
+      default = false;
+    };
 
     uid = mkOption {
       type = types.int;

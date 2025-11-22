@@ -8,61 +8,109 @@ in
 {
   options.host.features = {
     development = {
-      enable = mkEnableOption "development tools and environments";
+      enable = mkEnableOption "development tools and environments" // {
+        default = true;
+      };
 
-      rust = mkEnableOption "Rust development environment";
-      python = mkEnableOption "Python development environment";
-      go = mkEnableOption "Go development environment";
-      node = mkEnableOption "Node.js/TypeScript development";
-      lua = mkEnableOption "Lua development environment";
-      java = mkEnableOption "Java development environment";
+      rust = mkEnableOption "Rust development environment" // {
+        default = true;
+      };
+      python = mkEnableOption "Python development environment" // {
+        default = true;
+      };
+      go = mkEnableOption "Go development environment" // {
+        default = false;
+      };
+      node = mkEnableOption "Node.js/TypeScript development" // {
+        default = true;
+      };
+      lua = mkEnableOption "Lua development environment" // {
+        default = false;
+      };
+      java = mkEnableOption "Java development environment" // {
+        default = false;
+      };
       nix = mkEnableOption "Nix development tools";
 
-      docker = mkEnableOption "Docker and containerization";
+      docker = mkEnableOption "Docker and containerization" // {
+        default = false;
+      };
       kubernetes = mkEnableOption "Kubernetes and container orchestration";
-      git = mkEnableOption "Git and version control tools";
+      git = mkEnableOption "Git and version control tools" // {
+        default = true;
+      };
       buildTools = mkEnableOption "Build tools (make, cmake, pkg-config, etc.)";
       debugTools = mkEnableOption "Debug tools (lldb, gdb)";
 
       vscode = mkEnableOption "VS Code editor";
       helix = mkEnableOption "Helix editor";
-      neovim = mkEnableOption "Neovim editor";
+      neovim = mkEnableOption "Neovim editor" // {
+        default = false;
+      };
     };
 
     gaming = {
-      enable = mkEnableOption "gaming platforms and optimizations";
-      steam = mkEnableOption "Steam gaming platform";
+      enable = mkEnableOption "gaming platforms and optimizations" // {
+        default = false;
+      };
+      steam = mkEnableOption "Steam gaming platform" // {
+        default = false;
+      };
       lutris = mkEnableOption "Lutris game manager";
       emulators = mkEnableOption "game console emulators";
-      performance = mkEnableOption "gaming performance optimizations";
+      performance = mkEnableOption "gaming performance optimizations" // {
+        default = false;
+      };
     };
 
     virtualisation = {
-      enable = mkEnableOption "virtual machines and containers";
-      docker = mkEnableOption "Docker containers";
-      podman = mkEnableOption "Podman containers";
+      enable = mkEnableOption "virtual machines and containers" // {
+        default = false;
+      };
+      docker = mkEnableOption "Docker containers" // {
+        default = false;
+      };
+      podman = mkEnableOption "Podman containers" // {
+        default = false;
+      };
       qemu = mkEnableOption "QEMU virtual machines";
       virtualbox = mkEnableOption "VirtualBox VMs";
     };
 
     homeServer = {
-      enable = mkEnableOption "home server and self-hosting";
+      enable = mkEnableOption "home server and self-hosting" // {
+        default = false;
+      };
       homeAssistant = mkEnableOption "Home Assistant smart home";
       mediaServer = mkEnableOption "Plex/Jellyfin media server";
-      fileSharing = mkEnableOption "Samba/NFS file sharing";
+      fileSharing = mkEnableOption "Samba/NFS file sharing" // {
+        default = false;
+      };
       backups = mkEnableOption "automated backup systems";
     };
 
     desktop = {
-      enable = mkEnableOption "desktop environment and customization";
-      niri = mkEnableOption "Niri Wayland compositor";
-      hyprland = mkEnableOption "Hyprland Wayland compositor";
-      theming = mkEnableOption "system-wide theming";
-      utilities = mkEnableOption "desktop utilities";
+      enable = mkEnableOption "desktop environment and customization" // {
+        default = true;
+      };
+      niri = mkEnableOption "Niri Wayland compositor" // {
+        default = false;
+      };
+      hyprland = mkEnableOption "Hyprland Wayland compositor" // {
+        default = false;
+      };
+      theming = mkEnableOption "system-wide theming" // {
+        default = true;
+      };
+      utilities = mkEnableOption "desktop utilities" // {
+        default = false;
+      };
 
       # Signal theme options
       signalTheme = {
-        enable = mkEnableOption "Signal OKLCH color palette theme";
+        enable = mkEnableOption "Signal OKLCH color palette theme" // {
+          default = true;
+        };
         mode = mkOption {
           type = types.enum [
             "light"
@@ -81,7 +129,9 @@ in
     };
 
     restic = {
-      enable = mkEnableOption "Restic backup integration";
+      enable = mkEnableOption "Restic backup integration" // {
+        default = false;
+      };
 
       backups = mkOption {
         type = types.attrsOf (
@@ -133,7 +183,9 @@ in
       };
 
       restServer = {
-        enable = mkEnableOption "Restic REST server";
+        enable = mkEnableOption "Restic REST server" // {
+          default = false;
+        };
         port = mkOption {
           type = types.int;
           default = 8000;
@@ -153,21 +205,41 @@ in
     };
 
     productivity = {
-      enable = mkEnableOption "productivity and office tools";
-      office = mkEnableOption "LibreOffice suite";
-      notes = mkEnableOption "note-taking (Obsidian)";
-      email = mkEnableOption "email clients";
-      calendar = mkEnableOption "calendar applications";
-      resume = mkEnableOption "resume generation and management";
+      enable = mkEnableOption "productivity and office tools" // {
+        default = false;
+      };
+      office = mkEnableOption "LibreOffice suite" // {
+        default = false;
+      };
+      notes = mkEnableOption "note-taking (Obsidian)" // {
+        default = false;
+      };
+      email = mkEnableOption "email clients" // {
+        default = false;
+      };
+      calendar = mkEnableOption "calendar applications" // {
+        default = false;
+      };
+      resume = mkEnableOption "resume generation and management" // {
+        default = false;
+      };
     };
 
     media = {
-      enable = mkEnableOption "media production tools and environments";
+      enable = mkEnableOption "media production tools and environments" // {
+        default = false;
+      };
 
       audio = {
-        enable = mkEnableOption "audio production and music";
-        production = mkEnableOption "DAW and audio tools";
-        realtime = mkEnableOption "real-time audio optimizations (musnix)";
+        enable = mkEnableOption "audio production and music" // {
+          default = false;
+        };
+        production = mkEnableOption "DAW and audio tools" // {
+          default = false;
+        };
+        realtime = mkEnableOption "real-time audio optimizations (musnix)" // {
+          default = false;
+        };
         streaming = mkEnableOption "audio streaming";
 
         audioNix = {
@@ -204,14 +276,22 @@ in
     };
 
     security = {
-      enable = mkEnableOption "security and privacy tools";
-      yubikey = mkEnableOption "YubiKey hardware support";
-      gpg = mkEnableOption "GPG/PGP encryption";
+      enable = mkEnableOption "security and privacy tools" // {
+        default = true;
+      };
+      yubikey = mkEnableOption "YubiKey hardware support" // {
+        default = true;
+      };
+      gpg = mkEnableOption "GPG/PGP encryption" // {
+        default = true;
+      };
       firewall = mkEnableOption "advanced firewall";
     };
 
     aiTools = {
-      enable = mkEnableOption "AI tools stack (Ollama, Open WebUI) - NixOS only";
+      enable = mkEnableOption "AI tools stack (Ollama, Open WebUI) - NixOS only" // {
+        default = false;
+      };
 
       ollama = {
         enable = mkEnableOption "Ollama LLM backend" // {
