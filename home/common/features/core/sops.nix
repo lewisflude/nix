@@ -13,7 +13,7 @@
 }:
 let
   isDarwin = lib.strings.hasSuffix "darwin" system;
-  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+  platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem system;
 
   # Use the same age key file location as the system-level config
   # This prevents the home-manager SOPS module from generating its own key

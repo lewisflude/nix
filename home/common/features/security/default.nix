@@ -1,12 +1,12 @@
 {
   lib,
-  host,
+  systemConfig,
   pkgs,
   hostSystem,
   ...
 }:
 let
-  cfg = host.features.security;
+  cfg = systemConfig.host.features.security;
   platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
   inherit (platformLib) isDarwin isLinux;
 in

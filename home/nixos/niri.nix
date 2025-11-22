@@ -4,16 +4,14 @@
   lib,
   inputs,
   system,
+  themeLib,
   ...
 }:
 let
   themeConstants = import ./theme-constants.nix {
     inherit
-      pkgs
-      inputs
-      system
-      config
       lib
+      themeLib
       ;
   };
   inherit (inputs.niri.packages.${system}) xwayland-satellite-unstable niri-unstable;

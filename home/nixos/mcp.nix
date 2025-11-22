@@ -37,6 +37,7 @@ let
     inherit
       pkgs
       config
+      constants
       ;
   };
   wrappers = import ../../modules/shared/mcp/wrappers.nix {

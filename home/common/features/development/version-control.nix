@@ -1,10 +1,10 @@
 {
   lib,
-  host,
+  systemConfig,
   ...
 }:
 let
-  cfg = host.features.development;
+  cfg = systemConfig.host.features.development;
 in
 {
 

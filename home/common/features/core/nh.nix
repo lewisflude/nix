@@ -5,7 +5,7 @@
   ...
 }:
 let
-  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+  platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem system;
 in
 {
   programs.nh = {

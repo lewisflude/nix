@@ -8,6 +8,6 @@
     ./profiles/optional.nix
 
     # SOPS configuration for user-level secrets
-    ./sops.nix
+    ./features/core/sops.nix
   ];
 }

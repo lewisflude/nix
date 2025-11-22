@@ -1,10 +1,10 @@
 {
   lib,
-  host,
+  systemConfig,
   ...
 }:
 let
-  cfg = host.features.desktop;
+  cfg = systemConfig.host.features.desktop;
 in
 {
 
