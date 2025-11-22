@@ -1,0 +1,131 @@
+# Aider AI Configuration for Nix Repository
+#
+# This file configures Aider's behavior when working with this Nix configuration repository.
+# Aider will automatically load this file from the repository root.
+
+# Read coding conventions and guidelines into context
+read:
+  - CLAUDE.md
+  - CONVENTIONS.md
+  - docs/DX_GUIDE.md
+  - docs/FEATURES.md
+
+# Model configuration
+# Use Claude Sonnet 4.5 for best Nix understanding
+model: anthropic/claude-sonnet-4-5-20250929
+
+# Git integration
+auto-commits: true
+dirty-commits: false
+commit: true
+
+# Commit message configuration
+commit-prompt: |
+  Create a conventional commit message following the project's DX_GUIDE.md standards.
+
+  Format: <type>(<scope>): <description>
+
+  Types: feat, fix, refactor, docs, test, chore
+
+  Examples:
+  - feat(audio): add PipeWire support for pro audio routing
+  - fix(modules): correct home-manager module placement
+  - refactor(features): simplify gaming feature configuration
+  - docs(qbittorrent): update troubleshooting guide
+
+  The commit message should be concise, clear, and follow conventional commits format.
+
+# Linting and formatting
+lint: true
+lint-cmd: "nix fmt"
+auto-lint: true
+
+# Test command (flake check)
+test-cmd: "nix flake check"
+auto-test: false  # Don't auto-run tests (they can be slow)
+
+# Code editing behavior
+editor-edit-format: "diff"
+edit-format: "diff"
+
+# Watch files for changes
+watch-files: true
+
+# Show diffs before applying
+show-diffs: true
+
+# Architect mode (for complex multi-file changes)
+architect: false  # Enable manually when needed with --architect flag
+
+# Map refresh (track git state)
+map-refresh: auto
+
+# Dark mode for terminal output
+dark-mode: true
+
+# Stream responses (show thinking in real-time)
+stream: true
+
+# Pretty print (nice formatting)
+pretty: true
+
+# Voice mode disabled (terminal use)
+voice-language: null
+
+# Restore chat history
+restore-chat-history: true
+
+# Chat history file location
+chat-history-file: .aider.chat.history.md
+
+# Check update availability
+check-update: true
+
+# Encoding for files (UTF-8)
+encoding: utf-8
+
+# Timeout for model responses (seconds)
+timeout: 300
+
+# Environment variables (if needed)
+# env-file: .env
+
+# Additional instructions for Aider
+# These are appended to every request
+extra-instructions: |
+  CRITICAL RULES:
+
+  1. MODULE PLACEMENT:
+     - System services/hardware → modules/nixos/ or modules/darwin/
+     - User apps/dotfiles → home/common/apps/ or home/{nixos,darwin}/
+     - Container runtimes (Podman, Docker) → system modules ONLY
+     - Graphics libraries → system modules ONLY
+
+  2. CODE STYLE:
+     - NEVER use 'with pkgs;' antipattern
+     - ALWAYS use explicit 'pkgs.packageName'
+     - Use constants from lib/constants.nix for ports/paths
+     - Format ALL .nix files with 'nix fmt' before committing
+
+  3. COMMANDS TO NEVER RUN:
+     - nh os switch
+     - sudo nixos-rebuild switch
+     - sudo darwin-rebuild switch
+     - rm -rf (especially system dirs)
+
+     Instead: suggest these for the user to run manually
+
+  4. CREATE MODULES:
+     - Use 'nix run .#new-module' for scaffolding
+     - Follow existing patterns in similar modules
+     - Add proper option documentation
+
+  5. BEFORE COMMITTING:
+     - Format: nix fmt or treefmt
+     - Validate: nix flake check (suggest to user)
+     - Review: check git diff for unintended changes
+
+  6. DOCUMENTATION:
+     - Check docs/reference/architecture.md for patterns
+     - See docs/FEATURES.md for feature conventions
+     - Follow docs/DX_GUIDE.md for commit messages
