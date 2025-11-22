@@ -1,15 +1,10 @@
 { ... }:
 {
   imports = [
+    # Core features (shell, git, ssh, gpg, sops, nix, terminal, nh)
+    ../features
 
-    ../shell.nix
-    ../git.nix
-    ../ssh.nix
-    ../gpg.nix
-    ../nix-config.nix
-    ../terminal.nix
-    ../nh.nix
-
+    # Common applications
     ../apps/bat.nix
     ../apps/direnv.nix
     ../apps/fzf.nix
@@ -26,14 +21,13 @@
 
     ../apps/packages.nix
 
+    # Library helpers
     ../lib
 
+    # Custom modules
     ../modules.nix
 
     # Theming system
     ../theming
-
-    # Feature modules (includes security with sops)
-    ../features
   ];
 }
