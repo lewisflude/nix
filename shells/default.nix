@@ -195,10 +195,6 @@ let
 
       git config commit.template "$PWD/.gitmessage"
 
-
-      export PATH="$PWD/scripts/utils:$PWD/scripts/maintenance:$PATH"
-
-
       alias fmt='nix fmt'
       alias fmt-nix='nixfmt-rfc-style'
       alias fmt-all='treefmt'

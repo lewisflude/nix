@@ -473,31 +473,6 @@ nix build .#darwinConfigurations.$(hostname).system
 
 ## Performance Monitoring
 
-### Automated Performance Tracking
-
-**Monthly Performance Tracking Script**: `scripts/maintenance/track-performance.sh`
-
-This automated script collects comprehensive performance metrics monthly:
-
-- Evaluation time measurements (flake check, NixOS/Darwin)
-- Store size growth tracking
-- Binary cache connectivity and metrics
-- System information (OS, kernel, Nix versions)
-- Git commit/branch information for correlation
-
-**Usage**:
-
-```bash
-# Run monthly performance tracking
-./scripts/maintenance/track-performance.sh
-```
-
-**Metrics Storage**: `.performance-metrics/YYYY-MM.json`
-
-**Scheduling**: See `docs/PERFORMANCE_MONITORING.md` for systemd timer or cron setup.
-
-For detailed monitoring documentation, see: [`docs/PERFORMANCE_MONITORING.md`](./PERFORMANCE_MONITORING.md)
-
 ### Current Performance Baseline
 
 **Baseline Measurement Date**: Initial baseline established (2024)
@@ -576,12 +551,6 @@ nix path-info --recursive --size /run/current-system | head -20
 
 # Check substitution status
 nix store ping
-
-# Test cache connectivity
-./scripts/utils/test-caches.sh
-
-# Test cache substitution with real packages
-./scripts/utils/test-cache-substitution.sh [package-name]
 ```
 
 **Note**: For detailed information on cache behavior and troubleshooting, see:

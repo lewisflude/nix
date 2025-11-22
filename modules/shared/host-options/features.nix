@@ -31,7 +31,6 @@ in
         default = false;
       };
       nix = mkEnableOption "Nix development tools";
-      neovim = mkEnableOption "Neovim text editor";
 
       docker = mkEnableOption "Docker and containerization";
       git = mkEnableOption "Git and version control tools";
@@ -41,8 +40,6 @@ in
       enable = mkEnableOption "gaming platforms and optimizations";
       steam = mkEnableOption "Steam gaming platform";
       performance = mkEnableOption "gaming performance optimizations";
-      lutris = mkEnableOption "Lutris game launcher";
-      emulators = mkEnableOption "game console emulators";
     };
 
     virtualisation = {
@@ -53,9 +50,7 @@ in
 
     homeServer = {
       enable = mkEnableOption "home server and self-hosting";
-      homeAssistant = mkEnableOption "Home Assistant smart home platform";
       fileSharing = mkEnableOption "Samba/NFS file sharing";
-      backups = mkEnableOption "Restic backup service";
     };
 
     desktop = {
@@ -175,7 +170,6 @@ in
 
     productivity = {
       enable = mkEnableOption "productivity and office tools";
-      office = mkEnableOption "office suite (LibreOffice)";
       notes = mkEnableOption "note-taking (Obsidian)";
       email = mkEnableOption "email clients";
       calendar = mkEnableOption "calendar applications";

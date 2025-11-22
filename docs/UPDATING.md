@@ -44,12 +44,6 @@ nix run .#update-all
 
 ### 3. Update ZSH Plugins
 
-If using the `nvfetcher` approach:
-
-```bash
-./scripts/maintenance/update-zsh-plugins.sh
-```
-
 Manual approach with nix-update:
 
 ```bash
@@ -154,9 +148,8 @@ To enable automated PRs, ensure the workflow has permissions to create PRs.
 
 For better automation, consider migrating your ZSH plugins to `nvfetcher`:
 
-1. **Configuration created**: `home/common/zsh-plugins.toml`
-2. **Update script created**: `scripts/maintenance/update-zsh-plugins.sh`
-3. **To migrate**: Modify `shell.nix` to use generated sources
+1. **Configuration**: Create `home/common/zsh-plugins.toml`
+2. **To migrate**: Modify `shell.nix` to use generated sources
 
 ### Example Migration
 
@@ -184,11 +177,7 @@ in
 }
 ```
 
-Then update all plugins with:
-
-```bash
-./scripts/maintenance/update-zsh-plugins.sh
-```
+Then use nvfetcher to update plugins.
 
 ## Using nix-update
 
@@ -300,17 +289,7 @@ Current system: 'aarch64-darwin' with features {...}
 
 **This is normal!** You're on macOS trying to validate a NixOS configuration (or vice versa).
 
-**Solution:** The update scripts have been fixed to only check your current system's configuration.
-
-If you need to check a specific configuration:
-
-```bash
-# Check darwin config
-./scripts/maintenance/check-config.sh Lewiss-MacBook-Pro darwin
-
-# Check nixos config (on linux machine)
-./scripts/maintenance/check-config.sh jupiter nixos
-```
+**Solution:** Use `nix run .#update-all` which only checks your current system's configuration.
 
 ### Hash Mismatch
 
