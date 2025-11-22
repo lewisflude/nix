@@ -7,11 +7,7 @@
 let
   cfg = config.host.features.desktop;
 
-  # NVIDIA Driver Branch Selection
-  # For RTX 4090 (Ada Lovelace architecture), choose the driver that works best:
-  # package = config.boot.kernelPackages.nvidiaPackages.stable;      # Alternative: Latest stable release
-  package = config.boot.kernelPackages.nvidiaPackages.beta; # ACTIVE: Bleeding edge features (best for 40-series)
-  # package = config.boot.kernelPackages.nvidiaPackages.production; # Alternative: Conservative, well-tested (fewer features)
+  package = config.boot.kernelPackages.nvidiaPackages.beta;
 in
 {
   config = lib.mkIf cfg.enable {
@@ -29,10 +25,6 @@ in
       # NVIDIA VA-API (video acceleration) support
       LIBVA_DRIVER_NAME = "nvidia";
       NVD_BACKEND = "direct";
-
-      # Uncomment if experiencing cursor glitches/artifacts with NVIDIA + Wayland
-      # Forces software cursor rendering instead of hardware cursors
-      # WLR_NO_HARDWARE_CURSORS = "1";
     };
     hardware = {
       graphics = {
@@ -95,12 +87,7 @@ in
         # PRIME offload - not needed for desktop with single GPU
         prime.offload.enableOffloadCmd = false;
 
-        # Driver package selection (see package definition above)
         inherit package;
-
-        # nvidia-patch for stream limits - currently disabled
-        # Uncomment to remove NVENC/NVFBC stream limits:
-        # package = pkgs.nvidia-patch.patch-nvenc (pkgs.nvidia-patch.patch-fbc package);
       };
       nvidia-container-toolkit.enable = true;
     };

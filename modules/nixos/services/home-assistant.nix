@@ -4,7 +4,6 @@
   ...
 }:
 let
-  # home-llm removed: custom LLM component not needed (~saves build time)
   intent_script_yaml = ./home-assistant/intent-scripts/intent_script.yaml;
 in
 {
@@ -22,13 +21,7 @@ in
     enable = true;
     configDir = "/var/lib/hass";
     blueprints = {
-      script = [
-        # Commented out: Requires music_assistant component (removed to save ~100-200MB)
-        # (pkgs.fetchurl {
-        #   url = "https://raw.githubusercontent.com/music-assistant/voice-support/main/llm-script-blueprint/llm_voice_script.yaml";
-        #   sha256 = "sha256-qu+dQWBke5hGJL8+FTj0ghxeao4LjAPFMIckLXnn3eg=";
-        # })
-      ];
+      script = [ ];
     };
 
     extraComponents = [
@@ -37,7 +30,6 @@ in
       "met"
       "radio_browser"
       "shopping_list"
-      # "music_assistant"  # Removed: ~100-200MB, not needed
       "default_config"
       "homekit_controller"
       "linkplay"
@@ -63,12 +55,10 @@ in
       "prusalink"
       "upnp"
       "wled"
-      # "zha"  # Removed: ~50-100MB, not using Zigbee
       "isal"
     ];
     customComponents = [
       pkgs.home-assistant-custom-components.localtuya
-      # home-llm  # Removed: custom LLM component, not needed
     ];
     openFirewall = true;
     config = {
@@ -82,110 +72,6 @@ in
       };
       intent_script = "!include intent_script.yaml";
       script = [
-        # Commented out: Requires music_assistant component (removed to save ~100-200MB)
-        # {
-        #   llm_script_for_music_assistant_voice_requests = {
-        #     alias = "LLM Script for Music Assistant voice requests";
-        #     use_blueprint = {
-        #       path = "llm_voice_script.yaml";
-        #       input = {
-        #         default_player = "media_player.office";
-        #       };
-        #     };
-        #   };
-        #   systemd.services.home-assistant.path = [
-        #     pkgs.gnumake
-        #     pkgs.cmake
-        #     pkgs.extra-cmake-modules
-        #   ];
-        # }
-        # {
-        #   play_music = {
-        #     alias = "Play Music";
-        #     description = "Plays music via music assistant";
-        #     sequence = [
-        #       {
-        #         variables = {
-        #           media_player = ''
-        #             {% set media_players = integration_entities('music_assistant') %}
-        #             {% set area_entities = area_entities(area) %}
-        #             {% for player in media_players %}
-        #               {% if player in area_entities %}
-        #                 {{ player }}
-        #               {% endif %}
-        #             {% endfor %}
-        #           '';
-        #         };
-        #       }
-        #       {
-        #         choose = [
-        #           {
-        #             conditions = [
-        #               {
-        #                 condition = "template";
-        #                 value_template = "{{ 'album' in query.lower() }}";
-        #               }
-        #             ];
-        #             sequence = [
-        #               {
-        #                 data = {
-        #                   media_type = "album";
-        #                   enqueue = "replace";
-        #                   media_id = "{{ query }}";
-        #                   entity_id = "{{ media_player }}";
-        #                 };
-        #                 action = "music_assistant.play_media";
-        #               }
-        #             ];
-        #           }
-        #           {
-        #             conditions = [
-        #               {
-        #                 condition = "template";
-        #                 value_template = "{{ 'playlist' in query.lower() }}";
-        #               }
-        #             ];
-        #             sequence = [
-        #               {
-        #                 data = {
-        #                   media_type = "playlist";
-        #                   enqueue = "replace";
-        #                   media_id = "{{ query }}";
-        #                   entity_id = "{{ media_player }}";
-        #                 };
-        #                 action = "music_assistant.play_media";
-        #               }
-        #             ];
-        #           }
-        #         ];
-        #         default = [
-        #           {
-        #             data = {
-        #               media_type = "track";
-        #               enqueue = "replace";
-        #               media_id = "{{ query }}";
-        #               radio_mode = true;
-        #               entity_id = "{{ media_player }}";
-        #             };
-        #             action = "music_assistant.play_media";
-        #           }
-        #         ];
-        #       }
-        #     ];
-        #     fields = {
-        #       query = {
-        #         description = "The title of the song, album, artist, or playlist to play.";
-        #         example = "Greatest Hits album";
-        #         required = true;
-        #       };
-        #       area = {
-        #         example = "Living Room";
-        #         description = "The area";
-        #         required = true;
-        #       };
-        #     };
-        #   };
-        # }
         {
           weather_forecast = {
             alias = "Weather Forecast";
