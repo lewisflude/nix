@@ -47,7 +47,7 @@ in
           scriptArgs =
             if needsConfigRoot then
               {
-                config-root = toString ../..;
+                config-root = ../..;
               }
             else
               { };
