@@ -138,6 +138,9 @@ in
           "${cfg.janitorr.dataPath}:${cfg.janitorr.dataPath}"
         ];
         extraOptions = [
+          # NOTE: Using host network mode for media management service access
+          # Host networking reduces isolation but simplifies communication with Jellyfin/Sonarr/Radarr
+          # Acceptable for internal media cleanup services on trusted home network
           "--network=host"
         ]
         ++ mkHealthFlags {

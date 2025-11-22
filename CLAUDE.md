@@ -238,6 +238,7 @@ in
 - **Contributing**: `CONTRIBUTING.md`
 - **qBittorrent Setup**: `docs/QBITTORRENT_GUIDE.md` - Complete setup, optimization, and troubleshooting
 - **ProtonVPN Port Forwarding**: `docs/PROTONVPN_PORT_FORWARDING_SETUP.md` - Detailed VPN configuration
+- **SOPS Secret Management**: `docs/SOPS_GUIDE.md` - Comprehensive secrets management, key rotation, and best practices
 - **Refactoring Patterns**: `docs/reference/REFACTORING_EXAMPLES.md` - Examples of over-engineering to avoid
 
 ## Important Notes
