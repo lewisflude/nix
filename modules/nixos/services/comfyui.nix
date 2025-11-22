@@ -55,7 +55,10 @@ in
       type = types.listOf types.str;
       default = [ ];
       description = "Extra arguments to pass to ComfyUI.";
-      example = [ "--listen" "0.0.0.0" ];
+      example = [
+        "--listen"
+        "0.0.0.0"
+      ];
     };
 
     enableGpu = mkOption {
@@ -77,13 +80,16 @@ in
 
       serviceConfig = {
         Type = "simple";
-        ExecStart = lib.concatStringsSep " " ([
-          "${pkgs.comfyui}/bin/comfyui"
-          "--listen"
-          "0.0.0.0"
-          "--port"
-          (toString cfg.port)
-        ] ++ cfg.extraArgs);
+        ExecStart = lib.concatStringsSep " " (
+          [
+            "${pkgs.comfyui}/bin/comfyui"
+            "--listen"
+            "0.0.0.0"
+            "--port"
+            (toString cfg.port)
+          ]
+          ++ cfg.extraArgs
+        );
         Restart = "on-failure";
         RestartSec = "10s";
         User = cfg.user;
@@ -117,7 +123,7 @@ in
     # Create user and group
     users.users.${cfg.user} = {
       isSystemUser = true;
-      group = cfg.group;
+      inherit (cfg) group;
       home = cfg.dataDir;
       createHome = true;
       description = "ComfyUI service user";

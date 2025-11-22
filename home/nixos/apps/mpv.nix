@@ -54,21 +54,17 @@ in
       cache-secs = 60;
       demuxer-max-bytes = "500M";
       demuxer-max-back-bytes = "500M";
-    };
 
-    # Use extraConfig for script-opts-append (special MPV directive)
-    extraConfig = ''
       # Stats overlay theming
-      script-opts-append=stats-border_color=${theme.formats.bgrHexRaw colors."divider-primary"}
-      script-opts-append=stats-font_color=${theme.formats.bgrHexRaw colors."text-primary"}
-      script-opts-append=stats-plot_bg_border_color=${theme.formats.bgrHexRaw colors."accent-info"}
-      script-opts-append=stats-plot_bg_color=${theme.formats.bgrHexRaw colors."surface-base"}
-      script-opts-append=stats-plot_color=${theme.formats.bgrHexRaw colors."accent-focus"}
-
-      # uosc script theming
-      script-opts-append=uosc-color=foreground=${colors."accent-focus".hexRaw},foreground_text=${colors."surface-base".hexRaw},background=${colors."surface-base".hexRaw},background_text=${colors."text-primary".hexRaw},curtain=${
+      script-opts = "stats-border_color=${
+        theme.formats.bgrHexRaw colors."divider-primary"
+      },stats-font_color=${theme.formats.bgrHexRaw colors."text-primary"},stats-plot_bg_border_color=${
+        theme.formats.bgrHexRaw colors."accent-info"
+      },stats-plot_bg_color=${theme.formats.bgrHexRaw colors."surface-base"},stats-plot_color=${
+        theme.formats.bgrHexRaw colors."accent-focus"
+      },uosc-color=foreground=${colors."accent-focus".hexRaw},foreground_text=${colors."surface-base".hexRaw},background=${colors."surface-base".hexRaw},background_text=${colors."text-primary".hexRaw},curtain=${
         colors."surface-emphasis".hexRaw
-      },success=${colors."accent-primary".hexRaw},error=${colors."accent-danger".hexRaw}
-    '';
+      },success=${colors."accent-primary".hexRaw},error=${colors."accent-danger".hexRaw}";
+    };
   };
 }

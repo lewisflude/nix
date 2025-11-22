@@ -14,7 +14,7 @@
 }:
 
 let
-  isLinux = lib.strings.hasSuffix "linux" config.home.hostPlatform.system;
+  inherit (pkgs.stdenv) isLinux;
 
   # Import custom wrappers for servers not in mcps.nix
   wrappers = import ../../modules/shared/mcp/wrappers.nix {
@@ -107,28 +107,28 @@ let
   addCommands = concatStringsSep "\n" (mapAttrsToList mkAddJsonCmd customServers);
 
   registerCustomScript = pkgs.writeShellScript "mcp-register-custom" ''
-    set -uo pipefail
-    echo "[mcp] Registering custom MCP servers (not in mcps.nix)…"
-    export PATH="${pkgs.coreutils}/bin:${pkgs.findutils}/bin:${pkgs.gawk}/bin:${pkgs.jq}/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:$PATH"
-    export MCP_TIMEOUT="''${MCP_TIMEOUT:-${constants.timeouts.mcp.registration}}"
+        set -uo pipefail
+        echo "[mcp] Registering custom MCP servers (not in mcps.nix)…"
+        export PATH="${pkgs.coreutils}/bin:${pkgs.findutils}/bin:${pkgs.gawk}/bin:${pkgs.jq}/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:$PATH"
+        export MCP_TIMEOUT="''${MCP_TIMEOUT:-${constants.timeouts.mcp.registration}}"
 
-    if ! command -v claude >/dev/null 2>&1; then
-      echo "[mcp] WARNING: 'claude' CLI not found in PATH, skipping custom server registration"
-      exit 0
-    fi
+        if ! command -v claude >/dev/null 2>&1; then
+          echo "[mcp] WARNING: 'claude' CLI not found in PATH, skipping custom server registration"
+          exit 0
+        fi
 
-    echo "[mcp] Custom servers: ${concatStringsSep " " declaredNames}"
+        echo "[mcp] Custom servers: ${concatStringsSep " " declaredNames}"
 
-    while IFS= read -r line; do
-      line="''${line%%$'\r'}"
-      [ -z "$line" ] && continue
-      echo "[mcp] -> $line"
-      bash -lc "$line" >/dev/null 2>&1 || echo "[mcp] WARN: add failed for custom server"
-    done <<'ADD_CMDS'
-${addCommands}
-ADD_CMDS
+        while IFS= read -r line; do
+          line="''${line%%$'\r'}"
+          [ -z "$line" ] && continue
+          echo "[mcp] -> $line"
+          bash -lc "$line" >/dev/null 2>&1 || echo "[mcp] WARN: add failed for custom server"
+        done <<'ADD_CMDS'
+    ${addCommands}
+    ADD_CMDS
 
-    echo "[mcp] Custom server registration complete."
+        echo "[mcp] Custom server registration complete."
   '';
 
 in
@@ -157,61 +157,23 @@ in
   };
 
   # Configure mcps.nix servers
+  # NOTE: All mcps.nix servers are currently disabled due to package availability issues
+  # The mcps overlay is not properly providing pkgs.mcp-servers
   programs.claude-code = {
     enable = true;
 
     mcps = {
-      # Version control
-      git.enable = true;
-
-      # Filesystem access
-      filesystem = {
-        enable = true;
-        allowedPaths = [
-          "${config.home.homeDirectory}/Code"
-          "${config.home.homeDirectory}/.config"
-          "${config.home.homeDirectory}/Documents"
-        ];
-      };
-
-      # GitHub integration
-      github = {
-        enable = true;
-        tokenFilepath = systemConfig.sops.secrets.GITHUB_TOKEN.path;
-      };
-
-      # Web fetching
-      fetch.enable = true;
-
-      # Sequential thinking
-      sequential-thinking.enable = true;
-
-      # Time utilities
-      time = {
-        enable = true;
-        timezone = constants.timezone or "UTC";
-      };
-
-      # Language servers
-      lsp-typescript = {
-        enable = true;
-        workspace = "${config.home.homeDirectory}/Code";
-      };
-
-      lsp-nix = {
-        enable = true;
-        workspace = "${config.home.homeDirectory}/nix";
-      };
-
-      lsp-rust = {
-        enable = true;
-        workspace = "${config.home.homeDirectory}/Code";
-      };
-
-      lsp-python = {
-        enable = true;
-        workspace = "${config.home.homeDirectory}/Code";
-      };
+      # All disabled due to missing pkgs.mcp-servers
+      git.enable = false;
+      filesystem.enable = false;
+      github.enable = false;
+      fetch.enable = false;
+      sequential-thinking.enable = false;
+      time.enable = false;
+      lsp-typescript.enable = false;
+      lsp-nix.enable = false;
+      lsp-rust.enable = false;
+      lsp-python.enable = false;
     };
   };
 

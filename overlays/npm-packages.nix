@@ -7,9 +7,7 @@ _final: prev: {
       url = "https://registry.npmjs.com/nx/-/nx-${version}.tgz";
       hash = "sha256-j/jGtZxoAKVAUVqUZaQCsZcdDthOYzHuk7Im3bGOZBk=";
     };
-    postPatch = ''
-      cp ${../pkgs/nx/package-lock.json} ./package-lock.json
-    '';
+    # postPatch removed - package-lock.json file doesn't exist
     dontNpmBuild = true;
     npmDepsHash = "sha256-/WdFmNDZZr4npLoWpczr8nFalQGQxAJLQa6Hza1tVBE=";
     meta = with prev.lib; {
