@@ -1,0 +1,359 @@
+# Nix Configuration Repository - Cursor AI Rules
+
+You are helping maintain a cross-platform Nix configuration repository that supports NixOS (Linux) and nix-darwin (macOS) systems.
+
+## Architecture Overview
+
+**Directory Structure:**
+- `hosts/` - Host-specific configurations (NixOS and nix-darwin)
+- `home/` - Home Manager user configurations
+  - `home/common/apps/` - Cross-platform user applications
+  - `home/nixos/` - Linux-specific user config
+  - `home/darwin/` - macOS-specific user config
+- `modules/nixos/` - NixOS system modules
+- `modules/darwin/` - nix-darwin system modules
+- `modules/shared/features/` - Cross-platform features
+- `pkgs/pog-scripts/` - Interactive CLI tools (POG apps)
+- `scripts/` - Shell utility scripts
+- `docs/` - Project documentation
+
+## Critical Rules - Module Placement
+
+**THIS IS THE MOST IMPORTANT RULE: Modules must be placed in the correct location.**
+
+### System-Level Modules (`modules/nixos/` or `modules/darwin/`)
+
+Place here ONLY if the configuration requires:
+- System services (systemd on Linux, launchd on macOS)
+- Kernel modules and drivers
+- Hardware configuration
+- System daemons running as root
+- Container runtime daemons (Docker, Podman system service)
+- Graphics drivers and system-level graphics libraries
+- System-wide network configuration
+- Boot loader configuration
+
+**Examples:**
+```nix
+# ✅ CORRECT: modules/nixos/features/virtualisation.nix
+virtualisation.podman.enable = true;
+
+# ✅ CORRECT: modules/nixos/features/desktop/graphics.nix
+hardware.graphics.extraPackages = [ pkgs.mesa ];
+```
+
+### Home-Manager Modules (`home/common/apps/` or `home/{nixos,darwin}/`)
+
+Place here for:
+- User applications and CLI tools
+- User-level systemd services (systemd --user)
+- Dotfiles and user configuration files
+- Development tools (LSPs, formatters, linters)
+- Desktop applications
+- User tray applets and indicators
+- Shell configuration (zsh, bash, fish)
+- Editor and IDE configurations
+
+**Examples:**
+```nix
+# ✅ CORRECT: home/common/apps/git.nix
+programs.git.enable = true;
+
+# ✅ CORRECT: home/nixos/hardware-tools/audio.nix
+home.packages = [ pkgs.pwvucontrol pkgs.playerctl ];
+```
+
+### Decision Checklist
+
+When adding a package or service, ask:
+
+1. Does it require root/system privileges? → **System module**
+2. Does it run as a system service (not user service)? → **System module**
+3. Is it hardware or driver configuration? → **System module**
+4. Is it a user application or CLI tool? → **Home-Manager module**
+5. Does it configure user dotfiles? → **Home-Manager module**
+6. Is it a desktop tray applet? → **Home-Manager module**
+
+## Code Style - Critical Antipatterns
+
+### ❌ ANTIPATTERN #1: Using `with pkgs;`
+
+**NEVER use this antipattern:**
+```nix
+# ❌ WRONG - Don't do this
+home.packages = with pkgs; [ curl wget tree ];
+```
+
+**ALWAYS use explicit references:**
+```nix
+# ✅ CORRECT - Modern pattern
+home.packages = [ pkgs.curl pkgs.wget pkgs.tree ];
+```
+
+**Why:** Explicit references make it clear where packages come from, improve code readability, and make refactoring easier.
+
+### ❌ ANTIPATTERN #2: Hardcoded Values
+
+**NEVER hardcode ports, paths, or constants:**
+```nix
+# ❌ WRONG - Don't do this
+services.jellyfin.port = 8096;
+time.timeZone = "Europe/London";
+```
+
+**ALWAYS use constants or per-host config:**
+```nix
+# ✅ CORRECT - Use constants
+let
+  constants = import ../lib/constants.nix;
+in
+{
+  services.jellyfin.port = constants.ports.services.jellyfin;
+  # time.timeZone configured per-host in hosts/<hostname>/
+}
+```
+
+### ❌ ANTIPATTERN #3: Wrong Module Placement
+
+**NEVER put system packages in home-manager:**
+```nix
+# ❌ WRONG - Container runtimes are system-level
+home.packages = [ pkgs.podman pkgs.podman-compose ];
+
+# ❌ WRONG - Graphics libraries are system-level
+home.packages = [ pkgs.vulkan-tools pkgs.mesa-demos ];
+```
+
+**ALWAYS place at the correct level:**
+```nix
+# ✅ CORRECT - System module
+virtualisation.podman.enable = true;
+
+# ✅ CORRECT - System graphics config
+hardware.graphics.extraPackages = [ pkgs.mesa ];
+```
+
+## Commands You Must NEVER Run
+
+**CRITICAL SAFETY RULE: Never run system rebuild commands without explicit user permission.**
+
+**Prohibited commands:**
+- `nh os switch`
+- `nh os boot`
+- `sudo nixos-rebuild switch`
+- `sudo nixos-rebuild boot`
+- `sudo darwin-rebuild switch`
+- `darwin-rebuild activate`
+- `rm -rf` (especially in system directories)
+- `sudo rm -rf`
+
+**Why:** You don't have the required permissions, and these commands can break the user's system if run incorrectly.
+
+**Instead:** Suggest commands for the user to run manually:
+```bash
+# Review changes first
+git diff
+
+# Suggest (don't run):
+# "Please run: nh os switch"
+# or "Please run: sudo nixos-rebuild switch"
+```
+
+## Code Formatting - Always Required
+
+After editing ANY `.nix` file, you MUST format it:
+
+```bash
+# Format single file
+nix fmt path/to/file.nix
+
+# Format entire project
+treefmt
+```
+
+**This repository has automated formatting hooks that will run after your edits.**
+
+## Available Tools and Scripts
+
+### POG Apps (Interactive CLI Tools)
+
+These are modern interactive tools built with the POG library. Run them with `nix run .#<name>`:
+
+- `nix run .#new-module` - **USE THIS** to create new modules (don't create manually)
+- `nix run .#update-all` - Update flake inputs and ZSH plugins
+- `nix run .#visualize-modules` - Generate module dependency graphs
+- `nix run .#setup-cachix` - Configure Cachix binary cache
+
+**Important:** When creating new modules, ALWAYS use `nix run .#new-module` instead of creating files manually. It ensures correct structure and placement.
+
+### Diagnostic Scripts (`scripts/`)
+
+**qBittorrent & VPN:**
+- `./scripts/diagnose-qbittorrent-seeding.sh` - Full seeding diagnostics
+- `./scripts/verify-qbittorrent-vpn.sh` - VPN verification
+- `./scripts/monitor-protonvpn-portforward.sh` - Port forwarding monitor
+
+**SSH & Network:**
+- `./scripts/diagnose-ssh-slowness.sh` - SSH troubleshooting
+- `./scripts/test-ssh-performance.sh` - Performance benchmarking
+- `./scripts/test-vlan2-speed.sh` - Network speed testing
+
+**Validation:**
+- `./scripts/validate-config.sh` - Validate Nix flake
+- `./scripts/strict-lint-check.sh` - Linting checks
+
+## Git Commit Conventions
+
+Follow conventional commits format (see `docs/DX_GUIDE.md`):
+
+**Format:** `<type>(<scope>): <description>`
+
+**Types:**
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `refactor:` - Code refactoring
+- `docs:` - Documentation changes
+- `test:` - Test additions or changes
+- `chore:` - Build/tooling changes
+
+**Examples:**
+```
+feat(audio): add PipeWire support for pro audio routing
+fix(modules): correct home-manager module placement for git config
+refactor(features): simplify gaming feature configuration
+docs(qbittorrent): update troubleshooting guide
+```
+
+## Documentation You Should Reference
+
+**Before making changes, check these docs:**
+
+- `CLAUDE.md` - Primary AI assistant guidelines
+- `CONVENTIONS.md` - Detailed coding conventions
+- `docs/reference/architecture.md` - Architecture guide
+- `docs/FEATURES.md` - Feature patterns and usage
+- `docs/DX_GUIDE.md` - Development experience guide
+- `docs/reference/REFACTORING_EXAMPLES.md` - Antipatterns and refactoring examples
+
+## Module Structure Pattern
+
+When creating new modules, follow this structure:
+
+```nix
+{ config, lib, pkgs, ... }:
+
+let
+  cfg = config.features.myFeature;
+in
+{
+  options.features.myFeature = {
+    enable = lib.mkEnableOption "my feature";
+
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.myPackage;
+      description = "The package to use for my feature";
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
+    # Configuration here
+  };
+}
+```
+
+## Common Tasks
+
+### Adding a Package
+
+1. **Check if it exists** in `home/common/apps/` or `modules/nixos/features/`
+2. **Determine placement** using the decision checklist above
+3. **Use feature flags** when appropriate (see `docs/FEATURES.md`)
+4. **Format code** after editing
+
+### Creating a Module
+
+1. **USE THE SCAFFOLDING TOOL**: `nix run .#new-module`
+2. **Follow existing patterns** in similar modules
+3. **Add proper documentation** in module options
+4. **Update docs** if needed (especially `docs/FEATURES.md`)
+
+### Updating Dependencies
+
+```bash
+# Update everything (POG script)
+nix run .#update-all
+
+# Or manually update flake
+nix flake update
+```
+
+## Working with Agent Mode
+
+When using Cursor Agent mode for complex tasks:
+
+1. **Plan before executing** - Outline the changes needed
+2. **Check existing patterns** - Review similar implementations
+3. **Make atomic changes** - Group related changes together
+4. **Test incrementally** - Suggest validation steps
+5. **Document reasoning** - Explain why you made certain decisions
+
+## Validation Before Suggesting Commits
+
+Before suggesting a commit:
+
+1. ✅ **Format code**: `nix fmt` or `treefmt`
+2. ✅ **Validate flake**: `nix flake check`
+3. ✅ **Review diff**: Check for unintended changes
+4. ✅ **Verify placement**: Ensure modules are in correct locations
+5. ✅ **Check antipatterns**: No `with pkgs;`, no hardcoded values
+
+## What NOT to Do
+
+1. ❌ Don't run system rebuild commands
+2. ❌ Don't use `with pkgs;`
+3. ❌ Don't hardcode values that should be constants
+4. ❌ Don't place system config in home-manager
+5. ❌ Don't place user apps in system modules
+6. ❌ Don't create modules manually (use `nix run .#new-module`)
+7. ❌ Don't commit unformatted code
+8. ❌ Don't over-engineer simple changes
+
+## Constants and Validators
+
+**Use constants for magic values:**
+```nix
+let
+  constants = import ../lib/constants.nix;
+in
+{
+  services.myService.port = constants.ports.services.myService;
+}
+```
+
+**Use validators for assertions:**
+```nix
+let
+  validators = import ../lib/validators.nix { inherit lib; };
+in
+{
+  assertions = [
+    (validators.assertValidPort cfg.port "service-name")
+  ];
+}
+```
+
+## Key Principles
+
+1. **Correctness over cleverness** - Simple, clear code wins
+2. **Follow existing patterns** - Consistency matters
+3. **Document complex logic** - Help future maintainers
+4. **Test before suggesting** - Validate your changes
+5. **Ask when uncertain** - Better to clarify than assume
+
+## Additional Resources
+
+- **qBittorrent Setup**: `docs/QBITTORRENT_GUIDE.md`
+- **ProtonVPN Port Forwarding**: `docs/PROTONVPN_PORT_FORWARDING_SETUP.md`
+- **Performance Tuning**: `docs/PERFORMANCE_TUNING.md`
+- **Feature Usage**: `docs/FEATURE_USAGE.md`
