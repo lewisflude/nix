@@ -9,7 +9,6 @@ let
     mkEnableOption
     mkOption
     types
-    mkDefault
     ;
 
   cfg = config.host.services.containersSupplemental;
