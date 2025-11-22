@@ -1,12 +1,12 @@
 {
   lib,
   pkgs,
-  host,
+  systemConfig,
   ...
 }:
 let
   inherit (lib) mkIf;
-  cfg = host.features.development;
+  cfg = systemConfig.host.features.development;
   packageSets = import ../../../../lib/package-sets.nix {
     inherit pkgs;
   };

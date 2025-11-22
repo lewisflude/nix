@@ -10,7 +10,7 @@
   ...
 }:
 let
-  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+  platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem system;
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
 
   sources = import ../../_sources/generated.nix {
@@ -371,7 +371,7 @@ in
   # Declaratively manage p10k configuration
   # This file must exist for p10k to work - if it doesn't, p10k will show the wizard
   home.file.".p10k.zsh" = {
-    source = ./lib/p10k.zsh;
+    source = ../../lib/p10k.zsh;
     # Ensure the file is readable and executable
     executable = false;
   };

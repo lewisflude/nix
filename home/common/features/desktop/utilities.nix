@@ -1,11 +1,11 @@
 {
   lib,
-  host,
+  systemConfig,
   pkgs,
   ...
 }:
 let
-  cfg = host.features.desktop;
+  cfg = systemConfig.host.features.desktop;
 in
 {
   config = lib.mkIf cfg.enable {

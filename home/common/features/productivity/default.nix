@@ -1,11 +1,11 @@
 {
   lib,
-  host,
+  systemConfig,
   pkgs,
   ...
 }:
 let
-  cfg = host.features.productivity;
+  cfg = systemConfig.host.features.productivity;
 in
 {
   config = lib.mkIf cfg.enable {

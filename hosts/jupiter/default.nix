@@ -109,6 +109,7 @@
         acceleration = "cuda";
         models = [ "llama2" ];
       };
+      openWebui.enable = false;
     };
 
     containersSupplemental = {

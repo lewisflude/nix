@@ -24,6 +24,7 @@
   systemConfig,
   lib,
   system,
+  constants,
   ...
 }:
 
@@ -32,7 +33,9 @@ let
   claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
 
   # Import shared MCP utilities
-  servers = import ../../modules/shared/mcp/servers.nix { inherit pkgs config; };
+  servers = import ../../modules/shared/mcp/servers.nix {
+    inherit pkgs config constants;
+  };
 
   inherit (lib)
     concatStringsSep
