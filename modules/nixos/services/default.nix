@@ -1,9 +1,6 @@
 { ... }:
 {
   imports = [
-
-    ./containers
-
     ./media-management
     ./containers-supplemental
 
