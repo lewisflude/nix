@@ -32,7 +32,19 @@ in
           podman = {
             enable = true;
             dockerCompat = !cfg.docker;
-            defaultNetwork.settings.dns_enabled = true;
+
+            # Podman 5.0+ uses pasta as default network backend (more secure than slirp4netns)
+            # Pasta provides better IPv6 support, improved security isolation, and modern Linux mechanisms
+            defaultNetwork.settings = {
+              dns_enabled = true;
+            };
+
+            # Auto-prune containers, images, and volumes to save disk space
+            autoPrune = {
+              enable = true;
+              dates = "weekly";
+              flags = [ "--all" ];
+            };
           };
         })
         (mkIf cfg.qemu {
@@ -61,6 +73,12 @@ in
 
       users.users.${config.host.username}.extraGroups =
         optional cfg.docker "docker" ++ optional cfg.qemu "libvirtd" ++ optional cfg.virtualbox "vboxusers";
+
+      # SELinux support for Podman containers (enhanced security isolation)
+      # Only enable if SELinux is available and activated on the system
+      virtualisation.podman.extraPackages = mkIf (cfg.podman && config.security.selinux.enable or false) [
+        pkgs.podman-selinux
+      ];
 
       environment.systemPackages =
         optionals cfg.qemu [

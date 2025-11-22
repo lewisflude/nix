@@ -62,6 +62,9 @@ in
         "${cfg.cleanuparr.dataPath}:${cfg.cleanuparr.dataPath}:ro"
       ];
       extraOptions = [
+        # NOTE: Using host network mode for media management service access
+        # Host networking reduces isolation but simplifies communication with Sonarr/Radarr/etc
+        # Acceptable for internal services on trusted home network
         "--network=host"
       ]
       ++ mkHealthFlags {

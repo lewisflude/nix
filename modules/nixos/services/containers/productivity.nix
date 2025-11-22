@@ -64,6 +64,9 @@ in
         ];
 
         extraOptions = [
+          # NOTE: Using host network mode for socket access
+          # Host networking reduces isolation but is necessary for Podman socket communication
+          # This is acceptable for development/management tools on trusted networks
           "--network=host"
 
           "--memory=256m"
