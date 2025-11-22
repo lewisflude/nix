@@ -57,17 +57,20 @@ in
   };
 
   config = mkIf cfg.enable {
-    virtualisation.podman = {
-      enable = true;
-      defaultNetwork.settings.dns_enabled = true;
-      dockerCompat = mkDefault (!config.virtualisation.docker.enable);
-      dockerSocket.enable = mkDefault (!config.virtualisation.docker.enable);
-    };
-
+    # Podman configuration is handled by host.features.virtualisation
+    # This module only configures OCI container services
     virtualisation.oci-containers.backend = "podman";
 
     systemd.tmpfiles.rules = [
       "d ${cfg.configPath} 0755 ${toString cfg.uid} ${toString cfg.gid} -"
+    ];
+
+    # Ensure virtualisation feature is enabled with Podman
+    assertions = [
+      {
+        assertion = config.virtualisation.podman.enable or false;
+        message = "containersSupplemental requires Podman to be enabled via host.features.virtualisation.podman = true";
+      }
     ];
   };
 }
