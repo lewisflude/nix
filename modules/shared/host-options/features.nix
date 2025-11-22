@@ -31,6 +31,7 @@ in
         default = false;
       };
       nix = mkEnableOption "Nix development tools";
+      neovim = mkEnableOption "Neovim text editor";
 
       docker = mkEnableOption "Docker and containerization";
       git = mkEnableOption "Git and version control tools";
