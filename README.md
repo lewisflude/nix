@@ -1,34 +1,86 @@
-# Nix Configuration
+# 🔷 Nix Configuration
 
 [![CI](https://github.com/lewisflude/nix/workflows/CI/badge.svg)](https://github.com/lewisflude/nix/actions/workflows/ci.yml)
 [![Nix Flake](https://img.shields.io/badge/nix-flake-blue.svg)](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake.html)
 [![NixOS 24.11](https://img.shields.io/badge/NixOS-24.11-blue.svg)](https://nixos.org)
+[![nix-darwin](https://img.shields.io/badge/nix--darwin-supported-blue.svg)](https://github.com/LnL7/nix-darwin)
+[![GitHub last commit](https://img.shields.io/github/last-commit/lewisflude/nix)](https://github.com/lewisflude/nix/commits)
+[![GitHub stars](https://img.shields.io/github/stars/lewisflude/nix?style=social)](https://github.com/lewisflude/nix)
 
-A modern, cross-platform Nix setup for both macOS (nix-darwin) and Linux (NixOS), with shared Home Manager and development environments.
+> **A modern, declarative, cross-platform Nix configuration** for both macOS (nix-darwin) and Linux (NixOS), featuring shared Home Manager configurations, comprehensive development environments, and production-ready tooling.
+
+## 📖 Table of Contents
+
+- [✨ Key Features](#-key-features)
+- [🚀 Quick Start](#-quick-start)
+- [📁 Structure Overview](#-structure-overview)
+- [📚 Documentation](#-documentation)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [🎯 Common Tasks](#-common-tasks)
+- [🛠️ Maintenance](#️-maintenance)
+- [🎨 Developer Experience](#-developer-experience)
+- [🚀 Binary Cache & Publishing](#-binary-cache--publishing)
+- [💡 Support & Help](#-support--help)
+
+## ✨ Key Features
+
+- 🌍 **Cross-Platform**: Unified configuration for NixOS (Linux) and nix-darwin (macOS)
+- 🏠 **Home Manager Integration**: Consistent user environment across all systems
+- 🔄 **Flake-Based**: Modern Nix flakes for reproducible builds
+- 🚀 **Binary Cache Ready**: Pre-configured Cachix support for faster builds (10-30s vs 10-20min)
+- 🔐 **Secrets Management**: SOPS-nix integration for secure credential handling
+- 🛠️ **DX Tooling**: Pre-commit hooks, formatters, linters, and conventional commits
+- 🎨 **Feature System**: Modular, reusable feature-based configuration
+- 📊 **CI/CD**: Automated testing and validation via GitHub Actions
+- 🔧 **POG Scripts**: Interactive CLI tools for common tasks (module creation, updates, visualization)
 
 > **📚 Full Documentation:** [`docs/`](docs/) - Comprehensive guides, references, and examples
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+- A supported system: **macOS** (10.14+) or **Linux** (any modern distro)
+- Internet connection for downloading Nix packages
+
 ### 1. Install Nix
 
 ```bash
+# Using Determinate Systems installer (recommended - includes flakes by default)
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
 ### 2. Clone This Configuration
 
 ```bash
-git clone <your-repo-url> ~/.config/nix
+# Clone to your preferred location (e.g., ~/.config/nix)
+git clone https://github.com/lewisflude/nix.git ~/.config/nix
 cd ~/.config/nix
 ```
 
-### 3. Build Your System
+### 3. Configure Your Host
 
-Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewiss-MacBook-Pro` for macOS):
+Create a host configuration for your machine in `hosts/` directory (or use an existing one), then build:
 
-- **macOS:** `sudo darwin-rebuild switch --flake ~/.config/nix#<hostname>`
-- **Linux:** `sudo nixos-rebuild switch --flake ~/.config/nix#<hostname>`
+```bash
+# Replace <hostname> with your machine name
+# Examples: jupiter (Linux) | Lewiss-MacBook-Pro (macOS)
+
+# macOS (nix-darwin)
+sudo darwin-rebuild switch --flake ~/.config/nix#<hostname>
+
+# Linux (NixOS)
+sudo nixos-rebuild switch --flake ~/.config/nix#<hostname>
+```
+
+### 4. Enter Development Environment (Optional)
+
+```bash
+# Sets up pre-commit hooks, formatters, and linters automatically
+nix develop
+```
+
+> **💡 Tip:** Use Cachix to speed up builds! See [Binary Cache & Publishing](#-binary-cache--publishing) section.
 
 ## 📁 Structure Overview
 
@@ -69,28 +121,78 @@ Replace `<hostname>` with your machine name (e.g., `jupiter` for Linux or `Lewis
 | **📈 Performance Monitoring** | [`docs/reference/performance-monitoring.md`](docs/reference/performance-monitoring.md) | Monitoring and tracking performance metrics |
 | **🤝 Contributing** | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to contribute to this repo |
 
+## 🛠️ Tech Stack
+
+<details>
+<summary>Click to expand core technologies</summary>
+
+- **Nix Flakes** - Reproducible, composable package management
+- **NixOS** - Declarative Linux distribution
+- **nix-darwin** - Nix modules for macOS system configuration
+- **Home Manager** - User environment management
+- **SOPS-nix** - Secrets management with age/GPG encryption
+- **Treefmt** - Multi-language code formatting
+- **Pre-commit Hooks** - Automated code quality checks
+- **GitHub Actions** - Continuous integration and testing
+- **Cachix** - Binary cache for faster builds
+- **FlakeHub** - Flake publishing and versioning
+
+</details>
+
 ## 🎯 Common Tasks
 
-- **Add a package:** See [DX Guide](docs/DX_GUIDE.md) or [Features Guide](docs/FEATURES.md) for configuration patterns
-- **Set up dev environment:** `nix develop` - includes pre-commit hooks, formatters, and linters
-- **Update dependencies:** See [Updating Guide](docs/UPDATING.md) or run `nix run .#update-all`
-- **Format code:** `nix fmt` or `treefmt` for all files, automatic via pre-commit hooks
-- **Write good commits:** See [DX Guide → Conventional Commits](docs/DX_GUIDE.md#conventional-commits)
-- **Troubleshoot issues:** See [Performance Tuning](docs/PERFORMANCE_TUNING.md)
+| Task | Command | Documentation |
+|------|---------|---------------|
+| **🔧 Enter dev environment** | `nix develop` | Auto-configures hooks, formatters, linters |
+| **📦 Add a package** | See guides → | [DX Guide](docs/DX_GUIDE.md) \| [Features Guide](docs/FEATURES.md) |
+| **🔄 Update dependencies** | `nix run .#update-all` | [Updating Guide](docs/UPDATING.md) |
+| **✨ Format code** | `nix fmt` or `treefmt` | Runs automatically via pre-commit |
+| **✍️ Write good commits** | Follow convention → | [Conventional Commits](docs/DX_GUIDE.md#conventional-commits) |
+| **🆕 Create module** | `nix run .#new-module` | Interactive scaffolding tool |
+| **📊 Visualize modules** | `nix run .#visualize-modules` | Generate dependency graphs |
+| **🐛 Troubleshoot** | See docs → | [Performance Tuning](docs/PERFORMANCE_TUNING.md) |
+| **🧹 Cleanup** | `nix-collect-garbage -d` | Reclaim disk space |
 
 ## 🛠️ Maintenance
 
+### Update Dependencies
+
 ```bash
-# Update all dependencies (automated)
+# 🎯 Recommended: Automated update (flake inputs + ZSH plugins)
 nix run .#update-all
 
-# Or manually update inputs
+# Or manually update flake inputs
 nix flake update
+
+# Apply updates to your system
 sudo nixos-rebuild switch --flake ~/.config/nix#<hostname>  # Linux
 sudo darwin-rebuild switch --flake ~/.config/nix#<hostname> # macOS
+```
 
-# Cleanup
+### Cleanup & Optimization
+
+```bash
+# Remove old generations and optimize store
 nix-collect-garbage -d && nix store optimise
+
+# List generations (to see what you're deleting)
+sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
+
+# Delete specific generations
+sudo nix-env --delete-generations 14d --profile /nix/var/nix/profiles/system
+```
+
+### Health Checks
+
+```bash
+# Verify flake
+nix flake check
+
+# Check configuration syntax
+nix flake show
+
+# Dry-run build (test without applying)
+sudo nixos-rebuild dry-run --flake ~/.config/nix#<hostname>
 ```
 
 ## 🎨 Developer Experience
@@ -138,4 +240,34 @@ This configuration can be published to FlakeHub for easy discovery and versioned
 
 ---
 
-**Need more help?** Check out the [`docs/`](docs/) directory for comprehensive guides and references.
+## 💡 Support & Help
+
+### 📚 Documentation
+
+- **Primary Docs**: Browse the [`docs/`](docs/) directory for comprehensive guides
+- **Architecture**: Understand the system design in [`docs/reference/architecture.md`](docs/reference/architecture.md)
+- **DX Guide**: Learn best practices in [`docs/DX_GUIDE.md`](docs/DX_GUIDE.md)
+- **Features**: Explore the feature system in [`docs/FEATURES.md`](docs/FEATURES.md)
+
+### 🤝 Contributing
+
+Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md) for:
+- Code style guidelines
+- Commit message conventions
+- Pull request process
+- Development setup
+
+### 📝 License
+
+This configuration is personal but shared as reference material. Feel free to fork and adapt for your own use.
+
+### 🔗 Resources
+
+- [NixOS Manual](https://nixos.org/manual/nixos/stable/)
+- [Nix-Darwin Manual](https://daiderd.com/nix-darwin/manual/)
+- [Home Manager Manual](https://nix-community.github.io/home-manager/)
+- [Nix Pills](https://nixos.org/guides/nix-pills/) - In-depth Nix tutorial
+
+---
+
+**Questions?** Check the documentation or open an issue for help!
