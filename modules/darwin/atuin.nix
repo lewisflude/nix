@@ -54,9 +54,73 @@ in
       # Note: macOS doesn't have a declarative firewall like NixOS
       # This option is kept for compatibility but doesn't do anything
     };
+
+    database = {
+      uri = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "postgresql://atuin:password@localhost/atuin";
+        description = ''
+          Database connection URI. Atuin requires PostgreSQL 14+ for optimal performance.
+          If null, defaults to SQLite at ~/.local/share/atuin/history.db
+
+          Recommended: Use PostgreSQL for production deployments.
+          SQLite is suitable for single-user development only.
+        '';
+      };
+    };
+
+    tls = {
+      enable = lib.mkEnableOption "TLS/HTTPS support for Atuin server";
+
+      cert = lib.mkOption {
+        type = lib.types.nullOr lib.types.path;
+        default = null;
+        example = "/etc/ssl/certs/atuin.crt";
+        description = "Path to TLS certificate file (PEM format)";
+      };
+
+      key = lib.mkOption {
+        type = lib.types.nullOr lib.types.path;
+        default = null;
+        example = "/etc/ssl/private/atuin.key";
+        description = "Path to TLS private key file (PEM format)";
+      };
+    };
+
+    logging = {
+      directory = lib.mkOption {
+        type = lib.types.str;
+        default = "${config.home-manager.users.${config.host.username or "lewis"}.home.homeDirectory or "/Users/lewis"}/.local/state/atuin";
+        description = "Directory for Atuin server logs (replaces /tmp for persistence)";
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
+    # Create log directory
+    system.activationScripts.postActivation.text = lib.mkAfter ''
+      mkdir -p ${cfg.logging.directory}
+      chmod 755 ${cfg.logging.directory}
+    '';
+
+    # Assertions for TLS configuration
+    assertions = [
+      {
+        assertion = cfg.tls.enable -> (cfg.tls.cert != null && cfg.tls.key != null);
+        message = "Atuin TLS is enabled but cert or key path is not set";
+      }
+      {
+        assertion = cfg.database.uri != null -> (lib.hasPrefix "postgresql://" cfg.database.uri);
+        message = "Atuin database URI must start with 'postgresql://' (PostgreSQL 14+ required)";
+      }
+    ];
+
+    # Set environment variables for Atuin server
+    environment.variables = lib.mkIf (cfg.database.uri != null) {
+      ATUIN_DB_URI = cfg.database.uri;
+    };
+
     launchd.daemons.atuin = {
       command = lib.getExe cfg.package;
       serviceConfig = {
@@ -79,11 +143,25 @@ in
         ]
         ++ lib.optionals cfg.openRegistration [
           "--open-registration"
+        ]
+        ++ lib.optionals cfg.tls.enable [
+          "--tls-cert"
+          (toString cfg.tls.cert)
+          "--tls-key"
+          (toString cfg.tls.key)
         ];
+
+        # Environment for database configuration
+        EnvironmentVariables = lib.mkIf (cfg.database.uri != null) {
+          ATUIN_DB_URI = cfg.database.uri;
+        };
+
         RunAtLoad = true;
         KeepAlive = true;
-        StandardOutPath = "/tmp/atuin-server.log";
-        StandardErrorPath = "/tmp/atuin-server.log";
+
+        # Improved logging with rotation support (use journald or rotate externally)
+        StandardOutPath = "${cfg.logging.directory}/atuin-server.log";
+        StandardErrorPath = "${cfg.logging.directory}/atuin-server-error.log";
       };
     };
   };
