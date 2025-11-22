@@ -65,4 +65,20 @@ in
       doCheck = false;
     });
   };
+
+  # MCP servers overlay (version-pinned server implementations)
+  mcps =
+    if inputs ? mcps && inputs.mcps ? overlays then
+      inputs.mcps.overlays.default
+    else
+      (_final: _prev: { });
+
+  # ComfyUI overlay (native Nix package, replaces Docker container)
+  comfyui =
+    if inputs ? comfyui && inputs.comfyui ? overlays && inputs.comfyui.overlays ? default then
+      inputs.comfyui.overlays.default
+    else if inputs ? comfyui && inputs.comfyui ? packages && inputs.comfyui.packages ? ${system} then
+      (_final: _prev: { comfyui = inputs.comfyui.packages.${system}.default or _prev.hello; })
+    else
+      (_final: _prev: { });
 }

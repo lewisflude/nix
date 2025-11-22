@@ -1,56 +1,88 @@
-# MCP Configuration for NixOS
+# MCP Configuration for NixOS (mcps.nix flake integration)
 #
-# This module configures MCP (Model Context Protocol) servers for NixOS systems.
-# It provides systemd user services for registration, warming, and HTTP servers,
-# along with home-manager activation hooks for configuration management.
-#
-# Features:
-# - Automatic MCP server registration with Claude CLI
-# - Server warm-up (pre-fetching and caching)
-# - HTTP server for docs-mcp-server
-# - Integration with Cursor and Claude Code applications
-# - SOPS secret management for API keys
-#
-# Systemd Services:
-# - mcp-claude-register: Registers servers with Claude CLI (oneshot)
-# - mcp-warm: Pre-fetches and builds MCP server dependencies (oneshot)
-# - docs-mcp-http: HTTP interface for docs-mcp-server (daemon)
-#
-# See also:
-# - modules/shared/mcp/: Shared module definitions
-# - home/darwin/mcp.nix: macOS-specific configuration
+# This module uses roman/mcps.nix for version-pinned MCP servers.
+# Servers provided by mcps.nix: git, github, filesystem, fetch, sequential-thinking, time, LSPs
+# Custom servers: memory, nixos, kagi, openai, docs-mcp-server, rust-docs-bevy
 {
   pkgs,
   config,
   systemConfig,
   lib,
-  hostSystem,
+  inputs,
   constants,
   ...
 }:
 
 let
-  isLinux = lib.strings.hasSuffix "linux" hostSystem;
+  isLinux = lib.strings.hasSuffix "linux" config.home.hostPlatform.system;
 
-  # Import shared MCP utilities
-  servers = import ../../modules/shared/mcp/servers.nix {
-    inherit
-      pkgs
-      config
-      constants
-      ;
-  };
+  # Import custom wrappers for servers not in mcps.nix
   wrappers = import ../../modules/shared/mcp/wrappers.nix {
-    inherit
-      pkgs
-      systemConfig
-      lib
-      ;
+    inherit pkgs systemConfig lib;
   };
 
   inherit (lib) concatStringsSep mapAttrsToList escapeShellArg;
 
-  # MCP registration helper
+  # Custom servers not provided by mcps.nix
+  customServers = {
+    # Memory server - not in mcps.nix
+    memory = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-memory@0.1.0"
+      ];
+      port = constants.ports.mcp.memory;
+    };
+
+    # NixOS-specific MCP server
+    nixos = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [
+        "--from"
+        "mcp-nixos==0.2.0"
+        "mcp-nixos"
+      ];
+      port = constants.ports.mcp.nixos;
+      env = {
+        UV_PYTHON = "${pkgs.python3}/bin/python3";
+      };
+    };
+
+    # Kagi MCP server with SOPS integration
+    kagi = {
+      command = "${wrappers.kagiWrapper}/bin/kagi-mcp-wrapper";
+      args = [ ];
+      port = constants.ports.mcp.kagi;
+    };
+
+    # OpenAI MCP server with SOPS integration
+    openai = {
+      command = "${wrappers.openaiWrapper}/bin/openai-mcp-wrapper";
+      args = [ ];
+      port = constants.ports.mcp.openai;
+    };
+
+    # Docs MCP server with SOPS integration
+    docs-mcp-server = {
+      command = "${wrappers.docsMcpWrapper}/bin/docs-mcp-wrapper";
+      args = [ ];
+      port = constants.ports.mcp.docs;
+    };
+
+    # Rust documentation MCP server
+    rust-docs-bevy = {
+      command = "${wrappers.rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
+      args = [
+        "bevy@0.16.1"
+        "-F"
+        "default"
+      ];
+      port = constants.ports.mcp.rustdocs;
+    };
+  };
+
+  # Registration script for custom servers
   mkAddJsonCmd =
     name: serverCfg:
     let
@@ -71,78 +103,43 @@ let
       claude mcp add-json ${escapeShellArg name} ${jsonArg} --scope user
     '';
 
-  declaredNames = mapAttrsToList (n: _: escapeShellArg n) config.services.mcp.servers;
-  addCommands = concatStringsSep "\n" (mapAttrsToList mkAddJsonCmd config.services.mcp.servers);
+  declaredNames = mapAttrsToList (n: _: escapeShellArg n) customServers;
+  addCommands = concatStringsSep "\n" (mapAttrsToList mkAddJsonCmd customServers);
 
-  registerScript = pkgs.writeShellScript "mcp-register" ''
-        set -uo pipefail
-        echo "[mcp] Starting Claude MCP registration…"
-        export PATH="${pkgs.coreutils}/bin:${pkgs.findutils}/bin:${pkgs.gawk}/bin:${pkgs.jq}/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:$PATH"
-        export MCP_TIMEOUT="''${MCP_TIMEOUT:-${constants.timeouts.mcp.registration}}"
-        if ! command -v claude >/dev/null 2>&1; then
-          echo "[mcp] WARNING: 'claude' CLI not found in PATH, skipping registration"
-          exit 0
-        fi
-        DRY_RUN="''${MCP_DRY_RUN:-0}"
-        declare -a DECLARED=( ${concatStringsSep " " declaredNames} )
-        echo "[mcp] Declared servers: ${concatStringsSep " " declaredNames}"
-        if [ "$DRY_RUN" = "1" ]; then
-          echo "[mcp] DRY-RUN: would run:"
-          cat <<'ADD_CMDS'
-    ${addCommands}
-    ADD_CMDS
-        else
-          while IFS= read -r line; do
-            line="''${line%%$'\r'}"
-            [ -z "$line" ] && continue
-            case "$line" in
-              *)
-                echo "[mcp] -> $line"
-                if ! bash -lc "$line" >/dev/null 2>&1; then
-                  echo "[mcp] WARN: add failed, will evaluate health after list"
-                fi
-                ;;
-            esac
-          done <<'ADD_CMDS'
-    ${addCommands}
-    ADD_CMDS
-        fi
-        echo "[mcp] Skipping health prune (using add-json mirroring)"
-        echo "[mcp] Skipping unmanaged prune"
-        echo "[mcp] Final state (MCP_TIMEOUT=$MCP_TIMEOUT):"
-        claude mcp list || echo "[mcp] WARNING: claude mcp list failed"
-        echo "[mcp] Claude MCP registration complete."
-  '';
+  registerCustomScript = pkgs.writeShellScript "mcp-register-custom" ''
+    set -uo pipefail
+    echo "[mcp] Registering custom MCP servers (not in mcps.nix)…"
+    export PATH="${pkgs.coreutils}/bin:${pkgs.findutils}/bin:${pkgs.gawk}/bin:${pkgs.jq}/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:$PATH"
+    export MCP_TIMEOUT="''${MCP_TIMEOUT:-${constants.timeouts.mcp.registration}}"
 
-  warmScript = pkgs.writeShellScript "mcp-warm" ''
-    set -euo pipefail
-    echo "[mcp-warm] Starting warm-up…"
-    export PATH="${pkgs.coreutils}/bin:${pkgs.findutils}/bin:$PATH"
-    export UV_PYTHON="${pkgs.python3}/bin/python3"
-    echo "[mcp-warm] Prebuilding rustdocs-mcp-server binary…"
-    ${wrappers.rustdocsWrapper}/bin/rustdocs-mcp-wrapper --help >/dev/null 2>&1 || true
-    echo "[mcp-warm] Prefetching uvx servers…"
-    ${pkgs.uv}/bin/uvx --from cli-mcp-server cli-mcp-server --help >/dev/null 2>&1 || true
-    ${pkgs.uv}/bin/uvx --from mcp-server-fetch mcp-server-fetch --help >/dev/null 2>&1 || true
-    ${pkgs.uv}/bin/uvx --from mcp-server-git mcp-server-git --help >/dev/null 2>&1 || true
-    ${pkgs.uv}/bin/uvx --from mcp-server-time mcp-server-time --help >/dev/null 2>&1 || true
-    ${pkgs.uv}/bin/uvx --from mcp-nixos mcp-nixos --help >/dev/null 2>&1 || true
-    echo "[mcp-warm] Prefetching npx servers…"
-    ${servers.nodejs}/bin/npx -y @modelcontextprotocol/server-everything@latest --help >/dev/null 2>&1 || true
-    ${servers.nodejs}/bin/npx -y @modelcontextprotocol/server-filesystem@latest --help >/dev/null 2>&1 || true
-    ${servers.nodejs}/bin/npx -y @modelcontextprotocol/server-memory@latest --help >/dev/null 2>&1 || true
-    ${servers.nodejs}/bin/npx -y @modelcontextprotocol/server-sequential-thinking@latest --help >/dev/null 2>&1 || true
-    ${servers.nodejs}/bin/npx -y @arabold/docs-mcp-server@latest --help >/dev/null 2>&1 || true
-    ${servers.nodejs}/bin/npx -y tritlo/lsp-mcp --help >/dev/null 2>&1 || true
-    echo "[mcp-warm] Warm-up complete."
+    if ! command -v claude >/dev/null 2>&1; then
+      echo "[mcp] WARNING: 'claude' CLI not found in PATH, skipping custom server registration"
+      exit 0
+    fi
+
+    echo "[mcp] Custom servers: ${concatStringsSep " " declaredNames}"
+
+    while IFS= read -r line; do
+      line="''${line%%$'\r'}"
+      [ -z "$line" ] && continue
+      echo "[mcp] -> $line"
+      bash -lc "$line" >/dev/null 2>&1 || echo "[mcp] WARN: add failed for custom server"
+    done <<'ADD_CMDS'
+${addCommands}
+ADD_CMDS
+
+    echo "[mcp] Custom server registration complete."
   '';
 
 in
 {
+  # Import mcps.nix home-manager module
+  imports = [ inputs.mcps.homeManagerModules.claude ];
+
   home = {
     packages = [
       pkgs.uv
-      servers.nodejs
+      pkgs.nodejs
       pkgs.coreutils
       pkgs.gawk
       wrappers.kagiWrapper
@@ -153,15 +150,72 @@ in
       pkgs.nodePackages.typescript
     ];
 
-    activation.mcpWarm = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      ${warmScript}
-    '';
-
-    activation.setupClaudeMcp = lib.hm.dag.entryAfter [ "mcpWarm" ] ''
-      ${registerScript}
+    # Register custom servers after mcps.nix servers
+    activation.setupCustomMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      ${registerCustomScript}
     '';
   };
 
+  # Configure mcps.nix servers
+  programs.claude-code = {
+    enable = true;
+
+    mcps = {
+      # Version control
+      git.enable = true;
+
+      # Filesystem access
+      filesystem = {
+        enable = true;
+        allowedPaths = [
+          "${config.home.homeDirectory}/Code"
+          "${config.home.homeDirectory}/.config"
+          "${config.home.homeDirectory}/Documents"
+        ];
+      };
+
+      # GitHub integration
+      github = {
+        enable = true;
+        tokenFilepath = systemConfig.sops.secrets.GITHUB_TOKEN.path;
+      };
+
+      # Web fetching
+      fetch.enable = true;
+
+      # Sequential thinking
+      sequential-thinking.enable = true;
+
+      # Time utilities
+      time = {
+        enable = true;
+        timezone = constants.timezone or "UTC";
+      };
+
+      # Language servers
+      lsp-typescript = {
+        enable = true;
+        workspace = "${config.home.homeDirectory}/Code";
+      };
+
+      lsp-nix = {
+        enable = true;
+        workspace = "${config.home.homeDirectory}/nix";
+      };
+
+      lsp-rust = {
+        enable = true;
+        workspace = "${config.home.homeDirectory}/Code";
+      };
+
+      lsp-python = {
+        enable = true;
+        workspace = "${config.home.homeDirectory}/Code";
+      };
+    };
+  };
+
+  # Legacy services.mcp configuration for Cursor compatibility
   services.mcp = {
     enable = true;
 
@@ -176,102 +230,27 @@ in
       };
     };
 
-    servers = servers.commonServers // {
-      # Override sequential-thinking port for nixos
-      sequential-thinking = {
-        command = "${servers.nodejs}/bin/npx";
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-sequential-thinking@latest"
-        ];
-        port = servers.ports.sequential-thinking-nixos;
-      };
-
-      # Override time port for nixos
-      time = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [
-          "--from"
-          "mcp-server-time"
-          "mcp-server-time"
-        ];
-        port = servers.ports.time-nixos;
-        env = {
-          UV_PYTHON = "${pkgs.python3}/bin/python3";
-        };
-      };
-
-      # NixOS-specific servers with wrappers
-      kagi = {
-        command = "${wrappers.kagiWrapper}/bin/kagi-mcp-wrapper";
-        args = [ ];
-        port = servers.ports.kagi;
-      };
-
-      github = {
-        command = "${wrappers.githubWrapper}/bin/github-mcp-wrapper";
-        args = [ ];
-        port = servers.ports.github;
-      };
-
-      openai = {
-        command = "${wrappers.openaiWrapper}/bin/openai-mcp-wrapper";
-        args = [ ];
-        port = servers.ports.openai;
-      };
-
-      docs-mcp-server = {
-        command = "${wrappers.docsMcpWrapper}/bin/docs-mcp-wrapper";
-        args = [ ];
-        port = servers.ports.docs;
-      };
-
-      rust-docs-bevy = {
-        command = "${wrappers.rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
-        args = [
-          "bevy@0.16.1"
-          "-F"
-          "default"
-        ];
-        port = servers.ports.rustdocs;
-      };
-    };
+    # Add custom servers to legacy config
+    servers = customServers;
   };
 
+  # Systemd services for Linux
   systemd.user.services = lib.mkIf isLinux {
-    mcp-claude-register = {
+    mcp-claude-register-custom = {
       Unit = {
-        Description = "Register MCP servers for Claude CLI (idempotent)";
+        Description = "Register custom MCP servers for Claude CLI";
         After = [ "graphical-session.target" ];
         PartOf = [ "graphical-session.target" ];
       };
       Service = {
         Type = "oneshot";
-        ExecStart = "${registerScript}";
+        ExecStart = "${registerCustomScript}";
         Environment = [
           "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
         ];
         TimeoutStartSec = "${constants.timeouts.service.start}";
         Restart = "on-failure";
         RestartSec = "${constants.timeouts.service.restart}";
-      };
-      Install = {
-        WantedBy = [ "default.target" ];
-      };
-    };
-
-    mcp-warm = {
-      Unit = {
-        Description = "Warm MCP servers (build binaries, prefetch packages)";
-        After = [ "network-online.target" ];
-      };
-      Service = {
-        Type = "oneshot";
-        ExecStart = "${warmScript}";
-        TimeoutStartSec = "${constants.timeouts.mcp.warmup}";
-        Environment = [
-          "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
-        ];
       };
       Install = {
         WantedBy = [ "default.target" ];
