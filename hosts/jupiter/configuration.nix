@@ -2,10 +2,10 @@
   lib,
   pkgs,
   config,
+  constants,
   ...
 }:
 let
-  constants = import ../../lib/constants.nix;
 in
 {
 

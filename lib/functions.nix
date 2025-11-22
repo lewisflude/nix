@@ -47,6 +47,15 @@ let
       hostConfig,
       includeUserFields ? true,
     }:
+    let
+      # Shared resources (eliminates fragile relative imports)
+      constants = import ../lib/constants.nix;
+      palette = import ../modules/shared/features/theming/palette.nix { };
+      themeLib = import ../modules/shared/features/theming/lib.nix {
+        inherit lib;
+        palette = import ../modules/shared/features/theming/palette.nix { };
+      };
+    in
     inputs
     // hostConfig
     // {
@@ -55,6 +64,8 @@ let
       hostSystem = hostConfig.system;
       host = hostConfig;
       inherit (inputs) nix-colorizer;
+      # Add shared resources
+      inherit constants palette themeLib;
     }
     // lib.optionalAttrs includeUserFields {
       inherit (hostConfig) username useremail hostname;

@@ -3,10 +3,10 @@
   pkgs,
   config,
   inputs,
+  constants,
   ...
 }:
 let
-  constants = import ../../lib/constants.nix;
 in
 {
 
