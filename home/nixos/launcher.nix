@@ -1,6 +1,5 @@
 {
   pkgs,
-  lib,
   themeContext ? null,
   themeLib,
   ...

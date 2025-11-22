@@ -1,7 +1,6 @@
 {
   config,
   pkgs,
-  lib,
   themeContext ? null,
   themeLib,
   ...
