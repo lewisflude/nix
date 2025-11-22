@@ -138,21 +138,6 @@ If an input should follow nixpkgs but doesn't:
 - ❌ **Cache misses**: Binary caches may not match
 - ❌ **Evaluation slowdown**: More nixpkgs to evaluate
 
-## Verification Script
-
-Use the provided script to check your configuration:
-
-```bash
-./scripts/utils/check-nixpkgs-follows.sh
-```
-
-This will:
-
-- Analyze your `flake.nix` inputs
-- Check which ones have `follows` set
-- Suggest which ones might need it based on usage patterns
-- Flag potential issues
-
 ## Best Practices
 
 1. **When in doubt, check the input's documentation**
