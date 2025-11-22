@@ -50,7 +50,9 @@ in
 
     homeServer = {
       enable = mkEnableOption "home server and self-hosting";
+      homeAssistant = mkEnableOption "Home Assistant smart home platform";
       fileSharing = mkEnableOption "Samba/NFS file sharing";
+      backups = mkEnableOption "Restic backup service";
     };
 
     desktop = {
