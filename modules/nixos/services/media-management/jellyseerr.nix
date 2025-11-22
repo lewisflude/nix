@@ -1,13 +1,13 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
   inherit (lib) mkEnableOption mkIf mkAfter;
   inherit (lib.lists) optional;
   cfg = config.host.services.mediaManagement;
-  constants = import ../../../../lib/constants.nix;
 in
 {
   options.host.services.mediaManagement.jellyseerr.enable =

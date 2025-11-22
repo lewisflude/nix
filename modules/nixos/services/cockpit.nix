@@ -1,10 +1,10 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
-  constants = import ../../../lib/constants.nix;
 in
 {
 

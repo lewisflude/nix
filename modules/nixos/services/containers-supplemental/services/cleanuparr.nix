@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  constants,
   ...
 }:
 let
@@ -15,7 +16,6 @@ let
   inherit (containersLib) mkResourceOptions mkResourceFlags mkHealthFlags;
 
   cfg = config.host.services.containersSupplemental;
-  constants = import ../../../../../lib/constants.nix;
 in
 {
   options.host.services.containersSupplemental.cleanuparr = {

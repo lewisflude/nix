@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
@@ -15,7 +16,6 @@ let
   cfg = config.host.services.mediaManagement;
   qbittorrentCfg = cfg.qbittorrent or { };
   webUI = qbittorrentCfg.webUI or null;
-  constants = import ../../../../lib/constants.nix;
 in
 {
   options.host.services.mediaManagement.qbittorrent = {

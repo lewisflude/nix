@@ -18,6 +18,14 @@ let
 
   functionsLib = import ./functions.nix { inherit lib; };
 
+  # Shared resources (eliminates fragile relative imports)
+  constants = import ../lib/constants.nix;
+  palette = import ../modules/shared/features/theming/palette.nix { };
+  themeLib = import ../modules/shared/features/theming/lib.nix {
+    inherit lib;
+    palette = import ../modules/shared/features/theming/palette.nix { };
+  };
+
   commonModules = [
     ../modules/shared
   ];
@@ -119,6 +127,8 @@ in
           inherit (hostConfig) username;
           inherit (hostConfig) useremail;
           inherit (hostConfig) hostname;
+          # Shared resources
+          inherit constants palette themeLib;
         };
 
         # Module list follows flake-parts best practices:
@@ -201,6 +211,8 @@ in
         inherit (hostConfig) hostname;
         keysDirectory = "${self}/keys";
         inherit (inputs) nix-colorizer;
+        # Shared resources
+        inherit constants palette themeLib;
       };
 
       # Module list follows flake-parts best practices:

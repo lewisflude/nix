@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
@@ -14,7 +15,6 @@ let
   inherit (lib.strings) concatMapStringsSep;
 
   cfg = config.host.features.aiTools;
-  constants = import ../../../lib/constants.nix;
 in
 {
   # Additional options not in shared/host-options/features.nix

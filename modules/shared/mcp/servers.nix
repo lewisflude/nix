@@ -22,11 +22,10 @@
 {
   pkgs,
   config,
+  constants,
 }:
 
 let
-  # Import centralized constants
-  constants = import ../../../lib/constants.nix;
 
   uvx = "${pkgs.uv}/bin/uvx";
   inherit (pkgs) nodejs;
