@@ -73,6 +73,9 @@ in
       };
       volumes = [ "${cfg.configPath}/doplarr:/config" ];
       extraOptions = [
+        # NOTE: Using host network mode for localhost API access to Sonarr/Radarr
+        # Host networking reduces isolation but is necessary for Discord bot functionality
+        # Acceptable for internal bot services on trusted home network
         "--network=host"
       ]
       ++ mkResourceFlags cfg.doplarr.resources;

@@ -57,7 +57,10 @@ if echo "$content" | grep -q "with pkgs;"; then
 fi
 
 # Check module placement antipatterns
-if [[ "$file_path" =~ home/.* ]]; then
+# Convert to relative path from project root for pattern matching
+relative_path="${file_path#${CLAUDE_PROJECT_DIR:-$(pwd)}/}"
+
+if [[ "$relative_path" =~ ^home/.* ]]; then
   # Home-manager files shouldn't have system-level config
   if echo "$content" | grep -qE "(virtualisation\.(podman|docker)|hardware\.graphics)"; then
     issues+=("❌ Wrong placement: System-level config in home-manager")
@@ -66,7 +69,7 @@ if [[ "$file_path" =~ home/.* ]]; then
     issues+=("")
     has_blocking_issues=true
   fi
-elif [[ "$file_path" =~ modules/(nixos|darwin)/.* ]]; then
+elif [[ "$relative_path" =~ ^modules/(nixos|darwin)/.* ]]; then
   # System modules shouldn't have user-level config
   if echo "$content" | grep -qE "programs\.(helix|zed|vscode)\.enable"; then
     issues+=("❌ Wrong placement: User applications in system modules")
