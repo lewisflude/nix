@@ -1,16 +1,11 @@
 {
   lib,
+  themeLib,
   ...
 }:
 let
-  # Import shared palette (single source of truth)
-  themeHelpers = import ../../modules/shared/features/theming/helpers.nix { inherit lib; };
-  themeImport = themeHelpers.importTheme {
-    repoRootPath = ../..;
-  };
-
-  # Generate dark mode theme
-  theme = themeImport.generateTheme "dark";
+  # Generate dark mode theme using shared themeLib
+  theme = themeLib.generateTheme "dark" { };
 
   # Extract colors from theme
   inherit (theme) colors;

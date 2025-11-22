@@ -1,12 +1,12 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.host.services.mediaManagement;
-  constants = import ../../../../lib/constants.nix;
 in
 {
   options.host.services.mediaManagement.flaresolverr.enable =

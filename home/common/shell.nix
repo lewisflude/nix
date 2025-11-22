@@ -6,6 +6,7 @@
   hostSystem,
   lib,
   inputs,
+  themeLib,
   ...
 }:
 let
@@ -21,12 +22,8 @@ let
   };
   inherit (shellHelpers) secretExportSnippet;
 
-  # Import shared palette (single source of truth)
-  themeHelpers = import ../../modules/shared/features/theming/helpers.nix { inherit lib; };
-  themeImport = themeHelpers.importTheme {
-    repoRootPath = ../../..;
-  };
-  fallbackTheme = themeImport.generateTheme "dark";
+  # Generate fallback theme using shared themeLib
+  fallbackTheme = themeLib.generateTheme "dark" { };
 
   # Use Signal theme if available, otherwise use fallback from shared palette
   theme = (config._module.args.themeContext or { theme = null; }).theme or fallbackTheme;

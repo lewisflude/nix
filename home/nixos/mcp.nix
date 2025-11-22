@@ -25,14 +25,12 @@
   systemConfig,
   lib,
   hostSystem,
+  constants,
   ...
 }:
 
 let
   isLinux = lib.strings.hasSuffix "linux" hostSystem;
-
-  # Import centralized constants
-  constants = import ../../lib/constants.nix;
 
   # Import shared MCP utilities
   servers = import ../../modules/shared/mcp/servers.nix {
