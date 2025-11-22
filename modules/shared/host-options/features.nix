@@ -41,6 +41,8 @@ in
       enable = mkEnableOption "gaming platforms and optimizations";
       steam = mkEnableOption "Steam gaming platform";
       performance = mkEnableOption "gaming performance optimizations";
+      lutris = mkEnableOption "Lutris game launcher";
+      emulators = mkEnableOption "game console emulators";
     };
 
     virtualisation = {
