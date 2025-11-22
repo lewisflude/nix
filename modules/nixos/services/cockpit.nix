@@ -4,8 +4,6 @@
   constants,
   ...
 }:
-let
-in
 {
 
   _module.args = lib.mkIf (config == null) { };

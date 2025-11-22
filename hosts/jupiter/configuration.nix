@@ -5,8 +5,6 @@
   constants,
   ...
 }:
-let
-in
 {
 
   imports = [
