@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
@@ -13,7 +14,6 @@ let
     ;
   inherit (lib.lists) optional;
   cfg = config.host.services.mediaManagement;
-  constants = import ../../../../lib/constants.nix;
 in
 {
   options.host.services.mediaManagement.listenarr = {

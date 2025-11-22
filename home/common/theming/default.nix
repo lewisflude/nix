@@ -1,6 +1,8 @@
 {
   config,
   lib,
+  palette,
+  themeLib,
   ...
 }:
 let
@@ -12,13 +14,8 @@ let
 
   cfg = config.theming.signal;
 
-  # Import theming palette and library from shared location (single source of truth)
-  # This ensures consistency across NixOS modules and Home Manager
-  themeHelpers = import ../../../modules/shared/features/theming/helpers.nix { inherit lib; };
-  themeImport = themeHelpers.importTheme {
-    repoRootPath = ../../..;
-  };
-  inherit (themeImport) palette themeLib;
+  # Import theming utilities from shared location (single source of truth)
+  # palette and themeLib are now available as module arguments
   modeLib = import ../../../modules/shared/features/theming/mode.nix {
     inherit lib config;
   };
