@@ -164,13 +164,16 @@ in
 
     mcps = {
       # All disabled due to missing pkgs.mcp-servers
-      git.enable = false;
-      filesystem.enable = false;
-      github.enable = false;
+      git.enable = true;
+      filesystem.enable = true;
+      github = {
+        enable = true;
+        tokenFilepath = systemConfig.sops.secrets.GITHUB_TOKEN.path;
+      };
       fetch.enable = false;
       sequential-thinking.enable = false;
       time.enable = false;
-      lsp-typescript.enable = false;
+      lsp-typescript.enable = true;
       lsp-nix.enable = false;
       lsp-rust.enable = false;
       lsp-python.enable = false;

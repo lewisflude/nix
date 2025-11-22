@@ -85,7 +85,7 @@ in
     secretName = "KAGI_API_KEY";
     command = ''
       export UV_PYTHON="${pkgs.python3}/bin/python3"
-      exec ${uvx} --from kagimcp kagimcp "$@"
+      exec ${uvx} --from kagimcp==0.2.0 kagimcp "$@"
     '';
   };
 
@@ -104,31 +104,12 @@ in
     '';
   };
 
-  # GitHub MCP server (repositories, issues, PRs)
-  githubWrapper = pkgs.writeShellApplication {
-    name = "github-mcp-wrapper";
-    runtimeInputs = [
-      pkgs.coreutils
-      pkgs.nodejs
-    ];
-    text = ''
-      set -euo pipefail
-
-      # Read GitHub token from SOPS
-      GITHUB_TOKEN="$(${pkgs.coreutils}/bin/cat ${systemConfig.sops.secrets.GITHUB_TOKEN.path})"
-      export GITHUB_TOKEN
-
-      # Execute GitHub MCP server
-      exec ${pkgs.nodejs}/bin/npx -y @modelcontextprotocol/server-github@latest "$@"
-    '';
-  };
-
   # Documentation MCP server (supports stdio and HTTP protocols)
   docsMcpWrapper = mkSecretWrapper {
     name = "docs-mcp-wrapper";
     secretName = "OPENAI_API_KEY";
     command = ''
-      exec ${pkgs.nodejs}/bin/npx -y @arabold/docs-mcp-server@latest "$@"
+      exec ${pkgs.nodejs}/bin/npx -y @arabold/docs-mcp-server@0.3.1 "$@"
     '';
   };
 
