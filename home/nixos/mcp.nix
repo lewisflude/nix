@@ -9,6 +9,7 @@
   lib,
   inputs,
   constants,
+  osConfig,
   ...
 }:
 
@@ -18,7 +19,7 @@ let
   # Import custom wrappers for servers not in mcps.nix
   wrappers = import ../../modules/shared/mcp/wrappers.nix {
     inherit pkgs lib;
-    systemConfig = config;
+    systemConfig = osConfig;
   };
 
   inherit (lib) concatStringsSep mapAttrsToList escapeShellArg;
