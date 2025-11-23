@@ -11,7 +11,7 @@ in
     ./audio
     ./desktop-environment.nix
     ./graphics.nix
-    ./hyprland.nix
+    ./hardware-support.nix
     ./niri.nix
     ./theme.nix
     ./xwayland.nix
