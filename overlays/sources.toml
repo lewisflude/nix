@@ -1,0 +1,18 @@
+# nvfetcher configuration for overlay sources
+# Run: nvfetcher -c overlays/sources.toml -o overlays/_sources
+# This generates overlays/_sources/generated.nix with updated hashes
+#
+# Note: For packages that require additional hashes (like npmDepsHash),
+# you'll still need to update those manually after building.
+
+[gemini-cli]
+src.github = "google-gemini/gemini-cli"
+fetch.github = "owner=google-gemini,repo=gemini-cli"
+# Use latest release tag
+git.tag = "latest"
+
+# Example: Add more overlay sources here as needed
+# [another-package]
+# src.github = "owner/repo"
+# fetch.github = "owner=owner,repo=repo"
+# git.tag = "latest"  # or git.branch = "main"

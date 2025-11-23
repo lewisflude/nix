@@ -87,6 +87,21 @@ pog.pog {
         yellow "Skipping plugin updates"
       fi
 
+      # Update overlay sources (optional - using nvfetcher)
+      if [ -f "$FLAKE_DIR/overlays/sources.toml" ]; then
+        cyan "3️⃣  Updating Overlay Sources"
+        if ${flag "dry_run"}; then
+          debug "DRY RUN: Would update overlay sources with nvfetcher"
+        else
+          cd "$FLAKE_DIR/overlays" || die "Failed to change to overlays directory"
+          nvfetcher -c sources.toml -o _sources 2>&1 | grep -v "trace:" || true
+          green "✅ Overlay sources updated"
+          cyan "   Note: You may need to update additional hashes (like npmDepsHash) manually"
+        fi
+      else
+        debug "No overlays/sources.toml found, skipping"
+      fi
+
       # Summary
       if ! ${flag "dry_run"}; then
         cyan "📊 Update Summary"
@@ -97,6 +112,10 @@ pog.pog {
 
         if ! ${flag "skip_plugins"} && [ -d "$FLAKE_DIR/home/common/_sources" ]; then
           git diff --quiet home/common/_sources/ 2>/dev/null && echo "_sources/: No changes" || echo "_sources/: Updated"
+        fi
+
+        if [ -d "$FLAKE_DIR/overlays/_sources" ]; then
+          git diff --quiet overlays/_sources/ 2>/dev/null && echo "overlays/_sources/: No changes" || echo "overlays/_sources/: Updated"
         fi
 
         echo ""
