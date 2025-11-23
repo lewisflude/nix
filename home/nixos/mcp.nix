@@ -16,73 +16,66 @@ let
   inherit (pkgs.stdenv) isLinux;
 
   # Import custom wrappers for servers not in mcps.nix
-  # NOTE: Currently disabled - all custom servers using wrappers are disabled
-  # Re-enable when custom servers are fixed
-  # wrappers = import ../../modules/shared/mcp/wrappers.nix {
-  #   inherit pkgs systemConfig lib;
-  # };
+  wrappers = import ../../modules/shared/mcp/wrappers.nix {
+    inherit pkgs lib;
+    systemConfig = config;
+  };
 
   inherit (lib) concatStringsSep mapAttrsToList escapeShellArg;
 
   # Custom servers not provided by mcps.nix
-  # NOTE: All custom servers are currently disabled due to connection failures
-  # Re-enable and fix individual servers as needed
   customServers = {
-    # # Memory server - DISABLED: fails to connect
-    # memory = {
-    #   command = "${pkgs.nodejs}/bin/npx";
-    #   args = [
-    #     "-y"
-    #     "@modelcontextprotocol/server-memory@0.1.0"
-    #   ];
-    #   port = constants.ports.mcp.memory;
-    # };
+    # Memory server - Knowledge graph-based persistent memory
+    memory = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-memory@0.1.0"
+      ];
+      port = constants.ports.mcp.memory;
+    };
 
-    # # NixOS-specific MCP server - DISABLED: fails to connect
-    # nixos = {
-    #   command = "${pkgs.uv}/bin/uvx";
-    #   args = [
-    #     "--from"
-    #     "mcp-nixos==0.2.0"
-    #     "mcp-nixos"
-    #   ];
-    #   port = constants.ports.mcp.nixos;
-    #   env = {
-    #     UV_PYTHON = "${pkgs.python3}/bin/python3";
-    #   };
-    # };
+    # NixOS-specific MCP server - Package and config search
+    nixos = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [ "mcp-nixos" ];
+      port = constants.ports.mcp.nixos;
+      env = {
+        UV_PYTHON = "${pkgs.python3}/bin/python3";
+      };
+    };
 
-    # # Kagi MCP server - DISABLED: fails to connect (wrapper issue)
-    # kagi = {
-    #   command = "${wrappers.kagiWrapper}/bin/kagi-mcp-wrapper";
-    #   args = [ ];
-    #   port = constants.ports.mcp.kagi;
-    # };
+    # Kagi MCP server - Search and summarization (requires KAGI_API_KEY)
+    kagi = {
+      command = "${wrappers.kagiWrapper}/bin/kagi-mcp-wrapper";
+      args = [ ];
+      port = constants.ports.mcp.kagi;
+    };
 
-    # # OpenAI MCP server - DISABLED: fails to connect (wrapper issue)
-    # openai = {
-    #   command = "${wrappers.openaiWrapper}/bin/openai-mcp-wrapper";
-    #   args = [ ];
-    #   port = constants.ports.mcp.openai;
-    # };
+    # OpenAI MCP server - Rust documentation support (requires OPENAI_API_KEY)
+    openai = {
+      command = "${wrappers.openaiWrapper}/bin/openai-mcp-wrapper";
+      args = [ ];
+      port = constants.ports.mcp.openai;
+    };
 
-    # # Docs MCP server - DISABLED: fails to connect (wrapper issue)
-    # docs-mcp-server = {
-    #   command = "${wrappers.docsMcpWrapper}/bin/docs-mcp-wrapper";
-    #   args = [ ];
-    #   port = constants.ports.mcp.docs;
-    # };
+    # Docs MCP server - Documentation indexing (optional OPENAI_API_KEY for vector search)
+    docs-mcp-server = {
+      command = "${wrappers.docsMcpWrapper}/bin/docs-mcp-wrapper";
+      args = [ ];
+      port = constants.ports.mcp.docs;
+    };
 
-    # # Rust documentation MCP server - DISABLED: fails to connect (wrapper issue)
-    # rust-docs-bevy = {
-    #   command = "${wrappers.rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
-    #   args = [
-    #     "bevy@0.16.1"
-    #     "-F"
-    #     "default"
-    #   ];
-    #   port = constants.ports.mcp.rustdocs;
-    # };
+    # Rust documentation MCP server - Bevy crate docs (requires OPENAI_API_KEY)
+    rust-docs-bevy = {
+      command = "${wrappers.rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
+      args = [
+        "bevy@0.16.1"
+        "-F"
+        "default"
+      ];
+      port = constants.ports.mcp.rustdocs;
+    };
   };
 
   # Registration script for custom servers
@@ -145,10 +138,11 @@ in
       pkgs.nodejs
       pkgs.coreutils
       pkgs.gawk
-      # Wrappers disabled - servers not currently in use
-      # wrappers.kagiWrapper
-      # wrappers.openaiWrapper
-      # wrappers.docsMcpWrapper
+      # MCP server wrappers with SOPS secret injection
+      wrappers.kagiWrapper
+      wrappers.openaiWrapper
+      wrappers.docsMcpWrapper
+      wrappers.rustdocsWrapper
       pkgs.lua-language-server
       pkgs.nodePackages.typescript-language-server
       pkgs.nodePackages.typescript
@@ -225,22 +219,22 @@ in
       };
     };
 
-    # docs-mcp-http service disabled - server not currently in use
-    # docs-mcp-http = {
-    #   Unit = {
-    #     Description = "Docs MCP Server HTTP Interface";
-    #     After = [ "network-online.target" ];
-    #   };
-    #   Service = {
-    #     ExecStart = "${wrappers.docsMcpWrapper}/bin/docs-mcp-wrapper --protocol http --host 0.0.0.0 --port ${toString constants.ports.mcp.docs}";
-    #     Restart = "on-failure";
-    #     Environment = [
-    #       "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
-    #     ];
-    #   };
-    #   Install = {
-    #     WantedBy = [ "default.target" ];
-    #   };
-    # };
+    # Docs MCP Server HTTP Interface
+    docs-mcp-http = {
+      Unit = {
+        Description = "Docs MCP Server HTTP Interface";
+        After = [ "network-online.target" ];
+      };
+      Service = {
+        ExecStart = "${wrappers.docsMcpWrapper}/bin/docs-mcp-wrapper --protocol http --host 0.0.0.0 --port ${toString constants.ports.mcp.docs}";
+        Restart = "on-failure";
+        Environment = [
+          "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
+        ];
+      };
+      Install = {
+        WantedBy = [ "default.target" ];
+      };
+    };
   };
 }
