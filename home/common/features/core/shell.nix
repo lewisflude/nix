@@ -361,7 +361,13 @@ in
       EDITOR = "hx";
       # NH_FLAKE is set in home/common/nh.nix
 
+      # Direnv performance optimizations
+      # Suppress verbose output (already set, kept for clarity)
       DIRENV_LOG_FORMAT = "";
+      # Warn if direnv takes longer than 20 seconds (helps identify slow loads)
+      DIRENV_WARN_TIMEOUT = "20s";
+      # Fail fast if direnv hangs (prevents infinite blocking of shell)
+      DIRENV_TIMEOUT = "5s";
     };
     packages = [
       pkgs.zoxide
