@@ -72,6 +72,16 @@
         maxActiveUploads = 75; # Reduced to prevent HDD thrashing during streaming
         maxUploads = 300; # Increased from 150 for better slot allocation across torrents
         maxUploadsPerTorrent = 10; # Increased from 5 for improved seed ratio
+        # Upload speed limit: 80% of upload capacity through VPN
+        # Measured VPN upload speed: 82.16 Mbit/s = 10,270 KB/s (tested via: sudo ip netns exec qbt speedtest-cli --simple)
+        # 80% of measured VPN upload = 8,216 KB/s (leaves 20% headroom for ACKs and resend requests)
+        uploadSpeedLimit = 8216; # KB/s - 80% of measured VPN upload (82.16 Mbit/s)
+
+        # Automatic torrent management
+        autoTMMEnabled = true;
+        defaultSavePath = "/mnt/storage/torrents";
+        maxRatio = 3.0;
+        maxRatioAction = 0; # 0 = pause torrent when ratio reached
 
         # VPN Configuration
         vpn = {
@@ -87,6 +97,8 @@
           bindAddress = "*"; # Accessible from any interface (192.168.1.210:8080)
           username = "lewis";
           password = "@ByteArray(J5lri+TddZR2AJqNVPndng==:no5T50n4CD9peISk6jZQ+Cb8qzv6DoV2MtOxE2oErywXVFngVDq/eySGpoNjUCFOHFdbifjwwHI4jlV2LH4ocQ==)";
+          alternativeUIEnabled = true;
+          # rootFolder will default to vuetorrent package path when alternativeUIEnabled is true
         };
 
         # Category Mappings (final download destinations on HDD)
