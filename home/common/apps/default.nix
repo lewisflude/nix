@@ -25,5 +25,6 @@
     ./yq.nix
     ./cachix.nix
     ./zellij.nix
+    ./tealdeer.nix
   ];
 }
