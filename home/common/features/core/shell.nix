@@ -48,65 +48,48 @@ in
       enable = true;
       enableCompletion = true;
       dotDir = "${config.xdg.configHome}/zsh";
-      autosuggestion.enable = true;
-      syntaxHighlighting.enable = true;
-      historySubstringSearch.enable = true;
+      # Disabled: eager loading defeats lazy loading with zsh-defer
+      # These are now manually sourced with proper ordering in initContent
+      autosuggestion.enable = false;
+      syntaxHighlighting.enable = false;
+      historySubstringSearch.enable = false;
       plugins = [
+        # ONLY zsh-defer loads synchronously - everything else is deferred manually
         {
           name = "zsh-defer";
           inherit (sources.zsh-defer) src;
           file = "zsh-defer.plugin.zsh";
         }
-        {
-          name = "zsh-you-should-use";
-          inherit (sources.zsh-you-should-use) src;
-          file = "you-should-use.plugin.zsh";
-        }
-        {
-          name = "zsh-autopair";
-          inherit (sources.zsh-autopair) src;
-          file = "autopair.zsh";
-        }
-        {
-          name = "zsh-auto-notify";
-          inherit (sources.zsh-auto-notify) src;
-          file = "auto-notify.plugin.zsh";
-        }
-        {
-          name = "zsh-bd";
-          inherit (sources.zsh-bd) src;
-          file = "bd.zsh";
-        }
       ];
       completionInit = ''
-        setopt EXTENDED_GLOB
+        # Initialize completion system with aggressive caching
         autoload -Uz compinit
 
-
+        # Ensure cache directory exists
         mkdir -p ${config.xdg.cacheHome}/zsh
 
-
-
+        # Add zsh-completions to fpath before compinit
         fpath=(${pkgs.zsh-completions}/share/zsh/site-functions $fpath)
 
-
-
-        setopt EXTENDEDGLOB
+        # Cache compinit dump - only regenerate once per day
+        # This dramatically speeds up shell startup
         local zcompdump="${config.xdg.cacheHome}/zsh/.zcompdump"
-        if [[ -f "$zcompdump" ]]; then
+
+        # Check if dump file is older than 24 hours
+        if [[ -f "$zcompdump" && -n "$zcompdump"(#qN.mh+24) ]]; then
+          # Dump is old, regenerate with full checks
+          compinit -d "$zcompdump"
+        elif [[ -f "$zcompdump" ]]; then
+          # Dump is fresh, use cached version (skip expensive checks)
           compinit -C -d "$zcompdump"
         else
+          # No dump exists, create it
           compinit -i -d "$zcompdump"
         fi
-        unsetopt EXTENDEDGLOB
 
-
+        # Enable completion caching for expensive completions (e.g., package managers)
         zstyle ':completion:*' use-cache yes
         zstyle ':completion:*' cache-path ${config.xdg.cacheHome}/zsh
-
-
-
-
       '';
 
       autocd = true;
@@ -151,7 +134,7 @@ in
           la = "eza -la";
           lt = "eza --tree";
           ll = "eza -l --git --header";
-          cd = "z";
+          # cd is replaced by zoxide via --cmd cd (see initContent)
           find = "fd";
           cat = "bat";
           top = "htop";
@@ -247,54 +230,24 @@ in
         '')
 
         (lib.mkAfter ''
+          # ════════════════════════════════════════════════════════════════
+          # SECTION 1: Environment Variables & Exports
+          # ════════════════════════════════════════════════════════════════
           ${secretExportSnippet systemConfig "KAGI_API_KEY" "KAGI_API_KEY"}
           ${secretExportSnippet systemConfig "GITHUB_TOKEN" "GITHUB_TOKEN"}
           export SSH_AUTH_SOCK="$(${pkgs.gnupg}/bin/gpgconf --list-dirs agent-ssh-socket)"
-
-          typeset -ga ZSH_AUTOSUGGEST_STRATEGY
-          ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-          export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=${palette.purple},bg=${palette.surface},bold,underline"
           export SOPS_GPG_EXEC="${lib.getExe pkgs.gnupg}"
           export SOPS_GPG_ARGS="--pinentry-mode=loopback"
           export NIX_FLAKE="${config.home.homeDirectory}/.config/nix"
-
-
-          # NH_CLEAN_ARGS is set in home/common/nh.nix
-          zsh-defer -c 'export YSU_MESSAGE_POSITION="after"'
-          zsh-defer -c 'export YSU_HARDCORE=1'
-
-          zsh-defer -c 'export AUTO_NOTIFY_THRESHOLD=10'
-          zsh-defer -c 'export AUTO_NOTIFY_TITLE="Command finished"'
-          zsh-defer -c 'export AUTO_NOTIFY_BODY="Completed in %elapsed seconds"'
-          zsh-defer -c 'export AUTO_NOTIFY_IGNORE=(
-            "man" "less" "more" "vim" "nano" "htop" "top" "ssh" "scp" "rsync"
-            "watch" "tail" "sleep" "ping" "curl" "wget" "git log" "git diff"
-          )'
           export WORDCHARS='*?_-.[]~=&;!'
           export ATUIN_NOBIND="true"
 
-          # Only set keybindings in interactive shells (requires ZLE)
-          if [[ -o interactive ]]; then
-            zsh-defer -c 'bindkey "^r" _atuin_search_widget'
-            bindkey '^[[1;5C' forward-word
-            bindkey '^[[1;5D' backward-word
-            bindkey '^H' backward-kill-word
-            bindkey '^[[3;5~' kill-word
-
-            bindkey '^P' history-substring-search-up
-            bindkey '^N' history-substring-search-down
-            function _ghostty_insert_newline() { LBUFFER+=$'\n' }
-            zle -N ghostty-insert-newline _ghostty_insert_newline
-            bindkey -M emacs $'\e[99997u' ghostty-insert-newline
-            bindkey -M viins $'\e[99997u' ghostty-insert-newline
-            bindkey -M emacs $'\e\r'     ghostty-insert-newline
-            bindkey -M viins $'\e\r'     ghostty-insert-newline
-          fi
-
+          # ════════════════════════════════════════════════════════════════
+          # SECTION 2: Zstyle Configuration (Completion System Styling)
+          # ════════════════════════════════════════════════════════════════
           zstyle ':completion:*' completer _complete _match _approximate
           zstyle ':completion:*:match:*' original only
           zstyle ':completion:*:approximate:*' max-errors 1 numeric
-
           zstyle ':completion:*' matcher-list \
             'm:{a-zA-Z}={A-Za-z}' \
             'r:|[._-]=* r:|=*' \
@@ -313,6 +266,10 @@ in
           zstyle ':completion:*:cd:*' tag-order local-directories directory-stack path-directories
           zstyle ':completion:*:cd:*' ignore-parents parent pwd
           zstyle ':completion:*' file-patterns '%p:globbed-files *(-/):directories' '*:all-files'
+
+          # ════════════════════════════════════════════════════════════════
+          # SECTION 3: Shell Options & Correction
+          # ════════════════════════════════════════════════════════════════
           unsetopt FLOW_CONTROL
           if [[ ! -o interactive || ! -t 1 || "$TERM_PROGRAM" == "vscode" || "$TERM_PROGRAM" == "cursor" ]]; then
             unsetopt CORRECT CORRECT_ALL
@@ -321,37 +278,106 @@ in
             unsetopt CORRECT_ALL
           fi
 
-
-
+          # ════════════════════════════════════════════════════════════════
+          # SECTION 4: Custom Functions (Load Immediately)
+          # ════════════════════════════════════════════════════════════════
           if [[ -f "${config.home.homeDirectory}/.config/nix/home/common/lib/zsh/functions.zsh" ]]; then
             source "${config.home.homeDirectory}/.config/nix/home/common/lib/zsh/functions.zsh"
           fi
 
-          source ${sources.zsh_codex.src}/zsh_codex.plugin.zsh
+          # ════════════════════════════════════════════════════════════════
+          # SECTION 5: Deferred Plugin Loading (Non-blocking)
+          # ════════════════════════════════════════════════════════════════
+          # These plugins are deferred to unblock prompt rendering
 
-          # Only bind keys in interactive shells
+          # Autosuggestions (with configuration)
+          typeset -ga ZSH_AUTOSUGGEST_STRATEGY
+          ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+          export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=240"
+          zsh-defer source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+          # Autopair
+          zsh-defer source ${sources.zsh-autopair.src}/autopair.zsh
+
+          # You Should Use (with configuration)
+          zsh-defer -c 'export YSU_MESSAGE_POSITION="after"'
+          zsh-defer -c 'export YSU_HARDCORE=1'
+          zsh-defer source ${sources.zsh-you-should-use.src}/you-should-use.plugin.zsh
+
+          # Auto Notify (with configuration)
+          zsh-defer -c 'export AUTO_NOTIFY_THRESHOLD=10'
+          zsh-defer -c 'export AUTO_NOTIFY_TITLE="Command finished"'
+          zsh-defer -c 'export AUTO_NOTIFY_BODY="Completed in %elapsed seconds"'
+          zsh-defer -c 'export AUTO_NOTIFY_IGNORE=(
+            "man" "less" "more" "vim" "nano" "htop" "top" "ssh" "scp" "rsync"
+            "watch" "tail" "sleep" "ping" "curl" "wget" "git log" "git diff"
+          )'
+          zsh-defer source ${sources.zsh-auto-notify.src}/auto-notify.plugin.zsh
+
+          # BD (quick directory navigation)
+          zsh-defer source ${sources.zsh-bd.src}/bd.zsh
+
+          # History Substring Search (deferred)
+          zsh-defer source ${pkgs.zsh-history-substring-search}/share/zsh-history-substring-search/zsh-history-substring-search.zsh
+
+          # Codex (AI completion - deferred)
+          zsh-defer source ${sources.zsh_codex.src}/zsh_codex.plugin.zsh
+
+          # ════════════════════════════════════════════════════════════════
+          # SECTION 6: Keybindings (Interactive Shells Only)
+          # ════════════════════════════════════════════════════════════════
           if [[ -o interactive ]]; then
-            bindkey '^X' create_completion
+            # CRITICAL: Keybinding conflict resolution
+            # Priority: Atuin > FZF (Atuin overwrites Ctrl+R)
+            # FZF keeps Ctrl+T (file search) and Alt+C (directory search)
+            zsh-defer -c 'bindkey "^r" _atuin_search_widget'
+
+            # History Substring Search (Ctrl+P/N instead of Up/Down to avoid Atuin conflict)
+            zsh-defer -c 'bindkey "^P" history-substring-search-up'
+            zsh-defer -c 'bindkey "^N" history-substring-search-down'
+
+            # Word navigation (Ctrl+Arrow)
+            bindkey '^[[1;5C' forward-word
+            bindkey '^[[1;5D' backward-word
+            bindkey '^H' backward-kill-word
+            bindkey '^[[3;5~' kill-word
+
+            # Codex AI completion (Ctrl+X)
+            zsh-defer -c 'bindkey "^X" create_completion'
+
+            # Ghostty multiline input support
+            function _ghostty_insert_newline() { LBUFFER+=$'\n' }
+            zle -N ghostty-insert-newline _ghostty_insert_newline
+            bindkey -M emacs $'\e[99997u' ghostty-insert-newline
+            bindkey -M viins $'\e[99997u' ghostty-insert-newline
+            bindkey -M emacs $'\e\r'     ghostty-insert-newline
+            bindkey -M viins $'\e\r'     ghostty-insert-newline
           fi
 
-          # Only initialize powerlevel10k in interactive shells
+          # ════════════════════════════════════════════════════════════════
+          # SECTION 7: Powerlevel10k (Prompt) - Load After Plugins
+          # ════════════════════════════════════════════════════════════════
           if [[ -o interactive ]]; then
-            # Initialize powerlevel10k (as recommended by nixpkgs, using initContent since promptInit is NixOS-only)
             source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-
-            # Load p10k configuration (managed by Home Manager)
-            # Ensure the file exists before sourcing to avoid p10k wizard
             if [[ -f ${config.home.homeDirectory}/.p10k.zsh ]]; then
               source ${config.home.homeDirectory}/.p10k.zsh
             else
-              # If file doesn't exist, p10k will show wizard - this shouldn't happen
-              # as Home Manager should create it, but we handle it gracefully
               echo "Warning: ~/.p10k.zsh not found. Run 'home-manager switch' to create it."
             fi
           fi
 
-          # Initialize zoxide at the very end of shell configuration
-          eval "$(zoxide init zsh)"
+          # ════════════════════════════════════════════════════════════════
+          # SECTION 8: Zoxide (Navigation) - Before Syntax Highlighting
+          # ════════════════════════════════════════════════════════════════
+          # Use --cmd cd to completely replace the cd command (better than aliasing)
+          eval "$(zoxide init zsh --cmd cd)"
+
+          # ════════════════════════════════════════════════════════════════
+          # SECTION 9: Syntax Highlighting - MUST BE LAST
+          # ════════════════════════════════════════════════════════════════
+          # This MUST load after all other plugins that define commands/aliases
+          # Otherwise it cannot highlight the new commands correctly
+          source ${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
         '')
       ];
     };

@@ -246,19 +246,9 @@ in
             else
               { };
 
-          # Build Saving config cleanly
-          savingCfg =
-            optionalAttrs (qbittorrentCfg.incompleteDownloadPath != null) {
-              SavePath = qbittorrentCfg.incompleteDownloadPath;
-            }
-            // optionalAttrs (qbittorrentCfg.defaultSavePath != null) {
-              DefaultSavePath = qbittorrentCfg.defaultSavePath;
-            };
-
           # Build Preferences with optional fields
           preferencesCfg = {
             Connection = { };
-            Saving = savingCfg;
             AutoTMMEnabled = qbittorrentCfg.autoTMMEnabled;
             WebUI = webUICfg;
             queueing_enabled = true;
@@ -276,6 +266,12 @@ in
             max_uploads_per_torrent = qbittorrentCfg.maxUploadsPerTorrent;
             send_buf_watermark = 1024;
             send_buf_low_watermark = 128;
+          }
+          // optionalAttrs (qbittorrentCfg.incompleteDownloadPath != null) {
+            SavePath = qbittorrentCfg.incompleteDownloadPath;
+          }
+          // optionalAttrs (qbittorrentCfg.defaultSavePath != null) {
+            DefaultSavePath = qbittorrentCfg.defaultSavePath;
           }
           // optionalAttrs (qbittorrentCfg.uploadSpeedLimit != null) {
             GlobalMaxUploadSpeed = qbittorrentCfg.uploadSpeedLimit;
