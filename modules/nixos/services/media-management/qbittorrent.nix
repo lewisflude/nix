@@ -369,6 +369,10 @@ in
             # Add DefaultSavePath to Session if configured
             // optionalAttrs (qbittorrentCfg.defaultSavePath != null) {
               DefaultSavePath = qbittorrentCfg.defaultSavePath;
+            }
+            # Add upload speed limit to Session if configured
+            // optionalAttrs (qbittorrentCfg.uploadSpeedLimit != null) {
+              GlobalUPSpeedLimit = qbittorrentCfg.uploadSpeedLimit;
             };
           };
         }
