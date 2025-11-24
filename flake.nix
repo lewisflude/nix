@@ -100,8 +100,8 @@
       url = "github:utensils/nix-comfyui";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    claude-code-overlay = {
-      url = "github:ryoppippi/claude-code-overlay";
+    claude-code-nix = {
+      url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
