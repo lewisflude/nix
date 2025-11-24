@@ -432,6 +432,7 @@ in
 
               # Tracker announce settings
               AnnounceToAllTrackers = qbittorrentCfg.reannounceWhenAddressChanged;
+              ReannounceWhenAddressChanged = qbittorrentCfg.reannounceWhenAddressChanged;
             }
             # VPN Interface binding - ONLY when VPN is enabled
             # This ensures all BitTorrent traffic uses the VPN interface
