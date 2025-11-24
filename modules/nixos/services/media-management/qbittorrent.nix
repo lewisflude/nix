@@ -168,6 +168,45 @@ in
         then set this to approximately 80% of that value to allow room for outgoing communications.
       '';
     };
+
+    addToTopOfQueue = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Add new torrents to the top of the queue";
+    };
+
+    preallocation = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Pre-allocate disk space for all files";
+    };
+
+    addExtensionToIncompleteFiles = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Append .!qB extension to incomplete files";
+    };
+
+    useCategoryPathsInManualMode = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Use category paths even in manual torrent management mode";
+    };
+
+    deleteTorrentFilesAfterwards = mkOption {
+      type = types.enum [
+        "Never"
+        "Always"
+        "IfAdded"
+      ];
+      default = "Never";
+      description = ''
+        Delete .torrent files after adding:
+        - Never: Keep torrent files
+        - Always: Always delete torrent files
+        - IfAdded: Delete if torrent was successfully added
+      '';
+    };
   };
 
   config = mkIf (cfg.enable && qbittorrentCfg.enable) {
@@ -313,6 +352,12 @@ in
               MaxUploads = qbittorrentCfg.maxUploads;
               # Maximum number of upload slots per torrent (improved from 5 to 10)
               MaxUploadsPerTorrent = qbittorrentCfg.maxUploadsPerTorrent;
+
+              # Additional torrent behavior settings
+              AddTorrentToTopOfQueue = qbittorrentCfg.addToTopOfQueue;
+              Preallocation = qbittorrentCfg.preallocation;
+              AddExtensionToIncompleteFiles = qbittorrentCfg.addExtensionToIncompleteFiles;
+              UseCategoryPathsInManualMode = qbittorrentCfg.useCategoryPathsInManualMode;
             }
             # VPN Interface binding - ONLY when VPN is enabled
             # This ensures all BitTorrent traffic uses the VPN interface
@@ -325,6 +370,12 @@ in
             // optionalAttrs (qbittorrentCfg.defaultSavePath != null) {
               DefaultSavePath = qbittorrentCfg.defaultSavePath;
             };
+          };
+        }
+        # Core configuration - at same level as BitTorrent and Preferences
+        // optionalAttrs (qbittorrentCfg.deleteTorrentFilesAfterwards != "Never") {
+          Core = {
+            AutoDeleteAddedTorrentFile = qbittorrentCfg.deleteTorrentFilesAfterwards;
           };
         }
         // optionalAttrs (qbittorrentCfg.categories != null) {
