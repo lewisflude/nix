@@ -368,6 +368,11 @@ in
         {
           Preferences = preferencesCfg;
 
+          # Application configuration
+          Application = {
+            MemoryWorkingSetLimit = qbittorrentCfg.physicalMemoryLimit;
+          };
+
           # BitTorrent configuration
           BitTorrent = {
             Session = {
@@ -421,6 +426,9 @@ in
 
               # Resume data save interval (minutes)
               SaveResumeDataInterval = qbittorrentCfg.resumeDataSaveInterval;
+
+              # Upload piece suggestions for better seeding
+              SuggestMode = qbittorrentCfg.sendUploadPieceSuggestions;
 
               # Tracker announce settings
               AnnounceToAllTrackers = qbittorrentCfg.reannounceWhenAddressChanged;
