@@ -341,10 +341,15 @@ in
 
           # Build Preferences with optional fields
           # Note: Modern qBittorrent uses Session\ prefixed keys in [BitTorrent] section
-          # This section only needs WebUI config and AutoTMM, plus optional path/ratio settings
+          # This section includes WebUI config, AutoTMM, paths, ratio settings, and Advanced settings
           preferencesCfg = {
             AutoTMMEnabled = qbittorrentCfg.autoTMMEnabled;
             WebUI = webUICfg;
+            # Advanced settings for libtorrent - nested under Advanced key
+            Advanced = {
+              PhysicalMemoryLimit = qbittorrentCfg.physicalMemoryLimit;
+              SendUploadPieceSuggestions = qbittorrentCfg.sendUploadPieceSuggestions;
+            };
           }
           // optionalAttrs (qbittorrentCfg.incompleteDownloadPath != null) {
             SavePath = qbittorrentCfg.incompleteDownloadPath;
@@ -362,15 +367,6 @@ in
         in
         {
           Preferences = preferencesCfg;
-          # Advanced configuration for libtorrent
-          Advanced = {
-            # Resume data save interval (minutes)
-            AutoSaveInterval = qbittorrentCfg.resumeDataSaveInterval;
-            # Physical memory limit for libtorrent >= 2.0 (MiB)
-            PhysicalMemoryLimit = qbittorrentCfg.physicalMemoryLimit;
-            # Send upload piece suggestions to improve seeding efficiency
-            SendUploadPieceSuggestions = qbittorrentCfg.sendUploadPieceSuggestions;
-          };
 
           # BitTorrent configuration
           BitTorrent = {
@@ -422,6 +418,9 @@ in
               Preallocation = qbittorrentCfg.preallocation;
               AddExtensionToIncompleteFiles = qbittorrentCfg.addExtensionToIncompleteFiles;
               UseCategoryPathsInManualMode = qbittorrentCfg.useCategoryPathsInManualMode;
+
+              # Resume data save interval (minutes)
+              SaveResumeDataInterval = qbittorrentCfg.resumeDataSaveInterval;
 
               # Tracker announce settings
               AnnounceToAllTrackers = qbittorrentCfg.reannounceWhenAddressChanged;
