@@ -9,14 +9,15 @@ let
   inherit (lib)
     mkEnableOption
     mkIf
+    mkMerge
     mkOption
     types
     optionalAttrs
     mapAttrs
     ;
   cfg = config.host.services.mediaManagement;
-  qbittorrentCfg = cfg.qbittorrent or { };
-  webUI = qbittorrentCfg.webUI or null;
+  qbittorrentCfg = cfg.qbittorrent;
+  inherit (qbittorrentCfg) webUI;
 in
 {
   options.host.services.mediaManagement.qbittorrent = {
@@ -61,7 +62,7 @@ in
             rootFolder = mkOption {
               type = types.nullOr types.str;
               default = null;
-              description = "Root folder for alternative WebUI (absolute path). If null and alternativeUIEnabled is true, defaults to vuetorrent package path";
+              description = "Root folder for alternative WebUI (absolute path). If null and alternativeUIEnabled is true, uses vuetorrent from Nix store";
             };
           };
         }
@@ -175,7 +176,7 @@ in
     # When VPN is disabled, both WebUI and torrent ports need to be open
     networking.firewall = {
       allowedTCPPorts = [
-        (webUI.port or constants.ports.services.qbittorrent)
+        (if webUI != null then webUI.port else constants.ports.services.qbittorrent)
       ] # WebUI always accessible
       ++ lib.optionals (!(qbittorrentCfg.vpn.enable or false)) [
         qbittorrentCfg.torrentPort # Torrent port only when VPN disabled
@@ -198,171 +199,153 @@ in
     # Set umask for qBittorrent service to ensure group-writable files
     systemd.services.qbittorrent.serviceConfig.UMask = "0002";
 
-    # Ensure vuetorrent is available when alternative UI is enabled
-    environment.systemPackages =
-      lib.optionals (webUI != null && (webUI.alternativeUIEnabled or false))
-        [
-          pkgs.vuetorrent
-        ];
+    # Alternative UI support (vuetorrent)
+    # No need to copy files - qBittorrent can read directly from Nix store
+    environment.systemPackages = lib.optionals (webUI != null && webUI.alternativeUIEnabled) [
+      pkgs.vuetorrent
+    ];
 
     services.qbittorrent = {
       enable = true;
       # Run qBittorrent with media group for file access
       user = "qbittorrent";
       group = "media";
-      webuiPort = webUI.port or constants.ports.services.qbittorrent;
+      webuiPort = if webUI != null then webUI.port else constants.ports.services.qbittorrent;
       torrentingPort = qbittorrentCfg.torrentPort;
       # Add --confirm-legal-notice flag to prevent service from exiting
       extraArgs = [ "--confirm-legal-notice" ];
       openFirewall = false; # Firewall handled explicitly above
-      serverConfig = {
-        Preferences = {
-          # Connection settings - NO explicit binding in VPN namespace
-          # The namespace itself constrains all traffic through VPN
-          Connection = { };
-          # Storage settings - staging incomplete on SSD, final on HDD via categories
-          Saving =
-            (optionalAttrs (qbittorrentCfg.incompleteDownloadPath != null) {
+      serverConfig =
+        let
+          # Build WebUI config cleanly
+          webUICfg =
+            if webUI != null then
+              mkMerge [
+                {
+                  Address = webUI.bindAddress;
+                  Port = webUI.port;
+                  HostHeaderValidation = false;
+                  LocalHostAuth = false;
+                  AlternativeUIEnabled = webUI.alternativeUIEnabled;
+                }
+                (optionalAttrs (webUI.alternativeUIEnabled && webUI.rootFolder == null) {
+                  RootFolder = "${pkgs.vuetorrent}/share/vuetorrent";
+                })
+                (optionalAttrs (webUI.rootFolder != null) {
+                  RootFolder = webUI.rootFolder;
+                })
+                (optionalAttrs (webUI.username != null) {
+                  Username =
+                    if webUI.useSops then config.sops.secrets."qbittorrent/webui/username".path else webUI.username;
+                })
+                (optionalAttrs (webUI.password != null) {
+                  Password_PBKDF2 =
+                    if webUI.useSops then config.sops.secrets."qbittorrent/webui/password".path else webUI.password;
+                })
+              ]
+            else
+              { };
+
+          # Build Saving config cleanly
+          savingCfg =
+            optionalAttrs (qbittorrentCfg.incompleteDownloadPath != null) {
               SavePath = qbittorrentCfg.incompleteDownloadPath;
-            })
-            // (optionalAttrs (qbittorrentCfg.defaultSavePath != null) {
+            }
+            // optionalAttrs (qbittorrentCfg.defaultSavePath != null) {
               DefaultSavePath = qbittorrentCfg.defaultSavePath;
-            });
-          # Automatic torrent management
-          AutoTMMEnabled = qbittorrentCfg.autoTMMEnabled or false;
-          WebUI = {
-            # Bind WebUI to specified address or all interfaces
-            Address = webUI.bindAddress or "*";
-            Port = webUI.port or constants.ports.services.qbittorrent;
-            # WebUI access control
-            HostHeaderValidation = false;
-            LocalHostAuth = false;
-            # Alternative UI configuration
-            AlternativeUIEnabled = webUI.alternativeUIEnabled or false;
+            };
+
+          # Build Preferences with optional fields
+          preferencesCfg = {
+            Connection = { };
+            Saving = savingCfg;
+            AutoTMMEnabled = qbittorrentCfg.autoTMMEnabled;
+            WebUI = webUICfg;
+            queueing_enabled = true;
+            max_active_uploads = qbittorrentCfg.maxActiveUploads;
+            max_active_torrents = qbittorrentCfg.maxActiveTorrents;
+            checking_memory_use = 1;
+            disk_cache = qbittorrentCfg.diskCacheSize;
+            disk_cache_ttl = qbittorrentCfg.diskCacheTTL;
+            utp_tcp_mixed_mode = 1;
+            upload_slots_behavior = 0;
+            upload_choking_algorithm = 1;
+            max_connec = 600;
+            max_connec_per_torrent = 80;
+            max_uploads = qbittorrentCfg.maxUploads;
+            max_uploads_per_torrent = qbittorrentCfg.maxUploadsPerTorrent;
+            send_buf_watermark = 1024;
+            send_buf_low_watermark = 128;
           }
-          //
-            optionalAttrs (webUI != null && (webUI.rootFolder != null || (webUI.alternativeUIEnabled or false)))
-              {
-                RootFolder = webUI.rootFolder or "${pkgs.vuetorrent}/share/vuetorrent/public";
-              }
-          // optionalAttrs (webUI != null && webUI.username != null) {
-            Username =
-              if webUI.useSops then config.sops.secrets."qbittorrent/webui/username".path else webUI.username;
+          // optionalAttrs (qbittorrentCfg.uploadSpeedLimit != null) {
+            GlobalMaxUploadSpeed = qbittorrentCfg.uploadSpeedLimit;
           }
-          // optionalAttrs (webUI != null && webUI.password != null) {
-            Password_PBKDF2 =
-              if webUI.useSops then config.sops.secrets."qbittorrent/webui/password".path else webUI.password;
+          // optionalAttrs (qbittorrentCfg.maxRatio != null) {
+            MaxRatio = qbittorrentCfg.maxRatio;
+            MaxRatioAction = qbittorrentCfg.maxRatioAction;
           };
-          # Torrent queueing
-          queueing_enabled = true;
-          # Maximum active uploads (optimized for HDD + Jellyfin streaming)
-          max_active_uploads = qbittorrentCfg.maxActiveUploads or 75;
-          # Maximum active torrents (optimized for HDD capacity)
-          max_active_torrents = qbittorrentCfg.maxActiveTorrents or 150;
-          # Maximum active checking torrents (outstanding memory in MiB)
-          checking_memory_use = 1;
-          # Disk cache size in MiB (0 = disabled, -1 = auto, >0 = fixed size)
-          # Optimized for SSD staging of incomplete downloads
-          disk_cache = qbittorrentCfg.diskCacheSize or 512;
-          # Disk cache TTL in seconds (how long to keep data in cache)
-          disk_cache_ttl = qbittorrentCfg.diskCacheTTL or 60;
-          # uTP-TCP mixed mode algorithm: 1 = Peer proportional
-          # Rate limits TCP connections to their proportional share based on how many
-          # connections are TCP, preventing uTP connections from being starved by TCP.
-          # Values: 0 = Prefer TCP, 1 = Peer proportional
-          utp_tcp_mixed_mode = 1;
-          # Upload slots behaviour: 0 = Fixed slots
-          # Values: 0 = Fixed slots, 1 = Upload rate based
-          upload_slots_behavior = 0;
-          # Upload choking algorithm: 1 = Fastest upload
-          # Values: 0 = Round-robin, 1 = Fastest upload, 2 = Anti-leech
-          upload_choking_algorithm = 1;
-          # Global maximum number of connections
-          # Optimized: Reduced from 2000 to 600 to prevent router/gateway overload
-          # and reduce VPN namespace overhead while still supporting 150 active torrents
-          max_connec = 600;
-          # Maximum number of connections per torrent
-          # Optimized: Reduced from 200 to 80 for better peer management
-          max_connec_per_torrent = 80;
-          # Global maximum number of upload slots (optimized for balanced seeding)
-          max_uploads = qbittorrentCfg.maxUploads or 300;
-          # Maximum number of upload slots per torrent (improved from 5 to 10)
-          max_uploads_per_torrent = qbittorrentCfg.maxUploadsPerTorrent or 10;
-          # Advanced libtorrent buffer settings for better throughput
-          # Send buffer watermark: 1024 KB (1 MB) reduces pipeline stalls during uploads
-          send_buf_watermark = 1024;
-          # Send buffer low watermark: 128 KB minimum buffer target for good seeding
-          send_buf_low_watermark = 128;
-          # Upload speed limit in KB/s (recommended: ~80% of upload capacity)
-          # Setting this prevents download speeds from suffering due to interference
-          # with outgoing communications (acknowledgment signals, resend requests, etc.)
-        }
-        // optionalAttrs (qbittorrentCfg.uploadSpeedLimit != null) {
-          GlobalMaxUploadSpeed = qbittorrentCfg.uploadSpeedLimit;
-        }
-        // optionalAttrs (qbittorrentCfg.maxRatio != null) {
-          MaxRatio = qbittorrentCfg.maxRatio;
-          MaxRatioAction = qbittorrentCfg.maxRatioAction or 0;
-        };
-        # BitTorrent configuration
-        BitTorrent = {
-          Session = {
-            Port = qbittorrentCfg.torrentPort;
+        in
+        {
+          Preferences = preferencesCfg;
+          # BitTorrent configuration
+          BitTorrent = {
+            Session = {
+              Port = qbittorrentCfg.torrentPort;
 
-            # Automatic port forwarding (disabled in VPN mode)
-            # When VPN is enabled, UPnP and NAT-PMP are disabled because:
-            # 1. VPN gateways don't support these protocols
-            # 2. External NAT-PMP automation (protonvpn-portforward.service) handles port forwarding
-            # 3. This prevents "no router found" errors in logs
-            # When VPN is disabled, enable UPnP for automatic port forwarding on local router
-            UseUPnP = if (qbittorrentCfg.vpn.enable or false) then false else true;
-            UseNATPMP = if (qbittorrentCfg.vpn.enable or false) then false else true;
+              # Automatic port forwarding (disabled in VPN mode)
+              # When VPN is enabled, UPnP and NAT-PMP are disabled because:
+              # 1. VPN gateways don't support these protocols
+              # 2. External NAT-PMP automation (protonvpn-portforward.service) handles port forwarding
+              # 3. This prevents "no router found" errors in logs
+              # When VPN is disabled, enable UPnP for automatic port forwarding on local router
+              UseUPnP = if (qbittorrentCfg.vpn.enable or false) then false else true;
+              UseNATPMP = if (qbittorrentCfg.vpn.enable or false) then false else true;
 
-            # Protocol settings
-            UsePEX = true; # Peer exchange for better peer discovery
-            UseDHT = true; # DHT for trackerless torrents
-            UseLSD = true; # Local Peer Discovery - useful on LAN or extended network
+              # Protocol settings
+              UsePEX = true; # Peer exchange for better peer discovery
+              UseDHT = true; # DHT for trackerless torrents
+              UseLSD = true; # Local Peer Discovery - useful on LAN or extended network
 
-            # Encryption: 0 = disabled, 1 = enabled (allow legacy), 2 = forced
-            # Set to 1 (enabled, allow legacy) to thwart ISP interference and access larger peer pool
-            BT_protocol = 1; # Encryption enabled, allow legacy connections
+              # Encryption: 0 = disabled, 1 = enabled (allow legacy), 2 = forced
+              # Set to 1 (enabled, allow legacy) to thwart ISP interference and access larger peer pool
+              BT_protocol = 1; # Encryption enabled, allow legacy connections
 
-            # uTP/TCP mixed mode: Proportional balances both protocols
-            # Prevents TCP from starving uTP connections
-            uTPMixedMode = "Proportional";
+              # uTP/TCP mixed mode: Proportional balances both protocols
+              # Prevents TCP from starving uTP connections
+              uTPMixedMode = "Proportional";
 
-            # Torrent queueing system
-            QueueingSystemEnabled = true;
-            # Maximum active uploads (optimized for HDD + Jellyfin streaming)
-            MaxActiveUploads = qbittorrentCfg.maxActiveUploads or 75;
-            # Maximum active torrents (optimized for HDD capacity)
-            MaxActiveTorrents = qbittorrentCfg.maxActiveTorrents or 150;
-            # Global maximum number of connections
-            # Optimized: Reduced from 2000 to 600 to prevent router/gateway overload
-            MaxConnections = 600;
-            # Maximum number of connections per torrent
-            # Optimized: Reduced from 200 to 80 for better peer management
-            MaxConnectionsPerTorrent = 80;
-            # Global maximum number of upload slots (optimized for balanced seeding)
-            # Increased default to 300 for better slot allocation across many torrents
-            MaxUploads = qbittorrentCfg.maxUploads or 300;
-            # Maximum number of upload slots per torrent (improved from 5 to 10)
-            MaxUploadsPerTorrent = qbittorrentCfg.maxUploadsPerTorrent or 10;
-          }
-          # VPN Interface binding - ONLY when VPN is enabled
-          # This ensures all BitTorrent traffic uses the VPN interface
-          // optionalAttrs (qbittorrentCfg.vpn.enable or false) {
-            Interface = "qbt0";
-            InterfaceName = "qbt0";
-            InterfaceAddress = "10.2.0.2";
+              # Torrent queueing system
+              QueueingSystemEnabled = true;
+              # Maximum active uploads (optimized for HDD + Jellyfin streaming)
+              MaxActiveUploads = qbittorrentCfg.maxActiveUploads;
+              # Maximum active torrents (optimized for HDD capacity)
+              MaxActiveTorrents = qbittorrentCfg.maxActiveTorrents;
+              # Global maximum number of connections
+              # Optimized: Reduced from 2000 to 600 to prevent router/gateway overload
+              MaxConnections = 600;
+              # Maximum number of connections per torrent
+              # Optimized: Reduced from 200 to 80 for better peer management
+              MaxConnectionsPerTorrent = 80;
+              # Global maximum number of upload slots (optimized for balanced seeding)
+              # Increased default to 300 for better slot allocation across many torrents
+              MaxUploads = qbittorrentCfg.maxUploads;
+              # Maximum number of upload slots per torrent (improved from 5 to 10)
+              MaxUploadsPerTorrent = qbittorrentCfg.maxUploadsPerTorrent;
+            }
+            # VPN Interface binding - ONLY when VPN is enabled
+            # This ensures all BitTorrent traffic uses the VPN interface
+            // optionalAttrs (qbittorrentCfg.vpn.enable or false) {
+              Interface = "qbt0";
+              InterfaceName = "qbt0";
+              InterfaceAddress = "10.2.0.2";
+            };
           };
+        }
+        // optionalAttrs (qbittorrentCfg.categories != null) {
+          Category = mapAttrs (_: path: {
+            SavePath = path;
+          }) qbittorrentCfg.categories;
         };
-      }
-      // optionalAttrs (qbittorrentCfg.categories != null) {
-        Category = mapAttrs (_: path: {
-          SavePath = path;
-        }) qbittorrentCfg.categories;
-      };
     };
 
   };
