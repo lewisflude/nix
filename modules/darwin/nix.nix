@@ -6,10 +6,10 @@
   ...
 }:
 {
-  # Determinate Nix settings for darwin
-  # Note: With Determinate Nix, we use determinate-nix.settings instead of nix.settings
-  # to ensure settings are properly written to /etc/nix/nix.custom.conf
-  determinate-nix.settings = {
+  # Nix settings for darwin
+  # Note: Determinate Nix will automatically handle writing these to /etc/nix/nix.custom.conf
+  # when the determinate-nix module is enabled
+  nix.settings = {
     # Determinate-specific settings
     flake-registry = "/etc/nix/flake-registry.json";
     sandbox = "relaxed";
@@ -98,10 +98,8 @@
       "pipe-operators"
       "no-url-literals"
       "git-hashing"
+      "build-time-fetch-tree" # darwin-specific
     ];
-
-    # Additional experimental features (darwin-specific)
-    extra-experimental-features = [ "build-time-fetch-tree" ];
 
     # Logging
     log-lines = 25;

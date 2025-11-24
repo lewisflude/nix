@@ -90,7 +90,8 @@ let
 in
 {
   # Import mcps.nix home-manager module
-  imports = [ inputs.mcps.homeManagerModules.claude ];
+  # NOTE: Disabled due to missing pkgs.mcp-servers
+  # imports = [ inputs.mcps.homeManagerModules.claude ];
 
   home = {
     # Install required packages
@@ -113,63 +114,26 @@ in
   };
 
   # Configure mcps.nix servers
-  programs.claude-code = {
-    enable = true;
-
-    mcps = {
-      # Version control
-      git.enable = true;
-
-      # Filesystem access
-      filesystem = {
-        enable = true;
-        allowedPaths = [
-          "${config.home.homeDirectory}/Code"
-          "${config.home.homeDirectory}/.config"
-          "${config.home.homeDirectory}/Documents"
-        ];
-      };
-
-      # GitHub integration
-      github = {
-        enable = true;
-        tokenFilepath = systemConfig.sops.secrets.GITHUB_TOKEN.path;
-      };
-
-      # Web fetching
-      fetch.enable = true;
-
-      # Sequential thinking
-      sequential-thinking.enable = true;
-
-      # Time utilities
-      time = {
-        enable = true;
-        timezone = constants.timezone or "UTC";
-      };
-
-      # Language servers
-      lsp-typescript = {
-        enable = true;
-        workspace = "${config.home.homeDirectory}/Code";
-      };
-
-      lsp-nix = {
-        enable = true;
-        workspace = "${config.home.homeDirectory}/nix";
-      };
-
-      lsp-rust = {
-        enable = true;
-        workspace = "${config.home.homeDirectory}/Code";
-      };
-
-      lsp-python = {
-        enable = true;
-        workspace = "${config.home.homeDirectory}/Code";
-      };
-    };
-  };
+  # NOTE: claude-code disabled due to upstream overlay issues
+  # MCP servers also disabled since they require pkgs.mcp-servers which is not provided by overlay
+  # Re-enable when claude-code-overlay is fixed
+  # programs.claude-code = {
+  #   enable = true;
+  #
+  #   mcps = {
+  #     # Disabled: require pkgs.mcp-servers which is not provided by overlay
+  #     git.enable = false;
+  #     filesystem.enable = false;
+  #     github.enable = false;
+  #     fetch.enable = false;
+  #     sequential-thinking.enable = false;
+  #     time.enable = false;
+  #     lsp-typescript.enable = false;
+  #     lsp-nix.enable = false;
+  #     lsp-rust.enable = false;
+  #     lsp-python.enable = false;
+  #   };
+  # };
 
   # Legacy services.mcp configuration for Cursor compatibility
   services.mcp = {
