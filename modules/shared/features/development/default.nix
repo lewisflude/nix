@@ -19,12 +19,12 @@ let
   inherit (platformLib) isLinux;
 in
 {
-  # Automatically enable git when rust is enabled (implicit dependency)
-  config.host.features.development.git = lib.mkDefault cfg.rust;
-
   config = mkIf cfg.enable (
     lib.mkMerge [
       {
+        # Automatically enable git when rust is enabled (implicit dependency)
+        host.features.development.git = lib.mkDefault cfg.rust;
+
         environment.variables = featureBuilders.mkDevEnvironment cfg;
 
         environment.systemPackages = mkIf isLinux (

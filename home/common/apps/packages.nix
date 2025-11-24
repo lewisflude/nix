@@ -15,7 +15,7 @@
     # to avoid duplicate entries in Spotlight/Launchpad
     pkgs.pgcli
     pkgs.cursor-cli
-    pkgs.claude-code # Claude agentic coding CLI
+    pkgs.claude-code # Claude agentic coding CLI (from claude-code-nix overlay)
   ]
   # Linux-only packages
   ++ lib.optionals pkgs.stdenv.isLinux [

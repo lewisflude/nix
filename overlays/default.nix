@@ -82,11 +82,14 @@ in
     else
       (_final: _prev: { });
 
-  # Claude Code overlay (pre-built binaries from Anthropic)
-  # DISABLED: Upstream bug with wrapper script template substitution
-  # Error: {{storeDir}}/bin/claude: cannot execute: required file not found
-  # See: https://github.com/ryoppippi/claude-code-overlay/issues
-  claude-code-overlay = _final: _prev: { };
+  # Claude Code overlay (always up-to-date, hourly automated updates)
+  # Uses github:sadjow/claude-code-nix for latest versions with Node.js 22 LTS
+  # See: https://github.com/sadjow/claude-code-nix
+  claude-code-nix =
+    if inputs ? claude-code-nix && inputs.claude-code-nix ? overlays then
+      inputs.claude-code-nix.overlays.default
+    else
+      (_final: _prev: { });
 
   # Gemini CLI overlay (build from latest GitHub source)
   # DISABLED: Missing build dependencies (pkg-config, libsecret)

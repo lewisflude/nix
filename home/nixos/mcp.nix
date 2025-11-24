@@ -156,9 +156,8 @@ in
   };
 
   # Configure mcps.nix servers
-  # NOTE: claude-code disabled due to upstream overlay issues
+  # NOTE: claude-code is now available via claude-code-nix overlay
   # MCP servers also disabled since they require pkgs.mcp-servers which is not provided by overlay
-  # Re-enable when claude-code-overlay is fixed
   # programs.claude-code = {
   #   enable = true;
   #
