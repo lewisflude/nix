@@ -42,17 +42,21 @@
       tag.sort = "version:refname"; # Sort tags semantically
 
       # Diff improvements
-      diff.algorithm = "histogram"; # Modern diff algorithm (better than Myers)
-      diff.colorMoved = "default"; # Highlight moved code blocks
-      diff.mnemonicPrefix = true; # Show context (i/w/c) instead of a/b
+      diff = {
+        algorithm = "histogram"; # Modern diff algorithm (better than Myers)
+        colorMoved = "default"; # Highlight moved code blocks
+        mnemonicPrefix = true; # Show context (i/w/c) instead of a/b
+      };
 
       # Merge configuration
       merge.conflictStyle = "zdiff3"; # Show base, yours, and theirs in conflicts
 
       # Rebase improvements
-      rebase.autoSquash = true; # Auto-squash fixup commits
-      rebase.autoStash = true; # Auto-stash changes before rebasing
-      rebase.updateRefs = true; # Update stacked references during rebase
+      rebase = {
+        autoSquash = true; # Auto-squash fixup commits
+        autoStash = true; # Auto-stash changes before rebasing
+        updateRefs = true; # Update stacked references during rebase
+      };
 
       # Commit configuration
       commit.verbose = true; # Show full diff when writing commit messages

@@ -207,6 +207,60 @@ in
         - IfAdded: Delete if torrent was successfully added
       '';
     };
+
+    resumeDataSaveInterval = mkOption {
+      type = types.int;
+      default = 15;
+      description = ''
+        Interval in minutes to save resume data (fastresume files).
+        Recommended: 15-30 minutes to prevent data loss on crashes.
+        Default qBittorrent: 60 minutes.
+      '';
+    };
+
+    reannounceWhenAddressChanged = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Reannounce to all trackers when IP or port changes.
+        Critical for VPN setups - ensures trackers know about IP changes.
+        Recommended: true (especially with VPN).
+      '';
+    };
+
+    sendUploadPieceSuggestions = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Send upload piece suggestions to peers.
+        Improves seeding efficiency by suggesting which pieces peers should request.
+        Recommended: true for better upload performance.
+      '';
+    };
+
+    utpTcpMixedMode = mkOption {
+      type = types.enum [
+        "TCP"
+        "Proportional"
+      ];
+      default = "TCP";
+      description = ''
+        μTP-TCP mixed mode algorithm:
+        - TCP: Prefer TCP connections (recommended for VPN and private trackers)
+        - Proportional: Balance both protocols (may throttle TCP)
+        For VPN users: TCP is more reliable and compatible.
+      '';
+    };
+
+    physicalMemoryLimit = mkOption {
+      type = types.int;
+      default = 512;
+      description = ''
+        Physical memory (RAM) usage limit in MiB for libtorrent >= 2.0.
+        Recommended: 1024-2048 MiB if you have 8GB+ RAM, 512 MiB for systems with limited RAM.
+        This is separate from disk cache and controls overall libtorrent memory usage.
+      '';
+    };
   };
 
   config = mkIf (cfg.enable && qbittorrentCfg.enable) {
@@ -308,6 +362,16 @@ in
         in
         {
           Preferences = preferencesCfg;
+          # Advanced configuration for libtorrent
+          Advanced = {
+            # Resume data save interval (minutes)
+            AutoSaveInterval = qbittorrentCfg.resumeDataSaveInterval;
+            # Physical memory limit for libtorrent >= 2.0 (MiB)
+            PhysicalMemoryLimit = qbittorrentCfg.physicalMemoryLimit;
+            # Send upload piece suggestions to improve seeding efficiency
+            SendUploadPieceSuggestions = qbittorrentCfg.sendUploadPieceSuggestions;
+          };
+
           # BitTorrent configuration
           BitTorrent = {
             Session = {
@@ -331,9 +395,9 @@ in
               # Set to 1 (enabled, allow legacy) to thwart ISP interference and access larger peer pool
               BT_protocol = 1; # Encryption enabled, allow legacy connections
 
-              # uTP/TCP mixed mode: Proportional balances both protocols
-              # Prevents TCP from starving uTP connections
-              uTPMixedMode = "Proportional";
+              # uTP/TCP mixed mode: TCP preferred for VPN, Proportional for balanced protocols
+              # TCP is more reliable with VPNs and required by some private trackers
+              uTPMixedMode = qbittorrentCfg.utpTcpMixedMode;
 
               # Torrent queueing system
               QueueingSystemEnabled = true;
@@ -358,6 +422,9 @@ in
               Preallocation = qbittorrentCfg.preallocation;
               AddExtensionToIncompleteFiles = qbittorrentCfg.addExtensionToIncompleteFiles;
               UseCategoryPathsInManualMode = qbittorrentCfg.useCategoryPathsInManualMode;
+
+              # Tracker announce settings
+              AnnounceToAllTrackers = qbittorrentCfg.reannounceWhenAddressChanged;
             }
             # VPN Interface binding - ONLY when VPN is enabled
             # This ensures all BitTorrent traffic uses the VPN interface
