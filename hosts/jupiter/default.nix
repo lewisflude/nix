@@ -83,6 +83,13 @@
         maxRatio = 3.0;
         maxRatioAction = 0; # 0 = pause torrent when ratio reached
 
+        # Torrent behavior settings
+        addToTopOfQueue = true;
+        preallocation = true;
+        addExtensionToIncompleteFiles = true;
+        useCategoryPathsInManualMode = true;
+        deleteTorrentFilesAfterwards = "Always";
+
         # VPN Configuration
         vpn = {
           enable = true;
