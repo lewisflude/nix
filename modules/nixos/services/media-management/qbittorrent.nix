@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   constants,
   ...
 }:
@@ -51,6 +52,16 @@ in
               type = types.str;
               default = "*";
               description = "WebUI bind address (* for all interfaces, or specific IP)";
+            };
+            alternativeUIEnabled = mkOption {
+              type = types.bool;
+              default = false;
+              description = "Enable alternative WebUI (e.g., vuetorrent)";
+            };
+            rootFolder = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "Root folder for alternative WebUI (absolute path). If null and alternativeUIEnabled is true, defaults to vuetorrent package path";
             };
           };
         }
@@ -122,6 +133,40 @@ in
       default = 62000;
       description = "Port for BitTorrent traffic";
     };
+
+    autoTMMEnabled = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Enable automatic torrent management (AutoTMM)";
+    };
+
+    defaultSavePath = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "Default folder for completed torrents (when AutoTMM is disabled or no category is set)";
+    };
+
+    maxRatio = mkOption {
+      type = types.nullOr types.float;
+      default = null;
+      description = "Maximum seeding ratio (0 = unlimited, >0 = ratio limit). When reached, MaxRatioAction is triggered";
+    };
+
+    maxRatioAction = mkOption {
+      type = types.int;
+      default = 0;
+      description = "Action when max ratio is reached: 0 = pause torrent, 1 = remove torrent, 2 = remove torrent with files";
+    };
+
+    uploadSpeedLimit = mkOption {
+      type = types.nullOr types.int;
+      default = null;
+      description = ''
+        Upload speed limit in KB/s (recommended: ~80% of upload capacity).
+        Set to null for unlimited. Use speedtest.net to determine your upload speed in kB/s,
+        then set this to approximately 80% of that value to allow room for outgoing communications.
+      '';
+    };
   };
 
   config = mkIf (cfg.enable && qbittorrentCfg.enable) {
@@ -153,6 +198,13 @@ in
     # Set umask for qBittorrent service to ensure group-writable files
     systemd.services.qbittorrent.serviceConfig.UMask = "0002";
 
+    # Ensure vuetorrent is available when alternative UI is enabled
+    environment.systemPackages =
+      lib.optionals (webUI != null && (webUI.alternativeUIEnabled or false))
+        [
+          pkgs.vuetorrent
+        ];
+
     services.qbittorrent = {
       enable = true;
       # Run qBittorrent with media group for file access
@@ -169,9 +221,15 @@ in
           # The namespace itself constrains all traffic through VPN
           Connection = { };
           # Storage settings - staging incomplete on SSD, final on HDD via categories
-          Saving = optionalAttrs (qbittorrentCfg.incompleteDownloadPath != null) {
-            SavePath = qbittorrentCfg.incompleteDownloadPath;
-          };
+          Saving =
+            (optionalAttrs (qbittorrentCfg.incompleteDownloadPath != null) {
+              SavePath = qbittorrentCfg.incompleteDownloadPath;
+            })
+            // (optionalAttrs (qbittorrentCfg.defaultSavePath != null) {
+              DefaultSavePath = qbittorrentCfg.defaultSavePath;
+            });
+          # Automatic torrent management
+          AutoTMMEnabled = qbittorrentCfg.autoTMMEnabled or false;
           WebUI = {
             # Bind WebUI to specified address or all interfaces
             Address = webUI.bindAddress or "*";
@@ -179,7 +237,14 @@ in
             # WebUI access control
             HostHeaderValidation = false;
             LocalHostAuth = false;
+            # Alternative UI configuration
+            AlternativeUIEnabled = webUI.alternativeUIEnabled or false;
           }
+          //
+            optionalAttrs (webUI != null && (webUI.rootFolder != null || (webUI.alternativeUIEnabled or false)))
+              {
+                RootFolder = webUI.rootFolder or "${pkgs.vuetorrent}/share/vuetorrent/public";
+              }
           // optionalAttrs (webUI != null && webUI.username != null) {
             Username =
               if webUI.useSops then config.sops.secrets."qbittorrent/webui/username".path else webUI.username;
@@ -228,6 +293,16 @@ in
           send_buf_watermark = 1024;
           # Send buffer low watermark: 128 KB minimum buffer target for good seeding
           send_buf_low_watermark = 128;
+          # Upload speed limit in KB/s (recommended: ~80% of upload capacity)
+          # Setting this prevents download speeds from suffering due to interference
+          # with outgoing communications (acknowledgment signals, resend requests, etc.)
+        }
+        // optionalAttrs (qbittorrentCfg.uploadSpeedLimit != null) {
+          GlobalMaxUploadSpeed = qbittorrentCfg.uploadSpeedLimit;
+        }
+        // optionalAttrs (qbittorrentCfg.maxRatio != null) {
+          MaxRatio = qbittorrentCfg.maxRatio;
+          MaxRatioAction = qbittorrentCfg.maxRatioAction or 0;
         };
         # BitTorrent configuration
         BitTorrent = {
@@ -246,6 +321,11 @@ in
             # Protocol settings
             UsePEX = true; # Peer exchange for better peer discovery
             UseDHT = true; # DHT for trackerless torrents
+            UseLSD = true; # Local Peer Discovery - useful on LAN or extended network
+
+            # Encryption: 0 = disabled, 1 = enabled (allow legacy), 2 = forced
+            # Set to 1 (enabled, allow legacy) to thwart ISP interference and access larger peer pool
+            BT_protocol = 1; # Encryption enabled, allow legacy connections
 
             # uTP/TCP mixed mode: Proportional balances both protocols
             # Prevents TCP from starving uTP connections

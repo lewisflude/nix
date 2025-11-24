@@ -127,6 +127,35 @@ in
             default = 10;
             description = "Maximum upload slots per torrent (recommended: 10 to improve seeding)";
           };
+          uploadSpeedLimit = mkOption {
+            type = types.nullOr types.int;
+            default = null;
+            description = ''
+              Upload speed limit in KB/s (recommended: ~80% of upload capacity).
+              Set to null for unlimited. Use speedtest.net to determine your upload speed in kB/s,
+              then set this to approximately 80% of that value to allow room for outgoing communications.
+            '';
+          };
+          autoTMMEnabled = mkOption {
+            type = types.bool;
+            default = false;
+            description = "Enable automatic torrent management (AutoTMM)";
+          };
+          defaultSavePath = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "Default folder for completed torrents (when AutoTMM is disabled or no category is set)";
+          };
+          maxRatio = mkOption {
+            type = types.nullOr types.float;
+            default = null;
+            description = "Maximum seeding ratio (0 = unlimited, >0 = ratio limit). When reached, MaxRatioAction is triggered";
+          };
+          maxRatioAction = mkOption {
+            type = types.int;
+            default = 0;
+            description = "Action when max ratio is reached: 0 = pause torrent, 1 = remove torrent, 2 = remove torrent with files";
+          };
           vpn = mkOption {
             type = types.nullOr (
               types.submodule {
@@ -180,6 +209,16 @@ in
                     type = types.nullOr types.str;
                     default = null;
                     description = "WebUI password (PBKDF2 format)";
+                  };
+                  alternativeUIEnabled = mkOption {
+                    type = types.bool;
+                    default = false;
+                    description = "Enable alternative WebUI (e.g., vuetorrent)";
+                  };
+                  rootFolder = mkOption {
+                    type = types.nullOr types.str;
+                    default = null;
+                    description = "Root folder for alternative WebUI (absolute path). If null and alternativeUIEnabled is true, defaults to vuetorrent package path";
                   };
                 };
               }
