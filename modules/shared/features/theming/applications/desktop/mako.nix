@@ -21,6 +21,8 @@ in
           background-color = colors."surface-base".hex;
           text-color = colors."text-primary".hex;
           border-color = colors."divider-primary".hex;
+          # Ensure fully opaque background (no transparency)
+          background-opacity = "1.0";
         };
 
         # Urgency-specific colors (mako uses INI-style sections in extraConfig)

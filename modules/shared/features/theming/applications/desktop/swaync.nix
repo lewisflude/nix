@@ -26,7 +26,7 @@ let
 
     /* Control Center (main panel) */
     .control-center {
-      background: ${theme.withAlpha colors."surface-base" 0.95};
+      background: ${colors."surface-base".hex};
       border: 1px solid ${colors."divider-primary".hex};
       border-radius: 12px;
       box-shadow: 0 4px 16px ${theme.withAlpha colors."surface-base" 0.3};

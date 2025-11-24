@@ -306,6 +306,71 @@ let
         outline: 1px solid @accent_color;
         outline-offset: -1px;
       }
+
+      /* Context menus and popup menus - ensure fully opaque backgrounds */
+      menu,
+      .menu,
+      popover.menu,
+      popover > menu,
+      .context-menu,
+      .popup-menu {
+        background-color: @popover_bg_color;
+        color: @popover_fg_color;
+        border: 1px solid @borders;
+        border-radius: 6px;
+        padding: 4px;
+      }
+
+      /* Menu items */
+      menuitem,
+      .menuitem,
+      menu menuitem,
+      .menu menuitem {
+        background-color: transparent;
+        color: @popover_fg_color;
+        border-radius: 4px;
+        padding: 6px 12px;
+        margin: 2px;
+      }
+
+      menuitem:hover,
+      .menuitem:hover,
+      menu menuitem:hover,
+      .menu menuitem:hover {
+        background-color: @theme_hover_color;
+        color: @popover_fg_color;
+      }
+
+      menuitem:disabled,
+      .menuitem:disabled {
+        color: @insensitive_fg_color;
+      }
+
+      /* Separators in menus */
+      separator,
+      .separator,
+      menu separator,
+      .menu separator {
+        background-color: @borders;
+        min-height: 1px;
+        margin: 4px 0;
+      }
+
+      /* Ensure popovers (including context menus) have solid backgrounds */
+      popover,
+      .popover {
+        background-color: @popover_bg_color;
+        color: @popover_fg_color;
+        border: 1px solid @borders;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      /* GTK4 specific popover styling */
+      popover.background {
+        background-color: @popover_bg_color;
+        color: @popover_fg_color;
+      }
     '';
 in
 {
