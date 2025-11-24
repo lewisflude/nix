@@ -247,25 +247,11 @@ in
               { };
 
           # Build Preferences with optional fields
+          # Note: Modern qBittorrent uses Session\ prefixed keys in [BitTorrent] section
+          # This section only needs WebUI config and AutoTMM, plus optional path/ratio settings
           preferencesCfg = {
-            Connection = { };
             AutoTMMEnabled = qbittorrentCfg.autoTMMEnabled;
             WebUI = webUICfg;
-            queueing_enabled = true;
-            max_active_uploads = qbittorrentCfg.maxActiveUploads;
-            max_active_torrents = qbittorrentCfg.maxActiveTorrents;
-            checking_memory_use = 1;
-            disk_cache = qbittorrentCfg.diskCacheSize;
-            disk_cache_ttl = qbittorrentCfg.diskCacheTTL;
-            utp_tcp_mixed_mode = 1;
-            upload_slots_behavior = 0;
-            upload_choking_algorithm = 1;
-            max_connec = 600;
-            max_connec_per_torrent = 80;
-            max_uploads = qbittorrentCfg.maxUploads;
-            max_uploads_per_torrent = qbittorrentCfg.maxUploadsPerTorrent;
-            send_buf_watermark = 1024;
-            send_buf_low_watermark = 128;
           }
           // optionalAttrs (qbittorrentCfg.incompleteDownloadPath != null) {
             SavePath = qbittorrentCfg.incompleteDownloadPath;
@@ -334,6 +320,10 @@ in
               Interface = "qbt0";
               InterfaceName = "qbt0";
               InterfaceAddress = "10.2.0.2";
+            }
+            # Add DefaultSavePath to Session if configured
+            // optionalAttrs (qbittorrentCfg.defaultSavePath != null) {
+              DefaultSavePath = qbittorrentCfg.defaultSavePath;
             };
           };
         }
