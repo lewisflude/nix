@@ -15,7 +15,7 @@
     pkgs.dust
     pkgs.procs
     pkgs.gping
-    pkgs.tldr
+    # Note: tldr is handled via programs.tealdeer in apps/tealdeer.nix
     pkgs.p7zip
     pkgs.pigz
     pkgs.git-extras
