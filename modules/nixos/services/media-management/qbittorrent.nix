@@ -389,6 +389,47 @@ in
       default = 128;
       description = "Memory usage limit in MiB for hash checking operations";
     };
+
+    ignoreSlowTorrents = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Do not count slow torrents in active torrent limits.
+        When enabled, slow torrents don't count against MaxActiveTorrents and MaxActiveUploads limits.
+        Useful for allowing active downloads/uploads to proceed without being blocked by idle seeding torrents.
+        Recommended: true for systems with many seeding torrents.
+      '';
+    };
+
+    slowTorrentsDownloadRate = mkOption {
+      type = types.int;
+      default = 5;
+      description = ''
+        Download rate threshold in KiB/s for considering a torrent "slow".
+        A torrent downloading below this rate may be considered slow (if below threshold for SlowTorrentsInactivityTimer seconds).
+        Recommended: 5 KiB/s (lower values may cause false positives).
+      '';
+    };
+
+    slowTorrentsUploadRate = mkOption {
+      type = types.int;
+      default = 5;
+      description = ''
+        Upload rate threshold in KiB/s for considering a torrent "slow".
+        A torrent uploading below this rate may be considered slow (if below threshold for SlowTorrentsInactivityTimer seconds).
+        Recommended: 5 KiB/s (lower values may cause false positives).
+      '';
+    };
+
+    slowTorrentsInactivityTimer = mkOption {
+      type = types.int;
+      default = 60;
+      description = ''
+        Time in seconds a torrent must be below the slow rate thresholds before being considered "slow".
+        This prevents briefly idle torrents from being marked as slow.
+        Recommended: 60 seconds (default qBittorrent value).
+      '';
+    };
   };
 
   config = mkIf (cfg.enable && qbittorrentCfg.enable) {
@@ -418,7 +459,22 @@ in
     };
 
     # Set umask for qBittorrent service to ensure group-writable files
-    systemd.services.qbittorrent.serviceConfig.UMask = "0002";
+    systemd.services.qbittorrent.serviceConfig = {
+      UMask = "0002";
+
+      # CPU Scheduling: Use "batch" policy for smoother network throughput
+      # Batch scheduling prevents qBittorrent from interrupting the networking stack
+      # Nice=5 gives slightly lower priority than system processes (Nice=0)
+      # but higher than background tasks (Nice=19)
+      CPUSchedulingPolicy = "batch";
+      Nice = 5;
+
+      # I/O Scheduling: Best-effort with priority 5 (middle priority)
+      # This prevents qBittorrent I/O from blocking Jellyfin streaming
+      # but still prioritizes it over background tasks
+      IOSchedulingClass = "best-effort";
+      IOSchedulingPriority = 5;
+    };
 
     # Alternative UI support (vuetorrent)
     # No need to copy files - qBittorrent can read directly from Nix store
@@ -594,6 +650,12 @@ in
 
               # Torrent start behavior
               AddTorrentStopped = qbittorrentCfg.addTorrentStopped;
+
+              # Slow torrent handling - don't count slow torrents in active limits
+              IgnoreSlowTorrents = qbittorrentCfg.ignoreSlowTorrents;
+              SlowTorrentsDownloadRate = qbittorrentCfg.slowTorrentsDownloadRate;
+              SlowTorrentsUploadRate = qbittorrentCfg.slowTorrentsUploadRate;
+              SlowTorrentsInactivityTimer = qbittorrentCfg.slowTorrentsInactivityTimer;
             }
             # VPN Interface binding - ONLY when VPN is enabled
             # This ensures all BitTorrent traffic uses the VPN interface
