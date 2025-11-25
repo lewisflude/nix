@@ -8,6 +8,27 @@
         global = {
           "browseable" = "yes";
           "smb encrypt" = "required";
+
+          # Performance optimizations for LAN transfers
+          "socket options" = "TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=131072 SO_SNDBUF=131072";
+          "read raw" = "yes";
+          "write raw" = "yes";
+          "max xmit" = "65535";
+          "dead time" = "15";
+          "getwd cache" = "yes";
+
+          # SMB3 multi-channel for better throughput (if clients support it)
+          "server multi channel support" = "yes";
+
+          # Disable unnecessary features for pure file serving
+          "dns proxy" = "no";
+          "load printers" = "no";
+          "printcap name" = "/dev/null";
+          "disable spoolss" = "yes";
+
+          # Async I/O for better performance
+          "aio read size" = "16384";
+          "aio write size" = "16384";
         };
         homes = {
           browseable = "no";
