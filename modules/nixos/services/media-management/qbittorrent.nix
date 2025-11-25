@@ -93,7 +93,16 @@ in
     diskCacheTTL = mkOption {
       type = types.int;
       default = 60;
-      description = "Disk cache TTL in seconds (how long to keep data in cache)";
+      description = "Disk cache TTL in seconds (how long to keep data in cache before flushing to disk)";
+    };
+
+    useOSCache = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Use OS page cache for disk I/O operations.
+        Recommended: true for better performance with sufficient RAM.
+      '';
     };
 
     incompleteDownloadPath = mkOption {
@@ -138,8 +147,11 @@ in
 
     autoTMMEnabled = mkOption {
       type = types.bool;
-      default = false;
-      description = "Enable automatic torrent management (AutoTMM)";
+      default = true;
+      description = ''
+        Enable automatic torrent management (AutoTMM).
+        Recommended: true for Arr apps to automatically use category-based save paths.
+      '';
     };
 
     defaultSavePath = mkOption {
@@ -176,37 +188,74 @@ in
         "IPv6"
         "Both"
       ];
-      default = "Both";
+      default = "IPv4";
       description = ''
         IP protocol to use for BitTorrent connections:
-        - IPv4: Use only IPv4 (recommended if IPv6 port forwarding doesn't work)
+        - IPv4: Use only IPv4 (recommended if IPv6 port forwarding doesn't work, or to prevent VPN leaks)
         - IPv6: Use only IPv6
-        - Both: Use both IPv4 and IPv6 (default, but may waste resources if IPv6 incoming doesn't work)
+        - Both: Use both IPv4 and IPv6 (may waste resources if IPv6 incoming doesn't work)
+      '';
+    };
+
+    encryption = mkOption {
+      type = types.enum [
+        0
+        1
+        2
+      ];
+      default = 1;
+      description = ''
+        Protocol encryption mode:
+        - 0: Prefer unencrypted connections (allow both encrypted and unencrypted)
+        - 1: Require encryption (hide protocol headers from DPI, but allow legacy peers)
+        - 2: Force encryption (only encrypted connections, may reduce peer pool)
+        Recommended: 1 (require encryption) to prevent ISP throttling while maintaining peer pool.
       '';
     };
 
     addToTopOfQueue = mkOption {
       type = types.bool;
-      default = false;
+      default = true;
       description = "Add new torrents to the top of the queue";
+    };
+
+    addTorrentStopped = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Add new torrents in a stopped state (do not start automatically).
+        Recommended: false for Arr apps to start downloads immediately.
+      '';
     };
 
     preallocation = mkOption {
       type = types.bool;
       default = false;
-      description = "Pre-allocate disk space for all files";
+      description = ''
+        Pre-allocate disk space for all files.
+        CRITICAL: Must be false for ZFS/Btrfs to prevent massive fragmentation and double-writes.
+      '';
     };
 
     addExtensionToIncompleteFiles = mkOption {
       type = types.bool;
-      default = false;
+      default = true;
       description = "Append .!qB extension to incomplete files";
     };
 
     useCategoryPathsInManualMode = mkOption {
       type = types.bool;
-      default = false;
+      default = true;
       description = "Use category paths even in manual torrent management mode";
+    };
+
+    ignoreLimitsOnLAN = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Ignore upload/download rate limits for LAN transfers.
+        Recommended: true to allow full-speed transfers within the local network.
+      '';
     };
 
     deleteTorrentFilesAfterwards = mkOption {
@@ -270,24 +319,33 @@ in
 
     physicalMemoryLimit = mkOption {
       type = types.int;
-      default = 512;
+      default = 8192;
       description = ''
         Physical memory (RAM) usage limit in MiB for libtorrent >= 2.0.
-        Recommended: 1024-2048 MiB if you have 8GB+ RAM, 512 MiB for systems with limited RAM.
+        CRITICAL: Must match Application/MemoryWorkingSetLimit to prevent crashes when disk cache fills up.
+        Recommended: 8192 MiB (8GB) for systems with 64GB+ RAM, 2048 MiB for 16GB RAM systems.
         This is separate from disk cache and controls overall libtorrent memory usage.
       '';
     };
 
     asyncIOThreadsCount = mkOption {
       type = types.int;
-      default = 128;
-      description = "Number of async I/O threads for disk operations";
+      default = 32;
+      description = ''
+        Number of async I/O threads for disk operations.
+        Recommended: 32 for NVMe SSDs with high-performance CPUs (lower latency than 128).
+        Default qBittorrent: 128 (too high even for i9, causes diminishing returns).
+      '';
     };
 
     hashingThreadsCount = mkOption {
       type = types.int;
-      default = 32;
-      description = "Number of threads for hash checking operations";
+      default = 8;
+      description = ''
+        Number of threads for hash checking operations.
+        Recommended: 8 for modern CPUs (matches P-core count on i9-13900K).
+        Default qBittorrent: 32 (causes diminishing returns and context switching overhead).
+      '';
     };
 
     filePoolSize = mkOption {
@@ -473,9 +531,9 @@ in
               # IP Protocol selection (IPv4, IPv6, or Both)
               BTProtocol = qbittorrentCfg.ipProtocol;
 
-              # Encryption: 0 = disabled, 1 = enabled (allow legacy), 2 = forced
-              # Set to 1 (enabled, allow legacy) to thwart ISP interference and access larger peer pool
-              BT_protocol = 1; # Encryption enabled, allow legacy connections
+              # Protocol encryption mode (hides BitTorrent protocol from DPI)
+              # 0 = prefer unencrypted, 1 = require encryption (allow legacy), 2 = force encryption
+              Encryption = qbittorrentCfg.encryption;
 
               # uTP/TCP mixed mode: TCP preferred for VPN, Proportional for balanced protocols
               # TCP is more reliable with VPNs and required by some private trackers
@@ -520,12 +578,22 @@ in
               HashingThreadsCount = qbittorrentCfg.hashingThreadsCount;
               FilePoolSize = qbittorrentCfg.filePoolSize;
               DiskCacheSize = qbittorrentCfg.diskCacheSize;
+              DiskCacheTTL = qbittorrentCfg.diskCacheTTL;
               CoalesceReadWrite = qbittorrentCfg.coalesceReadWrite;
               PieceExtentAffinity = qbittorrentCfg.usePieceExtentAffinity;
               SendBufferWatermark = qbittorrentCfg.sendBufferWatermark;
               SendBufferLowWatermark = qbittorrentCfg.sendBufferLowWatermark;
               SendBufferWatermarkFactor = qbittorrentCfg.sendBufferWatermarkFactor;
               CheckingMemUsageSize = qbittorrentCfg.checkingMemUsageSize;
+
+              # OS cache usage for better performance with sufficient RAM
+              use_os_cache = qbittorrentCfg.useOSCache;
+
+              # LAN rate limit bypass
+              IgnoreLimitsOnLAN = qbittorrentCfg.ignoreLimitsOnLAN;
+
+              # Torrent start behavior
+              AddTorrentStopped = qbittorrentCfg.addTorrentStopped;
             }
             # VPN Interface binding - ONLY when VPN is enabled
             # This ensures all BitTorrent traffic uses the VPN interface
