@@ -1,5 +1,11 @@
 { lib, ... }:
 {
+  # ZFS ARC memory limit
+  # NOTE: This is now managed by modules/nixos/system/disk-performance.nix
+  # when system.diskPerformance.enable = true
+  # The disk-performance module sets ARC to 48GB (75% of 64GB RAM) for better performance
+  # boot.kernelParams = [ "zfs.zfs_arc_max=25769803776" ]; # 24GB in bytes (DISABLED)
+
   zramSwap = {
     enable = true;
     algorithm = "zstd";

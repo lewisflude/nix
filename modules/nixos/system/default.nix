@@ -11,6 +11,7 @@
     ./monitor-brightness.nix
 
     ./zfs.nix
+    ./disk-performance.nix
 
     ./sops.nix
 

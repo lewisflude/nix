@@ -75,17 +75,16 @@ phase1_connectivity() {
 
     # Step 2: Check WireGuard interface
     print_step "Step 2: Verify WireGuard interface"
-    local wg_interface
-    wg_interface=$(ip netns exec "$NAMESPACE" ip addr show 2>/dev/null | grep -oP '^\d+: \Kwg\d+' | head -1 || echo "")
+    local wg_interface="${NAMESPACE}0"
 
-    if [[ -n "$wg_interface" ]]; then
+    if ip netns exec "$NAMESPACE" ip addr show "$wg_interface" &>/dev/null; then
         print_success "WireGuard interface found: $wg_interface"
 
         local ip_addr
         ip_addr=$(ip netns exec "$NAMESPACE" ip addr show "$wg_interface" | grep -oP 'inet \K[0-9.]+/[0-9]+' || echo "")
         print_result "IP Address" "$ip_addr"
     else
-        print_failure "WireGuard interface NOT found"
+        print_failure "WireGuard interface NOT found (expected: $wg_interface)"
         return 1
     fi
 

@@ -68,8 +68,8 @@
         # IP Protocol: Use IPv4 only (IPv6 port forwarding not supported by ProtonVPN NAT-PMP)
         ipProtocol = "IPv4";
 
-        # Storage optimization: SSD for incomplete downloads, HDD for final storage
-        incompleteDownloadPath = "/mnt/nvme/qbittorrent/incomplete";
+        # Storage optimization: NVMe (ZFS root pool) for incomplete downloads, HDD for final storage
+        incompleteDownloadPath = "/var/lib/qbittorrent/incomplete";
         diskCacheSize = 4096; # MiB - 4GB cache for high-performance with 64GB RAM system
         maxActiveTorrents = 150; # Reduced from 200 to avoid HDD saturation with Jellyfin
         maxActiveUploads = 75; # Reduced to prevent HDD thrashing during streaming
