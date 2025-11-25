@@ -18,27 +18,8 @@ in
       raopOpenFirewall = true;
       wireplumber = {
         configPackages = [
-          # Set default audio devices for all applications (PulseAudio, ALSA, JACK, native PipeWire)
-          # This configuration ensures consistent device selection across all audio APIs
-          (pkgs.writeTextDir "share/wireplumber/main.lua.d/50-default-devices.lua" ''
-            -- Increase priority of Speakers sink to make it the preferred default
-            -- Higher priority = preferred by default, but users can still override
-            rule = {
-              matches = {
-                {
-                  { "node.name", "equals", "Speakers" },
-                },
-              },
-              apply_properties = {
-                ["node.description"] = "Speakers (Default)",
-                ["priority.session"] = 3000,  -- Higher than hardware devices (typically 1000-2000)
-                ["node.nick"] = "Speakers",    -- Friendly name for ALSA/apps
-                ["media.class"] = "Audio/Sink",
-              },
-            }
-            table.insert(alsa_monitor.rules, rule)
-          '')
-          # Set priorities to ensure consistent default device for Wine/Proton
+          # Set device priorities to ensure consistent default device for Wine/Proton
+          # Note: Speakers sink priority is already set in hardware-specific.nix via pw-loopback
           (pkgs.writeTextDir "share/wireplumber/main.lua.d/51-device-priority.lua" ''
             -- Give Apogee Symphony Desktop highest priority to ensure it's always the default
             -- This fixes intermittent Wine/Proton audio failures caused by device enumeration races
