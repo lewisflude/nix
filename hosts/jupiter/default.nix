@@ -65,6 +65,9 @@
       qbittorrent = {
         enable = true;
 
+        # IP Protocol: Use IPv4 only (IPv6 port forwarding not supported by ProtonVPN NAT-PMP)
+        ipProtocol = "IPv4";
+
         # Storage optimization: SSD for incomplete downloads, HDD for final storage
         incompleteDownloadPath = "/mnt/nvme/qbittorrent/incomplete";
         diskCacheSize = 512; # MiB - Optimized for SSD write protection and 64GB RAM

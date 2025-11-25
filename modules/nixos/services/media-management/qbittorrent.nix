@@ -79,13 +79,14 @@ in
 
     diskCacheSize = mkOption {
       type = types.int;
-      default = 512;
+      default = 4096;
       description = ''
         Disk cache size in MiB.
         - 0 = disabled
         - -1 = auto (qBittorrent decides)
         - >0 = fixed size in MiB
         Recommended: 512-1024 MiB for HDD-heavy setups with SSD incomplete staging.
+        Default: 4096 MiB (4GB) for high-performance setups.
       '';
     };
 
@@ -166,6 +167,21 @@ in
         Upload speed limit in KB/s (recommended: ~80% of upload capacity).
         Set to null for unlimited. Use speedtest.net to determine your upload speed in kB/s,
         then set this to approximately 80% of that value to allow room for outgoing communications.
+      '';
+    };
+
+    ipProtocol = mkOption {
+      type = types.enum [
+        "IPv4"
+        "IPv6"
+        "Both"
+      ];
+      default = "Both";
+      description = ''
+        IP protocol to use for BitTorrent connections:
+        - IPv4: Use only IPv4 (recommended if IPv6 port forwarding doesn't work)
+        - IPv6: Use only IPv6
+        - Both: Use both IPv4 and IPv6 (default, but may waste resources if IPv6 incoming doesn't work)
       '';
     };
 
@@ -260,6 +276,60 @@ in
         Recommended: 1024-2048 MiB if you have 8GB+ RAM, 512 MiB for systems with limited RAM.
         This is separate from disk cache and controls overall libtorrent memory usage.
       '';
+    };
+
+    asyncIOThreadsCount = mkOption {
+      type = types.int;
+      default = 128;
+      description = "Number of async I/O threads for disk operations";
+    };
+
+    hashingThreadsCount = mkOption {
+      type = types.int;
+      default = 32;
+      description = "Number of threads for hash checking operations";
+    };
+
+    filePoolSize = mkOption {
+      type = types.int;
+      default = 10000;
+      description = "File pool size for managing open file handles";
+    };
+
+    coalesceReadWrite = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Coalesce read and write operations for better disk performance";
+    };
+
+    usePieceExtentAffinity = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Use piece extent affinity for better disk I/O performance";
+    };
+
+    sendBufferWatermark = mkOption {
+      type = types.int;
+      default = 512000;
+      description = "Send buffer watermark in bytes (high watermark for TCP send buffer)";
+    };
+
+    sendBufferLowWatermark = mkOption {
+      type = types.int;
+      default = 1024;
+      description = "Send buffer low watermark in bytes (low watermark for TCP send buffer)";
+    };
+
+    sendBufferWatermarkFactor = mkOption {
+      type = types.int;
+      default = 150;
+      description = "Send buffer watermark factor (percentage multiplier for watermark calculation)";
+    };
+
+    checkingMemUsageSize = mkOption {
+      type = types.int;
+      default = 128;
+      description = "Memory usage limit in MiB for hash checking operations";
     };
   };
 
@@ -373,6 +443,14 @@ in
             MemoryWorkingSetLimit = qbittorrentCfg.physicalMemoryLimit;
           };
 
+          # Network configuration
+          # PortForwardingEnabled is the master switch for UPnP/NAT-PMP in the WebUI
+          # When VPN is enabled, disable port forwarding (handled by external NAT-PMP service)
+          # When VPN is disabled, enable port forwarding for local router
+          Network = {
+            PortForwardingEnabled = if (qbittorrentCfg.vpn.enable or false) then false else true;
+          };
+
           # BitTorrent configuration
           BitTorrent = {
             Session = {
@@ -391,6 +469,9 @@ in
               UsePEX = true; # Peer exchange for better peer discovery
               UseDHT = true; # DHT for trackerless torrents
               UseLSD = true; # Local Peer Discovery - useful on LAN or extended network
+
+              # IP Protocol selection (IPv4, IPv6, or Both)
+              BTProtocol = qbittorrentCfg.ipProtocol;
 
               # Encryption: 0 = disabled, 1 = enabled (allow legacy), 2 = forced
               # Set to 1 (enabled, allow legacy) to thwart ISP interference and access larger peer pool
@@ -433,6 +514,18 @@ in
               # Tracker announce settings
               AnnounceToAllTrackers = qbittorrentCfg.reannounceWhenAddressChanged;
               ReannounceWhenAddressChanged = qbittorrentCfg.reannounceWhenAddressChanged;
+
+              # Advanced session settings for performance optimization
+              AsyncIOThreadsCount = qbittorrentCfg.asyncIOThreadsCount;
+              HashingThreadsCount = qbittorrentCfg.hashingThreadsCount;
+              FilePoolSize = qbittorrentCfg.filePoolSize;
+              DiskCacheSize = qbittorrentCfg.diskCacheSize;
+              CoalesceReadWrite = qbittorrentCfg.coalesceReadWrite;
+              PieceExtentAffinity = qbittorrentCfg.usePieceExtentAffinity;
+              SendBufferWatermark = qbittorrentCfg.sendBufferWatermark;
+              SendBufferLowWatermark = qbittorrentCfg.sendBufferLowWatermark;
+              SendBufferWatermarkFactor = qbittorrentCfg.sendBufferWatermarkFactor;
+              CheckingMemUsageSize = qbittorrentCfg.checkingMemUsageSize;
             }
             # VPN Interface binding - ONLY when VPN is enabled
             # This ensures all BitTorrent traffic uses the VPN interface
@@ -440,6 +533,8 @@ in
               Interface = "qbt0";
               InterfaceName = "qbt0";
               InterfaceAddress = "10.2.0.2";
+              # Note: AnnounceIP is left unset to allow auto-detection
+              # The tracker will see the VPN's public IP from the connection
             }
             # Add DefaultSavePath to Session if configured
             // optionalAttrs (qbittorrentCfg.defaultSavePath != null) {
