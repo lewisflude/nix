@@ -139,6 +139,26 @@ in
       description = "Maximum upload slots per torrent (recommended: 10 to improve seeding)";
     };
 
+    maxConnections = mkOption {
+      type = types.int;
+      default = 600;
+      description = ''
+        Global maximum number of connections.
+        Recommended: 600 for stability (higher values may overwhelm routers/gateways).
+        This value should remain at 600 regardless of upload speed for optimal router compatibility.
+      '';
+    };
+
+    maxConnectionsPerTorrent = mkOption {
+      type = types.int;
+      default = 80;
+      description = ''
+        Maximum connections per torrent.
+        Recommended: 80-100 (increase for better peer diversity on fast connections).
+        Speed optimization: Set to 100 for upload speeds >5 MB/s (40 Mbit/s).
+      '';
+    };
+
     torrentPort = mkOption {
       type = types.port;
       default = 62000;
@@ -602,11 +622,11 @@ in
               # Maximum active torrents (optimized for HDD capacity)
               MaxActiveTorrents = qbittorrentCfg.maxActiveTorrents;
               # Global maximum number of connections
-              # Optimized: Reduced from 2000 to 600 to prevent router/gateway overload
-              MaxConnections = 600;
+              # Configurable via maxConnections option (default: 600 for router stability)
+              MaxConnections = qbittorrentCfg.maxConnections;
               # Maximum number of connections per torrent
-              # Optimized: Reduced from 200 to 80 for better peer management
-              MaxConnectionsPerTorrent = 80;
+              # Configurable via maxConnectionsPerTorrent option (default: 80, recommended 100 for speed)
+              MaxConnectionsPerTorrent = qbittorrentCfg.maxConnectionsPerTorrent;
               # Global maximum number of upload slots (optimized for balanced seeding)
               # Increased default to 300 for better slot allocation across many torrents
               MaxUploads = qbittorrentCfg.maxUploads;

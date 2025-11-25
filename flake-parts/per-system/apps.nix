@@ -43,6 +43,7 @@ in
             "new-module"
             "update-all"
             "visualize-modules"
+            "calculate-qbittorrent-config"
           ];
           scriptArgs =
             if needsConfigRoot then
@@ -56,6 +57,7 @@ in
             "setup-cachix" = "Configure Cachix binary cache";
             "update-all" = "Update all flake dependencies";
             "visualize-modules" = "Generate module dependency graphs";
+            "calculate-qbittorrent-config" = "Calculate optimal qBittorrent settings from speed tests";
           };
           pogScript = pkgsWithPog.callPackage ../../pkgs/pog-scripts/${script-name}.nix scriptArgs;
         in
@@ -77,6 +79,7 @@ in
         setup-cachix = mkPogApp "setup-cachix";
         update-all = mkPogApp "update-all";
         visualize-modules = mkPogApp "visualize-modules";
+        calculate-qbittorrent-config = mkPogApp "calculate-qbittorrent-config";
         # devour-flake: Build all flake outputs efficiently
         devour-flake = {
           type = "app";
