@@ -26,17 +26,30 @@ in
         pulseaudio
         libpulseaudio
       ];
+
+      # Wrap Steam to fix pressure-vessel container audio issues
+      # pressure-vessel tries to use /run/pressure-vessel/pulse/native which doesn't exist
+      # Override to use the actual PipeWire-pulse socket location
+      package = pkgs.steam.override {
+        extraEnv = {
+          # Force games to use host's PipeWire-pulse socket directly
+          # This bypasses pressure-vessel's broken audio socket setup
+          PULSE_SERVER = "unix:\${XDG_RUNTIME_DIR}/pulse/native";
+        };
+      };
     };
 
     # Set audio environment variables for Steam/Proton games
     # SDL_AUDIODRIVER forces SDL games to use PulseAudio (PipeWire compat layer)
-    # PULSE_SERVER lets PipeWire auto-detect (empty = auto)
     # PULSE_LATENCY_MSEC ensures reasonable buffer for games
+    # WINE_AUDIO tells Wine/Proton which audio driver to use (pulse = PulseAudio/PipeWire)
     # These fix games not appearing in audio mixer
     environment.sessionVariables = mkIf cfg.steam {
       SDL_AUDIODRIVER = "pulseaudio";
       PULSE_LATENCY_MSEC = "60";
       PIPEWIRE_LATENCY = "256/48000";
+      # Force Wine/Proton to use PulseAudio backend (works with PipeWire)
+      WINE_AUDIO = "pulse";
     };
 
     # Ensure PipeWire PulseAudio socket is available system-wide
