@@ -97,10 +97,15 @@
         "nonempty"
         "allow_other"
         "use_ino"
-        "cache.files=partial"
+        "cache.files=off" # Changed from partial for direct_io compatibility
         "dropcacheonclose=true"
         "category.create=mfs"
         "minfreespace=1G"
+        "fsname=mergerfs" # Good practice for identifying the mount
+        # Performance optimization: direct_io prevents double-caching
+        # (FUSE layer + XFS layer), reducing RAM waste and improving
+        # consistency during large file moves from NVMe to HDD
+        "direct_io"
         "x-systemd.before=local-fs.target"
       ];
     };

@@ -40,6 +40,16 @@
 
   boot.loader.systemd-boot.configurationLimit = 5;
 
+  # Disk performance optimizations
+  system.diskPerformance = {
+    enable = true;
+    enableVMTuning = true; # VM subsystem tuning for 64GB RAM
+    enableIOTuning = true; # I/O scheduler and readahead optimization
+    enableZFSTuning = true; # ZFS ARC, compression, and atime optimization
+    ramSizeGB = 64; # i9-13900K system with 64GB RAM
+    zfsARCMaxGB = 48; # Cap ZFS ARC at 48GB (75% of RAM)
+  };
+
   # Firewall configuration
   networking.firewall = {
     allowedTCPPorts = [ constants.ports.mcp.docs ]; # Docs MCP Server HTTP interface

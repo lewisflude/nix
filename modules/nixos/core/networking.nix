@@ -121,18 +121,18 @@
     "net.ipv4.conf.all.forwarding" = 1;
     "net.ipv6.conf.all.forwarding" = lib.mkDefault 1;
 
-    # Network performance optimizations
-    # Increase maximum buffer sizes for high-throughput traffic
-    "net.core.rmem_max" = 16777216; # 16MB
-    "net.core.wmem_max" = 16777216; # 16MB
+    # Network performance optimizations for high-bandwidth torrenting
+    # Increased to 32MB to prevent buffer bloat on 1Gbps+ links with 64GB RAM
+    "net.core.rmem_max" = 33554432; # 32MB
+    "net.core.wmem_max" = 33554432; # 32MB
 
     # TCP buffer sizes (min, default, max) - IPv4
-    "net.ipv4.tcp_rmem" = "4096 87380 16777216";
-    "net.ipv4.tcp_wmem" = "4096 65536 16777216";
+    "net.ipv4.tcp_rmem" = "4096 87380 33554432";
+    "net.ipv4.tcp_wmem" = "4096 65536 33554432";
 
     # TCP buffer sizes (min, default, max) - IPv6 (same as IPv4 for consistency)
-    "net.ipv6.tcp_rmem" = "4096 87380 16777216";
-    "net.ipv6.tcp_wmem" = "4096 65536 16777216";
+    "net.ipv6.tcp_rmem" = "4096 87380 33554432";
+    "net.ipv6.tcp_wmem" = "4096 65536 33554432";
 
     # Enable BBR congestion control for better throughput (IPv4 and IPv6)
     "net.ipv4.tcp_congestion_control" = "bbr";
