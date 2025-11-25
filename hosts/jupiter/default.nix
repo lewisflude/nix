@@ -70,7 +70,7 @@
 
         # Storage optimization: SSD for incomplete downloads, HDD for final storage
         incompleteDownloadPath = "/mnt/nvme/qbittorrent/incomplete";
-        diskCacheSize = 512; # MiB - Optimized for SSD write protection and 64GB RAM
+        diskCacheSize = 4096; # MiB - 4GB cache for high-performance with 64GB RAM system
         maxActiveTorrents = 150; # Reduced from 200 to avoid HDD saturation with Jellyfin
         maxActiveUploads = 75; # Reduced to prevent HDD thrashing during streaming
         maxUploads = 300; # Increased from 150 for better slot allocation across torrents
@@ -87,17 +87,18 @@
         maxRatioAction = 0; # 0 = pause torrent when ratio reached
 
         # Torrent behavior settings
-        addToTopOfQueue = true;
-        preallocation = true;
-        addExtensionToIncompleteFiles = true;
-        useCategoryPathsInManualMode = true;
+        # Note: addToTopOfQueue, addExtensionToIncompleteFiles, and useCategoryPathsInManualMode
+        # are now enabled by default in the module, so explicit settings are optional
         deleteTorrentFilesAfterwards = "Always";
+
+        # Preallocation disabled for ZFS (prevents fragmentation and double-writes)
+        preallocation = false;
 
         # VPN Configuration
         vpn = {
           enable = true;
           namespace = "qbt";
-          torrentPort = 62000; # Will be updated by NAT-PMP
+          torrentPort = 61377; # Updated by NAT-PMP script
           webUIBindAddress = "*"; # Accessible from any interface
         };
 
