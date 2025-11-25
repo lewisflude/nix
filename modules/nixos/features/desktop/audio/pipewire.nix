@@ -18,13 +18,25 @@ in
       raopOpenFirewall = true;
       wireplumber = {
         configPackages = [
-          # Explicitly set default sink for Steam/Proton games
-          # This ensures games always connect to the correct audio device on launch
-          # Uses the "Speakers" virtual sink created by apogee-speakers-loopback service
+          # Set default audio devices for all applications (PulseAudio, ALSA, JACK, native PipeWire)
+          # This configuration ensures consistent device selection across all audio APIs
           (pkgs.writeTextDir "share/wireplumber/main.lua.d/50-default-devices.lua" ''
-            -- Set explicit default sink for Steam/Proton compatibility
-            -- Without this, games may fail to initialize audio or pick wrong device
-            default_policy.policy["audio.default.sink"] = "Speakers"
+            -- Increase priority of Speakers sink to make it the preferred default
+            -- Higher priority = preferred by default, but users can still override
+            rule = {
+              matches = {
+                {
+                  { "node.name", "equals", "Speakers" },
+                },
+              },
+              apply_properties = {
+                ["node.description"] = "Speakers (Default)",
+                ["priority.session"] = 3000,  -- Higher than hardware devices (typically 1000-2000)
+                ["node.nick"] = "Speakers",    -- Friendly name for ALSA/apps
+                ["media.class"] = "Audio/Sink",
+              },
+            }
+            table.insert(alsa_monitor.rules, rule)
           '')
           # Set priorities to ensure consistent default device for Wine/Proton
           (pkgs.writeTextDir "share/wireplumber/main.lua.d/51-device-priority.lua" ''
