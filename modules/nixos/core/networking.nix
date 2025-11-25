@@ -137,5 +137,13 @@
     # Enable BBR congestion control for better throughput (IPv4 and IPv6)
     "net.ipv4.tcp_congestion_control" = "bbr";
     "net.ipv6.tcp_congestion_control" = "bbr";
+
+    # Additional LAN optimizations for file transfers
+    "net.core.netdev_max_backlog" = 5000;
+    "net.ipv4.tcp_fastopen" = 3; # Enable both client and server
+    "net.ipv4.tcp_mtu_probing" = 1; # Enable MTU probing for better path discovery
+    "net.ipv4.tcp_window_scaling" = 1;
+    "net.ipv4.tcp_timestamps" = 1;
+    "net.ipv4.tcp_fin_timeout" = 15; # Reduce TIME_WAIT for faster connection recycling
   };
 }

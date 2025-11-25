@@ -37,7 +37,7 @@ let
     USB_PATH="/dev/bus/usb/$BUS/$DEVICE"
     if [ -e "$USB_PATH" ]; then
       log "Resetting USB device at $USB_PATH"
-      ${pkgs.usb-reset}/bin/usbreset "$USB_PATH" || log "WARNING: USB reset failed, continuing anyway"
+      ${pkgs.usbutils}/bin/usbreset "$USB_PATH" || log "WARNING: USB reset failed, continuing anyway"
     else
       log "WARNING: USB device path $USB_PATH not found"
     fi
@@ -74,18 +74,23 @@ let
 in
 {
   config = lib.mkIf (cfg.enable or false) {
-    # Install usb-reset utility
-    environment.systemPackages = [ pkgs.usb-reset ];
+    # Install usbutils (provides usbreset command)
+    environment.systemPackages = [ pkgs.usbutils ];
 
-    # Udev rule to trigger reset when Apogee is connected
-    # This catches the device when switching from macOS via KVM
+    # Disable USB autosuspend for Apogee Symphony Desktop
+    # Audio interfaces should never be power-managed to avoid dropouts and connection issues
     services.udev.extraRules = ''
       # Apogee Symphony Desktop - Auto-reset when connected via KVM switch
       # Vendor ID: 0c60 (Apogee Electronics Corp)
-      # Product ID: 0014 (Symphony Desktop)
+      # Product ID: 002a (Symphony Desktop)
       # Trigger: Device add/change events to catch KVM switches
-      ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="0c60", ATTR{idProduct}=="0014", \
+      ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="0c60", ATTR{idProduct}=="002a", \
         TAG+="systemd", ENV{SYSTEMD_WANTS}="apogee-reset@$env{BUSNUM}-$env{DEVNUM}.service"
+
+      # Disable USB autosuspend for Apogee Symphony Desktop
+      # This prevents the device from being suspended, which can cause connection issues
+      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0c60", ATTR{idProduct}=="002a", \
+        TEST=="power/control", ATTR{power/control}="on"
     '';
 
     # Systemd service template for the reset script
@@ -106,6 +111,35 @@ in
         Restart = "no";
         # Timeout after 30 seconds if something goes wrong
         TimeoutStartSec = "30s";
+      };
+    };
+
+    # Boot-time initialization service
+    # This runs at boot to reset the Apogee if it's already connected
+    # The udev rule above only triggers on hot-plug or KVM switch events
+    systemd.services.apogee-symphony-init = {
+      description = "Initialize Apogee Symphony Desktop at boot";
+      wantedBy = [ "sound.target" ];
+      after = [
+        "sound.target"
+        "systemd-udev-settle.service"
+      ];
+
+      # Wait a bit for USB enumeration to complete
+      # This ensures the device is fully initialized before we try to reset it
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStartPre = "${pkgs.coreutils}/bin/sleep 3";
+        ExecStart = "${resetApogeeScript}";
+        RemainAfterExit = true;
+        User = "root";
+        # Allow failure - device might not be connected
+        SuccessExitStatus = [
+          0
+          1
+        ];
+        # Longer timeout for boot-time reset
+        TimeoutStartSec = "45s";
       };
     };
 
