@@ -20,11 +20,16 @@ in
       dedicatedServer.openFirewall = true;
 
       # Fix for Steam/Proton games not producing audio with PipeWire
-      # Proton/Wine games need full 32-bit audio stack to work properly
+      # Provides complete audio stack for all game audio APIs:
+      # - PulseAudio/libpulseaudio: For SDL2 games and Wine/Proton
+      # - PipeWire: For native PipeWire-aware games
+      # - ALSA libs: For FMOD games (Dwarf Fortress), OpenAL, and low-level audio
       extraCompatPackages = with pkgs; [
-        pipewire
-        pulseaudio
-        libpulseaudio
+        pipewire # PipeWire daemon and libraries
+        pulseaudio # PulseAudio daemon (for fallback)
+        libpulseaudio # PulseAudio client library
+        alsa-lib # ALSA user-space library (required for FMOD)
+        alsa-plugins # ALSA plugins including PipeWire bridge
       ];
 
       # Wrap Steam to fix pressure-vessel container audio issues
@@ -39,16 +44,16 @@ in
       };
     };
 
-    # Set audio environment variables for Steam/Proton games
-    # SDL_AUDIODRIVER forces SDL games to use PulseAudio (PipeWire compat layer)
-    # PULSE_LATENCY_MSEC ensures reasonable buffer for games
-    # WINE_AUDIO tells Wine/Proton which audio driver to use (pulse = PulseAudio/PipeWire)
-    # These fix games not appearing in audio mixer
+    # Audio environment variables for Steam/Proton games
+    # Only set what's necessary - ALSA configuration handles device routing
     environment.sessionVariables = mkIf cfg.steam {
+      # SDL2 games: Use PulseAudio backend (PipeWire provides pulseaudio compatibility)
       SDL_AUDIODRIVER = "pulseaudio";
+      # PulseAudio buffer latency (60ms is good balance for gaming)
       PULSE_LATENCY_MSEC = "60";
+      # PipeWire-native latency setting (256 frames @ 48kHz = ~5.3ms)
       PIPEWIRE_LATENCY = "256/48000";
-      # Force Wine/Proton to use PulseAudio backend (works with PipeWire)
+      # Wine/Proton: Use PulseAudio backend (most compatible, works with PipeWire)
       WINE_AUDIO = "pulse";
     };
 
