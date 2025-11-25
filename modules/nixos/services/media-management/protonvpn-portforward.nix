@@ -46,25 +46,43 @@ let
 
     echo "Updating firewall for port $NEW_PORT in namespace $NAMESPACE..."
 
-    # Remove old port rules (if any exist for ports that aren't the new port)
+    # IPv4: Remove old port rules (if any exist for ports that aren't the new port)
     ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables-save | \
       grep -E "qbt0.*dpt:[0-9]+" | grep -v "dpt:$NEW_PORT" | \
       sed 's/^-A /-D /' | while read rule; do
         ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables $rule 2>/dev/null || true
       done || true  # Don't fail if no old rules exist
 
-    # Add rules for new port if they don't exist
+    # IPv4: Add rules for new port if they don't exist
     if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -C INPUT -p tcp --dport "$NEW_PORT" -i qbt0 -j ACCEPT 2>/dev/null; then
       ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -I INPUT -p tcp --dport "$NEW_PORT" -i qbt0 -j ACCEPT
-      echo "Added TCP rule for port $NEW_PORT"
+      echo "Added IPv4 TCP rule for port $NEW_PORT"
     fi
 
     if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -C INPUT -p udp --dport "$NEW_PORT" -i qbt0 -j ACCEPT 2>/dev/null; then
       ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -I INPUT -p udp --dport "$NEW_PORT" -i qbt0 -j ACCEPT
-      echo "Added UDP rule for port $NEW_PORT"
+      echo "Added IPv4 UDP rule for port $NEW_PORT"
     fi
 
-    echo "Firewall updated successfully for port $NEW_PORT"
+    # IPv6: Remove old port rules (if any exist for ports that aren't the new port)
+    ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/ip6tables-save | \
+      grep -E "qbt0.*dpt:[0-9]+" | grep -v "dpt:$NEW_PORT" | \
+      sed 's/^-A /-D /' | while read rule; do
+        ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/ip6tables $rule 2>/dev/null || true
+      done || true  # Don't fail if no old rules exist
+
+    # IPv6: Add rules for new port if they don't exist
+    if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/ip6tables -C INPUT -p tcp --dport "$NEW_PORT" -i qbt0 -j ACCEPT 2>/dev/null; then
+      ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/ip6tables -I INPUT -p tcp --dport "$NEW_PORT" -i qbt0 -j ACCEPT
+      echo "Added IPv6 TCP rule for port $NEW_PORT"
+    fi
+
+    if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/ip6tables -C INPUT -p udp --dport "$NEW_PORT" -i qbt0 -j ACCEPT 2>/dev/null; then
+      ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/ip6tables -I INPUT -p udp --dport "$NEW_PORT" -i qbt0 -j ACCEPT
+      echo "Added IPv6 UDP rule for port $NEW_PORT"
+    fi
+
+    echo "Firewall updated successfully for port $NEW_PORT (IPv4 + IPv6)"
   '';
 in
 {
