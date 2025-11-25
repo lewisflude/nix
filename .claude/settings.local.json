@@ -30,7 +30,9 @@
       "Bash(sudo cat:*)",
       "Bash(gpg --list-secret-keys:*)",
       "Bash(treefmt)",
-      "Bash(treefmt:*)"
+      "Bash(treefmt:*)",
+      "Bash(lsblk:*)",
+      "mcp__general-filesystem__write_file"
     ],
     "deny": [
       "Read(**/.env)",
