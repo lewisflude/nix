@@ -20,7 +20,8 @@ in
         timeout = 300;
         # Colors are configured via programs.swaylock.settings (see below)
         # Only pass non-color arguments here
-        command = "${pkgs.swaylock-effects}/bin/swaylock --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --grace 2 --fade-in 0.2";
+        # -f flag is required for proper ext-session-lock integration with niri
+        command = "${pkgs.swaylock-effects}/bin/swaylock -f --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --grace 2 --fade-in 0.2";
       }
       {
         timeout = 600;
@@ -31,7 +32,8 @@ in
     events = [
       {
         event = "before-sleep";
-        command = "${pkgs.swaylock-effects}/bin/swaylock";
+        # -f flag is required for proper ext-session-lock integration with niri
+        command = "${pkgs.swaylock-effects}/bin/swaylock -f";
       }
     ];
   };
