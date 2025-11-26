@@ -156,12 +156,20 @@ WireGuard adds significant overhead:
 - **Authentication**: 16 bytes
 - **Total overhead**: ~60-80 bytes
 
-So if your regular network MTU is 1492, the VPN MTU must be lower to account for encapsulation:
+However, testing revealed something important:
 
-- 1492 (regular MTU) - 80 (WireGuard overhead) = **1412 theoretical**
-- 1420 (actual optimal) is the tested maximum that doesn't fragment
+- **The VPN MTU of 1420 is optimal regardless of eno2's MTU**
+- Tested with both eno2=1500 and eno2=1492: VPN optimal remains 1420
+- This means the fragmentation bottleneck is **NOT at eno2**
+- The bottleneck is at the **ProtonVPN server** or **internet path**
 
-The optimal value of 1420 suggests your VPN path can handle slightly more than the theoretical minimum, which is good!
+This is good news because:
+
+- ✅ Lowering eno2 to 1492 **does not affect** qbt0
+- ✅ No need to adjust VPN MTU when changing regular network MTU
+- ✅ The VPN path MTU is independent of local interface MTU
+
+The network stack properly handles WireGuard encapsulation, and the 1420 limit comes from the VPN tunnel path, not your local hardware.
 
 ### Binary Search Algorithm
 
