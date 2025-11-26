@@ -56,7 +56,7 @@ in
     # Kernel network tuning for high-bandwidth torrenting
     # Increases socket buffers to handle burst traffic from many concurrent connections
     boot.kernel.sysctl = {
-      # Increase default and maximum socket buffer sizes
+      # Socket buffer configuration
       # Default: 212992 bytes (208 KB) - increased to 256 KB
       # Max: 33554432 bytes (32 MB) - kept at 32 MB
       "net.core.rmem_default" = 262144; # 256 KB receive buffer default
@@ -64,10 +64,16 @@ in
       "net.core.rmem_max" = 33554432; # 32 MB receive buffer max (unchanged)
       "net.core.wmem_max" = 33554432; # 32 MB send buffer max (unchanged)
 
-      # Increase UDP buffer minimums for better torrent performance
+      # UDP buffer configuration for torrent traffic
       # Default: 4096 bytes - increased to 16 KB
       "net.ipv4.udp_rmem_min" = 16384; # 16 KB UDP receive buffer min
       "net.ipv4.udp_wmem_min" = 16384; # 16 KB UDP send buffer min
+
+      # TCP congestion control and qdisc
+      # BBR (Bottleneck Bandwidth and RTT) congestion control for better VPN performance
+      # Recommended for WireGuard VPN tunnels to improve throughput
+      "net.core.default_qdisc" = "fq"; # Fair Queue - required for BBR
+      "net.ipv4.tcp_congestion_control" = "bbr"; # BBR congestion control
     };
 
     # Ensure WireGuard tools and natpmpc are available
@@ -192,8 +198,14 @@ in
           Type = "oneshot";
           RemainAfterExit = "yes";
           # Remove default noqueue, add CAKE qdisc optimized for WireGuard
-          # CAKE automatically handles bufferbloat and provides better fairness than fq
-          ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${vpnCfg.namespace} ${pkgs.iproute2}/bin/tc qdisc replace dev ${vpnCfg.namespace}0 root cake bandwidth 100mbit";
+          # CAKE configuration:
+          # - bandwidth 100mbit: Shape to 100 Mbit/s (headroom above 82 Mbit/s actual VPN speed)
+          # - overhead 60: Account for WireGuard IPv4 encapsulation (20B IPv4 + 8B UDP + 32B WG = 60B)
+          # - mpu 64: Minimum packet unit - accounts for WireGuard's cryptographic padding
+          # - rtt 100ms: Default "internet" preset - conservative for worldwide torrent peers
+          #              (Measured VPN RTT ~10ms, but peers can be 200ms+ globally)
+          # Note: Start with conservative settings, can optimize to "metro" (rtt 10ms) later
+          ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${vpnCfg.namespace} ${pkgs.iproute2}/bin/tc qdisc replace dev ${vpnCfg.namespace}0 root cake bandwidth 100mbit overhead 60 mpu 64";
           # Clean up on stop
           ExecStop = "${pkgs.iproute2}/bin/ip netns exec ${vpnCfg.namespace} ${pkgs.iproute2}/bin/tc qdisc del dev ${vpnCfg.namespace}0 root || true";
         };
