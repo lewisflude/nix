@@ -28,6 +28,7 @@
       openWebui = 7000;
       cockpit = 9090;
       dante = 1080;
+      eternalTerminal = 2022;
 
       # Media management services
       jellyfin = 8096;
