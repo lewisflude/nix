@@ -38,7 +38,11 @@ in
       allow-inhibiting = false;
       action.toggle-keyboard-shortcuts-inhibit = { };
     };
-    "Super+Alt+L".action.spawn = [ screenLocker ];
+    # -f flag is required for proper ext-session-lock integration with niri
+    "Super+Alt+L".action.spawn = [
+      screenLocker
+      "-f"
+    ];
     "Mod+Shift+P".action.power-off-monitors = { };
     "Mod+Shift+D" = {
       action.spawn = [
