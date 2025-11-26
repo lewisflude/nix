@@ -1,655 +1,370 @@
 # Scripts Directory
 
-Utility scripts for managing NixOS configuration and services.
+Utility scripts for NixOS configuration management, diagnostics, automation, and AI tool integration. Scripts are organized by category for easy discovery and maintenance.
 
-## Claude Code Hook Scripts
+## 📂 Directory Structure
 
-These scripts are used by Claude Code hooks (see `.claude/settings.json`) to enforce code quality and safety standards.
+```
+scripts/
+├── hooks/            7 scripts  - Claude Code integration hooks
+├── media/            9 scripts  - qBittorrent, VPN, storage monitoring
+├── network/          3 scripts  - Network testing and optimization
+├── diagnostics/      3 scripts  - System troubleshooting tools
+├── validation/       2 scripts  - Configuration validation
+└── templates/                  - Script templates for new scripts
+```
 
-### `block-dangerous-commands.sh`
+**Total**: 24 scripts across 5 categories
 
-**Hook**: PreToolUse (Bash)
-**Purpose**: Blocks dangerous commands before execution
-
-**Blocked operations**:
-
-- System rebuilds (`nh os switch`, `nixos-rebuild`, `darwin-rebuild`)
-- Destructive file operations (`rm -rf`, `mv to /dev/null`)
-- Git force operations (`git push --force`, `git reset --hard`)
-- Production host access (patterns: `prod*`, `production*`, `*-prod`, `*-production`)
-
-**Exit codes**:
-
-- `0`: Command allowed
-- `2`: Command blocked (shown to Claude)
-
-### `auto-format-nix.sh`
-
-**Hook**: PostToolUse (Write|Edit)
-**Purpose**: Automatically formats Nix files after editing
-
-**Behavior**:
-
-- Runs `nixfmt` on all `.nix` files after Write/Edit operations
-- Blocks (exit 2) if formatting fails (indicates syntax errors)
-- Skips non-Nix files silently
-
-**Requirements**: `nixfmt` must be in PATH (available in `nix develop`)
-
-### `strict-lint-check.sh`
-
-**Hook**: PostToolUse (Write|Edit)
-**Purpose**: Enforces code quality standards and architectural guidelines
-
-**Checks**:
-
-- **statix**: Nix antipattern detection
-- **deadnix**: Unused code detection
-- **with pkgs;**: Antipattern from CLAUDE.md
-- **Module placement**: Validates system vs home-manager separation
-
-**Exit codes**:
-
-- `0`: All checks passed
-- `2`: Issues found (blocks Claude, requires fixes)
-
-### `load-context.sh`
-
-**Hook**: SessionStart
-**Purpose**: Loads project context when Claude Code starts
-
-**Output** (added to Claude's context):
-
-- Current git branch
-- Last 3 commits
-- Working tree status
-
-**Performance**: Minimal overhead (~100ms)
-
-## qBittorrent & ProtonVPN Scripts
-
-### `protonvpn-natpmp-portforward.sh`
-
-Automated NAT-PMP port forwarding for qBittorrent via ProtonVPN.
-
-**Usage:**
+## 🚀 Quick Start
 
 ```bash
-# Run manually (uses defaults from env or config)
-./scripts/protonvpn-natpmp-portforward.sh
+# List scripts by category
+ls scripts/*/
 
-# Or with custom values
-NAMESPACE=qbt VPN_GATEWAY=10.2.0.1 ./scripts/protonvpn-natpmp-portforward.sh
+# Find a script
+find scripts/ -name "*vpn*"
+
+# Run a diagnostic
+./scripts/diagnostics/diagnose-ssh-slowness.sh hostname
+
+# Validate configuration
+./scripts/validation/validate-config.sh
+
+# Test network MTU
+sudo ./scripts/network/optimize-mtu.sh
 ```
 
-**What it does:**
+## 📚 Categories
 
-1. Checks VPN namespace and connectivity
-2. Queries NAT-PMP for forwarded port
-3. Updates qBittorrent configuration
-4. Restarts qBittorrent service
-5. Verifies port is listening
+### [Hooks](hooks/README.md) - Claude Code Integration (7 scripts)
 
-**Systemd Integration:**
-Runs automatically via systemd timer every 45 minutes when VPN is enabled.
+AI-powered automation hooks for code quality, safety, and context management.
 
-### `test-vpn-port-forwarding.sh`
+**Key Scripts**:
 
-Quick one-liner verification for port forwarding status.
+- `block-dangerous-commands.sh` - Prevents dangerous operations
+- `auto-format-nix.sh` - Automatic Nix formatting
+- `strict-lint-check.sh` - Enforce coding standards
+- `load-context.sh` - Load project context at session start
 
-**Usage:**
+**Integration**: `.claude/settings.json` (automated)
+
+[📖 Full Documentation](hooks/README.md)
+
+---
+
+### [Media](media/README.md) - qBittorrent & VPN (9 scripts)
+
+Port forwarding, VPN management, and storage monitoring for media services.
+
+**Key Scripts**:
+
+- `protonvpn-natpmp-portforward.sh` - Automated port forwarding (integrated)
+- `monitor-protonvpn-portforward.sh` - VPN monitoring
+- `verify-qbittorrent-vpn.sh` - Complete verification
+- `diagnose-qbittorrent-seeding.sh` - Seeding diagnostics
+- `monitor-hdd-storage.sh` - Storage monitoring
+
+**Integration**: NixOS modules in `modules/nixos/services/media-management/`
+
+[📖 Full Documentation](media/README.md)
+
+---
+
+### [Network](network/README.md) - Testing & Optimization (3 scripts)
+
+Network performance testing, MTU optimization, and speed benchmarking.
+
+**Key Scripts**:
+
+- `optimize-mtu.sh` - MTU discovery and optimization ⭐
+- `test-vlan2-speed.sh` - VLAN 2 speed testing
+- `test-sped.sh` - Internet speed test
+
+**Integration**: Standalone diagnostic tools
+
+[📖 Full Documentation](network/README.md)
+
+---
+
+### [Diagnostics](diagnostics/README.md) - Troubleshooting (3 scripts)
+
+Interactive diagnostic tools for identifying system issues.
+
+**Key Scripts**:
+
+- `diagnose-ssh-slowness.sh` - SSH performance diagnostics
+- `test-ssh-performance.sh` - SSH benchmarking
+- `diagnose-steam-audio.sh` - Steam/Proton audio issues
+
+**Integration**: Standalone diagnostic tools
+
+[📖 Full Documentation](diagnostics/README.md)
+
+---
+
+### [Validation](validation/README.md) - Configuration Testing (2 scripts)
+
+Validate system configuration and AI tool setups before deployment.
+
+**Key Scripts**:
+
+- `validate-config.sh` - Validate Nix configuration
+- `ai-tool-setup.sh` - Verify AI tool configurations
+
+**Integration**: Standalone validation tools (use in pre-commit hooks)
+
+[📖 Full Documentation](validation/README.md)
+
+---
+
+## 🔍 Finding the Right Script
+
+### By Use Case
+
+| I need to... | Script | Category |
+|--------------|--------|----------|
+| Check VPN port forwarding | `monitor-protonvpn-portforward.sh` | media |
+| Diagnose slow SSH | `diagnose-ssh-slowness.sh` | diagnostics |
+| Optimize network MTU | `optimize-mtu.sh` | network |
+| Test speed through VLAN 2 | `test-vlan2-speed.sh` | network |
+| Fix Steam audio issues | `diagnose-steam-audio.sh` | diagnostics |
+| Validate config before rebuild | `validate-config.sh` | validation |
+| Check AI tool setup | `ai-tool-setup.sh` | validation |
+| Verify qBittorrent setup | `verify-qbittorrent-vpn.sh` | media |
+| Monitor HDD storage | `monitor-hdd-storage.sh` | media |
+| Benchmark SSH performance | `test-ssh-performance.sh` | diagnostics |
+
+### By Integration Status
+
+**Automated (Integrated into System)** (12 scripts):
+
+- **Claude Code Hooks** (7) → `.claude/settings.json`
+  - All hooks run automatically during Claude Code sessions
+- **qBittorrent/VPN** (5) → NixOS modules
+  - `protonvpn-natpmp-portforward.sh` - systemd service
+  - `show-protonvpn-port.sh` - system package
+  - `monitor-protonvpn-portforward.sh` - system package
+  - `verify-qbittorrent-vpn.sh` - system package
+  - `test-vpn-port-forwarding.sh` - system package
+
+**Standalone (Manual Execution)** (12 scripts):
+
+- All diagnostics, network tests, and validation tools
+- Run these manually for troubleshooting and testing
+
+## 🛠️ Development
+
+### Creating New Scripts
+
+Use the interactive script generator:
 
 ```bash
-# Run quick verification
-./scripts/test-vpn-port-forwarding.sh
+# Create a new script from template
+nix run .#new-script
 
-# Or with custom settings
-NAMESPACE=qbt VPN_GATEWAY=10.2.0.1 ./scripts/test-vpn-port-forwarding.sh
+# Prompts for:
+# - Category: hooks, media, network, diagnostics, validation
+# - Name: my-awesome-script
+# - Description: What it does
+# - Integration: none, nix-module, claude-hook, systemd
 ```
 
-**Quick Checks:**
+Templates are available in `scripts/templates/`.
 
-1. ProtonVPN assigned port (via NAT-PMP)
-2. qBittorrent configured port
-3. Port matching verification
-4. qBittorrent listening status
-5. Port forwarding service status
-6. External IP verification
-7. qBittorrent service status
+### Script Standards
 
-**Returns:**
+All scripts follow these standards:
 
-- Exit code 0: All checks passed
-- Exit code 1: Issues found (shows troubleshooting steps)
+1. **Standard header format** with metadata
+2. **Proper shebang**: `#!/usr/bin/env bash`
+3. **Error handling**: `set -euo pipefail`
+4. **Help flag**: `--help` shows usage
+5. **Exit codes**: 0=success, 1=error, 2=blocked/invalid
+6. **Logging**: Color-coded output (✓ ✗ ⚠️ ℹ️)
 
-**Use when:**
+See `scripts/templates/generic-script.sh` for the standard template.
 
-- You want a fast status check
-- After making configuration changes
-- Before testing torrents
-- To verify automation is working
-
-### `monitor-protonvpn-portforward.sh`
-
-Comprehensive monitoring script for VPN namespace and port forwarding status.
-
-**Usage:**
+### Testing Scripts
 
 ```bash
-# Run monitoring
-./scripts/monitor-protonvpn-portforward.sh
+# Test a specific script
+./scripts/validation/validate-config.sh
 
-# Or with custom namespace
-NAMESPACE=qbt ./scripts/monitor-protonvpn-portforward.sh
+# Test all hooks
+for hook in scripts/hooks/*.sh; do
+  echo "Testing $hook..."
+  "$hook" --help
+done
+
+# Run validation on all scripts
+./scripts/validation/ai-tool-setup.sh
 ```
 
-**Checks:**
+## 📖 Documentation
 
-1. VPN namespace exists
-2. WireGuard interface status
-3. VPN connectivity (gateway ping, external IP)
-4. NAT-PMP port forwarding
-5. qBittorrent service status
-6. qBittorrent configuration (port, interface binding)
-7. Listening ports in namespace
-8. Recent service logs
+- **Category READMEs**: Each category has detailed documentation
+  - [hooks/README.md](hooks/README.md) - Claude Code hooks
+  - [media/README.md](media/README.md) - qBittorrent & VPN
+  - [network/README.md](network/README.md) - Network testing
+  - [diagnostics/README.md](diagnostics/README.md) - Troubleshooting
+  - [validation/README.md](validation/README.md) - Validation tools
 
-**Exit codes:**
+- **Guides**:
+  - [qBittorrent Setup Guide](../docs/QBITTORRENT_GUIDE.md) - Complete setup
+  - [ProtonVPN Port Forwarding](../docs/PROTONVPN_PORT_FORWARDING_SETUP.md) - VPN config
+  - [Script Organization Proposal](../docs/SCRIPT_ORGANIZATION_PROPOSAL.md) - Architecture
+  - [AI Tools Guide](../AI_TOOLS.md) - AI assistant setup
 
-- `0`: All checks passed
-- `>0`: Number of failed checks
+## 🔧 Common Tasks
 
-### `verify-qbittorrent-vpn.sh`
-
-Interactive verification script following the setup guide checklist.
-
-**Usage:**
+### Troubleshooting qBittorrent VPN
 
 ```bash
-./scripts/verify-qbittorrent-vpn.sh
+# Complete verification
+./scripts/media/verify-qbittorrent-vpn.sh
+
+# Monitor status
+./scripts/media/monitor-protonvpn-portforward.sh
+
+# Check port forwarding
+./scripts/media/test-vpn-port-forwarding.sh
+
+# Diagnose seeding issues
+./scripts/media/diagnose-qbittorrent-seeding.sh
 ```
 
-**Phases:**
-
-1. **Basic Connectivity**: Namespace, WireGuard, routing, gateway, external IP
-2. **NAT-PMP**: Port forwarding queries and assignments
-3. **qBittorrent**: Service status, configuration, port binding
-4. **Summary**: Next steps and automation tips
-
-### `monitor-hdd-storage.sh`
-
-Monitor HDD storage usage and health for media services.
-
-**Usage:**
+### Optimizing Network Performance
 
 ```bash
-# One-time report
-./scripts/monitor-hdd-storage.sh
+# Discover optimal MTU
+sudo ./scripts/network/optimize-mtu.sh
 
-# Continuous monitoring
-./scripts/monitor-hdd-storage.sh --continuous --interval 10
+# Test speeds
+./scripts/network/test-sped.sh
+
+# Compare VPN vs regular
+./scripts/network/test-sped.sh  # Regular
+sudo ip netns exec qbt ./scripts/network/test-sped.sh  # VPN
 ```
 
-**Checks:**
-
-- Disk space usage (SSD staging, HDD storage)
-- HDD I/O utilization
-- Service status
-- Temperature readings (if available)
-
-For complete qBittorrent setup and troubleshooting, see `docs/QBITTORRENT_GUIDE.md`.
-
-## Network Performance Scripts
-
-### `optimize-mtu.sh`
-
-Automatically discover and optimize MTU (Maximum Transmission Unit) for regular network and VPN interfaces using Path MTU Discovery.
-
-**Usage:**
+### Diagnosing SSH Slowness
 
 ```bash
-# Test both regular network and VPN (recommended)
-sudo ./scripts/optimize-mtu.sh
+# Quick diagnosis
+./scripts/diagnostics/diagnose-ssh-slowness.sh jupiter
 
-# Test only VPN (prioritize qBittorrent/VPN performance)
-sudo ./scripts/optimize-mtu.sh --vpn-only
+# Full benchmark
+./scripts/diagnostics/test-ssh-performance.sh jupiter
 
-# Test only regular network
-sudo ./scripts/optimize-mtu.sh --regular-only
-
-# Test and apply settings
-sudo ./scripts/optimize-mtu.sh --apply
-
-# Dry-run to see recommendations
-sudo ./scripts/optimize-mtu.sh --apply --dry-run
+# Apply recommended config to ~/.ssh/config
 ```
 
-**What it does:**
-
-1. Uses binary search with ping + "Don't Fragment" flag to find optimal MTU
-2. Tests both regular network interface and VPN namespace
-3. Discovers the largest packet size that doesn't fragment
-4. Provides specific recommendations for:
-   - NixOS configuration (`networking.interfaces.<iface>.mtu`)
-   - WireGuard configuration (`MTU = <value>` in SOPS secret)
-   - UniFi Dream Machine setup (DHCP options or per-port settings)
-
-**How it works:**
-
-- Sends ping packets with increasing sizes and DF (Don't Fragment) flag
-- Uses binary search to efficiently find optimal MTU (typically 8-12 tests)
-- Accounts for IP/ICMP header overhead (28 bytes)
-- Tests against reliable hosts (1.1.1.1 for regular, 8.8.8.8 for VPN)
-
-**Output:**
-
-- Current MTU vs Optimal MTU for each interface
-- Status indicators (✓ OPTIMAL or ⚠️ NEEDS ADJUSTMENT)
-- Configuration recommendations with exact values
-- Verification commands to test after applying
-
-**Critical for VPN:**
-
-Proper MTU is essential for VPN performance! WireGuard adds ~80 bytes overhead, so MTU must be lowered to avoid fragmentation. The script automatically accounts for this.
-
-**UniFi Dream Machine Integration:**
-
-The script provides two methods for applying MTU on UniFi:
-
-1. Network-wide via DHCP Option 26
-2. Per-port in device settings (recommended for specific devices)
-
-### qBittorrent Diagnostics
-
-- `diagnose-qbittorrent-seeding.sh` - Diagnose seeding issues
-- `test-qbittorrent-connectivity.sh` - Test qBittorrent connectivity
-- `test-qbittorrent-seeding-health.sh` - Check seeding health
-
-### SSH Performance
-
-- `diagnose-ssh-slowness.sh` - Diagnose SSH performance issues
-- `test-ssh-performance.sh` - Comprehensive SSH speed testing
-
-### Network Testing
-
-- `test-vlan2-speed.sh` - Test VLAN2 network speed
-- `test-sped.sh` - Simple speed test wrapper
-
-### Audio & Gaming
-
-#### `diagnose-steam-audio.sh`
-
-Comprehensive diagnostic tool for Steam/Proton audio issues with PipeWire.
-
-**Usage:**
+### Before System Rebuild
 
 ```bash
-# Run diagnostics (Steam can be running or stopped)
-./scripts/diagnose-steam-audio.sh
+# Validate configuration
+./scripts/validation/validate-config.sh
+
+# If valid, rebuild
+nh os switch
 ```
 
-**Checks:**
+## ⚙️ Integration with System
 
-1. PipeWire, PipeWire-Pulse, and WirePlumber service status
-2. PulseAudio socket existence and permissions
-3. Available audio sinks in PipeWire
-4. Default sink configuration
-5. WirePlumber device status
-6. Steam process environment variables
-7. Session audio environment variables
-8. Test audio playback
+### Automated Scripts (systemd)
 
-**Common Issues:**
-
-- **Games don't appear in audio mixer:** Missing `SDL_AUDIODRIVER=pulseaudio` or wrong `PULSE_SERVER`
-- **No sound in games but other apps work:** Games using ALSA directly instead of PulseAudio
-- **Intermittent audio failures:** No explicit default sink configured in WirePlumber
-
-**Fixes:**
-
-1. Restart Steam: `steam -shutdown && steam`
-2. Add to game launch options: `SDL_AUDIODRIVER=pulseaudio %command%`
-3. Check logs: `~/.local/share/Steam/logs/`
-4. Enable debug logging: `PULSE_LOG=99 <game>`
-
-### System Validation
-
-- `validate-config.sh` - Validate Nix configuration before rebuild
-
-## Backup Scripts
-
-### `backup-preview.sh`
-
-Preview what will be backed up to Samsung Drive before running the actual backup.
-
-**Usage:**
+These scripts run automatically via systemd:
 
 ```bash
-./scripts/backup-preview.sh
+# Check port forwarding timer
+systemctl status protonvpn-portforward.timer
+systemctl list-timers | grep protonvpn
+
+# View logs
+journalctl -u protonvpn-portforward.service -f
 ```
 
-**Shows:**
+### Configured in NixOS
 
-- All directories that will be backed up
-- Size of each directory
-- File counts
-- Total backup size
-- Available space on Samsung Drive
+Port forwarding automation:
 
-**What's included:**
+```nix
+host.services.mediaManagement.qbittorrent.vpn.portForwarding = {
+  enable = true;
+  renewInterval = "45min";
+  gateway = "10.2.0.1";
+};
+```
 
-- **Music & Audio Production:**
-  - Ableton Projects (`~/Music/Ableton/`) - ~41GB
-  - Sample Library (`~/Music/Sample Library/`) - ~150MB
-  - FastGarage Project
-  - Music Projects
-  - Guitar1 Project (from Desktop)
-  - ModularPolyGrandJam Project
+### Claude Code Hooks
 
-- **Ableton Application Support:**
-  - Preferences, database, and Live configuration (`~/Library/Application Support/Ableton/`)
-
-- **Max/MSP Projects:**
-  - Max 8 and Max 9 projects
-
-- **Development & Creative Projects:**
-  - Code Projects (`~/Code/`) - ~61GB
-  - Obsidian vaults
-  - Unreal Projects
-
-- **Audio Plugin Libraries & Samples:**
-  - Toontrack Superior Drummer 3 (`~/Library/Application Support/Toontrack/Superior3/`) - ~224GB
-  - FabFilter Plugin Presets (`~/Library/Application Support/FabFilter/`) - ~14MB
-  - Sonarworks SoundID Reference (`~/Library/Application Support/Sonarworks/`) - ~126MB
-
-- **Application Data & Workspaces:**
-  - Obsidian Application Support (`~/Library/Application Support/obsidian/`)
-  - Cursor Workspace Data (`~/Library/Application Support/Cursor/`) - ~2.1GB
-
-- **Security & Configuration:**
-  - SSH Keys (`~/.ssh/`)
-  - GPG Keys (`~/.gnupg/`)
-  - Existing Backups (`~/Backups/`) - ~2.3GB
-
-**What's excluded (already in iCloud):**
-
-- Photos (synced to iCloud)
-- Most Documents (synced to iCloud)
-- Desktop files (synced to iCloud, except Ableton projects)
-
-### `backup-to-samsung-drive.sh`
-
-Back up important files to Samsung Drive using rsync.
-
-**Usage:**
+Hooks run automatically during Claude Code sessions. Check status:
 
 ```bash
-# Run the backup
-./scripts/backup-to-samsung-drive.sh
+# Validate hook setup
+./scripts/validation/ai-tool-setup.sh
+
+# Test specific hook
+echo '{"tool_name":"Bash","tool_input":{"command":"ls"}}' | \
+  ./scripts/hooks/block-dangerous-commands.sh
 ```
 
-**Features:**
+## 🚨 Important Notes
 
-- Uses `rsync` for efficient incremental backups
-- Preserves file attributes and permissions
-- Creates timestamped backup directories
-- Generates detailed logs
-- Shows progress for each backup operation
-- Skips directories that don't exist
+### Backward Compatibility
 
-**Backup location:**
-
-```
-/Volumes/Samsung Drive/Backups/<hostname>/
-```
-
-**Logs:**
-
-Each backup creates a timestamped log file:
-
-```
-/Volumes/Samsung Drive/Backups/<hostname>/backup_YYYYMMDD_HHMMSS.log
-```
-
-**Requirements:**
-
-- Samsung Drive must be mounted at `/Volumes/Samsung Drive`
-- `rsync` (standard on macOS)
-
-**Example output:**
-
-```
-=== Starting Backup to Samsung Drive ===
-📦 Backing up Ableton Projects (41G)...
-✓ Completed: Ableton Projects
-📦 Backing up Sample Library (150M)...
-✓ Completed: Sample Library
-...
-=== Backup Summary ===
-Successful backups: 21
-Total backup size: ~330 GB
-✓ All backups completed successfully!
-```
-
-### `restore-from-samsung-drive.sh`
-
-Restore important files from Samsung Drive backup to a new host.
-
-**Usage:**
+Scripts in the root directory are **symlinks** to their category locations:
 
 ```bash
-# Run the restore
-./scripts/restore-from-samsung-drive.sh
+scripts/load-context.sh → scripts/hooks/load-context.sh
+scripts/optimize-mtu.sh → scripts/network/optimize-mtu.sh
 ```
 
-**Features:**
+This maintains backward compatibility with existing references. Always prefer using the category paths for new code.
 
-- Lists available backups from all hostnames
-- Interactive selection of which backup to restore
-- Confirmation prompt before restoring (safety check)
-- Uses `rsync` to restore files preserving attributes
-- Restores all items that were backed up:
-  - Music production files
-  - Code projects
-  - Audio plugin libraries
-  - Application data
-  - Security keys (SSH, GPG)
-- Shows progress for each restore operation
-- Skips items that don't exist in backup
+### Never Run These Directly
 
-**Restore process:**
+Some scripts are integrated into the system and should not be run manually:
 
-1. Lists all available backups (by hostname)
-2. Prompts you to select which backup to restore
-3. Shows warning and asks for confirmation
-4. Restores files to their original locations
-5. Shows summary of successful/failed restores
+- `protonvpn-natpmp-portforward.sh` - Runs via systemd timer
+- Claude Code hooks - Run automatically by Claude Code
 
-**Example output:**
+Others are safe to run anytime:
 
-```
-=== Restore from Samsung Drive ===
+- All diagnostic scripts
+- Network testing scripts
+- Validation scripts
 
-Available backups:
-  1. Lewiss-MacBook-Pro (330G)
+## 📊 Dependencies
 
-Select backup to restore from [hostname]: Lewiss-MacBook-Pro
-Selected backup: Lewiss-MacBook-Pro
+Common dependencies for scripts:
 
-⚠ WARNING: This will restore files from backup to your current system.
-Existing files may be overwritten.
-
-Continue? [y/N]: y
-
-=== Starting Restore ===
-📥 Restoring Ableton Projects (41G)...
-✓ Completed: Ableton Projects
-...
-=== Restore Summary ===
-Successful restores: 21
-✓ All restores completed successfully!
-```
-
-**Note:** The restore script will overwrite existing files. Make sure you want to restore before confirming.
-
-### `migrate-audio-plugins.sh`
-
-Migrate audio plugins (VST, Audio Units, VST3) and their associated data from one Mac to another.
-
-**Usage:**
-
-```bash
-# Migrate from external drive to current user
-./scripts/migrate-audio-plugins.sh /Volumes/External\ Drive /Users/username
-
-# Migrate from another Mac via network share
-./scripts/migrate-audio-plugins.sh /Volumes/Other\ Mac /Users/username
-
-# Migrate system plugins (requires sudo)
-sudo ./scripts/migrate-audio-plugins.sh /Volumes/External\ Drive /
-```
-
-**What it migrates:**
-
-- **Plugin binaries:**
-  - System-wide: `/Library/Audio/Plug-Ins/VST/`, `/Library/Audio/Plug-Ins/VST3/`, `/Library/Audio/Plug-Ins/Components/`
-  - User-specific: `~/Library/Audio/Plug-Ins/VST/`, `~/Library/Audio/Plug-Ins/VST3/`, `~/Library/Audio/Plug-Ins/Components/`
-
-- **Plugin data & presets:**
-  - FabFilter presets and settings
-  - Toontrack (Superior Drummer, etc.)
-  - Native Instruments
-  - iZotope
-  - Waves
-  - Plugin Alliance
-  - Universal Audio
-  - Sonarworks
-  - Avid (Pro Tools)
-  - Steinberg (Cubase, Nuendo)
-  - PreSonus (Studio One)
-
-**Features:**
-
-- Copies plugin binaries from both system and user locations
-- Migrates plugin presets, settings, and configurations
-- Shows progress for each operation
-- Skips directories that don't exist
-- Provides summary of successful/failed migrations
-
-**Important notes:**
-
-- **System-wide plugins require sudo** - Run with `sudo` to migrate plugins in `/Library/Audio/Plug-Ins/`
-- **Re-activation required** - Most commercial plugins need to be re-authorized on the new Mac
-- **Plugin managers** - Use vendor-specific tools (Native Access, Waves Central, etc.) to re-authorize
-- **iLok licenses** - Transfer via iLok License Manager if applicable
-- **DAW rescan** - Rescan plugins in your DAW after migration
-
-**Example output:**
-
-```
-========================================
-Audio Plugin Migration
-========================================
-
-Source: /Volumes/External Drive
-Destination: /Users/username
-
-Continue with migration? [y/N]: y
-
-========================================
-Plugin Binaries
-========================================
-📥 Copying VST plugins (2.1G)...
-✅ Copied VST plugins
-📥 Copying Components plugins (1.8G)...
-✅ Copied Components plugins
-...
-
-========================================
-Plugin Data & Presets
-========================================
-📥 Copying FabFilter data (14M)...
-✅ Copied FabFilter data
-...
-
-========================================
-Migration Summary
-========================================
-✅ Successful: 15
-❌ Failed: 0
-
-⚠ Important Next Steps:
-1. Re-authorize plugins using vendor plugin managers
-2. Transfer iLok licenses if applicable
-3. Rescan plugins in your DAW
-4. Verify all plugins load correctly
-```
-
-**See also:** `docs/AUDIO_PLUGIN_MIGRATION.md` for detailed migration guide and troubleshooting.
-
-## Requirements
-
-Most scripts require:
-
-- `bash` (standard)
-- `iproute2` for network namespace operations
-- `libnatpmp` for NAT-PMP queries (`natpmpc` command)
-- `systemd` for service management
-- `curl` for external connectivity tests
+- `bash` - Shell interpreter
+- `coreutils` - Basic utilities
+- `iproute2` - Network namespace operations
+- `iputils` - ping, nc
+- `curl` - HTTP requests
+- `jq` - JSON processing (for hooks)
 
 Install missing dependencies:
 
 ```bash
-nix-shell -p libnatpmp
+nix-shell -p bash coreutils iproute2 iputils curl jq
 ```
 
-## Automation
+Category-specific dependencies are listed in each category's README.
 
-The ProtonVPN port forwarding can be automated via systemd timer. Enable in your NixOS configuration:
+## 🔗 See Also
 
-```nix
-host.services.mediaManagement.qbittorrent.vpn.portForwarding = {
-  enable = true;  # Default: true when VPN is enabled
-  renewInterval = "45min";  # Default: 45 minutes
-  gateway = "10.2.0.1";  # Default: ProtonVPN gateway
-};
-```
+- [POG Scripts](../pkgs/pog-scripts/) - Interactive CLI tools (`nix run .#<name>`)
+- [Templates](../templates/) - Module templates
+- [AI Guidelines](../CLAUDE.md) - AI assistant rules
+- [Contributing](../CONTRIBUTING.md) - Development workflow
 
-Check timer status:
+---
 
-```bash
-systemctl status protonvpn-portforward.timer
-systemctl list-timers | grep protonvpn
-```
-
-View logs:
-
-```bash
-journalctl -u protonvpn-portforward.service -f
-```
-
-## Troubleshooting
-
-**Port forwarding not working:**
-
-1. Run verification: `./scripts/verify-qbittorrent-vpn.sh`
-2. Check monitoring: `./scripts/monitor-protonvpn-portforward.sh`
-3. View logs: `journalctl -u protonvpn-portforward -u qbittorrent -f`
-
-**NAT-PMP errors:**
-
-- Ensure VPN namespace exists: `ip netns list`
-- Check VPN connectivity: `sudo ip netns exec qbt ping 10.2.0.1`
-- Verify `natpmpc` is installed: `which natpmpc`
-
-**qBittorrent not updating:**
-
-- Check config permissions: `ls -la /var/lib/qBittorrent/`
-- Verify service can write: `systemctl cat qbittorrent.service | grep ReadWrite`
-- Check service status: `systemctl status qbittorrent`
-
-**VPN namespace issues:**
-
-- Check VPN service: `systemctl status qbt`
-- View WireGuard status: `sudo ip netns exec qbt wg show`
-- Verify SOPS secrets are decrypted: `ls -la /run/secrets/`
+**Last Updated**: 2025-11-26
+**Scripts**: 24 total (7 hooks, 9 media, 3 network, 3 diagnostics, 2 validation)
+**Organization**: Phase 1 complete (categorized structure with backward compatibility)
