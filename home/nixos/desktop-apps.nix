@@ -9,7 +9,7 @@ in
   home.packages = [
     pkgs.gimp
     pkgs.discord-krisp # Chaotic Nyx version with Krisp noise suppression
-    pkgs.telegram-desktop_git # Chaotic Nyx bleeding-edge version
+    pkgs.telegram-desktop # Stable version from nixpkgs
     pkgs.file-roller
     # Note: libnotify is handled in core-tooling.nix
     # Note: swaylock-effects is handled in apps/swayidle.nix via programs.swaylock
