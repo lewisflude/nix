@@ -58,25 +58,36 @@ Added systemd service `configure-qbt-qdisc` that:
 };
 ```
 
-### 2. Kernel Network Buffer Tuning
+### 2. Kernel Network Tuning
 
 **File**: `modules/nixos/services/media-management/qbittorrent-vpn-confinement.nix`
 
-Added sysctl parameters:
+Added comprehensive sysctl parameters:
 
 ```nix
 boot.kernel.sysctl = {
-  # Socket buffer defaults increased from 208 KB to 256 KB
-  "net.core.rmem_default" = 262144;
-  "net.core.wmem_default" = 262144;
-  "net.core.rmem_max" = 33554432;     # 32 MB (unchanged)
-  "net.core.wmem_max" = 33554432;     # 32 MB (unchanged)
+  # Socket buffer configuration
+  "net.core.rmem_default" = 262144;    # 256 KB receive buffer (up from 208 KB)
+  "net.core.wmem_default" = 262144;    # 256 KB send buffer (up from 208 KB)
+  "net.core.rmem_max" = 33554432;      # 32 MB max (unchanged)
+  "net.core.wmem_max" = 33554432;      # 32 MB max (unchanged)
 
-  # UDP buffer minimums increased from 4 KB to 16 KB
-  "net.ipv4.udp_rmem_min" = 16384;
-  "net.ipv4.udp_wmem_min" = 16384;
+  # UDP buffer minimums for torrent traffic
+  "net.ipv4.udp_rmem_min" = 16384;     # 16 KB UDP receive (up from 4 KB)
+  "net.ipv4.udp_wmem_min" = 16384;     # 16 KB UDP send (up from 4 KB)
+
+  # TCP congestion control - BBR for better VPN performance
+  "net.core.default_qdisc" = "fq";              # Fair Queue (required for BBR)
+  "net.ipv4.tcp_congestion_control" = "bbr";    # BBR congestion control
 };
 ```
+
+**Why BBR?**
+
+- BBR (Bottleneck Bandwidth and RTT) is Google's modern congestion control algorithm
+- Significantly improves TCP throughput over VPN tunnels
+- Works better than traditional algorithms (cubic) on high-latency links
+- Requires `fq` (Fair Queue) as the default qdisc
 
 ### 3. qBittorrent Connection Limits
 
@@ -184,7 +195,9 @@ sudo ip netns exec qbt ss -s
 sudo ip netns exec qbt ss -tunap | grep qbittorrent | wc -l
 ```
 
-## Tuning the CAKE Bandwidth
+## Advanced Tuning Options
+
+### Adjusting CAKE Bandwidth
 
 The CAKE qdisc is configured with `bandwidth 100mbit`. If your VPN speed differs significantly:
 
@@ -194,13 +207,57 @@ You can adjust the bandwidth parameter in `qbittorrent-vpn-confinement.nix`:
 
 ```nix
 # For slower VPN (e.g., 50 Mbit/s):
-ExecStart = "... cake bandwidth 50mbit";
+ExecStart = "... cake bandwidth 50mbit overhead 60 mpu 64";
 
 # For faster VPN (e.g., 200 Mbit/s):
-ExecStart = "... cake bandwidth 200mbit";
+ExecStart = "... cake bandwidth 200mbit overhead 60 mpu 64";
 ```
 
 Set it slightly higher than your actual speed for best results (e.g., 100 Mbit for 82 Mbit actual).
+
+### Optimizing RTT Parameter
+
+After confirming the configuration is stable, you can optimize RTT based on measured latency:
+
+```bash
+# Measure RTT to VPN gateway
+sudo ip netns exec qbt ping -c 10 -I qbt0 10.2.0.1
+
+# If consistently ~10ms, switch to "metro" preset:
+ExecStart = "... cake bandwidth 100mbit metro overhead 60 mpu 64";
+```
+
+CAKE RTT presets:
+
+- **internet** (100ms): Default - conservative for worldwide peers ✓ Current
+- **metro** (10ms): For VPN endpoints <20ms away
+- **regional** (30ms): For regional connections
+- **lan** (1ms): Only for local network traffic
+
+### Understanding Overhead Compensation
+
+The `overhead 60` parameter accounts for WireGuard's IPv4 encapsulation:
+
+```
+Your Application → TCP/IP → WireGuard → Physical Interface
+                    ↑
+                 CAKE sees this (e.g., 1400 bytes)
+                                    ↑
+                                 Actually sent: 1460 bytes
+                                 (1400 + 60 overhead)
+```
+
+Without overhead compensation:
+
+- CAKE thinks: "I'm sending 100 Mbit/s"
+- Reality: Sending ~107 Mbit/s (6.8% over)
+- Result: May exceed VPN capacity
+
+With `overhead 60`:
+
+- CAKE accounts for extra 60 bytes per packet
+- When limiting to 100 Mbit/s, actually limits to 100 Mbit/s on wire
+- Result: Accurate bandwidth control ✓
 
 ## Reverting Changes
 
