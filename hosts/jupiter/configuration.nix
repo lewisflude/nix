@@ -50,9 +50,16 @@
     zfsARCMaxGB = 48; # Cap ZFS ARC at 48GB (75% of RAM)
   };
 
-  # Firewall configuration
-  networking.firewall = {
-    allowedTCPPorts = [ constants.ports.mcp.docs ]; # Docs MCP Server HTTP interface
+  # Network configuration
+  networking = {
+    # Optimized MTU for primary interface (discovered via scripts/optimize-mtu.sh)
+    # Lower than standard 1500 to avoid fragmentation on path to internet
+    interfaces.eno2.mtu = 1492;
+
+    # Firewall configuration
+    firewall = {
+      allowedTCPPorts = [ constants.ports.mcp.docs ]; # Docs MCP Server HTTP interface
+    };
   };
 
   # Dante SOCKS proxy for routing traffic through vlan2 (VPN)

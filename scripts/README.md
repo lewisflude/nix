@@ -201,6 +201,64 @@ For complete qBittorrent setup and troubleshooting, see `docs/QBITTORRENT_GUIDE.
 
 ## Network Performance Scripts
 
+### `optimize-mtu.sh`
+
+Automatically discover and optimize MTU (Maximum Transmission Unit) for regular network and VPN interfaces using Path MTU Discovery.
+
+**Usage:**
+
+```bash
+# Test both regular network and VPN (recommended)
+sudo ./scripts/optimize-mtu.sh
+
+# Test only VPN (prioritize qBittorrent/VPN performance)
+sudo ./scripts/optimize-mtu.sh --vpn-only
+
+# Test only regular network
+sudo ./scripts/optimize-mtu.sh --regular-only
+
+# Test and apply settings
+sudo ./scripts/optimize-mtu.sh --apply
+
+# Dry-run to see recommendations
+sudo ./scripts/optimize-mtu.sh --apply --dry-run
+```
+
+**What it does:**
+
+1. Uses binary search with ping + "Don't Fragment" flag to find optimal MTU
+2. Tests both regular network interface and VPN namespace
+3. Discovers the largest packet size that doesn't fragment
+4. Provides specific recommendations for:
+   - NixOS configuration (`networking.interfaces.<iface>.mtu`)
+   - WireGuard configuration (`MTU = <value>` in SOPS secret)
+   - UniFi Dream Machine setup (DHCP options or per-port settings)
+
+**How it works:**
+
+- Sends ping packets with increasing sizes and DF (Don't Fragment) flag
+- Uses binary search to efficiently find optimal MTU (typically 8-12 tests)
+- Accounts for IP/ICMP header overhead (28 bytes)
+- Tests against reliable hosts (1.1.1.1 for regular, 8.8.8.8 for VPN)
+
+**Output:**
+
+- Current MTU vs Optimal MTU for each interface
+- Status indicators (✓ OPTIMAL or ⚠️ NEEDS ADJUSTMENT)
+- Configuration recommendations with exact values
+- Verification commands to test after applying
+
+**Critical for VPN:**
+
+Proper MTU is essential for VPN performance! WireGuard adds ~80 bytes overhead, so MTU must be lowered to avoid fragmentation. The script automatically accounts for this.
+
+**UniFi Dream Machine Integration:**
+
+The script provides two methods for applying MTU on UniFi:
+
+1. Network-wide via DHCP Option 26
+2. Per-port in device settings (recommended for specific devices)
+
 ### qBittorrent Diagnostics
 
 - `diagnose-qbittorrent-seeding.sh` - Diagnose seeding issues
