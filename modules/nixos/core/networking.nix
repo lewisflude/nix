@@ -10,23 +10,47 @@
     enableIPv6 = true;
     # Use systemd-networkd for advanced routing
     useNetworkd = true;
-    useDHCP = false; # DHCP configured per-interface in systemd.network
+    useDHCP = false;
+    # DHCP configured per-interface in systemd.network
     networkmanager.enable = false;
     firewall = {
       enable = true;
-
       # Core system ports that are essential for basic system functionality
-      # These are not service-specific and should remain in core networking
       allowedTCPPorts = [
-        22 # SSH - essential for system access
+        22 # SSH
       ];
       allowedUDPPorts = [
-        123 # NTP - essential for time synchronization
+        123 # NTP
       ];
+    };
+  };
 
-      # Service-specific firewall rules are declared by individual service modules
-      # using the firewall library helpers from lib/firewall.nix
-      # This ensures proper separation of concerns and maintainable configuration
+  # --- CPU Latency Tuning for Network Speed ---
+  # Prevents the CPU from entering deep sleep states (C3/C6), which causes
+  # micro-stutters on 1Gbps+ links.
+  boot.kernelParams = [
+    "processor.max_cstate=1"
+    "intel_idle.max_cstate=1"
+  ];
+
+  # Network Interface Hardware Tuning
+  # These settings must be applied via ethtool since systemd-networkd doesn't support
+  # hardware-specific ring buffer and offload settings in its Link section
+  systemd.services.network-tuning = {
+    description = "Network performance tuning for eno2 (offloading + ring buffers)";
+    after = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = [
+        # 1. Fix "Dropped Packets": Increase ring buffers to hardware max (4096)
+        "${pkgs.ethtool}/bin/ethtool -G eno2 rx 4096 tx 4096"
+        # 2. Fix "VPN/Router Performance": Disable LRO, keep GRO enabled
+        #    LRO breaks routing/VPN packet headers; GRO is software-friendly
+        "${pkgs.ethtool}/bin/ethtool -K eno2 lro off gro on"
+        # 3. Fix "Micro-Stutters": Disable pause frames (flow control)
+        "${pkgs.ethtool}/bin/ethtool -A eno2 rx off tx off"
+      ];
     };
   };
 
@@ -40,8 +64,9 @@
       DHCP = "yes";
       # Configure this interface to create VLAN interfaces
       networkConfig = {
-        # Create vlan2 interface on this physical interface
         VLAN = [ "vlan2" ];
+        # Fix for "igc" driver random disconnects (Energy Efficient Ethernet)
+        IPv6AcceptRA = true;
       };
     };
 
@@ -53,8 +78,6 @@
       };
       vlanConfig = {
         Id = 2;
-        # VLAN will be created on the interface that has this netdev referenced
-        # Typically referenced from the main network's VLAN setting
       };
     };
 
@@ -62,8 +85,6 @@
     networks."20-vlan2" = {
       matchConfig.Name = "vlan2";
       DHCP = "no";
-      # Static IP for VLAN 2 - allows services to bind to specific interface
-      # Services that bind to this interface (like qBittorrent) will route through it
       address = [
         "192.168.2.249/24"
       ];
@@ -84,14 +105,18 @@
         }
       ];
     };
+
+    # --- TODO: Add your VPN Interface here once you calculate MTU ---
+    # networks."30-vpn" = {
+    #   matchConfig.Name = "tun0"; # Change to your VPN interface name
+    #   linkConfig.MTUBytes = 1400; # Change to your calculated MTU
+    # };
   };
 
   services = {
     resolved = {
       enable = true;
-      # Disable fallback DNS - use only DHCP-provided DNS servers
       fallbackDns = [ ];
-      # Prefer DNS servers from DHCP over fallback servers
       extraConfig = ''
         DNSStubListener=yes
       '';
@@ -111,18 +136,24 @@
     };
     dbus = {
       implementation = "broker";
-      # Note: NixOS automatically adds packages for enabled services
-      # (networkmanager, polkit, gnome-keyring are auto-added when their services are enabled)
-      # Only add packages here that provide dbus services but aren't managed by NixOS service modules
       packages = [ pkgs.avahi ];
     };
   };
+
   boot.kernel.sysctl = {
     "net.ipv4.conf.all.forwarding" = 1;
     "net.ipv6.conf.all.forwarding" = lib.mkDefault 1;
 
+    # --- BBR & Buffer Tuning ---
+
+    # REQUIRED for BBR: Use Fair Queueing (fq) instead of fq_codel
+    "net.core.default_qdisc" = "fq";
+
+    # Enable BBR Congestion Control
+    "net.ipv4.tcp_congestion_control" = "bbr";
+    "net.ipv6.tcp_congestion_control" = "bbr";
+
     # Network performance optimizations for high-bandwidth torrenting
-    # Increased to 32MB to prevent buffer bloat on 1Gbps+ links with 64GB RAM
     "net.core.rmem_max" = 33554432; # 32MB
     "net.core.wmem_max" = 33554432; # 32MB
 
@@ -130,20 +161,16 @@
     "net.ipv4.tcp_rmem" = "4096 87380 33554432";
     "net.ipv4.tcp_wmem" = "4096 65536 33554432";
 
-    # TCP buffer sizes (min, default, max) - IPv6 (same as IPv4 for consistency)
+    # TCP buffer sizes - IPv6
     "net.ipv6.tcp_rmem" = "4096 87380 33554432";
     "net.ipv6.tcp_wmem" = "4096 65536 33554432";
 
-    # Enable BBR congestion control for better throughput (IPv4 and IPv6)
-    "net.ipv4.tcp_congestion_control" = "bbr";
-    "net.ipv6.tcp_congestion_control" = "bbr";
-
-    # Additional LAN optimizations for file transfers
+    # Additional LAN optimizations
     "net.core.netdev_max_backlog" = 5000;
-    "net.ipv4.tcp_fastopen" = 3; # Enable both client and server
-    "net.ipv4.tcp_mtu_probing" = 1; # Enable MTU probing for better path discovery
+    "net.ipv4.tcp_fastopen" = 3;
+    "net.ipv4.tcp_mtu_probing" = 1;
     "net.ipv4.tcp_window_scaling" = 1;
     "net.ipv4.tcp_timestamps" = 1;
-    "net.ipv4.tcp_fin_timeout" = 15; # Reduce TIME_WAIT for faster connection recycling
+    "net.ipv4.tcp_fin_timeout" = 15;
   };
 }
