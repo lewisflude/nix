@@ -53,6 +53,23 @@ in
       }
     ];
 
+    # Kernel network tuning for high-bandwidth torrenting
+    # Increases socket buffers to handle burst traffic from many concurrent connections
+    boot.kernel.sysctl = {
+      # Increase default and maximum socket buffer sizes
+      # Default: 212992 bytes (208 KB) - increased to 256 KB
+      # Max: 33554432 bytes (32 MB) - kept at 32 MB
+      "net.core.rmem_default" = 262144; # 256 KB receive buffer default
+      "net.core.wmem_default" = 262144; # 256 KB send buffer default
+      "net.core.rmem_max" = 33554432; # 32 MB receive buffer max (unchanged)
+      "net.core.wmem_max" = 33554432; # 32 MB send buffer max (unchanged)
+
+      # Increase UDP buffer minimums for better torrent performance
+      # Default: 4096 bytes - increased to 16 KB
+      "net.ipv4.udp_rmem_min" = 16384; # 16 KB UDP receive buffer min
+      "net.ipv4.udp_wmem_min" = 16384; # 16 KB UDP send buffer min
+    };
+
     # Ensure WireGuard tools and natpmpc are available
     # - wireguard-tools: required by VPN-Confinement startup script
     # - libnatpmp: required for ProtonVPN NAT-PMP port forwarding
@@ -93,9 +110,10 @@ in
       wireguardConfigFile = config.sops.secrets.${vpnCfg.wireguardConfig}.path;
 
       # IMPORTANT: MTU must be configured in the WireGuard config file itself
-      # Add "MTU = 1436" to the [Interface] section of your WireGuard config
-      # Standard MTU (1500) + WireGuard overhead (64 bytes) would exceed link MTU
-      # WireGuard typically needs 1436-1440 to avoid packet fragmentation
+      # Add "MTU = 1420" to the [Interface] section of your WireGuard config
+      # This value was determined by Path MTU Discovery (scripts/optimize-mtu.sh)
+      # WireGuard + network overhead requires lower MTU to avoid packet fragmentation
+      # Optimal MTU: 1420 (tested and verified)
 
       # Allow access from main network (192.168.1.0/24)
       accessibleFrom = [
@@ -160,6 +178,24 @@ in
             0
             2
           ];
+        };
+      };
+
+      # Configure traffic control queue discipline on WireGuard interface
+      # This prevents packet drops during traffic bursts from concurrent uploads
+      "configure-qbt-qdisc" = {
+        description = "Configure traffic control qdisc for qBittorrent WireGuard interface";
+        after = [ "${vpnCfg.namespace}.service" ];
+        before = [ "qbittorrent.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = "yes";
+          # Remove default noqueue, add CAKE qdisc optimized for WireGuard
+          # CAKE automatically handles bufferbloat and provides better fairness than fq
+          ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${vpnCfg.namespace} ${pkgs.iproute2}/bin/tc qdisc replace dev ${vpnCfg.namespace}0 root cake bandwidth 100mbit";
+          # Clean up on stop
+          ExecStop = "${pkgs.iproute2}/bin/ip netns exec ${vpnCfg.namespace} ${pkgs.iproute2}/bin/tc qdisc del dev ${vpnCfg.namespace}0 root || true";
         };
       };
     };
