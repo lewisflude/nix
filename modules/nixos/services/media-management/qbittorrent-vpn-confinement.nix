@@ -69,10 +69,9 @@ in
       "net.ipv4.udp_rmem_min" = 16384; # 16 KB UDP receive buffer min
       "net.ipv4.udp_wmem_min" = 16384; # 16 KB UDP send buffer min
 
-      # TCP congestion control and qdisc
-      # BBR (Bottleneck Bandwidth and RTT) congestion control for better VPN performance
-      # Recommended for WireGuard VPN tunnels to improve throughput
-      "net.core.default_qdisc" = "fq"; # Fair Queue - required for BBR
+      # TCP congestion control for better VPN performance
+      # BBR (Bottleneck Bandwidth and RTT) congestion control recommended for WireGuard VPN tunnels
+      # Note: net.core.default_qdisc = "fq" and BBR IPv4/IPv6 are already configured in core/networking.nix
       "net.ipv4.tcp_congestion_control" = "bbr"; # BBR congestion control
     };
 
