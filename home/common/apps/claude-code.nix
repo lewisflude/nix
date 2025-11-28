@@ -7,9 +7,9 @@
   programs.claude-code = {
     enable = true;
 
-    # Use nixpkgs version directly (version 2.0.54)
-    # Note: Overlay version 2.0.55 has runtime Segmenter errors in Bun
-    package = pkgs.claude-code;
+    # Use community-maintained claude-code-nix for hourly updates
+    # This avoids both nixpkgs build hangs and overlay runtime errors
+    package = inputs.claude-code-nix.packages.${pkgs.system}.default;
 
     # Custom commands for Claude Code
     # Usage: Type /command-name in claude-code prompt
