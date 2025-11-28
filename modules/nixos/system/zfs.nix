@@ -1,6 +1,13 @@
 { pkgs, ... }:
 
 {
+  # ZFS ARC (Adaptive Replacement Cache) tuning
+  # Limit ARC to 12GB max (default is 50% of RAM = 32GB on 64GB system)
+  # This leaves more RAM available for memory-intensive builds like CUDA
+  boot.kernelParams = [
+    "zfs.zfs_arc_max=12884901888" # 12GB in bytes (12 * 1024^3)
+  ];
+
   # ZFS configuration and maintenance
   services.zfs = {
     # Automatic snapshots for data protection

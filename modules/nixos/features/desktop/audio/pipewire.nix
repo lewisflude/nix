@@ -18,6 +18,23 @@ in
       raopOpenFirewall = true;
       wireplumber = {
         configPackages = [
+          # Force ACP to create nodes for Apogee Symphony Desktop in pro-audio mode
+          # Without this, pro-audio profile doesn't create usable ALSA output/input nodes
+          (pkgs.writeTextDir "share/wireplumber/main.lua.d/50-apogee-acp-enable.lua" ''
+            -- Enable ACP auto-port creation for Apogee Symphony Desktop
+            -- This ensures that ALSA output nodes are created even in pro-audio mode
+            table.insert(alsa_monitor.rules, {
+              matches = {
+                {
+                  { "device.name", "equals", "alsa_card.usb-Apogee_Electronics_Corp_Symphony_Desktop-00" },
+                },
+              },
+              apply_properties = {
+                ["api.acp.auto-port"] = true,
+                ["api.acp.auto-profile"] = false,  -- Keep pro-audio profile
+              },
+            })
+          '')
           # Set device priorities to ensure consistent default device for Wine/Proton
           # Note: Speakers sink priority is already set in hardware-specific.nix via pw-loopback
           (pkgs.writeTextDir "share/wireplumber/main.lua.d/51-device-priority.lua" ''
