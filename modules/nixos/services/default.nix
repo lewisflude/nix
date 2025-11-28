@@ -13,6 +13,7 @@
     ./music-assistant.nix
     ./samba.nix
     ./ssh.nix
+    ./syncthing.nix
     ./cockpit.nix
   ];
 }

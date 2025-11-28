@@ -889,11 +889,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1763708398,
-        "narHash": "sha256-pmgmzUr/EdLMeIvN7BLejc1MByYIp8QWtpa826WKJvM=",
+        "lastModified": 1764328157,
+        "narHash": "sha256-BtO4W6n9dncw113Upg/uaypCBd8cz1r2QTtcOsPPwJU=",
         "owner": "jesseduffield",
         "repo": "lazygit",
-        "rev": "b57be9ebe47a929ce321ea4d17b5802d03a3d7d4",
+        "rev": "28cd1c2df442a8b4fa101981d5d1727801aa244f",
         "type": "github"
       },
       "original": {
@@ -1132,11 +1132,11 @@
     },
     "nixos-hardware": {
       "locked": {
-        "lastModified": 1764269296,
-        "narHash": "sha256-lXAKymcMNIvuw3WLHBhdNWUs1bXl/BYWBtYNhhK+D1s=",
+        "lastModified": 1764328224,
+        "narHash": "sha256-hFyF1XQd+XrRx7WZCrGJp544dykexD8Q5SrJJZpEQYg=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "00e9525fb65da500852aae7bef666071eedf1b3e",
+        "rev": "d62603a997438e19182af69d3ce7be07565ecad4",
         "type": "github"
       },
       "original": {
