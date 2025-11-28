@@ -121,6 +121,16 @@ in
       description = "Maximum active torrents (recommended: 150 for HDD-based storage to avoid saturation)";
     };
 
+    maxActiveDownloads = mkOption {
+      type = types.int;
+      default = 3;
+      description = ''
+        Maximum active downloads (torrents actively downloading).
+        Recommended: 3-5 for residential connections to prevent download congestion.
+        Higher values may cause HDD thrashing during concurrent writes.
+      '';
+    };
+
     maxActiveUploads = mkOption {
       type = types.int;
       default = 75;
@@ -183,13 +193,44 @@ in
     maxRatio = mkOption {
       type = types.nullOr types.float;
       default = null;
-      description = "Maximum seeding ratio (0 = unlimited, >0 = ratio limit). When reached, MaxRatioAction is triggered";
+      description = "Maximum seeding ratio (0 = unlimited, >0 = ratio limit). When reached, shareLimitAction is triggered";
     };
 
-    maxRatioAction = mkOption {
-      type = types.int;
-      default = 0;
-      description = "Action when max ratio is reached: 0 = pause torrent, 1 = remove torrent, 2 = remove torrent with files";
+    maxSeedingTime = mkOption {
+      type = types.nullOr types.int;
+      default = null;
+      description = ''
+        Maximum seeding time in minutes (0 or null = unlimited).
+        When reached, shareLimitAction is triggered.
+        Note: This is an absolute time limit, not based on activity.
+        Consider using maxInactiveSeedingTime instead.
+      '';
+    };
+
+    maxInactiveSeedingTime = mkOption {
+      type = types.nullOr types.int;
+      default = null;
+      description = ''
+        Maximum inactive seeding time in minutes (0 or null = unlimited).
+        Torrent is paused/removed after this many minutes of no upload activity.
+        Recommended: 43200 (30 days) for automatic cleanup of dead torrents.
+        This is more useful than maxSeedingTime as it only affects truly dead torrents.
+      '';
+    };
+
+    shareLimitAction = mkOption {
+      type = types.enum [
+        "Stop"
+        "Remove"
+        "DeleteFiles"
+      ];
+      default = "Stop";
+      description = ''
+        Action when share limits (ratio or seeding time) are reached:
+        - Stop: Pause torrent (can be resumed manually)
+        - Remove: Remove torrent (files remain)
+        - DeleteFiles: Remove torrent and delete files (dangerous with Radarr/Sonarr!)
+      '';
     };
 
     uploadSpeedLimit = mkOption {
@@ -566,7 +607,6 @@ in
           }
           // optionalAttrs (qbittorrentCfg.maxRatio != null) {
             MaxRatio = qbittorrentCfg.maxRatio;
-            MaxRatioAction = qbittorrentCfg.maxRatioAction;
           };
         in
         {
@@ -617,6 +657,8 @@ in
 
               # Torrent queueing system
               QueueingSystemEnabled = true;
+              # Maximum active downloads (prevents download congestion)
+              MaxActiveDownloads = qbittorrentCfg.maxActiveDownloads;
               # Maximum active uploads (optimized for HDD + Jellyfin streaming)
               MaxActiveUploads = qbittorrentCfg.maxActiveUploads;
               # Maximum active torrents (optimized for HDD capacity)
@@ -673,9 +715,23 @@ in
 
               # Slow torrent handling - don't count slow torrents in active limits
               IgnoreSlowTorrents = qbittorrentCfg.ignoreSlowTorrents;
+              IgnoreSlowTorrentsForQueueing = qbittorrentCfg.ignoreSlowTorrents;
               SlowTorrentsDownloadRate = qbittorrentCfg.slowTorrentsDownloadRate;
               SlowTorrentsUploadRate = qbittorrentCfg.slowTorrentsUploadRate;
               SlowTorrentsInactivityTimer = qbittorrentCfg.slowTorrentsInactivityTimer;
+
+              # Share limits (ratio and seeding time limits)
+              # GlobalMaxRatio and GlobalMaxInactiveSeedingMinutes are in Session, not Preferences
+              ShareLimitAction = qbittorrentCfg.shareLimitAction;
+            }
+            // optionalAttrs (qbittorrentCfg.maxRatio != null) {
+              GlobalMaxRatio = qbittorrentCfg.maxRatio;
+            }
+            // optionalAttrs (qbittorrentCfg.maxSeedingTime != null) {
+              GlobalMaxSeedingMinutes = qbittorrentCfg.maxSeedingTime;
+            }
+            // optionalAttrs (qbittorrentCfg.maxInactiveSeedingTime != null) {
+              GlobalMaxInactiveSeedingMinutes = qbittorrentCfg.maxInactiveSeedingTime;
             }
             # VPN Interface binding - ONLY when VPN is enabled
             # This ensures all BitTorrent traffic uses the VPN interface

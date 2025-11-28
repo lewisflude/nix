@@ -5,14 +5,6 @@ let
   isLinux = system == "x86_64-linux" || system == "aarch64-linux";
 in
 {
-  # Local custom packages
-  localPkgs = _final: prev: {
-    cursor = prev.callPackage (../pkgs + "/cursor") { };
-  };
-
-  # Custom NPM packages
-  npm-packages = import ./npm-packages.nix;
-
   # Nix helper tool overlay
   nh =
     if inputs ? nh && inputs.nh ? overlays then inputs.nh.overlays.default else (_final: _prev: { });
@@ -59,20 +51,6 @@ in
     else
       (_final: _prev: { });
 
-  # Optimization: Disable direnv tests that fail on Darwin
-  direnv-optimization = _final: prev: {
-    direnv = prev.direnv.overrideAttrs (_old: {
-      doCheck = false;
-    });
-  };
-
-  # MCP servers overlay (version-pinned server implementations)
-  mcps =
-    if inputs ? mcps && inputs.mcps ? overlays then
-      inputs.mcps.overlays.default
-    else
-      (_final: _prev: { });
-
   # ComfyUI overlay (native Nix package, replaces Docker container)
   comfyui =
     if inputs ? comfyui && inputs.comfyui ? overlays && inputs.comfyui.overlays ? default then
@@ -82,18 +60,4 @@ in
     else
       (_final: _prev: { });
 
-  # Claude Code overlay (always up-to-date, hourly automated updates)
-  # Uses github:sadjow/claude-code-nix for latest versions with Node.js 22 LTS
-  # See: https://github.com/sadjow/claude-code-nix
-  claude-code-nix =
-    if inputs ? claude-code-nix && inputs.claude-code-nix ? overlays then
-      inputs.claude-code-nix.overlays.default
-    else
-      (_final: _prev: { });
-
-  # Gemini CLI overlay (build from latest GitHub source)
-  # DISABLED: Missing build dependencies (pkg-config, libsecret)
-  # Using nixpkgs version instead until overlay is fixed
-  # Error: pkg-config: command not found when building keytar native module
-  gemini-cli-latest = _final: _prev: { };
 }

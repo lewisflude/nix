@@ -94,13 +94,23 @@
 
         # Active torrent limits (balanced for performance without overwhelming interface)
         maxActiveTorrents = 150; # Reduced from 547 to prevent HDD thrashing
+        maxActiveDownloads = 5; # Concurrent downloads (5 for faster grabbing, 3 for HDD protection)
         maxActiveUploads = 50; # Reduced from 273 to prevent packet drops
 
         # Automatic torrent management
         autoTMMEnabled = true;
         defaultSavePath = "/mnt/storage/torrents";
+
+        # Share limits (ratio and seeding time)
         maxRatio = 3.0;
-        maxRatioAction = 0; # 0 = pause torrent when ratio reached
+        maxInactiveSeedingTime = 43200; # 30 days in minutes (43200 = 30 * 24 * 60)
+        shareLimitAction = "Stop"; # Pause torrent when limits reached
+
+        # Slow torrent handling (private tracker settings - more aggressive)
+        # These torrents don't count against active limits if below thresholds
+        slowTorrentsDownloadRate = 10; # KiB/s - private tracker setting (default: 5)
+        slowTorrentsUploadRate = 10; # KiB/s - private tracker setting (default: 5)
+        slowTorrentsInactivityTimer = 30; # seconds - private tracker setting (default: 60)
 
         # Torrent behavior settings
         # Note: addToTopOfQueue, addExtensionToIncompleteFiles, and useCategoryPathsInManualMode

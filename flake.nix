@@ -92,16 +92,8 @@
     vpn-confinement = {
       url = "github:Maroka-chan/VPN-Confinement";
     };
-    mcps = {
-      url = "github:roman/mcps.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     comfyui = {
       url = "github:utensils/nix-comfyui";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    claude-code-nix = {
-      url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

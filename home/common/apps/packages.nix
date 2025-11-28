@@ -13,9 +13,10 @@
     # Note: nx is handled in core-tooling.nix
     # Note: musescore is installed via Homebrew cask (modules/darwin/apps.nix)
     # to avoid duplicate entries in Spotlight/Launchpad
+    # Note: claude-code is handled via programs.claude-code in claude-code.nix
+    # Note: gemini-cli is handled via programs.gemini-cli in gemini-cli.nix
     pkgs.pgcli
     pkgs.cursor-cli
-    pkgs.claude-code # Claude agentic coding CLI (from claude-code-nix overlay)
   ]
   # Linux-only packages
   ++ lib.optionals pkgs.stdenv.isLinux [

@@ -68,7 +68,6 @@ in
           "https://devenv.cachix.org"
           "https://viperml.cachix.org"
           "https://cuda-maintainers.cachix.org"
-          "https://claude-code.cachix.org"
         ];
         extra-trusted-public-keys = [
           "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8="
@@ -88,7 +87,6 @@ in
           "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
           "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
           "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
-          "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
         ];
       }
       (lib.mkIf (hostSystem == "aarch64-darwin") {
