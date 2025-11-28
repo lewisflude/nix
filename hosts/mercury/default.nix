@@ -5,6 +5,11 @@
   hostname = "mercury";
 
   features = {
+    security = {
+      enable = true;
+      yubikey = true;
+    };
+
     productivity = {
       enable = true;
       notes = true;

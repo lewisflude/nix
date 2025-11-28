@@ -155,7 +155,8 @@
     gnupg.agent = {
       enable = true;
       enableSSHSupport = true;
-      pinentryPackage = pkgs.pinentry-gnome3;
+      # Note: pinentry is configured via home-manager for per-user customization
+      # See: home/common/features/core/gpg.nix
     };
     _1password = {
       enable = true;
