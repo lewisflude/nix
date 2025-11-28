@@ -28,21 +28,15 @@ in
     else
       (_final: _prev: { });
 
-  # Lazygit from flake input
-  flake-git-tools =
-    _final: prev:
-    if inputs ? lazygit && inputs.lazygit ? packages && inputs.lazygit.packages ? ${system} then
-      { lazygit = inputs.lazygit.packages.${system}.default; }
-    else
-      { inherit (prev) lazygit; };
+  # Lazygit - using nixpkgs version for binary cache
+  flake-git-tools = _final: prev: {
+    inherit (prev) lazygit;
+  };
 
-  # Atuin from flake input
-  flake-cli-tools =
-    _final: prev:
-    if inputs ? atuin && inputs.atuin ? packages && inputs.atuin.packages ? ${system} then
-      { atuin = inputs.atuin.packages.${system}.default; }
-    else
-      { inherit (prev) atuin; };
+  # Atuin - using nixpkgs version for binary cache
+  flake-cli-tools = _final: prev: {
+    inherit (prev) atuin;
+  };
 
   # Niri compositor (Linux only)
   niri =

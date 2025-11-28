@@ -81,12 +81,6 @@ in
       };
     };
 
-    openFirewall = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Open firewall ports for Syncthing";
-    };
-
     guiAddress = mkOption {
       type = types.str;
       default = "127.0.0.1:8384";
@@ -124,13 +118,9 @@ in
       };
     };
 
-    # Open firewall for Syncthing (NixOS only)
-    networking.firewall = mkIf cfg.openFirewall {
-      allowedTCPPorts = [ 22000 ]; # Sync protocol
-      allowedUDPPorts = [
-        22000 # Sync protocol (QUIC)
-        21027 # Discovery
-      ];
-    };
+    # Note: Firewall configuration should be handled at the host level for NixOS systems
+    # Example for NixOS hosts:
+    # networking.firewall.allowedTCPPorts = [ 22000 ];
+    # networking.firewall.allowedUDPPorts = [ 22000 21027 ];
   };
 }

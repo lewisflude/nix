@@ -17,7 +17,5 @@
     ./features/security
     ./features/productivity
     ./features/desktop
-
-    ./services/syncthing.nix
   ];
 }
