@@ -7,9 +7,9 @@
   programs.claude-code = {
     enable = true;
 
-    # Override package to use the pre-built binary from claude-code-overlay
-    # Access directly from the flake input's packages
-    package = inputs.claude-code-overlay.packages.${pkgs.system}.claude;
+    # Use nixpkgs version directly (version 2.0.54)
+    # Note: Overlay version 2.0.55 has runtime Segmenter errors in Bun
+    package = pkgs.claude-code;
 
     # Custom commands for Claude Code
     # Usage: Type /command-name in claude-code prompt
