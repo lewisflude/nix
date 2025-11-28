@@ -9,7 +9,6 @@
   systemConfig,
   lib,
   system,
-  inputs,
   constants,
   ...
 }:
@@ -114,8 +113,8 @@ in
   };
 
   # Configure mcps.nix servers
-  # NOTE: claude-code is now available via claude-code-nix overlay
-  # MCP servers also disabled since they require pkgs.mcp-servers which is not provided by overlay
+  # NOTE: claude-code is now available via programs.claude-code in home/common/apps/claude-code.nix
+  # MCP servers also disabled since they require pkgs.mcp-servers which is not provided by nixpkgs
   # programs.claude-code = {
   #   enable = true;
   #

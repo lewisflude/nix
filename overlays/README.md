@@ -6,54 +6,21 @@ This directory contains Nix overlays for custom packages and package overrides.
 
 - `default.nix` - Main overlay file containing all overlays
 - `sources.toml` - nvfetcher configuration for batch source updates
-- `npm-packages.nix` - Custom NPM packages overlay
 
 ## Current Overlays
 
-### gemini-cli-latest
+Using nixpkgs versions of packages where available (cursor, claude-code, gemini-cli, etc.).
 
-Overrides nixpkgs `gemini-cli` with the latest version from GitHub.
+**Available overlays:**
 
-**Update Methods:**
-
-1. **updateScript** (Recommended):
-
-   ```bash
-   # Run the updateScript
-   nix eval --raw '.#overlays.gemini-cli-latest.gemini-cli.passthru.updateScript' | bash
-   ```
-
-2. **nix-update**:
-
-   ```bash
-   nix-update gemini-cli-latest --override-filename overlays/default.nix
-   ```
-
-3. **nvfetcher** (Batch updates):
-
-   ```bash
-   nvfetcher -c overlays/sources.toml -o overlays/_sources
-   # Then update default.nix to use sources.gemini-cli
-   ```
-
-**Note:** After updating version/hash, you'll need to update `npmDepsHash`:
-
-```bash
-nix build .#gemini-cli-latest.gemini-cli
-# Copy the npmDepsHash from the error message
-```
-
-### claude-code-overlay
-
-Uses the `github:ryoppippi/claude-code-overlay` flake input.
-
-**Update:**
-
-```bash
-nix flake update claude-code-overlay
-```
-
-The overlay maintainer handles version updates automatically.
+- `nh` - Nix helper tool
+- `nix-topology` - Network topology visualization
+- `flake-editors` - Stable zed-editor from nixpkgs
+- `fenix-overlay` - Rust toolchains
+- `flake-git-tools` - Lazygit from flake
+- `flake-cli-tools` - Atuin from flake
+- `niri` - Niri compositor (Linux only)
+- `comfyui` - ComfyUI native package
 
 ## Using nvfetcher
 
@@ -108,11 +75,7 @@ nvfetcher provides declarative source management for batch updates.
 
 See `.github/workflows/update-overlays.yml` for automated weekly updates via GitHub Actions.
 
-The workflow:
-
-- Runs the `updateScript` for gemini-cli
-- Updates flake inputs (claude-code-overlay)
-- Creates a PR with changes
+The workflow updates flake inputs that provide overlays.
 
 ## Adding New Overlays
 

@@ -70,7 +70,6 @@ in
 
   config = mkIf (cfg.enable && cfg.janitorr.enable) (
     let
-      yamlFormat = pkgs.formats.yaml { };
       secretNames = {
         sonarr = "janitorr-sonarr-api-key";
         radarr = "janitorr-radarr-api-key";
@@ -102,7 +101,8 @@ in
         };
 
       janitorrConfig = recursiveUpdate baseConfig cfg.janitorr.extraConfig;
-      janitorrConfigFile = yamlFormat.generate "janitorr-application.yml" janitorrConfig;
+      # Generate YAML content directly as a string to avoid derivation issues during flake check
+      janitorrConfigContent = lib.generators.toYAML { } janitorrConfig;
       secretEntries = mapAttrs' (
         _name: secret:
         nameValuePair secret {
@@ -171,7 +171,7 @@ in
       sops.secrets = mkIf cfg.janitorr.useSops secretEntries;
 
       sops.templates."janitorr-application.yml" = {
-        content = builtins.readFile janitorrConfigFile;
+        content = janitorrConfigContent;
         mode = "0400";
         owner = "root";
       };

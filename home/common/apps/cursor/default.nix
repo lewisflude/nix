@@ -16,13 +16,8 @@ in
   };
   programs.vscode = {
     enable = true;
-    # Use code-cursor from nixpkgs for Linux (better maintained)
-    # Fall back to custom cursor package for Darwin or if code-cursor unavailable
-    package =
-      if pkgs.stdenv.isLinux && pkgs ? code-cursor then
-        pkgs.code-cursor
-      else
-        (pkgs.cursor.cursor or pkgs.vscode);
+    # Use cursor from nixpkgs (cross-platform)
+    package = pkgs.cursor or pkgs.vscode;
     mutableExtensionsDir = false;
     profiles.default = {
       userSettings = lib.mkMerge [
