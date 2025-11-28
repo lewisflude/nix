@@ -1,11 +1,15 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 {
   # Claude Code CLI - agentic coding assistant
-  # The claude-code overlay provides always up-to-date versions
+  # Uses claude-code-overlay for pre-built binaries from Anthropic
   # MCP servers configured in home/{nixos,darwin}/mcp.nix
 
   programs.claude-code = {
     enable = true;
+
+    # Override package to use the pre-built binary from claude-code-overlay
+    # Access directly from the flake input's packages
+    package = inputs.claude-code-overlay.packages.${pkgs.system}.claude;
 
     # Custom commands for Claude Code
     # Usage: Type /command-name in claude-code prompt
