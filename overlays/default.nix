@@ -54,4 +54,11 @@ in
     else
       (_final: _prev: { });
 
+  # Claude Code - Pre-built binaries from Anthropic (via overlay)
+  claude-code-overlay =
+    if inputs ? claude-code-overlay && inputs.claude-code-overlay ? overlays then
+      inputs.claude-code-overlay.overlays.default
+    else
+      (_final: _prev: { });
+
 }
