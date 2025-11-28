@@ -18,11 +18,11 @@ in
       raopOpenFirewall = true;
       wireplumber = {
         configPackages = [
-          # Force ACP to create nodes for Apogee Symphony Desktop in pro-audio mode
-          # Without this, pro-audio profile doesn't create usable ALSA output/input nodes
-          (pkgs.writeTextDir "share/wireplumber/main.lua.d/50-apogee-acp-enable.lua" ''
-            -- Enable ACP auto-port creation for Apogee Symphony Desktop
-            -- This ensures that ALSA output nodes are created even in pro-audio mode
+          # Manually create ALSA output node for Apogee Symphony Desktop
+          # The pro-audio profile doesn't create standard nodes, so we create one directly
+          (pkgs.writeTextDir "share/wireplumber/main.lua.d/50-apogee-manual-node.lua" ''
+            -- Manually create ALSA PCM node for Apogee Symphony Desktop
+            -- This bypasses the ACP pro-audio profile which doesn't create standard nodes
             table.insert(alsa_monitor.rules, {
               matches = {
                 {
@@ -30,8 +30,7 @@ in
                 },
               },
               apply_properties = {
-                ["api.acp.auto-port"] = true,
-                ["api.acp.auto-profile"] = false,  -- Keep pro-audio profile
+                ["api.alsa.use-acp"] = false,  -- Disable ACP, create nodes manually
               },
             })
           '')
