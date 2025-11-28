@@ -220,6 +220,9 @@ in
       enable = mkEnableOption "security and privacy tools";
       yubikey = mkEnableOption "YubiKey hardware support";
       gpg = mkEnableOption "GPG/PGP encryption";
+      fail2ban = mkEnableOption "fail2ban intrusion detection" // {
+        default = true;
+      };
     };
 
     aiTools = {

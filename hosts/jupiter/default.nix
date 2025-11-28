@@ -5,6 +5,12 @@
   hostname = "jupiter";
 
   features = {
+    security = {
+      enable = true;
+      yubikey = true;
+      fail2ban = true;
+    };
+
     development = {
       lua = true;
       # Moved to devShells to reduce system size (~2-4GB savings)
