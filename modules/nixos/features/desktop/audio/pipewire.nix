@@ -18,40 +18,6 @@ in
       raopOpenFirewall = true;
       wireplumber = {
         configPackages = [
-          # Manually create ALSA output node for Apogee Symphony Desktop
-          # The pro-audio profile doesn't create standard nodes, so we create one directly
-          (pkgs.writeTextDir "share/wireplumber/main.lua.d/50-apogee-manual-node.lua" ''
-            -- Manually create ALSA PCM node for Apogee Symphony Desktop
-            -- This bypasses the ACP pro-audio profile which doesn't create standard nodes
-            table.insert(alsa_monitor.rules, {
-              matches = {
-                {
-                  { "device.name", "equals", "alsa_card.usb-Apogee_Electronics_Corp_Symphony_Desktop-00" },
-                },
-              },
-              apply_properties = {
-                ["api.alsa.use-acp"] = false,  -- Disable ACP, create nodes manually
-              },
-            })
-          '')
-          # Set device priorities to ensure consistent default device for Wine/Proton
-          # Note: Speakers sink priority is already set in hardware-specific.nix via pw-loopback
-          (pkgs.writeTextDir "share/wireplumber/main.lua.d/51-device-priority.lua" ''
-            -- Give Apogee Symphony Desktop highest priority to ensure it's always the default
-            -- This fixes intermittent Wine/Proton audio failures caused by device enumeration races
-            table.insert(alsa_monitor.rules, {
-              matches = {
-                {
-                  { "node.name", "matches", "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-*" },
-                },
-              },
-              apply_properties = {
-                ["priority.driver"] = 2000,
-                ["priority.session"] = 2000,
-                ["node.pause-on-idle"] = false,
-              },
-            })
-          '')
           (pkgs.writeTextDir "share/wireplumber/main.lua.d/99-alsa-lowlatency.lua" ''
             -- Add low-latency ALSA configuration to existing rules
             table.insert(alsa_monitor.rules, {
@@ -64,24 +30,46 @@ in
               },
             })
           '')
-          # Prevent Apogee Symphony from suspending during screen lock
-          # Professional audio interfaces should maintain active state to avoid:
-          # - Sample rate changes, driver reinitialization, and audio session interruptions
-          (pkgs.writeTextDir "share/wireplumber/main.lua.d/99-apogee-no-suspend.lua" ''
-            -- Disable suspend for Apogee Symphony interface
-            rule = {
-              matches = {
-                {
-                  { "node.name", "matches", "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-.*" },
-                },
-              },
-              apply_properties = {
-                ["session.suspend-timeout-seconds"] = 0,
-              },
-            }
-            table.insert(alsa_monitor.rules, rule)
-          '')
         ];
+        extraConfig = {
+          "10-disable-acp-apogee" = {
+            "monitor.alsa.rules" = [
+              {
+                matches = [
+                  {
+                    "device.name" = "alsa_card.usb-Apogee_Electronics_Corp_Symphony_Desktop-00";
+                  }
+                ];
+                actions = {
+                  update-props = {
+                    "api.alsa.use-acp" = false;
+                    "api.acp.auto-profile" = false;
+                    "api.acp.auto-port" = false;
+                  };
+                };
+              }
+            ];
+          };
+          "20-apogee-priority" = {
+            "monitor.alsa.rules" = [
+              {
+                matches = [
+                  {
+                    "node.name" = "~alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-.*";
+                  }
+                ];
+                actions = {
+                  update-props = {
+                    "priority.driver" = 2000;
+                    "priority.session" = 2000;
+                    "node.pause-on-idle" = false;
+                    "session.suspend-timeout-seconds" = 0;
+                  };
+                };
+              }
+            ];
+          };
+        };
         # Bluetooth codec configuration
         # Note: Some configurations may affect codec availability in pavucontrol.
         # If A2DP codecs disappear, consider removing or adjusting these settings.
