@@ -40,6 +40,7 @@ in
                 users = [ config.host.username ];
                 keepEnv = true;
                 persist = true;
+                noPass = true; # Allow passwordless privilege escalation (matches sudo config)
               }
             ];
           };
