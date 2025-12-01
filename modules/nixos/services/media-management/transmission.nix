@@ -94,10 +94,25 @@ in
       mkIf (transmissionCfg.authentication != null && transmissionCfg.authentication.useSops)
         {
           "transmission/rpc/username" = {
-            neededForUsers = true;
+            inherit (cfg) user group;
+            mode = "0440";
           };
           "transmission/rpc/password" = {
-            neededForUsers = true;
+            inherit (cfg) user group;
+            mode = "0440";
+          };
+        };
+
+    # Generate credentials file from SOPS secrets using templates
+    sops.templates."transmission-credentials.json" =
+      mkIf (transmissionCfg.authentication != null && transmissionCfg.authentication.useSops)
+        {
+          inherit (cfg) user group;
+          mode = "0440";
+          content = builtins.toJSON {
+            rpc-authentication-required = true;
+            rpc-username = config.sops.placeholder."transmission/rpc/username";
+            rpc-password = config.sops.placeholder."transmission/rpc/password";
           };
         };
 
@@ -120,23 +135,31 @@ in
       # WebUI accessible from host network
       home = "/var/lib/transmission";
 
+      # Use credentialsFile for SOPS secrets, or configure inline for plaintext
+      credentialsFile =
+        if transmissionCfg.authentication != null && transmissionCfg.authentication.useSops then
+          config.sops.templates."transmission-credentials.json".path
+        else
+          null;
+
       settings =
         let
-          # Authentication configuration
+          # Authentication configuration (only for non-SOPS mode)
           authConfig =
-            if transmissionCfg.authentication != null && transmissionCfg.authentication.enable then
+            if
+              transmissionCfg.authentication != null
+              && transmissionCfg.authentication.enable
+              && !transmissionCfg.authentication.useSops
+            then
               {
                 rpc-authentication-required = true;
-                rpc-username =
-                  if transmissionCfg.authentication.useSops then
-                    config.sops.secrets."transmission/rpc/username".path
-                  else
-                    transmissionCfg.authentication.username;
-                rpc-password =
-                  if transmissionCfg.authentication.useSops then
-                    config.sops.secrets."transmission/rpc/password".path
-                  else
-                    transmissionCfg.authentication.password;
+                rpc-username = transmissionCfg.authentication.username;
+                rpc-password = transmissionCfg.authentication.password;
+              }
+            else if transmissionCfg.authentication != null && transmissionCfg.authentication.useSops then
+              {
+                # credentialsFile will handle these
+                rpc-authentication-required = true;
               }
             else
               {
