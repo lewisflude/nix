@@ -133,49 +133,65 @@ in
             "${vpnCfg.namespace}.service"
           ];
 
-          serviceConfig = {
-            Type = "oneshot";
+          serviceConfig =
+            let
+              transmissionCfg = config.host.services.mediaManagement.transmission or { };
+              transmissionEnabled = transmissionCfg.enable or false;
+              useSops =
+                transmissionEnabled
+                && (transmissionCfg.authentication != null)
+                && (transmissionCfg.authentication.useSops or false);
+            in
+            {
+              Type = "oneshot";
 
-            # Main script that queries NAT-PMP and updates qBittorrent
-            ExecStart = "${portforwardScript}/bin/protonvpn-portforward";
+              # Main script that queries NAT-PMP and updates qBittorrent
+              ExecStart = "${portforwardScript}/bin/protonvpn-portforward";
 
-            # Update firewall with the new port
-            ExecStartPost = "${pkgs.bash}/bin/bash -c '${firewallScript} ${qbittorrentCfg.vpn.portForwarding.namespace} $(cat /var/lib/protonvpn-portforward.state | grep PUBLIC_PORT | cut -d= -f2)'";
+              # Update firewall with the new port
+              ExecStartPost = "${pkgs.bash}/bin/bash -c '${firewallScript} ${qbittorrentCfg.vpn.portForwarding.namespace} $(cat /var/lib/protonvpn-portforward.state | grep PUBLIC_PORT | cut -d= -f2)'";
 
-            # Environment - pass configuration to script
-            Environment = [
-              "NAMESPACE=${qbittorrentCfg.vpn.portForwarding.namespace}"
-              "VPN_GATEWAY=${qbittorrentCfg.vpn.portForwarding.gateway}"
-              "NATPMPC_BIN=${pkgs.libnatpmp}/bin/natpmpc"
-              "CURL_BIN=${pkgs.curl}/bin/curl"
-              # Transmission integration
-              "TRANSMISSION_HOST=127.0.0.1:${
-                toString (config.host.services.mediaManagement.transmission.webUIPort or 9091)
-              }"
-              "TRANSMISSION_ENABLED=${
-                if config.host.services.mediaManagement.transmission.enable or false then "true" else "false"
-              }"
-            ];
+              # Environment - pass configuration to script
+              Environment = [
+                "NAMESPACE=${qbittorrentCfg.vpn.portForwarding.namespace}"
+                "VPN_GATEWAY=${qbittorrentCfg.vpn.portForwarding.gateway}"
+                "NATPMPC_BIN=${pkgs.libnatpmp}/bin/natpmpc"
+                "CURL_BIN=${pkgs.curl}/bin/curl"
+                # Transmission integration
+                "TRANSMISSION_HOST=127.0.0.1:${toString (transmissionCfg.webUIPort or 9091)}"
+                "TRANSMISSION_ENABLED=${if transmissionEnabled then "true" else "false"}"
+              ]
+              ++ lib.optionals useSops [
+                # Credentials will be loaded via LoadCredential below
+                "TRANSMISSION_USERNAME_FILE=\${CREDENTIALS_DIRECTORY}/transmission-username"
+                "TRANSMISSION_PASSWORD_FILE=\${CREDENTIALS_DIRECTORY}/transmission-password"
+              ];
 
-            # Timeout settings
-            TimeoutStartSec = "60s";
+              # Load SOPS secrets as credentials if Transmission uses SOPS
+              LoadCredential = lib.mkIf useSops [
+                "transmission-username:/run/secrets/transmission/rpc/username"
+                "transmission-password:/run/secrets/transmission/rpc/password"
+              ];
 
-            # Security
-            PrivateTmp = true;
-            NoNewPrivileges = false; # Needed for ip netns exec and iptables
-            ProtectSystem = "strict";
-            ProtectHome = true;
-            ReadWritePaths = [
-              "/var/lib" # Need to write state file
-            ];
+              # Timeout settings
+              TimeoutStartSec = "60s";
 
-            # Network
-            PrivateNetwork = false; # Need access to namespaces
+              # Security
+              PrivateTmp = true;
+              NoNewPrivileges = false; # Needed for ip netns exec and iptables
+              ProtectSystem = "strict";
+              ProtectHome = true;
+              ReadWritePaths = [
+                "/var/lib" # Need to write state file
+              ];
 
-            # Logging
-            StandardOutput = "journal";
-            StandardError = "journal";
-          };
+              # Network
+              PrivateNetwork = false; # Need access to namespaces
+
+              # Logging
+              StandardOutput = "journal";
+              StandardError = "journal";
+            };
         };
 
         # Timer to run periodically
