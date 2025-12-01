@@ -129,6 +129,50 @@ systemd.user.services.apogee-speakers-loopback = {
 
 ## Common Issues
 
+### Issue: Apogee Symphony Desktop Not Working After KVM Switch
+
+**Symptoms:**
+
+- After switching to this computer using KVM, audio interface doesn't appear in PipeWire
+- No audio output or input available
+- Device shows in `lsusb` but not in `wpctl status`
+
+**Cause:**
+
+When switching between computers via KVM, the USB audio interface can retain state from the previous system (e.g., macOS/Ableton) which prevents Linux from properly initializing it.
+
+**Solution:**
+
+This system has **automatic USB reset** configured in `modules/nixos/hardware/apogee-symphony.nix`.
+
+When you switch to this computer via KVM:
+
+1. The udev rule detects the Apogee reconnection
+2. Automatically runs USB reset to clear device state
+3. Restarts PipeWire services to detect the device
+4. Restarts the speakers loopback service for gaming
+
+**Manual Reset (if automatic fails):**
+
+```bash
+# Run the manual reset command
+sudo apogee-reset
+
+# Or manually restart PipeWire services
+systemctl --user restart pipewire wireplumber pipewire-pulse
+systemctl --user restart apogee-speakers-loopback
+```
+
+**Check Logs:**
+
+```bash
+# View reset activity logs
+journalctl -t apogee-reset -f
+
+# Check if reset service ran
+systemctl status 'apogee-kvm-reset@*'
+```
+
 ### Issue: Game Has No Audio
 
 **Symptoms:**
