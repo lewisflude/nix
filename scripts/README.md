@@ -231,6 +231,18 @@ done
 # Check port forwarding
 ./scripts/media/test-vpn-port-forwarding.sh
 
+# Check specific port (64243)
+./scripts/check-torrent-port-64243.sh
+
+# Check any port
+./scripts/check-torrent-port.sh 64243
+
+# Update Transmission port manually
+./scripts/update-transmission-port.sh 55555 -u admin -p secret
+
+# Get Transmission session info
+./scripts/update-transmission-port.sh info -u admin -p secret
+
 # Diagnose seeding issues
 ./scripts/media/diagnose-qbittorrent-seeding.sh
 ```

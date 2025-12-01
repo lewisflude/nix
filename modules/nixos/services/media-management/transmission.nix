@@ -179,6 +179,12 @@ in
           peer-port = transmissionCfg.peerPort;
           peer-port-random-on-start = false;
 
+          # Network configuration
+          # IMPORTANT: Disable IPv6 because ProtonVPN's NAT-PMP port forwarding is IPv4-only
+          # IPv6 peers would not be able to connect (port not forwarded)
+          bind-address-ipv4 = "0.0.0.0";
+          bind-address-ipv6 = ""; # Empty string disables IPv6
+
           # WebUI configuration
           rpc-enabled = true;
           rpc-port = transmissionCfg.webUIPort;

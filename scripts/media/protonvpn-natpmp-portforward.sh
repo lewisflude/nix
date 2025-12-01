@@ -222,34 +222,8 @@ get_transmission_credentials() {
     return 0
 }
 
-# Get Transmission RPC session ID
-transmission_get_session_id() {
-    local response
-
-    # Make request with or without auth
-    if [[ -n "${TRANSMISSION_USERNAME}" ]] && [[ -n "${TRANSMISSION_PASSWORD}" ]]; then
-        response=$(ip netns exec "${NAMESPACE}" "${CURL}" -s -m 10 \
-            --user "${TRANSMISSION_USERNAME}:${TRANSMISSION_PASSWORD}" \
-            "http://${TRANSMISSION_HOST}/transmission/rpc" 2>&1 || echo "")
-    else
-        response=$(ip netns exec "${NAMESPACE}" "${CURL}" -s -m 10 \
-            "http://${TRANSMISSION_HOST}/transmission/rpc" 2>&1 || echo "")
-    fi
-
-    # Extract X-Transmission-Session-Id from 409 response
-    local session_id
-    session_id=$(echo "$response" | grep -oP 'X-Transmission-Session-Id: \K[^<]+' || echo "")
-
-    if [[ -n "$session_id" ]]; then
-        echo "$session_id"
-        return 0
-    fi
-
-    log_error "Failed to get Transmission session ID"
-    return 1
-}
-
-# Update Transmission peer port
+# Update Transmission peer port using transmission-remote
+# This is the official and recommended method for updating Transmission settings
 update_transmission_port() {
     local new_port="$1"
 
@@ -260,31 +234,33 @@ update_transmission_port() {
 
     log_info "Updating Transmission peer port to ${new_port}..."
 
+    # Check if transmission-remote is available
+    local transmission_remote
+    transmission_remote=$(command -v transmission-remote || echo "")
+    if [[ -z "$transmission_remote" ]]; then
+        log_error "transmission-remote not found - cannot update Transmission"
+        return 1
+    fi
+
     # Get credentials
     if ! get_transmission_credentials; then
         log_error "Cannot update Transmission without credentials"
         return 1
     fi
 
-    # Get session ID first (required for CSRF protection)
-    local session_id
-    session_id=$(transmission_get_session_id)
-    if [[ -z "$session_id" ]]; then
-        log_error "Cannot update Transmission without session ID"
-        return 1
-    fi
-
+    # Update port using transmission-remote (the official CLI tool)
+    # IMPORTANT: Must use transmission-remote, not edit config file directly
+    # Editing the config file while Transmission is running causes changes to be overwritten
     local response
-    response=$(ip netns exec "${NAMESPACE}" "${CURL}" -s -m 10 \
-        --user "${TRANSMISSION_USERNAME}:${TRANSMISSION_PASSWORD}" \
-        -H "X-Transmission-Session-Id: ${session_id}" \
-        -X POST "http://${TRANSMISSION_HOST}/transmission/rpc" \
-        -d "{\"method\":\"session-set\",\"arguments\":{\"peer-port\":${new_port}}}" \
+    response=$(ip netns exec "${NAMESPACE}" "${transmission_remote}" \
+        "${TRANSMISSION_HOST}" \
+        -n "${TRANSMISSION_USERNAME}:${TRANSMISSION_PASSWORD}" \
+        -p "${new_port}" \
         2>&1 || echo "ERROR")
 
-    # Check for success
-    if echo "$response" | grep -q '"result":"success"'; then
-        log_success "Transmission port updated to ${new_port}"
+    # Check for success (transmission-remote outputs nothing on success)
+    if [[ "$response" != *"ERROR"* ]] && [[ "$response" != *"Unauthorized"* ]] && [[ "$response" != *"authentication"* ]]; then
+        log_success "Transmission port updated to ${new_port} via transmission-remote"
         return 0
     fi
 
