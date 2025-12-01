@@ -58,6 +58,12 @@ in
     # Firewall: WebUI port only (peer port handled in VPN namespace)
     networking.firewall.allowedTCPPorts = [ transmissionCfg.webUIPort ];
 
+    # Ensure required directories exist
+    systemd.tmpfiles.rules = [
+      "d '${transmissionCfg.incompleteDir}' 0750 ${cfg.user} ${cfg.group} - -"
+      "d '${transmissionCfg.downloadDir}' 0750 ${cfg.user} ${cfg.group} - -"
+    ];
+
     # Transmission service configuration
     services.transmission = {
       enable = true;
