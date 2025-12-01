@@ -225,15 +225,16 @@ get_transmission_credentials() {
 # Get Transmission RPC session ID
 transmission_get_session_id() {
     local response
-    local auth_args=""
 
-    # Add basic auth if credentials available
+    # Make request with or without auth
     if [[ -n "${TRANSMISSION_USERNAME}" ]] && [[ -n "${TRANSMISSION_PASSWORD}" ]]; then
-        auth_args="--user ${TRANSMISSION_USERNAME}:${TRANSMISSION_PASSWORD}"
+        response=$(ip netns exec "${NAMESPACE}" "${CURL}" -s -m 10 \
+            --user "${TRANSMISSION_USERNAME}:${TRANSMISSION_PASSWORD}" \
+            "http://${TRANSMISSION_HOST}/transmission/rpc" 2>&1 || echo "")
+    else
+        response=$(ip netns exec "${NAMESPACE}" "${CURL}" -s -m 10 \
+            "http://${TRANSMISSION_HOST}/transmission/rpc" 2>&1 || echo "")
     fi
-
-    response=$(ip netns exec "${NAMESPACE}" "${CURL}" -s -m 10 ${auth_args} \
-        "http://${TRANSMISSION_HOST}/transmission/rpc" 2>&1 || echo "")
 
     # Extract X-Transmission-Session-Id from 409 response
     local session_id
