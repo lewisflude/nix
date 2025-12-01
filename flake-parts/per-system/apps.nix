@@ -79,13 +79,16 @@ in
         setup-cachix = mkPogApp "setup-cachix";
         update-all = mkPogApp "update-all";
         visualize-modules = mkPogApp "visualize-modules";
-        calculate-qbittorrent-config = mkPogApp "calculate-qbittorrent-config";
         # devour-flake: Build all flake outputs efficiently
         devour-flake = {
           type = "app";
           meta.description = "Build all flake outputs efficiently";
           program = "${devour-flake}/bin/devour-flake";
         };
+      }
+      // lib.optionalAttrs pkgs.stdenv.isLinux {
+        # Linux-only apps (require iproute2, util-linux, network namespaces)
+        calculate-qbittorrent-config = mkPogApp "calculate-qbittorrent-config";
       };
     };
 }
