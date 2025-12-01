@@ -156,7 +156,7 @@
 
         authentication = {
           enable = true;
-          useSops = true; # Use encrypted SOPS secrets
+          useSops = true;
         };
 
         downloadDir = "/mnt/storage/torrents";
