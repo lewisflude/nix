@@ -18,19 +18,27 @@ let
   claudeConfigDir = platformLib.dataDir config.home.username + "/Claude";
 
   # Custom wrappers for Darwin (using home.file)
+  # TEMPORARILY DISABLED: uv build failing
   kagiWrapperScript = ''
     #!/usr/bin/env bash
     set -euo pipefail
-
-    if [ -r "${systemConfig.sops.secrets.KAGI_API_KEY.path or ""}" ]; then
-      export KAGI_API_KEY="$(${pkgs.coreutils}/bin/cat "${
-        systemConfig.sops.secrets.KAGI_API_KEY.path or ""
-      }")"
-    fi
-
-    export UV_PYTHON="${pkgs.python3}/bin/python3"
-    exec ${pkgs.uv}/bin/uvx --from kagimcp==0.2.0 kagimcp "$@"
+    echo "Kagi MCP server temporarily disabled due to uv build failure" >&2
+    exit 1
   '';
+
+  # kagiWrapperScript = ''
+  #   #!/usr/bin/env bash
+  #   set -euo pipefail
+  #
+  #   if [ -r "${systemConfig.sops.secrets.KAGI_API_KEY.path or ""}" ]; then
+  #     export KAGI_API_KEY="$(${pkgs.coreutils}/bin/cat "${
+  #       systemConfig.sops.secrets.KAGI_API_KEY.path or ""
+  #     }")"
+  #   fi
+  #
+  #   export UV_PYTHON="${pkgs.python3}/bin/python3"
+  #   exec ${pkgs.uv}/bin/uvx --from kagimcp==0.2.0 kagimcp "$@"
+  # '';
 
   docsWrapperScript = ''
     #!/usr/bin/env bash
@@ -58,25 +66,27 @@ let
     };
 
     # NixOS-specific MCP server
-    nixos = {
-      command = "${pkgs.uv}/bin/uvx";
-      args = [
-        "--from"
-        "mcp-nixos==0.2.0"
-        "mcp-nixos"
-      ];
-      port = constants.ports.mcp.nixos;
-      env = {
-        UV_PYTHON = "${pkgs.python3}/bin/python3";
-      };
-    };
+    # TEMPORARILY DISABLED: uv build failing
+    # nixos = {
+    #   command = "${pkgs.uv}/bin/uvx";
+    #   args = [
+    #     "--from"
+    #     "mcp-nixos==0.2.0"
+    #     "mcp-nixos"
+    #   ];
+    #   port = constants.ports.mcp.nixos;
+    #   env = {
+    #     UV_PYTHON = "${pkgs.python3}/bin/python3";
+    #   };
+    # };
 
     # Kagi MCP server with SOPS integration
-    kagi = {
-      command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
-      args = [ ];
-      port = constants.ports.mcp.kagi;
-    };
+    # TEMPORARILY DISABLED: uv build failing
+    # kagi = {
+    #   command = "${config.home.homeDirectory}/bin/kagi-mcp-wrapper";
+    #   args = [ ];
+    #   port = constants.ports.mcp.kagi;
+    # };
 
     # Docs MCP server with SOPS integration
     docs-mcp-server = {
@@ -95,7 +105,7 @@ in
   home = {
     # Install required packages
     packages = [
-      pkgs.uv
+      # pkgs.uv  # Temporarily disabled due to build failure
       pkgs.nodejs
     ];
 

@@ -33,7 +33,8 @@ let
     ;
 
   # Note: nodejs package directly from pkgs (no version wrapper needed)
-  uvx = "${pkgs.uv}/bin/uvx";
+  # TEMPORARILY DISABLED: uv build failing
+  # uvx = "${pkgs.uv}/bin/uvx";
 
   # Generic secret wrapper builder
   #
@@ -80,14 +81,25 @@ in
   # Kagi provides search, summarization, and assistant capabilities.
   #
   # Usage: kagi-mcp-wrapper [args...]
-  kagiWrapper = mkSecretWrapper {
+  # TEMPORARILY DISABLED: uv build failing
+  kagiWrapper = pkgs.writeShellApplication {
     name = "kagi-mcp-wrapper";
-    secretName = "KAGI_API_KEY";
-    command = ''
-      export UV_PYTHON="${pkgs.python3}/bin/python3"
-      exec ${uvx} --from kagimcp==0.2.0 kagimcp "$@"
+    runtimeInputs = [ pkgs.coreutils ];
+    text = ''
+      set -euo pipefail
+      echo "Kagi MCP server temporarily disabled due to uv build failure" >&2
+      exit 1
     '';
   };
+
+  # kagiWrapper = mkSecretWrapper {
+  #   name = "kagi-mcp-wrapper";
+  #   secretName = "KAGI_API_KEY";
+  #   command = ''
+  #     export UV_PYTHON="${pkgs.python3}/bin/python3"
+  #     exec ${uvx} --from kagimcp==0.2.0 kagimcp "$@"
+  #   '';
+  # };
 
   # OpenAI MCP server with Rust documentation support
   openaiWrapper = mkSecretWrapper {
