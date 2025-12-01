@@ -36,14 +36,15 @@ let
     };
 
     # NixOS-specific MCP server - Package and config search
-    nixos = {
-      command = "${pkgs.uv}/bin/uvx";
-      args = [ "mcp-nixos" ];
-      port = constants.ports.mcp.nixos;
-      env = {
-        UV_PYTHON = "${pkgs.python3}/bin/python3";
-      };
-    };
+    # TEMPORARILY DISABLED: uv build failing
+    # nixos = {
+    #   command = "${pkgs.uv}/bin/uvx";
+    #   args = [ "mcp-nixos" ];
+    #   port = constants.ports.mcp.nixos;
+    #   env = {
+    #     UV_PYTHON = "${pkgs.python3}/bin/python3";
+    #   };
+    # };
 
     # Kagi MCP server - Search and summarization (requires KAGI_API_KEY)
     kagi = {
@@ -131,7 +132,7 @@ in
 {
   home = {
     packages = [
-      pkgs.uv
+      # pkgs.uv  # TEMPORARILY DISABLED: uv build failing
       pkgs.nodejs
       pkgs.coreutils
       pkgs.gawk
