@@ -15,6 +15,10 @@ COOKIE_FILE="/tmp/qbittorrent_portforward_cookie.txt"
 PORTFORWARD_STATE="/var/lib/protonvpn-portforward.state"
 LOG_PREFIX="[ProtonVPN-PortForward]"
 
+# Transmission configuration
+TRANSMISSION_HOST="${TRANSMISSION_HOST:-127.0.0.1:9091}"
+TRANSMISSION_ENABLED="${TRANSMISSION_ENABLED:-false}"
+
 # Tool paths (can be overridden by systemd)
 NATPMPC="${NATPMPC_BIN:-$(command -v natpmpc)}"
 CURL="${CURL_BIN:-$(command -v curl)}"
@@ -193,6 +197,61 @@ verify_listening() {
     fi
 }
 
+# Get Transmission RPC session ID
+transmission_get_session_id() {
+    local response
+    response=$(ip netns exec "${NAMESPACE}" "${CURL}" -s -m 10 \
+        "http://${TRANSMISSION_HOST}/transmission/rpc" 2>&1 || echo "")
+
+    # Extract X-Transmission-Session-Id from 409 response
+    local session_id
+    session_id=$(echo "$response" | grep -oP 'X-Transmission-Session-Id: \K[^<]+' || echo "")
+
+    if [[ -n "$session_id" ]]; then
+        echo "$session_id"
+        return 0
+    fi
+
+    log_error "Failed to get Transmission session ID"
+    return 1
+}
+
+# Update Transmission peer port
+update_transmission_port() {
+    local new_port="$1"
+
+    if [[ "${TRANSMISSION_ENABLED}" != "true" ]]; then
+        log_info "Transmission integration disabled, skipping..."
+        return 0
+    fi
+
+    log_info "Updating Transmission peer port to ${new_port}..."
+
+    # Get session ID first (required for CSRF protection)
+    local session_id
+    session_id=$(transmission_get_session_id)
+    if [[ -z "$session_id" ]]; then
+        log_error "Cannot update Transmission without session ID"
+        return 1
+    fi
+
+    local response
+    response=$(ip netns exec "${NAMESPACE}" "${CURL}" -s -m 10 \
+        -H "X-Transmission-Session-Id: ${session_id}" \
+        -X POST "http://${TRANSMISSION_HOST}/transmission/rpc" \
+        -d "{\"method\":\"session-set\",\"arguments\":{\"peer-port\":${new_port}}}" \
+        2>&1 || echo "ERROR")
+
+    # Check for success
+    if echo "$response" | grep -q '"result":"success"'; then
+        log_success "Transmission port updated to ${new_port}"
+        return 0
+    fi
+
+    log_error "Failed to update Transmission port. Response: ${response}"
+    return 1
+}
+
 # Main execution
 main() {
     log_info "=== ProtonVPN NAT-PMP Port Forwarding Automation ==="
@@ -228,7 +287,14 @@ main() {
     else
         log_info "Port mismatch detected - updating from ${CURRENT_PORT} to ${FORWARDED_PORT}"
 
+        # Update qBittorrent
         if update_qbittorrent_port "${FORWARDED_PORT}"; then
+            log_success "qBittorrent port updated successfully"
+
+            # Update Transmission (non-fatal if it fails)
+            update_transmission_port "${FORWARDED_PORT}" || \
+                log_error "Transmission port update failed (non-fatal)"
+
             save_state "${FORWARDED_PORT}"
 
             # Verify the port is listening
@@ -242,7 +308,7 @@ main() {
     fi
 
     log_success "=== Port Forwarding Maintenance Complete ==="
-    log_info "qBittorrent is now using port: ${FORWARDED_PORT}"
+    log_info "Services are now using port: ${FORWARDED_PORT}"
 
     # Output port for other scripts
     echo "${FORWARDED_PORT}"

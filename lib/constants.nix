@@ -40,6 +40,7 @@
       listenarr = 5000;
       prowlarr = 9696;
       qbittorrent = 8080;
+      transmission = 9091;
       sabnzbd = 8082;
       navidrome = 4533;
       flaresolverr = 8191;

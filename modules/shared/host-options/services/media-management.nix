@@ -90,6 +90,12 @@ in
       description = "qBittorrent configuration (options defined in service module)";
     };
 
+    transmission = mkOption {
+      type = types.attrs;
+      default = { };
+      description = "Transmission configuration (options defined in service module)";
+    };
+
     jellyfin = {
       enable = mkOption {
         type = types.bool;

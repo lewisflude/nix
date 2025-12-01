@@ -148,6 +148,13 @@ in
               "VPN_GATEWAY=${qbittorrentCfg.vpn.portForwarding.gateway}"
               "NATPMPC_BIN=${pkgs.libnatpmp}/bin/natpmpc"
               "CURL_BIN=${pkgs.curl}/bin/curl"
+              # Transmission integration
+              "TRANSMISSION_HOST=127.0.0.1:${
+                toString (config.host.services.mediaManagement.transmission.webUIPort or 9091)
+              }"
+              "TRANSMISSION_ENABLED=${
+                if config.host.services.mediaManagement.transmission.enable or false then "true" else "false"
+              }"
             ];
 
             # Timeout settings

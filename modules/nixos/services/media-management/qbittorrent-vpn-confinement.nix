@@ -126,8 +126,12 @@ in
       # Port forwarding for WebUI (host network ? namespace)
       portMappings = [
         {
-          from = 8080;
+          from = 8080; # qBittorrent WebUI
           to = 8080;
+        }
+        {
+          from = 9091; # Transmission WebUI
+          to = 9091;
         }
       ];
 
