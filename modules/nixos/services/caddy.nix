@@ -118,6 +118,18 @@ in
           '';
         };
 
+        # Transmission (VPN namespace)
+        "transmission.blmt.io" = {
+          extraConfig = ''
+            reverse_proxy 192.168.15.1:9091 {
+              header_up X-Real-IP {remote_host}
+              header_up X-Forwarded-For {remote_host}
+              header_up X-Forwarded-Proto {scheme}
+            }
+            encode zstd gzip
+          '';
+        };
+
         # Prowlarr
         "prowlarr.blmt.io" = {
           extraConfig = ''

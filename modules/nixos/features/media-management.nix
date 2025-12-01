@@ -22,6 +22,7 @@ in
       listenarr = cfg.listenarr or { };
       sabnzbd = cfg.sabnzbd or { };
       qbittorrent = cfg.qbittorrent or { };
+      transmission = cfg.transmission or { };
       jellyfin = cfg.jellyfin or { };
       jellyseerr = cfg.jellyseerr or { };
       flaresolverr = cfg.flaresolverr or { };

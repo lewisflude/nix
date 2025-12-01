@@ -1,0 +1,109 @@
+{
+  config,
+  lib,
+  pkgs,
+  constants,
+  ...
+}:
+let
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    mkOption
+    types
+    ;
+  cfg = config.host.services.mediaManagement;
+  transmissionCfg = cfg.transmission;
+in
+{
+  options.host.services.mediaManagement.transmission = {
+    enable = mkEnableOption "Transmission BitTorrent client";
+
+    webUIPort = mkOption {
+      type = types.port;
+      default = constants.ports.services.transmission;
+      description = "WebUI port (default: 9091)";
+    };
+
+    downloadDir = mkOption {
+      type = types.str;
+      default = "/mnt/storage/torrents";
+      description = "Directory for completed downloads";
+    };
+
+    incompleteDir = mkOption {
+      type = types.str;
+      default = "/var/lib/transmission/incomplete";
+      description = "Directory for incomplete downloads";
+    };
+
+    peerPort = mkOption {
+      type = types.port;
+      default = 62000;
+      description = "Initial peer port (will be updated by NAT-PMP)";
+    };
+
+    vpn = {
+      enable = mkEnableOption "VPN namespace for Transmission";
+
+      namespace = mkOption {
+        type = types.str;
+        default = "qbt";
+        description = "VPN namespace name (shared with qBittorrent)";
+      };
+    };
+  };
+
+  config = mkIf (cfg.enable && transmissionCfg.enable) {
+    # Firewall: WebUI port only (peer port handled in VPN namespace)
+    networking.firewall.allowedTCPPorts = [ transmissionCfg.webUIPort ];
+
+    # Transmission service configuration
+    services.transmission = {
+      enable = true;
+
+      # Use Transmission 4 (required in NixOS 24.11+)
+      package = pkgs.transmission_4;
+
+      # Use media user/group for file access compatibility
+      inherit (cfg) user group;
+
+      # WebUI accessible from host network
+      home = "/var/lib/transmission";
+
+      settings = {
+        # Download paths
+        download-dir = transmissionCfg.downloadDir;
+        incomplete-dir = transmissionCfg.incompleteDir;
+        incomplete-dir-enabled = true;
+
+        # Peer port (will be dynamically updated by NAT-PMP)
+        peer-port = transmissionCfg.peerPort;
+        peer-port-random-on-start = false;
+
+        # WebUI configuration
+        rpc-enabled = true;
+        rpc-port = transmissionCfg.webUIPort;
+        rpc-bind-address = "0.0.0.0";
+        rpc-whitelist-enabled = false; # Allow from any IP (reverse proxy handles auth)
+        rpc-host-whitelist-enabled = false;
+
+        # Basic limits (minimal configuration)
+        speed-limit-up-enabled = false;
+        speed-limit-down-enabled = false;
+
+        # Ratio limits (disabled by default)
+        ratio-limit-enabled = false;
+      };
+    };
+
+    # VPN confinement when enabled
+    systemd.services.transmission = mkIf transmissionCfg.vpn.enable {
+      vpnConfinement = {
+        enable = true;
+        vpnNamespace = transmissionCfg.vpn.namespace;
+      };
+      wants = [ "network-online.target" ];
+    };
+  };
+}

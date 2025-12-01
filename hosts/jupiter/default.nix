@@ -150,6 +150,18 @@
           tv = "/mnt/storage/tv";
         };
       };
+
+      transmission = {
+        enable = true;
+
+        downloadDir = "/mnt/storage/torrents";
+        incompleteDir = "/var/lib/transmission/incomplete";
+
+        vpn = {
+          enable = true;
+          namespace = "qbt"; # Share with qBittorrent
+        };
+      };
     };
 
     aiTools = {

@@ -13,6 +13,7 @@
     ./qbittorrent.nix
     ./qbittorrent-vpn-confinement.nix
     ./protonvpn-portforward.nix
+    ./transmission.nix
     ./jellyfin.nix
     ./jellyseerr.nix
     ./flaresolverr.nix
