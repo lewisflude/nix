@@ -39,6 +39,8 @@ Automated NAT-PMP port forwarding for qBittorrent running in a VPN-confined name
 - **Renewal Interval**: 45 seconds (75% of lease duration)
 - **Protocol Support**: Both UDP and TCP port mappings
 
+> **⚠️ Important:** ProtonVPN's NAT-PMP port forwarding is **IPv4-only**. Even though ProtonVPN provides IPv6 connectivity, port forwarding does not work for IPv6. Both torrent clients are configured to use IPv4 only. See [ProtonVPN IPv6 and Port Forwarding Limitations](./PROTONVPN_IPV6_PORTFORWARDING.md) for details.
+
 ## Architecture
 
 ```
@@ -72,6 +74,17 @@ Automated NAT-PMP port forwarding for qBittorrent running in a VPN-confined name
 ???????????????????????????????????????????????????????????????
 ```
 
+## Supported Clients
+
+This setup supports **both qBittorrent and Transmission** running in the same VPN namespace:
+
+| Client | Integration | Port Update Method | Status |
+|--------|-------------|-------------------|---------|
+| **qBittorrent** | WebUI API | HTTP API calls | ✅ Full |
+| **Transmission** | transmission-remote | CLI utility | ✅ Full |
+
+Both clients share the same forwarded port from ProtonVPN and are automatically updated by the port forwarding automation.
+
 ## Components
 
 ### 1. VPN-Confinement Module
@@ -104,17 +117,25 @@ Manages automated NAT-PMP port forwarding.
 
 **File**: `scripts/protonvpn-natpmp-portforward.sh`
 
-Main script that handles port forwarding workflow.
+Main script that handles port forwarding workflow for both qBittorrent and Transmission.
 
 **Workflow**:
 
 1. Checks VPN namespace exists and is reachable
 2. Queries NAT-PMP gateway (10.2.0.1) for forwarded port (both UDP and TCP)
 3. Verifies both protocols receive the same port assignment
-4. Compares with current qBittorrent configuration
-5. Updates qBittorrent config if port changed
+4. **qBittorrent Update**: Compares with current config and updates via WebUI API if needed
+5. **Transmission Update**: Updates port using `transmission-remote` CLI utility
 6. Updates VPN namespace firewall rules for new port
-7. Verifies port is listening
+7. Verifies ports are listening
+
+**Important Notes**:
+
+- **qBittorrent**: Uses WebUI API (HTTP POST requests)
+- **Transmission**: Uses `transmission-remote` CLI utility (the **only** safe method)
+  - ⚠️ **NEVER edit Transmission's `settings.json` while the daemon is running**
+  - Manual edits are **overwritten** when Transmission restarts
+  - Always use `transmission-remote` for live configuration changes
 
 ### 4. Monitoring Script
 
@@ -147,7 +168,7 @@ Interactive verification following the setup guide checklist.
 
 ## Configuration
 
-### Enable Port Forwarding (Default)
+### qBittorrent with Port Forwarding
 
 Port forwarding is automatically enabled when VPN confinement is active:
 
@@ -156,16 +177,84 @@ host.services.mediaManagement.qbittorrent.vpn = {
   enable = true;
   namespace = "qbt";
   torrentPort = 62000;  # Initial port, will be updated by NAT-PMP
+
+  portForwarding = {
+    enable = true;              # Default: true
+    renewInterval = "45min";    # How often to renew (ProtonVPN: 60s lease, 45min renewal)
+    gateway = "10.2.0.1";       # ProtonVPN gateway
+  };
 };
 ```
 
-### Customize Port Forwarding
+### Transmission with Port Forwarding
+
+Enable Transmission in the same VPN namespace:
 
 ```nix
-host.services.mediaManagement.qbittorrent.vpn.portForwarding = {
-  enable = true;              # Default: true
-  renewInterval = "45s";      # How often to renew (ProtonVPN official: 60s lease, 45s renewal)
-  gateway = "10.2.0.1";       # ProtonVPN gateway
+host.services.mediaManagement.transmission = {
+  enable = true;
+
+  # WebUI configuration
+  webUIPort = 9091;
+
+  # Authentication (required for transmission-remote)
+  authentication = {
+    enable = true;
+    username = "admin";
+    password = "your-password";  # Or use SOPS secrets
+    useSops = false;  # Set to true to use SOPS secrets
+  };
+
+  # Initial peer port (will be updated by NAT-PMP)
+  peerPort = 62000;
+
+  # VPN confinement (shares namespace with qBittorrent)
+  vpn = {
+    enable = true;
+    namespace = "qbt";  # Same namespace as qBittorrent
+  };
+};
+```
+
+### Enable Transmission in Port Forwarding Automation
+
+The port forwarding service needs to know about Transmission:
+
+```nix
+# In your host configuration or the protonvpn-portforward module
+systemd.services.protonvpn-portforward = {
+  environment = {
+    TRANSMISSION_ENABLED = "true";
+    TRANSMISSION_HOST = "127.0.0.1:9091";
+    TRANSMISSION_USERNAME_FILE = "/run/secrets/transmission/rpc/username";  # Or use plain string
+    TRANSMISSION_PASSWORD_FILE = "/run/secrets/transmission/rpc/password";
+  };
+};
+```
+
+### Using SOPS Secrets for Transmission
+
+For better security, use SOPS to manage Transmission credentials:
+
+```nix
+host.services.mediaManagement.transmission.authentication = {
+  enable = true;
+  useSops = true;
+  # Credentials will be loaded from secrets
+};
+
+# SOPS secrets configuration
+sops.secrets = {
+  "transmission/rpc/username" = {
+    owner = "transmission";
+    group = "transmission";
+    mode = "0440";
+  };
+  "transmission/rpc/password" = {
+    owner = "transmission";
+    group = "transmission";
+    mode = "0440";
+  };
 };
 ```
 
@@ -259,7 +348,9 @@ sudo ip netns exec qbt natpmpc -a 1 0 tcp 60 -g 10.2.0.1
 systemctl status protonvpn-portforward.timer
 ```
 
-### ? Phase 3: qBittorrent
+### ? Phase 3: Torrent Clients
+
+#### qBittorrent
 
 - [ ] Service is running
 - [ ] Config file exists
@@ -274,11 +365,84 @@ sudo grep "InterfaceName" /var/lib/qBittorrent/qBittorrent/config/qBittorrent.co
 sudo ip netns exec qbt ss -tuln | grep <PORT>
 ```
 
+#### Transmission (Optional)
+
+- [ ] Service is running
+- [ ] Port matches NAT-PMP assignment
+- [ ] Transmission is listening on assigned port
+
+```bash
+systemctl status transmission
+# Get current port
+sudo ip netns exec qbt transmission-remote 127.0.0.1:9091 -n 'username:password' -si | grep "Peer port"
+# Check listening
+sudo ip netns exec qbt ss -tuln | grep <PORT>
+```
+
 ### ? Phase 4: External Connectivity
 
 - [ ] Port is open externally (test at <https://www.yougetsignal.com/tools/open-ports/>)
 - [ ] Torrents show incoming peer connections
 - [ ] Trackers report correct port
+
+## Manual Port Configuration
+
+### Transmission: Using transmission-remote
+
+**⚠️ CRITICAL**: The **ONLY** safe way to update Transmission settings while it's running is using `transmission-remote`. Never edit `settings.json` manually when the daemon is running.
+
+#### Update Port Manually
+
+```bash
+# Basic syntax
+transmission-remote [HOST:PORT] -n 'username:password' -p [NEW_PORT]
+
+# Example: Update to port 55555
+sudo ip netns exec qbt transmission-remote 127.0.0.1:9091 -n 'admin:secret' -p 55555
+
+# Without authentication (if auth disabled)
+sudo ip netns exec qbt transmission-remote 127.0.0.1:9091 -p 55555
+
+# From host network (if WebUI accessible)
+transmission-remote jupiter:9091 -n 'admin:secret' -p 55555
+```
+
+#### Verify Port Change
+
+```bash
+# Get session info (includes port)
+sudo ip netns exec qbt transmission-remote 127.0.0.1:9091 -n 'admin:secret' -si
+
+# Check specific port
+sudo ip netns exec qbt transmission-remote 127.0.0.1:9091 -n 'admin:secret' -si | grep "Peer port"
+
+# Verify listening
+sudo ip netns exec qbt ss -tuln | grep 55555
+```
+
+#### Common transmission-remote Commands
+
+```bash
+# Get session info
+transmission-remote HOST:PORT -n 'user:pass' -si
+
+# Update port
+transmission-remote HOST:PORT -n 'user:pass' -p PORT
+
+# Enable port test
+transmission-remote HOST:PORT -n 'user:pass' --port-test
+
+# Set download/upload limits
+transmission-remote HOST:PORT -n 'user:pass' -d 5000  # Download KB/s
+transmission-remote HOST:PORT -n 'user:pass' -u 1000  # Upload KB/s
+
+# List all torrents
+transmission-remote HOST:PORT -n 'user:pass' -l
+```
+
+### qBittorrent: Using WebUI API
+
+qBittorrent uses HTTP API calls (handled automatically by the port forwarding script).
 
 ## Troubleshooting
 
@@ -292,6 +456,80 @@ sudo ip netns exec qbt ss -tuln | grep <PORT>
 2. Verify route exists: `sudo ip netns exec qbt ip route | grep 10.2.0`
 3. Check WireGuard handshake: `sudo ip netns exec qbt wg show`
 4. Verify ProtonVPN account has port forwarding enabled
+
+### Transmission Port Not Updating
+
+**Symptoms**: Transmission still uses old port after NAT-PMP renewal
+
+**Solutions**:
+
+1. Check service logs: `journalctl -u protonvpn-portforward.service -n 50 | grep -i transmission`
+2. Verify `transmission-remote` is available: `which transmission-remote`
+3. Check credentials are configured correctly
+4. Manually update port to test:
+
+   ```bash
+   sudo ip netns exec qbt transmission-remote 127.0.0.1:9091 -n 'admin:password' -p 55555
+   ```
+
+5. Verify Transmission authentication is working:
+
+   ```bash
+   sudo ip netns exec qbt transmission-remote 127.0.0.1:9091 -n 'admin:password' -si
+   ```
+
+### Transmission Authentication Fails
+
+**Symptoms**: `"Unauthorized User"` or `"401 Unauthorized"`
+
+**Solutions**:
+
+1. Verify credentials in Transmission config:
+
+   ```bash
+   sudo grep "rpc-username\|rpc-password" /var/lib/transmission/.config/transmission-daemon/settings.json
+   ```
+
+2. Check if authentication is enabled:
+
+   ```bash
+   sudo grep "rpc-authentication-required" /var/lib/transmission/.config/transmission-daemon/settings.json
+   ```
+
+3. If using SOPS secrets, verify they're loaded:
+
+   ```bash
+   ls -la /run/secrets/transmission/rpc/
+   cat /run/secrets/transmission/rpc/username
+   ```
+
+4. Test with authentication disabled (temporarily):
+
+   ```nix
+   host.services.mediaManagement.transmission.authentication.enable = false;
+   ```
+
+### Transmission Config Changes Overwritten
+
+**Symptoms**: Manual edits to `settings.json` are lost after restart
+
+**Solution**: This is **expected behavior**. Transmission overwrites `settings.json` on shutdown with its in-memory configuration. You have two options:
+
+1. **Use transmission-remote** (recommended):
+
+   ```bash
+   sudo ip netns exec qbt transmission-remote 127.0.0.1:9091 -n 'admin:password' -p 55555
+   ```
+
+2. **Edit while stopped** (not recommended for port forwarding):
+
+   ```bash
+   sudo systemctl stop transmission
+   sudo nano /var/lib/transmission/.config/transmission-daemon/settings.json
+   sudo systemctl start transmission
+   ```
+
+⚠️ **Never edit the config file while Transmission is running!**
 
 ### Port Not Updating
 
@@ -325,6 +563,44 @@ sudo ip netns exec qbt ss -tuln | grep <PORT>
 2. List namespaces: `sudo ip netns list`
 3. Restart VPN: `sudo systemctl restart qbt.service`
 4. Check SOPS secrets: `ls -la /run/secrets/ | grep vpn`
+
+## Quick Reference: transmission-remote Commands
+
+Essential `transmission-remote` commands for managing Transmission:
+
+```bash
+# Session info (shows all settings including port)
+transmission-remote HOST:PORT -n 'user:pass' -si
+
+# Update peer port (the safe way!)
+transmission-remote HOST:PORT -n 'user:pass' -p PORT
+
+# Port test (test if port is open externally)
+transmission-remote HOST:PORT -n 'user:pass' --port-test
+
+# Get statistics
+transmission-remote HOST:PORT -n 'user:pass' -st
+
+# List torrents
+transmission-remote HOST:PORT -n 'user:pass' -l
+
+# Add torrent
+transmission-remote HOST:PORT -n 'user:pass' -a URL_OR_FILE
+
+# Start/stop all torrents
+transmission-remote HOST:PORT -n 'user:pass' --start-all
+transmission-remote HOST:PORT -n 'user:pass' --stop-all
+
+# Set speed limits (KB/s)
+transmission-remote HOST:PORT -n 'user:pass' -d 5000  # Download
+transmission-remote HOST:PORT -n 'user:pass' -u 1000  # Upload
+
+# Helper script (with better error handling and validation)
+./scripts/update-transmission-port.sh PORT -u user -p pass
+./scripts/update-transmission-port.sh info -u user -p pass
+```
+
+**See also**: `man transmission-remote` for complete command reference
 
 ## Migration from Old Setup
 

@@ -14,6 +14,7 @@ let
   cfg = config.host.services.mediaManagement;
   qbittorrentCfg = cfg.qbittorrent or { };
   vpnCfg = qbittorrentCfg.vpn or { };
+  transmissionCfg = cfg.transmission or { };
 
   # Port forwarding script with qBittorrent API integration
   portforwardScript = pkgs.writeShellApplication {
@@ -27,6 +28,9 @@ let
       pkgs.coreutils
       pkgs.curl
       pkgs.iptables
+    ]
+    ++ lib.optionals (transmissionCfg.enable or false) [
+      pkgs.transmission_4 # Provides transmission-remote CLI tool
     ];
     text = builtins.readFile ../../../../scripts/protonvpn-natpmp-portforward.sh;
   };

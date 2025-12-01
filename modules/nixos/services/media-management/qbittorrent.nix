@@ -642,7 +642,10 @@ in
               # Protocol settings
               UsePEX = true; # Peer exchange for better peer discovery
               UseDHT = true; # DHT for trackerless torrents
-              UseLSD = true; # Local Peer Discovery - useful on LAN or extended network
+              # LSD (Local Peer Discovery) - disable when using VPN
+              # It's only useful for finding peers on local LAN, which is irrelevant inside a VPN tunnel
+              # When VPN is disabled, enable it for local network peer discovery
+              UseLSD = if (qbittorrentCfg.vpn.enable or false) then false else true;
 
               # IP Protocol selection (IPv4, IPv6, or Both)
               BTProtocol = qbittorrentCfg.ipProtocol;
@@ -741,6 +744,9 @@ in
               InterfaceAddress = "10.2.0.2";
               # Note: AnnounceIP is left unset to allow auto-detection
               # The tracker will see the VPN's public IP from the connection
+              # IMPORTANT: Disable IPv6 because ProtonVPN's NAT-PMP port forwarding is IPv4-only
+              # Binding to IPv4 address ensures no IPv6 connections
+              DisableIPv6 = true;
             }
             # Add DefaultSavePath to Session if configured
             // optionalAttrs (qbittorrentCfg.defaultSavePath != null) {
