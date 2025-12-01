@@ -154,6 +154,11 @@
       transmission = {
         enable = true;
 
+        authentication = {
+          enable = true;
+          useSops = true; # Use encrypted SOPS secrets
+        };
+
         downloadDir = "/mnt/storage/torrents";
         incompleteDir = "/var/lib/transmission/incomplete";
 

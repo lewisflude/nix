@@ -25,6 +25,37 @@ in
       description = "WebUI port (default: 9091)";
     };
 
+    authentication = mkOption {
+      type = types.nullOr (
+        types.submodule {
+          options = {
+            enable = mkOption {
+              type = types.bool;
+              default = true;
+              description = "Enable RPC authentication for WebUI";
+            };
+            username = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "RPC username (plain text or SOPS secret path)";
+            };
+            password = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "RPC password (plain text or SOPS secret path). Transmission will automatically hash it.";
+            };
+            useSops = mkOption {
+              type = types.bool;
+              default = false;
+              description = "Whether to use SOPS secrets for RPC credentials";
+            };
+          };
+        }
+      );
+      default = null;
+      description = "RPC authentication configuration for WebUI access";
+    };
+
     downloadDir = mkOption {
       type = types.str;
       default = "/mnt/storage/torrents";
@@ -58,6 +89,18 @@ in
     # Firewall: WebUI port only (peer port handled in VPN namespace)
     networking.firewall.allowedTCPPorts = [ transmissionCfg.webUIPort ];
 
+    # SOPS secrets for RPC credentials
+    sops.secrets =
+      mkIf (transmissionCfg.authentication != null && transmissionCfg.authentication.useSops)
+        {
+          "transmission/rpc/username" = {
+            neededForUsers = true;
+          };
+          "transmission/rpc/password" = {
+            neededForUsers = true;
+          };
+        };
+
     # Ensure required directories exist
     systemd.tmpfiles.rules = [
       "d '${transmissionCfg.incompleteDir}' 0750 ${cfg.user} ${cfg.group} - -"
@@ -77,30 +120,54 @@ in
       # WebUI accessible from host network
       home = "/var/lib/transmission";
 
-      settings = {
-        # Download paths
-        download-dir = transmissionCfg.downloadDir;
-        incomplete-dir = transmissionCfg.incompleteDir;
-        incomplete-dir-enabled = true;
+      settings =
+        let
+          # Authentication configuration
+          authConfig =
+            if transmissionCfg.authentication != null && transmissionCfg.authentication.enable then
+              {
+                rpc-authentication-required = true;
+                rpc-username =
+                  if transmissionCfg.authentication.useSops then
+                    config.sops.secrets."transmission/rpc/username".path
+                  else
+                    transmissionCfg.authentication.username;
+                rpc-password =
+                  if transmissionCfg.authentication.useSops then
+                    config.sops.secrets."transmission/rpc/password".path
+                  else
+                    transmissionCfg.authentication.password;
+              }
+            else
+              {
+                rpc-authentication-required = false;
+              };
+        in
+        {
+          # Download paths
+          download-dir = transmissionCfg.downloadDir;
+          incomplete-dir = transmissionCfg.incompleteDir;
+          incomplete-dir-enabled = true;
 
-        # Peer port (will be dynamically updated by NAT-PMP)
-        peer-port = transmissionCfg.peerPort;
-        peer-port-random-on-start = false;
+          # Peer port (will be dynamically updated by NAT-PMP)
+          peer-port = transmissionCfg.peerPort;
+          peer-port-random-on-start = false;
 
-        # WebUI configuration
-        rpc-enabled = true;
-        rpc-port = transmissionCfg.webUIPort;
-        rpc-bind-address = "0.0.0.0";
-        rpc-whitelist-enabled = false; # Allow from any IP (reverse proxy handles auth)
-        rpc-host-whitelist-enabled = false;
+          # WebUI configuration
+          rpc-enabled = true;
+          rpc-port = transmissionCfg.webUIPort;
+          rpc-bind-address = "0.0.0.0";
+          rpc-whitelist-enabled = false; # Allow from any IP (auth protects access)
+          rpc-host-whitelist-enabled = false;
 
-        # Basic limits (minimal configuration)
-        speed-limit-up-enabled = false;
-        speed-limit-down-enabled = false;
+          # Basic limits (minimal configuration)
+          speed-limit-up-enabled = false;
+          speed-limit-down-enabled = false;
 
-        # Ratio limits (disabled by default)
-        ratio-limit-enabled = false;
-      };
+          # Ratio limits (disabled by default)
+          ratio-limit-enabled = false;
+        }
+        // authConfig;
     };
 
     # VPN confinement when enabled
