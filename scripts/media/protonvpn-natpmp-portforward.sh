@@ -18,6 +18,10 @@ LOG_PREFIX="[ProtonVPN-PortForward]"
 # Transmission configuration
 TRANSMISSION_HOST="${TRANSMISSION_HOST:-127.0.0.1:9091}"
 TRANSMISSION_ENABLED="${TRANSMISSION_ENABLED:-false}"
+TRANSMISSION_USERNAME="${TRANSMISSION_USERNAME:-}"
+TRANSMISSION_PASSWORD="${TRANSMISSION_PASSWORD:-}"
+TRANSMISSION_USERNAME_FILE="${TRANSMISSION_USERNAME_FILE:-}"
+TRANSMISSION_PASSWORD_FILE="${TRANSMISSION_PASSWORD_FILE:-}"
 
 # Tool paths (can be overridden by systemd)
 NATPMPC="${NATPMPC_BIN:-$(command -v natpmpc)}"
@@ -197,10 +201,38 @@ verify_listening() {
     fi
 }
 
+# Get Transmission credentials (from files or environment)
+get_transmission_credentials() {
+    # Read username
+    if [[ -n "${TRANSMISSION_USERNAME_FILE}" && -f "${TRANSMISSION_USERNAME_FILE}" ]]; then
+        TRANSMISSION_USERNAME=$(cat "${TRANSMISSION_USERNAME_FILE}")
+    fi
+
+    # Read password
+    if [[ -n "${TRANSMISSION_PASSWORD_FILE}" && -f "${TRANSMISSION_PASSWORD_FILE}" ]]; then
+        TRANSMISSION_PASSWORD=$(cat "${TRANSMISSION_PASSWORD_FILE}")
+    fi
+
+    # Check if we have credentials
+    if [[ -z "${TRANSMISSION_USERNAME}" ]] || [[ -z "${TRANSMISSION_PASSWORD}" ]]; then
+        log_error "Transmission credentials not available"
+        return 1
+    fi
+
+    return 0
+}
+
 # Get Transmission RPC session ID
 transmission_get_session_id() {
     local response
-    response=$(ip netns exec "${NAMESPACE}" "${CURL}" -s -m 10 \
+    local auth_args=""
+
+    # Add basic auth if credentials available
+    if [[ -n "${TRANSMISSION_USERNAME}" ]] && [[ -n "${TRANSMISSION_PASSWORD}" ]]; then
+        auth_args="--user ${TRANSMISSION_USERNAME}:${TRANSMISSION_PASSWORD}"
+    fi
+
+    response=$(ip netns exec "${NAMESPACE}" "${CURL}" -s -m 10 ${auth_args} \
         "http://${TRANSMISSION_HOST}/transmission/rpc" 2>&1 || echo "")
 
     # Extract X-Transmission-Session-Id from 409 response
@@ -227,6 +259,12 @@ update_transmission_port() {
 
     log_info "Updating Transmission peer port to ${new_port}..."
 
+    # Get credentials
+    if ! get_transmission_credentials; then
+        log_error "Cannot update Transmission without credentials"
+        return 1
+    fi
+
     # Get session ID first (required for CSRF protection)
     local session_id
     session_id=$(transmission_get_session_id)
@@ -237,6 +275,7 @@ update_transmission_port() {
 
     local response
     response=$(ip netns exec "${NAMESPACE}" "${CURL}" -s -m 10 \
+        --user "${TRANSMISSION_USERNAME}:${TRANSMISSION_PASSWORD}" \
         -H "X-Transmission-Session-Id: ${session_id}" \
         -X POST "http://${TRANSMISSION_HOST}/transmission/rpc" \
         -d "{\"method\":\"session-set\",\"arguments\":{\"peer-port\":${new_port}}}" \
@@ -280,32 +319,30 @@ main() {
     log_info "Current qBittorrent port: ${CURRENT_PORT}"
     log_info "ProtonVPN assigned port: ${FORWARDED_PORT}"
 
-    # Step 4: Update port if needed
+    # Step 4: Update qBittorrent port if needed
     if [[ "${CURRENT_PORT}" == "${FORWARDED_PORT}" ]]; then
-        log_info "Port already correct (${FORWARDED_PORT}) - no update needed"
-        save_state "${FORWARDED_PORT}"
+        log_info "qBittorrent port already correct (${FORWARDED_PORT}) - no update needed"
     else
-        log_info "Port mismatch detected - updating from ${CURRENT_PORT} to ${FORWARDED_PORT}"
+        log_info "qBittorrent port mismatch detected - updating from ${CURRENT_PORT} to ${FORWARDED_PORT}"
 
         # Update qBittorrent
         if update_qbittorrent_port "${FORWARDED_PORT}"; then
             log_success "qBittorrent port updated successfully"
 
-            # Update Transmission (non-fatal if it fails)
-            update_transmission_port "${FORWARDED_PORT}" || \
-                log_error "Transmission port update failed (non-fatal)"
-
-            save_state "${FORWARDED_PORT}"
-
             # Verify the port is listening
             verify_listening "${FORWARDED_PORT}" || log_error "Port verification failed (non-fatal)"
-
-            log_success "Port forwarding update complete!"
         else
             log_error "Failed to update qBittorrent port"
             exit 1
         fi
     fi
+
+    # Step 5: Always update Transmission (independent of qBittorrent status)
+    update_transmission_port "${FORWARDED_PORT}" || \
+        log_error "Transmission port update failed (non-fatal)"
+
+    # Save state after all updates
+    save_state "${FORWARDED_PORT}"
 
     log_success "=== Port Forwarding Maintenance Complete ==="
     log_info "Services are now using port: ${FORWARDED_PORT}"

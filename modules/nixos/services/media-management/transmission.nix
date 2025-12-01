@@ -94,11 +94,13 @@ in
       mkIf (transmissionCfg.authentication != null && transmissionCfg.authentication.useSops)
         {
           "transmission/rpc/username" = {
-            inherit (cfg) user group;
+            owner = cfg.user;
+            inherit (cfg) group;
             mode = "0440";
           };
           "transmission/rpc/password" = {
-            inherit (cfg) user group;
+            owner = cfg.user;
+            inherit (cfg) group;
             mode = "0440";
           };
         };
@@ -107,7 +109,8 @@ in
     sops.templates."transmission-credentials.json" =
       mkIf (transmissionCfg.authentication != null && transmissionCfg.authentication.useSops)
         {
-          inherit (cfg) user group;
+          owner = cfg.user;
+          inherit (cfg) group;
           mode = "0440";
           content = builtins.toJSON {
             rpc-authentication-required = true;
