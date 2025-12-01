@@ -1,8 +1,32 @@
-# MCP Configuration for NixOS (mcps.nix flake integration)
+# MCP Configuration for NixOS (Linux)
 #
-# This module uses roman/mcps.nix for version-pinned MCP servers.
-# Servers provided by mcps.nix: git, github, filesystem, fetch, sequential-thinking, time, LSPs
-# Custom servers: memory, nixos, kagi, openai, docs-mcp-server, rust-docs-bevy
+# This module configures Model Context Protocol (MCP) servers for NixOS hosts.
+# It uses the shared wrappers module and provides platform-specific integration
+# via systemd services for persistent server management.
+#
+# Architecture:
+# - Shared wrappers from modules/shared/mcp/wrappers.nix
+# - Configuration via services.mcp (home/common/modules/mcp.nix)
+# - Systemd user services for automatic server registration
+# - Health checks via wrapper scripts (--health-check flag)
+#
+# Active Servers:
+# - memory: Knowledge graph-based persistent memory (npx)
+# - docs-mcp-server: Documentation indexing (npx, requires OPENAI_API_KEY)
+# - openai: General OpenAI integration (npx, requires OPENAI_API_KEY)
+# - rustdocs: Rust documentation for Bevy (Nix build, requires OPENAI_API_KEY)
+#
+# Disabled Servers (awaiting uv package fix):
+# - kagi: Search and summarization (requires uv)
+# - nixos: NixOS package search (requires uv)
+#
+# Configuration Targets:
+# - Cursor: ~/.cursor/mcp.json
+# - Claude Code: ~/.config/claude/claude_desktop_config.json
+#
+# Systemd Services:
+# - mcp-health-check.timer: Periodic health checks (every 6 hours)
+# - mcp-health-check.service: Health check execution
 {
   pkgs,
   config,
@@ -15,168 +39,169 @@
 let
   inherit (pkgs.stdenv) isLinux;
 
-  # Import custom wrappers for servers not in mcps.nix
+  # Import shared wrappers module
   wrappers = import ../../modules/shared/mcp/wrappers.nix {
     inherit pkgs lib;
     systemConfig = osConfig;
   };
 
-  inherit (lib) concatStringsSep mapAttrsToList escapeShellArg;
+  # Port key mapping: server name -> constants.ports.mcp.<key>
+  # This maps server names to their corresponding port constant keys
+  portKeys = {
+    memory = "memory";
+    "docs-mcp-server" = "docs";
+    openai = "openai";
+    rustdocs = "rustdocs";
+    kagi = "kagi";
+    nixos = "nixos";
+  };
 
-  # Custom servers not provided by mcps.nix
-  customServers = {
-    # Memory server - Knowledge graph-based persistent memory
+  # Server definitions with feature flags
+  # Each server has:
+  # - enabled: Whether to include in configuration
+  # - available: Whether dependencies are satisfied
+  # - wrapper: Path to wrapper script
+  # - portKey: Key for looking up port in constants.ports.mcp
+  # - config: MCP server configuration
+  servers = {
     memory = {
-      command = "${pkgs.nodejs}/bin/npx";
-      args = [
-        "-y"
-        "@modelcontextprotocol/server-memory@0.1.0"
-      ];
-      port = constants.ports.mcp.memory;
+      enabled = true;
+      available = true;
+      wrapper = wrappers.memoryWrapper;
+      portKey = portKeys.memory;
+      config = {
+        command = "${wrappers.memoryWrapper}/bin/memory-mcp-wrapper";
+        args = [ ];
+        port = constants.ports.mcp.memory;
+      };
     };
 
-    # NixOS-specific MCP server - Package and config search
-    # TEMPORARILY DISABLED: uv build failing
-    # nixos = {
-    #   command = "${pkgs.uv}/bin/uvx";
-    #   args = [ "mcp-nixos" ];
-    #   port = constants.ports.mcp.nixos;
-    #   env = {
-    #     UV_PYTHON = "${pkgs.python3}/bin/python3";
-    #   };
-    # };
-
-    # Kagi MCP server - Search and summarization (requires KAGI_API_KEY)
-    kagi = {
-      command = "${wrappers.kagiWrapper}/bin/kagi-mcp-wrapper";
-      args = [ ];
-      port = constants.ports.mcp.kagi;
+    "docs-mcp-server" = {
+      enabled = true;
+      available = osConfig.sops.secrets ? OPENAI_API_KEY;
+      wrapper = wrappers.docsMcpWrapper;
+      portKey = portKeys."docs-mcp-server";
+      config = {
+        command = "${wrappers.docsMcpWrapper}/bin/docs-mcp-wrapper";
+        args = [ ];
+        port = constants.ports.mcp.docs;
+      };
     };
 
-    # OpenAI MCP server - Rust documentation support (requires OPENAI_API_KEY)
     openai = {
-      command = "${wrappers.openaiWrapper}/bin/openai-mcp-wrapper";
-      args = [ ];
-      port = constants.ports.mcp.openai;
+      enabled = true;
+      available = osConfig.sops.secrets ? OPENAI_API_KEY;
+      wrapper = wrappers.openaiWrapper;
+      portKey = portKeys.openai;
+      config = {
+        command = "${wrappers.openaiWrapper}/bin/openai-mcp-wrapper";
+        args = [ ];
+        port = constants.ports.mcp.openai;
+      };
     };
 
-    # Docs MCP server - Documentation indexing (optional OPENAI_API_KEY for vector search)
-    docs-mcp-server = {
-      command = "${wrappers.docsMcpWrapper}/bin/docs-mcp-wrapper";
-      args = [ ];
-      port = constants.ports.mcp.docs;
+    rustdocs = {
+      enabled = true;
+      available = osConfig.sops.secrets ? OPENAI_API_KEY;
+      wrapper = wrappers.rustdocsWrapper;
+      portKey = portKeys.rustdocs;
+      config = {
+        command = "${wrappers.rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
+        args = [
+          "bevy@0.16.1"
+          "-F"
+          "default"
+        ];
+        port = constants.ports.mcp.rustdocs;
+      };
     };
 
-    # Rust documentation MCP server - Bevy crate docs (requires OPENAI_API_KEY)
-    rust-docs-bevy = {
-      command = "${wrappers.rustdocsWrapper}/bin/rustdocs-mcp-wrapper";
-      args = [
-        "bevy@0.16.1"
-        "-F"
-        "default"
-      ];
-      port = constants.ports.mcp.rustdocs;
+    # Disabled servers - awaiting uv package availability
+    kagi = {
+      enabled = false;
+      available = false;
+      wrapper = wrappers.kagiWrapper;
+      portKey = portKeys.kagi;
+      config = { };
+    };
+
+    nixos = {
+      enabled = false;
+      available = false;
+      wrapper = wrappers.nixosWrapper;
+      portKey = portKeys.nixos;
+      config = { };
     };
   };
 
-  # Registration script for custom servers
-  mkAddJsonCmd =
-    name: serverCfg:
-    let
-      json = builtins.toJSON (
-        {
-          type = "stdio";
-          args = serverCfg.args or [ ];
-          env = serverCfg.env or { };
-        }
-        // {
-          inherit (serverCfg) command;
-        }
-      );
-      jsonArg = escapeShellArg json;
-    in
-    ''
-      claude mcp remove ${escapeShellArg name} --scope user >/dev/null 2>&1 || true
-      claude mcp add-json ${escapeShellArg name} ${jsonArg} --scope user
+  # Filter to only enabled and available servers
+  activeServers = lib.filterAttrs (_name: server: server.enabled && server.available) servers;
+
+  # Extract server configs for services.mcp
+  serverConfigs = lib.mapAttrs (_name: server: server.config) activeServers;
+
+  # Health check script for all active servers
+  healthCheckScript = pkgs.writeShellApplication {
+    name = "mcp-health-check";
+    text = ''
+      set -euo pipefail
+
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      echo "MCP Server Health Check (NixOS)"
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      echo
+
+      failed=0
+      total=0
+
+      ${lib.concatStringsSep "\n" (
+        lib.mapAttrsToList (name: server: ''
+          total=$((total + 1))
+          echo "Checking ${name}..."
+          if ${server.wrapper}/bin/${server.wrapper.name} --health-check >/dev/null 2>&1; then
+            echo "  ✓ ${name}: healthy"
+          else
+            echo "  ✗ ${name}: unhealthy"
+            failed=$((failed + 1))
+          fi
+          echo
+        '') activeServers
+      )}
+
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      echo "Results: $((total - failed))/$total servers healthy"
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      if [ $failed -gt 0 ]; then
+        exit 1
+      fi
     '';
-
-  declaredNames = mapAttrsToList (n: _: escapeShellArg n) customServers;
-  addCommands = concatStringsSep "\n" (mapAttrsToList mkAddJsonCmd customServers);
-
-  registerCustomScript = pkgs.writeShellScript "mcp-register-custom" ''
-        set -uo pipefail
-        echo "[mcp] Registering custom MCP servers (not in mcps.nix)…"
-        export PATH="${pkgs.coreutils}/bin:${pkgs.findutils}/bin:${pkgs.gawk}/bin:${pkgs.jq}/bin:/etc/profiles/per-user/$USER/bin:$HOME/.nix-profile/bin:$PATH"
-        export MCP_TIMEOUT="''${MCP_TIMEOUT:-${constants.timeouts.mcp.registration}}"
-
-        if ! command -v claude >/dev/null 2>&1; then
-          echo "[mcp] WARNING: 'claude' CLI not found in PATH, skipping custom server registration"
-          exit 0
-        fi
-
-        echo "[mcp] Custom servers: ${concatStringsSep " " declaredNames}"
-
-        while IFS= read -r line; do
-          line="''${line%%$'\r'}"
-          [ -z "$line" ] && continue
-          echo "[mcp] -> $line"
-          bash -lc "$line" >/dev/null 2>&1 || echo "[mcp] WARN: add failed for custom server"
-        done <<'ADD_CMDS'
-    ${addCommands}
-    ADD_CMDS
-
-        echo "[mcp] Custom server registration complete."
-  '';
+  };
 
 in
 {
   home = {
+    # Install wrapper packages
     packages = [
-      # pkgs.uv  # TEMPORARILY DISABLED: uv build failing
       pkgs.nodejs
       pkgs.coreutils
       pkgs.gawk
-      # MCP server wrappers with SOPS secret injection
-      wrappers.kagiWrapper
-      wrappers.openaiWrapper
-      wrappers.docsMcpWrapper
-      wrappers.rustdocsWrapper
-      pkgs.lua-language-server
-      pkgs.nodePackages.typescript-language-server
-      pkgs.nodePackages.typescript
-    ];
+    ]
+    ++ (lib.mapAttrsToList (_name: server: server.wrapper) activeServers)
+    ++ [ healthCheckScript ];
 
-    # Register custom servers after mcps.nix servers
-    activation.setupCustomMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      ${registerCustomScript}
-    '';
+    # Health check script in user's path
+    file."bin/mcp-health-check" = {
+      source = healthCheckScript;
+      executable = true;
+    };
   };
 
-  # Configure mcps.nix servers
-  # NOTE: claude-code is now available via programs.claude-code in home/common/apps/claude-code.nix
-  # MCP servers also disabled since they require pkgs.mcp-servers which is not provided by nixpkgs
-  # programs.claude-code = {
-  #   enable = true;
-  #
-  #   mcps = {
-  #     # Disabled: require pkgs.mcp-servers which is not provided by overlay
-  #     git.enable = false;
-  #     filesystem.enable = false;
-  #     github.enable = false;
-  #     fetch.enable = false;
-  #     sequential-thinking.enable = false;
-  #     time.enable = false;
-  #     lsp-typescript.enable = false;
-  #     lsp-nix.enable = false;
-  #     lsp-rust.enable = false;
-  #     lsp-python.enable = false;
-  #   };
-  # };
-
-  # Legacy services.mcp configuration for Cursor compatibility
+  # Configure MCP servers via services.mcp
   services.mcp = {
     enable = true;
 
+    # Target applications
     targets = {
       cursor = {
         directory = "${config.home.homeDirectory}/.cursor";
@@ -188,50 +213,104 @@ in
       };
     };
 
-    # Custom servers currently disabled - will be empty config
-    # Re-enable servers in customServers above when issues are resolved
-    servers = customServers;
+    # Active server configurations
+    servers = serverConfigs;
   };
 
   # Systemd services for Linux
   systemd.user.services = lib.mkIf isLinux {
-    mcp-claude-register-custom = {
+    # Health check service
+    mcp-health-check = {
       Unit = {
-        Description = "Register custom MCP servers for Claude CLI";
-        After = [ "graphical-session.target" ];
-        PartOf = [ "graphical-session.target" ];
+        Description = "MCP Server Health Check";
+        Documentation = [ "https://github.com/modelcontextprotocol" ];
+        After = [ "network-online.target" ];
       };
       Service = {
         Type = "oneshot";
-        ExecStart = "${registerCustomScript}";
+        ExecStart = "${healthCheckScript}";
         Environment = [
-          "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
+          "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:/run/current-system/sw/bin"
         ];
-        TimeoutStartSec = "${constants.timeouts.service.start}";
-        Restart = "on-failure";
-        RestartSec = "${constants.timeouts.service.restart}";
-      };
-      Install = {
-        WantedBy = [ "default.target" ];
+        StandardOutput = "journal";
+        StandardError = "journal";
       };
     };
 
-    # Docs MCP Server HTTP Interface
-    docs-mcp-http = {
+    # Documentation MCP Server HTTP interface
+    # Runs docs-mcp-server in HTTP mode for remote access
+    docs-mcp-http = lib.mkIf (activeServers ? docs-mcp-server) {
       Unit = {
         Description = "Docs MCP Server HTTP Interface";
+        Documentation = [ "https://github.com/arabold/docs-mcp-server" ];
         After = [ "network-online.target" ];
+        Wants = [ "network-online.target" ];
       };
       Service = {
         ExecStart = "${wrappers.docsMcpWrapper}/bin/docs-mcp-wrapper --protocol http --host 0.0.0.0 --port ${toString constants.ports.mcp.docs}";
         Restart = "on-failure";
+        RestartSec = "${constants.timeouts.service.restart}";
         Environment = [
-          "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:$PATH"
+          "PATH=/etc/profiles/per-user/%u/bin:%h/.nix-profile/bin:/run/current-system/sw/bin"
         ];
+        StandardOutput = "journal";
+        StandardError = "journal";
       };
       Install = {
         WantedBy = [ "default.target" ];
       };
     };
   };
+
+  # Systemd timers for periodic health checks
+  systemd.user.timers = lib.mkIf isLinux {
+    mcp-health-check = {
+      Unit = {
+        Description = "MCP Server Health Check Timer";
+        Documentation = [ "https://github.com/modelcontextprotocol" ];
+      };
+      Timer = {
+        OnBootSec = "5min"; # 5 minutes after boot
+        OnUnitActiveSec = "6h"; # Every 6 hours
+        Persistent = true; # Run missed timers on boot
+      };
+      Install = {
+        WantedBy = [ "timers.target" ];
+      };
+    };
+  };
+
+  # Home activation hook to display MCP status
+  home.activation.mcpStatus = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    echo
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "MCP Server Configuration (NixOS)"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo
+    echo "Active Servers:"
+    ${lib.concatStringsSep "\n" (
+      lib.mapAttrsToList (name: server: ''
+        echo "  • ${name} (port ${toString constants.ports.mcp.${server.portKey}})"
+      '') activeServers
+    )}
+    echo
+    echo "Disabled Servers:"
+    ${lib.concatStringsSep "\n" (
+      lib.mapAttrsToList (name: _server: ''
+        echo "  • ${name} (unavailable: awaiting dependencies)"
+      '') (lib.filterAttrs (_name: server: !server.enabled || !server.available) servers)
+    )}
+    echo
+    echo "Configuration Files:"
+    echo "  • Cursor: ~/.cursor/mcp.json"
+    echo "  • Claude Code: ~/.config/claude/claude_desktop_config.json"
+    echo
+    echo "Health Check:"
+    echo "  Run: ~/bin/mcp-health-check"
+    echo "  Systemd: systemctl --user status mcp-health-check.timer"
+    echo "  Logs: journalctl --user -u mcp-health-check.service"
+    echo
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo
+  '';
 }
