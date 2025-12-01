@@ -124,7 +124,7 @@
         vpn = {
           enable = true;
           namespace = "qbt";
-          torrentPort = 61377; # Updated by NAT-PMP script
+          torrentPort = 62000; # Initial placeholder - dynamically updated by protonvpn-portforward.service every 45s
           webUIBindAddress = "*"; # Accessible from any interface
         };
 
