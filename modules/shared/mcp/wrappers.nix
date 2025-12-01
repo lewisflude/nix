@@ -50,7 +50,6 @@ let
 
   # Logging utilities for consistent output
   logInfo = msg: ''echo "[mcp-wrapper] INFO: ${msg}" >&2'';
-  logWarn = msg: ''echo "[mcp-wrapper] WARN: ${msg}" >&2'';
   logError = msg: ''echo "[mcp-wrapper] ERROR: ${msg}" >&2'';
 
   #
@@ -359,8 +358,7 @@ in
   # Platform-aware: Uses different build dependencies on Linux vs Darwin
   rustdocsWrapper =
     let
-      isLinux = pkgs.stdenv.isLinux;
-      isDarwin = pkgs.stdenv.isDarwin;
+      inherit (pkgs.stdenv) isLinux isDarwin;
 
       # Platform-specific packages
       linuxPkgs = lib.optionals isLinux [
