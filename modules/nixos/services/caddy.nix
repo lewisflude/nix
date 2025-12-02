@@ -120,10 +120,10 @@ in
           '';
         };
 
-        # Transmission (VPN namespace)
+        # Transmission (Host network - not VPN)
         "transmission.blmt.io" = {
           extraConfig = ''
-            reverse_proxy 192.168.15.1:9091 {
+            reverse_proxy localhost:9091 {
               # CSRF Protection Fix: Tell Transmission the request is coming from localhost
               header_up Host localhost:9091
               header_up Origin http://localhost:9091
