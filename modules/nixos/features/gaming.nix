@@ -24,12 +24,12 @@ in
       # - PulseAudio/libpulseaudio: For SDL2 games and Wine/Proton
       # - PipeWire: For native PipeWire-aware games
       # - ALSA libs: For FMOD games (Dwarf Fortress), OpenAL, and low-level audio
-      extraCompatPackages = with pkgs; [
-        pipewire # PipeWire daemon and libraries
-        pulseaudio # PulseAudio daemon (for fallback)
-        libpulseaudio # PulseAudio client library
-        alsa-lib # ALSA user-space library (required for FMOD)
-        alsa-plugins # ALSA plugins including PipeWire bridge
+      extraCompatPackages = [
+        pkgs.pipewire # PipeWire daemon and libraries
+        pkgs.pulseaudio # PulseAudio daemon (for fallback)
+        pkgs.libpulseaudio # PulseAudio client library
+        pkgs.alsa-lib # ALSA user-space library (required for FMOD)
+        pkgs.alsa-plugins # ALSA plugins including PipeWire bridge
       ];
 
       # Wrap Steam to fix pressure-vessel container audio issues
@@ -44,20 +44,9 @@ in
       };
     };
 
-    # Audio environment variables for Steam/Proton games
-    # Only set what's necessary - ALSA configuration handles device routing
-    environment.sessionVariables = mkIf cfg.steam {
-      # SDL2 games: Use PulseAudio backend (PipeWire provides pulseaudio compatibility)
-      SDL_AUDIODRIVER = "pulseaudio";
-      # PulseAudio buffer latency (60ms is good balance for gaming)
-      PULSE_LATENCY_MSEC = "60";
-      # PipeWire-native latency setting (256 frames @ 48kHz = ~5.3ms)
-      PIPEWIRE_LATENCY = "256/48000";
-      # Wine/Proton: Use PulseAudio backend (most compatible, works with PipeWire)
-      WINE_AUDIO = "pulse";
-    };
+    # Audio environment variables are now configured in modules/nixos/features/desktop/audio.nix
 
-    # Ensure PipeWire PulseAudio socket is available system-wide
+    # Ensure PipeWire PulseAudio socket is available for Steam
     # This allows Steam and games running in different namespaces to find audio
     systemd.user.services.pipewire-pulse.environment = mkIf cfg.steam {
       PULSE_SERVER = "unix:/run/user/%U/pulse/native";

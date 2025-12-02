@@ -10,6 +10,7 @@
     ./security-preferences.nix
 
     ./apps.nix
+    ./audio.nix
     ./gaming.nix
 
     ./keyboard.nix
