@@ -82,6 +82,12 @@ in
         default = "qbt";
         description = "VPN namespace name (shared with qBittorrent)";
       };
+
+      portForwarding = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable automatic port forwarding updates for Transmission (disable if sharing VPN with qBittorrent)";
+      };
     };
   };
 
