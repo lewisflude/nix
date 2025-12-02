@@ -8,8 +8,8 @@
     pkgs.lame # MP3 encoding
     pkgs.flac # FLAC codec
 
-    # JACK audio (for professional audio routing if needed)
-    pkgs.qjackctl # JACK control GUI
+    # Note: qjackctl (JACK control GUI) is Linux-only, not available on macOS
+    # macOS users can use JACK Pilot or other native JACK tools if needed
   ];
 
   # macOS native audio control via System Preferences
