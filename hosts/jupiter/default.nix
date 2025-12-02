@@ -24,6 +24,7 @@
       enable = true;
       steam = true;
       performance = true;
+      lutris = true;
     };
 
     virtualisation = {
