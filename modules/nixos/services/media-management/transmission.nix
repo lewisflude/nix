@@ -92,8 +92,16 @@ in
   };
 
   config = mkIf (cfg.enable && transmissionCfg.enable) {
-    # Firewall: WebUI port only (peer port handled in VPN namespace)
-    networking.firewall.allowedTCPPorts = [ transmissionCfg.webUIPort ];
+    # Firewall configuration
+    # - WebUI port: Always open for web interface access
+    # - Peer port: Open when VPN disabled (when VPN enabled, handled in VPN namespace)
+    networking.firewall = {
+      allowedTCPPorts = [
+        transmissionCfg.webUIPort
+      ]
+      ++ lib.optionals (!transmissionCfg.vpn.enable) [ transmissionCfg.peerPort ];
+      allowedUDPPorts = lib.optionals (!transmissionCfg.vpn.enable) [ transmissionCfg.peerPort ];
+    };
 
     # SOPS secrets for RPC credentials
     sops.secrets =
