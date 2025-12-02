@@ -28,7 +28,7 @@ in
       pkgs.rtaudio
       pkgs.rtmidi
       pkgs.jack2
-      pkgs.qjackctl
+      # Note: qjackctl is Linux-only, not available on macOS
     ];
 
     # Audio production utilities that benefit from system-wide installation

@@ -9,7 +9,7 @@
 
     # Use community-maintained claude-code-nix for hourly updates
     # This avoids both nixpkgs build hangs and overlay runtime errors
-    package = inputs.claude-code-nix.packages.${pkgs.system}.default;
+    package = inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
     # Custom commands for Claude Code
     # Usage: Type /command-name in claude-code prompt
