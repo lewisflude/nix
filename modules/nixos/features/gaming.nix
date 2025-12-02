@@ -46,12 +46,6 @@ in
 
     # Audio environment variables are now configured in modules/nixos/features/desktop/audio.nix
 
-    # Ensure PipeWire PulseAudio socket is available for Steam
-    # This allows Steam and games running in different namespaces to find audio
-    systemd.user.services.pipewire-pulse.environment = mkIf cfg.steam {
-      PULSE_SERVER = "unix:/run/user/%U/pulse/native";
-    };
-
     services.sunshine = mkIf cfg.steam {
       enable = true;
       autoStart = true;

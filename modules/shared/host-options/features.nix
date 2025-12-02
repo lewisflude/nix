@@ -194,6 +194,18 @@ in
         production = mkEnableOption "DAW and audio tools";
         realtime = mkEnableOption "real-time audio optimizations (musnix)";
 
+        noiseCancellation = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Enable RNNoise-based noise cancellation filter (for voice chat/calls)";
+        };
+
+        echoCancellation = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Enable WebRTC-based echo cancellation (for voice chat/calls)";
+        };
+
         audioNix = {
           enable = mkOption {
             type = types.bool;

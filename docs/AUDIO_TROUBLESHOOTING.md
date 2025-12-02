@@ -20,10 +20,101 @@ PipeWire Layer (services.pipewire)
     ├─ PulseAudio compatibility (pulse.enable = true)
     ├─ ALSA compatibility (alsa.enable = true)
     ├─ JACK compatibility (jack.enable = true)
+    ├─ Filter chains (noise/echo cancellation, optional)
     └─ WirePlumber (session manager, sets defaults)
 
 Hardware Layer
     └─ USB/PCIe audio interfaces, built-in audio, etc.
+```
+
+## Configuration Options
+
+The audio system is configured via `host.features.media.audio`:
+
+```nix
+audio = {
+  enable = true;                    # Enable PipeWire audio
+  realtime = true;                  # Enable musnix RT kernel (optional)
+  production = false;               # Enable DAW tools (optional)
+  noiseCancellation = false;        # Enable RNNoise filter (optional)
+  echoCancellation = false;         # Enable WebRTC AEC (optional)
+};
+```
+
+## New Features (2025)
+
+### 1. Noise Cancellation (Optional)
+
+**Enable with:** `host.features.media.audio.noiseCancellation = true;`
+
+Uses RNNoise to filter out background noise from microphone input. Creates a virtual "Noise Canceling Source" device.
+
+**Use cases:**
+
+- Voice chat (Discord, Zoom, Teams)
+- Streaming
+- Podcast recording
+- Content creation
+
+**How to use:**
+
+1. Enable in configuration
+2. Rebuild system
+3. Select "Noise Canceling Source" as input in your application
+
+### 2. Echo Cancellation (Optional)
+
+**Enable with:** `host.features.media.audio.echoCancellation = true;`
+
+Uses WebRTC AEC to remove echo feedback during calls. Useful when speakers and microphone are active simultaneously.
+
+**Use cases:**
+
+- Video calls without headphones
+- Streaming with desktop audio
+- Recording with monitor speakers
+
+**Features:**
+
+- Automatic gain control
+- Extended echo suppression
+- Delay-agnostic processing
+- Additional noise suppression
+
+### 3. Enhanced Bluetooth Audio
+
+**New codecs supported:**
+
+- **LC3**: Bluetooth LE Audio codec (modern standard)
+- **aptX LL**: Low-latency variant of aptX
+- **LDAC**: High Quality mode (990kbps) - configurable
+
+**Quality settings:**
+
+- LDAC set to "hq" (990kbps) for maximum quality
+- Adaptive bitrate support
+- 48kHz sample rate default
+
+### 4. USB Audio Optimizations
+
+Automatically disables USB autosuspend for audio interfaces to prevent dropouts and pops.
+
+### 5. Low-Latency Configuration
+
+**Default settings:**
+
+- 48kHz sample rate
+- 256 quantum (~5.3ms latency)
+- Supports multiple sample rates: 44.1kHz, 48kHz, 96kHz, 192kHz
+
+**For professional audio work:**
+
+```bash
+# Ultra-low latency (<2ms) for recording
+pw-metadata -n settings 0 clock.force-quantum 64
+
+# Reset to default
+pw-metadata -n settings 0 clock.force-quantum 0
 ```
 
 ## Best Practices Implemented
@@ -319,7 +410,47 @@ pkill steam && steam
 5. ✅ Proper systemd service ordering and dependencies
 6. ✅ Declarative configuration (no manual configs)
 7. ✅ Documentation of architecture decisions
+8. ✅ Low-latency optimizations for gaming and real-time audio
+9. ✅ Enhanced Bluetooth codec support (LC3, aptX LL, LDAC HQ)
+10. ✅ USB audio optimizations (disabled autosuspend)
+11. ✅ Optional noise and echo cancellation filters
+12. ✅ Proper configuration validation via assertions
 
 **Root cause of FMOD audio issues**: Missing `alsa-lib` and `alsa-plugins` in Steam's `extraCompatPackages`. FMOD uses ALSA directly, not PulseAudio or SDL.
 
 **Solution**: Add complete ALSA stack to pressure-vessel container, let NixOS's existing ALSA configuration handle routing to PipeWire.
+
+## Configuration Audit (December 2025)
+
+### Issues Found and Fixed
+
+1. **❌ Duplicate musnix configuration** - Removed from `audio.nix` (handled by `media/default.nix`)
+2. **❌ Duplicate rtkit configuration** - Removed from `audio.nix` (handled by `media/default.nix`)
+3. **❌ Duplicate pavucontrol package** - Removed from system packages (kept in home-manager)
+4. **❌ Redundant PipeWire/WirePlumber packages** - Removed (auto-installed by service)
+5. **❌ Unnecessary PULSE_SERVER override** - Removed from `gaming.nix`
+6. **❌ Non-standard WirePlumber config names** - Fixed naming convention
+
+### Improvements Added
+
+1. **✅ Explicit low-latency configuration** - Clock quantum, rates, and buffer settings
+2. **✅ Enhanced Bluetooth codecs** - LC3, aptX LL, LDAC HQ support
+3. **✅ USB audio optimizations** - Disabled autosuspend via udev rules
+4. **✅ Device suspension disabled** - Prevents audio dropouts
+5. **✅ Filter chain support** - Infrastructure for audio processing
+6. **✅ Noise cancellation (optional)** - RNNoise-based filtering
+7. **✅ Echo cancellation (optional)** - WebRTC AEC for calls
+8. **✅ Configuration assertions** - Validates proper setup
+9. **✅ Better documentation** - Comprehensive guide to features
+
+### Configuration Quality
+
+**Before:** Good foundation with some redundancy and missing optimizations
+**After:** Production-ready with professional audio features and zero redundancy
+
+The configuration now follows all PipeWire best practices from:
+
+- [PipeWire Documentation](https://docs.pipewire.org/)
+- [WirePlumber Documentation](https://pipewire.pages.freedesktop.org/wireplumber/)
+- [Arch Wiki: PipeWire](https://wiki.archlinux.org/title/PipeWire)
+- NixOS community best practices
