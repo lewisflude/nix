@@ -11,6 +11,22 @@ let
 in
 {
   config = mkIf cfg.enable {
+    # Wine/Proton synchronization optimizations
+    #
+    # FSYNC (futex synchronization) - Preferred method (kernel 5.16+)
+    # - Uses Linux futexes for thread synchronization
+    # - More efficient than ESYNC, no file descriptor limits needed
+    # - Automatically enabled by Wine/Proton when kernel support detected
+    # - Kernel 6.6+ has full FUTEX2 support (this system: 6.6.112-rt63)
+    #
+    # ESYNC (eventfd synchronization) - Fallback method
+    # - Uses eventfd for synchronization when FSYNC unavailable
+    # - Requires high file descriptor limits (1,048,576)
+    # - Still useful as fallback for older Wine versions
+    #
+    # Wine/Proton will automatically prefer FSYNC > ESYNC > wineserver
+    # Override the default 524288 limit from security.nix with the higher limit needed for gaming
+    systemd.settings.Manager.DefaultLimitNOFILE = lib.mkForce 1048576;
 
     programs.steam = mkIf cfg.steam {
       enable = true;
