@@ -162,9 +162,12 @@
         downloadDir = "/mnt/storage/torrents";
         incompleteDir = "/var/lib/transmission/incomplete";
 
+        # Run on host network (not VPN) since ProtonVPN only forwards one port
+        # qBittorrent gets the forwarded port and VPN, Transmission runs directly
+        peerPort = 51413; # Default Transmission port
+
         vpn = {
-          enable = true;
-          namespace = "qbt"; # Share with qBittorrent
+          enable = false; # Run on host network, not VPN
         };
       };
     };

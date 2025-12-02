@@ -5,7 +5,6 @@
     ./features/theming
     ./features/security.nix
     ./features/gaming.nix
-    ./features/audio.nix
     ./features/home-server.nix
     ./features/restic.nix
     ./features/media-management.nix

@@ -565,6 +565,8 @@ in
                   HostHeaderValidation = false;
                   LocalHostAuth = false;
                   AlternativeUIEnabled = webUI.alternativeUIEnabled;
+                  CSRFProtection = false;
+                  ServerDomains = "*";
                 }
                 (optionalAttrs (webUI.alternativeUIEnabled && webUI.rootFolder == null) {
                   RootFolder = "${pkgs.vuetorrent}/share/vuetorrent";

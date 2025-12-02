@@ -110,16 +110,11 @@ in
         "torrent.blmt.io" = {
           extraConfig = ''
             reverse_proxy 192.168.15.1:8080 {
-              # CSRF Protection Fix: Tell qBittorrent the request is coming from localhost
-              # This satisfies qBittorrent's Host header validation while maintaining security
-              header_up Host localhost:8080
-              header_up Origin http://localhost:8080
-              header_up Referer http://localhost:8080
-
-              # Standard proxy headers
+              # Standard proxy headers (no Host rewriting - let qBittorrent see original host)
               header_up X-Real-IP {remote_host}
               header_up X-Forwarded-For {remote_host}
               header_up X-Forwarded-Proto {scheme}
+              header_up X-Forwarded-Host {host}
             }
             encode zstd gzip
           '';

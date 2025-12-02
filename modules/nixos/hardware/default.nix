@@ -1,7 +1,6 @@
 { ... }:
 {
   imports = [
-    ./apogee-symphony.nix
     ./bluetooth.nix
     ./keyboard.nix
     ./mouse.nix

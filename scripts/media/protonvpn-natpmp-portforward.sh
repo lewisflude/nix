@@ -203,17 +203,41 @@ verify_listening() {
 
 # Get Transmission credentials (from files or environment)
 get_transmission_credentials() {
+    # Construct credential file paths
+    # If CREDENTIALS_DIRECTORY is set (systemd LoadCredential), use it
+    # Otherwise fall back to environment-specified paths
+    local username_file="${CREDENTIALS_DIRECTORY:+${CREDENTIALS_DIRECTORY}/transmission-username}"
+    local password_file="${CREDENTIALS_DIRECTORY:+${CREDENTIALS_DIRECTORY}/transmission-password}"
+
+    # Fall back to explicitly set file paths if CREDENTIALS_DIRECTORY is not set
+    username_file="${username_file:-${TRANSMISSION_USERNAME_FILE}}"
+    password_file="${password_file:-${TRANSMISSION_PASSWORD_FILE}}"
+
+    log_info "Checking for Transmission credentials..."
+
     # Read username
-    if [[ -n "${TRANSMISSION_USERNAME_FILE}" && -f "${TRANSMISSION_USERNAME_FILE}" ]]; then
-        TRANSMISSION_USERNAME=$(cat "${TRANSMISSION_USERNAME_FILE}")
+    if [[ -n "${username_file}" && -f "${username_file}" ]]; then
+        TRANSMISSION_USERNAME=$(cat "${username_file}")
+        log_info "Loaded Transmission username from ${username_file}"
+    elif [[ -n "${TRANSMISSION_USERNAME}" ]]; then
+        log_info "Using Transmission username from environment"
+    else
+        log_error "No Transmission username available (checked: ${username_file:-<not set>})"
+        return 1
     fi
 
     # Read password
-    if [[ -n "${TRANSMISSION_PASSWORD_FILE}" && -f "${TRANSMISSION_PASSWORD_FILE}" ]]; then
-        TRANSMISSION_PASSWORD=$(cat "${TRANSMISSION_PASSWORD_FILE}")
+    if [[ -n "${password_file}" && -f "${password_file}" ]]; then
+        TRANSMISSION_PASSWORD=$(cat "${password_file}")
+        log_info "Loaded Transmission password from ${password_file}"
+    elif [[ -n "${TRANSMISSION_PASSWORD}" ]]; then
+        log_info "Using Transmission password from environment"
+    else
+        log_error "No Transmission password available (checked: ${password_file:-<not set>})"
+        return 1
     fi
 
-    # Check if we have credentials
+    # Final validation
     if [[ -z "${TRANSMISSION_USERNAME}" ]] || [[ -z "${TRANSMISSION_PASSWORD}" ]]; then
         log_error "Transmission credentials not available"
         return 1

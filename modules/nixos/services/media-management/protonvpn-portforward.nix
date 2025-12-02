@@ -156,20 +156,23 @@ in
               ExecStartPost = "${pkgs.bash}/bin/bash -c '${firewallScript} ${qbittorrentCfg.vpn.portForwarding.namespace} $(cat /var/lib/protonvpn-portforward.state | grep PUBLIC_PORT | cut -d= -f2)'";
 
               # Environment - pass configuration to script
-              Environment = [
-                "NAMESPACE=${qbittorrentCfg.vpn.portForwarding.namespace}"
-                "VPN_GATEWAY=${qbittorrentCfg.vpn.portForwarding.gateway}"
-                "NATPMPC_BIN=${pkgs.libnatpmp}/bin/natpmpc"
-                "CURL_BIN=${pkgs.curl}/bin/curl"
-                # Transmission integration
-                "TRANSMISSION_HOST=127.0.0.1:${toString (transmissionCfg.webUIPort or 9091)}"
-                "TRANSMISSION_ENABLED=${if transmissionEnabled then "true" else "false"}"
-              ]
-              ++ lib.optionals useSops [
-                # Credentials will be loaded via LoadCredential below
-                "TRANSMISSION_USERNAME_FILE=\${CREDENTIALS_DIRECTORY}/transmission-username"
-                "TRANSMISSION_PASSWORD_FILE=\${CREDENTIALS_DIRECTORY}/transmission-password"
-              ];
+              Environment =
+                let
+                  # Only enable Transmission port forwarding if explicitly enabled
+                  transmissionPortForwardingEnabled =
+                    transmissionEnabled && (transmissionCfg.vpn.portForwarding or false);
+                in
+                [
+                  "NAMESPACE=${qbittorrentCfg.vpn.portForwarding.namespace}"
+                  "VPN_GATEWAY=${qbittorrentCfg.vpn.portForwarding.gateway}"
+                  "NATPMPC_BIN=${pkgs.libnatpmp}/bin/natpmpc"
+                  "CURL_BIN=${pkgs.curl}/bin/curl"
+                  # Transmission integration
+                  "TRANSMISSION_HOST=127.0.0.1:${toString (transmissionCfg.webUIPort or 9091)}"
+                  "TRANSMISSION_ENABLED=${if transmissionPortForwardingEnabled then "true" else "false"}"
+                ];
+              # Note: Transmission credentials are loaded via LoadCredential below
+              # The script reads them from $CREDENTIALS_DIRECTORY/transmission-{username,password}
 
               # Load SOPS secrets as credentials if Transmission uses SOPS
               LoadCredential = lib.mkIf useSops [
