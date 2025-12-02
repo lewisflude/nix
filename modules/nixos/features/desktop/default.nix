@@ -8,6 +8,7 @@ let
 in
 {
   imports = [
+    ./audio.nix
     ./desktop-environment.nix
     ./graphics.nix
     ./hardware-support.nix

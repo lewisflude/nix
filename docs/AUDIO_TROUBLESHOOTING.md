@@ -23,17 +23,8 @@ PipeWire Layer (services.pipewire)
     └─ WirePlumber (session manager, sets defaults)
 
 Hardware Layer
-    └─ Apogee Symphony Desktop → AUX0/AUX1 channels
-        └─ pw-loopback "Speakers" virtual sink (for games)
+    └─ USB/PCIe audio interfaces, built-in audio, etc.
 ```
-
-### Custom Audio Routing
-
-**Problem**: Apogee Symphony Desktop uses professional audio routing with separate AUX channels. Games expect a simple stereo sink.
-
-**Solution**: Use `pw-loopback` to create a virtual "Speakers" sink that routes to Apogee's AUX0/AUX1 channels.
-
-**Implementation**: `modules/nixos/features/desktop/audio/hardware-specific.nix`
 
 ## Best Practices Implemented
 
@@ -63,12 +54,12 @@ Hardware Layer
 **The Solution**: Use `extraCompatPackages` to provide complete audio stack:
 
 ```nix
-extraCompatPackages = with pkgs; [
-  pipewire          # PipeWire daemon and libraries
-  pulseaudio        # PulseAudio daemon (for fallback)
-  libpulseaudio     # PulseAudio client library
-  alsa-lib          # ALSA user-space library (required for FMOD, OpenAL)
-  alsa-plugins      # ALSA plugins including PipeWire bridge
+extraCompatPackages = [
+  pkgs.pipewire          # PipeWire daemon and libraries
+  pkgs.pulseaudio        # PulseAudio daemon (for fallback)
+  pkgs.libpulseaudio     # PulseAudio client library
+  pkgs.alsa-lib          # ALSA user-space library (required for FMOD, OpenAL)
+  pkgs.alsa-plugins      # ALSA plugins including PipeWire bridge
 ];
 ```
 
@@ -79,16 +70,16 @@ extraCompatPackages = with pkgs; [
 - `alsa-lib`: For FMOD games (Dwarf Fortress, Celeste, etc.)
 - `alsa-plugins`: Provides the ALSA→PipeWire bridge inside container
 
-### 3. Set WirePlumber Priorities (Not Hardcoded Defaults)
+### 3. Set WirePlumber Priorities
 
-**Best Practice**: Use priority system instead of hardcoding defaults.
+**Best Practice**: Use priority system to control default device selection.
 
 ```lua
--- GOOD: Set priority, let WirePlumber decide
+-- Example: Set priority for a specific audio device
 rule = {
-  matches = {{ { "node.name", "equals", "Speakers" }}},
+  matches = {{ { "node.name", "equals", "alsa_output.usb-..." }}},
   apply_properties = {
-    ["priority.session"] = 3000,  -- Higher than hardware devices
+    ["priority.session"] = 2000,  -- Higher priority = preferred device
   },
 }
 ```
@@ -114,10 +105,10 @@ rule = {
 
 ### 5. Use Systemd Service Dependencies Correctly
 
-**Best Practice**: Ensure audio routing services start in correct order.
+**Best Practice**: Ensure audio services start in correct order.
 
 ```nix
-systemd.user.services.apogee-speakers-loopback = {
+systemd.user.services.my-audio-service = {
   after = ["pipewire.service" "wireplumber.service"];
   wants = ["pipewire.service" "wireplumber.service"];
   partOf = ["pipewire.service"];
@@ -125,53 +116,9 @@ systemd.user.services.apogee-speakers-loopback = {
 };
 ```
 
-**Why**: Prevents race conditions where games start before audio routing is ready.
+**Why**: Prevents race conditions where applications start before audio is ready.
 
 ## Common Issues
-
-### Issue: Apogee Symphony Desktop Not Working After KVM Switch
-
-**Symptoms:**
-
-- After switching to this computer using KVM, audio interface doesn't appear in PipeWire
-- No audio output or input available
-- Device shows in `lsusb` but not in `wpctl status`
-
-**Cause:**
-
-When switching between computers via KVM, the USB audio interface can retain state from the previous system (e.g., macOS/Ableton) which prevents Linux from properly initializing it.
-
-**Solution:**
-
-This system has **automatic USB reset** configured in `modules/nixos/hardware/apogee-symphony.nix`.
-
-When you switch to this computer via KVM:
-
-1. The udev rule detects the Apogee reconnection
-2. Automatically runs USB reset to clear device state
-3. Restarts PipeWire services to detect the device
-4. Restarts the speakers loopback service for gaming
-
-**Manual Reset (if automatic fails):**
-
-```bash
-# Run the manual reset command
-sudo apogee-reset
-
-# Or manually restart PipeWire services
-systemctl --user restart pipewire wireplumber pipewire-pulse
-systemctl --user restart apogee-speakers-loopback
-```
-
-**Check Logs:**
-
-```bash
-# View reset activity logs
-journalctl -t apogee-reset -f
-
-# Check if reset service ran
-systemctl status 'apogee-kvm-reset@*'
-```
 
 ### Issue: Game Has No Audio
 
@@ -200,7 +147,7 @@ pw-cli list-objects | grep -A 10 "Stream"
 
 2. **Wrong default device**
    - **Check**: `pw-metadata -n default | grep default.audio`
-   - **Solution**: WirePlumber priority configuration ensures "Speakers" is default
+   - **Solution**: Use WirePlumber priority configuration
 
 3. **Steam container isolation**
    - **Check**: Sockets exist at `/run/user/$UID/pipewire-0` and `/run/user/$UID/pulse/native`
@@ -210,16 +157,19 @@ pw-cli list-objects | grep -A 10 "Stream"
 
 **Symptoms:**
 
-- Game has audio but it's on wrong output
-- Can't select "Speakers" device in game
+- Audio plays but on the wrong output device
+- Can't select desired device in application
 
 **Solution:**
 
 ```bash
-# Manually set default for this session
-wpctl set-default $(wpctl status | grep "Speakers" | awk '{print $1}' | tr -d '*.')
+# List available devices
+wpctl status
 
-# Permanent: Already configured in WirePlumber rules
+# Manually set default for this session
+wpctl set-default <device-id>
+
+# Permanent: Configure in WirePlumber rules
 ```
 
 ### Issue: Crackling or Stuttering Audio
@@ -241,10 +191,14 @@ top -o %CPU
 
 **Solutions:**
 
-1. Increase quantum: Edit `modules/nixos/features/desktop/audio/pipewire.nix`
+1. Increase quantum: Edit `modules/nixos/features/desktop/audio.nix`
 
    ```nix
-   "default.clock.quantum" = 256;  # Was 128
+   services.pipewire.extraConfig.pipewire = {
+     "context.properties" = {
+       "default.clock.quantum" = 512;  # Increase from 256
+     };
+   };
    ```
 
 2. Check realtime priority:
@@ -252,6 +206,26 @@ top -o %CPU
    ```bash
    chrt -p $(pgrep pipewire)  # Should show SCHED_FIFO or SCHED_RR
    ```
+
+### Issue: USB Audio Interface Not Detected
+
+**Symptoms:**
+
+- USB audio interface not appearing in PipeWire
+- Device shows in `lsusb` but not in `wpctl status`
+
+**Solution:**
+
+```bash
+# Restart PipeWire services
+systemctl --user restart pipewire wireplumber pipewire-pulse
+
+# Check for kernel errors
+dmesg | grep -i audio
+
+# Check USB device permissions
+lsusb -v -d <vendor>:<product>
+```
 
 ## Testing Audio Configuration
 
@@ -272,7 +246,7 @@ aplay -L | grep -A 2 "default"
 # List PulseAudio sinks
 pactl list sinks short
 
-# Should show Speakers and other devices
+# Should show available audio devices
 ```
 
 ### Test in Steam Container
@@ -285,12 +259,12 @@ steam-run aplay -L
 
 ## When to Rebuild
 
-After changing these files, rebuild your system:
+After changing audio configuration, rebuild your system:
 
 ```bash
 # Review changes
 git diff modules/nixos/features/gaming.nix
-git diff modules/nixos/features/desktop/audio/
+git diff modules/nixos/features/desktop/audio.nix
 
 # Rebuild (user runs this)
 nh os switch
@@ -303,18 +277,6 @@ pkill steam && steam
 ```
 
 ## Architecture Decisions
-
-### Why pw-loopback Instead of Virtual ALSA Device?
-
-**Considered**: Creating ALSA virtual device pointing to Apogee
-**Chosen**: pw-loopback creating virtual sink
-
-**Reasoning**:
-
-- pw-loopback integrates better with WirePlumber
-- Automatic priority handling
-- Visible in all audio APIs (PulseAudio, ALSA, JACK)
-- Can be controlled by audio mixer applications
 
 ### Why Not Use ~/.asoundrc?
 
