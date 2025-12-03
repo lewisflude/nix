@@ -96,8 +96,8 @@ in
     {
       assertions = [
         {
-          assertion = cfg.video.streaming -> cfg.streaming.enable || cfg.video.enable;
-          message = "Video streaming requires either media.streaming.enable or media.video.enable";
+          assertion = cfg.video.streaming -> cfg.video.enable;
+          message = "Video streaming requires media.video.enable to be true";
         }
         {
           assertion = audioNixCfg.bitwig -> audioNixCfg.enable;
