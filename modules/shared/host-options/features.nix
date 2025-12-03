@@ -256,13 +256,13 @@ in
 
           bitwig = mkOption {
             type = types.bool;
-            default = true;
+            default = false;
             description = "Install Bitwig Studio (latest beta version)";
           };
 
           plugins = mkOption {
             type = types.bool;
-            default = true;
+            default = false;
             description = "Install audio plugins from audio.nix (neuralnote, paulxstretch, etc.)";
           };
         };
@@ -271,17 +271,13 @@ in
       video = {
         enable = mkEnableOption "video production and editing tools";
 
-        editing = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Enable video editing tools (kdenlive, ffmpeg, handbrake, imagemagick, gimp)";
-        };
+        editing = mkEnableOption "video editing tools (kdenlive, ffmpeg, handbrake, imagemagick, gimp)";
 
-        streaming = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Enable video streaming tools (v4l2loopback for virtual camera)";
-        };
+        streaming = mkEnableOption "video streaming tools (v4l2loopback for virtual camera)";
+      };
+
+      streaming = {
+        enable = mkEnableOption "media streaming and recording (OBS Studio)";
       };
     };
 

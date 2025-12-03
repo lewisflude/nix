@@ -15,5 +15,9 @@
       notes = true;
       resume = true;
     };
+
+    gaming = {
+      enable = true;
+    };
   };
 }
