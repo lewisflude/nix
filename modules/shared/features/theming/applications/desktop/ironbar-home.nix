@@ -15,10 +15,32 @@ in
       style =
         let
           inherit (theme) colors;
-          radius = "12px";
+
+          # Design System Constants (4px spacing scale)
+          spacing = {
+            xs = "4px"; # 1x - Tight internal spacing
+            sm = "8px"; # 2x - Module container padding
+            md = "12px"; # 3x - Standard element padding
+            lg = "16px"; # 4x - Wider element padding
+            xl = "20px"; # 5x - Extra spacing
+            xxl = "24px"; # 6x - Maximum spacing
+          };
+
+          radius = {
+            sm = "8px"; # Small elements (buttons, chips)
+            md = "12px"; # Module pills
+          };
         in
         ''
-          /* Global Reset */
+          /* ============================================
+             IRONBAR GTK CSS STYLING
+             Note: GTK CSS does NOT support :root or CSS variables
+             All values are inlined via Nix string interpolation
+             ============================================ */
+
+          /* ============================================
+             GLOBAL RESET
+             ============================================ */
           * {
             font-family: "JetBrainsMono Nerd Font", "Iosevka Nerd Font", sans-serif;
             font-size: 14px;
@@ -30,22 +52,21 @@ in
             text-shadow: none;
           }
 
-          /*
-             CRITICAL: Window Transparency
-             We target every possible container to ensure no black background
-          */
+          /* ============================================
+             WINDOW TRANSPARENCY
+             Ensures bar background is fully transparent
+             ============================================ */
           window#ironbar,
           #bar,
           .background {
-            background-color: rgba(0,0,0,0);
+            background-color: rgba(0, 0, 0, 0);
             background-image: none;
           }
 
-          /*
-             --- Module Pills ---
-             We apply the pill styling to the top-level module containers.
-             This ensures the rounded shape and background applies to the "Island".
-          */
+          /* ============================================
+             MODULE PILLS (Island Design Pattern)
+             Shared styling for all floating modules
+             ============================================ */
           .workspaces,
           .label,
           .clock,
@@ -57,126 +78,208 @@ in
             background-color: ${colors."surface-subtle".hex};
             color: ${colors."text-primary".hex};
 
-            /* The Pill Shape */
-            border-radius: ${radius};
+            /* Pill shape with consistent radius */
+            border-radius: ${radius.md};
             border: 1px solid ${colors."divider-primary".hex};
 
-            /* Spacing around the pill (Floating effect) */
-            margin-top: 4px;
-            margin-bottom: 4px;
-            margin-left: 4px;
-            margin-right: 4px;
+            /* Uniform floating margins (4px scale) */
+            margin: ${spacing.xs};
 
-            /* Internal Padding (Space inside the pill) */
-            padding-top: 0px;
-            padding-bottom: 0px;
-            padding-left: 16px;
-            padding-right: 16px;
+            /* Standard internal padding WITH vertical padding for centering */
+            padding: ${spacing.xs} ${spacing.lg};
           }
 
-          /* --- Specific Module Adjustments --- */
-
-          /* Workspaces: Needs tighter padding because buttons have their own padding */
+          /* ============================================
+             WORKSPACES MODULE
+             ============================================ */
           .workspaces {
-            padding: 0 8px;
+            /* Minimal padding - buttons have their own spacing */
+            padding: ${spacing.xs} ${spacing.sm};
           }
 
           .workspaces button {
             background-color: transparent;
             color: ${colors."text-secondary".hex};
-            padding: 4px 12px;
-            margin: 4px 2px; /* Add vertical margin to float inside container */
-            border-radius: 8px;
+
+            /* Reduced size to fit 40px bar with proper spacing */
+            min-height: 24px;
+            min-width: 28px;
+            padding: ${spacing.xs} ${spacing.md};
+
+            /* Horizontal spacing between buttons */
+            margin: 0 ${spacing.xs};
+
+            border-radius: ${radius.sm};
           }
 
+          /* Hover state - only for unfocused buttons */
           .workspaces button:hover {
-             background-color: ${colors."surface-emphasis".hex};
-             color: ${colors."text-primary".hex};
+            background-color: ${colors."surface-emphasis".hex};
+            color: ${colors."text-primary".hex};
           }
 
+          /* Focused workspace - highest priority state */
           .workspaces button.focused {
             background-color: ${colors."accent-focus".hex};
             color: ${colors."surface-base".hex};
-            min-width: 32px;
           }
 
+          /* Focused + Hover - maintain focus appearance */
+          .workspaces button.focused:hover {
+            background-color: ${colors."accent-focus".hex};
+            color: ${colors."surface-base".hex};
+          }
+
+          /* Visible but not focused */
           .workspaces button.visible {
-             background-color: ${colors."surface-subtle".hex};
+            background-color: ${colors."surface-subtle".hex};
           }
 
-          /* Clock */
+          /* Keyboard navigation (accessibility) */
+          .workspaces button:focus-visible {
+            outline: 2px solid ${colors."accent-primary".hex};
+            outline-offset: 2px;
+          }
+
+          /* ============================================
+             CLOCK MODULE
+             Subtle styling - blends with other modules
+             ============================================ */
           .clock {
-             color: ${colors."accent-primary".hex};
-             font-weight: 800;
-             padding: 0 24px; /* Wider padding for the anchor */
+            color: ${colors."text-secondary".hex};
+            font-weight: 600; /* Match global weight */
+            /* Padding inherited from module pills (4px vertical, 16px horizontal) */
           }
 
           .clock:hover {
-             background-color: ${colors."surface-emphasis".hex};
+            background-color: ${colors."surface-emphasis".hex};
+            color: ${colors."text-primary".hex};
           }
 
-          /* SysInfo - The "Microchip" Module
-             Issue: It creates multiple children. We want the CONTAINER to be the pill.
-             We must ensure children are invisible layout-wise.
-          */
+          /* ============================================
+             SYSTEM INFO MODULE
+             CPU/RAM display with nested elements
+             ============================================ */
           .sys-info {
-             color: ${colors."accent-info".hex};
-             /* Ensure flex/box layout doesn't break */
+            color: ${colors."accent-info".hex};
+            /* Padding inherited from module pills */
           }
 
-          .sys-info button, .sys-info label {
-             background: none;
-             border: none;
-             padding: 0 4px; /* Space between CPU and RAM text */
-             margin: 0;
-             box-shadow: none;
+          /* Reset nested elements - increased spacing between CPU and RAM */
+          .sys-info button,
+          .sys-info label {
+            background: none;
+            border: none;
+            padding: 0 ${spacing.sm}; /* Increased from 4px to 8px */
+            margin: 0;
+            box-shadow: none;
           }
 
-          /* Brightness & Volume */
-          .brightness { color: ${colors."accent-warning".hex}; }
-          .volume { color: ${colors."accent-primary".hex}; }
+          /* Ensure font icons in sys-info are visually consistent with 16px icons */
+          .sys-info {
+            font-size: 14px; /* Match global font size for icon consistency */
+          }
 
-          /* Tray */
+          /* ============================================
+             BRIGHTNESS & VOLUME MODULES
+             Semantic colors for quick identification
+             Consistent icon sizing with font icons
+             ============================================ */
+          .brightness {
+            color: ${colors."accent-info".hex}; /* Changed from warning */
+            /* Font icons should match 16px icon size visually */
+            font-size: 14px;
+          }
+
+          .volume {
+            color: ${colors."accent-primary".hex};
+            /* Font icons should match 16px icon size visually */
+            font-size: 14px;
+          }
+
+          /* ============================================
+             TRAY MODULE
+             Consistent icon sizing with other modules
+             ============================================ */
           .tray {
-            padding: 0 12px;
+            /* Vertical padding inherited, horizontal slightly reduced */
+            padding: ${spacing.xs} ${spacing.md};
           }
 
-          /* Notifications */
+          /* Ensure tray icons are consistently sized */
+          .tray image {
+            min-width: 16px;
+            min-height: 16px;
+            max-width: 16px;
+            max-height: 16px;
+          }
+
+          /* ============================================
+             NOTIFICATIONS MODULE
+             Consistent styling and icon sizing
+             ============================================ */
           .notifications {
-             /* Symmetrical padding */
-             padding-left: 16px;
-             padding-right: 16px;
-
-             /* Force right margin for the bar end */
-             margin-right: 12px !important;
+            /* Padding inherited from module pills (4px vertical, 16px horizontal) */
+            /* Match other icon-based modules */
+            padding: ${spacing.xs} ${spacing.md};
           }
 
+          /* Ensure notification icon matches tray icon size */
+          .notifications image,
+          .notifications button image {
+            min-width: 16px;
+            min-height: 16px;
+            max-width: 16px;
+            max-height: 16px;
+          }
+
+          /* Unread notification indicator */
           .notifications.notification-count {
-             color: ${colors."accent-danger".hex};
+            color: ${colors."accent-danger".hex};
           }
 
-          /* Label (Title) */
+          /* ============================================
+             LABEL MODULE (Window Title / Focused Widget)
+             Improved contrast for better visibility
+             ============================================ */
           .label {
-             color: ${colors."text-secondary".hex};
-             font-style: italic;
-             margin-right: 12px; /* Gap between context and rest */
+            /* Use primary text for better contrast */
+            color: ${colors."text-primary".hex};
+            font-style: italic;
+            /* Ensure it's visible even when empty */
+            min-width: 0;
           }
 
-          /* Tooltips */
+          /* Hover state for better interactivity */
+          .label:hover {
+            background-color: ${colors."surface-emphasis".hex};
+            color: ${colors."text-primary".hex};
+          }
+
+          /* When label has content, ensure it's always visible */
+          .label label {
+            color: ${colors."text-primary".hex};
+          }
+
+          /* ============================================
+             TOOLTIPS
+             ============================================ */
           tooltip {
             background-color: ${colors."surface-base".hex};
             border: 1px solid ${colors."divider-primary".hex};
-            border-radius: ${radius};
-            padding: 8px 12px;
+            border-radius: ${radius.md};
+            padding: ${spacing.sm} ${spacing.md};
           }
 
-          /* Popup Menu */
+          /* ============================================
+             POPUP MENUS
+             Note: margin-top removed - handled by popup_gap config
+             ============================================ */
           popup {
-             background-color: ${colors."surface-base".hex};
-             border: 1px solid ${colors."divider-primary".hex};
-             border-radius: ${radius};
-             padding: 10px;
-             margin-top: 8px;
+            background-color: ${colors."surface-base".hex};
+            border: 1px solid ${colors."divider-primary".hex};
+            border-radius: ${radius.md};
+            padding: ${spacing.md};
           }
         '';
     };

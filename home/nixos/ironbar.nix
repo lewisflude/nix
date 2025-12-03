@@ -96,11 +96,12 @@
             {
               type = "tray";
               class = "tray";
-              icon_size = 18;
+              icon_size = 16; # Match font icon size for consistency
             }
             {
               type = "notifications";
               class = "notifications";
+              icon_size = 16; # Match tray icon size for consistency
             }
           ];
         };
