@@ -96,8 +96,8 @@
       delayed-services = {
         description = "Start non-essential services after boot";
         script = ''
-          ${pkgs.systemd}/bin/systemctl start ollama.service
-          ${pkgs.systemd}/bin/systemctl start open-webui.service
+          ${lib.optionalString config.services.ollama.enable "${pkgs.systemd}/bin/systemctl start ollama.service"}
+          ${lib.optionalString config.services.open-webui.enable "${pkgs.systemd}/bin/systemctl start open-webui.service"}
         '';
         serviceConfig = {
           Type = "oneshot";
