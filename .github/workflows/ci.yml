@@ -185,10 +185,10 @@ jobs:
 
       - name: Build and push Darwin to Cachix
         run: |
-          # Build Darwin system configuration (Lewiss-MacBook-Pro - aarch64-darwin)
+          # Build Darwin system configuration (mercury - aarch64-darwin)
           # This caches the full system build so rebuilds on your Mac are much faster
-          echo "Building Darwin configuration (Lewiss-MacBook-Pro)..."
-          nix build .#darwinConfigurations.Lewiss-MacBook-Pro.system --no-link || true
+          echo "Building Darwin configuration (mercury)..."
+          nix build .#darwinConfigurations.mercury.system --no-link || true
 
           # Build dev tools for Darwin
           echo "Building dev tools..."

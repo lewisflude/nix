@@ -67,7 +67,6 @@ keys:
 | `secrets/user.yaml` | macOS + admin | User-specific secrets |
 | `hosts/jupiter/secrets.yaml` | Jupiter + admin | Jupiter-only secrets |
 | `hosts/mercury/secrets.yaml` | Mercury + admin | Mercury-only secrets |
-| `hosts/Lewiss-MacBook-Pro/secrets.yaml` | MacBook + admin | MacBook-only secrets |
 
 ## Common Operations
 
@@ -220,7 +219,6 @@ sops updatekeys secrets/secrets.yaml
 sops updatekeys secrets/user.yaml
 sops updatekeys hosts/jupiter/secrets.yaml
 sops updatekeys hosts/mercury/secrets.yaml
-sops updatekeys hosts/Lewiss-MacBook-Pro/secrets.yaml
 
 # 5. Test decryption with new key
 sops secrets/secrets.yaml

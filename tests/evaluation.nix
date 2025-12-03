@@ -20,7 +20,7 @@ in
       system = "aarch64-darwin";
     }).darwinSystem {
       system = "aarch64-darwin";
-      modules = [ ../hosts/Lewiss-MacBook-Pro/configuration.nix ];
+      modules = [ ../hosts/mercury/configuration.nix ];
     }.system
   '';
 

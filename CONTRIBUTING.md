@@ -113,7 +113,7 @@ nix build .#nixosConfigurations.jupiter.config.system.build.toplevel
 
 ```bash
 # Build configuration
-nix build .#darwinConfigurations.Lewiss-MacBook-Pro.system
+nix build .#darwinConfigurations.mercury.system
 ```
 
 **For Home-Manager changes:**
@@ -284,7 +284,7 @@ nix build .#checks.x86_64-linux.pre-commit-check
 nix build .#nixosConfigurations.jupiter.config.system.build.toplevel
 
 # Test Darwin configuration builds
-nix build .#darwinConfigurations.Lewiss-MacBook-Pro.system
+nix build .#darwinConfigurations.mercury.system
 
 # Test home-manager configuration builds
 nix build .#homeConfigurations.lewis@jupiter.activationPackage

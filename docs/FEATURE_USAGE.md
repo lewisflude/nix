@@ -1,7 +1,7 @@
 # Feature Usage Across Hosts
 
-**Last updated:** 2025-11-22
-**Total hosts:** 3 (jupiter, mercury, Lewiss-MacBook-Pro)
+**Last updated:** 2025-12-03
+**Total hosts:** 2 (jupiter, mercury)
 
 This document tracks which features are actively used across all hosts to help identify unused options during regular audits.
 
@@ -9,18 +9,18 @@ This document tracks which features are actively used across all hosts to help i
 
 ## Development
 
-| Feature | Jupiter (NixOS) | Mercury (macOS) | Lewiss-MacBook-Pro (macOS) | Status |
-|---------|----------------|-----------------|---------------------------|---------|
-| `enable` | ✅ | ✅ (default) | ✅ (default) | **Keep** |
-| `git` | ✅ | ✅ (default) | ✅ (default) | **Keep** |
-| `rust` | ❌ (devShell) | ✅ (default) | ✅ (default) | **Keep** |
-| `python` | ❌ (devShell) | ✅ (default) | ✅ (default) | **Keep** |
-| `node` | ❌ (devShell) | ✅ (default) | ✅ (default) | **Keep** |
-| `lua` | ✅ | ❌ | ❌ | **Keep** |
-| `go` | ❌ | ❌ | ❌ | Monitor |
-| `java` | ❌ | ❌ | ❌ | Monitor |
-| `nix` | Available | Available | Available | **Keep** |
-| `docker` | ❌ | ❌ | ❌ | **Keep** |
+| Feature | Jupiter (NixOS) | Mercury (macOS) | Status |
+|---------|----------------|-----------------|---------|
+| `enable` | ✅ | ✅ (default) | **Keep** |
+| `git` | ✅ | ✅ (default) | **Keep** |
+| `rust` | ❌ (devShell) | ✅ (default) | **Keep** |
+| `python` | ❌ (devShell) | ✅ (default) | **Keep** |
+| `node` | ❌ (devShell) | ✅ (default) | **Keep** |
+| `lua` | ✅ | ❌ | **Keep** |
+| `go` | ❌ | ❌ | Monitor |
+| `java` | ❌ | ❌ | Monitor |
+| `nix` | Available | Available | **Keep** |
+| `docker` | ❌ | ❌ | **Keep** |
 
 **Notes:**
 - Jupiter uses devShells for rust/python/node to reduce system size (~2-4GB savings)
@@ -30,11 +30,11 @@ This document tracks which features are actively used across all hosts to help i
 
 ## Gaming
 
-| Feature | Jupiter (NixOS) | Mercury (macOS) | Lewiss-MacBook-Pro (macOS) | Status |
-|---------|----------------|-----------------|---------------------------|---------|
-| `enable` | ✅ | ❌ | ❌ | **Keep** |
-| `steam` | ✅ | ❌ | ❌ | **Keep** |
-| `performance` | ✅ | ❌ | ❌ | **Keep** |
+| Feature | Jupiter (NixOS) | Mercury (macOS) | Status |
+|---------|----------------|-----------------|---------|
+| `enable` | ✅ | ❌ | **Keep** |
+| `steam` | ✅ | ❌ | **Keep** |
+| `performance` | ✅ | ❌ | **Keep** |
 
 **Notes:**
 - Gaming features only used by Jupiter
@@ -44,11 +44,11 @@ This document tracks which features are actively used across all hosts to help i
 
 ## Virtualisation
 
-| Feature | Jupiter (NixOS) | Mercury (macOS) | Lewiss-MacBook-Pro (macOS) | Status |
-|---------|----------------|-----------------|---------------------------|---------|
-| `enable` | ✅ | ❌ | ❌ | **Keep** |
-| `docker` | ❌ | ❌ | ❌ | **Keep** |
-| `podman` | ✅ | ❌ | ❌ | **Keep** |
+| Feature | Jupiter (NixOS) | Mercury (macOS) | Status |
+|---------|----------------|-----------------|---------|
+| `enable` | ✅ | ❌ | **Keep** |
+| `docker` | ❌ | ❌ | **Keep** |
+| `podman` | ✅ | ❌ | **Keep** |
 
 **Notes:**
 - Jupiter uses Podman for containers
@@ -58,10 +58,10 @@ This document tracks which features are actively used across all hosts to help i
 
 ## Home Server
 
-| Feature | Jupiter (NixOS) | Mercury (macOS) | Lewiss-MacBook-Pro (macOS) | Status |
-|---------|----------------|-----------------|---------------------------|---------|
-| `enable` | ✅ | ❌ | ❌ | **Keep** |
-| `fileSharing` | ✅ | ❌ | ❌ | **Keep** |
+| Feature | Jupiter (NixOS) | Mercury (macOS) | Status |
+|---------|----------------|-----------------|---------|
+| `enable` | ✅ | ❌ | **Keep** |
+| `fileSharing` | ✅ | ❌ | **Keep** |
 
 **Notes:**
 - Only Jupiter acts as home server
@@ -71,14 +71,14 @@ This document tracks which features are actively used across all hosts to help i
 
 ## Desktop
 
-| Feature | Jupiter (NixOS) | Mercury (macOS) | Lewiss-MacBook-Pro (macOS) | Status |
-|---------|----------------|-----------------|---------------------------|---------|
-| `enable` | ✅ | ✅ (default) | ✅ (default) | **Keep** |
-| `niri` | ✅ | ❌ | ❌ | **Keep** |
-| `hyprland` | ❌ | ❌ | ❌ | **Keep** |
-| `theming` | ✅ (default) | ✅ (default) | ✅ (default) | **Keep** |
-| `utilities` | ✅ | ❌ | ❌ | **Keep** |
-| `signalTheme` | ✅ (default) | ✅ (default) | ✅ (default) | **Keep** |
+| Feature | Jupiter (NixOS) | Mercury (macOS) | Status |
+|---------|----------------|-----------------|---------|
+| `enable` | ✅ | ✅ (default) | **Keep** |
+| `niri` | ✅ | ❌ | **Keep** |
+| `hyprland` | ❌ | ❌ | **Keep** |
+| `theming` | ✅ (default) | ✅ (default) | **Keep** |
+| `utilities` | ✅ | ❌ | **Keep** |
+| `signalTheme` | ✅ (default) | ✅ (default) | **Keep** |
 
 **Notes:**
 - All hosts use desktop features
@@ -88,16 +88,16 @@ This document tracks which features are actively used across all hosts to help i
 
 ## Productivity
 
-| Feature | Jupiter (NixOS) | Mercury (macOS) | Lewiss-MacBook-Pro (macOS) | Status |
-|---------|----------------|-----------------|---------------------------|---------|
-| `enable` | ✅ | ✅ | ✅ | **Keep** |
-| `notes` | ✅ | ✅ | ✅ | **Keep** |
-| `email` | ✅ | ❌ | ❌ | **Keep** |
-| `calendar` | ✅ | ❌ | ❌ | **Keep** |
-| `resume` | ❌ | ✅ | ✅ | **Keep** |
+| Feature | Jupiter (NixOS) | Mercury (macOS) | Status |
+|---------|----------------|-----------------|---------|
+| `enable` | ✅ | ✅ | **Keep** |
+| `notes` | ✅ | ✅ | **Keep** |
+| `email` | ✅ | ❌ | **Keep** |
+| `calendar` | ✅ | ❌ | **Keep** |
+| `resume` | ❌ | ✅ | **Keep** |
 
 **Notes:**
-- macOS hosts use notes + resume
+- Mercury (macOS) uses notes + resume
 - Jupiter uses notes + email + calendar
 - Removed: `office` (explicitly disabled, LibreOffice ~1.3GB)
 
@@ -105,13 +105,13 @@ This document tracks which features are actively used across all hosts to help i
 
 ## Media
 
-| Feature | Jupiter (NixOS) | Mercury (macOS) | Lewiss-MacBook-Pro (macOS) | Status |
-|---------|----------------|-----------------|---------------------------|---------|
-| `enable` | ✅ | ❌ | ❌ | **Keep** |
-| `audio.enable` | ✅ | ❌ | ❌ | **Keep** |
-| `audio.production` | ❌ | ❌ | ❌ | **Keep** |
-| `audio.realtime` | ✅ | ❌ | ❌ | **Keep** |
-| `audio.audioNix.*` | ✅ (disabled) | ❌ | ❌ | **Keep** |
+| Feature | Jupiter (NixOS) | Mercury (macOS) | Status |
+|---------|----------------|-----------------|---------|
+| `enable` | ✅ | ❌ | **Keep** |
+| `audio.enable` | ✅ | ❌ | **Keep** |
+| `audio.production` | ❌ | ❌ | **Keep** |
+| `audio.realtime` | ✅ | ❌ | **Keep** |
+| `audio.audioNix.*` | ✅ (disabled) | ❌ | **Keep** |
 
 **Notes:**
 - Only Jupiter uses media features (audio production setup)
@@ -121,11 +121,11 @@ This document tracks which features are actively used across all hosts to help i
 
 ## Security
 
-| Feature | Jupiter (NixOS) | Mercury (macOS) | Lewiss-MacBook-Pro (macOS) | Status |
-|---------|----------------|-----------------|---------------------------|---------|
-| `enable` | ✅ (default) | ✅ (default) | ✅ (default) | **Keep** |
-| `yubikey` | ✅ (default) | ✅ (default) | ✅ (default) | **Keep** |
-| `gpg` | ✅ (default) | ✅ (default) | ✅ (default) | **Keep** |
+| Feature | Jupiter (NixOS) | Mercury (macOS) | Status |
+|---------|----------------|-----------------|---------|
+| `enable` | ✅ (default) | ✅ (default) | **Keep** |
+| `yubikey` | ✅ (default) | ✅ (default) | **Keep** |
+| `gpg` | ✅ (default) | ✅ (default) | **Keep** |
 
 **Notes:**
 - Security features used by all hosts via defaults
@@ -152,9 +152,8 @@ This document tracks which features are actively used across all hosts to help i
 
 ### Restic
 - ✅ Jupiter: REST server enabled
-- ✅ Lewiss-MacBook-Pro: Backup client enabled
 - ❌ Mercury: Not enabled
-- **Status:** Keep (2/3 hosts use)
+- **Status:** Keep (1/2 hosts use)
 
 ---
 
@@ -163,8 +162,8 @@ This document tracks which features are actively used across all hosts to help i
 ### Overall Usage
 - **Total active features:** ~50
 - **Unused options removed:** 18
-- **Features used by all hosts:** ~15 (security, desktop basics, etc.)
-- **Features used by 1 host:** ~30 (Jupiter-specific server features)
+- **Features used by all hosts:** ~12 (security, desktop basics, etc.)
+- **Features used by 1 host:** ~35 (Jupiter-specific server features)
 
 ### Host Profiles
 **Jupiter (NixOS - Heavy):**
@@ -176,11 +175,6 @@ This document tracks which features are actively used across all hosts to help i
 - macOS laptop
 - Uses: Productivity (notes, resume)
 - Config complexity: LOW (~6 lines of features)
-
-**Lewiss-MacBook-Pro (macOS - Minimal):**
-- macOS laptop with backups
-- Uses: Productivity (notes, resume), Restic
-- Config complexity: LOW (~9 lines of features)
 
 ---
 
@@ -218,7 +212,7 @@ Ask these questions:
 4. **Can it be inferred from other config?** → If yes, don't add
 
 ### Usage Thresholds
-- ✅ **2-3 hosts:** Definitely keep
+- ✅ **2 hosts:** Definitely keep
 - ⚠️ **1 host:** Monitor for potential removal
 - ❌ **0 hosts:** Remove after 1 quarter unused
 
