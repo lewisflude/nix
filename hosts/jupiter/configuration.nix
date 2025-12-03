@@ -68,18 +68,10 @@
     };
   };
 
-  # Dante SOCKS proxy for routing traffic through vlan2 (VPN)
-  services.dante-proxy = {
-    enable = true;
-    port = constants.ports.services.dante;
-    interface = "vlan2";
-    listenAddress = "127.0.0.1"; # Localhost only for security
-    allowedClients = [
-      "127.0.0.1/32" # Localhost
-      "192.168.0.0/16" # Local network
-    ];
-    openFirewall = false; # Localhost only, no need to open firewall
-  };
+  # Dante SOCKS proxy - disabled (VLAN2 removed)
+  # services.dante-proxy = {
+  #   enable = false;
+  # };
 
   # Caddy reverse proxy
   host.services.caddy = {
@@ -91,6 +83,36 @@
   services.open-webui = {
     port = constants.ports.services.openWebui; # 7000
     openFirewall = true;
+  };
+
+  # Boot optimization: Delay non-essential services to speed up boot
+  systemd = {
+    services = {
+      # AI services don't need to start immediately at boot
+      ollama.wantedBy = lib.mkForce [ ];
+      open-webui.wantedBy = lib.mkForce [ ];
+
+      # Start delayed services 30 seconds after boot
+      delayed-services = {
+        description = "Start non-essential services after boot";
+        script = ''
+          ${pkgs.systemd}/bin/systemctl start ollama.service
+          ${pkgs.systemd}/bin/systemctl start open-webui.service
+        '';
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+      };
+    };
+
+    timers.delayed-services = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "30s";
+        Unit = "delayed-services.service";
+      };
+    };
   };
 
 }

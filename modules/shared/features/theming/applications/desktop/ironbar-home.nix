@@ -15,25 +15,65 @@ in
       style =
         let
           inherit (theme) colors;
+          # Common radii for consistent design
+          radius = "12px";
+          innerRadius = "8px";
         in
         ''
           * {
-            font-family: "Iosevka Nerd Font", "Font Awesome 6 Free", sans-serif;
+            font-family: "JetBrainsMono Nerd Font", "Iosevka Nerd Font", sans-serif;
             font-size: 14px;
+            font-weight: 600;
             border: none;
+            border-radius: ${radius};
+            transition: background-color 0.2s ease;
+          }
+
+          /* Main transparent bar */
+          window#ironbar {
+            background-color: transparent;
           }
 
           #bar {
-            background-color: ${colors."surface-base".hex};
+            background-color: transparent;
             color: ${colors."text-primary".hex};
           }
 
-          /* Workspace indicators */
+          /* --- Module Groups (Islands) --- */
+          /* We simulate islands by giving modules backgrounds and spacing */
+          /* 4px spacing system */
+
+          .widget, .workspaces, .label, .clock, .sys-info, .brightness, .volume, .tray, .notifications {
+             margin-top: 4px;    /* 1x4 */
+             margin-bottom: 4px; /* 1x4 */
+          }
+
+          .widget {
+            background-color: ${colors."surface-subtle".hex};
+            margin-left: 4px;  /* 1x4 */
+            margin-right: 4px; /* 1x4 */
+            padding: 0;
+            border: 1px solid ${colors."divider-primary".hex};
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+          }
+
+          /* --- Left Group: Workspaces & Title --- */
+          .workspaces {
+            background-color: ${colors."surface-subtle".hex};
+            padding: 4px 8px; /* 1x4 vertical, 2x4 horizontal */
+            margin-left: 4px;
+            margin-right: 4px;
+            border-radius: ${radius};
+            border: 1px solid ${colors."divider-primary".hex};
+          }
+
           .workspaces button {
-            padding: 0 10px;
             background-color: transparent;
             color: ${colors."text-secondary".hex};
-            transition: all 0.2s ease-in-out;
+            padding: 4px 12px; /* 1x4 vertical, 3x4 horizontal */
+            margin: 0 4px;     /* 1x4 */
+            border-radius: ${innerRadius};
+            box-shadow: none;
           }
 
           .workspaces button:hover {
@@ -44,7 +84,7 @@ in
           .workspaces button.focused {
             background-color: ${colors."accent-focus".hex};
             color: ${colors."surface-base".hex};
-            font-weight: bold;
+            min-width: 32px; /* 8x4 - Consistent width for active */
           }
 
           .workspaces button.visible {
@@ -52,132 +92,91 @@ in
             color: ${colors."text-primary".hex};
           }
 
-          /* Window title */
           .label {
-            padding: 0 12px;
-            margin: 0 2px;
+            background-color: ${colors."surface-subtle".hex};
             color: ${colors."text-secondary".hex};
-            font-style: italic;
+            padding: 0 16px;   /* 4x4 */
+            margin-right: 8px; /* 2x4 - Extra space after context group */
+            margin-left: 4px;  /* 1x4 */
+            opacity: 0.8;
+            border-radius: ${radius};
+            border: 1px solid ${colors."divider-primary".hex};
           }
 
-          /* System info module */
-          .sys-info {
-            padding: 0 12px;
-            margin: 0 2px;
-            background-color: ${colors."surface-subtle".hex};
-            color: ${colors."text-primary".hex};
-          }
-
-          /* Brightness module */
-          .brightness {
-            padding: 0 12px;
-            margin: 0 2px;
-            background-color: ${colors."surface-subtle".hex};
-            color: ${colors."accent-warning".hex};
-          }
-
-          .brightness:hover {
-            background-color: ${colors."surface-emphasis".hex};
-          }
-
-          /* Volume module */
-          .volume {
-            padding: 0 12px;
-            margin: 0 2px;
-            background-color: ${colors."surface-subtle".hex};
-            color: ${colors."accent-info".hex};
-          }
-
-          .volume:hover {
-            background-color: ${colors."surface-emphasis".hex};
-          }
-
-          /* Clock module */
+          /* --- Center Group: Clock --- */
           .clock {
-            padding: 0 12px;
-            margin: 0 2px;
             background-color: ${colors."surface-subtle".hex};
-            color: ${colors."text-primary".hex};
-            font-weight: 600;
+            color: ${colors."accent-primary".hex};
+            padding: 0 24px;
+            font-size: 15px;
+            font-weight: 800;
+            margin-left: 4px;
+            margin-right: 4px;
+            border-radius: ${radius};
+            border: 1px solid ${colors."divider-primary".hex};
           }
 
           .clock:hover {
             background-color: ${colors."surface-emphasis".hex};
-            color: ${colors."accent-focus".hex};
           }
 
-          /* System tray */
-          .tray {
-            padding: 0 8px;
-            margin: 0 2px;
-            background-color: transparent;
-          }
-
-          .tray menu {
+          /* --- Right Group: System --- */
+          /* Unified look for system modules */
+          .sys-info, .brightness, .volume, .tray, .notifications {
             background-color: ${colors."surface-subtle".hex};
+            padding: 0 16px;   /* 4x4 */
+            color: ${colors."text-primary".hex};
+            margin-left: 4px;  /* 1x4 */
+            margin-right: 4px; /* 1x4 */
+            border-radius: ${radius};
             border: 1px solid ${colors."divider-primary".hex};
-            color: ${colors."text-primary".hex};
           }
 
-          .tray menuitem {
-            padding: 4px 8px;
+          .sys-info {
+            color: ${colors."accent-info".hex};
           }
 
-          .tray menuitem:hover {
-            background-color: ${colors."surface-emphasis".hex};
+          .brightness {
+             color: ${colors."accent-warning".hex};
           }
 
-          /* Notifications module */
+          .volume {
+            color: ${colors."accent-primary".hex};
+          }
+
           .notifications {
-            padding: 0 12px;
-            margin: 0 2px;
-            background-color: ${colors."surface-subtle".hex};
-            color: ${colors."text-primary".hex};
-          }
-
-          .notifications:hover {
-            background-color: ${colors."surface-emphasis".hex};
+             padding-right: 20px; /* 5x4 - End cap padding */
           }
 
           .notifications.notification-count {
             color: ${colors."accent-danger".hex};
-            font-weight: bold;
+            animation: pulse 2s infinite;
           }
 
-          /* Custom modules */
-          .custom {
+          .tray {
             padding: 0 12px;
-            margin: 0 2px;
-            background-color: ${colors."surface-subtle".hex};
-            color: ${colors."text-primary".hex};
           }
 
-          .custom:hover {
-            background-color: ${colors."surface-emphasis".hex};
-          }
-
-          /* Scrollbar styling for modules with scroll */
-          scrollbar {
-            background-color: ${colors."surface-base".hex};
-            min-width: 8px;
-          }
-
-          scrollbar slider {
-            background-color: ${colors."divider-primary".hex};
-            border-radius: 4px;
-          }
-
-          scrollbar slider:hover {
-            background-color: ${colors."divider-secondary".hex};
-          }
-
-          /* Tooltip styling */
+          /* --- Tooltips & Menus --- */
           tooltip {
-            background-color: ${colors."surface-emphasis".hex};
+            background-color: ${colors."surface-base".hex};
             border: 1px solid ${colors."divider-primary".hex};
-            border-radius: 4px;
-            color: ${colors."text-primary".hex};
-            padding: 4px 8px;
+            border-radius: ${radius};
+            padding: 8px 12px;
+          }
+
+          popup {
+             background-color: ${colors."surface-base".hex};
+             border: 1px solid ${colors."divider-primary".hex};
+             border-radius: ${radius};
+             padding: 10px;
+          }
+
+          /* --- Animation --- */
+          @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
           }
         '';
     };
