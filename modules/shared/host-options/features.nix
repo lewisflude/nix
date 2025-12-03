@@ -267,6 +267,22 @@ in
           };
         };
       };
+
+      video = {
+        enable = mkEnableOption "video production and editing tools";
+
+        editing = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Enable video editing tools (kdenlive, ffmpeg, handbrake, imagemagick, gimp)";
+        };
+
+        streaming = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Enable video streaming tools (v4l2loopback for virtual camera)";
+        };
+      };
     };
 
     security = {
