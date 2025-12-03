@@ -45,13 +45,6 @@ in
               192000
             ];
           };
-          # Load filter chain modules for audio processing
-          "context.modules" = [
-            {
-              name = "libpipewire-module-filter-chain";
-              args = { };
-            }
-          ];
         };
 
         # WirePlumber session manager configuration
