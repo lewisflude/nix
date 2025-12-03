@@ -64,7 +64,7 @@ Create a host configuration for your machine in `hosts/` directory (or use an ex
 
 ```bash
 # Replace <hostname> with your machine name
-# Examples: jupiter (Linux) | Lewiss-MacBook-Pro (macOS)
+# Examples: jupiter (Linux) | mercury (macOS)
 
 # macOS (nix-darwin)
 sudo darwin-rebuild switch --flake ~/.config/nix#<hostname>

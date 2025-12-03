@@ -56,14 +56,6 @@ creation_rules:
           - *admin_lewis_age
           - *mercury_age
 
-  - path_regex: hosts/Lewiss-MacBook-Pro/secrets\.yaml$
-    key_groups:
-      - pgp:
-          - *admin_lewis_gpg
-        age:
-          - *admin_lewis_age
-          - *macbook_age
-
   # Catch-all: Other secrets default to Jupiter + Mercury + admin
   - path_regex: secrets/.*\.(yaml|json)$
     key_groups:

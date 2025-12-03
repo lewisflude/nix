@@ -510,7 +510,7 @@ time nh os build --dry
 
 ```bash
 # Measure Darwin system evaluation (dry run)
-time darwin-rebuild switch --dry-run --flake ~/.config/nix#Lewiss-MacBook-Pro
+time darwin-rebuild switch --dry-run --flake ~/.config/nix#mercury
 # Baseline: To be measured on macOS system
 ```
 
