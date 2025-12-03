@@ -73,6 +73,14 @@
         rtirq = true; # IRQ priority management (prioritizes USB + sound)
         dasWatchdog = true; # Safety: kills runaway RT processes
         rtcqs = true; # Install rtcqs analysis tool (run: rtcqs)
+
+        # audio.nix flake packages (Bitwig Studio and plugins)
+        # Temporarily disabling due to webkitgtk compatibility issue
+        audioNix = {
+          enable = false;
+          bitwig = false;
+          plugins = false;
+        };
       };
     };
 
