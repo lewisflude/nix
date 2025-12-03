@@ -38,7 +38,9 @@
       font-synthetic-style = true;
       scrollback-limit = 100000;
 
-      keybind = [ "shift+enter=text:\n" ];
+      # Shift+Enter inserts a newline (multiline input)
+      # Note: The literal backslash-n must be preserved in the output
+      keybind = [ ''shift+enter=text:\n'' ];
     };
   };
 }
