@@ -79,6 +79,15 @@ in
             "";
       };
 
+      # Explicitly set boot.kernelPackages to match musnix kernel
+      # The musnix module should set this automatically when musnix.enable is true,
+      # but musnix.enable is evaluating to false even though we set it.
+      # So we set boot.kernelPackages directly using the same package musnix uses.
+      # We use config.musnix.kernel.packages to ensure we use exactly what musnix is configured with.
+      boot.kernelPackages = mkIf (cfg.audio.enable && cfg.audio.realtime) (
+        lib.mkForce config.musnix.kernel.packages
+      );
+
       security.rtkit.enable = mkIf cfg.audio.enable true;
 
       users.users.${config.host.username}.extraGroups = optional cfg.audio.enable "audio";

@@ -17,5 +17,6 @@
     ./features/security
     ./features/productivity
     ./features/desktop
+    ./features/media
   ];
 }

@@ -1,5 +1,4 @@
-{ ... }:
-{
+_: {
   # Keybindings for Cursor/VSCode
   # These ensure consistent newline insertion behavior across the editor
   keybindings = [
