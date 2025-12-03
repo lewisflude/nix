@@ -52,7 +52,29 @@
 
       audio = {
         enable = true;
+
+        # Real-time audio with RT kernel and musnix optimizations
         realtime = true;
+
+        # Professional audio configuration for Apogee Symphony Desktop
+        # Ultra-low latency: 64 frames @ 48kHz = ~1.3ms (for recording/monitoring)
+        # Set to false for general use (256 frames = ~5.3ms)
+        ultraLowLatency = true;
+
+        # USB audio interface optimizations
+        usbAudioInterface = {
+          enable = true;
+          # PCI ID of USB controller (not the Apogee device itself)
+          # Find with: lspci | grep -i usb
+          # Common Intel xHCI: "00:14.0"
+          # TODO: Set this after running: lspci | grep -i usb
+          pciId = null; # Set to your USB controller PCI ID (e.g., "00:14.0")
+        };
+
+        # musnix tools and features
+        rtirq = true; # IRQ priority management (prioritizes USB + sound)
+        dasWatchdog = true; # Safety: kills runaway RT processes
+        rtcqs = true; # Install rtcqs analysis tool (run: rtcqs)
       };
     };
 

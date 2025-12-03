@@ -119,6 +119,7 @@ nix develop
 | **💬 Code Review** | [`docs/CONVENTIONAL_COMMENTS.md`](docs/CONVENTIONAL_COMMENTS.md) | Conventional comments for reviews |
 | **📊 Performance Tuning** | [`docs/PERFORMANCE_TUNING.md`](docs/PERFORMANCE_TUNING.md) | Performance optimizations and configurations |
 | **📈 Performance Monitoring** | [`docs/reference/performance-monitoring.md`](docs/reference/performance-monitoring.md) | Monitoring and tracking performance metrics |
+| **🎵 Real-Time Audio** | [`docs/REALTIME_AUDIO_GUIDE.md`](docs/REALTIME_AUDIO_GUIDE.md) | Professional audio with musnix, RT kernel, and USB audio interfaces |
 | **🤝 Contributing** | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to contribute to this repo |
 
 ## 🛠️ Tech Stack

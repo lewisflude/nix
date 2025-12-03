@@ -44,11 +44,39 @@ in
       musnix = mkIf (cfg.audio.enable && cfg.audio.realtime) {
         enable = true;
 
+        # Real-time kernel with RT patches
         kernel = {
           realtime = true;
-          packages = pkgs.linuxPackages-rt_latest;
+          # Use latest RT kernel - tested with ZFS
+          # Available: linuxPackages_rt (6.6), linuxPackages_latest_rt (6.11)
+          packages = pkgs.linuxPackages_latest_rt;
         };
-        rtirq.enable = true;
+
+        # IRQ priority management for audio devices
+        rtirq = {
+          enable = cfg.audio.rtirq;
+          # Prioritize USB (for USB audio interfaces) and sound devices
+          # Higher priority (lower number) = higher real-time priority
+          nameList = "rtc usb snd";
+          prioLow = 0; # Lowest priority for non-realtime
+          prioHigh = 90; # Highest priority for realtime
+        };
+
+        # das_watchdog: Prevents RT processes from hanging the system
+        # Monitors CPU usage and kills runaway RT processes
+        das_watchdog.enable = cfg.audio.dasWatchdog;
+
+        # rtcqs: Real-time configuration analysis tool
+        # Run with: rtcqs
+        rtcqs.enable = cfg.audio.rtcqs;
+
+        # Soundcard PCI ID for latency timer optimization
+        # For USB interfaces, use the USB controller PCI ID
+        soundcardPciId =
+          if cfg.audio.usbAudioInterface.enable && cfg.audio.usbAudioInterface.pciId != null then
+            cfg.audio.usbAudioInterface.pciId
+          else
+            "";
       };
 
       security.rtkit.enable = mkIf cfg.audio.enable true;
