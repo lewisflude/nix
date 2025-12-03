@@ -79,7 +79,6 @@ Network performance testing, MTU optimization, and speed benchmarking.
 **Key Scripts**:
 
 - `optimize-mtu.sh` - MTU discovery and optimization ⭐
-- `test-vlan2-speed.sh` - VLAN 2 speed testing
 - `test-sped.sh` - Internet speed test
 
 **Integration**: Standalone diagnostic tools
@@ -130,7 +129,6 @@ Validate system configuration and AI tool setups before deployment.
 | Diagnose slow SSH | `diagnose-ssh-slowness.sh` | diagnostics |
 | Debug Shift+Enter keybindings | `debug-newline-keybinding.sh` | diagnostics |
 | Optimize network MTU | `optimize-mtu.sh` | network |
-| Test speed through VLAN 2 | `test-vlan2-speed.sh` | network |
 | Fix Steam audio issues | `diagnose-steam-audio.sh` | diagnostics |
 | Validate config before rebuild | `validate-config.sh` | validation |
 | Check AI tool setup | `ai-tool-setup.sh` | validation |

@@ -65,10 +65,8 @@
         usbAudioInterface = {
           enable = true;
           # PCI ID of USB controller (not the Apogee device itself)
-          # Find with: lspci | grep -i usb
-          # Common Intel xHCI: "00:14.0"
-          # TODO: Set this after running: lspci | grep -i usb
-          pciId = null; # Set to your USB controller PCI ID (e.g., "00:14.0")
+          # Intel Raptor Lake USB 3.2 Gen 2x2 XHCI Host Controller
+          pciId = "00:14.0";
         };
 
         # musnix tools and features

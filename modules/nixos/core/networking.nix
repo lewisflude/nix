@@ -58,52 +58,20 @@
   systemd.network = {
     enable = true;
 
-    # Main interface configuration (VLAN 1 - Default network)
+    # Optimize boot time: don't wait forever for all interfaces
+    wait-online = {
+      timeout = 10; # Reduced from default 120 seconds
+      anyInterface = true; # Continue boot once any interface is up
+    };
+
+    # Main interface configuration
     networks."10-main" = {
       matchConfig.Name = "eno2";
       DHCP = "yes";
-      # Configure this interface to create VLAN interfaces
       networkConfig = {
-        VLAN = [ "vlan2" ];
         # Fix for "igc" driver random disconnects (Energy Efficient Ethernet)
         IPv6AcceptRA = true;
       };
-    };
-
-    # VLAN 2 - Secondary network (routed through UDM)
-    netdevs."10-vlan2" = {
-      netdevConfig = {
-        Name = "vlan2";
-        Kind = "vlan";
-      };
-      vlanConfig = {
-        Id = 2;
-      };
-    };
-
-    # VLAN 2 interface configuration
-    networks."20-vlan2" = {
-      matchConfig.Name = "vlan2";
-      DHCP = "no";
-      address = [
-        "192.168.2.249/24"
-      ];
-      # Policy routing: traffic from this interface goes through VPN gateway
-      routingPolicyRules = [
-        {
-          From = "192.168.2.249/32";
-          Table = 2;
-          Priority = 100;
-        }
-      ];
-      # Custom routing table for VPN traffic
-      routes = [
-        {
-          Gateway = "192.168.2.1";
-          Destination = "0.0.0.0/0";
-          Table = 2;
-        }
-      ];
     };
 
     # --- TODO: Add your VPN Interface here once you calculate MTU ---

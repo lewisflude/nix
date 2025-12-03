@@ -56,7 +56,6 @@ Located in `scripts/`:
 
 **Network Testing:**
 
-- `scripts/test-vlan2-speed.sh` - Network speed testing through VLAN 2
 - `scripts/test-sped.sh` - Simple speed test wrapper
 
 See `scripts/README.md` for detailed documentation of each script.

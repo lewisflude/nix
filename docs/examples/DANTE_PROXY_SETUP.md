@@ -1,10 +1,12 @@
 # Dante SOCKS Proxy Setup
 
-This guide shows how to use the Dante SOCKS proxy to route traffic through vlan2 (VPN).
+> **⚠️ DEPRECATED**: This service has been disabled as VLAN2 no longer exists in the network configuration. This documentation is kept for reference only.
+
+This guide shows how to use the Dante SOCKS proxy to route traffic through a specific network interface.
 
 ## Overview
 
-The Dante proxy module (`services.dante-proxy`) provides a SOCKS proxy server that binds to vlan2, allowing you to selectively route traffic through your VPN gateway (192.168.2.1).
+The Dante proxy module (`services.dante-proxy`) provides a SOCKS proxy server that can bind to a specific network interface for selective traffic routing.
 
 ## Basic Configuration
 

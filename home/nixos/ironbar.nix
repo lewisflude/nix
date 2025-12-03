@@ -9,89 +9,98 @@
     package = pkgs.ironbar;
 
     config = {
-      # Monitor-specific configuration
-      # Using monitors map for per-monitor configuration (use-case 2b from guide)
+      # Per-monitor configuration
       monitors = {
         "DP-1" = {
-          # Bar-level options (must come before module arrays)
           position = "top";
-          height = 42;
+          height = 40; # 10x4
           layer = "top";
           exclusive_zone = true;
-          popup_gap = 5;
+          popup_gap = 8; # 2x4 # Increased gap for floating feel
           popup_autohide = false;
           start_hidden = false;
+          icon_theme = "Papirus"; # Ensure good icons
 
-          # Margins
+          # Floating margins
           margin = {
-            top = 0;
+            top = 8; # 2x4
             bottom = 0;
-            left = 0;
-            right = 0;
+            left = 16; # 4x4
+            right = 16; # 4x4
           };
 
-          # Start modules (left/top side) - must come after bar-level options
+          # Left: Context
           start = [
             {
               type = "workspaces";
               class = "workspaces";
-              tooltip = "Workspaces";
+              name_map = {
+                "1" = "1";
+                "2" = "2";
+                "3" = "3";
+                "4" = "4";
+                "5" = "5";
+              };
             }
             {
               type = "focused";
               class = "label";
-              tooltip = "Active window";
+              truncate = "end";
+              length = 40; # Limit length to maintain minimalism
             }
           ];
 
-          # Center modules
+          # Center: Time
           center = [
             {
               type = "clock";
               class = "clock";
-              format = "%H:%M:%S";
-              tooltip = "{{date +'%A, %B %d, %Y'}}";
+              format = "%H:%M";
+              format_popup = "%A, %B %d, %Y";
             }
           ];
 
-          # End modules (right/bottom side)
+          # Right: System Status
           end = [
             {
               type = "sys_info";
               class = "sys-info";
-              tooltip = "System information";
               format = [
-                "{cpu_percent}% {memory_percent}% {temp_c@CPUTIN}?C"
+                "  {cpu_percent}%"
+                "  {memory_percent}%"
               ];
             }
             {
               type = "script";
               class = "brightness";
-              format = "?? {}%";
+              mode = "poll";
+              format = "󰃠 {}%";
               cmd = "brightnessctl -m | awk -F '[(),%]' '{print $6}'";
-              interval = 1;
+              interval = 1000;
               on_click_left = "brightnessctl set 10%-";
               on_click_right = "brightnessctl set +10%";
-              tooltip = "Click to change brightness";
+              tooltip = "Brightness: {}%";
             }
             {
               type = "volume";
               class = "volume";
-              tooltip = "Volume: {{volume}}%";
-              on_click_left = "pactl set-sink-volume @DEFAULT_SINK@ -5%";
-              on_click_right = "pactl set-sink-volume @DEFAULT_SINK@ +5%";
-              on_click_middle = "pactl set-sink-mute @DEFAULT_SINK@ toggle";
-            }
-            {
-              type = "notifications";
-              class = "notifications";
-              tooltip = "Notifications";
+              format = "{icon} {percentage}%";
+              max_volume = 100;
+              icons = {
+                volume_high = " ";
+                volume_medium = " ";
+                volume_low = " ";
+                muted = "󰝟 ";
+              };
             }
             {
               type = "tray";
               class = "tray";
-              icon_size = 20;
-              tooltip = "System tray";
+              icon_size = 18;
+            }
+            {
+              type = "notifications";
+              class = "notifications";
             }
           ];
         };
