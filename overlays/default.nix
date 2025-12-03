@@ -54,6 +54,25 @@ in
     else
       (_final: _prev: { });
 
+  # Audio.nix overlay (Bitwig Studio and audio plugins)
+  # Wrapped with webkitgtk compatibility fix
+  audio-nix =
+    if
+      isLinux && inputs ? audio-nix && inputs.audio-nix ? overlays && inputs.audio-nix.overlays ? default
+    then
+      # Wrap the audio.nix overlay to add webkitgtk compatibility
+      final: super:
+      let
+        # First apply webkitgtk compatibility
+        superWithWebkit =
+          super // (if super ? webkitgtk_6_0 then { webkitgtk = super.webkitgtk_6_0; } else { });
+        # Then apply the audio.nix overlay
+        audioNixOverlay = inputs.audio-nix.overlays.default;
+      in
+      audioNixOverlay final superWithWebkit
+    else
+      (_final: _prev: { });
+
   # Claude Code overlay disabled due to runtime errors
   # The overlay version (2.0.55) has Bun Segmenter initialization errors
   # Using nixpkgs version (2.0.54) instead
