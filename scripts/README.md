@@ -9,12 +9,12 @@ scripts/
 ├── hooks/            7 scripts  - Claude Code integration hooks
 ├── media/            9 scripts  - qBittorrent, VPN, storage monitoring
 ├── network/          3 scripts  - Network testing and optimization
-├── diagnostics/      3 scripts  - System troubleshooting tools
+├── diagnostics/      4 scripts  - System troubleshooting tools
 ├── validation/       2 scripts  - Configuration validation
 └── templates/                  - Script templates for new scripts
 ```
 
-**Total**: 24 scripts across 5 categories
+**Total**: 25 scripts across 5 categories
 
 ## 🚀 Quick Start
 
@@ -97,6 +97,7 @@ Interactive diagnostic tools for identifying system issues.
 - `diagnose-ssh-slowness.sh` - SSH performance diagnostics
 - `test-ssh-performance.sh` - SSH benchmarking
 - `diagnose-steam-audio.sh` - Steam/Proton audio issues
+- `debug-newline-keybinding.sh` - Troubleshoot Shift+Enter keybindings
 
 **Integration**: Standalone diagnostic tools
 
@@ -127,6 +128,7 @@ Validate system configuration and AI tool setups before deployment.
 |--------------|--------|----------|
 | Check VPN port forwarding | `monitor-protonvpn-portforward.sh` | media |
 | Diagnose slow SSH | `diagnose-ssh-slowness.sh` | diagnostics |
+| Debug Shift+Enter keybindings | `debug-newline-keybinding.sh` | diagnostics |
 | Optimize network MTU | `optimize-mtu.sh` | network |
 | Test speed through VLAN 2 | `test-vlan2-speed.sh` | network |
 | Fix Steam audio issues | `diagnose-steam-audio.sh` | diagnostics |
@@ -271,6 +273,22 @@ sudo ip netns exec qbt ./scripts/network/test-sped.sh  # VPN
 ./scripts/diagnostics/test-ssh-performance.sh jupiter
 
 # Apply recommended config to ~/.ssh/config
+```
+
+### Debugging Keybinding Issues
+
+```bash
+# Debug Shift+Enter not working in apps (Claude, Cursor, terminal, etc.)
+./scripts/debug-newline-keybinding.sh
+
+# This will:
+# - Check Ghostty configuration
+# - Verify ZSH setup
+# - Look for conflicts (Karabiner, system shortcuts)
+# - Check app-specific configurations
+# - Provide a test file and troubleshooting steps
+
+# See also: docs/NEWLINE_KEYBINDINGS.md for full documentation
 ```
 
 ### Before System Rebuild
