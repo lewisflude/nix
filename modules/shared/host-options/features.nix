@@ -194,6 +194,47 @@ in
         production = mkEnableOption "DAW and audio tools";
         realtime = mkEnableOption "real-time audio optimizations (musnix)";
 
+        # Low-latency settings for professional audio work
+        ultraLowLatency = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Enable ultra-low latency settings (64 frames @ 48kHz = ~1.3ms) for professional recording";
+        };
+
+        # USB audio interface optimization
+        usbAudioInterface = {
+          enable = mkEnableOption "USB audio interface optimizations (disable autosuspend, set IRQ priorities)";
+
+          # PCI ID of the USB controller (not the audio device itself)
+          # Find with: lspci | grep -i usb
+          # Example: "00:14.0" for Intel xHCI controller
+          pciId = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "PCI ID of the USB controller for latency timer optimization";
+            example = "00:14.0";
+          };
+        };
+
+        # musnix advanced options
+        rtirq = mkOption {
+          type = types.bool;
+          default = true;
+          description = "Enable rtirq for IRQ priority management (requires realtime kernel)";
+        };
+
+        dasWatchdog = mkOption {
+          type = types.bool;
+          default = true;
+          description = "Enable das_watchdog to prevent RT processes from hanging the system";
+        };
+
+        rtcqs = mkOption {
+          type = types.bool;
+          default = true;
+          description = "Install rtcqs (realtime configuration quick scan) analysis tool";
+        };
+
         noiseCancellation = mkOption {
           type = types.bool;
           default = false;

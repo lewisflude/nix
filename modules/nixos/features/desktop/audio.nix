@@ -29,13 +29,15 @@ in
         # JACK compatibility for professional audio applications (Ardour, REAPER, etc.)
         jack.enable = true;
 
-        # Low-latency configuration optimized for gaming and real-time audio
+        # Low-latency configuration
+        # Ultra-low latency: 64 frames @ 48kHz = ~1.3ms (for professional recording/monitoring)
+        # Balanced latency: 256 frames @ 48kHz = ~5.3ms (for general use, streaming, gaming)
         extraConfig.pipewire."99-lowlatency" = {
           "context.properties" = {
             "default.clock.rate" = 48000;
-            "default.clock.quantum" = 256; # ~5.3ms latency at 48kHz
-            "default.clock.min-quantum" = 64; # ~1.3ms minimum
-            "default.clock.max-quantum" = 2048; # ~42ms maximum
+            "default.clock.quantum" = if cfg.ultraLowLatency then 64 else 256;
+            "default.clock.min-quantum" = 64; # ~1.3ms minimum for pro audio
+            "default.clock.max-quantum" = 2048; # ~42ms maximum for power saving
             "default.clock.allowed-rates" = [
               44100
               48000
@@ -152,11 +154,12 @@ in
         # PulseAudio buffer latency (60ms is a good balance for gaming)
         PULSE_LATENCY_MSEC = "60";
 
-        # PipeWire-native latency setting (256 frames @ 48kHz = ~5.3ms)
-        # This is a good default for most use cases including streaming/recording
-        # For ultra-low-latency recording (<2ms), use: pw-metadata -n settings 0 clock.force-quantum 64
-        # To reset to default: pw-metadata -n settings 0 clock.force-quantum 0
-        PIPEWIRE_LATENCY = "256/48000";
+        # PipeWire-native latency setting
+        # Ultra-low latency: 64/48000 (~1.3ms) for professional recording/monitoring
+        # Balanced latency: 256/48000 (~5.3ms) for general use, streaming, gaming
+        # Manual override: pw-metadata -n settings 0 clock.force-quantum <frames>
+        # Reset to default: pw-metadata -n settings 0 clock.force-quantum 0
+        PIPEWIRE_LATENCY = if cfg.ultraLowLatency then "64/48000" else "256/48000";
 
         # Wine/Proton: Use PulseAudio backend (most compatible, works with PipeWire)
         WINE_AUDIO = "pulse";
@@ -173,11 +176,24 @@ in
       ];
 
       # USB audio optimizations
-      # Disable USB autosuspend for audio devices to prevent dropouts
+      # Critical for professional USB audio interfaces like Apogee Symphony Desktop
       services.udev.extraRules = ''
-        # Disable autosuspend for USB audio interfaces
+        # Disable autosuspend for USB audio interfaces (class 01)
         ACTION=="add", SUBSYSTEM=="usb", ATTR{idClass}=="01", TEST=="power/control", ATTR{power/control}="on"
+
+        # Set realtime priority for USB audio devices
+        ACTION=="add", SUBSYSTEM=="usb", ATTR{idClass}=="01", ATTR{power/wakeup}="disabled"
+
+        # Apogee-specific optimizations (if detected)
+        # Apogee Symphony Desktop (USB Vendor ID: 0xa07, Product ID varies)
+        ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0a07", ATTR{power/control}="on", ATTR{power/wakeup}="disabled"
       '';
+
+      # USB audio-specific kernel parameters (when USB audio interface is enabled)
+      boot.kernelParams = lib.optionals cfg.usbAudioInterface.enable [
+        # Increase USB polling rate for lower latency
+        "usbcore.autosuspend=-1" # Disable USB autosuspend globally for audio work
+      ];
 
       # Assertions to ensure proper configuration
       assertions = [
