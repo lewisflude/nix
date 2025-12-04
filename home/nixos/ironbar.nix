@@ -11,7 +11,7 @@
     config = {
       # Per-monitor configuration
       monitors = {
-        "DP-1" = {
+        "DP-3" = {
           position = "top";
           height = 40; # 10x4
           layer = "top";

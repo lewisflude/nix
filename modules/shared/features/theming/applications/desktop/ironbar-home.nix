@@ -210,8 +210,7 @@ in
           .tray image {
             min-width: 16px;
             min-height: 16px;
-            max-width: 16px;
-            max-height: 16px;
+            /* GTK CSS doesn't support max-width/max-height */
           }
 
           /* ============================================
@@ -229,8 +228,7 @@ in
           .notifications button image {
             min-width: 16px;
             min-height: 16px;
-            max-width: 16px;
-            max-height: 16px;
+            /* GTK CSS doesn't support max-width/max-height */
           }
 
           /* Unread notification indicator */
