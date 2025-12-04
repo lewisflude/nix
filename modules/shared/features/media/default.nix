@@ -47,9 +47,10 @@ in
         # Real-time kernel with RT patches
         kernel = {
           realtime = true;
-          # Use latest RT kernel - tested with ZFS
+          # Use stable RT kernel (6.6) - more reliable ZFS support
+          # linuxPackages_latest_rt (6.11) may have ZFS module build issues
           # Available: linuxPackages_rt (6.6), linuxPackages_latest_rt (6.11)
-          packages = pkgs.linuxPackages_latest_rt;
+          packages = pkgs.linuxPackages_rt;
         };
 
         # IRQ priority management for audio devices
