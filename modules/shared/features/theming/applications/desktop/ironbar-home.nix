@@ -220,7 +220,6 @@ in
           /* Button inside notifications inherits parent styling */
           .notifications button {
             all: inherit; /* Inherit all properties from parent */
-            display: inline-flex; /* Restore display property after 'all: inherit' */
           }
 
           /* Ensure notification icons match tray icon size */

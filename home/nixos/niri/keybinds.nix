@@ -151,7 +151,7 @@ in
         ''
           GEOM=$(slurp) && if [ -n "$GEOM" ]; then
             FILE="$HOME/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png"
-            grim -g "$GEOM" -t png - | satty --filename - --fullscreen --output-filename "$FILE"
+            grim -g "$GEOM" -t ppm - | satty --filename - --fullscreen --output-filename "$FILE"
             notify-send "Screenshot" "Area saved" -i "$FILE"
           fi
         ''
@@ -163,22 +163,10 @@ in
         "sh"
         "-c"
         ''
-          # Get focused window info and extract geometry
-          WINDOW_INFO=$(niri msg focused-window 2>/dev/null)
-          if [ -n "$WINDOW_INFO" ]; then
-            # Use slurp to select window (user can click on window)
-            GEOM=$(slurp -f "%x,%y %wx%h") && if [ -n "$GEOM" ]; then
-              FILE="$HOME/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png"
-              grim -g "$GEOM" -t png - | satty --filename - --fullscreen --output-filename "$FILE"
-              notify-send "Screenshot" "Window saved" -i "$FILE"
-            fi
-          else
-            # Fallback to area selection
-            GEOM=$(slurp) && if [ -n "$GEOM" ]; then
-              FILE="$HOME/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png"
-              grim -g "$GEOM" -t png - | satty --filename - --fullscreen --output-filename "$FILE"
-              notify-send "Screenshot" "Area saved" -i "$FILE"
-            fi
+          GEOM=$(slurp) && if [ -n "$GEOM" ]; then
+            FILE="$HOME/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png"
+            grim -g "$GEOM" -t ppm - | satty --filename - --fullscreen --output-filename "$FILE"
+            notify-send "Screenshot" "Area saved" -i "$FILE"
           fi
         ''
       ];
@@ -190,7 +178,7 @@ in
         "-c"
         ''
           FILE="$HOME/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png"
-          grim -t png - | satty --filename - --fullscreen --output-filename "$FILE"
+          grim -t ppm - | satty --filename - --fullscreen --output-filename "$FILE"
           notify-send "Screenshot" "Screen saved" -i "$FILE"
         ''
       ];
