@@ -218,6 +218,12 @@ in
              Consistent styling and icon sizing
              ============================================ */
           .notifications {
+            /* Base styling from module pills */
+            background-color: ${colors."surface-subtle".hex};
+            border-radius: ${radius.md};
+            border: 1px solid ${colors."divider-primary".hex};
+            margin: ${spacing.xs};
+
             /* Match other icon-based modules */
             padding: ${spacing.xs} ${spacing.md};
             color: ${colors."text-secondary".hex};
@@ -231,6 +237,8 @@ in
             min-width: 16px;
             min-height: 16px;
             /* GTK CSS doesn't support max-width/max-height */
+            /* Apply filter to make outlined icons appear more solid/filled */
+            filter: brightness(1.2) contrast(1.1);
           }
 
           /* Hover state for better interactivity */
