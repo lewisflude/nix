@@ -210,6 +210,7 @@ Model Context Protocol (MCP) is a standardized protocol for AI assistants to acc
 #### NixOS (`home/nixos/mcp.nix`)
 
 **Structure**: Identical to Darwin, but with:
+- Uses `systemConfig` (same as Darwin for consistency)
 - Systemd services instead of LaunchAgents
 - Systemd timers for periodic health checks
 - HTTP service for docs-mcp-server

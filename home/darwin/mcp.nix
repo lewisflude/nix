@@ -26,10 +26,10 @@
 {
   pkgs,
   config,
-  systemConfig,
   lib,
   system,
   constants,
+  systemConfig,
   ...
 }:
 
