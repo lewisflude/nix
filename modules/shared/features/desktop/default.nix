@@ -52,7 +52,7 @@ in
             # Desktop environment (Linux)
             gtk.enable = lib.mkDefault isLinux;
             ironbar.enable = lib.mkDefault isLinux;
-            swappy.enable = lib.mkDefault isLinux;
+            satty.enable = lib.mkDefault isLinux;
 
             # Command-line tools
             bat.enable = true;

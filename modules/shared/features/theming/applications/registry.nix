@@ -97,14 +97,14 @@ rec {
       modulePath = "modules/shared/features/theming/applications/desktop/swaync.nix";
     };
 
-    swappy = {
-      name = "swappy";
-      displayName = "Swappy";
+    satty = {
+      name = "satty";
+      displayName = "Satty";
       platform = "home";
       category = "desktop";
-      description = "Swappy screenshot annotation tool theme";
+      description = "Satty screenshot annotation tool theme";
       dependencies = [ ];
-      modulePath = "modules/shared/features/theming/applications/desktop/swappy.nix";
+      modulePath = "modules/shared/features/theming/applications/desktop/satty.nix";
     };
 
     gtk = {

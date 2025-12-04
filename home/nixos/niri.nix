@@ -19,8 +19,7 @@ let
 in
 {
   home.packages = [
-    pkgs.grim
-    pkgs.slurp
+    pkgs.grimblast
     pkgs.wl-clipboard
     pkgs.wlr-randr
     pkgs.wayland-utils

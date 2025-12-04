@@ -216,6 +216,7 @@ in
           /* ============================================
              NOTIFICATIONS MODULE
              Consistent styling and icon sizing
+             Note: Notifications uses overlay.widget.notifications with button.text-button inside
              ============================================ */
           .notifications {
             /* Base styling from module pills */
@@ -231,18 +232,29 @@ in
             font-size: 14px;
           }
 
+          /* Target the button inside notifications overlay to ensure background styling */
+          .notifications button,
+          .notifications button.text-button {
+            background-color: ${colors."surface-subtle".hex};
+            border-radius: ${radius.md};
+            border: 1px solid ${colors."divider-primary".hex};
+            padding: ${spacing.xs} ${spacing.md};
+            margin: 0;
+            color: ${colors."text-secondary".hex};
+            font-size: 14px;
+          }
+
           /* Ensure notification icon matches tray icon size */
           .notifications image,
           .notifications button image {
             min-width: 16px;
             min-height: 16px;
             /* GTK CSS doesn't support max-width/max-height */
-            /* Apply filter to make outlined icons appear more solid/filled */
-            filter: brightness(1.2) contrast(1.1);
           }
 
           /* Hover state for better interactivity */
-          .notifications:hover {
+          .notifications:hover,
+          .notifications button:hover {
             background-color: ${colors."surface-emphasis".hex};
             color: ${colors."text-primary".hex};
           }
