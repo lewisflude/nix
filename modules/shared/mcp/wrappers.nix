@@ -116,6 +116,9 @@ let
           # Read and export secret from SOPS
           if [ ! -r "${secretPath}" ]; then
             ${logError "Cannot read secret at ${secretPath}"}
+            ${logError "The secret file may not exist or may not be readable."}
+            ${logError "Ensure SOPS secrets are properly deployed and the system has been rebuilt."}
+            ${logError "Run: sudo nixos-rebuild switch (or darwin-rebuild switch on macOS)"}
             exit 1
           fi
 
@@ -275,6 +278,9 @@ let
           ${optionalString hasSecret ''
             if [ ! -r "${secretPath}" ]; then
               ${logError "Cannot read secret at ${secretPath}"}
+              ${logError "The secret file may not exist or may not be readable."}
+              ${logError "Ensure SOPS secrets are properly deployed and the system has been rebuilt."}
+              ${logError "Run: sudo nixos-rebuild switch (or darwin-rebuild switch on macOS)"}
               exit 1
             fi
 
