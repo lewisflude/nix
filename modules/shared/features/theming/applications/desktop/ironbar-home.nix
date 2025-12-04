@@ -50,6 +50,8 @@ in
             min-height: 0;
             box-shadow: none;
             text-shadow: none;
+            outline-offset: 0; /* Prevent layout shifts */
+            -gtk-icon-effect: none; /* Disable icon effects for performance */
           }
 
           /* ============================================
@@ -91,12 +93,18 @@ in
 
           /* ============================================
              WORKSPACES MODULE
+             State priority (highest to lowest):
+             1. .focused - Always shows accent color, even on hover
+             2. :hover - Interactive feedback (only when not focused)
+             3. .visible - Subtle background indicator
+             4. default - Transparent with secondary text
              ============================================ */
           .workspaces {
             /* Minimal padding - buttons have their own spacing */
             padding: ${spacing.xs} ${spacing.sm};
           }
 
+          /* Default state */
           .workspaces button {
             background-color: transparent;
             color: ${colors."text-secondary".hex};
@@ -112,8 +120,13 @@ in
             border-radius: ${radius.sm};
           }
 
+          /* Visible but not focused */
+          .workspaces button.visible {
+            background-color: ${colors."surface-subtle".hex};
+          }
+
           /* Hover state - only for unfocused buttons */
-          .workspaces button:hover {
+          .workspaces button:hover:not(.focused) {
             background-color: ${colors."surface-emphasis".hex};
             color: ${colors."text-primary".hex};
           }
@@ -122,17 +135,6 @@ in
           .workspaces button.focused {
             background-color: ${colors."accent-focus".hex};
             color: ${colors."surface-base".hex};
-          }
-
-          /* Focused + Hover - maintain focus appearance */
-          .workspaces button.focused:hover {
-            background-color: ${colors."accent-focus".hex};
-            color: ${colors."surface-base".hex};
-          }
-
-          /* Visible but not focused */
-          .workspaces button.visible {
-            background-color: ${colors."surface-subtle".hex};
           }
 
           /* Keyboard navigation (accessibility) */
@@ -151,11 +153,6 @@ in
             /* Padding inherited from module pills (4px vertical, 16px horizontal) */
           }
 
-          .clock:hover {
-            background-color: ${colors."surface-emphasis".hex};
-            color: ${colors."text-primary".hex};
-          }
-
           /* ============================================
              SYSTEM INFO MODULE
              CPU/RAM display with nested elements
@@ -166,35 +163,32 @@ in
           }
 
           /* Reset nested elements - increased spacing between CPU and RAM */
-          .sys-info button,
-          .sys-info label {
-            background: none;
-            border: none;
+          .sys-info > * {
+            all: unset; /* GTK-idiomatic nuclear reset */
             padding: 0 ${spacing.sm}; /* Increased from 4px to 8px */
-            margin: 0;
-            box-shadow: none;
           }
 
-          /* Ensure font icons in sys-info are visually consistent with 16px icons */
-          .sys-info {
-            font-size: 14px; /* Match global font size for icon consistency */
+          /* ============================================
+             ICON-BASED MODULES
+             Consistent font sizing for visual alignment with 16px icons
+             ============================================ */
+          .sys-info,
+          .brightness,
+          .volume,
+          .notifications {
+            font-size: 14px; /* Ensures font icons match 16px icon size visually */
           }
 
           /* ============================================
              BRIGHTNESS & VOLUME MODULES
              Semantic colors for quick identification
-             Consistent icon sizing with font icons
              ============================================ */
           .brightness {
             color: ${colors."accent-info".hex}; /* Changed from warning */
-            /* Font icons should match 16px icon size visually */
-            font-size: 14px;
           }
 
           .volume {
             color: ${colors."accent-primary".hex};
-            /* Font icons should match 16px icon size visually */
-            font-size: 14px;
           }
 
           /* ============================================
@@ -210,7 +204,6 @@ in
           .tray image {
             min-width: 16px;
             min-height: 16px;
-            /* GTK CSS doesn't support max-width/max-height */
           }
 
           /* ============================================
@@ -219,44 +212,21 @@ in
              Note: Notifications uses overlay.widget.notifications with button.text-button inside
              ============================================ */
           .notifications {
-            /* Base styling from module pills */
-            background-color: ${colors."surface-subtle".hex};
-            border-radius: ${radius.md};
-            border: 1px solid ${colors."divider-primary".hex};
-            margin: ${spacing.xs};
-
-            /* Match other icon-based modules */
-            padding: ${spacing.xs} ${spacing.md};
+            /* Base styling inherited from module pills */
             color: ${colors."text-secondary".hex};
-            /* Font icons should match 16px icon size visually */
-            font-size: 14px;
+            /* Font size inherited from icon-based modules section */
           }
 
-          /* Target the button inside notifications overlay to ensure background styling */
-          .notifications button,
-          .notifications button.text-button {
-            background-color: ${colors."surface-subtle".hex};
-            border-radius: ${radius.md};
-            border: 1px solid ${colors."divider-primary".hex};
-            padding: ${spacing.xs} ${spacing.md};
-            margin: 0;
-            color: ${colors."text-secondary".hex};
-            font-size: 14px;
+          /* Button inside notifications inherits parent styling */
+          .notifications button {
+            all: inherit; /* Inherit all properties from parent */
+            display: inline-flex; /* Restore display property after 'all: inherit' */
           }
 
-          /* Ensure notification icon matches tray icon size */
-          .notifications image,
-          .notifications button image {
+          /* Ensure notification icons match tray icon size */
+          .notifications image {
             min-width: 16px;
             min-height: 16px;
-            /* GTK CSS doesn't support max-width/max-height */
-          }
-
-          /* Hover state for better interactivity */
-          .notifications:hover,
-          .notifications button:hover {
-            background-color: ${colors."surface-emphasis".hex};
-            color: ${colors."text-primary".hex};
           }
 
           /* Unread notification indicator */
@@ -276,14 +246,20 @@ in
             min-width: 0;
           }
 
-          /* Hover state for better interactivity */
-          .label:hover {
-            background-color: ${colors."surface-emphasis".hex};
+          /* When label has content, ensure it's always visible */
+          .label label {
             color: ${colors."text-primary".hex};
           }
 
-          /* When label has content, ensure it's always visible */
-          .label label {
+          /* ============================================
+             SHARED INTERACTIVE HOVER STATES
+             Common hover behavior for all interactive modules
+             ============================================ */
+          .clock:hover,
+          .label:hover,
+          .notifications:hover,
+          .notifications button:hover {
+            background-color: ${colors."surface-emphasis".hex};
             color: ${colors."text-primary".hex};
           }
 
