@@ -46,7 +46,7 @@ in
     # Desktop environment (Linux)
     ../../../modules/shared/features/theming/applications/desktop/gtk.nix
     ../../../modules/shared/features/theming/applications/desktop/ironbar-home.nix
-    ../../../modules/shared/features/theming/applications/desktop/swappy.nix
+    ../../../modules/shared/features/theming/applications/desktop/satty.nix
 
     # Command-line tools
     ../../../modules/shared/features/theming/applications/cli/bat.nix

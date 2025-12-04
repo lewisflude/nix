@@ -30,7 +30,10 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''grimblast --notify copysave screen''
+        ''
+          FILE="$HOME/Pictures/Screenshots/screenshot-$(date +%Y%m%d-%H%M%S).png"
+          grim -t png "$FILE" && wl-copy < "$FILE" && notify-send "Screenshot" "Saved and copied to clipboard" -i "$FILE"
+        ''
       ];
     };
     "Mod+Shift+Slash".action.show-hotkey-overlay = { };
@@ -145,7 +148,13 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''grimblast --notify save area - | satty --filename - --fullscreen --output-filename ~/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png''
+        ''
+          GEOM=$(slurp) && if [ -n "$GEOM" ]; then
+            FILE="$HOME/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png"
+            grim -g "$GEOM" -t png - | satty --filename - --fullscreen --output-filename "$FILE"
+            notify-send "Screenshot" "Area saved" -i "$FILE"
+          fi
+        ''
       ];
     };
     "Shift+Print" = {
@@ -153,7 +162,25 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''grimblast --notify save window - | satty --filename - --fullscreen --output-filename ~/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png''
+        ''
+          # Get focused window info and extract geometry
+          WINDOW_INFO=$(niri msg focused-window 2>/dev/null)
+          if [ -n "$WINDOW_INFO" ]; then
+            # Use slurp to select window (user can click on window)
+            GEOM=$(slurp -f "%x,%y %wx%h") && if [ -n "$GEOM" ]; then
+              FILE="$HOME/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png"
+              grim -g "$GEOM" -t png - | satty --filename - --fullscreen --output-filename "$FILE"
+              notify-send "Screenshot" "Window saved" -i "$FILE"
+            fi
+          else
+            # Fallback to area selection
+            GEOM=$(slurp) && if [ -n "$GEOM" ]; then
+              FILE="$HOME/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png"
+              grim -g "$GEOM" -t png - | satty --filename - --fullscreen --output-filename "$FILE"
+              notify-send "Screenshot" "Area saved" -i "$FILE"
+            fi
+          fi
+        ''
       ];
     };
     "Ctrl+Print" = {
@@ -161,7 +188,11 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''grimblast --notify save screen - | satty --filename - --fullscreen --output-filename ~/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png''
+        ''
+          FILE="$HOME/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png"
+          grim -t png - | satty --filename - --fullscreen --output-filename "$FILE"
+          notify-send "Screenshot" "Screen saved" -i "$FILE"
+        ''
       ];
     };
     "Alt+Print" = {
@@ -169,7 +200,11 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''grimblast --notify copy area''
+        ''
+          GEOM=$(slurp) && if [ -n "$GEOM" ]; then
+            grim -g "$GEOM" -t png | wl-copy && notify-send "Screenshot" "Area copied to clipboard"
+          fi
+        ''
       ];
     };
 
@@ -178,7 +213,12 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''grimblast --notify copysave area ~/Pictures/Screenshots/screenshot-$(date +%Y%m%d-%H%M%S).png''
+        ''
+          GEOM=$(slurp) && if [ -n "$GEOM" ]; then
+            FILE="$HOME/Pictures/Screenshots/screenshot-$(date +%Y%m%d-%H%M%S).png"
+            grim -g "$GEOM" -t png "$FILE" && wl-copy < "$FILE" && notify-send "Screenshot" "Area saved and copied to clipboard" -i "$FILE"
+          fi
+        ''
       ];
     };
     "Mod+Shift+C" = {
