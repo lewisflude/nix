@@ -32,7 +32,7 @@
   config,
   lib,
   constants,
-  osConfig,
+  systemConfig,
   ...
 }:
 
@@ -41,8 +41,7 @@ let
 
   # Import shared wrappers module
   wrappers = import ../../modules/shared/mcp/wrappers.nix {
-    inherit pkgs lib;
-    systemConfig = osConfig;
+    inherit pkgs lib systemConfig;
   };
 
   # Port key mapping: server name -> constants.ports.mcp.<key>
@@ -78,7 +77,7 @@ let
 
     "docs-mcp-server" = {
       enabled = true;
-      available = osConfig.sops.secrets ? OPENAI_API_KEY;
+      available = systemConfig.sops.secrets ? OPENAI_API_KEY;
       wrapper = wrappers.docsMcpWrapper;
       portKey = portKeys."docs-mcp-server";
       config = {
@@ -90,7 +89,7 @@ let
 
     openai = {
       enabled = true;
-      available = osConfig.sops.secrets ? OPENAI_API_KEY;
+      available = systemConfig.sops.secrets ? OPENAI_API_KEY;
       wrapper = wrappers.openaiWrapper;
       portKey = portKeys.openai;
       config = {
@@ -102,7 +101,7 @@ let
 
     rustdocs = {
       enabled = true;
-      available = osConfig.sops.secrets ? OPENAI_API_KEY;
+      available = systemConfig.sops.secrets ? OPENAI_API_KEY;
       wrapper = wrappers.rustdocsWrapper;
       portKey = portKeys.rustdocs;
       config = {
