@@ -38,7 +38,7 @@ in
       example = {
         jupiter = {
           id = "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX";
-          addresses = [ "tcp://192.168.1.210:22000" ];
+          addresses = [ "tcp://192.168.10.210:22000" ];
         };
       };
     };

@@ -9,8 +9,8 @@ PORT="${2:-22}"
 
 if [ -z "$HOST" ]; then
   echo "Usage: $0 [user@]hostname [port]"
-  echo "Example: $0 root@192.168.1.1"
-  echo "Example: $0 root@192.168.1.1 2222"
+  echo "Example: $0 root@192.168.10.1"
+  echo "Example: $0 root@192.168.10.1 2222"
   exit 1
 fi
 

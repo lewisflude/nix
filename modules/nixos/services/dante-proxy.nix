@@ -43,7 +43,7 @@ in
       description = "List of client IP addresses/ranges allowed to connect";
       example = [
         "127.0.0.1/32"
-        "192.168.1.0/24"
+        "192.168.10.0/24"
       ];
     };
 

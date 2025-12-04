@@ -49,7 +49,7 @@ Scripts for diagnosing system issues, particularly SSH performance and audio pro
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 1. DNS Resolution
-   jupiter → 192.168.1.50 (12ms)
+   jupiter → 192.168.10.50 (12ms)
    ⚠️ DNS lookup is slow (>10ms)
    Recommendation: Add to /etc/hosts
 
@@ -77,12 +77,12 @@ Recommendations:
 
 1. Add to ~/.ssh/config:
    Host jupiter
-     HostName 192.168.1.50
+     HostName 192.168.10.50
      Ciphers chacha20-poly1305@openssh.com
      Compression no
 
 2. Add to /etc/hosts:
-   192.168.1.50 jupiter
+   192.168.10.50 jupiter
 ```
 
 **When to use**:
@@ -160,7 +160,7 @@ Optimal SSH Config:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Host jupiter
-  HostName 192.168.1.50
+  HostName 192.168.10.50
   Ciphers chacha20-poly1305@openssh.com
   Compression no
   ControlMaster auto
@@ -356,11 +356,11 @@ Host *
 
 # Host-specific (from diagnose-ssh-slowness.sh output)
 Host jupiter
-  HostName 192.168.1.50
+  HostName 192.168.10.50
   User lewis
 
 Host mercury
-  HostName 192.168.1.51
+  HostName 192.168.10.51
   User lewis
 ```
 

@@ -34,7 +34,7 @@ in
         # Pi-hole admin interface
         "pihole.blmt.io" = {
           extraConfig = ''
-            reverse_proxy 192.168.1.10:8080 {
+            reverse_proxy 192.168.10.10:8080 {
               header_up X-Real-IP {remote_host}
               header_up X-Forwarded-For {remote_host}
               header_up X-Forwarded-Proto {scheme}
@@ -313,7 +313,7 @@ in
         # UniFi Controller
         "unifi.blmt.io" = {
           extraConfig = ''
-            reverse_proxy 192.168.1.1:443 {
+            reverse_proxy 192.168.10.1:443 {
               header_up X-Real-IP {remote_host}
               header_up X-Forwarded-For {remote_host}
               header_up X-Forwarded-Proto {scheme}

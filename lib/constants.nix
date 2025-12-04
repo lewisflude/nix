@@ -84,7 +84,7 @@
   # Host IP addresses (for services that need explicit IPs)
   hosts = {
     jupiter = {
-      ipv4 = "192.168.1.210";
+      ipv4 = "192.168.10.210";
     };
   };
 }

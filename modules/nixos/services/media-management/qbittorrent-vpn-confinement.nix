@@ -39,7 +39,7 @@ in
 
     webUIBindAddress = mkOption {
       type = types.str;
-      default = "192.168.1.210";
+      default = "192.168.10.210";
       description = "IP address to bind WebUI to on the host network";
     };
   };
@@ -118,9 +118,9 @@ in
       # WireGuard + network overhead requires lower MTU to avoid packet fragmentation
       # Optimal MTU: 1420 (tested and verified)
 
-      # Allow access from main network (192.168.1.0/24)
+      # Allow access from main network (192.168.10.0/24)
       accessibleFrom = [
-        "192.168.1.0/24"
+        "192.168.10.0/24"
       ];
 
       # Port forwarding for WebUI (host network ? namespace)

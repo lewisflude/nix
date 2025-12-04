@@ -41,7 +41,7 @@ in
               "server string" = config.host.hostname;
               "netbios name" = config.host.hostname;
               "security" = "user";
-              "hosts allow" = "192.168.1. 192.168.0. 127.0.0.1 localhost";
+              "hosts allow" = "192.168.10. 192.168.0. 127.0.0.1 localhost";
               "hosts deny" = "0.0.0.0/0";
               "guest account" = "nobody";
               "map to guest" = "bad user";
