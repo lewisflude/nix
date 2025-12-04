@@ -13,7 +13,7 @@
     ./apps/polkit-gnome.nix
     ./apps/wlsunset.nix
     ./apps/swayidle.nix
-    ./apps/swappy.nix
+    ./apps/satty.nix
     ./apps/wofi.nix
     ./apps/gaming.nix
     ./apps/mpv.nix

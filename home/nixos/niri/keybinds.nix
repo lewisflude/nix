@@ -30,7 +30,7 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''grim - | swappy-fixed -f -''
+        ''grimblast --notify copysave screen''
       ];
     };
     "Mod+Shift+Slash".action.show-hotkey-overlay = { };
@@ -145,7 +145,7 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''GEOM=$(slurp) && [ -n "$GEOM" ] && grim -g "$GEOM" - | swappy-fixed -f -''
+        ''grimblast --notify save area - | satty --filename - --fullscreen --output-filename ~/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png''
       ];
     };
     "Shift+Print" = {
@@ -153,7 +153,7 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''GEOM=$(slurp -w) && [ -n "$GEOM" ] && grim -g "$GEOM" - | swappy-fixed -f -''
+        ''grimblast --notify save window - | satty --filename - --fullscreen --output-filename ~/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png''
       ];
     };
     "Ctrl+Print" = {
@@ -161,7 +161,7 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''grim - | swappy-fixed -f -''
+        ''grimblast --notify save screen - | satty --filename - --fullscreen --output-filename ~/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png''
       ];
     };
     "Alt+Print" = {
@@ -169,7 +169,7 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''GEOM=$(slurp) && [ -n "$GEOM" ] && grim -g "$GEOM" - | wl-copy''
+        ''grimblast --notify copy area''
       ];
     };
 
@@ -178,7 +178,7 @@ in
       action.spawn = [
         "sh"
         "-c"
-        ''GEOM=$(slurp) && [ -n "$GEOM" ] && grim -g "$GEOM" ~/Pictures/Screenshots/screenshot-$(date +%Y%m%d-%H%M%S).png''
+        ''grimblast --notify copysave area ~/Pictures/Screenshots/screenshot-$(date +%Y%m%d-%H%M%S).png''
       ];
     };
     "Mod+Shift+C" = {

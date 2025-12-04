@@ -101,8 +101,8 @@ in
       enable = mkEnableOption "Apply theme to zellij (terminal multiplexer)";
     };
 
-    swappy = {
-      enable = mkEnableOption "Apply theme to swappy (screenshot editor)";
+    satty = {
+      enable = mkEnableOption "Apply theme to satty (screenshot annotation tool)";
     };
   };
 
