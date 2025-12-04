@@ -329,8 +329,8 @@ in
       RUSTDOCFLAGS = "--cfg=docsrs";
     };
     healthCheck = ''
-      if [ -z "''${OPENAI_API_KEY:-}" ]; then
-        ${logError "OPENAI_API_KEY not set"}
+      if [ ! -r "/run/secrets-for-users/OPENAI_API_KEY" ]; then
+        ${logError "Cannot read OPENAI_API_KEY secret file"}
         exit 1
       fi
       exit 0
@@ -429,8 +429,8 @@ in
           -c "$OUT_LINK/bin/rustdocs_mcp_server" "$@"
       '';
       healthCheck = ''
-        if [ -z "''${OPENAI_API_KEY:-}" ]; then
-          ${logError "OPENAI_API_KEY not set"}
+        if [ ! -r "/run/secrets-for-users/OPENAI_API_KEY" ]; then
+          ${logError "Cannot read OPENAI_API_KEY secret file"}
           exit 1
         fi
 
