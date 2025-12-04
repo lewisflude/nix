@@ -191,7 +191,7 @@ in
         server_host = [ "0.0.0.0" ];
         server_port = 8123;
         use_x_forwarded_for = true;
-        trusted_proxies = [ "192.168.1.0/24" ];
+        trusted_proxies = [ "192.168.10.0/24" ];
       };
       default_config = { };
     };

@@ -160,7 +160,7 @@
         # WebUI Configuration
         webUI = {
           port = 8080;
-          bindAddress = "*"; # Accessible from any interface (192.168.1.210:8080)
+          bindAddress = "*"; # Accessible from any interface (192.168.10.210:8080)
           username = "lewis";
           password = "@ByteArray(J5lri+TddZR2AJqNVPndng==:no5T50n4CD9peISk6jZQ+Cb8qzv6DoV2MtOxE2oErywXVFngVDq/eySGpoNjUCFOHFdbifjwwHI4jlV2LH4ocQ==)";
           alternativeUIEnabled = true;

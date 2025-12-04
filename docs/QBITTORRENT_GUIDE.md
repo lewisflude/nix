@@ -18,7 +18,7 @@ Complete guide for qBittorrent with ProtonVPN in a network namespace.
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│ Host Network (192.168.1.0/24)                       │
+│ Host Network (192.168.10.0/24)                       │
 │                                                      │
 │  ┌───────────────────────────────────────────────┐  │
 │  │ VPN Namespace: qbt                            │  │
@@ -275,13 +275,13 @@ sudo ip netns exec qbt ss -tuln | grep qbittorrent
 
 #### Radarr/Sonarr Configuration
 
-**Radarr** (<http://192.168.1.210:7878>):
+**Radarr** (<http://192.168.10.210:7878>):
 
 1. Go to **Settings → Download Clients**
 2. Verify qBittorrent client configured
 3. Test connection
 
-**Sonarr** (<http://192.168.1.210:8989>):
+**Sonarr** (<http://192.168.10.210:8989>):
 
 1. Go to **Settings → Download Clients**
 2. Verify qBittorrent client configured

@@ -101,8 +101,8 @@ These settings should be configured on your UDM but are not managed by NixOS:
 
 1. UniFi Console → **Settings** → **Internet** → **Port Forwarding**
 2. Check rules:
-   - `80 → 192.168.1.210:80` ✅
-   - `443 → 192.168.1.210:443` ✅
+   - `80 → 192.168.10.210:80` ✅
+   - `443 → 192.168.10.210:443` ✅
    - No torrent port forwards (e.g., 62000) ✅
 
 #### ⚠️ Threat Management (IDS/IPS)
@@ -122,7 +122,7 @@ These settings should be configured on your UDM but are not managed by NixOS:
 1. UniFi Console → **Settings** → **Security** → **Threat Management**
 2. Check mode:
    - **Option A**: Set to "Detect Only" (safer for testing)
-   - **Option B**: Keep "Detect and Block" but whitelist `192.168.1.210`
+   - **Option B**: Keep "Detect and Block" but whitelist `192.168.10.210`
 
 **Test:** Run `./scripts/test-vpn-port-forwarding.sh` and monitor for packet drops.
 
@@ -267,7 +267,7 @@ You have comprehensive diagnostic scripts:
 # UniFi Console → Settings → Security → Threat Management
 # Options:
 #   A. Set to "Detect Only" (recommended during testing)
-#   B. Whitelist 192.168.1.210 if using "Detect and Block"
+#   B. Whitelist 192.168.10.210 if using "Detect and Block"
 
 # 3. Check Smart Queues
 # UniFi Console → Settings → Internet → Smart Queues

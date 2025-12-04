@@ -19,7 +19,7 @@ _: {
         sendEnv = [ "TERM" ];
       };
 
-      "192.168.1.1" = {
+      "192.168.10.1" = {
         # Use simple terminal type for embedded devices (routers, switches, etc.)
         extraOptions = {
           RequestTTY = "yes";

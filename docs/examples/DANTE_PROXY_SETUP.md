@@ -51,7 +51,7 @@ services.dante-proxy = {
   enable = true;
   listenAddress = "0.0.0.0";  # All interfaces
   allowedClients = [
-    "192.168.1.0/24"  # Main network
+    "192.168.10.0/24"  # Main network
     "192.168.2.0/24"  # VLAN 2 network
   ];
   openFirewall = true;  # Allow through firewall

@@ -71,7 +71,7 @@ services.dante-proxy = {
 
 Then in Prowlarr, use your server's IP instead of `127.0.0.1`:
 
-- **Hostname**: `192.168.1.x` (your server's IP on main network)
+- **Hostname**: `192.168.10.x` (your server's IP on main network)
 - **Port**: `1080`
 
 ## With Authentication (Optional)
