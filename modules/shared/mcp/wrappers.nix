@@ -80,6 +80,11 @@ let
     let
       secretPath = systemConfig.sops.secrets.${secretName}.path or null;
       hasSecret = secretPath != null;
+      # Inject secret path into health check if it contains the placeholder
+      resolvedHealthCheck = if healthCheck != null && hasSecret then
+        lib.replaceStrings [ "{{SECRET_PATH}}" ] [ secretPath ] healthCheck
+      else
+        healthCheck;
     in
     if !hasSecret then
       mkDisabledWrapper {
@@ -95,10 +100,10 @@ let
           set -euo pipefail
 
           # Health check mode
-          ${optionalString (healthCheck != null) ''
+          ${optionalString (resolvedHealthCheck != null) ''
             if [ "''${1:-}" = "--health-check" ]; then
               ${logInfo "Running health check for ${name}"}
-              ${healthCheck}
+              ${resolvedHealthCheck}
               # Health check passed (set -e would exit on failure)
               # shellcheck disable=SC2317
               exit 0
@@ -233,6 +238,11 @@ let
       hasSecret = secretName != null;
       secretPath = if hasSecret then systemConfig.sops.secrets.${secretName}.path or null else null;
       secretAvailable = !hasSecret || secretPath != null;
+      # Inject secret path into health check if it contains the placeholder
+      resolvedHealthCheck = if healthCheck != null && hasSecret && secretPath != null then
+        lib.replaceStrings [ "{{SECRET_PATH}}" ] [ secretPath ] healthCheck
+      else
+        healthCheck;
     in
     if !secretAvailable then
       mkDisabledWrapper {
@@ -248,10 +258,10 @@ let
           set -euo pipefail
 
           # Health check mode
-          ${optionalString (healthCheck != null) ''
+          ${optionalString (resolvedHealthCheck != null) ''
             if [ "''${1:-}" = "--health-check" ]; then
               ${logInfo "Running health check for ${name}"}
-              ${healthCheck}
+              ${resolvedHealthCheck}
               # Health check passed (set -e would exit on failure)
               # shellcheck disable=SC2317
               exit 0
@@ -329,7 +339,7 @@ in
       RUSTDOCFLAGS = "--cfg=docsrs";
     };
     healthCheck = ''
-      if [ ! -r "/run/secrets-for-users/OPENAI_API_KEY" ]; then
+      if [ ! -r "{{SECRET_PATH}}" ]; then
         ${logError "Cannot read OPENAI_API_KEY secret file"}
         exit 1
       fi
@@ -429,7 +439,7 @@ in
           -c "$OUT_LINK/bin/rustdocs_mcp_server" "$@"
       '';
       healthCheck = ''
-        if [ ! -r "/run/secrets-for-users/OPENAI_API_KEY" ]; then
+        if [ ! -r "{{SECRET_PATH}}" ]; then
           ${logError "Cannot read OPENAI_API_KEY secret file"}
           exit 1
         fi
