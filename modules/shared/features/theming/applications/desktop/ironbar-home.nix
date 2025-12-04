@@ -218,9 +218,11 @@ in
              Consistent styling and icon sizing
              ============================================ */
           .notifications {
-            /* Padding inherited from module pills (4px vertical, 16px horizontal) */
             /* Match other icon-based modules */
             padding: ${spacing.xs} ${spacing.md};
+            color: ${colors."text-secondary".hex};
+            /* Font icons should match 16px icon size visually */
+            font-size: 14px;
           }
 
           /* Ensure notification icon matches tray icon size */
@@ -229,6 +231,12 @@ in
             min-width: 16px;
             min-height: 16px;
             /* GTK CSS doesn't support max-width/max-height */
+          }
+
+          /* Hover state for better interactivity */
+          .notifications:hover {
+            background-color: ${colors."surface-emphasis".hex};
+            color: ${colors."text-primary".hex};
           }
 
           /* Unread notification indicator */
