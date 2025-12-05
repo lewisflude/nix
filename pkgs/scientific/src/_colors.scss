@@ -1,0 +1,52 @@
+/**
+ * Signal Color Palette
+ * Signal: Perception, engineered.
+ *
+ * A dual-theme color system built on perceptual uniformity (Oklch) and accessibility (APCA).
+ * This palette is dynamically generated from the Signal theme system.
+ */
+
+// Base surface colors
+$surface-base: #1e1f26;
+$surface-subtle: #2d2e39;
+$surface-elevated: #353642;
+
+// Text hierarchy
+$text-primary: #c0c3d1;
+$text-secondary: #9498ab;
+$text-tertiary: #6b6f82;
+
+// Accent colors
+$accent-primary: #5a7dcf;    // Focus/Primary actions
+$accent-primary-dim: #3a5da3;
+$accent-special: #a368cf;     // Special emphasis
+$accent-special-dim: #7d49a3;
+
+// Semantic colors
+$accent-danger: #d9574a;      // Destructive actions
+$accent-warning: #c9a93a;     // Warnings
+$accent-success: #4db368;     // Success states
+
+// Dividers and borders
+$divider-primary: #454759;
+$divider-subtle: #353642;
+
+// Static colors
+$white: #ffffff;
+$black: #000000;
+
+// Derived colors for GTK compatibility
+$theme-base-color: $surface-base;
+$theme-bg-color: $surface-subtle;
+$theme-fg-color: $text-primary;
+$theme-text-color: $text-primary;
+$theme-selected-bg-color: $accent-primary;
+$theme-selected-fg-color: $white;
+
+$insensitive-bg-color: $surface-subtle;
+$insensitive-fg-color: $text-tertiary;
+
+$borders: $divider-primary;
+$warning-color: $accent-warning;
+$error-color: $accent-danger;
+$success-color: $accent-success;

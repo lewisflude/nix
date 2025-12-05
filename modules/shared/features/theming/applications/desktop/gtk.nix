@@ -371,6 +371,35 @@ let
         background-color: @popover_bg_color;
         color: @popover_fg_color;
       }
+
+      /* Ironbar specific overrides */
+      /* These ensure Ironbar widgets inherit the GTK theme colors */
+      .workspaces,
+      .label,
+      .clock,
+      .sys-info,
+      .brightness,
+      .volume,
+      .tray,
+      .notifications {
+        background-color: @card_bg_color;
+        color: @view_fg_color;
+      }
+
+      .workspaces button {
+        background-color: transparent;
+        color: @text_secondary_color;
+      }
+
+      .workspaces button.focused {
+        background-color: @accent_bg_color;
+        color: @accent_fg_color;
+      }
+
+      .workspaces button:hover:not(.focused) {
+        background-color: @divider_color;
+        color: @view_fg_color;
+      }
     '';
 in
 {

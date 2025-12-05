@@ -219,6 +219,11 @@ in
       initContent = lib.mkMerge [
         (lib.mkBefore ''
 
+          # Skip the rest of the zsh config inside Cursor Agent shells so commands finish cleanly
+          if [[ "$PAGER" == "head -n 10000 | cat" || "$COMPOSER_NO_INTERACTION" == "1" ]]; then
+            return
+          fi
+
           # Suppress direnv output during initialization to avoid p10k instant prompt warnings
           export DIRENV_LOG_FORMAT=""
           export DIRENV_WARN_TIMEOUT=0

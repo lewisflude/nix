@@ -1,0 +1,419 @@
+/**
+ * Signal GTK Theme - GTK 4.0
+ * Signal: Perception, engineered.
+ */
+
+@import '../colors';
+@import '../mixins';
+
+/* Color Definitions for GTK 4 */
+@define-color window_bg_color #{$surface-base};
+@define-color window_fg_color #{$text-primary};
+@define-color view_bg_color #{$surface-base};
+@define-color view_fg_color #{$text-primary};
+@define-color headerbar_bg_color #{$surface-subtle};
+@define-color headerbar_fg_color #{$text-primary};
+@define-color headerbar_border_color #{$borders};
+@define-color card_bg_color #{$surface-subtle};
+@define-color card_fg_color #{$text-primary};
+@define-color dialog_bg_color #{$surface-subtle};
+@define-color dialog_fg_color #{$text-primary};
+@define-color popover_bg_color #{$surface-subtle};
+@define-color popover_fg_color #{$text-primary};
+@define-color accent_bg_color #{$accent-primary};
+@define-color accent_fg_color #{$white};
+@define-color accent_color #{$accent-primary};
+@define-color destructive_bg_color #{$accent-danger};
+@define-color destructive_fg_color #{$white};
+@define-color destructive_color #{$accent-danger};
+@define-color success_bg_color #{$accent-success};
+@define-color success_fg_color #{$white};
+@define-color success_color #{$accent-success};
+@define-color warning_bg_color #{$accent-warning};
+@define-color warning_fg_color #{$white};
+@define-color warning_color #{$accent-warning};
+@define-color error_bg_color #{$accent-danger};
+@define-color error_fg_color #{$white};
+@define-color error_color #{$accent-danger};
+@define-color sidebar_bg_color #{$surface-subtle};
+@define-color sidebar_fg_color #{$text-primary};
+@define-color sidebar_border_color #{$borders};
+@define-color secondary_sidebar_bg_color #{$surface-base};
+@define-color secondary_sidebar_fg_color #{$text-primary};
+
+/* Additional Signal palette colors */
+@define-color borders #{$borders};
+@define-color special_color #{$accent-special};
+@define-color special_dim_color #{$accent-special-dim};
+@define-color focus_color #{$accent-primary};
+@define-color focus_dim_color #{$accent-primary-dim};
+@define-color divider_color #{$divider-primary};
+@define-color divider_subtle_color #{$divider-subtle};
+@define-color text_secondary_color #{$text-secondary};
+@define-color text_tertiary_color #{$text-tertiary};
+
+/* Windows */
+window,
+.background {
+  background-color: $surface-base;
+  color: $text-primary;
+}
+
+/* HeaderBars */
+headerbar {
+  @include headerbar;
+
+  button {
+    background-color: transparent;
+    color: $text-primary;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+
+    &:hover {
+      background-color: lighten($surface-subtle, 10%);
+    }
+
+    &:active,
+    &:checked {
+      background-color: $accent-primary;
+      color: $white;
+    }
+  }
+}
+
+/* Buttons */
+button {
+  @include button-base;
+
+  &:hover {
+    @include button-hover;
+  }
+
+  &:active,
+  &:checked {
+    @include button-active;
+  }
+
+  &:disabled {
+    background-color: $insensitive-bg-color;
+    color: $insensitive-fg-color;
+    border-color: $borders;
+  }
+
+  &.suggested-action {
+    background-color: $accent-primary;
+    color: $white;
+    border-color: $accent-primary;
+
+    &:hover {
+      background-color: lighten($accent-primary, 10%);
+    }
+
+    &:active {
+      background-color: darken($accent-primary, 10%);
+    }
+  }
+
+  &.destructive-action {
+    background-color: $accent-danger;
+    color: $white;
+    border-color: $accent-danger;
+
+    &:hover {
+      background-color: lighten($accent-danger, 10%);
+    }
+
+    &:active {
+      background-color: darken($accent-danger, 10%);
+    }
+  }
+}
+
+/* Entry Fields */
+entry {
+  @include entry-base;
+
+  &:focus-within {
+    @include entry-focus;
+  }
+
+  &:disabled {
+    background-color: $insensitive-bg-color;
+    color: $insensitive-fg-color;
+    border-color: $borders;
+  }
+}
+
+/* Menus and Popovers */
+popover {
+  @include popover;
+
+  > contents {
+    background-color: transparent;
+  }
+}
+
+popover.menu {
+  padding: 4px;
+
+  > contents {
+    background-color: transparent;
+  }
+}
+
+modelbutton {
+  @include menuitem;
+}
+
+/* Dialogs */
+dialog,
+window.dialog {
+  @include dialog;
+}
+
+/* Cards */
+.card {
+  @include card;
+}
+
+/* Lists */
+listview,
+list {
+  background-color: $surface-base;
+  color: $text-primary;
+
+  row {
+    background-color: transparent;
+    color: $text-primary;
+    padding: 8px;
+
+    &:hover {
+      background-color: $surface-elevated;
+    }
+
+    &:selected {
+      background-color: $accent-primary;
+      color: $white;
+    }
+  }
+}
+
+/* Scrollbars */
+scrollbar {
+  background-color: transparent;
+
+  > slider {
+    background-color: rgba($text-secondary, 0.3);
+    border-radius: 10px;
+    min-width: 6px;
+    min-height: 6px;
+
+    &:hover {
+      background-color: rgba($text-secondary, 0.5);
+    }
+
+    &:active {
+      background-color: rgba($text-secondary, 0.7);
+    }
+  }
+}
+
+/* Notebook Tabs */
+notebook {
+  background-color: $surface-base;
+
+  > header {
+    background-color: $surface-subtle;
+    border-bottom: 1px solid $borders;
+
+    > tabs {
+      > tab {
+        background-color: transparent;
+        color: $text-secondary;
+        border: none;
+        padding: 8px 16px;
+
+        &:hover {
+          background-color: $surface-elevated;
+          color: $text-primary;
+        }
+
+        &:checked {
+          background-color: $surface-base;
+          color: $accent-primary;
+          border-bottom: 2px solid $accent-primary;
+        }
+      }
+    }
+  }
+}
+
+/* Tooltips */
+tooltip {
+  background-color: $surface-elevated;
+  color: $text-primary;
+  border: 1px solid $borders;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+/* Check Buttons */
+checkbutton {
+  check {
+    background-color: $surface-base;
+    border: 1px solid $borders;
+    border-radius: 4px;
+    min-width: 16px;
+    min-height: 16px;
+
+    &:checked {
+      background-color: $accent-primary;
+      border-color: $accent-primary;
+      -gtk-icon-source: -gtk-icontheme("object-select-symbolic");
+      color: $white;
+    }
+
+    &:disabled {
+      background-color: $insensitive-bg-color;
+      border-color: $borders;
+    }
+  }
+}
+
+/* Radio Buttons */
+checkbutton.radio {
+  check {
+    border-radius: 50%;
+  }
+}
+
+/* Switches */
+switch {
+  background-color: $surface-elevated;
+  border: 1px solid $borders;
+  border-radius: 12px;
+  min-height: 24px;
+
+  > slider {
+    background-color: $white;
+    border-radius: 50%;
+    min-width: 20px;
+    min-height: 20px;
+  }
+
+  &:checked {
+    background-color: $accent-primary;
+    border-color: $accent-primary;
+  }
+
+  &:disabled {
+    background-color: $insensitive-bg-color;
+    border-color: $borders;
+  }
+}
+
+/* Progress Bars */
+progressbar {
+  background-color: $surface-elevated;
+  border-radius: 4px;
+
+  > trough {
+    background-color: $surface-elevated;
+    border-radius: 4px;
+    min-height: 6px;
+
+    > progress {
+      background-color: $accent-primary;
+      border-radius: 4px;
+      min-height: 6px;
+    }
+  }
+}
+
+/* Spinners */
+spinner {
+  color: $accent-primary;
+}
+
+/* LibAdwaita specific overrides */
+/* These ensure compatibility with LibAdwaita apps */
+.view {
+  background-color: $surface-base;
+  color: $text-primary;
+}
+
+.sidebar {
+  background-color: $surface-subtle;
+  color: $text-primary;
+
+  row {
+    &:hover {
+      background-color: $surface-elevated;
+    }
+
+    &:selected {
+      background-color: $accent-primary;
+      color: $white;
+    }
+  }
+}
+
+/* Preferences Groups */
+preferencesgroup {
+  background-color: $surface-subtle;
+  border-radius: 8px;
+  padding: 12px;
+
+  > box {
+    background-color: transparent;
+  }
+}
+
+/* Action Rows */
+row.activatable {
+  background-color: transparent;
+  color: $text-primary;
+  padding: 8px;
+
+  &:hover {
+    background-color: $surface-elevated;
+  }
+
+  &:active {
+    background-color: $accent-primary;
+    color: $white;
+  }
+}
+
+/* Split Buttons */
+splitbutton {
+  > button {
+    &:first-child {
+      border-right: none;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    &:last-child {
+      border-left: 1px solid $borders;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+  }
+}
+
+/* Menu Buttons */
+menubutton {
+  > button {
+    @include button-base;
+
+    &:hover {
+      @include button-hover;
+    }
+
+    &:active {
+      @include button-active;
+    }
+  }
+}
