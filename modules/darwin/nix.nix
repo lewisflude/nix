@@ -23,7 +23,6 @@
 
     # Build settings
     warn-dirty = false;
-    auto-optimise-store = true;
     max-jobs = "auto"; # Darwin uses auto instead of fixed number
     cores = 0;
     keep-outputs = true;
@@ -100,7 +99,6 @@
       "pipe-operators"
       "no-url-literals"
       "git-hashing"
-      "build-time-fetch-tree" # darwin-specific
     ];
 
     # Logging
@@ -147,10 +145,14 @@
   };
 
   nix = {
-    enable = false;
+    # Determinate Nix owns the daemon + /etc/nix/nix.conf; keep nix-darwin out
+    enable = lib.mkForce false;
 
     # Flakes don't use channels - nixPath is only for legacy compatibility
     # Leaving empty for pure flakes approach
     nixPath = lib.mkDefault [ ];
+    optimise = {
+      automatic = lib.mkDefault true;
+    };
   };
 }
