@@ -28,7 +28,7 @@ let
     monitors = {
       "DP-3" = {
         position = "top";
-        height = 42;
+        height = 44;
         layer = "top";
         exclusive_zone = true;
         popup_gap = 10;
@@ -104,12 +104,12 @@ let
           {
             type = "tray";
             class = "tray";
-            icon_size = 20;
+            icon_size = 22;
           }
           {
             type = "notifications";
             class = "notifications";
-            icon_size = 20;
+            icon_size = 22;
           }
         ];
       };
@@ -175,10 +175,7 @@ let
           min-height: 0;
         }
 
-        /* Remove button states from GTK theme */
-        button:hover,
-        button:active,
-        button:focus,
+        /* Remove button states from GTK theme - but preserve our custom styles */
         button:checked {
           background: none;
           background-color: transparent;
@@ -197,9 +194,11 @@ let
         #bar {
           background: transparent;
           padding: 6px 20px;
-          min-height: 42px;
+          min-height: 44px;
+          font-family: "Inter", "SF Pro", -apple-system, system-ui, sans-serif;
           font-size: 14px;
           font-weight: 400;
+        }
       '';
 
       # Signal theme colors - Floating island containers
@@ -262,7 +261,7 @@ let
             /* Workspace buttons - transparent by default */
             .workspaces button {
               background: transparent;
-              transition: background-color 150ms ease;
+              transition: background-color 150ms ease, transform 50ms ease;
             }
 
             /* Focused workspace - only element with background emphasis */
@@ -277,10 +276,54 @@ let
               border-radius: 8px;
             }
 
+            /* Active/pressed state for tactile feedback */
+            .workspaces button:active {
+              transform: scale(0.96);
+            }
+
+            /* Keyboard focus indicator */
+            .workspaces button:focus-visible {
+              outline: 2px solid ${colors."accent-focus".hex};
+              outline-offset: 2px;
+              border-radius: 8px;
+            }
+
             /* Popup styling - match island aesthetic */
             .popup {
               background-color: ${colors."surface-base".hex};
-              border: 1px solid rgba(255, 255, 255, 0.1);
+              border: 1px solid ${colors."surface-emphasis".hex};
+            }
+
+            /* Interactive widget hover states */
+            .brightness:hover,
+            .volume:hover {
+              background-color: rgba(37, 38, 47, 0.25);
+              border-radius: 8px;
+              cursor: pointer;
+            }
+
+            /* Interactive widget active states */
+            .brightness:active,
+            .volume:active {
+              transform: scale(0.98);
+            }
+
+            /* Tray button hover states */
+            .tray button:hover {
+              background-color: rgba(37, 38, 47, 0.25);
+              border-radius: 6px;
+            }
+
+            /* Tray button active states */
+            .tray button:active {
+              transform: scale(0.95);
+            }
+
+            /* Universal focus indicator for keyboard navigation */
+            *:focus-visible {
+              outline: 2px solid ${colors."accent-focus".hex};
+              outline-offset: 2px;
+              border-radius: 8px;
             }
           ''
         else
@@ -288,9 +331,6 @@ let
     in
     baseCss
     + themeCss
-    + ''
-      }
-    ''
     + widgetThemeCss
     + ''
 
@@ -299,45 +339,52 @@ let
       #bar #start,
       #bar #center,
       #bar #end {
-        min-height: 34px;
+        min-height: 36px;
+      }
+
+      /* Center island gets slightly more visual weight */
+      #bar #center {
+        padding: 6px 12px;
+        box-shadow: 0 3px 16px rgba(0, 0, 0, 0.12);
       }
 
       /* ===== MODULE POSITIONING ===== */
       /* Widget containers - minimal spacing within islands */
       .widget-container {
         margin: 0;
-        min-height: 34px;
+        min-height: 36px;
       }
 
       /* Widget containers - ensure flex children are centered */
       .widget-container > box {
-        min-height: 34px;
+        min-height: 36px;
       }
 
       /* All widgets - consistent height */
       .widget {
-        min-height: 34px;
+        min-height: 36px;
         border: none;
       }
 
       /* ===== ISLAND 1: NAVIGATION (Workspaces + Focused Window) ===== */
+      /* Gestalt: Proximity - Workspaces grouped tightly, separated from window title */
 
-      /* Workspace widget - minimal spacing */
+      /* Workspace widget - tight internal spacing */
       .workspaces {
         padding: 2px 4px;
-        margin-right: 8px;
+        margin-right: 16px;
       }
 
-      /* Individual workspace buttons - clean and minimal */
+      /* Individual workspace buttons - larger touch targets */
       .workspaces button {
-        min-width: 38px;
-        min-height: 30px;
+        min-width: 40px;
+        min-height: 32px;
         margin: 0 2px;
         padding: 0 12px;
         border: none;
         font-size: 14px;
-        font-weight: 500;
-        line-height: 30px;
+        font-weight: 400;
+        line-height: 32px;
       }
 
       /* First workspace button - no leading margin */
@@ -350,133 +397,146 @@ let
         margin-right: 0;
       }
 
-      /* Focused window title - minimal padding */
+      /* Focused window title - smaller and lighter (contextual info) */
       .label {
         padding: 0 12px;
         border: none;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 400;
-        line-height: 34px;
-        min-height: 34px;
+        line-height: 36px;
+        min-height: 36px;
+        opacity: 0.9;
       }
 
       /* ===== ISLAND 2: TIME (Clock as Visual Anchor) ===== */
+      /* Gestalt: Figure-ground - Clock is the primary visual anchor */
 
-      /* Clock widget - emphasized through typography alone */
+      /* Clock widget - largest and most prominent element */
       .clock {
-        padding: 0 16px;
+        padding: 0 20px;
         border: none;
-        font-size: 15px;
+        font-size: 17px;
         font-weight: 600;
-        letter-spacing: 0.02em;
-        min-width: 100px;
-        min-height: 34px;
-        line-height: 34px;
+        letter-spacing: 0.05em;
+        min-width: 110px;
+        min-height: 36px;
+        line-height: 36px;
       }
 
       /* ===== ISLAND 3: SYSTEM STATUS (Monitoring + Controls) ===== */
+      /* Gestalt: Proximity - Three sub-groups with varying spacing */
+      /* Sub-group 1: Monitoring (CPU/RAM) - tight spacing */
+      /* Sub-group 2: Controls (Brightness/Volume) - medium spacing */
+      /* Sub-group 3: Communications (Tray/Notifications) - separate with more space */
 
-      /* System info - clean text display */
+      /* System info - monitoring sub-group */
       .sys-info {
         padding: 0 12px;
-        margin-right: 6px;
+        margin-right: 14px;
         border: none;
-        font-size: 13px;
-        font-weight: 400;
-        line-height: 34px;
-        min-height: 34px;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 36px;
+        min-height: 36px;
       }
 
-      /* Brightness control - minimal spacing */
+      /* Brightness control - interactive sub-group start */
       .brightness {
-        padding: 0 10px;
-        margin-right: 6px;
-        min-width: 75px;
+        padding: 0 12px;
+        margin-right: 4px;
+        min-width: 80px;
         border: none;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 400;
-        line-height: 34px;
-        min-height: 34px;
+        line-height: 36px;
+        min-height: 36px;
+        transition: background-color 150ms ease, transform 50ms ease;
       }
 
-      /* Volume control - minimal spacing */
+      /* Volume control - interactive sub-group (paired with brightness) */
       .volume {
-        padding: 0 10px;
-        margin-right: 8px;
-        min-width: 75px;
+        padding: 0 12px;
+        margin-right: 16px;
+        min-width: 80px;
         border: none;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 400;
-        line-height: 34px;
-        min-height: 34px;
+        line-height: 36px;
+        min-height: 36px;
+        transition: background-color 150ms ease, transform 50ms ease;
       }
 
-      /* System tray - icon group */
+      /* System tray - communications sub-group start */
       .tray {
-        padding: 7px 8px;
-        margin-right: 6px;
+        padding: 7px 10px;
+        margin-right: 8px;
         border: none;
-        min-height: 34px;
+        min-height: 36px;
       }
 
-      /* Tray buttons - minimal spacing */
+      /* Tray buttons - larger touch targets */
       .tray button {
-        min-height: 20px;
-        min-width: 20px;
+        min-height: 22px;
+        min-width: 22px;
         padding: 0;
         margin: 0 4px;
         background: transparent;
         border: none;
+        transition: background-color 150ms ease, transform 50ms ease;
       }
 
-      /* Tray button images */
+      /* Tray button images - increased size for accessibility */
       .tray button image {
-        min-height: 20px;
-        min-width: 20px;
+        min-height: 22px;
+        min-width: 22px;
         padding: 0;
         margin: 0;
       }
 
-      /* Notifications - end of island */
+      /* Notifications - end of communications sub-group */
       .notifications {
-        padding: 0 10px;
+        padding: 0 12px;
         border: none;
-        min-width: 40px;
-        min-height: 34px;
-        line-height: 34px;
+        min-width: 45px;
+        min-height: 36px;
+        line-height: 36px;
       }
 
       /* ===== TYPOGRAPHY & ALIGNMENT ===== */
+      /* Gestalt: Similarity - Similar elements use similar typography */
+      /* Size hierarchy: Clock (17px) > System info (14px) > Controls (14px) > Context (13px) */
+
       /* All labels - consistent baseline alignment */
       label {
         font-size: 14px;
         font-weight: 400;
-        line-height: 34px;
+        line-height: 36px;
       }
 
       /* Icon-label combinations - ensure vertical centering */
       box > label,
       button > label {
-        line-height: 34px;
+        line-height: 36px;
       }
 
       /* ===== INTERACTIVE ELEMENTS ===== */
-      /* All buttons - minimal, transparent by default */
+      /* All buttons - accessible touch targets with feedback */
       button {
-        min-width: 34px;
-        min-height: 34px;
+        min-width: 36px;
+        min-height: 36px;
         padding: 0 12px;
         background: transparent;
         border: none;
         box-shadow: none;
         font-size: 14px;
         font-weight: 400;
-        line-height: 34px;
+        line-height: 36px;
+        cursor: pointer;
       }
 
       /* Button labels - vertically centered, no styling */
       button label {
-        line-height: 34px;
+        line-height: 36px;
         font-size: 14px;
         font-weight: 400;
         background: transparent;
@@ -492,30 +552,45 @@ let
         margin-bottom: auto;
       }
 
-      /* Tray icons - consistent sizing and vertical centering */
+      /* Tray icons - larger for accessibility */
       .tray image {
-        min-height: 20px;
-        min-width: 20px;
+        min-height: 22px;
+        min-width: 22px;
+        -gtk-icon-size: 22px;
         margin-top: auto;
         margin-bottom: auto;
       }
 
-      /* Notification icon - consistent sizing */
+      /* Notification icon - standard sizing */
       .notifications image {
         min-height: 18px;
         min-width: 18px;
+        -gtk-icon-size: 18px;
         margin-top: auto;
         margin-bottom: auto;
       }
 
       /* ===== POPUPS ===== */
-      /* Popup windows - match floating island style */
+      /* Popup windows - match floating island style with entrance animation */
       .popup {
         padding: 16px;
         border-radius: 12px;
         margin-top: 8px;
         font-size: 14px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        animation: slideDown 150ms ease-out;
+      }
+
+      /* Popup entrance animation */
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       /* Popup labels - proper line height */
@@ -537,6 +612,23 @@ let
         min-width: 320px;
         font-size: 15px;
       }
+
+      /* ===== VISUAL SEPARATORS ===== */
+      /* Gestalt: Common region - Use subtle separators to show sub-grouping */
+      /* Add visual separator between workspaces and window title */
+      .workspaces::after {
+        content: "";
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1px;
+        height: 20px;
+        opacity: 0;
+      }
+
+      /* Subtle visual breathing room through spacing (proximity) */
+      /* Already implemented via margin-right variations */
     '';
 in
 {
