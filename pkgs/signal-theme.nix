@@ -8,7 +8,7 @@ stdenvNoCC.mkDerivation {
   pname = "signal-theme";
   version = "0.1.0";
 
-  src = lib.cleanSource ./scientific;
+  src = lib.cleanSource ./signal-theme-src;
 
   nativeBuildInputs = [ sassc ];
 
