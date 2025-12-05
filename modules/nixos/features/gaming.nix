@@ -54,7 +54,8 @@ in
         extraEnv = {
           # Force games to use host's PipeWire-pulse socket directly
           # This bypasses pressure-vessel's broken audio socket setup
-          PULSE_SERVER = "unix:\${XDG_RUNTIME_DIR}/pulse/native";
+          # Use direct path since XDG_RUNTIME_DIR is always /run/user/UID
+          PULSE_SERVER = "unix:/run/user/1000/pulse/native";
         };
       };
     };
