@@ -7,6 +7,22 @@
 @import '../mixins';
 
 /* Color Definitions for GTK 3 */
+/* SCSS will interpolate these to actual color values */
+$gtk-theme-base-color: $theme-base-color;
+$gtk-theme-bg-color: $theme-bg-color;
+$gtk-theme-fg-color: $theme-fg-color;
+$gtk-theme-text-color: $theme-text-color;
+$gtk-theme-selected-bg-color: $theme-selected-bg-color;
+$gtk-theme-selected-fg-color: $theme-selected-fg-color;
+$gtk-insensitive-bg-color: $insensitive-bg-color;
+$gtk-insensitive-fg-color: $insensitive-fg-color;
+$gtk-borders: $borders;
+$gtk-warning-color: $warning-color;
+$gtk-error-color: $error-color;
+$gtk-success-color: $success-color;
+
+/* GTK named colors - must be interpolated for GTK */
+/* Note: These use the literal string format GTK expects */
 @define-color theme_base_color #{$theme-base-color};
 @define-color theme_bg_color #{$theme-bg-color};
 @define-color theme_fg_color #{$theme-fg-color};
@@ -34,7 +50,7 @@
 * {
   background-clip: padding-box;
   -GtkToolButton-icon-spacing: 4;
-  -GtkTextView-error-underline-color: @error_color;
+  -GtkTextView-error-underline-color: $error-color;
   -GtkCheckButton-indicator-size: 16;
   -GtkCheckMenuItem-indicator-size: 16;
   -GtkScrolledWindow-scrollbar-spacing: 0;
@@ -44,8 +60,8 @@
   -GtkTreeView-horizontal-separator: 4;
   -GtkMenu-horizontal-padding: 0;
   -GtkMenu-vertical-padding: 0;
-  -GtkWidget-link-color: @focus_color;
-  -GtkWidget-visited-link-color: @accent_color;
+  -GtkWidget-link-color: $accent-primary;
+  -GtkWidget-visited-link-color: $accent-special;
   -GtkWidget-focus-padding: 2;
   -GtkWidget-focus-line-width: 1;
   @include focus-ring($accent-primary);
