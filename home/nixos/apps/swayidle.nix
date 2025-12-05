@@ -9,31 +9,50 @@ let
   fallbackTheme = themeLib.generateTheme "dark" { };
 
   # Use Signal theme if available, otherwise use fallback
-  inherit (themeContext.theme or fallbackTheme) colors;
+  signalTheme =
+    if themeContext != null && themeContext ? theme && themeContext.theme != null then
+      themeContext.theme
+    else
+      fallbackTheme;
+  inherit (signalTheme) colors;
+
+  withAlpha = color: alpha: "${color}${alpha}";
+
+  lockCommand = pkgs.writeShellScript "signal-lock-screen" ''
+    exec ${pkgs.swaylock-effects}/bin/swaylock -f
+  '';
+
+  powerOffMonitors = "${pkgs.niri}/bin/niri msg action power-off-monitors";
+  powerOnMonitors = "${pkgs.niri}/bin/niri msg action power-on-monitors";
 in
 {
   services.swayidle = {
     enable = true;
     package = pkgs.swayidle;
+    systemdTarget = "graphical-session.target";
     timeouts = [
       {
         timeout = 300;
-        # Colors are configured via programs.swaylock.settings (see below)
-        # Only pass non-color arguments here
-        # -f flag is required for proper ext-session-lock integration with niri
-        command = "${pkgs.swaylock-effects}/bin/swaylock -f --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --grace 2 --fade-in 0.2";
+        command = "${lockCommand}";
       }
       {
         timeout = 600;
-        command = "${pkgs.niri}/bin/niri msg action power-off-monitors";
-        resumeCommand = "${pkgs.niri}/bin/niri msg action power-on-monitors";
+        command = powerOffMonitors;
+        resumeCommand = powerOnMonitors;
       }
     ];
     events = [
       {
         event = "before-sleep";
-        # -f flag is required for proper ext-session-lock integration with niri
-        command = "${pkgs.swaylock-effects}/bin/swaylock -f";
+        command = "${lockCommand}";
+      }
+      {
+        event = "lock";
+        command = "${lockCommand}";
+      }
+      {
+        event = "after-resume";
+        command = powerOnMonitors;
       }
     ];
   };
@@ -46,17 +65,37 @@ in
     settings = {
       # Signal theme colors (swaylock expects hex without # prefix)
       ring-color = colors."accent-focus".hexRaw;
-      key-hl-color = colors."accent-info".hexRaw;
+      ring-ver-color = colors."accent-primary".hexRaw;
+      ring-clear-color = colors."accent-info".hexRaw;
+      ring-wrong-color = colors."accent-danger".hexRaw;
       line-color = "00000000"; # Transparent
-      inside-color = "${colors."surface-base".hexRaw}88"; # With alpha (~53% opacity)
+      line-ver-color = colors."accent-primary".hexRaw;
+      line-clear-color = colors."accent-info".hexRaw;
+      line-wrong-color = colors."accent-danger".hexRaw;
+      inside-color = withAlpha colors."surface-base".hexRaw "dd";
+      inside-ver-color = withAlpha colors."surface-subtle".hexRaw "dd";
+      inside-clear-color = withAlpha colors."surface-base".hexRaw "bb";
+      inside-wrong-color = withAlpha colors."surface-emphasis".hexRaw "dd";
       separator-color = "00000000"; # Transparent
       text-color = colors."text-primary".hexRaw;
+      text-ver-color = colors."accent-primary".hexRaw;
+      text-clear-color = colors."accent-info".hexRaw;
+      text-wrong-color = colors."accent-danger".hexRaw;
+      key-hl-color = colors."accent-info".hexRaw;
+      bs-hl-color = colors."accent-danger".hexRaw;
 
       # Visual settings
-      font-size = 24;
+      clock = true;
+      indicator = true;
       indicator-idle-visible = false;
-      indicator-radius = 100;
+      indicator-radius = 110;
       indicator-thickness = 7;
+      font-size = 24;
+      screenshots = true;
+      effect-blur = "7x5";
+      effect-vignette = "0.5:0.5";
+      grace = 2;
+      fade-in = 0.2;
       show-failed-attempts = true;
     };
   };

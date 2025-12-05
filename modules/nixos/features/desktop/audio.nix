@@ -47,6 +47,54 @@ in
           };
         };
 
+        # Provide a consumer-friendly stereo sink that still routes into the
+        # Apogee device so Proton titles see predictable formats.
+        extraConfig.pipewire."90-proton-stereo" = {
+          "context.modules" = [
+            {
+              name = "libpipewire-module-filter-chain";
+              args = {
+                "node.description" = "Proton Stereo Bridge";
+                "node.name" = "proton_stereo_bridge";
+                "media.class" = "Audio/Sink";
+                "audio.position" = [
+                  "FL"
+                  "FR"
+                ];
+                "filter.graph" = {
+                  "nodes" = [
+                    {
+                      "type" = "builtin";
+                      "name" = "copy";
+                      "label" = "copy";
+                    }
+                  ];
+                };
+                "capture.props" = {
+                  "node.name" = "proton_stereo_bridge.capture";
+                  "audio.rate" = 48000;
+                  "audio.channels" = 2;
+                  "audio.format" = "S16LE";
+                  "audio.position" = [
+                    "FL"
+                    "FR"
+                  ];
+                };
+                "playback.props" = {
+                  "node.name" = "proton_stereo_bridge.playback";
+                  "audio.rate" = 48000;
+                  "audio.channels" = 2;
+                  "audio.format" = "S32LE";
+                  "audio.position" = [
+                    "FL"
+                    "FR"
+                  ];
+                };
+              };
+            }
+          ];
+        };
+
         # WirePlumber session manager configuration
         wireplumber = {
           enable = true;
@@ -129,6 +177,62 @@ in
                   ];
                   actions = {
                     update-props = {
+                      "session.suspend-timeout-seconds" = 0;
+                    };
+                  };
+                }
+              ];
+            };
+
+            # Proton routing: direct Proton/Steam audio into the stereo bridge so
+            # games never interact with the multi-channel pro-audio sink directly.
+            "90-proton-routing" = {
+              "monitor.rules" = [
+                {
+                  matches = [
+                    {
+                      "node.name" = "proton_stereo_bridge";
+                    }
+                  ];
+                  actions = {
+                    update-props = {
+                      "priority.session" = 1900;
+                    };
+                  };
+                }
+              ];
+
+              "monitor.stream.rules" = [
+                {
+                  matches = [
+                    {
+                      "application.process.binary" = "steam";
+                    }
+                    {
+                      "application.name" = "~steam_app_.*";
+                    }
+                    {
+                      "application.name" = "Steam";
+                    }
+                  ];
+                  actions = {
+                    update-props = {
+                      "node.target" = "proton_stereo_bridge";
+                      "node.latency" = "256/48000";
+                      "session.suspend-timeout-seconds" = 0;
+                    };
+                  };
+                }
+                {
+                  matches = [
+                    {
+                      "application.id" = "gamescope";
+                    }
+                  ];
+                  actions = {
+                    update-props = {
+                      "node.target" = "proton_stereo_bridge";
+                      "node.latency" = "256/48000";
                       "session.suspend-timeout-seconds" = 0;
                     };
                   };

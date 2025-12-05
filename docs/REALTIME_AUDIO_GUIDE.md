@@ -22,20 +22,20 @@ In your host configuration (`hosts/<hostname>/default.nix`):
 ```nix
 host.features.media = {
   enable = true;
-  
+
   audio = {
     enable = true;
     realtime = true; # Enable RT kernel + musnix
-    
+
     # Professional audio: 64 frames @ 48kHz = ~1.3ms latency
     ultraLowLatency = true;
-    
+
     # USB audio interface (e.g., Apogee Symphony Desktop)
     usbAudioInterface = {
       enable = true;
       pciId = "00:14.0"; # Your USB controller PCI ID
     };
-    
+
     # musnix features
     rtirq = true;        # IRQ priority management
     dasWatchdog = true;  # Safety: kills runaway RT processes
@@ -68,6 +68,7 @@ sudo reboot
 ```
 
 After reboot, verify RT kernel:
+
 ```bash
 uname -r
 # Should show something like: 6.11.0-rt7
@@ -78,6 +79,7 @@ uname -r
 ### Audio Latency Settings
 
 #### Ultra-Low Latency (Professional Recording)
+
 ```nix
 audio.ultraLowLatency = true;
 # - 64 frames @ 48kHz = ~1.3ms
@@ -86,6 +88,7 @@ audio.ultraLowLatency = true;
 ```
 
 #### Balanced Latency (General Use)
+
 ```nix
 audio.ultraLowLatency = false;
 # - 256 frames @ 48kHz = ~5.3ms
@@ -98,13 +101,14 @@ audio.ultraLowLatency = false;
 ```nix
 audio.usbAudioInterface = {
   enable = true;  # Enable USB audio optimizations
-  
+
   # PCI ID of USB controller (find with: lspci | grep -i usb)
   pciId = "00:14.0";  # Example: Intel xHCI controller
 };
 ```
 
 **What this does:**
+
 - Sets PCI latency timer for USB controller
 - Disables USB autosuspend for audio devices
 - Disables USB wakeup events
@@ -115,6 +119,7 @@ audio.usbAudioInterface = {
 ```nix
 audio.rtirq = true;  # IRQ priority management
 ```
+
 - Prioritizes interrupts for: `rtc`, `usb`, `snd` (sound)
 - Higher priority = lower IRQ number = faster response
 - Priority range: 0 (lowest) to 90 (highest)
@@ -122,6 +127,7 @@ audio.rtirq = true;  # IRQ priority management
 ```nix
 audio.dasWatchdog = true;  # Watchdog for RT processes
 ```
+
 - Monitors RT process CPU usage
 - Kills processes that consume 100% CPU for >15 seconds
 - Prevents system hangs from buggy audio software
@@ -129,6 +135,7 @@ audio.dasWatchdog = true;  # Watchdog for RT processes
 ```nix
 audio.rtcqs = true;  # Real-time analysis tool
 ```
+
 - Installs `rtcqs` (realtime configuration quick scan)
 - Analyzes system for real-time audio readiness
 - Run with: `rtcqs`
@@ -149,6 +156,7 @@ rtcqs
 ```
 
 This will check:
+
 - ✅ RT kernel loaded
 - ✅ User in `audio` group
 - ✅ CPU frequency scaling (should be "performance")
@@ -193,6 +201,7 @@ cat /sys/bus/usb/devices/*/power/control | grep -v "auto"
 ## Apogee Symphony Desktop Specific
 
 ### Device Information
+
 - **Interface**: USB 2.0 (high-speed)
 - **Vendor ID**: 0x0a07 (Apogee Electronics)
 - **Channels**: Up to 8x8 analog I/O
@@ -202,17 +211,21 @@ cat /sys/bus/usb/devices/*/power/control | grep -v "auto"
 ### Optimal Settings
 
 **For Recording/Live Monitoring:**
+
 ```nix
 audio.ultraLowLatency = true;  # 64 frames = ~1.3ms
 ```
+
 - Latency: ~1.3ms (round-trip: ~2.6ms)
 - CPU usage: Higher
 - Best for: Recording with zero-latency monitoring
 
 **For Mixing/Production:**
+
 ```nix
 audio.ultraLowLatency = false;  # 256 frames = ~5.3ms
 ```
+
 - Latency: ~5.3ms (round-trip: ~10.6ms)
 - CPU usage: Lower
 - Best for: Mixing, mastering, plugin-heavy sessions
@@ -220,6 +233,7 @@ audio.ultraLowLatency = false;  # 256 frames = ~5.3ms
 ### Sample Rate Configuration
 
 The Apogee Symphony Desktop supports up to 192 kHz. PipeWire is configured to allow:
+
 - 44.1 kHz (CD quality)
 - 48 kHz (video standard, recommended default)
 - 96 kHz (high-resolution)
@@ -227,9 +241,51 @@ The Apogee Symphony Desktop supports up to 192 kHz. PipeWire is configured to al
 
 PipeWire will automatically match your DAW's sample rate.
 
+## Proton / Steam Games
+
+Proton titles expect a 2-channel, 16-bit sink with relaxed buffer sizes.
+When the Apogee stays in its multichannel “Pro Audio” profile, some
+games either refuse to open the device or constantly underrun. The host
+configuration now:
+
+- Exposes a `Proton Stereo Bridge` sink (PipeWire filter-chain) that
+  down-mixes to 2-channel `S16LE @ 48 kHz` while still routing audio
+  through the Apogee path.
+- Adds WirePlumber stream rules so Steam, individual `steam_app_*`
+  clients, and Gamescope sessions always target the bridge with a
+  `256/48000` latency budget.
+
+### Verify the bridge
+
+```bash
+# List PipeWire nodes and confirm the virtual sink exists
+pw-cli ls Node | grep -A2 "Proton Stereo Bridge"
+
+# Inspect a running Proton game to ensure it binds to the bridge
+wpctl status   # Note the node id for the game
+wpctl inspect <node-id> | grep -E "node.target|node.latency"
+```
+
+Expected:
+
+- `node.target` equals `proton_stereo_bridge`
+- `node.latency` shows `256/48000`
+- System audio / DAWs remain on the Apogee `Pro Audio` sink
+
+If a game still chooses the wrong device, temporarily pin it:
+
+```bash
+pw-metadata -n settings 0 target.node "<node-id>" \
+  node.target="proton_stereo_bridge"
+```
+
+Remove the override with the same command and an empty value once the
+game is closed.
+
 ## DAW Configuration
 
 ### Reaper
+
 ```
 Preferences → Audio → Device:
 - Audio System: ALSA
@@ -240,6 +296,7 @@ Preferences → Audio → Device:
 ```
 
 ### Bitwig Studio
+
 ```
 Settings → Audio:
 - Audio Device: PipeWire
@@ -248,6 +305,7 @@ Settings → Audio:
 ```
 
 ### Ardour
+
 ```
 Window → Audio/MIDI Setup:
 - Audio System: ALSA
@@ -263,6 +321,7 @@ Window → Audio/MIDI Setup:
 ### High CPU Usage / Xruns
 
 **Symptoms:**
+
 - Audio dropouts (xruns)
 - DAW showing buffer overruns
 - CPU spikes
@@ -270,22 +329,26 @@ Window → Audio/MIDI Setup:
 **Solutions:**
 
 1. **Increase buffer size** (reduce CPU load):
+
    ```nix
    audio.ultraLowLatency = false;  # Use 256 frames instead of 64
    ```
 
 2. **Check CPU frequency scaling**:
+
    ```bash
    cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
    # Should show "performance" on all CPUs
    ```
 
 3. **Monitor IRQ priorities**:
+
    ```bash
    sudo systemctl status rtirq
    ```
 
 4. **Check for competing processes**:
+
    ```bash
    # Find processes using high CPU
    top -o %CPU
@@ -294,24 +357,28 @@ Window → Audio/MIDI Setup:
 ### USB Audio Not Detected
 
 **Symptoms:**
+
 - `aplay -l` doesn't show Apogee device
 - No sound output
 
 **Solutions:**
 
 1. **Check USB connection**:
+
    ```bash
    lsusb | grep -i apogee
    # Should show: Bus XXX Device XXX: ID 0a07:XXXX Apogee Electronics
    ```
 
 2. **Verify kernel modules**:
+
    ```bash
    lsmod | grep snd_usb_audio
    # Should show snd_usb_audio module loaded
    ```
 
 3. **Check dmesg for errors**:
+
    ```bash
    dmesg | grep -i usb | grep -i audio
    ```
@@ -323,12 +390,14 @@ Window → Audio/MIDI Setup:
 ### RT Kernel Not Loading
 
 **Symptoms:**
+
 - `uname -r` doesn't show "-rt" suffix
 - System boots with standard kernel
 
 **Solutions:**
 
 1. **Check boot menu** (if using systemd-boot):
+
    ```bash
    # List available boot entries
    sudo bootctl list
@@ -338,6 +407,7 @@ Window → Audio/MIDI Setup:
    - At boot, select the entry with "rt" in the name
 
 3. **Check for kernel build errors**:
+
    ```bash
    # Rebuild and watch for errors
    sudo nixos-rebuild switch
@@ -346,6 +416,7 @@ Window → Audio/MIDI Setup:
 ### ZFS Compatibility Issues
 
 **Symptoms:**
+
 - Build fails with ZFS kernel module error
 - System won't boot after enabling RT kernel
 
@@ -354,12 +425,14 @@ Window → Audio/MIDI Setup:
 This shouldn't happen - ZFS compatibility is checked automatically. But if it does:
 
 1. **Check ZFS compatibility**:
+
    ```bash
    # List available ZFS-compatible kernels
    nix eval --json .#nixosConfigurations.jupiter.config.boot.kernelPackages.kernel.version
    ```
 
 2. **Use specific RT kernel version**:
+
    ```nix
    # In modules/shared/features/media/default.nix
    packages = pkgs.linuxPackages_6_11_rt;  # Instead of linuxPackages_latest_rt
