@@ -29,12 +29,12 @@
   };
   boot.kernel.sysctl = {
 
-    "vm.swappiness" = lib.mkForce 100;
+    "vm.swappiness" = lib.mkDefault 100;
 
     "vm.watermark_scale_factor" = 75;
 
-    "vm.dirty_background_ratio" = 5;
-    "vm.dirty_ratio" = 20;
+    "vm.dirty_background_ratio" = lib.mkDefault 5;
+    "vm.dirty_ratio" = lib.mkDefault 20;
 
     "vm.page-cluster" = 0;
 

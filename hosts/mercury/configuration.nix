@@ -39,10 +39,10 @@
       dseditgroup -o edit -a ${config.host.username} -t user wheel
     fi
   '';
-  time.timeZone = lib.mkForce constants.defaults.timezone;
+  time.timeZone = constants.defaults.timezone;
 
   host.features.restic = {
-    enable = lib.mkForce true;
+    enable = true;
     backups.macbook-home = {
       enable = true;
       path = "/Users/${config.host.username}/.config/nix";

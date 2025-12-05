@@ -11,6 +11,9 @@ let
 in
 {
   config = mkIf cfg.enable {
+    # ESYNC fallback still benefits from 1,048,576 FDs, so raise the shared limit
+    host.systemDefaults.fileDescriptorLimit = lib.mkOverride 60 1048576;
+
     # Wine/Proton synchronization optimizations
     #
     # FSYNC (futex synchronization) - Preferred method (kernel 5.16+)
@@ -24,10 +27,6 @@ in
     # - Requires high file descriptor limits (1,048,576)
     # - Still useful as fallback for older Wine versions
     #
-    # Wine/Proton will automatically prefer FSYNC > ESYNC > wineserver
-    # Override the default 524288 limit from security.nix with the higher limit needed for gaming
-    systemd.settings.Manager.DefaultLimitNOFILE = lib.mkForce 1048576;
-
     programs.steam = mkIf cfg.steam {
       enable = true;
       gamescopeSession.enable = false;

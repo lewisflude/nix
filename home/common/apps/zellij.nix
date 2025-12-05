@@ -9,7 +9,7 @@
     package = pkgs.zellij;
     enableZshIntegration = false;
 
-    settings = lib.mkForce {
+    settings = {
       default_mode = "locked";
       mouse_mode = true;
       scroll_buffer_size = 100000;

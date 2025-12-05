@@ -65,8 +65,9 @@ in
           # Dirty ratio tuning: Allow more dirty pages in memory before forcing writes
           # With 64GB RAM: 40% = ~25GB buffer (vs default 20% = ~12GB)
           # Impact: 20-40% faster large file operations, smoother performance during writes
-          # Overrides: memory.nix sets dirty_ratio=20, dirty_background_ratio=5
-          # Using mkOverride 40 to override the mkForce in memory.nix (which is mkOverride 50)
+          # Overrides: memory.nix defaults dirty_ratio=20, dirty_background_ratio=5.
+          # Use mkOverride 40 so disk-performance wins over the defaults while
+          # still allowing explicit host overrides.
           "vm.dirty_ratio" = lib.mkOverride 40 40;
           "vm.dirty_background_ratio" = lib.mkOverride 40 15;
 
@@ -81,8 +82,9 @@ in
 
           # Swappiness: Lower value = prefer keeping data in RAM over swap
           # With 64GB RAM and performance focus, prefer keeping data in RAM
-          # Overrides: memory.nix uses mkForce (priority 50) to set swappiness=100
-          # We use mkOverride 40 (higher priority) to override that for disk performance
+          # Overrides: memory.nix defaults swappiness=100; we want 10 here.
+          # mkOverride 40 ensures disk-performance wins over defaults but can
+          # still be superseded by host-specific overrides.
           "vm.swappiness" = lib.mkOverride 40 10;
         })
 

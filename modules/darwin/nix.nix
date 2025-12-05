@@ -152,7 +152,9 @@
     # Leaving empty for pure flakes approach
     nixPath = lib.mkDefault [ ];
     optimise = {
-      automatic = lib.mkDefault true;
+      # Automatic optimisation requires nix.enable = true; disable it while
+      # Determinate Nix manages the daemon so the assertion stays satisfied.
+      automatic = lib.mkDefault false;
     };
   };
 }

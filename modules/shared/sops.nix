@@ -41,9 +41,9 @@ in
 {
   sops = lib.mkIf (isLinux || isDarwin) {
     age = {
-      # Use mkForce for keyFile and generateKey to ensure consistency across modules
-      keyFile = lib.mkForce keyFilePath;
-      generateKey = lib.mkForce true;
+      # Provide shared defaults for the key file path so hosts can override if needed
+      keyFile = lib.mkDefault keyFilePath;
+      generateKey = lib.mkDefault true;
       # On Linux, use SSH host keys; on Darwin, explicitly disable to prevent auto-detection
       sshKeyPaths = if isLinux then [ "/etc/ssh/ssh_host_ed25519_key" ] else [ ];
     };
