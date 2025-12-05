@@ -6,7 +6,6 @@
   hostSystem,
   lib,
   inputs,
-  themeLib,
   ...
 }:
 let
@@ -22,23 +21,6 @@ let
   };
   inherit (shellHelpers) secretExportSnippet;
 
-  # Generate fallback theme using shared themeLib
-  fallbackTheme = themeLib.generateTheme "dark" { };
-
-  # Use Signal theme if available, otherwise use fallback from shared palette
-  theme = (config._module.args.themeContext or { theme = null; }).theme or fallbackTheme;
-  inherit (theme) colors;
-
-  # Legacy palette access (for backward compatibility with existing shell config)
-  palette = {
-    purple = colors."accent-special".hex;
-    blue = colors."accent-focus".hex;
-    surface = colors."surface-emphasis".hex;
-    divider = colors."divider-secondary".hex;
-    text = colors."text-primary".hex;
-    base = colors."surface-base".hex;
-    red = colors."accent-danger".hex;
-  };
 in
 {
   xdg.enable = true;
@@ -190,7 +172,8 @@ in
           zed = "env -u WAYLAND_DISPLAY zeditor"; # Force XWayland (native Wayland support is buggy)
         }
         (lib.mkIf isLinux {
-          lock = "saylock --screenshots --clock --indicator --indicator-radius 100 --indicator-thickness 7 --effect-blur 7x5 --effect-vignette 0.5:0.5 --ring-color ${lib.removePrefix "#" palette.purple} --key-hl-color ${lib.removePrefix "#" palette.blue} --line-color 00000000 --inside-color ${lib.removePrefix "#" palette.base}88 --separator-color 00000000 --text-color ${lib.removePrefix "#" palette.text} --grace 2 --fade-in 0.2";
+          # Lock screen styling is handled in programs.swaylock.settings (Signal theme)
+          lock = "swaylock -f";
         })
       ];
       history = {
