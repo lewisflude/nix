@@ -81,10 +81,11 @@ let
       secretPath = systemConfig.sops.secrets.${secretName}.path or null;
       hasSecret = secretPath != null;
       # Inject secret path into health check if it contains the placeholder
-      resolvedHealthCheck = if healthCheck != null && hasSecret then
-        lib.replaceStrings [ "{{SECRET_PATH}}" ] [ secretPath ] healthCheck
-      else
-        healthCheck;
+      resolvedHealthCheck =
+        if healthCheck != null && hasSecret then
+          lib.replaceStrings [ "{{SECRET_PATH}}" ] [ secretPath ] healthCheck
+        else
+          healthCheck;
     in
     if !hasSecret then
       mkDisabledWrapper {
@@ -166,6 +167,7 @@ let
             ${logInfo "Running health check for ${name}"}
             ${healthCheck}
             # Health check passed (set -e would exit on failure)
+            # shellcheck disable=SC2317
             exit 0
           fi
         ''}
@@ -242,10 +244,11 @@ let
       secretPath = if hasSecret then systemConfig.sops.secrets.${secretName}.path or null else null;
       secretAvailable = !hasSecret || secretPath != null;
       # Inject secret path into health check if it contains the placeholder
-      resolvedHealthCheck = if healthCheck != null && hasSecret && secretPath != null then
-        lib.replaceStrings [ "{{SECRET_PATH}}" ] [ secretPath ] healthCheck
-      else
-        healthCheck;
+      resolvedHealthCheck =
+        if healthCheck != null && hasSecret && secretPath != null then
+          lib.replaceStrings [ "{{SECRET_PATH}}" ] [ secretPath ] healthCheck
+        else
+          healthCheck;
     in
     if !secretAvailable then
       mkDisabledWrapper {
@@ -354,19 +357,31 @@ in
   };
 
   # Kagi MCP Server - Search and summarization
-  # DISABLED: Requires uv package which is currently failing to build
-  kagiWrapper = mkDisabledWrapper {
+  # Requires KAGI_API_KEY for search functionality
+  kagiWrapper = mkSecretWrapper {
     name = "kagi-mcp-wrapper";
-    reason = "Depends on 'uv' package which is currently unavailable in nixpkgs";
-    suggestion = "Wait for uv build to be fixed, or use alternative search server";
+    secretName = "KAGI_API_KEY";
+    command = ''exec ${pkgs.uv}/bin/uvx mcp-server-kagi "$@"'';
+    runtimeInputs = [ pkgs.uv ];
+    healthCheck = ''
+      if [ ! -r "{{SECRET_PATH}}" ]; then
+        ${logError "Cannot read KAGI_API_KEY secret file"}
+        exit 1
+      fi
+      exit 0
+    '';
   };
 
   # NixOS MCP Server - NixOS package and configuration search
-  # DISABLED: Requires uv package which is currently failing to build
-  nixosWrapper = mkDisabledWrapper {
+  # No secrets required, provides package search and documentation
+  nixosWrapper = mkSimpleWrapper {
     name = "nixos-mcp-wrapper";
-    reason = "Depends on 'uv' package which is currently unavailable in nixpkgs";
-    suggestion = "Wait for uv build to be fixed, or contribute a Node.js alternative";
+    command = ''exec ${pkgs.uv}/bin/uvx mcp-nixos "$@"'';
+    runtimeInputs = [ pkgs.uv ];
+    healthCheck = ''
+      ${logInfo "NixOS MCP server health check passed"}
+      exit 0
+    '';
   };
 
   # Rust Documentation MCP Server - Bevy and other crate documentation

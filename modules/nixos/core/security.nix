@@ -126,6 +126,10 @@
 
   systemd = {
     settings.Manager.DefaultLimitNOFILE = builtins.toString config.host.systemDefaults.fileDescriptorLimit;
+    user.extraConfig = ''
+      [Manager]
+      DefaultLimitNOFILE=${builtins.toString config.host.systemDefaults.fileDescriptorLimit}
+    '';
     user.services = {
 
       unlock-login-keyring = {

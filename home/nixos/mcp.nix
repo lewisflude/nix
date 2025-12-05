@@ -15,10 +15,8 @@
 # - docs-mcp-server: Documentation indexing (npx, requires OPENAI_API_KEY)
 # - openai: General OpenAI integration (npx, requires OPENAI_API_KEY)
 # - rustdocs: Rust documentation for Bevy (Nix build, requires OPENAI_API_KEY)
-#
-# Disabled Servers (awaiting uv package fix):
-# - kagi: Search and summarization (requires uv)
-# - nixos: NixOS package search (requires uv)
+# - kagi: Search and summarization (uvx, requires KAGI_API_KEY)
+# - nixos: NixOS package search (uvx)
 #
 # Configuration Targets:
 # - Cursor: ~/.cursor/mcp.json
@@ -115,21 +113,30 @@ let
       };
     };
 
-    # Disabled servers - awaiting uv package availability
+    # Kagi server - requires KAGI_API_KEY
     kagi = {
-      enabled = false;
-      available = false;
+      enabled = true;
+      available = systemConfig.sops.secrets ? KAGI_API_KEY;
       wrapper = wrappers.kagiWrapper;
       portKey = portKeys.kagi;
-      config = { };
+      config = {
+        command = "${wrappers.kagiWrapper}/bin/kagi-mcp-wrapper";
+        args = [ ];
+        port = constants.ports.mcp.kagi;
+      };
     };
 
+    # NixOS package search server - no secrets required
     nixos = {
-      enabled = false;
-      available = false;
+      enabled = true;
+      available = true;
       wrapper = wrappers.nixosWrapper;
       portKey = portKeys.nixos;
-      config = { };
+      config = {
+        command = "${wrappers.nixosWrapper}/bin/nixos-mcp-wrapper";
+        args = [ ];
+        port = constants.ports.mcp.nixos;
+      };
     };
   };
 
