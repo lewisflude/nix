@@ -2,6 +2,12 @@
 
 This document outlines performance optimizations applied to this Nix configuration based on the "Strategic Performance Tuning for Determinate Nix and Home Manager Environments" guide.
 
+## Determinate Nix + nix-darwin Coordination (macOS)
+
+- **Golden rule**: nix-darwin must not manage the daemon when Determinate Nix is installed. `modules/darwin/nix.nix` now forces `nix.enable = false`, ensuring Determinate's `determinate-nixd` owns `/etc/nix/nix.conf` and the launchd service.
+- **Declarative settings**: We continue to define `nix.settings = { ... };` in the darwin module. The imported `determinate.darwinModules.default` helper writes these values to `/etc/nix/nix.custom.conf`, which Determinate merges automatically.
+- **Why**: Allowing both tools to touch `/etc/nix/nix.conf` causes flake feature drift and sporadic build failures (e.g., missing `trusted-users`). Forcing nix-darwin off prevents configuration thrash while keeping all settings declarative.
+
 ## Current Optimizations
 
 ### Tier 2: Realization Optimization (Implemented)
@@ -231,7 +237,7 @@ These features provide significant functional benefits but introduce architectur
 **Recommendation**: **Keep enabled** (required for modern Nix workflows), but configure NAR compression to speed up the post-build phase:
 
 - For remote stores: Use `store-uri?parallel-compression=true` (to leverage multiple cores) or `store-uri?compression=none` (to eliminate the compression bottleneck)
-- For local stores: Current optimizations (`auto-optimise-store`, `keep-outputs`) already help mitigate impact
+- For local stores: Current optimizations (`nix.optimise.automatic`, `keep-outputs`) already help mitigate impact
 
 **Testing Impact**: If builds are still slow after enabling `parallel-eval`, you can temporarily test disabling `ca-derivations` to see if post-build hashing is the bottleneck:
 
@@ -246,7 +252,7 @@ time nix build .#nixosConfigurations.jupiter --dry-run
 
 - Enabled in `flake.nix` line 8 ✅
 - Enabled in `modules/shared/core.nix` line 37 ✅
-- `auto-optimise-store = true` configured in optimization modules ✅
+- `nix.optimise.automatic = true` configured in optimization modules ✅
 
 #### `nix-command` / `flakes` ⚠️ **ENABLED - OPTIMIZE WORKFLOW**
 
@@ -355,7 +361,7 @@ Experimental features are configured in:
 **How It Works**:
 
 - Inputs marked with `buildTime = true` are fetched only when needed during the actual build/realization phase
-- Requires the experimental feature `build-time-fetch-tree` to be enabled in `nixConfig.experimental-features`
+- Requires the experimental feature `build-time-fetch-tree`, which is not available in Determinate Systems' current Nix builds (so this optimization is documented for future adoption once the feature ships)
 - This is particularly useful for platform-specific inputs that are only needed for certain systems
 
 **Current Implementation**:
@@ -407,8 +413,8 @@ The following inputs are candidates for future conversion to `buildTime = true` 
 
 1. **Input not found during build**:
    - **Symptom**: Build fails with "input not found" error
-   - **Solution**: Ensure `build-time-fetch-tree` is enabled in `nixConfig.experimental-features`
-   - **Check**: Run `nix flake show` to verify input is marked correctly
+   - **Solution**: Upstream Nix requires `build-time-fetch-tree`; Determinate builds currently lack it, so defer using build-time inputs until support lands
+   - **Check**: When the feature becomes available, confirm `nix flake show` lists the input with `buildTime = true`
 
 2. **Evaluation-time references fail**:
    - **Symptom**: Evaluation fails when trying to access build-time input
@@ -491,7 +497,7 @@ nix build .#darwinConfigurations.$(hostname).system
 **Flake Evaluation Time**:
 
 ```bash
-# Measure flake evaluation time (requires build-time-fetch-tree feature)
+# Measure flake evaluation time (requires upstream Nix with build-time-fetch-tree)
 time nix flake check --extra-experimental-features build-time-fetch-tree
 # Baseline: To be measured after system rebuild with new configuration
 # Expected: Faster evaluation with homebrew-j178 marked as buildTime = true
