@@ -6,7 +6,9 @@
 @import '../colors';
 @import '../mixins';
 
-/* Color Definitions for GTK 4 */
+/* GTK 4 Named Color Definitions */
+/* These @define-color declarations create GTK-specific named colors */
+/* SCSS interpolation syntax converts SCSS variables to actual hex values */
 @define-color window_bg_color #{$surface-base};
 @define-color window_fg_color #{$text-primary};
 @define-color view_bg_color #{$surface-base};
