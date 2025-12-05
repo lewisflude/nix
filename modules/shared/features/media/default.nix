@@ -12,6 +12,7 @@ let
   platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
   inherit (platformLib) isLinux;
   audioNixCfg = cfg.audio.audioNix;
+  rtKernelPackages = pkgs.linuxPackages_rt;
 in
 {
   config = mkIf cfg.enable (mkMerge [
@@ -50,7 +51,7 @@ in
           # Use stable RT kernel (6.6) - more reliable ZFS support
           # linuxPackages_latest_rt (6.11) may have ZFS module build issues
           # Available: linuxPackages_rt (6.6), linuxPackages_latest_rt (6.11)
-          packages = pkgs.linuxPackages_rt;
+          packages = rtKernelPackages;
         };
 
         # IRQ priority management for audio devices
@@ -80,13 +81,9 @@ in
             "";
       };
 
-      # Explicitly set boot.kernelPackages to match musnix kernel
-      # The musnix module should set this automatically when musnix.enable is true,
-      # but musnix.enable is evaluating to false even though we set it.
-      # So we set boot.kernelPackages directly using the same package musnix uses.
-      # We use config.musnix.kernel.packages to ensure we use exactly what musnix is configured with.
+      # Keep boot kernel aligned with the musnix RT kernel selection
       boot.kernelPackages = mkIf (cfg.audio.enable && cfg.audio.realtime) (
-        lib.mkForce config.musnix.kernel.packages
+        lib.mkOverride 50 rtKernelPackages
       );
 
       security.rtkit.enable = mkIf cfg.audio.enable true;

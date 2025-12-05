@@ -35,7 +35,7 @@
       shell = pkgs.zsh;
     };
   };
-  time.timeZone = lib.mkForce constants.defaults.timezone;
+  time.timeZone = constants.defaults.timezone;
   security.sudo = {
     enable = true;
     wheelNeedsPassword = false;

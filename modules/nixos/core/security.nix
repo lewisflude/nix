@@ -1,4 +1,8 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  config,
+  ...
+}:
 {
   security = {
     doas = {
@@ -121,7 +125,7 @@
   ];
 
   systemd = {
-    settings.Manager.DefaultLimitNOFILE = "524288";
+    settings.Manager.DefaultLimitNOFILE = builtins.toString config.host.systemDefaults.fileDescriptorLimit;
     user.services = {
 
       unlock-login-keyring = {
