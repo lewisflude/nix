@@ -1,288 +1,449 @@
 {
   config,
+  inputs,
   lib,
+  pkgs,
   themeContext ? null,
   ...
 }:
 let
-  inherit (lib) mkIf;
-  cfg = config.theming.signal;
-  inherit (themeContext) theme;
-in
-{
-  config = mkIf (cfg.enable && cfg.applications.ironbar.enable && theme != null) {
-    programs.ironbar = {
-      style =
-        let
-          inherit (theme) colors;
+  inherit (lib)
+    hasAttr
+    mkIf
+    mkMerge
+    mkOption
+    optionalString
+    types
+    ;
 
-          # Design System Constants (4px spacing scale)
-          spacing = {
-            xs = "4px"; # 1x - Tight internal spacing
-            sm = "8px"; # 2x - Module container padding
-            md = "12px"; # 3x - Standard element padding
-            lg = "16px"; # 4x - Wider element padding
-            xl = "20px"; # 5x - Extra spacing
-            xxl = "24px"; # 6x - Maximum spacing
-          };
+  cfg = config.theming.signal or { };
+  appsCfg = cfg.applications or { };
+  appCfg = appsCfg.ironbar or { };
+  configEnabled = appCfg.enable or false;
+  ironbarEnabled = (cfg.enable or false) && configEnabled;
 
-          radius = {
-            sm = "8px"; # Small elements (buttons, chips)
-            md = "12px"; # Module pills
-          };
-        in
-        ''
-          /* ============================================
-             IRONBAR GTK CSS STYLING
-             Note: GTK CSS does NOT support :root or CSS variables
-             All values are inlined via Nix string interpolation
-             ============================================ */
+  theme = if themeContext != null && themeContext ? theme then themeContext.theme else null;
 
-          /* ============================================
-             GLOBAL RESET
-             ============================================ */
-          * {
-            font-family: "JetBrainsMono Nerd Font", "Iosevka Nerd Font", sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            border: none;
-            border-radius: 0;
-            min-height: 0;
-            box-shadow: none;
-            text-shadow: none;
-            outline-offset: 0; /* Prevent layout shifts */
-            -gtk-icon-effect: none; /* Disable icon effects for performance */
+  colors = if theme != null && theme ? colors then theme.colors else null;
+
+  spacing = {
+    xs = "4px"; # 1x - Tight internal spacing
+    sm = "8px"; # 2x - Module container padding
+    md = "12px"; # 3x - Standard element padding
+    lg = "16px"; # 4x - Wider element padding
+    xl = "20px"; # 5x - Extra spacing
+    xxl = "24px"; # 6x - Maximum spacing
+  };
+
+  radius = {
+    sm = "8px"; # Small elements (buttons, chips)
+    md = "12px"; # Module pills
+  };
+
+  defaultIronbarConfig = {
+    monitors = {
+      "DP-3" = {
+        position = "top";
+        height = 40;
+        layer = "top";
+        exclusive_zone = true;
+        popup_gap = 8;
+        popup_autohide = false;
+        start_hidden = false;
+        anchor_to_edges = false;
+        icon_theme = "Papirus";
+        margin = {
+          top = 8;
+          bottom = 0;
+          left = 16;
+          right = 16;
+        };
+        start = [
+          {
+            type = "workspaces";
+            class = "workspaces";
+            name_map = {
+              "1" = "1";
+              "2" = "2";
+              "3" = "3";
+              "4" = "4";
+              "5" = "5";
+            };
           }
-
-          /* ============================================
-             WINDOW TRANSPARENCY
-             Ensures bar background is fully transparent
-             ============================================ */
-          window#ironbar,
-          #bar,
-          .background {
-            background-color: rgba(0, 0, 0, 0);
-            background-image: none;
+          {
+            type = "focused";
+            class = "label";
+            truncate = "end";
+            length = 40;
           }
-
-          /* ============================================
-             MODULE PILLS (Island Design Pattern)
-             Shared styling for all floating modules
-             ============================================ */
-          .workspaces,
-          .label,
-          .clock,
-          .sys-info,
-          .brightness,
-          .volume,
-          .tray,
-          .notifications {
-            background-color: ${colors."surface-subtle".hex};
-            color: ${colors."text-primary".hex};
-
-            /* Pill shape with consistent radius */
-            border-radius: ${radius.md};
-            border: 1px solid ${colors."divider-primary".hex};
-
-            /* Uniform floating margins (4px scale) */
-            margin: ${spacing.xs};
-
-            /* Standard internal padding WITH vertical padding for centering */
-            padding: ${spacing.xs} ${spacing.lg};
+        ];
+        center = [
+          {
+            type = "clock";
+            class = "clock";
+            format = "%H:%M";
+            format_popup = "%A, %B %d, %Y";
           }
-
-          /* ============================================
-             WORKSPACES MODULE
-             State priority (highest to lowest):
-             1. .focused - Always shows accent color, even on hover
-             2. :hover - Interactive feedback (only when not focused)
-             3. .visible - Subtle background indicator
-             4. default - Transparent with secondary text
-             ============================================ */
-          .workspaces {
-            /* Minimal padding - buttons have their own spacing */
-            padding: ${spacing.xs} ${spacing.sm};
+        ];
+        end = [
+          {
+            type = "sys_info";
+            class = "sys-info";
+            format = [
+              "  {cpu_percent}%"
+              "  {memory_percent}%"
+            ];
           }
-
-          /* Default state */
-          .workspaces button {
-            background-color: transparent;
-            color: ${colors."text-secondary".hex};
-
-            /* Reduced size to fit 40px bar with proper spacing */
-            min-height: 24px;
-            min-width: 28px;
-            padding: ${spacing.xs} ${spacing.md};
-
-            /* Horizontal spacing between buttons */
-            margin: 0 ${spacing.xs};
-
-            border-radius: ${radius.sm};
+          {
+            type = "script";
+            class = "brightness";
+            mode = "poll";
+            format = "󰃠 {}%";
+            cmd = "brightnessctl -m | awk -F '[(),%]' '{print $6}'";
+            interval = 1000;
+            on_click_left = "brightnessctl set 10%-";
+            on_click_right = "brightnessctl set +10%";
+            tooltip = "Brightness: {}%";
           }
-
-          /* Visible but not focused */
-          .workspaces button.visible {
-            background-color: ${colors."surface-subtle".hex};
+          {
+            type = "volume";
+            class = "volume";
+            format = "{icon} {percentage}%";
+            max_volume = 100;
+            icons = {
+              volume_high = " ";
+              volume_medium = " ";
+              volume_low = " ";
+              muted = "󰝟 ";
+            };
           }
-
-          /* Hover state - only for unfocused buttons */
-          .workspaces button:hover:not(.focused) {
-            background-color: ${colors."surface-emphasis".hex};
-            color: ${colors."text-primary".hex};
+          {
+            type = "tray";
+            class = "tray";
+            icon_size = 16;
           }
-
-          /* Focused workspace - highest priority state */
-          .workspaces button.focused {
-            background-color: ${colors."accent-focus".hex};
-            color: ${colors."surface-base".hex};
+          {
+            type = "notifications";
+            class = "notifications";
+            icon_size = 16;
           }
-
-          /* Keyboard navigation (accessibility) */
-          .workspaces button:focus-visible {
-            outline: 2px solid ${colors."accent-primary".hex};
-            outline-offset: 2px;
-          }
-
-          /* ============================================
-             CLOCK MODULE
-             Subtle styling - blends with other modules
-             ============================================ */
-          .clock {
-            color: ${colors."text-secondary".hex};
-            font-weight: 600; /* Match global weight */
-            /* Padding inherited from module pills (4px vertical, 16px horizontal) */
-          }
-
-          /* ============================================
-             SYSTEM INFO MODULE
-             CPU/RAM display with nested elements
-             ============================================ */
-          .sys-info {
-            color: ${colors."accent-info".hex};
-            /* Padding inherited from module pills */
-          }
-
-          /* Reset nested elements - increased spacing between CPU and RAM */
-          .sys-info > * {
-            all: unset; /* GTK-idiomatic nuclear reset */
-            padding: 0 ${spacing.sm}; /* Increased from 4px to 8px */
-          }
-
-          /* ============================================
-             ICON-BASED MODULES
-             Consistent font sizing for visual alignment with 16px icons
-             ============================================ */
-          .sys-info,
-          .brightness,
-          .volume,
-          .notifications {
-            font-size: 14px; /* Ensures font icons match 16px icon size visually */
-          }
-
-          /* ============================================
-             BRIGHTNESS & VOLUME MODULES
-             Semantic colors for quick identification
-             ============================================ */
-          .brightness {
-            color: ${colors."accent-info".hex}; /* Changed from warning */
-          }
-
-          .volume {
-            color: ${colors."accent-primary".hex};
-          }
-
-          /* ============================================
-             TRAY MODULE
-             Consistent icon sizing with other modules
-             ============================================ */
-          .tray {
-            /* Vertical padding inherited, horizontal slightly reduced */
-            padding: ${spacing.xs} ${spacing.md};
-          }
-
-          /* Ensure tray icons are consistently sized */
-          .tray image {
-            min-width: 16px;
-            min-height: 16px;
-          }
-
-          /* ============================================
-             NOTIFICATIONS MODULE
-             Consistent styling and icon sizing
-             Note: Notifications uses overlay.widget.notifications with button.text-button inside
-             ============================================ */
-          .notifications {
-            /* Base styling inherited from module pills */
-            color: ${colors."text-secondary".hex};
-            /* Font size inherited from icon-based modules section */
-          }
-
-          /* Button inside notifications inherits parent styling */
-          .notifications button {
-            all: inherit; /* Inherit all properties from parent */
-          }
-
-          /* Ensure notification icons match tray icon size */
-          .notifications image {
-            min-width: 16px;
-            min-height: 16px;
-          }
-
-          /* Unread notification indicator */
-          .notifications.notification-count {
-            color: ${colors."accent-danger".hex};
-          }
-
-          /* ============================================
-             LABEL MODULE (Window Title / Focused Widget)
-             Improved contrast for better visibility
-             ============================================ */
-          .label {
-            /* Use primary text for better contrast */
-            color: ${colors."text-primary".hex};
-            font-style: italic;
-            /* Ensure it's visible even when empty */
-            min-width: 0;
-          }
-
-          /* When label has content, ensure it's always visible */
-          .label label {
-            color: ${colors."text-primary".hex};
-          }
-
-          /* ============================================
-             SHARED INTERACTIVE HOVER STATES
-             Common hover behavior for all interactive modules
-             ============================================ */
-          .clock:hover,
-          .label:hover,
-          .notifications:hover,
-          .notifications button:hover {
-            background-color: ${colors."surface-emphasis".hex};
-            color: ${colors."text-primary".hex};
-          }
-
-          /* ============================================
-             TOOLTIPS
-             ============================================ */
-          tooltip {
-            background-color: ${colors."surface-base".hex};
-            border: 1px solid ${colors."divider-primary".hex};
-            border-radius: ${radius.md};
-            padding: ${spacing.sm} ${spacing.md};
-          }
-
-          /* ============================================
-             POPUP MENUS
-             Note: margin-top removed - handled by popup_gap config
-             ============================================ */
-          popup {
-            background-color: ${colors."surface-base".hex};
-            border: 1px solid ${colors."divider-primary".hex};
-            border-radius: ${radius.md};
-            padding: ${spacing.md};
-          }
-        '';
+        ];
+      };
     };
   };
+
+  hostSystem =
+    if pkgs ? stdenv && pkgs.stdenv ? hostPlatform && pkgs.stdenv.hostPlatform ? system then
+      pkgs.stdenv.hostPlatform.system
+    else
+      pkgs.stdenv.system;
+
+  flakePackage =
+    if inputs ? ironbar && inputs.ironbar ? packages && hasAttr hostSystem inputs.ironbar.packages then
+      let
+        systemPackages = inputs.ironbar.packages.${hostSystem};
+      in
+      systemPackages.default or (systemPackages.ironbar or null)
+    else
+      null;
+
+  packageOverride = appCfg.package or null;
+
+  resolvedPackage =
+    if packageOverride != null then
+      packageOverride
+    else if flakePackage != null then
+      flakePackage
+    else
+      pkgs.ironbar;
+
+  extraCssText = appCfg.extraCss or "";
+
+  baseCss =
+    if colors == null then
+      null
+    else
+      ''
+        /* ============================================
+           SIGNAL THEME COLORS
+           ============================================ */
+        @define-color surface_subtle ${colors."surface-subtle".hex};
+        @define-color surface_base ${colors."surface-base".hex};
+        @define-color surface_emphasis ${colors."surface-emphasis".hex};
+        @define-color text_primary ${colors."text-primary".hex};
+        @define-color text_secondary ${colors."text-secondary".hex};
+        @define-color divider_primary ${colors."divider-primary".hex};
+        @define-color accent_primary ${colors."accent-primary".hex};
+        @define-color accent_focus ${colors."accent-focus".hex};
+        @define-color accent_info ${colors."accent-info".hex};
+        @define-color accent_danger ${colors."accent-danger".hex};
+
+        /* ============================================
+           IRONBAR GTK CSS STYLING
+           Generated by Signal theme. Use `ironbar inspect`
+           to explore nodes and iterate safely.
+           ============================================ */
+
+        * {
+          font-family: "JetBrainsMono Nerd Font", "Iosevka Nerd Font", sans-serif;
+          font-size: 14px;
+          font-weight: 600;
+          border: none;
+          border-radius: 0;
+          min-height: 0;
+          box-shadow: none;
+          text-shadow: none;
+          outline-offset: 0;
+          -gtk-icon-effect: none;
+        }
+
+        window#ironbar,
+        #bar,
+        .background {
+          background-color: rgba(0, 0, 0, 0);
+          background-image: none;
+        }
+
+        .workspaces,
+        .label,
+        .clock,
+        .sys-info,
+        .brightness,
+        .volume,
+        .tray {
+          background-color: @surface_subtle;
+          color: @text_primary;
+          border-radius: ${radius.md};
+          border: 1px solid @divider_primary;
+          margin: ${spacing.xs};
+          padding: ${spacing.xs} ${spacing.lg};
+        }
+
+        .workspaces {
+          padding: ${spacing.xs} ${spacing.sm};
+        }
+
+        .workspaces button {
+          background-color: transparent;
+          color: @text_secondary;
+          min-height: 24px;
+          min-width: 28px;
+          padding: ${spacing.xs} ${spacing.md};
+          margin: 0 ${spacing.xs};
+          border-radius: ${radius.sm};
+        }
+
+        .workspaces button.visible {
+          background-color: @surface_subtle;
+        }
+
+        .workspaces button:hover:not(.focused) {
+          background-color: @surface_emphasis;
+          color: @text_primary;
+        }
+
+        .workspaces button.focused {
+          background-color: @accent_focus;
+          color: @surface_base;
+        }
+
+        .workspaces button:focus-visible {
+          outline: 2px solid @accent_primary;
+          outline-offset: 2px;
+        }
+
+        .clock {
+          color: @text_secondary;
+        }
+
+        .sys-info {
+          color: @accent_info;
+        }
+
+        .sys-info > * {
+          background: none;
+          border: none;
+          margin: 0;
+          padding: 0 ${spacing.sm};
+        }
+
+        .sys-info,
+        .brightness,
+        .volume,
+        .notifications {
+          font-size: 14px;
+        }
+
+        .brightness {
+          color: @accent_info;
+        }
+
+        .volume {
+          color: @accent_primary;
+        }
+
+        .tray {
+          padding: ${spacing.xs} ${spacing.md};
+        }
+
+        .tray image {
+          min-width: 16px;
+          min-height: 16px;
+        }
+
+        revealer {
+          margin: 0;
+          padding: 0;
+          min-height: 0;
+        }
+
+        widget.widget-container > revealer > overlay.notifications,
+        .notifications {
+          margin: 0;
+          padding: 0;
+          background: none;
+          border: none;
+          color: @text_secondary;
+          min-height: 0;
+        }
+
+        overlay.notifications button.text-button {
+          background-color: @surface_subtle;
+          border-radius: ${radius.md};
+          border: 1px solid @divider_primary;
+          padding: 6px ${spacing.md};
+          margin: ${spacing.xs};
+          background-image: none;
+          box-shadow: none;
+          min-width: 16px;
+          min-height: 16px;
+        }
+
+        overlay.notifications button.text-button label {
+          padding: 0;
+          margin: 0;
+          min-height: 16px;
+          min-width: 16px;
+          font-size: 14px;
+        }
+
+        overlay.notifications button.text-button:active,
+        overlay.notifications button.text-button:focus {
+          padding: 6px ${spacing.md};
+          margin: ${spacing.xs};
+          border: 1px solid @divider_primary;
+          box-shadow: none;
+          outline: none;
+        }
+
+        .notifications image {
+          min-width: 16px;
+          min-height: 16px;
+        }
+
+        .notifications.notification-count {
+          color: @accent_danger;
+        }
+
+        .label {
+          color: @text_primary;
+          font-style: italic;
+          min-width: 0;
+        }
+
+        .label label {
+          color: @text_primary;
+        }
+
+        .clock:hover,
+        .label:hover,
+        .notifications:hover,
+        .notifications button:hover {
+          background-color: @surface_emphasis;
+          color: @text_primary;
+        }
+
+        tooltip {
+          background-color: @surface_base;
+          border: 1px solid @divider_primary;
+          border-radius: ${radius.md};
+          padding: ${spacing.sm} ${spacing.md};
+        }
+
+        popup {
+          background-color: @surface_base;
+          border: 1px solid @divider_primary;
+          border-radius: ${radius.md};
+          padding: ${spacing.md};
+        }
+      '';
+
+  cssBody =
+    if baseCss == null then
+      null
+    else
+      baseCss + optionalString (extraCssText != "") ("\n" + extraCssText);
+in
+{
+  options.theming.signal.applications.ironbar = {
+    config = mkOption {
+      type = types.attrs;
+      default = defaultIronbarConfig;
+      description = ''
+        Ironbar configuration forwarded directly to `programs.ironbar.config`.
+        The default ships with the Signal desktop layout (workspaces & title on the
+        left, clock centered, status indicators on the right). Override this per-host
+        to match the monitor names reported by your compositor.
+      '';
+    };
+
+    package = mkOption {
+      type = types.nullOr types.package;
+      default = null;
+      description = ''
+        Optional override for the Ironbar package. When unset, the module uses the
+        Ironbar flake input (matching upstream releases) and falls back to
+        `pkgs.ironbar` if the flake is unavailable.
+      '';
+    };
+
+    systemd = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Launch Ironbar as a user systemd service.";
+    };
+
+    features = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      description = ''
+        Compile-time Ironbar features to enable (for example "battery" or "lua").
+        Passed through to `programs.ironbar.features`.
+      '';
+    };
+
+    extraCss = mkOption {
+      type = types.lines;
+      default = "";
+      description = ''
+        Additional GTK4 CSS appended after the generated Signal stylesheet.
+        Handy for rapid tweaks without forking the managed file.
+      '';
+    };
+  };
+
+  config = mkMerge [
+    (mkIf configEnabled {
+      programs.ironbar = {
+        enable = true;
+        package = resolvedPackage;
+        inherit (appCfg) systemd features config;
+      };
+    })
+    (mkIf (ironbarEnabled && cssBody != null) {
+      xdg.configFile."ironbar/style.css" = {
+        text = cssBody;
+      };
+    })
+  ];
 }

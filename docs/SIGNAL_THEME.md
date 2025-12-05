@@ -702,6 +702,14 @@ home/common/theming/
     ??? zellij.nix
 ```
 
+## Ironbar Integration
+
+- Add the upstream Ironbar flake as an input and forward `inputs.ironbar.homeManagerModules.default` through the shared Home Manager modules (already handled in `lib/system-builders.nix`).
+- Enable the Signal application toggle: `theming.signal.applications.ironbar.enable = true;`. The module takes care of `programs.ironbar.enable`, `systemd`, and points `package` at the flake input (falling back to `pkgs.ironbar`).
+- Customize layout via `theming.signal.applications.ironbar.config`. The default matches the Signal desktop layout (workspaces + focused window on the left, clock center, system info/tray/notifications on the right). Override the `monitors` attrset per host to match compositor output names, icon sizes, popups, etc.
+- Styling is rendered into `~/.config/ironbar/style.css` via `xdg.configFile`, expressed in valid GTK4 CSS with `@define-color` blocks sourced from the palette. Add quick tweaks with `theming.signal.applications.ironbar.extraCss`.
+- Use `ironbar inspect` to explore GTK nodes when iterating on styles. Restart or reload the bar with `systemctl --user restart ironbar` after config changes; CSS hot-reloads on save.
+
 ### Color Conversion
 
 Colors are pre-calculated and stored as both OKLCH and hex values. The `lib.nix` module provides helper functions for:
