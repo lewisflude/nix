@@ -304,7 +304,7 @@ in
     ${lib.optionalString
       (activeServers ? "docs-mcp-server" || activeServers ? openai || activeServers ? rustdocs)
       ''
-        secretPath="${osConfig.sops.secrets.OPENAI_API_KEY.path or "/run/secrets/OPENAI_API_KEY"}"
+        secretPath="${systemConfig.sops.secrets.OPENAI_API_KEY.path or "/run/secrets/OPENAI_API_KEY"}"
         if [ ! -r "$secretPath" ]; then
           echo "  ⚠ WARNING: OPENAI_API_KEY secret not found at $secretPath"
           echo "    Servers requiring this key (docs-mcp-server, openai, rustdocs) will fail to start."
