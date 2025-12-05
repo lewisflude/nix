@@ -261,11 +261,11 @@ let
         .widget {
           background-color: @widget_bg;
           border-radius: ${radius.md};
-          border: 1px solid @widget_border;
+          border: none;
           padding: ${spacing.xs} ${spacing.lg};
           color: @text_primary;
           min-height: 28px;
-          transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+          transition: background-color 120ms ease, color 120ms ease;
         }
 
         .widget.compact {
@@ -275,7 +275,6 @@ let
         .widget:hover,
         .widget-container:focus-within .widget {
           background-color: @widget_hover;
-          border-color: @divider_primary;
           color: @text_primary;
         }
 
@@ -342,20 +341,6 @@ let
         }
 
         /* Common module tweaks --------------------------------------- */
-        .label,
-        .clock,
-        .sys-info,
-        .brightness,
-        .volume,
-        .notifications,
-        .tray {
-          background-color: @widget_bg;
-          border-radius: ${radius.md};
-          border: 1px solid @widget_border;
-          padding: ${spacing.xs} ${spacing.lg};
-          margin: 0;
-        }
-
         .label {
           font-style: italic;
           min-width: 0;

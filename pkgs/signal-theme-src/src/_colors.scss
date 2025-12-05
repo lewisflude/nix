@@ -7,9 +7,10 @@
  */
 
 // Base surface colors
-$surface-base: #1e1f26;
-$surface-subtle: #2d2e39;
-$surface-elevated: #353642;
+// These match the dynamic theme system in modules/shared/features/theming/palette.nix
+$surface-base: #1e1f26;       // base-L015
+$surface-subtle: #25262f;     // surface-Lc05
+$surface-elevated: #2d2e39;   // surface-Lc10 (was incorrectly called surface-subtle)
 
 // Text hierarchy
 $text-primary: #c0c3d1;
