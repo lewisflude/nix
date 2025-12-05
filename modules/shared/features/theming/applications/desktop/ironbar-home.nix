@@ -228,7 +228,7 @@ let
           padding: ${spacing.xs} ${spacing.sm};
           border-radius: ${radius.md};
           background-color: @panel_bg;
-          border: 1px solid @panel_border;
+          border: none;
           box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
         }
 
