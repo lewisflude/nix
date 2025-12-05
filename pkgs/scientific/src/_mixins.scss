@@ -1,0 +1,102 @@
+/**
+ * Signal Theme Mixins
+ * Reusable SCSS mixins for common styling patterns
+ */
+
+@import 'colors';
+
+// Focus ring styling
+@mixin focus-ring($color: $accent-primary, $opacity: 0.3) {
+  outline-color: rgba($color, $opacity);
+  outline-style: solid;
+  outline-width: 2px;
+  outline-offset: -2px;
+}
+
+// Button base styling
+@mixin button-base {
+  background-color: lighten($surface-subtle, 5%);
+  color: $text-primary;
+  border: 1px solid $borders;
+  border-radius: 6px;
+  padding: 6px 12px;
+  min-height: 32px;
+  transition: all 200ms ease;
+}
+
+// Button hover state
+@mixin button-hover {
+  background-color: $surface-elevated;
+  border-color: $accent-primary;
+}
+
+// Button active state
+@mixin button-active {
+  background-color: $accent-primary;
+  color: $accent-primary-dim;
+}
+
+// Entry field styling
+@mixin entry-base {
+  background-color: $surface-base;
+  color: $text-primary;
+  border: 1px solid $borders;
+  border-radius: 6px;
+  padding: 6px 10px;
+  min-height: 32px;
+}
+
+// Entry focus state
+@mixin entry-focus {
+  border-color: $accent-primary;
+  @include focus-ring($accent-primary);
+}
+
+// Card styling
+@mixin card {
+  background-color: $surface-subtle;
+  color: $text-primary;
+  border: 1px solid $divider-subtle;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+// Popover/Menu styling
+@mixin popover {
+  background-color: $surface-subtle;
+  color: $text-primary;
+  border: 1px solid $borders;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba($black, 0.2);
+}
+
+// Dialog styling
+@mixin dialog {
+  background-color: $surface-subtle;
+  color: $text-primary;
+}
+
+// Headerbar styling
+@mixin headerbar {
+  background-color: darken($surface-subtle, 5%);
+  color: $text-primary;
+  border-bottom: 1px solid $borders;
+}
+
+// Menu item styling
+@mixin menuitem {
+  background-color: transparent;
+  color: $text-primary;
+  border-radius: 4px;
+  padding: 6px 12px;
+  margin: 2px;
+
+  &:hover {
+    background-color: $surface-elevated;
+    color: $text-primary;
+  }
+
+  &:disabled {
+    color: $text-tertiary;
+  }
+}

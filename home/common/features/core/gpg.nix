@@ -34,12 +34,11 @@ in
     enable = true;
     enableSshSupport = true;
     enableZshIntegration = true; # Integrate with ZSH for better shell experience
-    pinentry.package = (
+    pinentry.package =
       # Platform-specific pinentry selection:
       # - macOS: pinentry_mac provides native GUI prompts
       # - Linux: pinentry-curses provides terminal-based prompts (better for Ghostty)
-      platformLib.platformPackage pkgs.pinentry-curses pkgs.pinentry_mac
-    );
+      platformLib.platformPackage pkgs.pinentry-curses pkgs.pinentry_mac;
 
     # Cache GPG and SSH keys for 24 hours
     defaultCacheTtl = 86400;
