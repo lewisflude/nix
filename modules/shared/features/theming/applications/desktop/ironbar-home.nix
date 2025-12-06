@@ -144,60 +144,12 @@ let
   # UI/UX optimized positioning styles for 3440x1440 ultrawide
   ironbarCss =
     let
-      # Base CSS with GTK resets and positioning
+      # Base CSS - minimal, let Signal theme do the work
       baseCss = ''
-        /* ===== GTK4 THEME RESETS ===== */
-        /* Reset all GTK4 theme defaults to ensure consistent styling */
-
-        /* Universal reset */
-        * {
-          all: unset;
-          box-sizing: border-box;
-        }
-
-        /* Reset all widgets - remove GTK theme styling */
-        button,
-        label,
-        box,
-        image,
-        eventbox {
-          background: none;
-          background-color: transparent;
-          background-image: none;
-          border: none;
-          border-radius: 0;
-          box-shadow: none;
-          outline: none;
-          text-shadow: none;
-          padding: 0;
-          margin: 0;
-          min-width: 0;
-          min-height: 0;
-        }
-
-        /* Remove button states from GTK theme - but preserve our custom styles */
-        button:checked {
-          background: none;
-          background-color: transparent;
-          border: none;
-          box-shadow: none;
-          outline: none;
-        }
-
-        /* ===== ROOT CONTAINERS ===== */
-        /* Bar window - completely transparent */
-        .background {
-          background: transparent;
-        }
-
-        /* Main bar container - no background, just spacing */
+        /* Let Signal GTK theme handle all base styling */
         #bar {
-          background: transparent;
           padding: 6px 20px;
           min-height: 44px;
-          font-family: "Inter", "SF Pro", -apple-system, system-ui, sans-serif;
-          font-size: 14px;
-          font-weight: 400;
         }
       '';
 
@@ -243,48 +195,11 @@ let
         if colors != null then
           ''
 
-            /* ===== TRANSPARENT WIDGETS WITHIN ISLANDS ===== */
-            /* Widgets are transparent - only focused/active states get emphasis */
+            /* Let Signal GTK theme style widgets by default */
 
-            /* All widgets - transparent by default */
-            .workspaces,
-            .label,
-            .clock,
-            .sys-info,
-            .brightness,
-            .volume,
-            .tray,
-            .notifications {
-              background: transparent;
-            }
-
-            /* Workspace buttons - transparent by default */
-            .workspaces button {
-              background: transparent;
-              transition: background-color 150ms ease, transform 50ms ease;
-            }
-
-            /* Focused workspace - only element with background emphasis */
-            .workspaces button.focused {
-              background-color: ${colors."surface-subtle".hex};
-              border-radius: 8px;
-            }
-
-            /* Hover states for interactivity feedback */
-            .workspaces button:hover:not(.focused) {
-              background-color: rgba(255, 255, 255, 0.05);
-              border-radius: 8px;
-            }
-
-            /* Active/pressed state for tactile feedback */
-            .workspaces button:active {
-              transform: scale(0.96);
-            }
-
-            /* Keyboard focus indicator */
-            .workspaces button:focus-visible {
-              outline: 2px solid ${colors."accent-focus".hex};
-              outline-offset: 2px;
+            /* Only style the focused workspace - let Signal theme handle the rest */
+            #bar #start .workspaces button.focused {
+              background-color: ${colors."surface-subtle".hex} !important;
               border-radius: 8px;
             }
 
@@ -375,8 +290,8 @@ let
         margin-right: 16px;
       }
 
-      /* Individual workspace buttons - larger touch targets */
-      .workspaces button {
+      /* Individual workspace items - larger touch targets */
+      .workspaces .item {
         min-width: 40px;
         min-height: 32px;
         margin: 0 2px;
@@ -387,13 +302,13 @@ let
         line-height: 32px;
       }
 
-      /* First workspace button - no leading margin */
-      .workspaces button:first-child {
+      /* First workspace item - no leading margin */
+      .workspaces .item:first-child {
         margin-left: 0;
       }
 
-      /* Last workspace button - no trailing margin */
-      .workspaces button:last-child {
+      /* Last workspace item - no trailing margin */
+      .workspaces .item:last-child {
         margin-right: 0;
       }
 
@@ -406,6 +321,19 @@ let
         line-height: 36px;
         min-height: 36px;
         opacity: 0.9;
+        transition: opacity 150ms ease, color 150ms ease;
+      }
+
+      /* Focused window title when window is active */
+      .label.active,
+      .label.focused {
+        opacity: 1;
+      }
+
+      /* Focused window title when window is inactive or no window */
+      .label.inactive,
+      .label:empty {
+        opacity: 0.5;
       }
 
       /* ===== ISLAND 2: TIME (Clock as Visual Anchor) ===== */

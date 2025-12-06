@@ -1,37 +1,16 @@
-# MCP Home-Manager Module - Common Configuration Generator
+# MCP Server Configuration
 #
-# This module provides the shared home-manager implementation for MCP configuration
-# across both NixOS and nix-darwin. It generates JSON configuration files and
-# manages file deployment through home-manager activation hooks.
+# Simple, declarative MCP server management for AI coding tools.
+# Generates JSON configs for Cursor, Claude Code, and other MCP clients.
 #
-# Architecture:
-# - Reads server configuration from services.mcp.servers
-# - Generates JSON files in ~/.mcp-generated/<target>/
-# - Copies generated configs to target application directories
-#
-# Configuration Format:
-#   {
-#     "mcpServers": {
-#       "server-name": {
-#         "command": "/path/to/command",
-#         "args": ["arg1", "arg2"],
-#         "env": { "VAR": "value" }
-#       }
-#     }
-#   }
-#
-# Supports:
-# - CLI servers (stdio protocol with command/args)
-# - Remote servers (HTTP protocol with url/headers)
-#
-# See also:
-# - modules/shared/mcp/servers.nix: Common server definitions (library)
-# - modules/shared/mcp/wrappers.nix: Secret-aware wrappers (library)
-# - home/nixos/mcp.nix: NixOS-specific configuration
-# - home/darwin/mcp.nix: Darwin-specific configuration
+# Usage:
+#   services.mcp.enable = true;
+#   services.mcp.servers.memory = {};
+#   services.mcp.servers.docs = { secret = "OPENAI_API_KEY"; };
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -40,287 +19,278 @@ let
     mkEnableOption
     mkIf
     types
-    optionalAttrs
     mapAttrs
-    mapAttrsToList
-    concatStringsSep
     filterAttrs
-    length
-    unique
-    filter
-    foldl'
-    attrNames
+    optionalAttrs
     ;
 
   cfg = config.services.mcp;
 
-  # Submodule type for MCP server configuration
-  # Supports both CLI servers (command-based) and remote servers (URL-based)
-  mcpServerType = types.submodule {
+  # Platform detection
+  inherit (pkgs.stdenv) isDarwin;
+
+  # Platform-specific paths
+  claudeConfigDir =
+    if isDarwin then
+      "${config.home.homeDirectory}/Library/Application Support/Claude"
+    else
+      "${config.home.homeDirectory}/.config/claude";
+
+  # Simple secret wrapper - one function instead of four builders
+  wrapWithSecret =
+    name: cmd: secretName:
+    let
+      secretPath =
+        config.sops.secrets.${secretName}.path or (config.osConfig.sops.secrets.${secretName}.path or null);
+    in
+    if secretPath == null then
+      # Secret not configured - create disabled wrapper
+      pkgs.writeShellScript "${name}-mcp" ''
+        echo "Error: ${name} requires ${secretName} secret" >&2
+        echo "Configure it in your SOPS secrets" >&2
+        exit 1
+      ''
+    else
+      # Secret available - inject it
+      pkgs.writeShellScript "${name}-mcp" ''
+        set -euo pipefail
+        if [ ! -r "${secretPath}" ]; then
+          echo "Error: Cannot read secret at ${secretPath}" >&2
+          exit 1
+        fi
+        export ${secretName}="$(cat "${secretPath}")"
+        exec ${cmd} "$@"
+      '';
+
+  # Build an MCP server config entry
+  mkServerConfig =
+    name: serverCfg:
+    let
+      # Determine the command
+      command =
+        if (serverCfg.secret or null) != null then
+          "${wrapWithSecret name serverCfg.command serverCfg.secret}"
+        else
+          serverCfg.command;
+
+      # Get args and env with defaults
+      args = serverCfg.args or [ ];
+      env = serverCfg.env or { };
+    in
+    {
+      inherit command;
+    }
+    // optionalAttrs (args != [ ]) { inherit args; }
+    // optionalAttrs (env != { }) { inherit env; };
+
+  # Server type definition
+  serverType = types.submodule {
     options = {
       command = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = lib.mdDoc ''
-          The command to run the MCP server (for CLI servers).
-
-          This should be an absolute path to ensure reproducibility.
-          Mutually exclusive with `url`.
-        '';
-        example = ''"''${pkgs.uv}/bin/uvx"'';
+        type = types.str;
+        description = "Command to run the MCP server";
+        example = ''"''${pkgs.nodejs}/bin/npx -y @modelcontextprotocol/server-memory"'';
       };
 
       args = mkOption {
         type = types.listOf types.str;
         default = [ ];
-        description = lib.mdDoc ''
-          Additional arguments to pass to the MCP server (for CLI servers).
-
-          These are passed to the command in order.
-        '';
+        description = "Arguments to pass to the command";
         example = [
-          "--from"
-          "mcp-server-fetch"
-          "mcp-server-fetch"
+          "bevy@0.16.1"
+          "-F"
+          "default"
         ];
       };
 
       env = mkOption {
         type = types.attrsOf types.str;
         default = { };
-        description = lib.mdDoc ''
-          Environment variables to set for the MCP server (for CLI servers).
-
-          Variables are exported before the server command is executed.
-          Secrets should be handled via SOPS and wrapper scripts.
-        '';
+        description = "Environment variables to set";
         example = {
           UV_PYTHON = "/nix/store/.../bin/python3";
         };
       };
 
-      url = mkOption {
+      secret = mkOption {
         type = types.nullOr types.str;
         default = null;
-        description = lib.mdDoc ''
-          The URL of the remote MCP server (for remote servers).
-
-          Example: `http://localhost:3000/mcp`
-          Mutually exclusive with `command`.
-        '';
-        example = "http://localhost:3000/mcp";
+        description = "Name of SOPS secret to inject (e.g., OPENAI_API_KEY)";
+        example = "OPENAI_API_KEY";
       };
 
-      headers = mkOption {
-        type = types.attrsOf types.str;
-        default = { };
-        description = lib.mdDoc ''
-          HTTP headers to send to the remote MCP server (for remote servers).
-
-          Example: `{ Authorization = "Bearer token"; }`
-        '';
-        example = {
-          Authorization = "Bearer token";
-        };
-      };
-
-      port = mkOption {
-        type = types.nullOr types.port;
-        default = null;
-        description = lib.mdDoc ''
-          Port for the MCP server (optional metadata).
-
-          This is used for documentation and port conflict detection,
-          but is not included in the generated configuration files.
-
-          MCP servers should use ports in the range 6200-6299.
-          See `lib/constants.nix` for port allocation.
-        '';
-        example = 6280;
-      };
-
-      extraArgs = mkOption {
-        type = types.listOf types.str;
-        default = [ ];
-        description = lib.mdDoc ''
-          Additional arguments (optional, not used in config generation).
-
-          Reserved for future use.
-        '';
+      enabled = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Whether to enable this server";
       };
     };
   };
 
-  # Submodule type for MCP target applications
-  mcpTargetType = types.submodule {
-    options = {
-      directory = mkOption {
-        type = types.str; # Using str to support interpolation with config.home.homeDirectory
-        description = lib.mdDoc ''
-          The directory to store the MCP configuration.
-
-          This directory will be created if it doesn't exist.
-          Typically application config directories like:
-          - `~/.cursor` for Cursor editor
-          - `~/.config/claude` for Claude Code
-        '';
-        example = "/home/user/.cursor";
-      };
-
-      fileName = mkOption {
-        type = types.str;
-        default = "mcp.json";
-        description = lib.mdDoc ''
-          The file name to store the MCP configuration.
-
-          Different applications expect different filenames:
-          - Cursor: `mcp.json`
-          - Claude Code: `claude_desktop_config.json`
-        '';
-        example = "mcp.json";
-      };
-    };
-  };
-
-  # Generate MCP configuration JSON for a server
-  # Handles both CLI servers (command-based) and remote servers (URL-based)
-  mkMcpConfig =
-    _name: serverCfg:
-    # Remote server configuration
-    if serverCfg.url != null then
-      {
-        inherit (serverCfg) url;
-      }
-      // (optionalAttrs (serverCfg.headers != { }) { inherit (serverCfg) headers; })
-
-    # CLI server configuration
-    else if serverCfg.command != null then
-      {
-        inherit (serverCfg) command;
-      }
-      // (optionalAttrs (serverCfg.args != [ ]) { inherit (serverCfg) args; })
-      // (optionalAttrs (serverCfg.env != { }) { inherit (serverCfg) env; })
-
-    # Invalid configuration
-    else
-      throw "MCP server '${_name}' must specify either 'command' (for CLI server) or 'url' (for remote server)";
-
-  # Generate the complete MCP configuration JSON structure
-  mcpConfigJson = {
-    mcpServers = mapAttrs mkMcpConfig cfg.servers;
-  };
-
-  # Validation helpers
-
-  # Helper to detect port conflicts
-  findPortConflicts =
+  # Build rustdocs server (special case - needs Nix build)
+  rustdocsServer =
     let
-      portList = mapAttrsToList (_name: server: server.port) (
-        filterAttrs (_name: server: server.port != null) cfg.servers
-      );
-      uniquePorts = unique portList;
-    in
-    length portList != length uniquePorts;
+      inherit (pkgs.stdenv) isLinux isDarwin;
 
-  # Helper to collect conflicting ports
-  getConflictingPorts =
-    let
-      portToServers = foldl' (
-        acc: name:
-        let
-          inherit (cfg.servers.${name}) port;
-        in
-        if port == null then
-          acc
+      # Platform-specific build dependencies
+      linuxPkgs = lib.optionals isLinux [
+        pkgs.alsa-lib
+        pkgs.systemd
+        pkgs.systemd.dev
+      ];
+
+      buildDeps = [
+        pkgs.pkg-config
+        pkgs.openssl
+        pkgs.openssl.dev
+        pkgs.cacert
+      ]
+      ++ linuxPkgs;
+
+      pkgConfigPath =
+        if isLinux then
+          "${pkgs.alsa-lib.dev}/lib/pkgconfig:${pkgs.openssl.dev}/lib/pkgconfig:${pkgs.systemd.dev}/lib/pkgconfig"
         else
-          acc // { ${toString port} = (acc.${toString port} or [ ]) ++ [ name ]; }
-      ) { } (attrNames (filterAttrs (_name: server: server.port != null) cfg.servers));
-      conflicts = filterAttrs (_port: servers: length servers > 1) portToServers;
+          "${pkgs.openssl.dev}/lib/pkgconfig";
+
+      nixShellPkgs = builtins.concatStringsSep " " (map (p: "${p}") buildDeps);
+
+      rustdocsWrapper = pkgs.writeShellScript "rustdocs-mcp-build" ''
+        set -euo pipefail
+
+        # Cache directory
+        CACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/mcp"
+        OUT_LINK="$CACHE_DIR/rustdocs-mcp-server"
+        mkdir -p "$CACHE_DIR"
+
+        # Build if not cached
+        if [ ! -e "$OUT_LINK" ] || [ ! -x "$OUT_LINK/bin/rustdocs_mcp_server" ]; then
+          echo "[mcp] Building rustdocs-mcp-server..." >&2
+          ${pkgs.nix}/bin/nix build github:Govcraft/rust-docs-mcp-server --out-link "$OUT_LINK.tmp"
+          ${if isDarwin then ''mv "$OUT_LINK.tmp" "$OUT_LINK"'' else ''mv -T "$OUT_LINK.tmp" "$OUT_LINK"''}
+        fi
+
+        # Set up build environment
+        export PKG_CONFIG_PATH="${pkgConfigPath}:''${PKG_CONFIG_PATH:-}"
+        export OPENSSL_DIR="${pkgs.openssl.out}"
+        export OPENSSL_LIB_DIR="${pkgs.openssl.out}/lib"
+        export OPENSSL_INCLUDE_DIR="${pkgs.openssl.dev}/include"
+        export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+
+        # Run in nix shell with build dependencies
+        exec ${pkgs.nix}/bin/nix shell ${nixShellPkgs} \
+          -c "$OUT_LINK/bin/rustdocs_mcp_server" "$@"
+      '';
     in
-    mapAttrsToList (port: servers: "Port ${port}: ${concatStringsSep ", " servers}") conflicts;
+    {
+      command = "${rustdocsWrapper}";
+      args = [
+        "bevy@0.16.1"
+        "-F"
+        "default"
+      ];
+      secret = "OPENAI_API_KEY";
+    };
 
-  # MCP port range from constants
-  mcpPortMin = 6200;
-  mcpPortMax = 6299;
+  # Default server configurations
+  defaultServers = {
+    # Memory - knowledge graph-based persistent memory
+    memory = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-memory"
+      ];
+    };
 
-  # Validate MCP port range
-  mcpPortInRange = port: port >= mcpPortMin && port <= mcpPortMax;
+    # Documentation indexing and search
+    docs = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@arabold/docs-mcp-server"
+      ];
+      secret = "OPENAI_API_KEY";
+    };
 
-  # Helper to find servers with out-of-range ports
-  getOutOfRangePorts =
-    let
-      serversWithPorts = filterAttrs (_name: server: server.port != null) cfg.servers;
-    in
-    filter (name: !mcpPortInRange cfg.servers.${name}.port) (attrNames serversWithPorts);
+    # OpenAI integration
+    openai = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@mzxrai/mcp-openai"
+      ];
+      secret = "OPENAI_API_KEY";
+      env = {
+        DOCS_RS = "1";
+        RUSTDOCFLAGS = "--cfg=docsrs";
+      };
+    };
+
+    # Rust documentation (Bevy)
+    rustdocs = rustdocsServer;
+
+    # Kagi search (requires uv)
+    kagi = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [ "mcp-server-kagi" ];
+      secret = "KAGI_API_KEY";
+      enabled = false; # Disabled until uv is fixed
+    };
+
+    # NixOS package search (requires uv)
+    nixos = {
+      command = "${pkgs.uv}/bin/uvx";
+      args = [ "mcp-nixos" ];
+      enabled = false; # Disabled until uv is fixed
+    };
+  };
+
+  # Merge user config with defaults
+  # User config overrides defaults, and we filter by enabled status
+  mergedServers = defaultServers // cfg.servers;
+  activeServers = filterAttrs (
+    _name: server: (server.enabled or true) # Default to enabled if not specified
+  ) mergedServers;
+
+  # Generate the MCP configuration JSON
+  mcpConfig = {
+    mcpServers = mapAttrs mkServerConfig activeServers;
+  };
+
+  configJson = builtins.toJSON mcpConfig;
 
 in
 {
   options.services.mcp = {
-    enable = mkEnableOption (
-      lib.mdDoc ''
-        MCP (Model Context Protocol) server configuration.
-
-        When enabled, this module generates MCP configuration files for target
-        applications and optionally registers servers with the Claude CLI.
-
-        Provides cross-platform support for NixOS and nix-darwin.
-      ''
-    );
-
-    targets = mkOption {
-      type = types.attrsOf mcpTargetType;
-      default = { };
-      description = lib.mdDoc ''
-        MCP targets to configure.
-
-        Each target represents an application that should receive the
-        MCP configuration. The same server configuration is deployed
-        to all targets.
-      '';
-      example = lib.literalExpression ''
-        {
-          "cursor" = {
-            directory = "''${config.home.homeDirectory}/.cursor";
-            fileName = "mcp.json";
-          };
-          "claude-code" = {
-            directory = "''${config.home.homeDirectory}/.config/claude";
-            fileName = "claude_desktop_config.json";
-          };
-        }
-      '';
-    };
+    enable = mkEnableOption "MCP (Model Context Protocol) server configuration";
 
     servers = mkOption {
-      type = types.attrsOf mcpServerType;
+      type = types.attrsOf serverType;
       default = { };
-      description = lib.mdDoc ''
+      description = ''
         MCP servers to configure.
 
-        Each server can be either a CLI server (with command/args/env)
-        or a remote server (with url/headers).
-
-        Common servers are available in `modules/shared/mcp/servers.nix`.
-        Secret-aware wrappers are available in `modules/shared/mcp/wrappers.nix`.
+        Defaults include: memory, docs, openai, rustdocs, kagi, nixos.
+        You can override defaults or add new servers.
       '';
       example = lib.literalExpression ''
         {
-          # CLI server example
-          fetch = {
-            command = "''${pkgs.uv}/bin/uvx";
-            args = [ "--from" "mcp-server-fetch" "mcp-server-fetch" ];
-            port = 6260;
-            env = {
-              UV_PYTHON = "''${pkgs.python3}/bin/python3";
-            };
+          # Use default memory server
+          memory = {};
+
+          # Override docs server
+          docs = {
+            command = "''${pkgs.nodejs}/bin/npx";
+            args = [ "-y" "@arabold/docs-mcp-server@1.32.0" ];
+            secret = "OPENAI_API_KEY";
           };
 
-          # Remote server example
-          remote-server = {
-            url = "http://localhost:3000/mcp";
-            headers = {
-              Authorization = "Bearer token";
-            };
+          # Add custom server
+          my-server = {
+            command = "/path/to/my-server";
+            args = [ "--port" "8080" ];
+            secret = "MY_API_KEY";
           };
         }
       '';
@@ -328,71 +298,43 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Validate configuration
-    assertions = [
-      # Validate no port conflicts exist
-      {
-        assertion = !findPortConflicts;
-        message = ''
-          MCP server port conflicts detected:
-          ${concatStringsSep "\n  " getConflictingPorts}
+    home = {
+      # Install Node.js for NPM-based servers
+      packages = [ pkgs.nodejs ];
 
-          Each MCP server must use a unique port number.
-          See lib/constants.nix for the MCP port allocation (6200-6299).
-        '';
-      }
+      # Generate config files
+      file = {
+        # Cursor configuration
+        ".cursor/mcp.json".text = configJson;
 
-      # Validate all ports are in the MCP range
-      {
-        assertion = getOutOfRangePorts == [ ];
-        message = ''
-          MCP servers with ports outside the reserved range (${toString mcpPortMin}-${toString mcpPortMax}):
-          ${concatStringsSep ", " getOutOfRangePorts}
+        # Claude Code configuration
+        "${claudeConfigDir}/claude_desktop_config.json".text = configJson;
 
-          MCP server ports must be in the range ${toString mcpPortMin}-${toString mcpPortMax}.
-          See lib/constants.nix for port allocation.
-        '';
-      }
+        # Also save to generated directory for reference
+        ".mcp-generated/config.json".text = configJson;
+      };
 
-      # Validate at least one target is configured
-      {
-        assertion = cfg.targets != { };
-        message = ''
-          MCP is enabled but no targets are configured.
-
-          You must configure at least one target application (e.g., cursor, claude-code).
-          Example:
-            services.mcp.targets.cursor = {
-              directory = "''${config.home.homeDirectory}/.cursor";
-              fileName = "mcp.json";
-            };
-        '';
-      }
-    ];
-
-    # Generate MCP configuration files in ~/.mcp-generated/
-    home.file = builtins.listToAttrs (
-      mapAttrsToList (name: target: {
-        name = ".mcp-generated/${name}/${target.fileName}";
-        value.text = builtins.toJSON mcpConfigJson;
-      }) cfg.targets
-    );
-
-    # Copy generated configs to target directories on activation
-    home.activation.copyMcpConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] (
-      let
-        # Generate copy commands for each target
-        copyCommands = concatStringsSep "\n" (
-          mapAttrsToList (name: target: ''
-            mkdir -p "${target.directory}"
-            cp -f "$HOME/.mcp-generated/${name}/${target.fileName}" "${target.directory}/${target.fileName}"
-            chmod 644 "${target.directory}/${target.fileName}"
-          '') cfg.targets
-        );
-      in
-      ''
-        ${copyCommands}
-      ''
-    );
+      # Activation message
+      activation.mcpStatus = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        echo
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "MCP Configuration Updated"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo
+        echo "Active servers:"
+        ${lib.concatStringsSep "\n" (
+          lib.mapAttrsToList (name: _server: ''
+            echo "  • ${name}"
+          '') activeServers
+        )}
+        echo
+        echo "Configuration files:"
+        echo "  • Cursor: ~/.cursor/mcp.json"
+        echo "  • Claude: ${claudeConfigDir}/claude_desktop_config.json"
+        echo
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo
+      '';
+    };
   };
 }
