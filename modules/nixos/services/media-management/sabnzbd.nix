@@ -28,13 +28,8 @@ in
       };
 
       preStart = ''
-
-
         mkdir -p ${cfg.dataPath}/usenet/complete || true
         mkdir -p ${cfg.dataPath}/usenet/incomplete || true
-
-        chown -R ${cfg.user}:${cfg.group} ${cfg.dataPath}/usenet 2>/dev/null || true
-        chmod -R 775 ${cfg.dataPath}/usenet 2>/dev/null || true
       '';
 
       serviceConfig = {
