@@ -49,46 +49,47 @@ in
 
         # Provide a consumer-friendly stereo sink that still routes into the
         # Apogee device so Proton titles see predictable formats.
+        # Uses null-audio-sink to create a proper PulseAudio-compatible sink
         extraConfig.pipewire."90-proton-stereo" = {
-          "context.modules" = [
+          "context.objects" = [
             {
-              name = "libpipewire-module-filter-chain";
+              factory = "adapter";
               args = {
-                "node.description" = "Proton Stereo Bridge";
+                "factory.name" = "support.null-audio-sink";
                 "node.name" = "proton_stereo_bridge";
+                "node.description" = "Proton Stereo Bridge";
                 "media.class" = "Audio/Sink";
                 "audio.position" = [
                   "FL"
                   "FR"
                 ];
-                "filter.graph" = {
-                  "nodes" = [
-                    {
-                      "type" = "builtin";
-                      "name" = "copy";
-                      "label" = "copy";
-                    }
-                  ];
-                };
+                "monitor.channel-volumes" = true;
+                # Set high priority to make this the default sink for games
+                "priority.session" = 1900;
+              };
+            }
+          ];
+
+          "context.modules" = [
+            # Loopback to route bridge output to physical Apogee device
+            {
+              name = "libpipewire-module-loopback";
+              args = {
+                "node.description" = "Proton Bridge → Symphony Desktop";
                 "capture.props" = {
-                  "node.name" = "proton_stereo_bridge.capture";
-                  "audio.rate" = 48000;
-                  "audio.channels" = 2;
-                  "audio.format" = "S16LE";
-                  "audio.position" = [
-                    "FL"
-                    "FR"
-                  ];
+                  "node.name" = "proton_bridge_loopback.capture";
+                  "audio.position" = "FL,FR";
+                  "stream.dont-remix" = true;
+                  # Capture from the bridge's monitor stream
+                  "stream.capture.sink" = "proton_stereo_bridge";
+                  "node.passive" = true;
                 };
                 "playback.props" = {
-                  "node.name" = "proton_stereo_bridge.playback";
-                  "audio.rate" = 48000;
-                  "audio.channels" = 2;
-                  "audio.format" = "S32LE";
-                  "audio.position" = [
-                    "FL"
-                    "FR"
-                  ];
+                  "node.name" = "proton_bridge_loopback.playback";
+                  "audio.position" = "FL,FR";
+                  "stream.dont-remix" = true;
+                  "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-output";
+                  "node.passive" = true;
                 };
               };
             }
@@ -104,6 +105,7 @@ in
             # Set default device priorities
             "10-device-priorities" = {
               "monitor.alsa.rules" = [
+                # General ALSA devices default priority (must come first)
                 {
                   matches = [
                     {
@@ -113,6 +115,20 @@ in
                   actions = {
                     update-props = {
                       "priority.session" = 1000;
+                    };
+                  };
+                }
+                # Lower priority for multi-channel audio interfaces
+                # (comes last to override the general rule)
+                {
+                  matches = [
+                    {
+                      "node.name" = "~alsa_output.usb-Apogee.*";
+                    }
+                  ];
+                  actions = {
+                    update-props = {
+                      "priority.session" = 100;
                     };
                   };
                 }
@@ -197,6 +213,21 @@ in
                   actions = {
                     update-props = {
                       "priority.session" = 1900;
+                      # Make this the default sink for applications
+                      "node.passive" = false;
+                    };
+                  };
+                }
+                # Disable auto-reconnect for loopback capture to prevent mic connection
+                {
+                  matches = [
+                    {
+                      "node.name" = "proton_bridge_loopback.capture";
+                    }
+                  ];
+                  actions = {
+                    update-props = {
+                      "node.dont-reconnect" = true;
                     };
                   };
                 }
@@ -227,6 +258,24 @@ in
                   matches = [
                     {
                       "application.id" = "gamescope";
+                    }
+                  ];
+                  actions = {
+                    update-props = {
+                      "node.target" = "proton_stereo_bridge";
+                      "node.latency" = "256/48000";
+                      "session.suspend-timeout-seconds" = 0;
+                    };
+                  };
+                }
+                # Wine/Proton games (non-Steam)
+                {
+                  matches = [
+                    {
+                      "application.process.binary" = "~wine.*";
+                    }
+                    {
+                      "application.process.binary" = "~.*\\.exe";
                     }
                   ];
                   actions = {
