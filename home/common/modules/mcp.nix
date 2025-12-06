@@ -37,30 +37,29 @@ let
       "${config.home.homeDirectory}/.config/claude";
 
   # Simple secret wrapper - one function instead of four builders
+  # Secrets are deployed to /run/secrets-for-users/ (with neededForUsers = true)
+  # We check at runtime, not build time, so wrappers always work if secret exists
   wrapWithSecret =
     name: cmd: secretName:
-    let
-      secretPath =
-        config.sops.secrets.${secretName}.path or (config.osConfig.sops.secrets.${secretName}.path or null);
-    in
-    if secretPath == null then
-      # Secret not configured - create disabled wrapper
-      pkgs.writeShellScript "${name}-mcp" ''
+    pkgs.writeShellScript "${name}-mcp" ''
+      set -euo pipefail
+
+      # Try both possible secret locations
+      SECRET_PATH=""
+      if [ -r "/run/secrets-for-users/${secretName}" ]; then
+        SECRET_PATH="/run/secrets-for-users/${secretName}"
+      elif [ -r "/run/secrets/${secretName}" ]; then
+        SECRET_PATH="/run/secrets/${secretName}"
+      else
         echo "Error: ${name} requires ${secretName} secret" >&2
-        echo "Configure it in your SOPS secrets" >&2
+        echo "Secret not found in /run/secrets-for-users/ or /run/secrets/" >&2
+        echo "Configure it in your SOPS secrets and rebuild" >&2
         exit 1
-      ''
-    else
-      # Secret available - inject it
-      pkgs.writeShellScript "${name}-mcp" ''
-        set -euo pipefail
-        if [ ! -r "${secretPath}" ]; then
-          echo "Error: Cannot read secret at ${secretPath}" >&2
-          exit 1
-        fi
-        export ${secretName}="$(cat "${secretPath}")"
-        exec ${cmd} "$@"
-      '';
+      fi
+
+      export ${secretName}="$(cat "$SECRET_PATH")"
+      exec ${cmd} "$@"
+    '';
 
   # Build an MCP server config entry
   mkServerConfig =
