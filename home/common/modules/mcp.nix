@@ -276,12 +276,52 @@ let
       ];
     };
 
-    # Kagi search (requires uv)
+    # Web content fetching and conversion for efficient LLM usage
+    fetch = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-fetch"
+      ];
+    };
+
+    # Secure file operations with configurable access controls
+    # Note: Configure allowed directories in your platform-specific config
+    filesystem = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-filesystem"
+        config.home.homeDirectory
+      ];
+    };
+
+    # Dynamic and reflective problem-solving through thought sequences
+    sequentialthinking = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-sequentialthinking"
+      ];
+    };
+
+    # Kagi search
     kagi = {
       command = "${pkgs.uv}/bin/uvx";
       args = [ "mcp-server-kagi" ];
       secret = "KAGI_API_KEY";
-      enabled = false; # Disabled until uv is fixed
+      enabled = true; # Testing if uv is fixed
+    };
+
+    # Brave Search - Fallback if Kagi doesn't work
+    brave = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@brave/brave-search-mcp-server"
+      ];
+      secret = "BRAVE_API_KEY";
+      enabled = false; # Disabled - Kagi is preferred
     };
 
     # NixOS package search (requires uv)
