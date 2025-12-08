@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   constants,
   ...
 }:
@@ -56,7 +57,13 @@ in
     # Configure Ollama
     services.ollama = mkIf cfg.ollama.enable {
       enable = true;
-      inherit (cfg.ollama) acceleration;
+      package =
+        if cfg.ollama.acceleration == "cuda" then
+          pkgs.ollama-cuda
+        else if cfg.ollama.acceleration == "rocm" then
+          pkgs.ollama-rocm
+        else
+          pkgs.ollama; # CPU-only by default
       environmentVariables = {
         OLLAMA_KEEP_ALIVE = "24h";
       };
