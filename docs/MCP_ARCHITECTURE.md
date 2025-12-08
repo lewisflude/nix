@@ -1,6 +1,6 @@
 # MCP Architecture Documentation
 
-**Enterprise-Grade Model Context Protocol Configuration**
+Enterprise-Grade Model Context Protocol Configuration
 
 This document describes the comprehensive, production-ready MCP (Model Context Protocol) architecture implemented across this Nix configuration.
 
@@ -127,6 +127,7 @@ Model Context Protocol (MCP) is a standardized protocol for AI assistants to acc
 #### Builder Functions
 
 1. **`mkSecretWrapper`** - For servers requiring SOPS secrets
+
    ```nix
    mkSecretWrapper {
      name = "my-server-wrapper";
@@ -138,6 +139,7 @@ Model Context Protocol (MCP) is a standardized protocol for AI assistants to acc
    ```
 
 2. **`mkSimpleWrapper`** - For public servers (no secrets)
+
    ```nix
    mkSimpleWrapper {
      name = "my-server-wrapper";
@@ -147,6 +149,7 @@ Model Context Protocol (MCP) is a standardized protocol for AI assistants to acc
    ```
 
 3. **`mkDisabledWrapper`** - For unavailable servers
+
    ```nix
    mkDisabledWrapper {
      name = "my-server-wrapper";
@@ -156,6 +159,7 @@ Model Context Protocol (MCP) is a standardized protocol for AI assistants to acc
    ```
 
 4. **`mkNpxWrapper`** - Specialized for Node.js/npx servers
+
    ```nix
    mkNpxWrapper {
      name = "my-server-wrapper";
@@ -178,6 +182,7 @@ Model Context Protocol (MCP) is a standardized protocol for AI assistants to acc
 #### Darwin (`home/darwin/mcp.nix`)
 
 **Structure**:
+
 ```nix
 {
   # Port key mapping
@@ -210,6 +215,7 @@ Model Context Protocol (MCP) is a standardized protocol for AI assistants to acc
 #### NixOS (`home/nixos/mcp.nix`)
 
 **Structure**: Identical to Darwin, but with:
+
 - Uses `systemConfig` (same as Darwin for consistency)
 - Systemd services instead of LaunchAgents
 - Systemd timers for periodic health checks
@@ -222,6 +228,7 @@ Model Context Protocol (MCP) is a standardized protocol for AI assistants to acc
 ### Active Servers
 
 #### Memory Server
+
 - **Purpose**: Knowledge graph-based persistent memory
 - **Runtime**: Node.js via npx
 - **Dependencies**: `nodejs`
@@ -229,6 +236,7 @@ Model Context Protocol (MCP) is a standardized protocol for AI assistants to acc
 - **Port**: 6221
 
 #### Documentation Server (docs-mcp-server)
+
 - **Purpose**: Documentation indexing and search
 - **Runtime**: Node.js via npx
 - **Dependencies**: `nodejs`, `OPENAI_API_KEY` (SOPS)
@@ -237,6 +245,7 @@ Model Context Protocol (MCP) is a standardized protocol for AI assistants to acc
 - **HTTP Mode** (NixOS only): Accessible at `http://localhost:6280`
 
 #### OpenAI Server
+
 - **Purpose**: General OpenAI integration with Rust docs support
 - **Runtime**: Node.js via npx
 - **Dependencies**: `nodejs`, `OPENAI_API_KEY` (SOPS)
@@ -244,6 +253,7 @@ Model Context Protocol (MCP) is a standardized protocol for AI assistants to acc
 - **Port**: 6250
 
 #### Rust Documentation Server
+
 - **Purpose**: Bevy crate documentation
 - **Runtime**: Nix-built binary
 - **Dependencies**: `nix`, `OPENAI_API_KEY` (SOPS), Rust build tools
@@ -251,15 +261,63 @@ Model Context Protocol (MCP) is a standardized protocol for AI assistants to acc
 - **Port**: 6270
 - **Platform Support**: Linux and Darwin (platform-aware build dependencies)
 
+#### Git Server
+
+- **Purpose**: Git repository operations (clone, commit, branch, diff, etc.)
+- **Runtime**: Node.js via npx
+- **Package**: `@cyanheads/git-mcp-server`
+- **Dependencies**: `nodejs`
+- **Secrets**: None
+- **Features**: 27 comprehensive Git operations
+
+#### Time Server
+
+- **Purpose**: Timezone and datetime utilities
+- **Runtime**: Node.js via npx
+- **Package**: `@odgrim/mcp-datetime`
+- **Dependencies**: `nodejs`
+- **Secrets**: None
+- **Features**: IANA timezone support, datetime operations
+
+#### SQLite Server
+
+- **Purpose**: SQLite database access and queries
+- **Runtime**: Node.js via npx
+- **Package**: `mcp-server-sqlite-npx`
+- **Dependencies**: `nodejs`
+- **Secrets**: None
+- **Database**: `~/.local/share/mcp/data.db` (configurable)
+- **Features**: Full CRUD operations, schema inspection
+
+#### GitHub Server
+
+- **Purpose**: GitHub API integration (repos, issues, PRs, code)
+- **Runtime**: Node.js via npx
+- **Package**: `@cyanheads/github-mcp-server`
+- **Dependencies**: `nodejs`, `GITHUB_PERSONAL_ACCESS_TOKEN` (SOPS)
+- **Secrets**: `GITHUB_PERSONAL_ACCESS_TOKEN`
+- **Features**: Repository management, issue tracking, PR operations
+
+#### Everything Server
+
+- **Purpose**: MCP reference/test server demonstrating all MCP features
+- **Runtime**: Node.js via npx
+- **Package**: `@modelcontextprotocol/server-everything`
+- **Dependencies**: `nodejs`
+- **Secrets**: None
+- **Features**: Prompts, tools, resources, sampling demonstrations
+
 ### Disabled Servers
 
 #### Kagi Server
+
 - **Status**: Disabled
 - **Reason**: Requires `uv` package (currently failing to build in nixpkgs)
 - **Port**: 6240
 - **Re-enable**: When uv build is fixed upstream
 
 #### NixOS Server
+
 - **Status**: Disabled
 - **Reason**: Requires `uv` package (currently failing to build in nixpkgs)
 - **Port**: 6265
@@ -286,6 +344,7 @@ Every MCP server wrapper includes a `--health-check` flag for validation:
 **Location**: `~/bin/mcp-health-check`
 
 **Features**:
+
 - Tests all active servers
 - Reports pass/fail for each
 - Returns exit code 1 if any server is unhealthy
@@ -300,10 +359,12 @@ Every MCP server wrapper includes a `--health-check` flag for validation:
 **Service**: `~/Library/LaunchAgents/org.nixos.mcp-health-check.plist`
 
 **Schedule**:
+
 - Every 6 hours after login
 - Logs to `~/Library/Logs/mcp-health-check.log`
 
 **Commands**:
+
 ```bash
 # Check status
 launchctl list | grep mcp-health-check
@@ -321,10 +382,12 @@ launchctl start org.nixos.mcp-health-check
 **Timer**: `mcp-health-check.timer`
 
 **Schedule**:
+
 - 5 minutes after boot
 - Every 6 hours thereafter
 
 **Commands**:
+
 ```bash
 # Check timer status
 systemctl --user status mcp-health-check.timer
@@ -437,6 +500,7 @@ sudo nixos-rebuild switch --flake .#hostname
 **Solutions**:
 
 1. **Check Configuration Files**:
+
    ```bash
    # Darwin
    cat ~/Library/Application\ Support/Claude/claude_desktop_config.json
@@ -446,12 +510,14 @@ sudo nixos-rebuild switch --flake .#hostname
    ```
 
 2. **Verify Permissions**:
+
    ```bash
    # Should be readable
    ls -l ~/Library/Application\ Support/Claude/claude_desktop_config.json
    ```
 
 3. **Check Activation Logs**:
+
    ```bash
    # Look for MCP-related errors during home-manager activation
    home-manager switch --flake .#hostname
@@ -464,12 +530,14 @@ sudo nixos-rebuild switch --flake .#hostname
 **Solutions**:
 
 1. **Run Individual Health Check**:
+
    ```bash
    # Test specific wrapper
    ~/bin/docs-mcp-wrapper --health-check
    ```
 
 2. **Check Secret Availability**:
+
    ```bash
    # Darwin
    sudo cat /run/secrets/OPENAI_API_KEY
@@ -479,6 +547,7 @@ sudo nixos-rebuild switch --flake .#hostname
    ```
 
 3. **Verify Dependencies**:
+
    ```bash
    # Check if nodejs is available
    which npx
@@ -492,18 +561,21 @@ sudo nixos-rebuild switch --flake .#hostname
 **Solutions**:
 
 1. **Verify SOPS Setup**:
+
    ```bash
    # Check secret exists
    sops -d secrets/secrets.yaml | grep OPENAI_API_KEY
    ```
 
 2. **Check File Permissions**:
+
    ```bash
    # Secret should be readable by user
    ls -l /run/secrets/OPENAI_API_KEY
    ```
 
 3. **Ensure SOPS Configuration**:
+
    ```nix
    # In systemConfig or osConfig
    sops.secrets.OPENAI_API_KEY = {
@@ -519,18 +591,21 @@ sudo nixos-rebuild switch --flake .#hostname
 **Solutions**:
 
 1. **Check for Platform Issues**:
+
    ```bash
    # Ensure no Linux-only packages on Darwin
    nix build .#darwinConfigurations.mercury.system --show-trace
    ```
 
 2. **Verify Port Uniqueness**:
+
    ```bash
    # Check lib/constants.nix for duplicate ports
    grep -E "= [0-9]+;" lib/constants.nix | sort
    ```
 
 3. **Test Individual Components**:
+
    ```bash
    # Test wrapper module
    nix-instantiate --eval --strict -E '
@@ -551,10 +626,12 @@ sudo nixos-rebuild switch --flake .#hostname
 **Configuration Directory**: `~/Library/Application Support/Claude/`
 
 **Service Management**: LaunchAgents
+
 - Located in `~/Library/LaunchAgents/`
 - Managed via `launchctl`
 
 **Health Checks**:
+
 - LaunchAgent runs every 6 hours
 - Logs to `~/Library/Logs/mcp-health-check.log`
 
@@ -563,26 +640,31 @@ sudo nixos-rebuild switch --flake .#hostname
 **Configuration Directory**: `~/.config/claude/`
 
 **Service Management**: Systemd
+
 - User services in `~/.config/systemd/user/`
 - Managed via `systemctl --user`
 
 **Health Checks**:
+
 - Systemd timer runs every 6 hours
 - Logs to systemd journal
 
 **HTTP Services**:
+
 - docs-mcp-server runs in HTTP mode
 - Accessible at `http://localhost:6280`
 
 ### Cross-Platform Considerations
 
 **Rust Documentation Server**:
+
 - Platform-aware build dependencies
 - Linux: includes `alsa-lib`, `systemd`
 - Darwin: excludes Linux-specific libraries
 - `mv` command differs: `-T` flag on Linux, not on Darwin
 
 **Wrapper Scripts**:
+
 - All use `writeShellApplication` for proper PATH
 - ShellCheck validation ensures compatibility
 - Explicit package references (no implicit PATH dependencies)
@@ -602,6 +684,7 @@ This MCP architecture provides:
 - ✅ **Extensible**: Easy to add new servers following established patterns
 
 For questions or issues, refer to:
-- **General MCP**: https://github.com/modelcontextprotocol
+
+- **General MCP**: <https://github.com/modelcontextprotocol>
 - **This Config**: `docs/CLAUDE.md` and `CONTRIBUTING.md`
 - **SOPS**: `docs/SOPS_GUIDE.md`

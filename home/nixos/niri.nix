@@ -117,7 +117,9 @@ in
             y = 8;
           };
           color = themeConstants.niri.colors.shadow;
-          draw-behind-window = true;
+          # Set to false to prevent background "spilling out" beyond borders
+          # This fixes the issue with context menus and popups
+          draw-behind-window = false;
         };
         tab-indicator = {
           hide-when-single-tab = true;
@@ -146,6 +148,14 @@ in
           ];
           default-column-width = { };
           open-floating = true;
+        }
+        # Disable shadows for notifications (SwayNC)
+        # Fixes background "spilling out" beyond borders issue
+        {
+          matches = [
+            { app-id = "^org\\.erikreider\\.swaync.*"; }
+          ];
+          shadow.enable = false;
         }
       ];
       animations = {

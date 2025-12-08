@@ -229,6 +229,53 @@ let
     # Rust documentation (Bevy)
     rustdocs = rustdocsServer;
 
+    # Git operations
+    git = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@cyanheads/git-mcp-server"
+      ];
+    };
+
+    # Time and timezone utilities
+    time = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@odgrim/mcp-datetime"
+      ];
+    };
+
+    # SQLite database access
+    sqlite = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "mcp-server-sqlite-npx"
+        "${config.home.homeDirectory}/.local/share/mcp/data.db"
+      ];
+    };
+
+    # GitHub API integration
+    github = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@cyanheads/github-mcp-server"
+      ];
+      secret = "GITHUB_TOKEN";
+    };
+
+    # MCP reference/test server
+    everything = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@modelcontextprotocol/server-everything"
+      ];
+    };
+
     # Kagi search (requires uv)
     kagi = {
       command = "${pkgs.uv}/bin/uvx";
@@ -270,7 +317,9 @@ in
       description = ''
         MCP servers to configure.
 
-        Defaults include: memory, docs, openai, rustdocs, kagi, nixos.
+        Defaults include: memory, docs, openai, rustdocs, git, time, sqlite, github, everything.
+        Disabled by default: kagi, nixos (require broken uv package).
+
         You can override defaults or add new servers.
       '';
       example = lib.literalExpression ''

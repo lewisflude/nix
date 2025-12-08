@@ -229,6 +229,64 @@ in
 }
 ```
 
+## MCP (Model Context Protocol) Servers
+
+This configuration includes built-in MCP server support for AI coding tools (Claude Code, Cursor, etc.).
+
+### Available MCP Servers
+
+**Active by default:**
+
+- **memory** - Knowledge graph-based persistent memory (no secrets)
+- **docs** - Documentation indexing and search (requires `OPENAI_API_KEY`)
+- **openai** - OpenAI integration with Rust docs support (requires `OPENAI_API_KEY`)
+- **rustdocs** - Bevy crate documentation (requires `OPENAI_API_KEY`)
+- **git** - Git repository operations (no secrets)
+- **time** - Timezone and datetime utilities (no secrets)
+- **sqlite** - SQLite database access at `~/.local/share/mcp/data.db` (no secrets)
+- **github** - GitHub API integration (requires `GITHUB_PERSONAL_ACCESS_TOKEN`)
+- **everything** - MCP reference/test server (no secrets)
+
+**Disabled (broken `uv` package):**
+
+- **kagi** - Kagi search (requires `KAGI_API_KEY`)
+- **nixos** - NixOS package search
+
+### Configuration
+
+MCP servers are configured in `home/common/modules/mcp.nix` and automatically deployed to:
+
+- **Claude Code**: `~/.config/claude/claude_desktop_config.json` (Linux) or `~/Library/Application Support/Claude/` (macOS)
+- **Cursor**: `~/.cursor/mcp.json`
+
+### Enabling/Disabling Servers
+
+Override in `home/nixos/mcp.nix` or `home/darwin/mcp.nix`:
+
+```nix
+services.mcp.servers = {
+  # Disable a default server
+  sqlite.enabled = false;
+
+  # Add a custom server
+  my-server = {
+    command = "${pkgs.nodejs}/bin/npx";
+    args = [ "-y" "my-mcp-server" ];
+    secret = "MY_API_KEY";  # Optional
+  };
+};
+```
+
+### GitHub MCP Server
+
+The GitHub server requires `GITHUB_TOKEN` in SOPS secrets (already configured in `modules/shared/sops.nix`):
+
+1. Token is in `secrets/secrets.yaml`
+2. Already configured with `allowUserRead = true` for MCP access
+3. Deployed to `/run/secrets-for-users/GITHUB_TOKEN` after rebuild
+
+See `docs/MCP_ARCHITECTURE.md` for detailed documentation.
+
 ## Documentation
 
 - **Architecture**: `docs/reference/architecture.md`

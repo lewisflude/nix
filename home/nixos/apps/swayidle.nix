@@ -41,20 +41,11 @@ in
         resumeCommand = powerOnMonitors;
       }
     ];
-    events = [
-      {
-        event = "before-sleep";
-        command = "${lockCommand}";
-      }
-      {
-        event = "lock";
-        command = "${lockCommand}";
-      }
-      {
-        event = "after-resume";
-        command = powerOnMonitors;
-      }
-    ];
+    events = {
+      before-sleep = "${lockCommand}";
+      lock = "${lockCommand}";
+      after-resume = powerOnMonitors;
+    };
   };
 
   # Configure swaylock colors via Home Manager settings (best practice)
