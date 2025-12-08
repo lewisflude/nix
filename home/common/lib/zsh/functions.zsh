@@ -6,8 +6,16 @@ function gclone() {
 }
 
 function gacp() {
-  [[ -z "$1" ]] && { echo "Usage: gacp <commit-message>"; return 1; }
-  git add . && git commit -m "$1" && git push || return 1
+  [[ -z "$1" ]] && { echo "Usage: gacp <commit-message> [--all]"; return 1; }
+
+  # By default, only stage tracked files (safer)
+  if [[ "$2" == "--all" ]]; then
+    echo "Staging all files (including untracked)..."
+    git add . && git commit -m "$1" && git push || return 1
+  else
+    echo "Staging tracked files only (use --all to include untracked)..."
+    git add -u && git commit -m "$1" && git push || return 1
+  fi
 }
 
 function gnew() {
@@ -65,9 +73,19 @@ function findrecent() { print -l **/*(.mm-7) }
 function findold() { print -l **/*(.mm+30) }
 
 # Archive helpers
+# Note: This uses 'ouch' (a modern Rust-based extraction tool) if available,
+# falling back to traditional tools for compatibility.
 function extract() {
   [[ -z "$1" ]] && { echo "Usage: extract <file>"; return 1; }
   [[ ! -f "$1" ]] && { echo "Error: '$1' is not a valid file"; return 1; }
+
+  # Try 'ouch' first (modern, handles all formats with consistent interface)
+  if command -v ouch >/dev/null 2>&1; then
+    ouch decompress "$1" && echo "Successfully extracted '$1'" && return 0
+    echo "Warning: ouch failed, falling back to traditional tools..."
+  fi
+
+  # Fallback to traditional extraction methods
   case "$1" in
     *.tar.bz2)   tar xjf "$1" || return 1 ;;
     *.tar.gz)    tar xzf "$1" || return 1 ;;

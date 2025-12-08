@@ -31,5 +31,6 @@
   ++ [
     pkgs.gnutar
     pkgs.gzip
+    pkgs.ouch # Modern compression/decompression tool (Rust-based)
   ];
 }
