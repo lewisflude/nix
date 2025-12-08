@@ -277,12 +277,14 @@ let
     };
 
     # Web content fetching and conversion for efficient LLM usage
+    # Note: Official @modelcontextprotocol/server-fetch not yet published
     fetch = {
       command = "${pkgs.nodejs}/bin/npx";
       args = [
         "-y"
-        "@modelcontextprotocol/server-fetch"
+        "mcp-server-fetch-typescript"
       ];
+      enabled = false; # Disabled - using community alternative, enable if needed
     };
 
     # Secure file operations with configurable access controls
@@ -301,16 +303,16 @@ let
       command = "${pkgs.nodejs}/bin/npx";
       args = [
         "-y"
-        "@modelcontextprotocol/server-sequentialthinking"
+        "@modelcontextprotocol/server-sequential-thinking"
       ];
     };
 
-    # Kagi search
+    # Kagi search - Still broken (uv package not fixed)
     kagi = {
       command = "${pkgs.uv}/bin/uvx";
       args = [ "mcp-server-kagi" ];
       secret = "KAGI_API_KEY";
-      enabled = true; # Testing if uv is fixed
+      enabled = false; # Disabled - uv package still not available
     };
 
     # Brave Search - Fallback if Kagi doesn't work
