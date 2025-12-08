@@ -42,15 +42,7 @@ in
     $DRY_RUN_CMD ${updateNixConf}
   '';
 
-  programs.zsh.initContent = lib.mkAfter ''
-
-    if [ -r "${systemConfig.sops.secrets.GITHUB_TOKEN.path or ""}" ]; then
-      GITHUB_TOKEN="$(${pkgs.coreutils}/bin/cat "${systemConfig.sops.secrets.GITHUB_TOKEN.path}")"
-      if [ -n "$GITHUB_TOKEN" ]; then
-        mkdir -p ${config.xdg.configHome}/nix
-        echo "access-tokens = github.com=$GITHUB_TOKEN" > ${config.xdg.configHome}/nix/nix.conf
-        chmod 600 ${config.xdg.configHome}/nix/nix.conf
-      fi
-    fi
-  '';
+  # Note: GitHub token is now ONLY written during home.activation (on switch)
+  # Previously this was also done in initContent, causing disk I/O on every shell spawn.
+  # If you rotate the GITHUB_TOKEN secret, run 'home-manager switch' to apply it.
 }
