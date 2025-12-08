@@ -45,8 +45,8 @@
       ExecStart = pkgs.writeShellScript "link-proton-bridge" ''
         # Wait up to 5 seconds for both nodes to exist
         for i in {1..10}; do
-          if ${pkgs.pipewire}/bin/pw-cli ls Node | grep -q "proton_stereo_bridge" && \
-             ${pkgs.pipewire}/bin/pw-cli ls Node | grep -q "proton_bridge_loopback.capture"; then
+          if ${pkgs.pipewire}/bin/pw-cli ls Node | ${pkgs.gnugrep}/bin/grep -q "proton_stereo_bridge" && \
+             ${pkgs.pipewire}/bin/pw-cli ls Node | ${pkgs.gnugrep}/bin/grep -q "proton_bridge_loopback.capture"; then
             # Disconnect any existing mic connections to loopback
             ${pkgs.pipewire}/bin/pw-link -d \
               alsa_input.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-input:capture_AUX0 \
@@ -65,7 +65,7 @@
 
             exit 0
           fi
-          sleep 0.5
+          ${pkgs.coreutils}/bin/sleep 0.5
         done
         echo "Timeout waiting for nodes to appear"
         exit 1
