@@ -307,12 +307,11 @@ let
       ];
     };
 
-    # Kagi search - Still broken (uv package not fixed)
+    # Kagi search and summarization
     kagi = {
       command = "${pkgs.uv}/bin/uvx";
-      args = [ "mcp-server-kagi" ];
+      args = [ "kagimcp" ];
       secret = "KAGI_API_KEY";
-      enabled = false; # Disabled - uv package still not available
     };
 
     # Brave Search - Fallback if Kagi doesn't work
@@ -348,6 +347,17 @@ let
 
   configJson = builtins.toJSON mcpConfig;
 
+  # Configuration for Claude Code CLI (~/.claude/settings.json)
+  # Merges MCP servers with other settings like permissions
+  claudeCliConfigJson = builtins.toJSON (
+    mcpConfig
+    // {
+      permissions = {
+        deny = [ "WebSearch" ]; # Disable built-in search to prefer Kagi
+      };
+    }
+  );
+
 in
 {
   options.services.mcp = {
@@ -359,8 +369,8 @@ in
       description = ''
         MCP servers to configure.
 
-        Defaults include: memory, docs, openai, rustdocs, git, time, sqlite, github, everything.
-        Disabled by default: kagi, nixos (require broken uv package).
+        Defaults include: memory, docs, openai, rustdocs, git, time, sqlite, github, everything, kagi.
+        Disabled by default: brave, fetch, nixos.
 
         You can override defaults or add new servers.
       '';
@@ -397,8 +407,11 @@ in
         # Cursor configuration
         ".cursor/mcp.json".text = configJson;
 
-        # Claude Code configuration
+        # Claude Desktop App configuration
         "${claudeConfigDir}/claude_desktop_config.json".text = configJson;
+
+        # Claude Code CLI configuration
+        ".claude/settings.json".text = claudeCliConfigJson;
 
         # Also save to generated directory for reference
         ".mcp-generated/config.json".text = configJson;

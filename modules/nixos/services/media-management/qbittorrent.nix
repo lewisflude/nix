@@ -535,6 +535,15 @@ in
       # but still prioritizes it over background tasks
       IOSchedulingClass = "best-effort";
       IOSchedulingPriority = 5;
+
+      # Restart configuration for resilience to transient failures
+      # Restart on failure (e.g., when VPN namespace isn't ready yet)
+      Restart = "on-failure";
+      # Wait 10 seconds before retrying to give VPN time to establish
+      RestartSec = "10s";
+      # Limit restart attempts to prevent infinite loops
+      StartLimitBurst = 5;
+      StartLimitIntervalSec = "5min";
     };
 
     # Alternative UI support (vuetorrent)
