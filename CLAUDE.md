@@ -246,11 +246,15 @@ This configuration includes built-in MCP server support for AI coding tools (Cla
 - **sqlite** - SQLite database access at `~/.local/share/mcp/data.db` (no secrets)
 - **github** - GitHub API integration (requires `GITHUB_PERSONAL_ACCESS_TOKEN`)
 - **everything** - MCP reference/test server (no secrets)
+- **kagi** - Kagi search and summarization (requires `KAGI_API_KEY`)
 
-**Disabled (broken `uv` package):**
+**Disabled by default:**
 
-- **kagi** - Kagi search (requires `KAGI_API_KEY`)
-- **nixos** - NixOS package search
+- **brave** - Brave Search (requires `BRAVE_API_KEY`)
+- **fetch** - Web content fetching (community alternative)
+- **filesystem** - File operations
+- **sequentialthinking** - Dynamic problem-solving
+- **nixos** - NixOS package search (requires `uv`, not yet functional)
 
 ### Configuration
 
