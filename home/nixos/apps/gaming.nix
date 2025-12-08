@@ -8,10 +8,12 @@ let
     runtimeInputs = [ pkgs.coreutils ];
   };
 
-  # Lutris launcher that uses systemd to get proper file descriptor limits
+  # Lutris wrapper to ensure ESYNC limits are set explicitly
+  # System-wide limits are configured in modules/nixos/features/gaming.nix
+  # but this ensures limits are set even if launched outside systemd scope
   lutris-systemd = pkgs.writeShellScriptBin "lutris-systemd" ''
-    exec ${pkgs.systemd}/bin/systemd-run --user --scope --unit=lutris \
-      --property="LimitNOFILE=1048576" \
+    exec ${pkgs.systemd}/bin/systemd-run --user --scope \
+      --property="LimitNOFILE=1048576:1048576" \
       ${pkgs.lutris}/bin/lutris "$@"
   '';
 in
@@ -33,12 +35,9 @@ in
     lutris-systemd
   ];
 
-  # Create a desktop entry that launches Lutris with proper ESYNC limits
-  # This overrides the default Lutris desktop entry to use systemd-run
-  # Note: This assumes Lutris is installed at the system level via gaming feature
+  # Override desktop entry to use wrapper with ESYNC limits
   xdg.desktopEntries.lutris = {
     name = "Lutris";
-    comment = "Install and play games (with ESYNC support)";
     exec = "${lutris-systemd}/bin/lutris-systemd %U";
     icon = "lutris";
     categories = [ "Game" ];

@@ -1,0 +1,22 @@
+/* Test fix for background spilling beyond borders */
+
+/* Remove box-shadow from popovers/menus */
+popover,
+.popover,
+menu,
+.menu,
+.context-menu,
+.popup-menu {
+    box-shadow: none !important;
+    background-clip: padding-box !important;
+}
+
+/* Alternative: use a smaller, inset shadow */
+/*
+popover,
+.popover,
+menu,
+.menu {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+}
+*/
