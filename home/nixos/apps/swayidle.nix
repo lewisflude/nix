@@ -48,46 +48,70 @@ in
     };
   };
 
-  # Configure swaylock colors via Home Manager settings (best practice)
-  # This is the correct way to theme swaylock - not via command-line args
+  # Configure swaylock-effects with Signal theme (OKLCH perceptual color system)
+  # Signal: Perception, engineered - scientifically designed for clarity and accessibility
   programs.swaylock = {
     enable = true;
     package = pkgs.swaylock-effects;
     settings = {
-      # Signal theme colors (swaylock expects hex without # prefix)
-      ring-color = colors."accent-focus".hexRaw;
-      ring-ver-color = colors."accent-primary".hexRaw;
-      ring-clear-color = colors."accent-info".hexRaw;
-      ring-wrong-color = colors."accent-danger".hexRaw;
-      line-color = "00000000"; # Transparent
-      line-ver-color = colors."accent-primary".hexRaw;
-      line-clear-color = colors."accent-info".hexRaw;
-      line-wrong-color = colors."accent-danger".hexRaw;
-      inside-color = withAlpha colors."surface-base".hexRaw "dd";
-      inside-ver-color = withAlpha colors."surface-subtle".hexRaw "dd";
-      inside-clear-color = withAlpha colors."surface-base".hexRaw "bb";
-      inside-wrong-color = withAlpha colors."surface-emphasis".hexRaw "dd";
-      separator-color = "00000000"; # Transparent
-      text-color = colors."text-primary".hexRaw;
-      text-ver-color = colors."accent-primary".hexRaw;
-      text-clear-color = colors."accent-info".hexRaw;
-      text-wrong-color = colors."accent-danger".hexRaw;
-      key-hl-color = colors."accent-info".hexRaw;
-      bs-hl-color = colors."accent-danger".hexRaw;
+      # === Signal Theme Colors ===
+      # Ring colors (state feedback with semantic meaning)
+      ring-color = colors."accent-focus".hexRaw; # Blue - Default/focus state
+      ring-ver-color = colors."accent-primary".hexRaw; # Green - Verifying (success)
+      ring-clear-color = colors."accent-info".hexRaw; # Cyan - Clearing input
+      ring-wrong-color = colors."accent-danger".hexRaw; # Red - Wrong password
 
-      # Visual settings
-      clock = true;
-      indicator = true;
-      indicator-idle-visible = false;
-      indicator-radius = 110;
-      indicator-thickness = 7;
-      font-size = 24;
-      screenshots = true;
-      effect-blur = "7x5";
-      effect-vignette = "0.5:0.5";
-      grace = 2;
-      fade-in = 0.2;
-      show-failed-attempts = true;
+      # Line colors (separator between ring and inside)
+      line-color = "00000000"; # Transparent - clean aesthetic
+      line-ver-color = colors."accent-primary".hexRaw; # Green when verifying
+      line-clear-color = colors."accent-info".hexRaw; # Cyan when clearing
+      line-wrong-color = colors."accent-danger".hexRaw; # Red when wrong
+
+      # Inside colors (indicator background with alpha for depth)
+      inside-color = withAlpha colors."surface-base".hexRaw "dd"; # Base with transparency
+      inside-ver-color = withAlpha colors."surface-subtle".hexRaw "dd"; # Subtle variation when verifying
+      inside-clear-color = withAlpha colors."surface-base".hexRaw "bb"; # More transparent when clearing
+      inside-wrong-color = withAlpha colors."surface-emphasis".hexRaw "dd"; # Emphasized on error
+
+      # Separator (not visible, kept for completeness)
+      separator-color = "00000000"; # Transparent
+
+      # Text colors (high contrast for readability)
+      text-color = colors."text-primary".hexRaw; # Primary text (time/date)
+      text-ver-color = colors."accent-primary".hexRaw; # Green when verifying
+      text-clear-color = colors."accent-info".hexRaw; # Cyan when clearing
+      text-wrong-color = colors."accent-danger".hexRaw; # Red on wrong password
+
+      # Highlight colors (keyboard feedback)
+      key-hl-color = colors."accent-info".hexRaw; # Cyan for key highlight
+      bs-hl-color = colors."accent-danger".hexRaw; # Red for backspace
+
+      # Layout/Background colors
+      color = colors."surface-base".hexRaw; # Fallback background color
+
+      # === Visual Effects (swaylock-effects exclusive) ===
+      screenshots = true; # Use actual screenshot as background
+      effect-blur = "7x5"; # Gaussian blur for privacy and aesthetics
+      effect-vignette = "0.5:0.5"; # Subtle vignette for depth and focus
+      fade-in = 0.2; # Smooth 200ms fade-in transition
+      grace = 2; # 2 second grace period before requiring password
+
+      # === Indicator Configuration ===
+      clock = true; # Show time and date
+      indicator = true; # Always show indicator
+      indicator-idle-visible = false; # Hide when idle (grace period)
+      indicator-radius = 110; # Size of circular indicator
+      indicator-thickness = 7; # Ring thickness
+      font-size = 24; # Readable clock text
+
+      # === Text Customization ===
+      datestr = "%A, %B %e"; # e.g., "Tuesday, December 9"
+      timestr = "%I:%M %p"; # 12-hour format with AM/PM
+      show-failed-attempts = true; # Security feedback
+
+      # === Accessibility ===
+      ignore-empty-password = false; # Don't submit empty passwords
+      show-keyboard-layout = true; # Show keyboard layout (helpful for multiple layouts)
     };
   };
 }

@@ -1,4 +1,8 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  ...
+}:
 let
   cfg = config.programs.gemini-cli;
 in
@@ -56,7 +60,7 @@ in
           Provide clear explanations and suggest improvements following Nix best practices.
           Consider:
           1. Correct module placement (system vs home-manager)
-          2. Avoiding antipatterns (like 'with pkgs;')
+          2. Avoiding antipatterns (like using 'with' for package imports)
           3. Using constants where appropriate
           4. Following the repository's conventions
         '';
@@ -273,4 +277,10 @@ in
     force = true; # Overwrite existing backup file if needed
     text = builtins.toJSON cfg.settings;
   };
+
+  # Declaratively create the checkpoint directory to ensure it persists
+  # across reboots. gemini-cli stores session data here.
+  home.file.".gemini/tmp".source = pkgs.runCommand "gemini-tmp-dir" { } ''
+    mkdir -p $out
+  '';
 }

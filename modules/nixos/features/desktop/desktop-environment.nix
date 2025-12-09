@@ -1,5 +1,4 @@
 {
-  pkgs,
   lib,
   config,
   ...
@@ -8,6 +7,10 @@ let
   cfg = config.host.features.desktop;
 in
 {
+  imports = [
+    ./regreet.nix
+  ];
+
   config = lib.mkIf cfg.enable {
     environment.pathsToLink = [ "/share/wayland-sessions" ];
     programs.niri.enable = true;
@@ -23,17 +26,7 @@ in
     };
     # Disable the plain niri session, only use UWSM-managed session
     services.displayManager.sessionPackages = lib.mkForce [ ];
-    services = {
-      greetd = {
-        enable = true;
-        settings = {
-          default_session = {
-            command = "${pkgs.tuigreet}/bin/tuigreet --remember --time --time-format '%I:%M %p | %a • %h | %F'";
-            user = "greeter";
-          };
-        };
-      };
 
-    };
+    # ReGreet greeter is configured in ./regreet.nix with Signal theme
   };
 }

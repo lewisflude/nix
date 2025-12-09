@@ -20,25 +20,15 @@ in
 
   users.users.${username}.extraGroups = [ "sops-secrets" ];
 
-  # Fix SOPS secret permissions on NixOS
-  # sops-nix with neededForUsers creates secrets as root:root, but we need sops-secrets group
-  system.activationScripts.fixSOPSSecretPermissions = lib.stringAfter [ "users" "groups" ] ''
-    # Fix permissions for user-readable secrets
-    if [ -d /run/secrets-for-users ]; then
-      ${lib.concatMapStringsSep "\n" (secret: ''
-        if [ -f /run/secrets-for-users/${secret} ]; then
-          chown ${username}:sops-secrets /run/secrets-for-users/${secret} || true
-          chmod 640 /run/secrets-for-users/${secret} || true
-        fi
-      '') sharedSecrets}
-    fi
-  '';
-
   # Configure NixOS-specific SOPS settings for secrets already defined in modules/shared/sops.nix
-  # The shared module defines the secrets themselves; this module adds NixOS-specific permissions
+  # The shared module defines the secrets themselves; this module adds NixOS-specific ownership and permissions.
+  # By setting owner/group declaratively, we avoid race conditions with activation scripts.
   sops.secrets =
     lib.genAttrs sharedSecrets (_: {
       neededForUsers = true;
+      owner = username;
+      group = "sops-secrets";
+      mode = "0440"; # Read-only for user and group
     })
     // {
       # Nix access token needs special permissions for Nix daemon to read it
