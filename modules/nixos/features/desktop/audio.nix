@@ -95,7 +95,7 @@ in
                       "FL"
                       "FR"
                     ];
-                    "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-audio";
+                    "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0";
                     "node.passive" = false;
                     "stream.dont-remix" = true;
                   };
