@@ -15,8 +15,8 @@
     # 2. Add secret to modules/shared/sops.nix with neededForUsers = true
     # 3. Enable server below:
     servers = {
-      # Example: Enable GitHub MCP (requires GITHUB_TOKEN)
-      # github.enabled = true;
+      # Enable GitHub MCP (uses GITHUB_TOKEN from SOPS)
+      github.enabled = true;
 
       # Example: Enable OpenAI MCP (requires OPENAI_API_KEY)
       # openai.enabled = true;
