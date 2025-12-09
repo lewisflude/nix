@@ -15,19 +15,18 @@
     # 2. Add secret to modules/shared/sops.nix with neededForUsers = true
     # 3. Enable server below:
     servers = {
-      # Enable GitHub MCP (uses GITHUB_TOKEN from SOPS)
+      # Enabled servers with API keys from SOPS
       github.enabled = true;
+      kagi.enabled = true;
+      openai.enabled = true;
+      docs.enabled = true;
+      rustdocs.enabled = true;
 
-      # Example: Enable OpenAI MCP (requires OPENAI_API_KEY)
-      # openai.enabled = true;
-      # docs.enabled = true;
-      # rustdocs.enabled = true;
-
-      # Example: Enable Kagi search (requires KAGI_API_KEY)
-      # kagi.enabled = true;
-
-      # Example: Enable filesystem server (disabled by default for security)
+      # Optional servers without secrets (enable if needed)
       # filesystem.enabled = true;
+      # sequentialthinking.enabled = true;
+      # fetch.enabled = true;
+      nixos.enabled = true;
     };
   };
 }
