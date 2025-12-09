@@ -41,7 +41,10 @@
       "Bash(systemctl:*)",
       "Bash(ulimit:*)",
       "Bash(nixos-option:*)",
-      "Bash(statix fix:*)"
+      "Bash(statix fix:*)",
+      "Bash(journalctl:*)",
+      "Bash(/bin/ls:*)",
+      "Bash(test:*)"
     ],
     "deny": [
       "Read(**/.env)",
