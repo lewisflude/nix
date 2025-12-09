@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  pkgs,
   ...
 }:
 let
@@ -89,6 +90,7 @@ in
 
       # Use a clean, readable font (Terminus is a good monospace font for console)
       font = "ter-v22n";
+      packages = [ pkgs.terminus_font ];
       earlySetup = true;
     };
   };
