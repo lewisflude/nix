@@ -46,13 +46,10 @@ in
           };
 
           # Low-latency configuration for PulseAudio backend
+          # Note: libpipewire-module-protocol-pulse is already loaded by the base
+          # pipewire-pulse.conf when services.pipewire.pulse.enable = true
+          # We only need to configure the pulse properties here
           pipewire-pulse."92-low-latency" = {
-            "context.modules" = [
-              {
-                name = "libpipewire-module-protocol-pulse";
-                args = { };
-              }
-            ];
             "pulse.properties" = {
               "pulse.min.req" = latency;
               "pulse.default.req" = latency;
