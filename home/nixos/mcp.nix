@@ -1,23 +1,33 @@
 # NixOS MCP Configuration
 #
 # Enables MCP servers for NixOS hosts.
-# The actual server definitions are in modules/shared/mcp.nix
+# The actual server definitions are in home/common/modules/mcp.nix
 {
-  # Enable MCP with default servers
+  # Enable MCP with default servers (no secrets required)
   services.mcp = {
     enable = true;
 
-    # All servers use defaults from modules/shared/mcp.nix
-    # Override here if needed:
-    servers = {
-      # memory = {};  # Enabled by default
-      # docs = {};    # Enabled by default
-      # openai = {};  # Enabled by default
-      # rustdocs = {}; # Enabled by default
+    # Default enabled servers (no secrets):
+    # - memory, git, time, sqlite, everything
 
-      # These are disabled by default (uv package broken)
-      # kagi.enabled = false;
-      # nixos.enabled = false;
+    # To enable servers that require secrets:
+    # 1. Configure secret in secrets/secrets.yaml (SOPS)
+    # 2. Add secret to modules/shared/sops.nix with neededForUsers = true
+    # 3. Enable server below:
+    servers = {
+      # Example: Enable GitHub MCP (requires GITHUB_TOKEN)
+      # github.enabled = true;
+
+      # Example: Enable OpenAI MCP (requires OPENAI_API_KEY)
+      # openai.enabled = true;
+      # docs.enabled = true;
+      # rustdocs.enabled = true;
+
+      # Example: Enable Kagi search (requires KAGI_API_KEY)
+      # kagi.enabled = true;
+
+      # Example: Enable filesystem server (disabled by default for security)
+      # filesystem.enabled = true;
     };
   };
 }

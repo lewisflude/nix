@@ -3,10 +3,20 @@
 # Simple, declarative MCP server management for AI coding tools.
 # Generates JSON configs for Cursor, Claude Code, and other MCP clients.
 #
+# By default, only servers that don't require secrets are enabled:
+# - memory, git, time, sqlite, everything
+#
+# Servers requiring secrets are disabled by default:
+# - docs, openai, rustdocs, github, kagi, brave
+#
 # Usage:
-#   services.mcp.enable = true;
-#   services.mcp.servers.memory = {};
-#   services.mcp.servers.docs = { secret = "OPENAI_API_KEY"; };
+#   services.mcp.enable = true;  # Enables default servers
+#   services.mcp.servers.github.enabled = true;  # Enable server with secret
+#
+# To use servers with secrets:
+#   1. Configure secret in SOPS (secrets/secrets.yaml)
+#   2. Enable server in platform config (home/{nixos,darwin}/mcp.nix)
+#   3. Rebuild system
 {
   config,
   lib,
@@ -193,7 +203,7 @@ let
 
   # Default server configurations
   defaultServers = {
-    # Memory - knowledge graph-based persistent memory
+    # Memory - knowledge graph-based persistent memory (no secrets required)
     memory = {
       command = "${pkgs.nodejs}/bin/npx";
       args = [
@@ -202,34 +212,7 @@ let
       ];
     };
 
-    # Documentation indexing and search
-    docs = {
-      command = "${pkgs.nodejs}/bin/npx";
-      args = [
-        "-y"
-        "@arabold/docs-mcp-server"
-      ];
-      secret = "OPENAI_API_KEY";
-    };
-
-    # OpenAI integration
-    openai = {
-      command = "${pkgs.nodejs}/bin/npx";
-      args = [
-        "-y"
-        "@mzxrai/mcp-openai"
-      ];
-      secret = "OPENAI_API_KEY";
-      env = {
-        DOCS_RS = "1";
-        RUSTDOCFLAGS = "--cfg=docsrs";
-      };
-    };
-
-    # Rust documentation (Bevy)
-    rustdocs = rustdocsServer;
-
-    # Git operations
+    # Git operations (no secrets required)
     git = {
       command = "${pkgs.nodejs}/bin/npx";
       args = [
@@ -238,7 +221,7 @@ let
       ];
     };
 
-    # Time and timezone utilities
+    # Time and timezone utilities (no secrets required)
     time = {
       command = "${pkgs.nodejs}/bin/npx";
       args = [
@@ -247,7 +230,7 @@ let
       ];
     };
 
-    # SQLite database access
+    # SQLite database access (no secrets required)
     sqlite = {
       command = "${pkgs.nodejs}/bin/npx";
       args = [
@@ -257,34 +240,13 @@ let
       ];
     };
 
-    # GitHub API integration
-    github = {
-      command = "${pkgs.nodejs}/bin/npx";
-      args = [
-        "-y"
-        "@cyanheads/github-mcp-server"
-      ];
-      secret = "GITHUB_TOKEN";
-    };
-
-    # MCP reference/test server
+    # MCP reference/test server (no secrets required)
     everything = {
       command = "${pkgs.nodejs}/bin/npx";
       args = [
         "-y"
         "@modelcontextprotocol/server-everything"
       ];
-    };
-
-    # Web content fetching and conversion for efficient LLM usage
-    # Note: Official @modelcontextprotocol/server-fetch not yet published
-    fetch = {
-      command = "${pkgs.nodejs}/bin/npx";
-      args = [
-        "-y"
-        "mcp-server-fetch-typescript"
-      ];
-      enabled = false; # Disabled - using community alternative, enable if needed
     };
 
     # Secure file operations with configurable access controls
@@ -296,6 +258,7 @@ let
         "@modelcontextprotocol/server-filesystem"
         config.home.homeDirectory
       ];
+      enabled = false; # Disabled by default for security - enable in platform config if needed
     };
 
     # Dynamic and reflective problem-solving through thought sequences
@@ -305,16 +268,63 @@ let
         "-y"
         "@modelcontextprotocol/server-sequential-thinking"
       ];
+      enabled = false; # Disabled by default - enable if needed
     };
 
-    # Kagi search and summarization
+    # === SERVERS REQUIRING SECRETS (disabled by default) ===
+    # Enable these in your platform-specific config after configuring secrets
+
+    # Documentation indexing and search (requires OPENAI_API_KEY)
+    docs = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@arabold/docs-mcp-server"
+      ];
+      secret = "OPENAI_API_KEY";
+      enabled = false; # Disabled - requires OPENAI_API_KEY secret
+    };
+
+    # OpenAI integration (requires OPENAI_API_KEY)
+    openai = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@mzxrai/mcp-openai"
+      ];
+      secret = "OPENAI_API_KEY";
+      env = {
+        DOCS_RS = "1";
+        RUSTDOCFLAGS = "--cfg=docsrs";
+      };
+      enabled = false; # Disabled - requires OPENAI_API_KEY secret
+    };
+
+    # Rust documentation - Bevy (requires OPENAI_API_KEY)
+    rustdocs = rustdocsServer // {
+      enabled = false;
+    }; # Disabled - requires OPENAI_API_KEY secret
+
+    # GitHub API integration (requires GITHUB_TOKEN)
+    github = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "@cyanheads/github-mcp-server"
+      ];
+      secret = "GITHUB_TOKEN";
+      enabled = false; # Disabled - requires GITHUB_TOKEN secret
+    };
+
+    # Kagi search and summarization (requires KAGI_API_KEY and uvx)
     kagi = {
       command = "${pkgs.uv}/bin/uvx";
       args = [ "kagimcp" ];
       secret = "KAGI_API_KEY";
+      enabled = false; # Disabled - requires KAGI_API_KEY secret and uv package
     };
 
-    # Brave Search - Fallback if Kagi doesn't work
+    # Brave Search (requires BRAVE_API_KEY)
     brave = {
       command = "${pkgs.nodejs}/bin/npx";
       args = [
@@ -322,14 +332,24 @@ let
         "@brave/brave-search-mcp-server"
       ];
       secret = "BRAVE_API_KEY";
-      enabled = false; # Disabled - Kagi is preferred
+      enabled = false; # Disabled - requires BRAVE_API_KEY secret
+    };
+
+    # Web content fetching (community alternative)
+    fetch = {
+      command = "${pkgs.nodejs}/bin/npx";
+      args = [
+        "-y"
+        "mcp-server-fetch-typescript"
+      ];
+      enabled = false; # Disabled - enable if needed
     };
 
     # NixOS package search (requires uv)
     nixos = {
       command = "${pkgs.uv}/bin/uvx";
       args = [ "mcp-nixos" ];
-      enabled = false; # Disabled until uv is fixed
+      enabled = false; # Disabled - requires uv package
     };
   };
 
@@ -369,18 +389,36 @@ in
       description = ''
         MCP servers to configure.
 
-        Defaults include: memory, docs, openai, rustdocs, git, time, sqlite, github, everything, kagi.
-        Disabled by default: brave, fetch, nixos.
+        Enabled by default (no secrets required):
+        - memory: Knowledge graph-based persistent memory
+        - git: Git repository operations
+        - time: Timezone and datetime utilities
+        - sqlite: SQLite database access
+        - everything: MCP reference/test server
 
-        You can override defaults or add new servers.
+        Disabled by default (require secrets or external dependencies):
+        - docs: Documentation indexing (requires OPENAI_API_KEY)
+        - openai: OpenAI integration (requires OPENAI_API_KEY)
+        - rustdocs: Rust documentation (requires OPENAI_API_KEY)
+        - github: GitHub API integration (requires GITHUB_TOKEN)
+        - kagi: Kagi search (requires KAGI_API_KEY and uv)
+        - brave: Brave Search (requires BRAVE_API_KEY)
+        - filesystem: File operations (disabled for security)
+        - sequentialthinking: Problem-solving tool (optional)
+        - fetch: Web content fetching (optional)
+        - nixos: NixOS package search (requires uv)
+
+        To enable servers with secrets, configure the secrets in SOPS first,
+        then enable them in your platform-specific config.
       '';
       example = lib.literalExpression ''
         {
-          # Use default memory server
-          memory = {};
+          # Enable a server that requires secrets
+          github.enabled = true;  # Requires GITHUB_TOKEN in SOPS
 
-          # Override docs server
+          # Override a default server
           docs = {
+            enabled = true;
             command = "''${pkgs.nodejs}/bin/npx";
             args = [ "-y" "@arabold/docs-mcp-server@1.32.0" ];
             secret = "OPENAI_API_KEY";

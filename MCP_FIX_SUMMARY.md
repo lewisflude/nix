@@ -1,181 +1,150 @@
-# MCP Module Fix Summary
+# MCP Server Fix Summary
 
-## Issue
-The MCP modules for NixOS and nix-darwin had inconsistent parameter naming, causing configuration evaluation to fail when accessing system configuration for secrets.
+## Problem
+
+Multiple MCP servers were failing with "Connection closed" errors:
+
+```
+Error (unhandledRejection): MCP error -32000: Connection closed
+```
 
 ## Root Cause
-- **NixOS MCP module** (`home/nixos/mcp.nix`) was using `osConfig` as the parameter name
-- **System builders** (`lib/system-builders.nix`) pass `systemConfig` to home-manager extraSpecialArgs
-- **Darwin MCP module** (`home/darwin/mcp.nix`) was already using `systemConfig` (correct)
 
-This inconsistency prevented the NixOS MCP module from accessing SOPS secrets via `systemConfig.sops.secrets`.
+The MCP configuration had **all servers enabled by default**, including those requiring:
+
+1. **API keys/secrets** that weren't configured (OPENAI_API_KEY, GITHUB_TOKEN, KAGI_API_KEY, etc.)
+2. **External dependencies** not available (uvx for kagi server)
+
+When Cursor tried to start these servers:
+
+- Wrapper scripts checked for secrets at `/run/secrets-for-users/`
+- Secrets didn't exist, so scripts exited with code 1
+- This caused the "Connection closed" error
+
+## Solution
+
+Changed MCP configuration to **only enable servers that work without configuration**:
+
+### Enabled by Default (No Secrets Required)
+
+✅ **memory** - Knowledge graph-based persistent memory
+✅ **git** - Git repository operations
+✅ **time** - Timezone and datetime utilities
+✅ **sqlite** - SQLite database access
+✅ **everything** - MCP reference/test server
+
+### Disabled by Default (Require Configuration)
+
+❌ **docs** - Requires OPENAI_API_KEY
+❌ **openai** - Requires OPENAI_API_KEY
+❌ **rustdocs** - Requires OPENAI_API_KEY
+❌ **github** - Requires GITHUB_TOKEN
+❌ **kagi** - Requires KAGI_API_KEY and uvx
+❌ **brave** - Requires BRAVE_API_KEY
+❌ **filesystem** - Disabled for security
+❌ **sequentialthinking** - Optional
+❌ **fetch** - Optional
+❌ **nixos** - Requires uvx
 
 ## Changes Made
 
-### 1. Fixed NixOS MCP Module (`home/nixos/mcp.nix`)
+### 1. Updated `home/common/modules/mcp.nix`
 
-**Changed parameter from `osConfig` to `systemConfig`:**
-```diff
- {
-   pkgs,
-   config,
-   lib,
-   constants,
--  osConfig,
-+  systemConfig,
-   ...
- }:
+- Reorganized default servers to clearly separate enabled/disabled
+- Added `.enabled = false` to all servers requiring secrets
+- Updated documentation and comments
+- Added clear instructions for enabling servers with secrets
+
+### 2. Updated Platform-Specific Configs
+
+**`home/nixos/mcp.nix`** and **`home/darwin/mcp.nix`**:
+
+- Documented which servers are enabled by default
+- Added examples showing how to enable servers with secrets
+- Included step-by-step instructions for secret configuration
+
+### 3. Updated Documentation
+
+**`CLAUDE.md`**:
+
+- Updated MCP server list to reflect new defaults
+- Added section on enabling servers with secrets
+- Documented the 4-step process for adding new secrets
+
+## How to Enable Servers with Secrets
+
+If you want to enable servers that require API keys:
+
+### Step 1: Add Secret to SOPS
+
+Edit `secrets/secrets.yaml`:
+
+```yaml
+OPENAI_API_KEY: ENC[AES256_GCM,data:...,type:str]
+GITHUB_TOKEN: ENC[AES256_GCM,data:...,type:str]
 ```
 
-**Updated wrappers import:**
-```diff
- wrappers = import ../../modules/shared/mcp/wrappers.nix {
--    inherit pkgs lib;
--    systemConfig = osConfig;
-+    inherit pkgs lib systemConfig;
- };
+### Step 2: Configure Secret for Users
+
+In `modules/shared/sops.nix`:
+
+```nix
+sops.secrets = {
+  "OPENAI_API_KEY" = {
+    neededForUsers = true;
+    allowUserRead = true;
+  };
+};
 ```
 
-**Updated all references from `osConfig` to `systemConfig`:**
-- `osConfig.sops.secrets ? OPENAI_API_KEY` → `systemConfig.sops.secrets ? OPENAI_API_KEY`
-- Applied to: docs-mcp-server, openai, and rustdocs servers
+### Step 3: Enable Server
 
-### 2. Standardized Darwin MCP Module (`home/darwin/mcp.nix`)
+In `home/nixos/mcp.nix` or `home/darwin/mcp.nix`:
 
-**Reordered parameters for consistency (cosmetic):**
-```diff
- {
-   pkgs,
-   config,
--  systemConfig,
-   lib,
-   system,
-   constants,
-+  systemConfig,
-   ...
- }:
+```nix
+services.mcp.servers = {
+  docs.enabled = true;      # Uses OPENAI_API_KEY
+  openai.enabled = true;    # Uses OPENAI_API_KEY
+  github.enabled = true;    # Uses GITHUB_TOKEN
+};
 ```
 
-### 3. Updated Documentation (`docs/MCP_ARCHITECTURE.md`)
+### Step 4: Rebuild
 
-Added clarification that NixOS uses `systemConfig` (same as Darwin):
-```diff
- #### NixOS (`home/nixos/mcp.nix`)
- 
- **Structure**: Identical to Darwin, but with:
-+- Uses `systemConfig` (same as Darwin for consistency)
- - Systemd services instead of LaunchAgents
- - Systemd timers for periodic health checks
- - HTTP service for docs-mcp-server
-```
-
-## Validation
-
-All configurations now evaluate successfully:
-
-### Darwin (mercury)
 ```bash
-$ nix eval '.#darwinConfigurations.mercury.config.home-manager.users.lewisflude.services.mcp.enable'
-true
+# NixOS
+nh os switch
 
-$ nix eval '.#darwinConfigurations.mercury.config.home-manager.users.lewisflude.services.mcp.servers' --json
-{
-  "docs-mcp-server": {...},
-  "memory": {...},
-  "openai": {...},
-  "rustdocs": {...}
-}
-
-$ nix eval '.#darwinConfigurations.mercury.config.home-manager.users.lewisflude.services.mcp.targets' --json
-{
-  "claude": {
-    "directory": "/Users/lewisflude/Library/Application Support/Claude",
-    "fileName": "claude_desktop_config.json"
-  },
-  "cursor": {
-    "directory": "/Users/lewisflude/.cursor",
-    "fileName": "mcp.json"
-  }
-}
+# nix-darwin
+darwin-rebuild switch
 ```
 
-### NixOS (jupiter)
-```bash
-$ nix eval '.#nixosConfigurations.jupiter.config.home-manager.users.lewis.services.mcp.enable'
-true
-
-$ nix eval '.#nixosConfigurations.jupiter.config.home-manager.users.lewis.services.mcp.servers' --json
-{
-  "docs-mcp-server": {...},
-  "memory": {...},
-  "openai": {...},
-  "rustdocs": {...}
-}
-
-$ nix eval '.#nixosConfigurations.jupiter.config.home-manager.users.lewis.services.mcp.targets' --json
-{
-  "claude-code": {
-    "directory": "/home/lewis/.config/claude",
-    "fileName": "claude_desktop_config.json"
-  },
-  "cursor": {
-    "directory": "/home/lewis/.cursor",
-    "fileName": "mcp.json"
-  }
-}
-```
-
-## MCP Servers Configuration
-
-All active MCP servers are now properly configured on both platforms:
-
-1. **memory** - Knowledge graph-based persistent memory (port 6221)
-   - No secrets required
-   - Node.js via npx
-
-2. **docs-mcp-server** - Documentation indexing (port 6280)
-   - Requires: OPENAI_API_KEY (via SOPS)
-   - Node.js via npx
-
-3. **openai** - General OpenAI integration (port 6250)
-   - Requires: OPENAI_API_KEY (via SOPS)
-   - Node.js via npx
-
-4. **rustdocs** - Rust documentation for Bevy (port 6270)
-   - Requires: OPENAI_API_KEY (via SOPS)
-   - Built via Nix
-
-### Disabled Servers
-- **kagi** - Awaiting uv package fix
-- **nixos** - Awaiting uv package fix
-
-## Benefits
-
-1. **Consistency**: Both platforms now use the same parameter name (`systemConfig`)
-2. **Maintainability**: Easier to understand and maintain cross-platform code
-3. **Correctness**: SOPS secret access now works correctly on both platforms
-4. **Documentation**: Updated docs reflect the correct architecture
+After rebuild, secrets will be available at `/run/secrets-for-users/`.
 
 ## Testing
 
-Run the following to test your configuration:
+To verify the fix works:
 
 ```bash
-# Test Darwin build
-nix build '.#darwinConfigurations.mercury.system'
+# Check generated MCP config
+cat ~/.cursor/mcp.json | jq '.mcpServers | keys'
 
-# Test NixOS build
-nix build '.#nixosConfigurations.jupiter.config.system.build.toplevel'
-
-# Test flake checks
-nix flake check
+# Should only show enabled servers:
+# ["everything", "git", "memory", "sqlite", "time"]
 ```
 
-## Next Steps
+## Benefits
 
-1. Review and test the changes
-2. Run `darwin-rebuild switch` (Darwin) or `nh os switch` (NixOS)
-3. Verify MCP servers are working: `~/bin/mcp-health-check`
-4. Check configuration files:
-   - Darwin: `~/.cursor/mcp.json` and `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - NixOS: `~/.cursor/mcp.json` and `~/.config/claude/claude_desktop_config.json`
+1. ✅ **Works out of the box** - No configuration required for basic functionality
+2. ✅ **No more crashes** - Only stable servers are enabled by default
+3. ✅ **Clear opt-in** - Servers with requirements are explicitly disabled
+4. ✅ **Better documentation** - Clear instructions for enabling additional servers
+5. ✅ **Cross-platform** - Works on both NixOS and nix-darwin
+
+## Related Files
+
+- `home/common/modules/mcp.nix` - Main MCP module
+- `home/nixos/mcp.nix` - NixOS-specific overrides
+- `home/darwin/mcp.nix` - macOS-specific overrides
+- `CLAUDE.md` - Updated documentation
+- `docs/MCP_ARCHITECTURE.md` - Detailed architecture docs
