@@ -71,6 +71,7 @@
             session required ${pkgs.linux-pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
             session required ${pkgs.linux-pam}/lib/security/pam_unix.so
             session required ${pkgs.linux-pam}/lib/security/pam_limits.so conf=/etc/security/limits.conf
+            session required ${pkgs.systemd}/lib/security/pam_systemd.so
             session optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so auto_start
           '';
         };
@@ -128,6 +129,7 @@
             session required ${pkgs.linux-pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
             session required ${pkgs.linux-pam}/lib/security/pam_unix.so
             session required ${pkgs.linux-pam}/lib/security/pam_limits.so conf=/etc/security/limits.conf
+            session required ${pkgs.systemd}/lib/security/pam_systemd.so
             session optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so auto_start
           '';
         };
@@ -189,9 +191,7 @@
     };
   };
   environment = {
-    sessionVariables = {
-      XDG_RUNTIME_DIR = "/run/user/$UID";
-    };
+    # XDG_RUNTIME_DIR is now set automatically by pam_systemd.so
     etc = {
       "u2f_mappings" = {
         text = ''lewis:PaGbsjJa2IPXjK/nuSZEgqrqcP9JoxEO0IVVinIyfEXR0EbctKkhinM6f50ccHj7uSdy+YM2O+ToKVhqv5ynyQ==,cFyPyH4AUHDjTXelbVpfnc4DnESr8xJWyZC42DwEiofkoqQdt0lBdxPGLwjviysl7WlH+jlEw3Yhe5TBiBLNOg==,es256,+presence'';

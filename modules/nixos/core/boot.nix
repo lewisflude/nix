@@ -44,22 +44,17 @@ in
 {
   boot = {
     kernelPackages = lib.mkDefault latestKernelPackage;
-    loader.grub = {
-      enable = true;
-      efiSupport = true;
-      efiInstallAsRemovable = true;
-      zfsSupport = true;
-      mirroredBoots = [
-        {
-          devices = [ "nodev" ];
-          path = "/boot";
-        }
-      ];
+    loader = {
+      systemd-boot = {
+        enable = lib.mkDefault true;
+        editor = false; # Disable editor for security
+      };
+      efi.canTouchEfiVariables = lib.mkDefault true;
+      timeout = 0;
     };
 
     zfs.package = pkgs.zfs;
     supportedFilesystems = [ "zfs" ];
-    loader.timeout = 0;
     kernelParams = [
       "quiet"
       "splash"
