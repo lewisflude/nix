@@ -42,12 +42,14 @@ in
 
   config = mkIf (cfg.enable && jellystatCfg.enable) (
     let
-      secretEntries = optionalAttrs jellystatCfg.useSops [
-        {
-          name = "janitorr-jellyfin-api-key";
-          value = "jellyfinApiKey";
-        }
-      ];
+      # Define secret with proper ownership for container access
+      secretEntries = optionalAttrs jellystatCfg.useSops {
+        "jellystat-jellyfin-api-key" = {
+          owner = toString cfg.uid;
+          group = toString cfg.gid;
+          mode = "0440";
+        };
+      };
     in
     {
       virtualisation.oci-containers.containers.jellystat = {
@@ -59,8 +61,10 @@ in
           JELLYFIN_HOST = "https://jellyfin.blmt.io";
           DISABLE_AUTH = "true"; # Disable authentication for local access
         }
+        # Pass secret file path when using SOPS
+        # App reads the API key from this file
         // optionalAttrs jellystatCfg.useSops {
-          JELLYFIN_API_KEY_FILE = config.sops.placeholder."jellystat-jellyfin-api-key";
+          JELLYFIN_API_KEY_FILE = config.sops.secrets."jellystat-jellyfin-api-key".path;
         };
         volumes = [
           "${cfg.configPath}/jellystat:/app/backend/userData"
@@ -81,7 +85,7 @@ in
         "d ${cfg.configPath}/jellystat 0755 ${toString cfg.uid} ${toString cfg.gid} -"
       ];
 
-      sops.secrets = optionalAttrs jellystatCfg.useSops secretEntries;
+      sops.secrets = secretEntries;
     }
   );
 }

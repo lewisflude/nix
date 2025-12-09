@@ -268,7 +268,7 @@ wpctl inspect <node-id> | grep -E "node.target|node.latency"
 
 Expected:
 
-- `node.target` equals `proton_stereo_bridge`
+- `node.target` equals `apogee_stereo_game_bridge`
 - `node.latency` shows `256/48000`
 - System audio / DAWs remain on the Apogee `Pro Audio` sink
 
@@ -276,7 +276,7 @@ If a game still chooses the wrong device, temporarily pin it:
 
 ```bash
 pw-metadata -n settings 0 target.node "<node-id>" \
-  node.target="proton_stereo_bridge"
+  node.target="apogee_stereo_game_bridge"
 ```
 
 Remove the override with the same command and an empty value once the

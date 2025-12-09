@@ -10,322 +10,228 @@ let
     mkMerge
     ;
   cfg = config.host.features.media.audio;
+
+  # Audio configuration constants
+  quantum = if cfg.ultraLowLatency then 64 else 256;
+  latency = "${toString quantum}/48000";
 in
 {
   config = mkIf cfg.enable (mkMerge [
     # Base PipeWire configuration
     {
+      # Enable realtime scheduling for PipeWire
+      security.rtkit.enable = true;
+
       services.pipewire = {
         enable = true;
 
-        # Enable compatibility layers
+        # Compatibility layers for legacy audio APIs
         alsa = {
           enable = true;
-          support32Bit = true; # Required for 32-bit games/applications
+          support32Bit = true; # Required for 32-bit games
         };
-
         pulse.enable = true; # PulseAudio compatibility
+        jack.enable = true; # JACK for professional audio (Ardour, REAPER, etc.)
 
-        # JACK compatibility for professional audio applications (Ardour, REAPER, etc.)
-        jack.enable = true;
+        # Combined PipeWire extraConfig - low-latency settings and gaming bridge
+        extraConfig = {
+          # Low-latency configuration for PipeWire core
+          pipewire."92-low-latency" = {
+            "context.properties" = {
+              "default.clock.rate" = 48000;
+              "default.clock.quantum" = quantum;
+              "default.clock.min-quantum" = 64;
+              "default.clock.max-quantum" = 2048;
+            };
+          };
 
-        # Low-latency configuration
-        # Ultra-low latency: 64 frames @ 48kHz = ~1.3ms (for professional recording/monitoring)
-        # Balanced latency: 256 frames @ 48kHz = ~5.3ms (for general use, streaming, gaming)
-        extraConfig.pipewire."99-lowlatency" = {
-          "context.properties" = {
-            "default.clock.rate" = 48000;
-            "default.clock.quantum" = if cfg.ultraLowLatency then 64 else 256;
-            "default.clock.min-quantum" = 64; # ~1.3ms minimum for pro audio
-            "default.clock.max-quantum" = 2048; # ~42ms maximum for power saving
-            "default.clock.allowed-rates" = [
-              44100
-              48000
-              96000
-              192000
+          # Low-latency configuration for PulseAudio backend
+          pipewire-pulse."92-low-latency" = {
+            "context.modules" = [
+              {
+                name = "libpipewire-module-protocol-pulse";
+                args = { };
+              }
+            ];
+            "pulse.properties" = {
+              "pulse.min.req" = latency;
+              "pulse.default.req" = latency;
+              "pulse.max.req" = latency;
+              "pulse.min.quantum" = latency;
+              "pulse.max.quantum" = latency;
+            };
+            "stream.properties" = {
+              "node.latency" = latency;
+              "resample.quality" = 1;
+            };
+          };
+
+          # Gaming Compatibility Bridge for Pro Audio Interface
+          # Creates a stereo virtual sink that routes to the Apogee Symphony Desktop
+          # This solves the issue where games/Proton fail with multi-channel devices
+          pipewire."90-stereo-bridge" = {
+            "context.modules" = [
+              {
+                name = "libpipewire-module-loopback";
+                args = {
+                  "node.name" = "apogee_stereo_game_bridge";
+                  "node.description" = "Apogee Stereo Game Bridge";
+
+                  # Virtual stereo sink that games see
+                  "capture.props" = {
+                    "media.class" = "Audio/Sink";
+                    "audio.position" = [
+                      "FL"
+                      "FR"
+                    ];
+                    "priority.session" = 1900;
+                    "node.passive" = false;
+                  };
+
+                  # Routes to physical hardware (Pro Audio profile)
+                  # Find your device with: pw-link -o | grep -i apogee
+                  "playback.props" = {
+                    "audio.position" = [
+                      "FL"
+                      "FR"
+                    ];
+                    "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-audio";
+                    "node.passive" = false;
+                    "stream.dont-remix" = true;
+                  };
+                };
+              }
             ];
           };
         };
 
-        # Provide a consumer-friendly stereo sink that still routes into the
-        # Apogee device so Proton titles see predictable formats.
-        # Uses null-audio-sink to create a proper PulseAudio-compatible sink
-        extraConfig.pipewire."90-proton-stereo" = {
-          "context.objects" = [
-            {
-              factory = "adapter";
-              args = {
-                "factory.name" = "support.null-audio-sink";
-                "node.name" = "proton_stereo_bridge";
-                "node.description" = "Proton Stereo Bridge";
-                "media.class" = "Audio/Sink";
-                "audio.position" = [
-                  "FL"
-                  "FR"
-                ];
-                "monitor.channel-volumes" = true;
-                # Set high priority to make this the default sink for games
-                "priority.session" = 1900;
-              };
-            }
-          ];
-
-          "context.modules" = [
-            # Loopback to route bridge output to physical Apogee device
-            {
-              name = "libpipewire-module-loopback";
-              args = {
-                "node.description" = "Proton Bridge → Symphony Desktop";
-                "capture.props" = {
-                  "node.name" = "proton_bridge_loopback.capture";
-                  "audio.position" = "FL,FR";
-                  "stream.dont-remix" = true;
-                  # Capture from the bridge's monitor stream
-                  "stream.capture.sink" = "proton_stereo_bridge";
-                  "node.passive" = false;
-                };
-                "playback.props" = {
-                  "node.name" = "proton_bridge_loopback.playback";
-                  "audio.position" = "FL,FR";
-                  "stream.dont-remix" = true;
-                  "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-output";
-                  "node.passive" = false;
-                };
-              };
-            }
-          ];
-        };
-
-        # WirePlumber session manager configuration
+        # WirePlumber session manager
         wireplumber = {
           enable = true;
-
-          # Custom WirePlumber configuration for device priorities and routing
           extraConfig = {
-            # Set default device priorities
-            "10-device-priorities" = {
-              "monitor.alsa.rules" = [
-                # General ALSA devices default priority (must come first)
-                {
-                  matches = [
-                    {
-                      "node.name" = "~alsa_output.*";
-                    }
-                  ];
-                  actions = {
-                    update-props = {
-                      "priority.session" = 1000;
-                    };
-                  };
-                }
-                # Lower priority for multi-channel audio interfaces
-                # (comes last to override the general rule)
-                {
-                  matches = [
-                    {
-                      "node.name" = "~alsa_output.usb-Apogee.*";
-                    }
-                  ];
-                  actions = {
-                    update-props = {
-                      "priority.session" = 100;
-                    };
-                  };
-                }
+            # Device priorities: prefer stereo bridge for games, lower priority for pro interface
+            "10-device-priorities"."monitor.alsa.rules" = [
+              {
+                matches = [ { "node.name" = "~alsa_output.*"; } ];
+                actions.update-props."priority.session" = 1000;
+              }
+              {
+                matches = [ { "node.name" = "~alsa_output.usb-Apogee.*"; } ];
+                actions.update-props."priority.session" = 100;
+              }
+            ];
+
+            # Bluetooth: Enable high-quality codecs
+            "10-bluez"."monitor.bluez.properties" = {
+              "bluez5.enable-sbc-xq" = true;
+              "bluez5.enable-msbc" = true;
+              "bluez5.enable-hw-volume" = true;
+              "bluez5.roles" = [
+                "hsp_hs"
+                "hsp_ag"
+                "hfp_hf"
+                "hfp_ag"
               ];
-            };
-
-            # Bluetooth configuration for better codec support
-            # Based on: https://pipewire.pages.freedesktop.org/wireplumber/daemon/configuration/bluetooth.html
-            "11-bluetooth-policy" = {
-              "monitor.bluez.properties" = {
-                # Enable high-quality SBC codec
-                "bluez5.enable-sbc-xq" = true;
-
-                # Enable mSBC for better headset audio quality
-                "bluez5.enable-msbc" = true;
-
-                # Enable hardware volume control
-                "bluez5.enable-hw-volume" = true;
-
-                # Support for HSP/HFP profiles (headset/hands-free)
-                "bluez5.roles" = [
-                  "hsp_hs"
-                  "hsp_ag"
-                  "hfp_hf"
-                  "hfp_ag"
-                ];
-
-                # High-quality Bluetooth codecs (when supported by device)
-                # Includes: SBC, SBC-XQ, AAC, LDAC (Sony), aptX, aptX HD, aptX LL, LC3 (LE Audio)
-                "bluez5.codecs" = [
-                  "sbc"
-                  "sbc_xq"
-                  "aac"
-                  "ldac"
-                  "aptx"
-                  "aptx_hd"
-                  "aptx_ll" # Low Latency variant
-                  "lc3" # Bluetooth LE Audio codec
-                ];
-
-                # LDAC quality settings (high quality, adaptive bitrate)
-                # Quality presets: hq (990kbps), sq (660kbps), mq (330kbps)
-                "bluez5.default.rate" = 48000;
-                "bluez5.default.channels" = 2;
-              };
-
-              # LDAC encoding quality for A2DP streaming
-              "bluez5.a2dp.ldac.quality" = "hq"; # High Quality mode (990kbps)
-            };
-
-            # Disable audio device suspension to prevent audio dropouts
-            "51-disable-suspension" = {
-              "monitor.alsa.rules" = [
-                {
-                  matches = [
-                    {
-                      "node.name" = "~alsa_input.*";
-                    }
-                    {
-                      "node.name" = "~alsa_output.*";
-                    }
-                  ];
-                  actions = {
-                    update-props = {
-                      "session.suspend-timeout-seconds" = 0;
-                    };
-                  };
-                }
+              "bluez5.codecs" = [
+                "sbc"
+                "sbc_xq"
+                "aac"
+                "ldac"
+                "aptx"
+                "aptx_hd"
+                "aptx_ll"
+                "lc3"
               ];
+              "bluez5.default.rate" = 48000;
+              "bluez5.default.channels" = 2;
+              "bluez5.a2dp.ldac.quality" = "hq";
             };
 
-            # Proton routing: direct Proton/Steam audio into the stereo bridge so
-            # games never interact with the multi-channel pro-audio sink directly.
-            "90-proton-routing" = {
+            # Disable audio device suspension to prevent dropouts
+            "51-disable-suspension"."monitor.alsa.rules" = [
+              {
+                matches = [
+                  { "node.name" = "~alsa_input.*"; }
+                  { "node.name" = "~alsa_output.*"; }
+                ];
+                actions.update-props."session.suspend-timeout-seconds" = 0;
+              }
+            ];
+
+            # Automatic routing: games use the stereo bridge
+            "90-gaming-routing" = {
               "monitor.rules" = [
                 {
-                  matches = [
-                    {
-                      "node.name" = "proton_stereo_bridge";
-                    }
-                  ];
-                  actions = {
-                    update-props = {
-                      "priority.session" = 1900;
-                      # Make this the default sink for applications
-                      "node.passive" = false;
-                    };
+                  matches = [ { "node.name" = "apogee_stereo_game_bridge"; } ];
+                  actions.update-props = {
+                    "priority.session" = 1900;
+                    "node.passive" = false;
                   };
                 }
               ];
 
-              "monitor.stream.rules" = [
-                {
-                  matches = [
-                    {
-                      "application.process.binary" = "steam";
-                    }
-                    {
-                      "application.name" = "~steam_app_.*";
-                    }
-                    {
-                      "application.name" = "Steam";
-                    }
-                  ];
-                  actions = {
-                    update-props = {
-                      "node.target" = "proton_stereo_bridge";
-                      "node.latency" = "256/48000";
-                      "session.suspend-timeout-seconds" = 0;
-                    };
+              # Route gaming applications to stereo bridge
+              "monitor.stream.rules" =
+                let
+                  gameRouting = {
+                    "node.target" = "apogee_stereo_game_bridge";
+                    "node.latency" = "256/48000";
+                    "session.suspend-timeout-seconds" = 0;
                   };
-                }
-                {
-                  matches = [
-                    {
-                      "application.id" = "gamescope";
-                    }
-                  ];
-                  actions = {
-                    update-props = {
-                      "node.target" = "proton_stereo_bridge";
-                      "node.latency" = "256/48000";
-                      "session.suspend-timeout-seconds" = 0;
-                    };
-                  };
-                }
-                # Wine/Proton games (non-Steam)
-                {
-                  matches = [
-                    {
-                      "application.process.binary" = "~wine.*";
-                    }
-                    {
-                      "application.process.binary" = "~.*\\.exe";
-                    }
-                  ];
-                  actions = {
-                    update-props = {
-                      "node.target" = "proton_stereo_bridge";
-                      "node.latency" = "256/48000";
-                      "session.suspend-timeout-seconds" = 0;
-                    };
-                  };
-                }
-              ];
+                in
+                [
+                  {
+                    matches = [
+                      { "application.process.binary" = "steam"; }
+                      { "application.name" = "~steam_app_.*"; }
+                      { "application.name" = "Steam"; }
+                    ];
+                    actions.update-props = gameRouting;
+                  }
+                  {
+                    matches = [ { "application.id" = "gamescope"; } ];
+                    actions.update-props = gameRouting;
+                  }
+                  {
+                    matches = [
+                      { "application.process.binary" = "~wine.*"; }
+                      { "application.process.binary" = "~.*\\.exe"; }
+                    ];
+                    actions.update-props = gameRouting;
+                  }
+                ];
             };
           };
         };
       };
 
-      # PipeWire environment variables for better gaming/audio experience
-      environment.sessionVariables = {
-        # SDL2 games: Use PulseAudio backend (PipeWire provides PulseAudio compatibility)
-        SDL_AUDIODRIVER = "pulseaudio";
+      # Audio utilities and environment
+      environment = {
+        sessionVariables = {
+          PIPEWIRE_LATENCY = latency;
+          SDL_AUDIODRIVER = "pulseaudio"; # For SDL2 games
+          PULSE_LATENCY_MSEC = "60"; # Balance for gaming
+        };
 
-        # PulseAudio buffer latency (60ms is a good balance for gaming)
-        PULSE_LATENCY_MSEC = "60";
-
-        # PipeWire-native latency setting
-        # Ultra-low latency: 64/48000 (~1.3ms) for professional recording/monitoring
-        # Balanced latency: 256/48000 (~5.3ms) for general use, streaming, gaming
-        # Manual override: pw-metadata -n settings 0 clock.force-quantum <frames>
-        # Reset to default: pw-metadata -n settings 0 clock.force-quantum 0
-        PIPEWIRE_LATENCY = if cfg.ultraLowLatency then "64/48000" else "256/48000";
-
-        # Wine/Proton: Use PulseAudio backend (most compatible, works with PipeWire)
-        WINE_AUDIO = "pulse";
+        systemPackages = [
+          pkgs.pulseaudio # pactl and compatibility tools
+          pkgs.alsa-utils
+          pkgs.alsa-tools
+        ];
       };
 
-      # Audio utilities (PipeWire and WirePlumber are automatically installed by the service)
-      environment.systemPackages = [
-        # PulseAudio tools for compatibility
-        pkgs.pulseaudio
-
-        # ALSA utilities
-        pkgs.alsa-utils
-        pkgs.alsa-tools
-      ];
-
-      # USB audio optimizations
-      # Critical for professional USB audio interfaces like Apogee Symphony Desktop
+      # USB audio optimizations for professional interfaces
       services.udev.extraRules = ''
-        # Disable autosuspend for USB audio interfaces (class 01)
+        # Disable autosuspend for USB audio (class 01)
         ACTION=="add", SUBSYSTEM=="usb", ATTR{idClass}=="01", TEST=="power/control", ATTR{power/control}="on"
-
-        # Set realtime priority for USB audio devices
         ACTION=="add", SUBSYSTEM=="usb", ATTR{idClass}=="01", ATTR{power/wakeup}="disabled"
 
-        # Apogee-specific optimizations (if detected)
-        # Apogee Symphony Desktop (USB Vendor ID: 0xa07, Product ID varies)
+        # Apogee-specific (USB Vendor ID: 0xa07)
         ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0a07", ATTR{power/control}="on", ATTR{power/wakeup}="disabled"
       '';
 
-      # USB audio-specific kernel parameters (when USB audio interface is enabled)
       boot.kernelParams = lib.optionals cfg.usbAudioInterface.enable [
-        # Increase USB polling rate for lower latency
-        "usbcore.autosuspend=-1" # Disable USB autosuspend globally for audio work
+        "usbcore.autosuspend=-1" # Disable USB autosuspend for audio
       ];
 
       # Assertions to ensure proper configuration
