@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  lib,
   ...
 }:
 {
@@ -69,7 +70,7 @@
             # Session management
             session required ${pkgs.linux-pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
             session required ${pkgs.linux-pam}/lib/security/pam_unix.so
-            session required ${pkgs.linux-pam}/lib/security/pam_limits.so
+            session required ${pkgs.linux-pam}/lib/security/pam_limits.so conf=/etc/security/limits.conf
             session optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so auto_start
           '';
         };
@@ -126,7 +127,7 @@
             # Session management - set up user environment
             session required ${pkgs.linux-pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
             session required ${pkgs.linux-pam}/lib/security/pam_unix.so
-            session required ${pkgs.linux-pam}/lib/security/pam_limits.so
+            session required ${pkgs.linux-pam}/lib/security/pam_limits.so conf=/etc/security/limits.conf
             session optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so auto_start
           '';
         };
@@ -191,9 +192,19 @@
     sessionVariables = {
       XDG_RUNTIME_DIR = "/run/user/$UID";
     };
-    etc."u2f_mappings" = {
-      text = ''lewis:PaGbsjJa2IPXjK/nuSZEgqrqcP9JoxEO0IVVinIyfEXR0EbctKkhinM6f50ccHj7uSdy+YM2O+ToKVhqv5ynyQ==,cFyPyH4AUHDjTXelbVpfnc4DnESr8xJWyZC42DwEiofkoqQdt0lBdxPGLwjviysl7WlH+jlEw3Yhe5TBiBLNOg==,es256,+presence'';
-      mode = "0644"; # Must be world-readable for non-root screen lockers like swaylock
+    etc = {
+      "u2f_mappings" = {
+        text = ''lewis:PaGbsjJa2IPXjK/nuSZEgqrqcP9JoxEO0IVVinIyfEXR0EbctKkhinM6f50ccHj7uSdy+YM2O+ToKVhqv5ynyQ==,cFyPyH4AUHDjTXelbVpfnc4DnESr8xJWyZC42DwEiofkoqQdt0lBdxPGLwjviysl7WlH+jlEw3Yhe5TBiBLNOg==,es256,+presence'';
+        mode = "0644"; # Must be world-readable for non-root screen lockers like swaylock
+      };
+      "security/limits.conf" = {
+        # Create limits.conf for custom PAM configurations that reference it
+        # This ensures pam_limits.so can find the file when using custom PAM text configs
+        text = lib.concatMapStringsSep "\n" (
+          limit: "${limit.domain} ${limit.type} ${limit.item} ${toString limit.value}"
+        ) config.security.pam.loginLimits;
+        mode = "0644";
+      };
     };
   };
   programs = {
