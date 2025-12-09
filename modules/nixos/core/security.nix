@@ -32,10 +32,47 @@
       ];
       services = {
         login.enableGnomeKeyring = true;
-        greetd.enableGnomeKeyring = true;
         niri.enableGnomeKeyring = true;
         sudo.enableGnomeKeyring = true;
         su.enableGnomeKeyring = true;
+        greetd = {
+          # Custom PAM configuration for greetd with YubiKey + password for keyring unlock
+          #
+          # Authentication flow:
+          # 1. Require YubiKey (U2F) authentication - provides hardware 2FA
+          # 2. Require password authentication - unlocks GNOME Keyring
+          # 3. GNOME Keyring unlock with the password
+          #
+          # This ensures both security (YubiKey required) and convenience (keyring auto-unlock)
+          text = ''
+            # Account management
+            account required ${pkgs.linux-pam}/lib/security/pam_unix.so
+
+            # Authentication management
+            # Step 1: Require YubiKey (U2F) - using 'required' not 'sufficient'
+            # - nouserok: Allow login even if U2F not configured (fallback to password-only)
+            # - cue: Show prompt to touch YubiKey
+            # - userpresence=1: Require physical touch
+            auth required ${pkgs.pam_u2f}/lib/security/pam_u2f.so authfile=/etc/u2f_mappings cue nouserok userpresence=1 origin=pam://yubi
+
+            # Step 2: Require password - this will unlock the keyring
+            # - use_first_pass: Try the password from U2F first (won't exist, so will prompt)
+            auth required ${pkgs.linux-pam}/lib/security/pam_unix.so
+
+            # Step 3: GNOME Keyring unlock with the password
+            auth optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so
+
+            # Password management
+            password required ${pkgs.linux-pam}/lib/security/pam_unix.so yescrypt
+            password optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so use_authtok
+
+            # Session management
+            session required ${pkgs.linux-pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
+            session required ${pkgs.linux-pam}/lib/security/pam_unix.so
+            session required ${pkgs.linux-pam}/lib/security/pam_limits.so conf=/etc/security/limits.conf
+            session optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so auto_start
+          '';
+        };
         swaylock = {
           # Custom PAM configuration for swaylock with YubiKey support
           #

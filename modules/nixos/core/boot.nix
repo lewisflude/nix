@@ -70,6 +70,7 @@ in
       "vt.global_cursor_default=0"
       "enable_fbc=1"
       "enable_psr=2"
+      "mitigations=off"
     ]
     ++ lib.optionals (config.hardware.nvidia.package != null) [
       "nvidia.NVreg=KmemLimit=0"

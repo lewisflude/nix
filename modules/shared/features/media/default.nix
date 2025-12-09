@@ -6,7 +6,12 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkMerge optionalAttrs;
+  inherit (lib)
+    mkIf
+    mkMerge
+    mkAfter
+    optionalAttrs
+    ;
   inherit (lib.lists) optional optionals;
   cfg = config.host.features.media;
   platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
@@ -83,8 +88,9 @@ in
 
       # Override musnix's default nofile limit (99999) for gaming compatibility
       # musnix sets PAM limits for @audio group, but gaming (ESYNC) requires 1048576
+      # Use mkAfter to ensure our settings come after musnix's and take precedence
       # This override ensures both real-time audio and Wine/Proton gaming work correctly
-      security.pam.loginLimits = mkIf (cfg.audio.enable && cfg.audio.realtime) [
+      security.pam.loginLimits = mkIf (cfg.audio.enable && cfg.audio.realtime) (mkAfter [
         {
           domain = "@audio";
           type = "soft";
@@ -97,7 +103,7 @@ in
           item = "nofile";
           value = "1048576";
         }
-      ];
+      ]);
 
       # Keep boot kernel aligned with the musnix RT kernel selection
       boot.kernelPackages = mkIf (cfg.audio.enable && cfg.audio.realtime) (

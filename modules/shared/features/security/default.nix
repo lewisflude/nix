@@ -48,7 +48,7 @@ in
             services = {
               login.u2fAuth = cfg.yubikey;
               sudo.u2fAuth = cfg.yubikey;
-              greetd.u2fAuth = cfg.yubikey;
+              # greetd PAM config is now in core/security.nix (custom text for keyring unlock)
             };
             u2f = mkIf cfg.yubikey {
               enable = true;

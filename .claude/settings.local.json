@@ -39,7 +39,9 @@
       "Bash(systemctl --user show-environment:*)",
       "Bash(systemctl show:*)",
       "Bash(systemctl:*)",
-      "Bash(ulimit:*)"
+      "Bash(ulimit:*)",
+      "Bash(nixos-option:*)",
+      "Bash(statix fix:*)"
     ],
     "deny": [
       "Read(**/.env)",
