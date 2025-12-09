@@ -1,10 +1,10 @@
 # Diagnostic & Troubleshooting Scripts
 
-Scripts for diagnosing system issues, particularly SSH performance and audio problems. These are interactive diagnostic tools designed to identify root causes of common problems.
+Scripts for diagnosing system issues, particularly SSH performance, audio problems, and authentication. These are interactive diagnostic tools designed to identify root causes of common problems.
 
 **Integration**: Standalone diagnostic tools (manual execution)
 
-## Available Scripts (3 scripts)
+## Available Scripts (4 scripts)
 
 ### SSH Diagnostics
 
@@ -269,6 +269,38 @@ If games still have no audio, try:
 - Audio works for some games but not others
 - After PipeWire or Steam updates
 - After switching audio devices
+
+---
+
+### Authentication Diagnostics
+
+#### `test-yubikey-auth.sh`
+
+**Purpose**: Comprehensive pre-flight checks for YubiKey PAM authentication
+
+**Usage**:
+
+```bash
+./scripts/diagnostics/test-yubikey-auth.sh
+```
+
+**Checks Performed**:
+
+1. YubiKey USB detection
+2. pcscd service status
+3. u2f_mappings file and user registration
+4. greetd PAM configuration
+5. Password fallback configuration
+6. GNOME Keyring integration
+7. YubiKey management tools
+
+**When to use**:
+
+- **ALWAYS before logging out** after PAM authentication changes
+- After updating YubiKey configuration
+- When YubiKey authentication isn't working
+
+**See**: [docs/TESTING_YUBIKEY_AUTH.md](../../docs/TESTING_YUBIKEY_AUTH.md) for full testing guide
 
 ---
 

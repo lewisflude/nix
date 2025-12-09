@@ -39,25 +39,27 @@
         greetd = {
           # Custom PAM configuration for greetd with YubiKey + password for keyring unlock
           #
-          # Authentication flow:
-          # 1. Require YubiKey (U2F) authentication - provides hardware 2FA
-          # 2. Require password authentication - unlocks GNOME Keyring
+          # Authentication flow (per Yubico official documentation):
+          # 1. Try YubiKey (U2F) first - if present and touched, authentication succeeds
+          # 2. Fall back to password authentication - unlocks GNOME Keyring
           # 3. GNOME Keyring unlock with the password
           #
-          # This ensures both security (YubiKey required) and convenience (keyring auto-unlock)
+          # This provides passwordless convenience with reliable password fallback.
+          # For true 2FA (both required), use 'auth required' instead of 'auth sufficient'.
           text = ''
             # Account management
             account required ${pkgs.linux-pam}/lib/security/pam_unix.so
 
             # Authentication management
-            # Step 1: Require YubiKey (U2F) - using 'required' not 'sufficient'
-            # - nouserok: Allow login even if U2F not configured (fallback to password-only)
+            # Step 1: Try YubiKey (U2F) first - using 'sufficient' allows password fallback
+            # - sufficient: If YubiKey succeeds, skip remaining auth modules
+            # - nouserok: Allow password fallback if YubiKey not configured/present
             # - cue: Show prompt to touch YubiKey
-            # - userpresence=1: Require physical touch
-            auth required ${pkgs.pam_u2f}/lib/security/pam_u2f.so authfile=/etc/u2f_mappings cue nouserok userpresence=1 origin=pam://yubi
+            # - userpresence=1: Require physical touch (security best practice)
+            # Reference: https://developers.yubico.com/pam-u2f/ (Passwordless Authentication section)
+            auth sufficient ${pkgs.pam_u2f}/lib/security/pam_u2f.so authfile=/etc/u2f_mappings cue nouserok userpresence=1 origin=pam://yubi
 
-            # Step 2: Require password - this will unlock the keyring
-            # - use_first_pass: Try the password from U2F first (won't exist, so will prompt)
+            # Step 2: Password authentication fallback - this will unlock the keyring
             auth required ${pkgs.linux-pam}/lib/security/pam_unix.so
 
             # Step 3: GNOME Keyring unlock with the password
@@ -137,15 +139,17 @@
         };
         sudo.u2fAuth = true;
         login.u2fAuth = true;
-        greetd.u2fAuth = true;
+        # greetd.u2fAuth not needed - custom PAM text config above takes precedence
       };
       u2f = {
         enable = true;
-        control = "sufficient";
+        control = "sufficient"; # Use YubiKey OR password (not both)
         settings = {
           debug = false;
           interactive = true;
-          cue = true;
+          cue = true; # Show "Please touch your YubiKey" prompt
+          nouserok = true; # Allow password fallback if YubiKey not configured
+          userpresence = 1; # Require physical touch (security best practice)
           origin = "pam://yubi";
           authfile = "/etc/u2f_mappings";
           max_devices = 5;
