@@ -235,26 +235,26 @@ This configuration includes built-in MCP server support for AI coding tools (Cla
 
 ### Available MCP Servers
 
-**Active by default:**
+**Enabled by default (no secrets required):**
 
-- **memory** - Knowledge graph-based persistent memory (no secrets)
+- **memory** - Knowledge graph-based persistent memory
+- **git** - Git repository operations
+- **time** - Timezone and datetime utilities
+- **sqlite** - SQLite database access at `~/.local/share/mcp/data.db`
+- **everything** - MCP reference/test server
+
+**Disabled by default (require secrets or dependencies):**
+
 - **docs** - Documentation indexing and search (requires `OPENAI_API_KEY`)
 - **openai** - OpenAI integration with Rust docs support (requires `OPENAI_API_KEY`)
 - **rustdocs** - Bevy crate documentation (requires `OPENAI_API_KEY`)
-- **git** - Git repository operations (no secrets)
-- **time** - Timezone and datetime utilities (no secrets)
-- **sqlite** - SQLite database access at `~/.local/share/mcp/data.db` (no secrets)
-- **github** - GitHub API integration (requires `GITHUB_PERSONAL_ACCESS_TOKEN`)
-- **everything** - MCP reference/test server (no secrets)
-- **kagi** - Kagi search and summarization (requires `KAGI_API_KEY`)
-
-**Disabled by default:**
-
+- **github** - GitHub API integration (requires `GITHUB_TOKEN`)
+- **kagi** - Kagi search and summarization (requires `KAGI_API_KEY` and `uv`)
 - **brave** - Brave Search (requires `BRAVE_API_KEY`)
-- **fetch** - Web content fetching (community alternative)
-- **filesystem** - File operations
+- **filesystem** - File operations (disabled for security)
 - **sequentialthinking** - Dynamic problem-solving
-- **nixos** - NixOS package search (requires `uv`, not yet functional)
+- **fetch** - Web content fetching (community alternative)
+- **nixos** - NixOS package search (requires `uv`)
 
 ### Configuration
 
@@ -272,6 +272,9 @@ services.mcp.servers = {
   # Disable a default server
   sqlite.enabled = false;
 
+  # Enable a server that requires secrets
+  github.enabled = true;  # Requires GITHUB_TOKEN in SOPS
+
   # Add a custom server
   my-server = {
     command = "${pkgs.nodejs}/bin/npx";
@@ -281,13 +284,27 @@ services.mcp.servers = {
 };
 ```
 
-### GitHub MCP Server
+### Enabling Servers with Secrets
 
-The GitHub server requires `GITHUB_TOKEN` in SOPS secrets (already configured in `modules/shared/sops.nix`):
+To enable servers that require API keys:
 
-1. Token is in `secrets/secrets.yaml`
-2. Already configured with `allowUserRead = true` for MCP access
-3. Deployed to `/run/secrets-for-users/GITHUB_TOKEN` after rebuild
+1. **Add secret to SOPS**: Edit `secrets/secrets.yaml` with your secret
+2. **Configure secret for users**: In `modules/shared/sops.nix`, add:
+
+   ```nix
+   "MY_SECRET" = {
+     neededForUsers = true;
+     allowUserRead = true;
+   };
+   ```
+
+3. **Enable server**: In `home/{nixos,darwin}/mcp.nix`:
+
+   ```nix
+   services.mcp.servers.my-server.enabled = true;
+   ```
+
+4. **Rebuild system**: The secret will be available at `/run/secrets-for-users/MY_SECRET`
 
 See `docs/MCP_ARCHITECTURE.md` for detailed documentation.
 
