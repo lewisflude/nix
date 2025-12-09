@@ -81,6 +81,24 @@ in
             "";
       };
 
+      # Override musnix's default nofile limit (99999) for gaming compatibility
+      # musnix sets PAM limits for @audio group, but gaming (ESYNC) requires 1048576
+      # This override ensures both real-time audio and Wine/Proton gaming work correctly
+      security.pam.loginLimits = mkIf (cfg.audio.enable && cfg.audio.realtime) [
+        {
+          domain = "@audio";
+          type = "soft";
+          item = "nofile";
+          value = "1048576";
+        }
+        {
+          domain = "@audio";
+          type = "hard";
+          item = "nofile";
+          value = "1048576";
+        }
+      ];
+
       # Keep boot kernel aligned with the musnix RT kernel selection
       boot.kernelPackages = mkIf (cfg.audio.enable && cfg.audio.realtime) (
         lib.mkOverride 50 rtKernelPackages

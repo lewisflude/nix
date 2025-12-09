@@ -82,14 +82,14 @@ in
                   "stream.dont-remix" = true;
                   # Capture from the bridge's monitor stream
                   "stream.capture.sink" = "proton_stereo_bridge";
-                  "node.passive" = true;
+                  "node.passive" = false;
                 };
                 "playback.props" = {
                   "node.name" = "proton_bridge_loopback.playback";
                   "audio.position" = "FL,FR";
                   "stream.dont-remix" = true;
                   "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-output";
-                  "node.passive" = true;
+                  "node.passive" = false;
                 };
               };
             }
@@ -215,19 +215,6 @@ in
                       "priority.session" = 1900;
                       # Make this the default sink for applications
                       "node.passive" = false;
-                    };
-                  };
-                }
-                # Disable auto-reconnect for loopback capture to prevent mic connection
-                {
-                  matches = [
-                    {
-                      "node.name" = "proton_bridge_loopback.capture";
-                    }
-                  ];
-                  actions = {
-                    update-props = {
-                      "node.dont-reconnect" = true;
                     };
                   };
                 }
