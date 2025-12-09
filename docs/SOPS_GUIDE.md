@@ -5,6 +5,7 @@
 This project uses **sops-nix** for declarative secrets management with age encryption. Secrets are encrypted before being committed to git, ensuring secure version control while maintaining the benefits of declarative configuration.
 
 **Key Features:**
+
 - ✅ Age-based encryption (modern, fast, secure)
 - ✅ GPG fallback for additional security layers
 - ✅ Per-host and per-user secret isolation
@@ -24,14 +25,17 @@ Plaintext Secret → SOPS Encryption → Encrypted File (git) → NixOS Build �
 ### Key Locations
 
 **Linux (NixOS):**
+
 - System key: `/var/lib/sops-nix/key.txt`
 - SSH host key: `/etc/ssh/ssh_host_ed25519_key` (converted to age)
 
 **macOS (nix-darwin):**
+
 - User key: `~/.config/sops-nix/key.txt`
 - No SSH key auto-detection (disabled for security)
 
 **Admin Keys:**
+
 - Age key: `~/.config/sops/age/keys.txt` (or `~/Library/Application Support/sops/age/keys.txt` on macOS)
 - GPG key: In GPG keyring (`gpg --list-secret-keys`)
 
@@ -54,6 +58,7 @@ keys:
 ```
 
 **Key Groups:**
+
 - Uses YAML anchors (`&name`) for reusable references
 - Admin keys can decrypt all secrets
 - Host keys only decrypt secrets for their specific machine
@@ -196,6 +201,7 @@ age-keygen -y ~/.config/sops/age/keys.txt
 ### Key Rotation (Security Best Practice)
 
 **Rotate keys when:**
+
 - A team member leaves
 - A host is decommissioned
 - Keys may have been compromised
@@ -313,6 +319,7 @@ git commit -m "feat: Add sops configuration for newhost"
 **Cause:** Your machine's age key is not in the `.sops.yaml` for this secret file.
 
 **Solution:**
+
 ```bash
 # 1. Check which keys can decrypt
 sops secrets/secrets.yaml  # Shows error if you can't decrypt
@@ -331,6 +338,7 @@ age-keygen -y ~/.config/sops-nix/key.txt  # macOS
 **Cause:** Secret file was manually edited while encrypted, or merge conflict.
 
 **Solution:**
+
 ```bash
 # 1. Restore from git if corrupted
 git checkout secrets/secrets.yaml
@@ -347,6 +355,7 @@ sops secrets/secrets.yaml
 **Cause:** Secret not declared in NixOS configuration, or deployment failed.
 
 **Solution:**
+
 ```bash
 # 1. Verify secret is declared
 grep -r "sops.secrets.YOUR_SECRET" modules/
@@ -366,6 +375,7 @@ nh os switch  # Or darwin-rebuild switch
 **Cause:** Service user doesn't have permission to read secret.
 
 **Solution:**
+
 ```nix
 # Adjust secret permissions
 sops.secrets.YOUR_SECRET = {
@@ -398,7 +408,7 @@ sops.secrets.YOUR_SECRET = {
 - **Don't skip key backups** (keys are unrecoverable if lost)
 - **Don't use root-owned secrets** for user services (set appropriate owner)
 
-## Integration with NixOS
+## Integration with NixOS and nix-darwin
 
 ### Declaring Secrets
 
@@ -438,25 +448,275 @@ sops = {
 };
 ```
 
-### Using Secrets in Services
+## Accessing Secrets at Runtime
+
+**CRITICAL RULE:** Never use `builtins.readFile` to read secrets into your Nix configuration. This copies the cleartext secret into the world-readable Nix store. Instead, pass the **filesystem path** of the decrypted secret to your services.
+
+### Platform-Specific Secret Locations
+
+| Platform | Secret Location | Key Location |
+|----------|----------------|--------------|
+| **NixOS** | `/run/secrets/<name>` | `/var/lib/sops-nix/key.txt` |
+| **nix-darwin** | `/run/secrets/<name>` (symlink to `/run/secrets.d/*`) | `~/.config/sops-nix/key.txt` |
+
+### NixOS: Using Secrets in Services
+
+#### Option 1: EnvironmentFile (Environment Variables)
+
+Best for apps that expect secrets in environment variables (e.g., `DB_PASS=...`).
 
 ```nix
-# Reference secret path in services
-systemd.services.myservice = {
+# Secret file must contain key=value pairs
+sops.secrets.app-env = {
+  owner = "myservice";
+  mode = "0400";
+};
+
+systemd.services.my-app = {
   serviceConfig = {
-    EnvironmentFile = config.sops.secrets.SERVICE_VARS.path;
-    # Secret available as environment variable
+    # Loads all key=value pairs from the file as environment variables
+    EnvironmentFile = config.sops.secrets.app-env.path;
+    # App can now access variables like $DB_PASS
+  };
+};
+```
+
+#### Option 2: LoadCredential (Systemd Native - Recommended)
+
+Best for apps that can read from `/run/credentials/<service>/<credential>`.
+
+```nix
+sops.secrets.db_password = {
+  owner = "myservice";
+  mode = "0400";
+};
+
+systemd.services.my-app = {
+  serviceConfig = {
+    LoadCredential = [
+      "db_pass:${config.sops.secrets.db_password.path}"
+    ];
+    # App reads secret from: $CREDENTIALS_DIRECTORY/db_pass
+    # This is more secure - credentials are only visible to this service
+  };
+};
+```
+
+**Real example from this repo:**
+
+```nix
+# modules/nixos/services/media-management/protonvpn-portforward.nix
+systemd.services.protonvpn-portforward = {
+  serviceConfig = {
+    LoadCredential = lib.mkIf useSops [
+      "transmission-username:/run/secrets/transmission/rpc/username"
+      "transmission-password:/run/secrets/transmission/rpc/password"
+    ];
+  };
+  # Script reads: $CREDENTIALS_DIRECTORY/transmission-username
+};
+```
+
+#### Option 3: sops.templates (Generate Config Files)
+
+Best for generating complete config files with secrets injected.
+
+```nix
+# Declare secrets
+sops.secrets."transmission/rpc/username" = {
+  owner = "transmission";
+  group = "media";
+  mode = "0440";
+};
+
+sops.secrets."transmission/rpc/password" = {
+  owner = "transmission";
+  group = "media";
+  mode = "0440";
+};
+
+# Generate config file with secrets
+sops.templates."transmission-credentials.json" = {
+  owner = "transmission";
+  group = "media";
+  mode = "0440";
+  content = builtins.toJSON {
+    rpc-authentication-required = true;
+    # Placeholders are replaced at runtime with actual secret values
+    rpc-username = config.sops.placeholder."transmission/rpc/username";
+    rpc-password = config.sops.placeholder."transmission/rpc/password";
   };
 };
 
-# Or load directly
-environment.systemPackages = [
-  (pkgs.writeShellScriptBin "deploy-script" ''
-    export API_KEY=$(cat ${config.sops.secrets.API_KEY.path})
-    curl -H "Authorization: Bearer $API_KEY" https://api.example.com
-  '')
-];
+# Use the generated file
+services.transmission = {
+  credentialsFile = config.sops.templates."transmission-credentials.json".path;
+};
 ```
+
+**Real example from this repo:** See `modules/nixos/services/media-management/transmission.nix` lines 123-134.
+
+#### Option 4: ExecStartPre Script (Dynamic Injection)
+
+Best for apps that need secrets written to config files at runtime.
+
+```nix
+sops.secrets."qbittorrent/webui/username" = {
+  owner = "qbittorrent";
+  mode = "0440";
+};
+
+systemd.services.qbittorrent.serviceConfig = {
+  ExecStartPre = pkgs.writeShellScript "inject-credentials" ''
+    set -euo pipefail
+    USERNAME=$(cat ${config.sops.secrets."qbittorrent/webui/username".path})
+    sed -i "s|^Username=.*|Username=$USERNAME|" /var/lib/qbittorrent/config.ini
+  '';
+};
+```
+
+**Real example from this repo:** See `modules/nixos/services/media-management/qbittorrent.nix`.
+
+### nix-darwin: Using Secrets in Services
+
+macOS uses `launchd` instead of `systemd`, so patterns differ:
+
+#### Option 1: Pass Secret Path to Application
+
+If your app accepts `--secret-file` or similar:
+
+```nix
+sops.secrets.api_key = {
+  owner = config.host.username;
+};
+
+launchd.user.agents.my-agent = {
+  script = ''
+    ${pkgs.my-app}/bin/my-app --secret-file "${config.sops.secrets.api_key.path}"
+  '';
+};
+```
+
+#### Option 2: Read Secret in Wrapper Script
+
+If app requires environment variable:
+
+```nix
+launchd.user.agents.my-agent = {
+  script = ''
+    # Read secret just before running app (never stored in env long-term)
+    export API_KEY=$(cat "${config.sops.secrets.api_key.path}")
+    ${pkgs.my-app}/bin/my-app
+  '';
+};
+```
+
+**Real example from this repo:**
+
+```nix
+# modules/darwin/nix.nix - System activation script
+system.activationScripts.nixGithubToken = {
+  text = ''
+    SECRET_PATH="${config.sops.secrets.GITHUB_TOKEN.path}"
+    if [ -r "$SECRET_PATH" ]; then
+      GITHUB_TOKEN="$(cat "$SECRET_PATH")"
+      # Use the token...
+    fi
+  '';
+};
+```
+
+#### Option 3: Home Manager Shell Integration
+
+For secrets needed in your shell:
+
+```nix
+# home/darwin/mcp.nix or home.nix
+sops.secrets.github_token = { };
+
+programs.zsh.initExtra = ''
+  # Safe way to load secret into shell session
+  export GITHUB_TOKEN=$(cat ${config.sops.secrets.github_token.path})
+'';
+```
+
+### Using nix.conf Include Directive
+
+For secrets that are valid nix.conf content:
+
+```nix
+# Secret file contains: "access-tokens = github.com=TOKEN"
+sops.secrets."nix-access-token" = { };
+
+nix.extraOptions = ''
+  # '!' prefix makes include optional (no error if file missing during build)
+  !include ${config.sops.secrets."nix-access-token".path}
+'';
+```
+
+**Real example from this repo:** See `modules/nixos/system/nix/github-token.nix`.
+
+### Common Antipatterns to Avoid
+
+#### ❌ WRONG: Reading Secrets into Nix Store
+
+```nix
+# NEVER DO THIS - Exposes secret in world-readable /nix/store
+services.myapp.apiKey = builtins.readFile config.sops.secrets.API_KEY.path;
+```
+
+#### ❌ WRONG: Hardcoding Secret Paths
+
+```nix
+# NEVER DO THIS - Path may change, breaks on different systems
+ExecStart = "${pkgs.curl}/bin/curl -H 'Auth: $(cat /run/secrets/api-key)'";
+```
+
+**Fix:** Use `config.sops.secrets.api-key.path`
+
+#### ❌ WRONG: Storing Secret Path as Value
+
+```nix
+# NEVER DO THIS - Stores "/run/secrets/password" as the actual password
+services.app.password = config.sops.secrets.password.path;
+```
+
+**Fix:** Read the secret content in a script or use `sops.templates`.
+
+### Decision Checklist: Which Pattern to Use?
+
+| App Expects | Platform | Best Pattern |
+|-------------|----------|--------------|
+| Environment variables | NixOS | `EnvironmentFile` |
+| File path parameter | NixOS/Darwin | Pass `config.sops.secrets.<name>.path` |
+| `/run/credentials/*` | NixOS | `LoadCredential` |
+| Config file with secrets | NixOS/Darwin | `sops.templates` |
+| Dynamic config updates | NixOS | `ExecStartPre` script |
+| Shell environment | Darwin | Read in shell init |
+| nix.conf settings | NixOS/Darwin | `!include` directive |
+
+### Troubleshooting Secret Access
+
+**"Secret file not found":**
+
+- Check systemd service started after `sops-nix.service`
+- Verify secret declared in `sops.secrets.<name>`
+- Check permissions: `ls -la /run/secrets/`
+
+**"Permission denied":**
+
+```nix
+# Fix: Set correct owner
+sops.secrets.my-secret = {
+  owner = "myservice";  # Must match service user
+  mode = "0400";
+};
+```
+
+**"Secret contains path, not content":**
+
+- You're storing `.path` instead of reading file content
+- Use `sops.templates` or read with `cat` in script
 
 ## Quick Reference
 
@@ -503,19 +763,23 @@ find hosts/ -name "secrets.yaml" -exec sops updatekeys {} \;
 ## Maintenance Schedule
 
 ### Weekly
+
 - None required (secrets are managed declaratively)
 
 ### Monthly
+
 - Review secret access logs
 - Audit which secrets are in use
 - Check for deprecated secrets
 
 ### Quarterly
+
 - Test secret restoration from backup
 - Review `.sops.yaml` for accuracy
 - Update documentation for new patterns
 
 ### Annually
+
 - **Rotate all encryption keys** (security best practice)
 - Review team access (offboard departed members)
 - Audit secret file organization
