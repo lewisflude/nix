@@ -9,6 +9,7 @@ in
 {
   imports = [
     ./regreet.nix
+    ./console-theme.nix
   ];
 
   config = lib.mkIf cfg.enable {
