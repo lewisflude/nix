@@ -157,6 +157,16 @@ in
           ];
           shadow.enable = false;
         }
+        # Gamescope nested compositor
+        {
+          matches = [
+            { app-id = "^gamescope$"; }
+          ];
+          default-column-width = {
+            proportion = 1.0;
+          };
+          open-maximized = true;
+        }
       ];
       animations = {
         enable = true;
