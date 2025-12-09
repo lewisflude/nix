@@ -34,7 +34,12 @@
       "Bash(lsblk:*)",
       "mcp__general-filesystem__write_file",
       "Bash(/bin/cat ~/.ssh/authorized_keys)",
-      "Bash(systemctl is-active:*)"
+      "Bash(systemctl is-active:*)",
+      "Bash(systemctl show-environment:*)",
+      "Bash(systemctl --user show-environment:*)",
+      "Bash(systemctl show:*)",
+      "Bash(systemctl:*)",
+      "Bash(ulimit:*)"
     ],
     "deny": [
       "Read(**/.env)",
