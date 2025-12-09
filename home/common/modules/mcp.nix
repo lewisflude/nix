@@ -75,9 +75,14 @@ let
   mkServerConfig =
     name: serverCfg:
     let
+      # Validate required fields
+      hasCommand = serverCfg.command or null != null;
+
       # Determine the command
       command =
-        if (serverCfg.secret or null) != null then
+        if !hasCommand then
+          throw "MCP server '${name}' has no command defined. This shouldn't happen after merge."
+        else if (serverCfg.secret or null) != null then
           "${wrapWithSecret name serverCfg.command serverCfg.secret}"
         else
           serverCfg.command;
@@ -96,7 +101,8 @@ let
   serverType = types.submodule {
     options = {
       command = mkOption {
-        type = types.str;
+        type = types.nullOr types.str;
+        default = null;
         description = "Command to run the MCP server";
         example = ''"''${pkgs.nodejs}/bin/npx -y @modelcontextprotocol/server-memory"'';
       };
@@ -353,9 +359,29 @@ let
     };
   };
 
-  # Merge user config with defaults
+  # Merge user config with defaults (deep merge for each server)
   # User config overrides defaults, and we filter by enabled status
-  mergedServers = defaultServers // cfg.servers;
+  mergedServers =
+    let
+      # Helper to filter out null/default values from user config
+      filterUserOverrides = userCfg: lib.filterAttrs (_: v: v != null && v != [ ] && v != { }) userCfg;
+
+      # Start with defaults, merge in user overrides (only non-null values)
+      mergedDefaults = lib.mapAttrs (
+        name: defaultCfg:
+        if lib.hasAttr name cfg.servers then
+          let
+            userOverrides = filterUserOverrides cfg.servers.${name};
+          in
+          defaultCfg // userOverrides # Merge only non-null user overrides into default
+        else
+          defaultCfg
+      ) defaultServers;
+      # Add any user-defined servers not in defaults
+      userOnlyServers = lib.filterAttrs (name: _: !(lib.hasAttr name defaultServers)) cfg.servers;
+    in
+    mergedDefaults // userOnlyServers;
+
   activeServers = filterAttrs (
     _name: server: (server.enabled or true) # Default to enabled if not specified
   ) mergedServers;
