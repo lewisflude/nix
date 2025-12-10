@@ -25,6 +25,23 @@ in
       # NVIDIA VA-API (video acceleration) support
       LIBVA_DRIVER_NAME = "nvidia";
       NVD_BACKEND = "direct";
+
+      # NVIDIA HDR support for Wayland compositors
+      # Enables HDR metadata passthrough for compatible displays (AW3423DWF)
+      KWIN_DRM_ALLOW_NVIDIA_COLORSPACE = "1";
+
+      # NVIDIA Vulkan optimizations for gaming
+      # Enable pipeline caching for faster shader compilation
+      __GL_SHADER_DISK_CACHE = "1";
+      __GL_SHADER_DISK_CACHE_SKIP_CLEANUP = "1";
+
+      # Threading optimizations for better gaming performance
+      __GL_THREADED_OPTIMIZATION = "1";
+
+      # VRR (Variable Refresh Rate) support
+      # Ensures VRR/G-SYNC works properly with Wayland
+      __GL_GSYNC_ALLOWED = "1";
+      __GL_VRR_ALLOWED = "1";
     };
     hardware = {
       graphics = {
@@ -86,6 +103,10 @@ in
 
         # PRIME offload - not needed for desktop with single GPU
         prime.offload.enableOffloadCmd = false;
+
+        # Dynamic Boost - disable for consistent performance (important for OLED displays)
+        # Prevents frame time variance that can cause judder on VRR displays
+        dynamicBoost.enable = false;
 
         inherit package;
       };
