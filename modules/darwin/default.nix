@@ -8,6 +8,7 @@
     ./finder-preferences.nix
     ./documentation.nix
     ./security-preferences.nix
+    ./performance.nix
 
     ./apps.nix
     ./audio.nix
