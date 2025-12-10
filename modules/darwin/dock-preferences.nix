@@ -20,7 +20,7 @@ in
 
       autohide = true;
       autohide-delay = 0.0;
-      autohide-time-modifier = 0.5;
+      autohide-time-modifier = 0.0; # Reduced from 0.5 for instant dock
 
       wvous-bl-corner = 4;
       wvous-br-corner = 2;
@@ -34,7 +34,7 @@ in
 
       mru-spaces = false;
       expose-group-apps = true;
-      expose-animation-duration = 0.5;
+      expose-animation-duration = 0.1; # Reduced from 0.5 for faster Mission Control
       appswitcher-all-displays = false;
 
       magnification = true;

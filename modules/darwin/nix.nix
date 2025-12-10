@@ -30,10 +30,10 @@
     fallback = true;
     keep-going = true;
 
-    # Network settings
+    # Network settings - optimized for M4 Pro
     download-buffer-size = 524288000;
-    http-connections = 64;
-    max-substitution-jobs = 28;
+    http-connections = 128; # Increased from 64 for faster downloads
+    max-substitution-jobs = 64; # Increased from 28 for M4 Pro's performance
     connect-timeout = 5;
 
     # Substituter settings
