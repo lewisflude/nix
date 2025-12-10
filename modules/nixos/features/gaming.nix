@@ -68,7 +68,9 @@ in
       # Supports HDR, frame limiting, FSR upscaling, and more
       gamescope = mkIf cfg.steam {
         enable = true;
-        capSysNice = true; # Allow Gamescope to set process priority for better performance
+        # capSysNice doesn't work with Steam's nested bubblewrap (FHS + Steam Runtime)
+        # Use ananicy instead to manage process priority
+        capSysNice = false;
       };
 
       gamemode = mkIf cfg.performance {
@@ -87,17 +89,27 @@ in
       };
     };
 
-    services.sunshine = mkIf cfg.steam {
-      enable = true;
-      autoStart = true;
-      capSysAdmin = true;
-      openFirewall = true;
-    };
+    services = {
+      # ananicy-cpp manages process priorities for gamescope and games
+      # This is a workaround for capSysNice not working in Steam's nested bubblewrap
+      ananicy = mkIf cfg.steam {
+        enable = true;
+        package = pkgs.ananicy-cpp;
+        rulesProvider = pkgs.ananicy-rules-cachyos; # Includes quality rules for gamescope and games
+      };
 
-    services.udev = mkIf cfg.enable {
-      packages = [
-        pkgs.game-devices-udev-rules
-      ];
+      sunshine = mkIf cfg.steam {
+        enable = true;
+        autoStart = true;
+        capSysAdmin = true;
+        openFirewall = true;
+      };
+
+      udev = mkIf cfg.enable {
+        packages = [
+          pkgs.game-devices-udev-rules
+        ];
+      };
     };
 
     hardware.uinput.enable = mkIf cfg.enable true;

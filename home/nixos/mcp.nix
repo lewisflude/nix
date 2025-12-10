@@ -21,11 +21,12 @@
       openai.enabled = true;
       docs.enabled = true;
       rustdocs.enabled = true;
+      brave.enabled = true;
 
-      # Optional servers without secrets (enable if needed)
-      # filesystem.enabled = true;
-      # sequentialthinking.enabled = true;
-      # fetch.enabled = true;
+      # Optional servers without secrets
+      filesystem.enabled = true;
+      sequentialthinking.enabled = true;
+      fetch.enabled = true;
       nixos.enabled = true;
     };
   };

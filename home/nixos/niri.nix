@@ -62,7 +62,7 @@ in
         };
       };
       outputs = {
-        "DP-1" = {
+        "DP-3" = {
           scale = 1.25;
           position = {
             x = 0;
@@ -73,7 +73,7 @@ in
             height = 1440;
             refresh = 164.90;
           };
-          variable-refresh-rate = "on-demand";
+          variable-refresh-rate = true;
         };
       };
       layout = {
