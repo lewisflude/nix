@@ -15,6 +15,6 @@ let
 in
 {
   services.udev.extraRules = ''
-    SUBSYSTEM=="drm", KERNEL=="card0-DP-1", ACTION=="change", RUN+="${restoreBrightness}"
+    SUBSYSTEM=="drm", KERNEL=="card1-DP-3", ACTION=="change", RUN+="${restoreBrightness}"
   '';
 }
