@@ -7,6 +7,7 @@ _: {
       positionY = "top";
       layer = "overlay";
       control-center-layer = "top";
+      cssPriority = "user"; # Ensure our CSS overrides GTK theme backgrounds
       # Position below ironbar: bar height (42px) + gap (10px) = 52px
       control-center-margin-top = 52;
       control-center-margin-bottom = 0;

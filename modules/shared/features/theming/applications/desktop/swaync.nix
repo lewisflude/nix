@@ -24,6 +24,21 @@ let
   generateSwayncCss = ''
     /* Signal Theme - SwayNC Notification Center */
 
+    /* Floating notifications container (transparent background) */
+    .floating-notifications {
+      background: transparent;
+    }
+
+    /* Notification background wrapper (transparent) */
+    .notification-background {
+      background: transparent;
+    }
+
+    /* Global background (transparent) */
+    .background {
+      background: transparent;
+    }
+
     /* Control Center (main panel) */
     .control-center {
       background: ${colors."surface-base".hex};
