@@ -289,35 +289,38 @@ let
         color: @dialog_fg_color;
       }
 
-      /* Ensure password entry fields always get proper styling */
-      entry[visibility="password"],
-      entry[input-purpose="password"] {
-        background-color: @view_bg_color;
-        color: @view_fg_color;
-        border: 1px solid @borders;
-        border-radius: 6px;
-        padding: 6px 10px;
-        min-height: 32px;
+      /* Note: GTK CSS doesn't support attribute selectors like entry[visibility="password"]
+         Password entry styling is handled by the general entry rules above */
+
+      /* Context menus and popup menus - fix double background issue */
+      /* According to GTK4 docs: popover > contents.background > menu
+         We need to make the outer popover transparent and style the contents */
+
+      /* Make the outer popover window transparent (no padding/border) */
+      popover.menu {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        border: none;
+        box-shadow: none;
       }
 
-      entry[visibility="password"]:focus,
-      entry[input-purpose="password"]:focus {
-        border-color: @accent_color;
-        outline: 1px solid @accent_color;
-        outline-offset: -1px;
-      }
-
-      /* Context menus and popup menus - ensure fully opaque backgrounds */
-      menu,
-      .menu,
-      popover.menu,
-      popover > menu,
-      .context-menu,
-      .popup-menu {
+      /* Style the contents node which contains the menu */
+      popover.menu contents,
+      popover.menu > contents {
         background-color: @popover_bg_color;
         color: @popover_fg_color;
         border: 1px solid @borders;
-        border-radius: 6px;
+        border-radius: 8px;
+        padding: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Additional menu styling for compatibility */
+      menu,
+      .menu {
+        background-color: @popover_bg_color;
+        color: @popover_fg_color;
         padding: 4px;
       }
 
@@ -356,20 +359,21 @@ let
         margin: 4px 0;
       }
 
-      /* Ensure popovers (including context menus) have solid backgrounds */
-      popover,
-      .popover {
+      /* Non-menu popovers (tooltips, date pickers, etc.) */
+      /* Style the contents node for proper rendering */
+      popover:not(.menu) {
+        background: transparent;
+        padding: 0;
+        border: none;
+      }
+
+      popover:not(.menu) contents {
         background-color: @popover_bg_color;
         color: @popover_fg_color;
         border: 1px solid @borders;
         border-radius: 8px;
+        padding: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      }
-
-      /* GTK4 specific popover styling */
-      popover.background {
-        background-color: @popover_bg_color;
-        color: @popover_fg_color;
       }
 
       /* Note: Ironbar styling is handled by ironbar-home.nix */
@@ -378,6 +382,12 @@ let
 in
 {
   config = mkIf (cfg.enable && cfg.applications.gtk.enable && theme != null && isLinux) {
+    # Set libadwaita color scheme via environment variable
+    # This is the proper way for GTK4/libadwaita applications
+    home.sessionVariables = {
+      ADW_COLOR_SCHEME = if cfg.mode == "dark" then "prefer-dark" else "prefer-light";
+    };
+
     gtk = {
       enable = true;
 
@@ -389,7 +399,8 @@ in
 
       gtk4 = {
         extraConfig = {
-          gtk-application-prefer-dark-theme = cfg.mode == "dark";
+          # Don't use gtk-application-prefer-dark-theme for GTK4/libadwaita
+          # It will use ADW_COLOR_SCHEME from the environment instead
         };
       };
     };
