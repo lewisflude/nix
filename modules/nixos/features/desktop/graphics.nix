@@ -42,6 +42,15 @@ in
       # Ensures VRR/G-SYNC works properly with Wayland
       __GL_GSYNC_ALLOWED = "1";
       __GL_VRR_ALLOWED = "1";
+
+      # Gaming-specific NVIDIA optimizations
+      # Maximum performance mode (disable power saving during gaming)
+      __GL_SYNC_TO_VBLANK = "0"; # Let game/compositor control vsync
+      __GL_MaxFramesAllowed = "1"; # Minimum input latency
+
+      # NVIDIA-specific Vulkan optimizations
+      __NV_PRIME_RENDER_OFFLOAD = "0"; # Not using PRIME (single GPU)
+      __VK_LAYER_NV_optimus = "NVIDIA_only"; # Use NVIDIA for Vulkan
     };
     hardware = {
       graphics = {

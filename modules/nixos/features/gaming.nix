@@ -14,6 +14,14 @@ in
     # ESYNC fallback still benefits from 1,048,576 FDs, so raise the shared limit
     host.systemDefaults.fileDescriptorLimit = lib.mkOverride 60 1048576;
 
+    # Gaming-specific kernel parameters
+    boot.kernel.sysctl = {
+      # Memory management - essential for some Windows games via Wine/Proton
+      # Must override disk-performance.nix's conservative value (262144)
+      # Games like Cyberpunk 2077 can create millions of memory mappings
+      "vm.max_map_count" = lib.mkForce 2147483642;
+    };
+
     # Wine/Proton synchronization optimizations
     #
     # FSYNC (futex synchronization) - Preferred method (kernel 5.16+)
