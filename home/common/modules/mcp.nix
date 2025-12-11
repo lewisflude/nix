@@ -54,16 +54,12 @@ let
     pkgs.writeShellScript "${name}-mcp" ''
       set -euo pipefail
 
-      # Try both possible secret locations
-      SECRET_PATH=""
-      if [ -r "/run/secrets-for-users/${secretName}" ]; then
-        SECRET_PATH="/run/secrets-for-users/${secretName}"
-      elif [ -r "/run/secrets/${secretName}" ]; then
-        SECRET_PATH="/run/secrets/${secretName}"
-      else
+      # Secrets are in /run/secrets/ with sops-secrets group ownership
+      SECRET_PATH="/run/secrets/${secretName}"
+      if [ ! -r "$SECRET_PATH" ]; then
         echo "Error: ${name} requires ${secretName} secret" >&2
-        echo "Secret not found in /run/secrets-for-users/ or /run/secrets/" >&2
-        echo "Configure it in your SOPS secrets and rebuild" >&2
+        echo "Secret not found or not readable at $SECRET_PATH" >&2
+        echo "Ensure you're in the 'sops-secrets' group and the secret is configured in SOPS" >&2
         exit 1
       fi
 
@@ -393,21 +389,16 @@ let
 
   configJson = builtins.toJSON mcpConfig;
 
-  # Configuration for Claude Code CLI (~/.claude/settings.json)
-  # Merges MCP servers with other settings like permissions
-  claudeCliConfigJson = builtins.toJSON (
-    mcpConfig
-    // {
-      permissions = {
-        deny = [ "WebSearch" ]; # Disable built-in search to prefer Kagi
-      };
-    }
-  );
-
 in
 {
   options.services.mcp = {
     enable = mkEnableOption "MCP (Model Context Protocol) server configuration";
+
+    _generatedServers = mkOption {
+      type = types.attrs;
+      internal = true;
+      description = "Internal option exposing generated MCP server configs for programs.claude-code";
+    };
 
     servers = mkOption {
       type = types.attrsOf serverType;
@@ -462,6 +453,9 @@ in
   };
 
   config = mkIf cfg.enable {
+    # Expose generated servers for programs.claude-code
+    services.mcp._generatedServers = mapAttrs mkServerConfig activeServers;
+
     home = {
       # Install Node.js for NPM-based servers
       packages = [ pkgs.nodejs ];
@@ -474,8 +468,8 @@ in
         # Claude Desktop App configuration
         "${claudeConfigDir}/claude_desktop_config.json".text = configJson;
 
-        # Claude Code CLI configuration
-        ".claude/settings.json".text = claudeCliConfigJson;
+        # Note: Claude Code CLI uses programs.claude-code.mcpServers instead
+        # See home/common/apps/claude-code.nix
 
         # Also save to generated directory for reference
         ".mcp-generated/config.json".text = configJson;

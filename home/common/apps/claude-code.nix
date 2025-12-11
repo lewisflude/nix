@@ -1,4 +1,9 @@
-{ pkgs, inputs, ... }:
+{
+  pkgs,
+  inputs,
+  config,
+  ...
+}:
 {
   # Claude Code CLI - agentic coding assistant
   # Uses claude-code-overlay for pre-built binaries from Anthropic
@@ -29,7 +34,7 @@
         6. **Testing**: Suggest areas that need better test coverage
 
         ## For Nix code specifically:
-        - Check for 'with pkgs;' antipattern (should use explicit references)
+        - Check for the pkgs scope antipattern (should use explicit pkgs.package references)
         - Verify correct module placement (system vs home-manager)
         - Ensure constants are used instead of hardcoded values
         - Validate conventional commit message format
@@ -91,7 +96,7 @@
         - Desktop applications
 
         ## Code Style Requirements:
-        1. ❌ Never use 'with pkgs;' - use explicit references
+        1. ❌ Never use pkgs scope operator - use explicit pkgs.package references
         2. ✅ Use constants from lib/constants.nix
         3. ✅ Follow conventional commits
         4. ✅ Format with 'nix fmt' or 'treefmt'
@@ -397,17 +402,10 @@
       };
     };
 
-    # Note: MCP servers are configured in home/{nixos,darwin}/mcp.nix
-    # The following servers are available:
-    # - memory: Knowledge graph-based persistent memory
-    # - nixos: NixOS package and config search
-    # - kagi: Search and summarization (requires KAGI_API_KEY)
-    # - openai: Rust documentation support (requires OPENAI_API_KEY)
-    # - docs-mcp-server: Documentation indexing
-    # - rust-docs-bevy: Bevy crate documentation
-    #
-    # To configure MCP servers for claude-code, edit:
-    # - home/nixos/mcp.nix (for NixOS)
-    # - home/darwin/mcp.nix (for macOS)
+    # MCP servers configuration
+    # This will be populated by the mcp.nix module via the services.mcp interface
+    # Servers are enabled/disabled in home/{nixos,darwin}/mcp.nix
+    mcpServers =
+      if config.services.mcp.enable or false then config.services.mcp._generatedServers or { } else { };
   };
 }

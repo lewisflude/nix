@@ -23,12 +23,12 @@ in
   # Configure NixOS-specific SOPS settings for secrets already defined in modules/shared/sops.nix
   # The shared module defines the secrets themselves; this module adds NixOS-specific ownership and permissions.
   # By setting owner/group declaratively, we avoid race conditions with activation scripts.
+  # Don't use neededForUsers - it prevents custom owner/group from being applied
   sops.secrets =
     lib.genAttrs sharedSecrets (_: {
-      neededForUsers = true;
-      owner = username;
-      group = "sops-secrets";
-      mode = "0440"; # Read-only for user and group
+      owner = lib.mkForce "root";
+      group = lib.mkForce "sops-secrets";
+      mode = lib.mkForce "0440"; # Read-only for owner and group
     })
     // {
       # Nix access token needs special permissions for Nix daemon to read it

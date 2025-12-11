@@ -26,16 +26,17 @@ let
           "0440"
         else
           mode;
-      resolvedOwner = config.host.username;
-      # On NixOS with neededForUsers, we need to set the owner to the user, not root
-      # This allows the user to read their own secrets
+      # For user-readable secrets, use root owner with sops-secrets group
+      # This allows group members to read without neededForUsers complications
+      resolvedOwner = if allowUserRead then "root" else config.host.username;
       resolvedGroup = if isDarwin then "admin" else "sops-secrets";
     in
     {
       mode = resolvedMode;
       owner = resolvedOwner;
       group = resolvedGroup;
-      neededForUsers = allowUserRead;
+      # Don't use neededForUsers - it prevents custom owner/group from being applied
+      # and deploys to /run/secrets-for-users/ as root:root
     };
 in
 {
