@@ -21,7 +21,7 @@
       openai.enabled = true;
       docs.enabled = true;
       rustdocs.enabled = true;
-      brave.enabled = true;
+      # brave.enabled = false;  # Disabled - using Kagi for search instead
 
       # Optional servers without secrets
       filesystem.enabled = true;

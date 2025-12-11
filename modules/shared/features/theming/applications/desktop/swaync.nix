@@ -47,7 +47,7 @@ let
       box-shadow: 0 4px 16px ${theme.withAlpha colors."surface-base" 0.3};
     }
 
-    /* Notification list */
+    /* Notification list container (keep transparent to avoid double background) */
     .notification-row {
       background: transparent;
       border-radius: 8px;
@@ -56,7 +56,7 @@ let
 
     .notification-row:focus,
     .notification-row:hover {
-      background: ${colors."surface-subtle".hex};
+      background: transparent; /* Don't add background here - style the inner .notification instead */
     }
 
     /* Individual notifications */
@@ -67,6 +67,13 @@ let
       color: ${colors."text-primary".hex};
       padding: 12px;
       margin: 4px;
+      transition: all 0.2s ease; /* Smooth hover transition */
+    }
+
+    /* Hover effect on the notification itself */
+    .notification:hover {
+      background: ${colors."surface-emphasis".hex};
+      border-color: ${colors."accent-primary".hex};
     }
 
     .notification.critical {
