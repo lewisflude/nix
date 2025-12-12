@@ -25,7 +25,7 @@
     };
     json = {
       lsp = "vscode-langservers-extracted";
-      formatter = "biome";
+      formatter = null;
       indent = 2;
       fileTypes = [ "json" ];
     };
