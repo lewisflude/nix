@@ -115,8 +115,6 @@ in
           }
         )
       ) standards.languages;
-    };
-    settings = {
       # Configure Biome as a language server
       # Biome LSP provides linting and diagnostics for JS/TS/CSS/GraphQL
       language-server = {
@@ -125,6 +123,8 @@ in
           args = [ "lsp-proxy" ];
         };
       };
+    };
+    settings = {
       editor = {
         line-number = "relative";
         cursorline = true;

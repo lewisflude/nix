@@ -22,8 +22,7 @@ in
   '';
 
   # Pre-check App Store authentication before mas installations
-  # This prevents mas installation failures due to authentication issues
-  # Runs early (alphabetically before homebrew) to catch issues before installation
+  # If mas isn't authenticated, skip masApps to prevent brew bundle from failing
   system.activationScripts.aaCheckMasAuth = ''
     echo "🔍 Checking Mac App Store authentication for mas..."
 
@@ -40,30 +39,22 @@ in
     if mas list &> /dev/null 2>&1; then
       echo "✅ Mac App Store authentication verified (mas can list apps)"
     else
-      # Check for the specific error we're seeing (PKInstallErrorDomain Code=201)
-      # This usually means the installation service can't be accessed
       echo ""
       echo "⚠️  WARNING: Mac App Store authentication issue detected"
       echo ""
       echo "   mas cannot access the App Store installation service."
-      echo "   This usually means:"
-      echo "   1. You're not signed into the App Store app, OR"
-      echo "   2. macOS security is blocking mas from accessing the service"
+      echo "   This usually means you're not signed into the App Store."
       echo ""
-      echo "   To fix this:"
+      echo "   To fix:"
       echo "   1. Open the App Store app (open -a 'App Store')"
       echo "   2. Sign in with your Apple ID (Store > Sign In)"
-      echo "   3. Try installing an app manually to verify authentication works"
-      echo "   4. Run 'darwin-rebuild switch' again"
+      echo "   3. Run 'darwin-rebuild switch' again"
       echo ""
-      echo "   If mas installations still fail after signing in:"
-      echo "   - Install mas apps manually from the App Store"
-      echo "   - mas will recognize them and won't try to reinstall"
-      echo ""
-      echo "   The rebuild will continue, but mas app installations may fail."
+      echo "   Activation will continue, but mas app installations will fail."
       echo ""
     fi
   '';
+
   homebrew = {
     enable = true;
     onActivation = {
