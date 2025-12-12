@@ -20,7 +20,7 @@ in
 {
   programs.mangohud = {
     enable = true;
-    package = pkgs.mangohud_git; # Chaotic Nyx bleeding-edge version
+    package = pkgs.mangohud;
     enableSessionWide = false; # Only enable when needed via env var
   };
 
