@@ -70,13 +70,15 @@ in
         # };
 
         # Mail performance
-        "com.apple.mail" = {
-          # Disable inline attachments
-          DisableInlineAttachmentViewing = true;
-          # Disable send and reply animations
-          DisableReplyAnimations = true;
-          DisableSendAnimations = true;
-        };
+        # DISABLED: Mail preferences are in a sandboxed container and can't be written via CustomUserPreferences
+        # Moved to activation script below with error handling
+        # "com.apple.mail" = {
+        #   # Disable inline attachments
+        #   DisableInlineAttachmentViewing = true;
+        #   # Disable send and reply animations
+        #   DisableReplyAnimations = true;
+        #   DisableSendAnimations = true;
+        # };
 
         # Mission Control performance
         "com.apple.dock" = {
@@ -164,6 +166,13 @@ in
       # Use error handling since these may fail if Safari is running or container doesn't exist
       defaults write com.apple.Safari DebugSnapshotsUpdatePolicy -int 2 2>/dev/null || true
       defaults write com.apple.Safari IncludeInternalDebugMenu -bool true 2>/dev/null || true
+
+      # Mail performance settings
+      # Mail preferences are in a sandboxed container, so we need to write directly
+      # Use error handling since these may fail if Mail is running or container doesn't exist
+      defaults write com.apple.mail DisableInlineAttachmentViewing -bool true 2>/dev/null || true
+      defaults write com.apple.mail DisableReplyAnimations -bool true 2>/dev/null || true
+      defaults write com.apple.mail DisableSendAnimations -bool true 2>/dev/null || true
     '';
   };
 }

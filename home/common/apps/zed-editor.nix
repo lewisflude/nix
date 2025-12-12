@@ -41,9 +41,7 @@ let
 in
 {
   programs.zed-editor = {
-    # TEMPORARILY DISABLED: Build failing due to disk space (errno=28)
-    # Re-enable after freeing disk space
-    enable = false;
+    enable = true;
 
     # Add nixd to extraPackages so it's in PATH for language server
     extraPackages = [ pkgs.nixd ];
