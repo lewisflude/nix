@@ -40,8 +40,16 @@ in
     HTML = mkBiomeLanguage 2 {
       format_on_save = "on";
     };
-    JSON = mkBiomeLanguage 2 { };
-    JSONC = mkBiomeLanguage 2 { };
+    # JSON formatting disabled - Biome was overwriting JSON files
+    # Users can manually format if needed
+    JSON = {
+      tab_size = 2;
+      language_servers = [ "vscode-json-language-server" ];
+    };
+    JSONC = {
+      tab_size = 2;
+      language_servers = [ "vscode-json-language-server" ];
+    };
     Markdown = {
       format_on_save = "on";
       remove_trailing_whitespace_on_save = false;

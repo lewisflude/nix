@@ -126,5 +126,13 @@ _: {
         };
       };
     };
+
+    # Biome LSP for linting and formatting
+    # Biome provides fast linting and formatting for JavaScript, TypeScript, CSS, and more
+    biome = {
+      binary = {
+        path_lookup = true;
+      };
+    };
   };
 }

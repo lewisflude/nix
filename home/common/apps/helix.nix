@@ -7,6 +7,58 @@ let
   standards = import ../features/development/language-standards.nix;
   makeIndentString = n: builtins.concatStringsSep "" (builtins.genList (_x: " ") n);
 
+  # Helper to get a representative filename for a language (used by Biome to infer file type)
+  # Biome uses the filename extension to determine the file type when formatting via stdin
+  getLanguageFilename =
+    name: value:
+    let
+      fileTypes = value.fileTypes or [ name ];
+      # Use the first file type as the extension
+      extension = builtins.head fileTypes;
+      # Fallback map for language names that don't match their file extensions
+      extensionMap = {
+        javascript = "js";
+        typescript = "ts";
+        jsx = "jsx";
+        tsx = "tsx";
+      };
+    in
+    "file.${extensionMap.${name} or extension}";
+
+  # Helper to build formatter configuration
+  # Biome requires special handling with --stdin-file-path argument
+  # Biome uses the filename extension to determine the file type
+  buildFormatter =
+    name: value:
+    if value.formatter == "biome" then
+      {
+        command = "biome";
+        args = [
+          "format"
+          "--stdin-file-path"
+          (getLanguageFilename name value)
+        ];
+      }
+    else
+      {
+        command = value.formatter;
+      };
+
+  # Helper to build language server list
+  # For languages using Biome, add Biome LSP alongside the primary LSP
+  # Biome LSP provides linting and diagnostics
+  buildLanguageServers =
+    name: value:
+    if value.formatter == "biome" then
+      [
+        # Primary LSP for language features (type checking, completion, etc.)
+        value.lsp
+        # Biome LSP for linting and additional diagnostics
+        "biome"
+      ]
+    else
+      [ value.lsp ];
+
   # Map command names to Nix packages
   # Note: Some formatters are part of larger packages (e.g., goimports is in gotools)
   lspPackages = [
@@ -48,7 +100,7 @@ in
             scope = "source.${name}";
             injection-regex = name;
             file-types = value.fileTypes or [ name ];
-            language-servers = [ value.lsp ];
+            language-servers = buildLanguageServers name value;
             indent = {
               tab-width = value.indent;
               unit = value.unit or (makeIndentString value.indent);
@@ -59,14 +111,20 @@ in
             comment-tokens = [ value.comment ];
           }
           // lib.optionalAttrs (value.formatter != null) {
-            formatter = {
-              command = value.formatter;
-            };
+            formatter = buildFormatter name value;
           }
         )
       ) standards.languages;
     };
     settings = {
+      # Configure Biome as a language server
+      # Biome LSP provides linting and diagnostics for JS/TS/CSS/GraphQL
+      language-server = {
+        biome = {
+          command = "biome";
+          args = [ "lsp-proxy" ];
+        };
+      };
       editor = {
         line-number = "relative";
         cursorline = true;
