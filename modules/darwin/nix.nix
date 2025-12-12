@@ -44,7 +44,6 @@
 
     # Binary cache substituters (from modules/shared/core.nix)
     extra-substituters = [
-      "https://chaotic-nyx.cachix.org"
       "https://nix-community.cachix.org"
       "https://nixpkgs-wayland.cachix.org"
       "https://numtide.cachix.org"
@@ -65,7 +64,6 @@
 
     # Trusted public keys for binary caches
     extra-trusted-public-keys = [
-      "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "nixpkgs-python.cachix.org-1:hxjI7pFxTyuTHn2NkvWCrAUcNZLNS3ZAvfYNuYifcEU="
       "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="

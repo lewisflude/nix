@@ -9,8 +9,7 @@ Does the input provide:
 ├─ NixOS/Darwin/Home Manager modules? → ✅ SHOULD follow
 ├─ Overlays or packages? → ✅ SHOULD follow
 ├─ Libraries/tools that use nixpkgs? → ✅ SHOULD follow
-├─ Just data/source (flake = false)? → ❌ NO follows needed
-└─ Explicitly says "don't follow"? → ❌ NO follows (e.g., chaotic-nyx)
+└─ Just data/source (flake = false)? → ❌ NO follows needed
 ```
 
 ## Detailed Rules
@@ -41,7 +40,6 @@ Does the input provide:
 
 1. **Explicitly Documented Exceptions**
    - Inputs that explicitly say not to follow (usually for cache/performance reasons)
-   - Example: `chaotic-nyx` - uses its own nixpkgs for binary cache compatibility
    - **Why**: The input maintainer has specific reasons (usually documented in their README)
 
 2. **Data-Only Flakes**
@@ -109,15 +107,6 @@ fenix = {
 };
 ```
 
-### ❌ Explicitly Not Following (Correct)
-
-```nix
-chaotic = {
-  url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
-  # Do NOT follow nixpkgs - this breaks their cache
-  # ✅ Correctly documented exception
-};
-```
 
 ### ❓ Needs Review
 

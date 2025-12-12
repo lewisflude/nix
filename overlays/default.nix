@@ -16,10 +16,23 @@ in
     else
       (_final: _prev: { });
 
-  # Use stable zed-editor from nixpkgs
+  # Use zed-editor from official flake (includes Cachix for faster builds)
+  # TEMPORARILY DISABLED: zed flake has build issues with cargo-about@0.8.2 dependency
+  # Using nixpkgs version until zed flake is fixed or updated
+  # TODO: Re-enable when zed flake build issues are resolved
   flake-editors = _final: prev: {
     inherit (prev) zed-editor;
   };
+  # flake-editors =
+  #   final: prev:
+  #   if inputs ? zed && inputs.zed ? packages && inputs.zed.packages ? ${system} then
+  #     {
+  #       zed-editor = inputs.zed.packages.${system}.default;
+  #     }
+  #   else
+  #     {
+  #       inherit (prev) zed-editor;
+  #     };
 
   # Rust toolchains from fenix (better than nixpkgs)
   fenix-overlay =

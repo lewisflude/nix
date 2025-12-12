@@ -14,7 +14,6 @@ let
   musnix = inputs.musnix or null;
   solaar = inputs.solaar or null;
   determinate = inputs.determinate or null;
-  chaotic = inputs.chaotic or null;
 
   functionsLib = import ./functions.nix { inherit lib; };
 
@@ -63,7 +62,6 @@ let
       inherit (attrs) determinate;
       sops-nix = attrs."sops-nix" or null;
       niri = attrs.niri or null;
-      chaotic = attrs.chaotic or null;
       musnix = attrs.musnix or null;
       solaar = attrs.solaar or null;
 
@@ -75,9 +73,6 @@ let
     ++ optionalModule (sops-nix != null) sops-nix.nixosModules.sops
     # NixOS-specific integrations
     ++ optionalModule (niri != null) niri.nixosModules.niri
-    # Chaotic-nyx: For nixos-unstable, use .default module only
-    # For stable channels, use nyx-cache, nyx-overlay, nyx-registry separately
-    ++ optionalModule (chaotic != null) chaotic.nixosModules.default
     ++ optionalModule (musnix != null) musnix.nixosModules.musnix
     ++ optionalModule (solaar != null) solaar.nixosModules.default
     ++ optionalModule (nix-topology != null) nix-topology.nixosModules.default
@@ -246,7 +241,6 @@ in
           determinate
           sops-nix
           niri
-          chaotic
           musnix
           solaar
 

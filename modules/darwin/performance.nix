@@ -18,10 +18,12 @@ in
   config = lib.mkIf cfg.enable {
     system.defaults = {
       # Universal Access - disable transparency for better performance
-      universalaccess = {
-        reduceTransparency = true;
-        reduceMotion = true;
-      };
+      # DISABLED: Causes activation failure on some macOS versions
+      # Moved to activation script below with error handling
+      # universalaccess = {
+      #   reduceTransparency = true;
+      #   reduceMotion = true;
+      # };
 
       # Additional NSGlobalDomain performance settings
       # Note: Some settings are in CustomUserPreferences as they're not in nix-darwin yet
@@ -58,12 +60,14 @@ in
         };
 
         # Safari performance
-        "com.apple.Safari" = {
-          # Disable thumbnail cache for Top Sites
-          DebugSnapshotsUpdatePolicy = 2;
-          # Enable debug menu
-          IncludeInternalDebugMenu = true;
-        };
+        # DISABLED: Safari preferences are in a sandboxed container and can't be written via CustomUserPreferences
+        # Moved to activation script below with error handling
+        # "com.apple.Safari" = {
+        #   # Disable thumbnail cache for Top Sites
+        #   DebugSnapshotsUpdatePolicy = 2;
+        #   # Enable debug menu
+        #   IncludeInternalDebugMenu = true;
+        # };
 
         # Mail performance
         "com.apple.mail" = {
@@ -148,6 +152,18 @@ in
 
       # Speed up wake from sleep
       pmset -a standbydelay 86400 2>/dev/null || true
+
+      # Universal Access - disable transparency and motion for better performance
+      # Use activation script with error handling since system.defaults.universalaccess
+      # can fail on some macOS versions
+      defaults write com.apple.universalaccess reduceTransparency -bool true 2>/dev/null || true
+      defaults write com.apple.universalaccess reduceMotion -bool true 2>/dev/null || true
+
+      # Safari performance settings
+      # Safari preferences are in a sandboxed container, so we need to write directly
+      # Use error handling since these may fail if Safari is running or container doesn't exist
+      defaults write com.apple.Safari DebugSnapshotsUpdatePolicy -int 2 2>/dev/null || true
+      defaults write com.apple.Safari IncludeInternalDebugMenu -bool true 2>/dev/null || true
     '';
   };
 }
