@@ -38,6 +38,19 @@
         storage = {
           path = "/mnt/storage";
           writable = "true";
+          # Only users in media group can access
+          "valid users" = "@media";
+          # Preserve user identity but force group ownership for new files
+          "force group" = "media";
+          # Set permissions for new files/directories
+          # 0664 = rw-rw-r-- (files), 0775 = rwxrwxr-x (dirs)
+          "create mask" = "0664";
+          "directory mask" = "0775";
+          # Ensure group write bit is always set
+          "force create mode" = "0660";
+          "force directory mode" = "0770";
+          # Enable case-insensitive filename handling
+          "case sensitive" = "auto";
         };
       };
     };
