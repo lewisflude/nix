@@ -23,8 +23,19 @@
 
     # Build settings
     warn-dirty = false;
-    max-jobs = "auto"; # Darwin uses auto instead of fixed number
-    cores = 0;
+
+    # Resource limits to prevent excessive RAM usage during builds
+    # max-jobs: Number of parallel build jobs (default "auto" = all cores)
+    # Reduce this to 2-4 to limit RAM consumption
+    max-jobs = 4;
+
+    # cores: Number of cores each build job can use (0 = all available)
+    # Set to 2-4 to prevent single builds from using all resources
+    cores = 2;
+
+    # Timeout for builds with no output (prevents stuck builds)
+    max-silent-time = 3600; # 1 hour
+
     keep-outputs = true;
     keep-derivations = true;
     fallback = true;
