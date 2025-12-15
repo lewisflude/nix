@@ -49,6 +49,7 @@ in
         ];
         # Binary cache substituters
         extra-substituters = [
+          "https://chaotic-nyx.cachix.org"
           "https://nix-community.cachix.org"
           "https://nixpkgs-wayland.cachix.org"
           "https://numtide.cachix.org"
@@ -65,8 +66,10 @@ in
           "https://devenv.cachix.org"
           "https://viperml.cachix.org"
           "https://cuda-maintainers.cachix.org"
+          "https://claude-code.cachix.org"
         ];
         extra-trusted-public-keys = [
+          "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8="
           "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
           "nixpkgs-python.cachix.org-1:hxjI7pFxTyuTHn2NkvWCrAUcNZLNS3ZAvfYNuYifcEU="
           "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
@@ -83,6 +86,7 @@ in
           "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
           "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
           "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+          "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
         ];
       }
       (lib.mkIf (hostSystem == "aarch64-darwin") {

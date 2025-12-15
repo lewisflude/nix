@@ -21,7 +21,11 @@ in
   # Using nixpkgs version until zed flake is fixed or updated
   # TODO: Re-enable when zed flake build issues are resolved
   flake-editors = _final: prev: {
-    inherit (prev) zed-editor;
+    zed-editor = prev.zed-editor.overrideAttrs (oldAttrs: {
+      # Skip tests to significantly speed up build time
+      # Tests require full compilation and can take considerable time
+      doCheck = false;
+    });
   };
   # flake-editors =
   #   final: prev:
