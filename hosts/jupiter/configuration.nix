@@ -31,6 +31,7 @@
         "staff"
         "_developer"
         "git"
+        "media" # Access to /mnt/storage and media services
       ];
       shell = pkgs.zsh;
     };

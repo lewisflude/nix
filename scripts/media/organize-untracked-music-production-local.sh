@@ -16,7 +16,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Configuration
-STORAGE_PATH="/Volumes/storage/torrents"
+STORAGE_PATH="/mnt/storage/torrents"
 MUSIC_PROD_BASE="${STORAGE_PATH}/music-production"
 
 # Dry run flag
@@ -65,12 +65,12 @@ declare -A FILE_MAP=(
   # FabFilter Presets
   ["Andi.Vax.FabFilter.PRO-Q.4.222.Presets.FABFILTER.PRO-Q.4.PRESETS"]="presets/fabfilter"
   ["Andi.Vax.FabFilter.PRO-R.2.141.Presets.FABFILTER.PRO-R.2.PRESETS"]="presets/fabfilter"
-  
+
   # Plugins
   ["Avid.Aphex.Bundle.v18.8.0-R2R"]="plugins/effects"
   ["Celemony.Melodyne.5.Studio.v5.4.2.006.U2B.Mac-MORiA"]="plugins/mixing-mastering"
   ["Leapwing.Audio.LimitOne.v1.0.1.Incl.Patched.and.Keygen-R2R"]="plugins/mixing-mastering"
-  
+
   # Jungle/DnB Sample Packs
   ["Breakbeats Collection"]="sample-packs/jungle-dnb"
   ["Deviant.Audio.Jungle.Kit.v2.0.MULTiFORMAT-DECiBEL"]="sample-packs/jungle-dnb"
@@ -82,33 +82,33 @@ declare -A FILE_MAP=(
   ["THICK.Sounds.Big.Bang.Jungle.by.Veak.WAV"]="sample-packs/jungle-dnb"
   ["Zero-G.Jungle.Warfare.Vol.1.DLP.WAV.ACID-ASSiGN"]="sample-packs/jungle-dnb"
   ["Zero-G.Jungle.Warfare.Vol.2.DLP.WAV.ACID-ASSiGN"]="sample-packs/jungle-dnb"
-  
+
   # Elektron
   ["Elektron.Analog.Rythm.drum.machine.Samples.WAV.SYX"]="sample-packs/elektron-rytm"
-  
+
   # Vintage Synth Presets
   ["Matt.Curry.DX7.CARTRIDGE.2.ANALOG.LAB.BANK"]="presets/vintage-synths"
   ["Matt.Curry.DX7.CARTRIDGE.ANALOG.LAB.BANK"]="presets/vintage-synths"
   ["midierror.Yamaha.TX81Z.Editor.[Max4Live]"]="presets/vintage-synths"
   ["norCTrack.Yamaha.TX81Z.NKI.KONTAKT"]="presets/vintage-synths"
-  
+
   # Serum/Bass Presets
   ["XLNTSOUND.Quest.For.Bass.Vol.2.WAV.Serum.Preset.Ableton.Project.Files"]="presets/serum"
-  
+
   # Superior Drummer
   ["SL-Toontrack-SuperiorDrummer3_SDX_Part3"]="sample-packs/drums"
   ["SL-Toontrack-SuperiorDrummer3_SDX_Part4"]="sample-packs/drums"
   ["Toontrack.Superior.Drummer.3.Factory.Content.PART.5.WIN.MAC"]="sample-packs/drums"
   ["SL-SuperiorDrummer3_SDX_Part1.zip"]="sample-packs/drums"
   ["SL-SuperiorDrummer3_SDX_Part2.zip"]="sample-packs/drums"
-  
+
   # MIDI Packs
   ["Toontrack.Laid-Back.Grooves.MIDI"]="midi-packs"
   ["Toontrack.Salsa.Grooves.MIDI"]="midi-packs"
-  
+
   # Tutorials
   ["Groove3.Ableton.Live.12.Creative.Drum.Production.TUTORIAL"]="tutorials"
-  
+
   # Book (uncategorized)
   ["Aphex.Twins.Selected.Ambient.Works.Volume.II.33.1x3.by.Marc.Weidenbaum.EPUB"]="uncategorized"
 )
@@ -121,7 +121,7 @@ echo ""
 # Check if mount is accessible
 if [[ ! -d "$STORAGE_PATH" ]]; then
   log_error "Storage path not accessible: $STORAGE_PATH"
-  log_info "Make sure /Volumes/storage is mounted"
+  log_info "Make sure /mnt/storage is mounted"
   exit 1
 fi
 
@@ -161,12 +161,12 @@ for file in "${!FILE_MAP[@]}"; do
   category="${FILE_MAP[$file]}"
   source_path="${STORAGE_PATH}/${file}"
   dest_path="${MUSIC_PROD_BASE}/${category}/${file}"
-  
+
   echo -e "${BLUE}→${NC} ${file}"
   echo "  Category: ${category}"
   echo "  Source: ${source_path}"
   echo "  Dest: ${dest_path}"
-  
+
   if [[ "$DRY_RUN" == false ]]; then
     # Check if source exists
     if [[ ! -e "$source_path" ]]; then
@@ -175,7 +175,7 @@ for file in "${!FILE_MAP[@]}"; do
       echo ""
       continue
     fi
-    
+
     # Check if destination already exists
     if [[ -e "$dest_path" ]]; then
       log_warning "  ⚠ Destination already exists (skipping)"
@@ -183,7 +183,7 @@ for file in "${!FILE_MAP[@]}"; do
       echo ""
       continue
     fi
-    
+
     # Move the file
     if mv "$source_path" "$dest_path" 2>/dev/null; then
       log_success "  ✓ Moved"
@@ -201,7 +201,7 @@ for file in "${!FILE_MAP[@]}"; do
       skipped_count=$((skipped_count + 1))
     fi
   fi
-  
+
   echo ""
 done
 
