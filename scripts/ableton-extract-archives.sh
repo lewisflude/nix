@@ -51,8 +51,8 @@ extract_archive() {
     
     echo -e "${BLUE}Extracting: ${name}${NC}"
     
-    # Extract directly to destination
-    if unrar x -o+ -inul "${archive}" "${dest}/" 2>&1 | grep -q "All OK"; then
+    # Extract directly to destination (silently)
+    if unrar x -o+ -inul "${archive}" "${dest}/" > /dev/null 2>&1; then
         # Move archive to extracted folder
         mv "${archive}" "${EXTRACTED_DIR}/"
         echo -e "${GREEN}  ✓ Extracted successfully${NC}"
