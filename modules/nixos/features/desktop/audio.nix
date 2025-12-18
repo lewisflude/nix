@@ -179,7 +179,7 @@ in
             "90-gaming-routing" = {
               "monitor.rules" = [
                 {
-                  matches = [ { "node.name" = "apogee_stereo_game_bridge"; } ];
+                  matches = [ { "node.name" = "input.apogee_stereo_game_bridge"; } ];
                   actions.update-props = {
                     "priority.session" = 1900;
                     "node.passive" = false;
@@ -191,7 +191,7 @@ in
               "monitor.stream.rules" =
                 let
                   gameRouting = {
-                    "node.target" = "apogee_stereo_game_bridge";
+                    "node.target" = "input.apogee_stereo_game_bridge";
                     "node.latency" = gamingLatency;
                     "session.suspend-timeout-seconds" = 0;
                   };
