@@ -34,8 +34,12 @@
       services = {
         login.enableGnomeKeyring = true;
         niri.enableGnomeKeyring = true;
-        sudo.enableGnomeKeyring = true;
-        su.enableGnomeKeyring = true;
+        # Don't enable gnome-keyring for sudo/su - we use passwordless authentication
+        # which means there's no password to unlock the keyring with, causing harmless
+        # "couldn't unlock the login keyring" warnings in the journal.
+        # The keyring is already unlocked at login, so privilege escalation doesn't need it.
+        sudo.enableGnomeKeyring = false;
+        su.enableGnomeKeyring = false;
         greetd = {
           # Custom PAM configuration for greetd with YubiKey + password for keyring unlock
           #
@@ -231,4 +235,18 @@
 
   boot.initrd.systemd.enable = true;
   boot.initrd.systemd.dbus.enable = true;
+
+  # D-Bus "Ignoring duplicate name" warnings explained:
+  # ====================================================
+  # These warnings are NORMAL in NixOS and occur because:
+  # 1. Multiple package versions coexist in /nix/store (old generations, different builds)
+  # 2. Each provides the same D-Bus service file (e.g., org.freedesktop.UDisks2)
+  # 3. D-Bus broker scans all service directories and finds duplicates
+  # 4. It uses the first definition and ignores the rest (correct behavior)
+  #
+  # This is a consequence of NixOS's atomic upgrades and rollback capability.
+  # D-Bus handles this gracefully - no action needed.
+  #
+  # To view logs without these messages:
+  #   journalctl --system | grep -v "Ignoring duplicate name"
 }
