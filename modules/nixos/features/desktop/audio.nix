@@ -103,6 +103,7 @@ in
                     ];
                     "priority.session" = 1900;
                     "node.passive" = false;
+                    "node.latency" = gamingLatency;
                   };
 
                   # Routes to physical hardware (Pro Audio profile)
@@ -115,6 +116,7 @@ in
                     "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0";
                     "node.passive" = false;
                     "stream.dont-remix" = true;
+                    "node.latency" = gamingLatency;
                   };
                 };
               }
