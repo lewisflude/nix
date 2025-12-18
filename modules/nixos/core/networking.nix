@@ -31,6 +31,9 @@
   boot.kernelParams = [
     "processor.max_cstate=1"
     "intel_idle.max_cstate=1"
+    # Suppress harmless USB audio quirk messages for Apogee Symphony Desktop
+    # The device tries to query 192kHz support but we use 48kHz - this is normal
+    "usbcore.quirks=0c60:002a:b"
   ];
 
   # Network Interface Hardware Tuning

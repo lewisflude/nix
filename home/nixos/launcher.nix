@@ -59,7 +59,7 @@ in
         cursor-end = "End Control+e";
         delete-prev = "BackSpace";
         delete-next = "Delete";
-        delete-to-end-of-line = "Control+k";
+        # delete-to-end-of-line = "Control+k";  # Not a valid fuzzel keybinding
         prev = "Up Control+p";
         next = "Down Control+n";
         prev-page = "Page_Up";
