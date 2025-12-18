@@ -14,6 +14,11 @@ let
   # Audio configuration constants
   quantum = if cfg.ultraLowLatency then 64 else 256;
   latency = "${toString quantum}/48000";
+
+  # Gaming uses 2x quantum for stability (prevents crackling/underruns)
+  # Pro audio: 64 → 128 or 256 → 512
+  gamingQuantum = quantum * 2;
+  gamingLatency = "${toString gamingQuantum}/48000";
 in
 {
   config = mkIf cfg.enable (mkMerge [
@@ -187,7 +192,7 @@ in
                 let
                   gameRouting = {
                     "node.target" = "apogee_stereo_game_bridge";
-                    "node.latency" = "256/48000";
+                    "node.latency" = gamingLatency;
                     "session.suspend-timeout-seconds" = 0;
                   };
                 in
