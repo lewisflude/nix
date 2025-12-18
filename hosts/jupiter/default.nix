@@ -59,7 +59,7 @@
         # Professional audio configuration for Apogee Symphony Desktop
         # Ultra-low latency: 64 frames @ 48kHz = ~1.3ms (for recording/monitoring)
         # Set to false for general use (256 frames = ~5.3ms)
-        ultraLowLatency = true;
+        ultraLowLatency = false;
 
         # USB audio interface optimizations
         usbAudioInterface = {

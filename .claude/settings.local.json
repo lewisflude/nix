@@ -44,7 +44,13 @@
       "Bash(statix fix:*)",
       "Bash(journalctl:*)",
       "Bash(/bin/ls:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(pw-metadata:*)",
+      "Bash(pw-top:*)",
+      "Bash(pactl list:*)",
+      "Bash(top:*)",
+      "Bash(ps:*)",
+      "Bash(pipewire:*)"
     ],
     "deny": [
       "Read(**/.env)",

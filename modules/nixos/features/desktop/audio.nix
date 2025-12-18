@@ -43,6 +43,21 @@ in
               "default.clock.min-quantum" = 64;
               "default.clock.max-quantum" = 2048;
             };
+            "context.modules" = [
+              {
+                name = "libpipewire-module-rt";
+                args = {
+                  "nice.level" = -11;
+                  "rt.prio" = 88;
+                  "rt.time.soft" = 200000;
+                  "rt.time.hard" = 200000;
+                };
+                flags = [
+                  "ifexists"
+                  "nofail"
+                ];
+              }
+            ];
           };
 
           # Low-latency configuration for PulseAudio backend
@@ -230,6 +245,9 @@ in
       boot.kernelParams = lib.optionals cfg.usbAudioInterface.enable [
         "usbcore.autosuspend=-1" # Disable USB autosuspend for audio
       ];
+
+      # CPU frequency governor for stable audio performance
+      powerManagement.cpuFreqGovernor = "performance";
 
       # Assertions to ensure proper configuration
       assertions = [
