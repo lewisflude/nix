@@ -1,5 +1,7 @@
 # Scripts Directory
 
+**⚠️ IMPORTANT**: Do not add new scripts to this directory without explicit permission. This directory was intentionally cleaned from 63→21 scripts. For new CLI tools, use POG apps in `pkgs/pog-scripts/` instead of shell scripts.
+
 Utility scripts for NixOS configuration management, diagnostics, automation, and AI tool integration. Scripts are organized by category for easy discovery and maintenance.
 
 ## 📂 Directory Structure
