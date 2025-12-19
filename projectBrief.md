@@ -9,20 +9,25 @@ This is a cross-platform Nix configuration repository that manages system config
 ## Core Features
 
 ### Multi-Platform Support
+
 - **NixOS** - Linux system configurations
 - **nix-darwin** - macOS system configurations
 - **Home Manager** - Cross-platform user environment management
 - **Nix Flakes** - Modern dependency management and reproducibility
 
 ### Host Management
+
 Multiple hosts with specific configurations:
+
 - Desktop workstations (gaming, audio production)
 - Servers (media, torrenting, home automation)
 - Development machines
 - Each host defined in `hosts/<hostname>/`
 
 ### Feature-Based Configuration
+
 Uses feature flags for modular configuration:
+
 - `features.gaming.enable` - Gaming setup (Steam, Lutris, etc.)
 - `features.audio.enable` - Audio production (JACK, PipeWire, plugins)
 - `features.development.enable` - Development tools
@@ -30,13 +35,16 @@ Uses feature flags for modular configuration:
 - See `docs/FEATURES.md` for complete list
 
 ### Automated Tools
+
 **POG Scripts** (Interactive CLI tools in `pkgs/pog-scripts/`):
+
 - `new-module` - Scaffold new configuration modules
 - `update-all` - Update all dependencies (flake inputs, ZSH plugins)
 - `visualize-modules` - Generate module dependency graphs
 - `setup-cachix` - Configure binary cache
 
 **Shell Scripts** (`scripts/`):
+
 - qBittorrent diagnostics and monitoring
 - VPN port forwarding automation
 - SSH performance testing
@@ -46,6 +54,7 @@ Uses feature flags for modular configuration:
 ## Target Users
 
 **Primary User**: System administrator managing personal infrastructure with:
+
 - Multiple NixOS and macOS machines
 - Complex requirements (gaming, audio production, media serving)
 - Need for reproducibility and version control
@@ -56,6 +65,7 @@ Uses feature flags for modular configuration:
 ## Technical Highlights
 
 ### Architecture Principles
+
 1. **Separation of Concerns**: System vs user configuration strictly separated
 2. **Modularity**: Feature-based modules that can be enabled/disabled per host
 3. **Cross-Platform**: Shared modules work on both NixOS and nix-darwin
@@ -63,6 +73,7 @@ Uses feature flags for modular configuration:
 5. **Reproducibility**: Flake lock ensures identical builds across machines
 
 ### Key Technologies
+
 - **Nix Flakes** - Dependency management and hermetic builds
 - **Home Manager** - User environment and dotfile management
 - **nixpkgs** - Package repository (follows unstable for latest packages)
@@ -99,12 +110,14 @@ Uses feature flags for modular configuration:
 ## Current Development Focus
 
 ### Active Areas
+
 - Audio production environment optimization (PipeWire, JACK, VST plugins)
 - Media server reliability (qBittorrent, *arr apps, Jellyfin)
 - VPN integration and port forwarding automation
 - Gaming configuration (Steam, Proton, anti-cheat compatibility)
 
 ### Recent Improvements
+
 - Feature-based configuration system overhaul
 - Module placement standardization
 - Linting and formatting automation
@@ -112,6 +125,7 @@ Uses feature flags for modular configuration:
 - POG-based tooling for better UX
 
 ### Ongoing Challenges
+
 - Balancing bleeding-edge packages with stability
 - Cross-platform consistency (NixOS vs nix-darwin differences)
 - Managing complexity as configuration grows
@@ -133,4 +147,4 @@ Uses feature flags for modular configuration:
 - `docs/FEATURES.md` - Feature flag system documentation
 - `docs/DX_GUIDE.md` - Development experience and workflow guide
 - `docs/QBITTORRENT_GUIDE.md` - Media server setup
-- `techContext.md` - Technical implementation details (companion file)
+- `docs/SOPS_GUIDE.md` - Secret management guide

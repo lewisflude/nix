@@ -87,7 +87,7 @@ Network performance testing, MTU optimization, and speed benchmarking.
 
 ---
 
-### [Diagnostics](diagnostics/README.md) - Troubleshooting (3 scripts)
+### [Diagnostics](diagnostics/README.md) - Troubleshooting (2 scripts)
 
 Interactive diagnostic tools for identifying system issues.
 
@@ -95,8 +95,6 @@ Interactive diagnostic tools for identifying system issues.
 
 - `diagnose-ssh-slowness.sh` - SSH performance diagnostics
 - `test-ssh-performance.sh` - SSH benchmarking
-- `diagnose-steam-audio.sh` - Steam/Proton audio issues
-- `debug-newline-keybinding.sh` - Troubleshoot Shift+Enter keybindings
 
 **Integration**: Standalone diagnostic tools
 
@@ -104,14 +102,13 @@ Interactive diagnostic tools for identifying system issues.
 
 ---
 
-### [Validation](validation/README.md) - Configuration Testing (2 scripts)
+### [Validation](validation/README.md) - Configuration Testing (1 script)
 
-Validate system configuration and AI tool setups before deployment.
+Validate system configuration before deployment.
 
 **Key Scripts**:
 
 - `validate-config.sh` - Validate Nix configuration
-- `ai-tool-setup.sh` - Verify AI tool configurations
 
 **Integration**: Standalone validation tools (use in pre-commit hooks)
 
@@ -127,31 +124,31 @@ Validate system configuration and AI tool setups before deployment.
 |--------------|--------|----------|
 | Check VPN port forwarding | `monitor-protonvpn-portforward.sh` | media |
 | Diagnose slow SSH | `diagnose-ssh-slowness.sh` | diagnostics |
-| Debug Shift+Enter keybindings | `debug-newline-keybinding.sh` | diagnostics |
-| Optimize network MTU | `optimize-mtu.sh` | network |
-| Fix Steam audio issues | `diagnose-steam-audio.sh` | diagnostics |
+| Test network speed | `test-sped.sh` | network |
 | Validate config before rebuild | `validate-config.sh` | validation |
-| Check AI tool setup | `ai-tool-setup.sh` | validation |
 | Verify qBittorrent setup | `verify-qbittorrent-vpn.sh` | media |
 | Monitor HDD storage | `monitor-hdd-storage.sh` | media |
 | Benchmark SSH performance | `test-ssh-performance.sh` | diagnostics |
+| Diagnose qBittorrent seeding | `diagnose-qbittorrent-seeding.sh` | media |
 
 ### By Integration Status
 
 **Automated (Integrated into System)** (12 scripts):
 
-- **Claude Code Hooks** (7) → `.claude/settings.json`
+- **Claude Code Hooks** (5) → `.claude/settings.json`
   - All hooks run automatically during Claude Code sessions
-- **qBittorrent/VPN** (5) → NixOS modules
+- **qBittorrent/VPN** (7) → NixOS modules
   - `protonvpn-natpmp-portforward.sh` - systemd service
   - `show-protonvpn-port.sh` - system package
   - `monitor-protonvpn-portforward.sh` - system package
   - `verify-qbittorrent-vpn.sh` - system package
   - `test-vpn-port-forwarding.sh` - system package
+  - `diagnose-qbittorrent-seeding.sh` - system package
+  - `test-qbittorrent-seeding-health.sh` - system package
 
-**Standalone (Manual Execution)** (12 scripts):
+**Standalone (Manual Execution)** (9 scripts):
 
-- All diagnostics, network tests, and validation tools
+- Diagnostics (2), network tests (1), validation (1), templates (1)
 - Run these manually for troubleshooting and testing
 
 ## 🛠️ Development
@@ -198,8 +195,6 @@ for hook in scripts/hooks/*.sh; do
   "$hook" --help
 done
 
-# Run validation on all scripts
-./scripts/validation/ai-tool-setup.sh
 ```
 
 ## 📖 Documentation
@@ -214,8 +209,7 @@ done
 - **Guides**:
   - [qBittorrent Setup Guide](../docs/QBITTORRENT_GUIDE.md) - Complete setup
   - [ProtonVPN Port Forwarding](../docs/PROTONVPN_PORT_FORWARDING_SETUP.md) - VPN config
-  - [Script Organization Proposal](../docs/SCRIPT_ORGANIZATION_PROPOSAL.md) - Architecture
-  - [AI Tools Guide](../AI_TOOLS.md) - AI assistant setup
+  - [AI Assistant Guidelines](../CLAUDE.md) - AI assistant guidelines
 
 ## 🔧 Common Tasks
 
@@ -231,28 +225,19 @@ done
 # Check port forwarding
 ./scripts/media/test-vpn-port-forwarding.sh
 
-# Check specific port (64243)
-./scripts/check-torrent-port-64243.sh
-
-# Check any port
-./scripts/check-torrent-port.sh 64243
-
-# Update Transmission port manually
-./scripts/update-transmission-port.sh 55555 -u admin -p secret
-
-# Get Transmission session info
-./scripts/update-transmission-port.sh info -u admin -p secret
-
 # Diagnose seeding issues
 ./scripts/media/diagnose-qbittorrent-seeding.sh
+
+# Full health check
+./scripts/media/test-qbittorrent-seeding-health.sh
+
+# Test connectivity
+./scripts/media/test-qbittorrent-connectivity.sh
 ```
 
-### Optimizing Network Performance
+### Testing Network Performance
 
 ```bash
-# Discover optimal MTU
-sudo ./scripts/network/optimize-mtu.sh
-
 # Test speeds
 ./scripts/network/test-sped.sh
 
@@ -271,22 +256,6 @@ sudo ip netns exec qbt ./scripts/network/test-sped.sh  # VPN
 ./scripts/diagnostics/test-ssh-performance.sh jupiter
 
 # Apply recommended config to ~/.ssh/config
-```
-
-### Debugging Keybinding Issues
-
-```bash
-# Debug Shift+Enter not working in apps (Claude, Cursor, terminal, etc.)
-./scripts/debug-newline-keybinding.sh
-
-# This will:
-# - Check Ghostty configuration
-# - Verify ZSH setup
-# - Look for conflicts (Karabiner, system shortcuts)
-# - Check app-specific configurations
-# - Provide a test file and troubleshooting steps
-
-# See also: docs/NEWLINE_KEYBINDINGS.md for full documentation
 ```
 
 ### Before System Rebuild
@@ -328,13 +297,9 @@ host.services.mediaManagement.qbittorrent.vpn.portForwarding = {
 
 ### Claude Code Hooks
 
-Hooks run automatically during Claude Code sessions. Check status:
+Hooks run automatically during Claude Code sessions. Test specific hook:
 
 ```bash
-# Validate hook setup
-./scripts/validation/ai-tool-setup.sh
-
-# Test specific hook
 echo '{"tool_name":"Bash","tool_input":{"command":"ls"}}' | \
   ./scripts/hooks/block-dangerous-commands.sh
 ```
@@ -393,6 +358,6 @@ Category-specific dependencies are listed in each category's README.
 
 ---
 
-**Last Updated**: 2025-11-26
-**Scripts**: 24 total (7 hooks, 9 media, 3 network, 3 diagnostics, 2 validation)
-**Organization**: Phase 1 complete (categorized structure with backward compatibility)
+**Last Updated**: 2025-12-19
+**Scripts**: 21 total (5 hooks, 9 media, 1 network, 2 diagnostics, 1 validation, 1 template)
+**Organization**: Cleaned and optimized (removed 42 obsolete scripts)

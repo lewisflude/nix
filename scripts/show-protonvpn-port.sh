@@ -1,1 +1,0 @@
-media/show-protonvpn-port.sh
