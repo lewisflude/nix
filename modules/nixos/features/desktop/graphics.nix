@@ -39,9 +39,9 @@ in
 
       nvidia = {
         modesetting.enable = true;
-        open = true;
+        open = false; # Proprietary driver for better gaming performance
         nvidiaSettings = true;
-        powerManagement.enable = true;
+        powerManagement.enable = false; # Not needed for desktop gaming GPUs
 
         inherit package;
       };
