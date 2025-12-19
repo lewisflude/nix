@@ -47,6 +47,23 @@ in
       emulators = mkEnableOption "gaming emulators";
     };
 
+    vr = {
+      enable = mkEnableOption "virtual reality support and optimizations";
+      alvr = mkEnableOption "ALVR wireless VR streaming" // {
+        default = true;
+      };
+      monado = mkEnableOption "Monado OpenXR runtime" // {
+        default = true;
+      };
+      steamvr = mkEnableOption "SteamVR support";
+      sidequest = mkEnableOption "SideQuest for Quest sideloading" // {
+        default = true;
+      };
+      performance = mkEnableOption "VR-specific performance optimizations" // {
+        default = true;
+      };
+    };
+
     virtualisation = {
       enable = mkEnableOption "virtual machines and containers";
       docker = mkEnableOption "Docker containers";

@@ -27,6 +27,15 @@
       lutris = true;
     };
 
+    vr = {
+      enable = true;
+      alvr = true;
+      monado = true;
+      steamvr = true;
+      sidequest = true;
+      performance = true;
+    };
+
     virtualisation = {
       enable = true;
       podman = true;

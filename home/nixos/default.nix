@@ -15,6 +15,7 @@
     ./apps/satty.nix
     ./apps/wofi.nix
     ./apps/gaming.nix
+    ./apps/vr.nix
     ./apps/mpv.nix
     ./apps/obs.nix
   ];
