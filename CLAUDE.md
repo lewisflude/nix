@@ -12,6 +12,23 @@ This document provides guidelines for AI assistants working with this Nix config
 
 Instead, suggest commands for the user to run manually.
 
+## Creating Documentation and Scripts
+
+**CRITICAL**: Do NOT create new documentation files or shell scripts without explicit user permission. The repository was intentionally cleaned of excessive documentation and scripts.
+
+**Guidelines:**
+
+- **Never proactively create** `.md` files in `docs/` or `.sh` files in `scripts/`
+- **Ask permission first** if the user's request implies creating new docs or scripts
+- **Use existing documentation** - update existing files rather than creating new ones
+- **Prefer inline documentation** in code comments over separate doc files
+- **Use POG scripts** (`pkgs/pog-scripts/`) for new CLI tools instead of shell scripts
+
+**Exceptions** (still require user confirmation):
+
+- User explicitly says "create a script to..." or "write documentation for..."
+- Task absolutely requires a new file and no existing file can be updated
+
 ## Repository Structure
 
 This is a cross-platform Nix configuration supporting:

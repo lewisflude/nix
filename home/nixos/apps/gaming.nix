@@ -11,7 +11,15 @@ let
   # Lutris wrapper to ensure ESYNC limits are set explicitly
   # System-wide limits are configured in modules/nixos/features/gaming.nix
   # but this ensures limits are set even if launched outside systemd scope
+  # Also sets explicit Vulkan ICD path to prevent GPU detection failures
   lutris-systemd = pkgs.writeShellScriptBin "lutris-systemd" ''
+    # Explicitly set NVIDIA Vulkan ICD to prevent intermittent detection failures
+    # This fixes "GPU outdated" errors caused by Vulkan loader timing issues
+    export VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.x86_64.json:/run/opengl-driver-32/share/vulkan/icd.d/nvidia_icd.i686.json
+
+    # Ensure DXVK uses the correct Vulkan device (fix for multi-GPU systems)
+    export DXVK_FILTER_DEVICE_NAME="NVIDIA"
+
     exec ${pkgs.systemd}/bin/systemd-run --user --scope \
       --property="LimitNOFILE=1048576:1048576" \
       ${pkgs.lutris}/bin/lutris "$@"

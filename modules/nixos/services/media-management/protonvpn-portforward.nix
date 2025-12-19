@@ -223,22 +223,6 @@ in
 
           # Port forwarding automation script (can be run manually)
           portforwardScript
-
-          # Helper to show current port
-          (pkgs.writeShellScriptBin "show-protonvpn-port" (
-            builtins.readFile ../../../../scripts/show-protonvpn-port.sh
-          ))
-
-          # Diagnostic scripts
-          (pkgs.writeShellScriptBin "monitor-protonvpn-portforward" (
-            builtins.readFile ../../../../scripts/monitor-protonvpn-portforward.sh
-          ))
-          (pkgs.writeShellScriptBin "verify-qbittorrent-vpn" (
-            builtins.readFile ../../../../scripts/verify-qbittorrent-vpn.sh
-          ))
-          (pkgs.writeShellScriptBin "test-vpn-port-forwarding" (
-            builtins.readFile ../../../../scripts/test-vpn-port-forwarding.sh
-          ))
         ];
       };
 }

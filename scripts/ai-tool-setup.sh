@@ -1,1 +1,0 @@
-validation/ai-tool-setup.sh
