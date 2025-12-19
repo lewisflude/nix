@@ -13,6 +13,19 @@ This guide outlines the developer experience tooling and best practices for this
 - [Formatting and Linting](#formatting-and-linting)
 - [Best Practices](#best-practices)
 
+## ⚠️ Creating Documentation and Scripts
+
+**Do not create new documentation files or shell scripts without explicit permission.** The repository was intentionally cleaned from 76→11 docs and 63→21 scripts to reduce maintenance burden.
+
+**Guidelines:**
+
+- **Ask first** before creating `.md` files in `docs/` or `.sh` files in `scripts/`
+- **Update existing files** rather than creating new ones
+- **Use POG scripts** in `pkgs/pog-scripts/` for new CLI tools instead of shell scripts
+- **Inline documentation** in code is preferred over separate doc files
+
+See `CLAUDE.md` for complete AI assistant guidelines on this policy.
+
 ## Getting Started
 
 Enter the development environment to get access to all DX tooling:

@@ -12,6 +12,15 @@ Thank you for your interest in contributing! This document provides guidelines a
 - [Testing](#testing)
 - [Documentation](#documentation)
 
+## ⚠️ Important: Documentation and Scripts
+
+**Do not create new documentation files or shell scripts without explicit permission.** The repository was intentionally cleaned from 76→11 docs and 63→21 scripts.
+
+- **Ask first** before creating new `.md` or `.sh` files
+- **Update existing files** rather than creating new ones
+- **Use POG apps** in `pkgs/pog-scripts/` for new CLI tools
+- See `CLAUDE.md` for complete guidelines
+
 ## Getting Started
 
 ### Prerequisites
