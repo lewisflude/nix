@@ -48,8 +48,7 @@ in
         remotePlay.openFirewall = true;
         dedicatedServer.openFirewall = true;
 
-        # Fix for Steam/Proton games not producing audio with PipeWire
-        # Provides complete audio stack for all game audio APIs:
+        # Complete audio stack for game compatibility
         # - PulseAudio/libpulseaudio: For SDL2 games and Wine/Proton
         # - PipeWire: For native PipeWire-aware games
         # - ALSA libs: For FMOD games (Dwarf Fortress), OpenAL, and low-level audio
@@ -62,17 +61,8 @@ in
           pkgs.alsa-plugins # ALSA plugins including PipeWire bridge
         ];
 
-        # Wrap Steam to fix pressure-vessel container audio issues
-        # pressure-vessel tries to use /run/pressure-vessel/pulse/native which doesn't exist
-        # Override to use the actual PipeWire-pulse socket location
-        package = pkgs.steam.override {
-          extraEnv = {
-            # Force games to use host's PipeWire-pulse socket directly
-            # This bypasses pressure-vessel's broken audio socket setup
-            # Use direct path since XDG_RUNTIME_DIR is always /run/user/UID
-            PULSE_SERVER = "unix:/run/user/1000/pulse/native";
-          };
-        };
+        # Note: pressure-vessel audio issues were fixed in nixpkgs PR #114024 (2021)
+        # No custom package override needed - using stock Steam
       };
 
       # Gamescope compositor for improved gaming experience
@@ -93,8 +83,8 @@ in
           gpu = {
             apply_gpu_optimisations = "accept-responsibility";
             gpu_device = 0;
-
-            amd_performance_level = "high";
+            # Note: NVIDIA GPU optimizations handled by driver
+            # AMD-specific settings (amd_performance_level) not applicable
           };
         };
       };
