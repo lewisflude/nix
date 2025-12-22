@@ -20,6 +20,9 @@ in
       # Must override disk-performance.nix's conservative value (262144)
       # Games like Cyberpunk 2077 can create millions of memory mappings
       "vm.max_map_count" = lib.mkForce 2147483642;
+
+      # Note: vm.swappiness and vm.vfs_cache_pressure are already optimally
+      # configured in disk-performance.nix (swappiness=10, vfs_cache_pressure=50)
     };
 
     # Wine/Proton synchronization optimizations

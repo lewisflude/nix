@@ -17,6 +17,10 @@ in
       LIBVA_DRIVER_NAME = "nvidia";
       NVD_BACKEND = "direct";
 
+      # Wayland/GBM backend support
+      GBM_BACKEND = "nvidia-drm";
+      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+
       # Gaming optimizations (shader caching and threading)
       __GL_SHADER_DISK_CACHE = "1";
       __GL_THREADED_OPTIMIZATION = "1";
@@ -39,7 +43,7 @@ in
 
       nvidia = {
         modesetting.enable = true;
-        open = false; # Proprietary driver for better gaming performance
+        open = true; # Open-source kernel modules for RTX 4090 (Turing+)
         nvidiaSettings = true;
         powerManagement.enable = false; # Not needed for desktop gaming GPUs
 
