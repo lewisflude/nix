@@ -32,6 +32,8 @@
         "_developer"
         "git"
         "media" # Access to /mnt/storage and media services
+        "uinput" # Required for Sunshine to capture input (mouse/keyboard)
+        "video" # Required for GPU access
       ];
       shell = pkgs.zsh;
     };

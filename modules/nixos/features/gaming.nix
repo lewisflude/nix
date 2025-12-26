@@ -61,6 +61,22 @@ in
           pkgs.alsa-plugins # ALSA plugins including PipeWire bridge
         ];
 
+        # Steam wrapper: Ensure NVIDIA encoding libraries are accessible for Remote Play streaming
+        # Steam Remote Play needs NVENC for hardware-accelerated encoding to Quest 3
+        # Without this, Steam may fall back to software encoding which can fail or perform poorly
+        # Note: If VR is enabled, VR module will handle Steam wrapping (includes NVIDIA encoding)
+        package = lib.mkIf (!(config.host.features.vr.enable or false)) (
+          pkgs.steam.overrideAttrs (oldAttrs: {
+            buildCommand = (oldAttrs.buildCommand or "") + ''
+              wrapProgram $out/bin/steam \
+                --set LD_LIBRARY_PATH "${config.hardware.nvidia.package}/lib:''${LD_LIBRARY_PATH:-}" \
+                --set __GLX_VENDOR_LIBRARY_NAME "nvidia" \
+                --set GBM_BACKEND "nvidia-drm"
+            '';
+            nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
+          })
+        );
+
         # Note: pressure-vessel audio issues were fixed in nixpkgs PR #114024 (2021)
         # No custom package override needed - using stock Steam
       };
@@ -104,6 +120,10 @@ in
         autoStart = true;
         capSysAdmin = true;
         openFirewall = true;
+        # Enable CUDA support for NVENC hardware encoding
+        # Without this, Sunshine can't load libcuda.so.1 and falls back to software encoding
+        # See: https://discourse.nixos.org/t/rtx-3070-sunshine-nvec-encoding-fails/62131
+        package = pkgs.sunshine.override { cudaSupport = true; };
       };
 
       udev = mkIf cfg.enable {
@@ -111,6 +131,21 @@ in
           pkgs.game-devices-udev-rules
         ];
       };
+    };
+
+    # Explicit Steam Link firewall ports for Quest 3 compatibility
+    # These ports are used by Steam Link for discovery and streaming
+    # Note: remotePlay.openFirewall should handle these, but explicit rules ensure compatibility
+    # with Quest 3 and other Steam Link clients that may have stricter requirements
+    networking.firewall = mkIf cfg.steam {
+      allowedUDPPorts = [
+        27031 # Steam Link discovery
+        27036 # Steam Link streaming
+        27037 # Steam Link streaming
+      ];
+      allowedTCPPorts = [
+        27036 # Steam Link streaming
+      ];
     };
 
     hardware.uinput.enable = mkIf cfg.enable true;
