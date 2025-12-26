@@ -29,9 +29,16 @@
 
     vr = {
       enable = true;
-      alvr = true;
+      alvr = false; # ALVR requires SteamVR - use WiVRn for Monado instead
       monado = true;
-      steamvr = true;
+      wivrn = {
+        enable = true;
+        autoStart = true; # Start automatically for convenience
+        defaultRuntime = true; # WiVRn manages Monado runtime
+        openFirewall = true;
+      };
+      opencomposite = true; # Required for running OpenVR games on Monado (Wayland)
+      steamvr = false; # Not needed on Wayland - Monado replaces SteamVR
       sidequest = true;
       performance = true;
     };

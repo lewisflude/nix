@@ -55,6 +55,15 @@ in
       monado = mkEnableOption "Monado OpenXR runtime" // {
         default = true;
       };
+      wivrn = {
+        enable = mkEnableOption "WiVRn wireless VR streaming";
+        autoStart = mkEnableOption "Start WiVRn service automatically on boot";
+        defaultRuntime = mkEnableOption "Set WiVRn as default OpenXR runtime";
+        openFirewall = mkEnableOption "Open firewall ports for WiVRn" // {
+          default = true;
+        };
+      };
+      opencomposite = mkEnableOption "OpenComposite (OpenVR to OpenXR translation)";
       steamvr = mkEnableOption "SteamVR support";
       sidequest = mkEnableOption "SideQuest for Quest sideloading" // {
         default = true;
