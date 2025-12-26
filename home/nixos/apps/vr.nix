@@ -1,28 +1,49 @@
 {
   lib,
   pkgs,
+  config,
   osConfig ? { },
   ...
 }:
 let
+  inherit (lib) mkIf;
   vrEnabled = osConfig.host.features.vr.enable or false;
-  monadoEnabled = osConfig.host.features.vr.monado or false;
+  opencompositeEnabled = osConfig.host.features.vr.opencomposite or false;
 in
-lib.mkIf vrEnabled {
+mkIf vrEnabled {
   # User VR packages
-  home.packages = [
-    pkgs.wivrn # Alternative wireless VR (if ALVR doesn't work)
-  ];
+  home.packages = [ pkgs.wlx-overlay-s ];
 
-  # OpenXR environment variable (Monado handles runtime via systemd)
-  home.sessionVariables = lib.mkIf monadoEnabled {
-    XR_RUNTIME_JSON = "${pkgs.monado}/share/openxr/1/openxr_monado.json";
+  # OpenComposite configuration
+  # Allows OpenVR games (including SteamVR) to run on OpenXR runtimes (Monado/WiVRn)
+  # Force = true prevents Steam from overwriting this file with SteamVR paths
+  xdg.configFile."openvr/openvrpaths.vrpath" = mkIf opencompositeEnabled {
+    force = true; # Prevent Steam from reverting to SteamVR
+    text = ''
+      {
+        "config" :
+        [
+          "${config.xdg.dataHome}/Steam/config"
+        ],
+        "external_drivers" : null,
+        "jsonid" : "vrpathreg",
+        "log" :
+        [
+          "${config.xdg.dataHome}/Steam/logs"
+        ],
+        "runtime" :
+        [
+          "${pkgs.opencomposite}/lib/opencomposite"
+        ],
+        "version" : 1
+      }
+    '';
   };
 
   # Shell aliases for VR tools
   programs.zsh.shellAliases = {
-    # ALVR is now a wrapped command with optimized env vars
-    alvr-log = "journalctl --user -u monado -f";
+    # VR logs
+    wivrn-log = "journalctl --user -u wivrn -f";
 
     # Quest ADB shortcuts
     quest-connect = "adb connect"; # Usage: quest-connect 192.168.1.X

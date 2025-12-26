@@ -62,6 +62,13 @@ in
     else
       (_final: _prev: { });
 
+  # nixpkgs-xr overlay (VR/AR/XR packages - Linux only)
+  nixpkgs-xr =
+    if isLinux && inputs ? nixpkgs-xr && inputs.nixpkgs-xr ? overlays then
+      inputs.nixpkgs-xr.overlays.default
+    else
+      (_final: _prev: { });
+
   # ComfyUI overlay (native Nix package, replaces Docker container)
   comfyui =
     if inputs ? comfyui && inputs.comfyui ? overlays && inputs.comfyui.overlays ? default then
