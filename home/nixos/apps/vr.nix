@@ -16,9 +16,9 @@ mkIf vrEnabled {
 
   # OpenComposite configuration
   # Allows OpenVR games (including SteamVR) to run on OpenXR runtimes (Monado/WiVRn)
-  # Force = true prevents Steam from overwriting this file with SteamVR paths
-  xdg.configFile."openvr/openvrpaths.vrpath" = mkIf opencompositeEnabled {
-    force = true; # Prevent Steam from reverting to SteamVR
+  # Stored as .vrpath.nix - use 'vr-enable' alias to activate, 'vr-disable' to deactivate
+  # This prevents conflicts with Steam Link and other non-VR Steam features
+  xdg.configFile."openvr/openvrpaths.vrpath.nix" = mkIf opencompositeEnabled {
     text = ''
       {
         "config" :
@@ -51,5 +51,10 @@ mkIf vrEnabled {
     quest-shell = "adb shell";
     quest-install = "adb install";
     quest-logs = "adb logcat";
+
+    # OpenComposite toggle (for playing OpenVR games on Monado)
+    # Disable when using Steam Link or non-VR Steam features
+    vr-enable = "ln -sf ${config.xdg.configHome}/openvr/openvrpaths.vrpath.nix ${config.xdg.configHome}/openvr/openvrpaths.vrpath";
+    vr-disable = "rm -f ${config.xdg.configHome}/openvr/openvrpaths.vrpath";
   };
 }
