@@ -150,6 +150,11 @@ in
 
     hardware.uinput.enable = mkIf cfg.enable true;
 
+    # Add user to input group for Sunshine KMS capture
+    users.users.lewis = mkIf cfg.steam {
+      extraGroups = [ "input" ];
+    };
+
     environment.systemPackages = [
       # System-level gaming tools
       pkgs.protonup-qt
