@@ -24,8 +24,33 @@ let
 
   powerOffMonitors = "${pkgs.niri}/bin/niri msg action power-off-monitors";
   powerOnMonitors = "${pkgs.niri}/bin/niri msg action power-on-monitors";
+
+  # Helper scripts for streaming - disable auto-lock temporarily
+  streamingHelper = pkgs.writeShellScriptBin "streaming-mode" ''
+    case "$1" in
+      on)
+        echo "Disabling auto-lock for streaming..."
+        systemctl --user stop swayidle.service
+        # Unlock if currently locked
+        pkill swaylock 2>/dev/null || true
+        echo "Streaming mode enabled. Auto-lock disabled."
+        ;;
+      off)
+        echo "Re-enabling auto-lock..."
+        systemctl --user start swayidle.service
+        echo "Streaming mode disabled. Auto-lock re-enabled."
+        ;;
+      *)
+        echo "Usage: streaming-mode {on|off}"
+        echo "  on  - Disable auto-lock for streaming"
+        echo "  off - Re-enable auto-lock"
+        exit 1
+        ;;
+    esac
+  '';
 in
 {
+  home.packages = [ streamingHelper ];
   services.swayidle = {
     enable = true;
     package = pkgs.swayidle;
