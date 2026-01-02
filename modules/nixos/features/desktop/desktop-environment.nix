@@ -19,6 +19,10 @@ in
     # Provides seat management for Wayland compositors
     services.seatd.enable = true;
 
+    # Add greeter user to seat group for display manager access
+    # The greeter runs Cage (Wayland compositor) which needs seatd access
+    users.users.greeter.extraGroups = [ "seat" ];
+
     programs.niri.enable = true;
     programs.uwsm = {
       enable = true;

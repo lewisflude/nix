@@ -77,7 +77,6 @@
             session required ${pkgs.linux-pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
             session required ${pkgs.linux-pam}/lib/security/pam_unix.so
             session required ${pkgs.linux-pam}/lib/security/pam_limits.so conf=/etc/security/limits.conf
-            session optional ${pkgs.systemd}/lib/security/pam_loginuid.so
             session required ${pkgs.systemd}/lib/security/pam_systemd.so class=greeter
             session optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so auto_start
           '';
@@ -136,7 +135,6 @@
             session required ${pkgs.linux-pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
             session required ${pkgs.linux-pam}/lib/security/pam_unix.so
             session required ${pkgs.linux-pam}/lib/security/pam_limits.so conf=/etc/security/limits.conf
-            session optional ${pkgs.systemd}/lib/security/pam_loginuid.so
             session required ${pkgs.systemd}/lib/security/pam_systemd.so
             session optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so auto_start
           '';
