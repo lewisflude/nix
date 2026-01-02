@@ -64,16 +64,13 @@ in
       orig = prev.gemini-cli;
     in
     {
-      gemini-cli = prev.buildNpmPackage (
-        {
-          inherit (orig) pname version src;
-          makeCacheWritable = true;
-          meta = orig.meta or { };
-        }
-        // prev.lib.optionalAttrs (orig ? npmDepsHash) {
-          inherit (orig) npmDepsHash;
-        }
-      );
+      gemini-cli = prev.buildNpmPackage ({
+        inherit (orig) pname version src;
+        makeCacheWritable = true;
+        meta = orig.meta or { };
+      } // prev.lib.optionalAttrs (orig ? npmDepsHash) {
+        inherit (orig) npmDepsHash;
+      });
     };
 
   # Niri compositor (Linux only)
