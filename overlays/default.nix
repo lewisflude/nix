@@ -55,25 +55,6 @@ in
     inherit (prev) atuin;
   };
 
-  # Fix gemini-cli build: npm cache needs to be writable
-  gemini-cli-fix =
-    final: prev:
-    let
-      orig = prev.gemini-cli;
-    in
-    {
-      gemini-cli = prev.buildNpmPackage (
-        {
-          inherit (orig) pname version src;
-          makeCacheWritable = true;
-          meta = orig.meta or { };
-        }
-        // prev.lib.optionalAttrs (orig ? npmDepsHash) {
-          inherit (orig) npmDepsHash;
-        }
-      );
-    };
-
   # Niri compositor (Linux only)
   niri =
     if isLinux && inputs ? niri && inputs.niri ? overlays then
