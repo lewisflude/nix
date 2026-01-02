@@ -75,7 +75,10 @@
         enable = true;
 
         # Real-time audio with RT kernel and musnix optimizations
-        realtime = true;
+        # Disabled due to RT kernel build issues with GPU drivers
+        # XanMod provides excellent low-latency for gaming and general audio
+        # Re-enable when needed for professional audio recording
+        realtime = false;
 
         # Professional audio configuration for Apogee Symphony Desktop
         # Ultra-low latency: 64 frames @ 48kHz = ~1.3ms (for recording/monitoring)
