@@ -49,10 +49,10 @@ in
     boot.blacklistedKernelModules = [ "nouveau" ];
 
     environment.sessionVariables = {
-      # Force the 4090 for Wayland/Niri
-      # card1 is typically the NVIDIA card when Intel iGPU is present (card0)
-      # This fixes the iGPU/dGPU selection order for Niri/Wayland
-      WLR_DRM_DEVICES = "/dev/dri/card1:/dev/dri/card0";
+      # Force NVIDIA GPU (card2) for Wayland/Niri
+      # card1: Intel iGPU (no monitors connected)
+      # card2: NVIDIA RTX 4090 (monitors connected here)
+      WLR_DRM_DEVICES = "/dev/dri/card2";
 
       # Hardware video acceleration via nvidia-vaapi-driver
       LIBVA_DRIVER_NAME = "nvidia";

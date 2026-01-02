@@ -60,6 +60,8 @@ in
         env = {
           # Wayland-specific
           XDG_SESSION_TYPE = "wayland";
+          # Force wlroots to use NVIDIA GPU (card2) where monitors are connected
+          WLR_DRM_DEVICES = "/dev/dri/card2";
         };
 
         GTK = {
