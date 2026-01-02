@@ -112,22 +112,6 @@ in
         pkgs.openxr-loader
         pkgs.pipewire
       ];
-
-      # Steam wrapper: Ensure XR_RUNTIME_JSON doesn't override system OpenXR runtime
-      # The nixpkgs-xr overlay sets XR_RUNTIME_JSON to standalone Monado in dev shells,
-      # but we need Steam to use the system's active_runtime.json (WiVRn) instead.
-      # Also ensure NVIDIA encoding libraries are accessible for Remote Play streaming
-      # This wrapper handles both VR and Remote Play streaming requirements
-      package = pkgs.steam.overrideAttrs (oldAttrs: {
-        buildCommand = (oldAttrs.buildCommand or "") + ''
-          wrapProgram $out/bin/steam \
-            --unset XR_RUNTIME_JSON \
-            --set LD_LIBRARY_PATH "${config.hardware.nvidia.package}/lib:''${LD_LIBRARY_PATH:-}" \
-            --set __GLX_VENDOR_LIBRARY_NAME "nvidia" \
-            --set GBM_BACKEND "nvidia-drm"
-        '';
-        nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
-      });
     };
 
     # Firewall for ALVR

@@ -8,10 +8,16 @@ let
   inherit (lib) mkIf;
   inherit (lib.lists) optionals;
   cfg = config.host.features.gaming;
+  # GPU ID can be configured per-host via host.hardware.gpuID
+  # Default to empty string to allow auto-detection when not set
+  gpuID = config.host.hardware.gpuID or "";
 in
 {
   config = mkIf cfg.enable {
     # ESYNC fallback still benefits from 1,048,576 FDs, so raise the shared limit
+    # FSYNC (futex synchronization) is preferred on kernel 5.16+ and doesn't need
+    # high file descriptor limits, but ESYNC (eventfd synchronization) is still
+    # used as a fallback and requires this setting for Wine/Proton compatibility
     host.systemDefaults.fileDescriptorLimit = lib.mkOverride 60 1048576;
 
     # Gaming-specific kernel parameters
@@ -25,60 +31,24 @@ in
       # configured in disk-performance.nix (swappiness=10, vfs_cache_pressure=50)
     };
 
-    # Wine/Proton synchronization optimizations
-    #
-    # FSYNC (futex synchronization) - Preferred method (kernel 5.16+)
-    # - Uses Linux futexes for thread synchronization
-    # - More efficient than ESYNC, no file descriptor limits needed
-    # - Automatically enabled by Wine/Proton when kernel support detected
-    # - Kernel 6.6+ has full FUTEX2 support (this system: 6.6.112-rt63)
-    #
-    # ESYNC (eventfd synchronization) - Fallback method
-    # - Uses eventfd for synchronization when FSYNC unavailable
-    # - Requires high file descriptor limits (1,048,576)
-    # - Still useful as fallback for older Wine versions
-    #
-    # Audio environment variables are now configured in modules/nixos/features/desktop/audio.nix
-
     programs = {
       steam = mkIf cfg.steam {
         enable = true;
-        gamescopeSession.enable = false;
-        protontricks.enable = true;
+        gamescopeSession.enable = false; # We use standalone gamescope instead
+        protontricks.enable = true; # Useful for Wine prefix debugging
         remotePlay.openFirewall = true;
         dedicatedServer.openFirewall = true;
 
-        # Complete audio stack for game compatibility
-        # - PulseAudio/libpulseaudio: For SDL2 games and Wine/Proton
-        # - PipeWire: For native PipeWire-aware games
-        # - ALSA libs: For FMOD games (Dwarf Fortress), OpenAL, and low-level audio
+        # Modern Steam handles audio properly via pressure-vessel
+        # The extensive audio stack (PulseAudio/PipeWire/ALSA) that was previously
+        # added here is no longer needed - fixed in nixpkgs PR #114024 (2021)
         extraCompatPackages = [
           pkgs.proton-ge-bin # GE-Proton for improved game compatibility
-          pkgs.pipewire # PipeWire daemon and libraries
-          pkgs.pulseaudio # PulseAudio daemon (for fallback)
-          pkgs.libpulseaudio # PulseAudio client library
-          pkgs.alsa-lib # ALSA user-space library (required for FMOD)
-          pkgs.alsa-plugins # ALSA plugins including PipeWire bridge
         ];
 
-        # Steam wrapper: Ensure NVIDIA encoding libraries are accessible for Remote Play streaming
-        # Steam Remote Play needs NVENC for hardware-accelerated encoding to Quest 3
-        # Without this, Steam may fall back to software encoding which can fail or perform poorly
-        # Note: If VR is enabled, VR module will handle Steam wrapping (includes NVIDIA encoding)
-        package = lib.mkIf (!(config.host.features.vr.enable or false)) (
-          pkgs.steam.overrideAttrs (oldAttrs: {
-            buildCommand = (oldAttrs.buildCommand or "") + ''
-              wrapProgram $out/bin/steam \
-                --set LD_LIBRARY_PATH "${config.hardware.nvidia.package}/lib:''${LD_LIBRARY_PATH:-}" \
-                --set __GLX_VENDOR_LIBRARY_NAME "nvidia" \
-                --set GBM_BACKEND "nvidia-drm"
-            '';
-            nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
-          })
-        );
-
-        # Note: pressure-vessel audio issues were fixed in nixpkgs PR #114024 (2021)
-        # No custom package override needed - using stock Steam
+        # Note: VR-specific Steam wrapping (NVIDIA libraries, XR_RUNTIME_JSON)
+        # is handled by the VR module (modules/nixos/features/vr.nix) to avoid
+        # duplication and conflicts when both features are enabled
       };
 
       # Gamescope compositor for improved gaming experience
@@ -88,6 +58,12 @@ in
         # capSysNice doesn't work with Steam's nested bubblewrap (FHS + Steam Runtime)
         # Use ananicy instead to manage process priority
         capSysNice = false;
+
+        # Conditionally add GPU preference if gpuID is configured
+        # If not set, gamescope will auto-detect the GPU
+        args = optionals (gpuID != "") [ "--prefer-vk-device ${gpuID}" ] ++ [
+          "--hdr-enabled"
+        ];
       };
 
       gamemode = mkIf cfg.performance {
@@ -98,9 +74,9 @@ in
           };
           gpu = {
             apply_gpu_optimisations = "accept-responsibility";
-            gpu_device = 0;
-            # Note: NVIDIA GPU optimizations handled by driver
-            # AMD-specific settings (amd_performance_level) not applicable
+            gpu_device = 0; # Primary GPU
+            # Note: NVIDIA GPU optimizations are handled by the driver
+            # AMD-specific settings (amd_performance_level) are not applicable
           };
         };
       };
@@ -115,6 +91,10 @@ in
         rulesProvider = pkgs.ananicy-rules-cachyos; # Includes quality rules for gamescope and games
       };
 
+      # Sunshine game streaming is configured via home-manager
+      # See: home/nixos/apps/sunshine.nix for KMS capture and NVENC settings
+      # The service itself is enabled in modules/nixos/features/gaming.nix when
+      # cfg.steam is true, with CAP_SYS_ADMIN for KMS capture
       sunshine = mkIf cfg.steam {
         enable = true;
         autoStart = true;
@@ -122,21 +102,20 @@ in
         openFirewall = true;
         # Enable CUDA support for NVENC hardware encoding
         # Without this, Sunshine can't load libcuda.so.1 and falls back to software encoding
-        # See: https://discourse.nixos.org/t/rtx-3070-sunshine-nvec-encoding-fails/62131
         package = pkgs.sunshine.override { cudaSupport = true; };
       };
 
-      udev = mkIf cfg.enable {
+      # Controller and Bluetooth udev rules
+      udev = {
         packages = [
           pkgs.game-devices-udev-rules
         ];
 
-        # Combined udev rules for game controllers and Bluetooth adapters
-        # Disable USB autosuspend to prevent Steam Input crashes and HID read failures
+        # Disable USB autosuspend for game controllers and Bluetooth adapters
+        # This prevents Steam Input crashes and HID read failures when controllers idle
+        # Issue: USB autosuspend can cause "Controller device closed after hid_read failure"
         extraRules = ''
           # USB game controllers - disable autosuspend to prevent Steam Input crashes
-          # USB autosuspend can cause HID read failures when controllers are idle
-          # This prevents "Controller device closed after hid_read failure" errors
 
           # Sony PlayStation controllers (DualSense, DualShock 4, etc.)
           ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="054c", TEST=="power/control", ATTR{power/control} = "on"
@@ -168,7 +147,6 @@ in
 
           # HID devices - disable autosuspend (covers both USB and Bluetooth HID)
           # This prevents game controllers from sleeping during Steam Input polling
-          # Note: HID devices use ATTR instead of ATTRS for vendor/product IDs
           ACTION=="add", SUBSYSTEM=="hid", ATTR{idVendor}=="054c", TEST=="power/control", ATTR{power/control} = "on"
           ACTION=="add", SUBSYSTEM=="hid", ATTR{idVendor}=="045e", TEST=="power/control", ATTR{power/control} = "on"
         '';
@@ -176,9 +154,9 @@ in
     };
 
     # Explicit Steam Link firewall ports for Quest 3 compatibility
-    # These ports are used by Steam Link for discovery and streaming
-    # Note: remotePlay.openFirewall should handle these, but explicit rules ensure compatibility
-    # with Quest 3 and other Steam Link clients that may have stricter requirements
+    # While remotePlay.openFirewall should handle these, explicit rules ensure
+    # compatibility with Quest 3 and other Steam Link clients that may have
+    # stricter discovery requirements
     networking.firewall = mkIf cfg.steam {
       allowedUDPPorts = [
         27031 # Steam Link discovery
@@ -190,59 +168,51 @@ in
       ];
     };
 
-    # Add user to input group for Sunshine KMS capture
-    users.users.lewis = mkIf cfg.steam {
-      extraGroups = [ "input" ];
+    # Bluetooth power management for game controllers
+    # Prevent Bluetooth controllers (DualSense, etc.) from going to sleep
+    # Fixes Steam Input crashes caused by HID read failures when controllers idle
+    hardware.bluetooth.settings = {
+      Policy = {
+        # Auto-connect to known devices (helps with reconnection after sleep)
+        AutoConnect = true;
+      };
+      General = {
+        # Enable fast connectable mode for better responsiveness
+        FastConnectable = true;
+      };
     };
 
+    # System packages based on enabled features
     environment.systemPackages = [
-      # System-level gaming tools
+      # System-level gaming tools (always installed when gaming is enabled)
       pkgs.protonup-qt
     ]
-
     ++ optionals cfg.steam [
       pkgs.steamcmd
       pkgs.steam-run
       pkgs.gamescope
       pkgs.gamescope-wsi # Required for HDR support in Gamescope
     ]
-
     ++ optionals cfg.performance [
-      # Note: mangohud is configured via home-manager programs.mangohud
       pkgs.gamemode
     ]
-
     ++ optionals cfg.lutris [
       pkgs.lutris
     ]
-
     ++ optionals cfg.emulators [
-
+      # Emulator packages can be added here when emulators feature is enabled
     ];
 
+    # Ensure graphics support (may be redundant with graphics.nix, but safe)
     hardware = {
-      uinput.enable = mkIf cfg.enable true;
-
-      # Bluetooth power management for game controllers
-      # Prevent Bluetooth controllers (DualSense, etc.) from going to sleep
-      # This fixes Steam Input crashes caused by HID read failures when controllers idle
-      # The issue: DualSense connected via Bluetooth sleeps after ~39 seconds of idle polling
-      # Solution: Keep Bluetooth adapter active and configure BlueZ to maintain connections
-      bluetooth = mkIf cfg.enable {
-        settings = {
-          Policy = {
-            # Auto-connect to known devices (helps with reconnection after sleep)
-            AutoConnect = true;
-          };
-        };
-      };
-
-      graphics = mkIf cfg.enable {
+      graphics = {
         enable = true;
         enable32Bit = true;
       };
+      uinput.enable = true;
     };
 
+    # Assertions to catch configuration mistakes
     assertions = [
       {
         assertion = cfg.emulators -> cfg.enable;

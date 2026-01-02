@@ -29,6 +29,7 @@ in
     pkgs.argyllcms
     pkgs.colord-gtk
     pkgs.wl-gammactl
+    pkgs.libdrm # Provides modetest for checking DRM/HDR properties
   ]
   ++ [
     inputs.awww.packages.${system}.awww
@@ -154,6 +155,14 @@ in
       };
       prefer-no-csd = true;
       hotkey-overlay.skip-at-startup = true;
+      # HDR/10-bit support status:
+      # - niri currently forces 8-bit by default to avoid bandwidth issues
+      # - The debug flag keep-max-bpc-unchanged is deprecated
+      # - PR #3158 is adding proper per-output BPC (bits per component) configuration
+      # - For actual 10-bit rendering, niri needs code changes to SUPPORTED_COLOR_FORMATS
+      # - 10-bit works with applications using vo=dmabuf-wayland (e.g., mpv)
+      # - HDR color management is not yet implemented (see issue #1841)
+      # See: https://github.com/YaLTeR/niri/issues/1533 and PR #3158
       window-rules = [
         {
           matches = [
@@ -185,13 +194,14 @@ in
         # Steam Big Picture mode - force to HDMI-A-4 dummy display for streaming
         # This rule only affects gamepadui mode used for Sunshine streaming
         # Regular Steam desktop mode remains on DP-3 for normal use
-        {
-          matches = [
-            { app-id = "^steam$"; }
-          ];
-          open-on-output = "HDMI-A-4";
-          open-maximized = true;
-        }
+        # DISABLED: This rule may be causing crashes - needs testing
+        # {
+        #   matches = [
+        #     { app-id = "^steam$"; }
+        #   ];
+        #   open-on-output = "HDMI-A-4";
+        #   open-maximized = true;
+        # }
       ];
       animations = {
         enable = true;
@@ -235,6 +245,18 @@ in
             "-d"
             "1"
             "${config.home.homeDirectory}/.local/share/icc/aw3423dwf.icc"
+          ];
+        }
+        # Gamma correction for better display quality
+        # Adjust gamma values if needed (default: 1.0 for all channels)
+        # For OLED displays, slight gamma adjustment can improve perceived contrast
+        {
+          command = [
+            "${pkgs.wl-gammactl}/bin/wl-gammactl"
+            "--gamma"
+            "1.0"
+            "--brightness"
+            "1.0"
           ];
         }
       ];

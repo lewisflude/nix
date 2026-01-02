@@ -47,6 +47,9 @@ in
               "default.clock.quantum" = quantum;
               "default.clock.min-quantum" = 64;
               "default.clock.max-quantum" = 2048;
+              # Disable ALSA sequencer to prevent crashes with phantom MIDI devices
+              # See: https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/3644
+              "alsa.seq.disabled" = true;
             };
             "context.modules" = [
               {
@@ -90,6 +93,11 @@ in
             "context.modules" = [
               {
                 name = "libpipewire-module-loopback";
+                # Add flags to prevent crashes if Apogee is not connected
+                flags = [
+                  "ifexists"
+                  "nofail"
+                ];
                 args = {
                   "node.name" = "apogee_stereo_game_bridge";
                   "node.description" = "Apogee Stereo Game Bridge";
@@ -114,7 +122,7 @@ in
                       "FR"
                     ];
                     "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0";
-                    "node.passive" = false;
+                    "node.passive" = true; # Changed to true - prevents hanging if device not found
                     "stream.dont-remix" = true;
                     "node.latency" = gamingLatency;
                   };
@@ -251,6 +259,16 @@ in
 
       boot.kernelParams = lib.optionals cfg.usbAudioInterface.enable [
         "usbcore.autosuspend=-1" # Disable USB autosuspend for audio
+      ];
+
+      # Blacklist ALSA sequencer kernel modules to prevent PipeWire crashes
+      # These modules cause snd_seq_event_input crashes in PipeWire < 1.4.10
+      # Since we're disabling alsa.seq in PipeWire config, we don't need these
+      boot.blacklistedKernelModules = [
+        "snd_seq"
+        "snd_seq_dummy"
+        "snd_seq_midi"
+        "snd_seq_midi_event"
       ];
 
       # CPU frequency governor for stable audio performance

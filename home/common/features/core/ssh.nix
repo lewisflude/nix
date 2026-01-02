@@ -29,8 +29,12 @@ _: {
 
       "github.com" = {
         user = "git";
-        # Allow SSH agent to provide YubiKey keys
-        identitiesOnly = false;
+        # Use only agent-provided keys (YubiKey PIV via GPG agent)
+        # Setting identitiesOnly = true without identityFile prevents SSH from
+        # trying file-based keys (~/.ssh/id_*) and forces use of agent keys only.
+        # This avoids passphrase prompts from the redundant file-based key.
+        identitiesOnly = true;
+        # No identityFile specified = only use agent-provided keys
       };
     };
   };
