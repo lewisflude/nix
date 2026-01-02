@@ -11,10 +11,9 @@
     encoder = nvenc
     adapter_name = /dev/dri/card1
     # Use monitor ID (numeric) - Monitor 0 = DP-3, Monitor 1 = HDMI-A-4 (dummy plug)
-    # Target dummy HDMI plug (ID 1) for reliable capture even when monitors are off/locked
-    # This ensures streaming works when screen is locked or monitors power off
-    # Note: Sunshine uses numeric IDs from the KMS monitor list (Monitor 1 = ID 1)
-    output_name = 1
+    # Target main display (DP-3) for Steam Link streaming
+    # Change to output_name = 1 to use dummy HDMI plug instead
+    output_name = 0
 
     # Network settings
     upnp = on
@@ -37,10 +36,24 @@
       {
         name = "Desktop";
         image-path = "desktop.png";
+        # Disable auto-lock when streaming desktop
+        prep-cmd = [
+          {
+            do = "systemctl --user stop swayidle.service";
+            undo = "systemctl --user start swayidle.service";
+          }
+        ];
         cmd = [ ];
       }
       {
         name = "Steam Big Picture";
+        # Disable auto-lock when streaming Steam
+        prep-cmd = [
+          {
+            do = "systemctl --user stop swayidle.service";
+            undo = "systemctl --user start swayidle.service";
+          }
+        ];
         detached = [
           # Gamescope wraps Steam Big Picture for reliable streaming
           # Niri window rules force Steam to HDMI-A-4 dummy display
