@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+_: {
   # Sunshine configuration for game streaming with KMS capture
   # KMS (Kernel Mode Setting) capture is more reliable than wlroots on Wayland
   # Requires CAP_SYS_ADMIN capability (configured in modules/nixos/features/gaming.nix)
@@ -54,15 +53,13 @@
             undo = "systemctl --user start swayidle.service";
           }
         ];
-        detached = [
-          # Gamescope wraps Steam Big Picture for reliable streaming
-          # Niri window rules force Steam to HDMI-A-4 dummy display
-          # -f enables fullscreen mode
-          # -w/-h sets internal resolution to match HDMI-A-4 (1920x1080)
-          # -W/-H sets output resolution to match HDMI-A-4
-          # --backend sdl required for proper cursor locking on Niri
-          # -e enables Steam integration
-          "${pkgs.gamescope}/bin/gamescope -f -w 1920 -h 1080 -W 1920 -H 1080 --backend sdl -e -- steam -steamos3 -steamdeck -gamepadui"
+        # Launch Steam Big Picture directly without gamescope wrapper
+        # Gamescope -e mode crashes on this system
+        cmd = [
+          "steam"
+          "-steamos3"
+          "-steamdeck"
+          "-gamepadui"
         ];
         image-path = "steam.png";
       }
