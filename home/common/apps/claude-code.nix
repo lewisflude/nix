@@ -6,15 +6,15 @@
 }:
 {
   # Claude Code CLI - agentic coding assistant
-  # Uses claude-code-overlay for pre-built binaries from Anthropic
+  # Uses llm-agents.nix for daily updates and pre-built binaries
   # MCP servers configured in home/{nixos,darwin}/mcp.nix
 
   programs.claude-code = {
     enable = true;
 
-    # Use community-maintained claude-code-nix for hourly updates
-    # This avoids both nixpkgs build hangs and overlay runtime errors
-    package = inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    # Use llm-agents.nix for daily updates and pre-built binaries from Numtide cache
+    # This provides better maintenance and faster builds than claude-code-nix
+    package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
 
     # Custom commands for Claude Code
     # Usage: Type /command-name in claude-code prompt

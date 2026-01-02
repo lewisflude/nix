@@ -67,6 +67,7 @@ in
           "https://viperml.cachix.org"
           "https://cuda-maintainers.cachix.org"
           "https://claude-code.cachix.org"
+          "https://cache.numtide.com"
         ];
         extra-trusted-public-keys = [
           "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8="
@@ -87,6 +88,7 @@ in
           "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
           "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
           "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
+          "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
         ];
       }
       (lib.mkIf (hostSystem == "aarch64-darwin") {
