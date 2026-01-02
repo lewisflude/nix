@@ -1,10 +1,4 @@
 { pkgs, ... }:
-let
-  cmakePolicyFlag = "-DCMAKE_POLICY_VERSION_MINIMUM=3.5";
-  asepriteFixed = pkgs.aseprite.overrideAttrs (prev: {
-    cmakeFlags = (prev.cmakeFlags or [ ]) ++ [ cmakePolicyFlag ];
-  });
-in
 {
   home.packages = [
     pkgs.gimp
@@ -14,7 +8,9 @@ in
     # Note: libnotify is handled in core-tooling.nix
     # Note: swaylock-effects is handled in apps/swayidle.nix via programs.swaylock
     pkgs.font-awesome
-    asepriteFixed
+    # FIXME: aseprite is currently broken in nixpkgs (skia-aseprite build failure)
+    # Temporarily commented out until upstream fix is available
+    # asepriteFixed
     pkgs.wl-screenrec
 
     # Thunar file manager with plugins
