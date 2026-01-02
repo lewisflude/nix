@@ -75,6 +75,21 @@ in
           };
           variable-refresh-rate = true;
         };
+        # Dummy HDMI plug (HDMI-A-4) - configured minimally for Sunshine KMS capture
+        # Used by Sunshine for KMS capture when monitors are off/locked
+        # Positioned off-screen and set to minimal resolution so niri doesn't actively use it
+        "HDMI-A-4" = {
+          position = {
+            x = 10000;
+            y = 10000;
+          };
+          mode = {
+            width = 1920;
+            height = 1080;
+            refresh = 60.0;
+          };
+          scale = 1.0;
+        };
       };
       layout = {
         gaps = 16;
@@ -157,7 +172,7 @@ in
           ];
           shadow.enable = false;
         }
-        # Gamescope nested compositor
+        # Gamescope nested compositor - opens on focused display for local gaming
         {
           matches = [
             { app-id = "^gamescope$"; }
@@ -165,6 +180,16 @@ in
           default-column-width = {
             proportion = 1.0;
           };
+          open-maximized = true;
+        }
+        # Steam Big Picture mode - force to HDMI-A-4 dummy display for streaming
+        # This rule only affects gamepadui mode used for Sunshine streaming
+        # Regular Steam desktop mode remains on DP-3 for normal use
+        {
+          matches = [
+            { app-id = "^steam$"; }
+          ];
+          open-on-output = "HDMI-A-4";
           open-maximized = true;
         }
       ];

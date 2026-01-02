@@ -130,6 +130,48 @@ in
         packages = [
           pkgs.game-devices-udev-rules
         ];
+
+        # Combined udev rules for game controllers and Bluetooth adapters
+        # Disable USB autosuspend to prevent Steam Input crashes and HID read failures
+        extraRules = ''
+          # USB game controllers - disable autosuspend to prevent Steam Input crashes
+          # USB autosuspend can cause HID read failures when controllers are idle
+          # This prevents "Controller device closed after hid_read failure" errors
+
+          # Sony PlayStation controllers (DualSense, DualShock 4, etc.)
+          ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="054c", TEST=="power/control", ATTR{power/control} = "on"
+
+          # Microsoft Xbox controllers
+          ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="045e", TEST=="power/control", ATTR{power/control} = "on"
+
+          # Logitech game controllers and receivers
+          ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", TEST=="power/control", ATTR{power/control} = "on"
+
+          # Nintendo Switch Pro Controller and Joy-Cons
+          ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="057e", TEST=="power/control", ATTR{power/control} = "on"
+
+          # SteelSeries controllers
+          ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="1038", TEST=="power/control", ATTR{power/control} = "on"
+
+          # Razer controllers
+          ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="1532", TEST=="power/control", ATTR{power/control} = "on"
+
+          # 8BitDo controllers
+          ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="2dc8", TEST=="power/control", ATTR{power/control} = "on"
+
+          # Generic HID gamepad class (catches other controllers)
+          ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="03", ATTR{bInterfaceSubClass}=="01", ATTR{bInterfaceProtocol}=="01", TEST=="power/control", ATTR{power/control} = "on"
+
+          # Bluetooth adapters - keep active to prevent controller disconnections
+          # This is critical for maintaining stable connections to Bluetooth game controllers
+          ACTION=="add", SUBSYSTEM=="usb", DRIVERS=="btusb", TEST=="power/control", ATTR{power/control} = "on"
+
+          # HID devices - disable autosuspend (covers both USB and Bluetooth HID)
+          # This prevents game controllers from sleeping during Steam Input polling
+          # Note: HID devices use ATTR instead of ATTRS for vendor/product IDs
+          ACTION=="add", SUBSYSTEM=="hid", ATTR{idVendor}=="054c", TEST=="power/control", ATTR{power/control} = "on"
+          ACTION=="add", SUBSYSTEM=="hid", ATTR{idVendor}=="045e", TEST=="power/control", ATTR{power/control} = "on"
+        '';
       };
     };
 
@@ -147,8 +189,6 @@ in
         27036 # Steam Link streaming
       ];
     };
-
-    hardware.uinput.enable = mkIf cfg.enable true;
 
     # Add user to input group for Sunshine KMS capture
     users.users.lewis = mkIf cfg.steam {
@@ -180,9 +220,27 @@ in
 
     ];
 
-    hardware.graphics = mkIf cfg.enable {
-      enable = true;
-      enable32Bit = true;
+    hardware = {
+      uinput.enable = mkIf cfg.enable true;
+
+      # Bluetooth power management for game controllers
+      # Prevent Bluetooth controllers (DualSense, etc.) from going to sleep
+      # This fixes Steam Input crashes caused by HID read failures when controllers idle
+      # The issue: DualSense connected via Bluetooth sleeps after ~39 seconds of idle polling
+      # Solution: Keep Bluetooth adapter active and configure BlueZ to maintain connections
+      bluetooth = mkIf cfg.enable {
+        settings = {
+          Policy = {
+            # Auto-connect to known devices (helps with reconnection after sleep)
+            AutoConnect = true;
+          };
+        };
+      };
+
+      graphics = mkIf cfg.enable {
+        enable = true;
+        enable32Bit = true;
+      };
     };
 
     assertions = [
