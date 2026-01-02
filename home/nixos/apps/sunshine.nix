@@ -36,10 +36,10 @@
       {
         name = "Desktop";
         image-path = "desktop.png";
-        # Disable auto-lock when streaming desktop
+        # Disable auto-lock and unlock screen when streaming desktop
         prep-cmd = [
           {
-            do = "systemctl --user stop swayidle.service";
+            do = "pkill swaylock; systemctl --user stop swayidle.service";
             undo = "systemctl --user start swayidle.service";
           }
         ];
@@ -47,10 +47,10 @@
       }
       {
         name = "Steam Big Picture";
-        # Disable auto-lock when streaming Steam
+        # Disable auto-lock and unlock screen when streaming Steam
         prep-cmd = [
           {
-            do = "systemctl --user stop swayidle.service";
+            do = "pkill swaylock; systemctl --user stop swayidle.service";
             undo = "systemctl --user start swayidle.service";
           }
         ];
