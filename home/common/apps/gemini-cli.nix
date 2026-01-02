@@ -2,6 +2,8 @@
   config,
   lib,
   pkgs,
+  inputs,
+  system,
   ...
 }:
 let
@@ -11,8 +13,9 @@ in
   programs.gemini-cli = {
     enable = true; # Using llm-agents.nix (daily builds with binary cache)
 
-    # Package comes from llm-agents.nix overlay in overlays/default.nix
-    # This provides pre-built binaries from https://cache.numtide.com
+    # Use gemini-cli from llm-agents.nix instead of nixpkgs
+    # This avoids the broken buildNpmPackage in nixpkgs
+    package = inputs.llm-agents.packages.${system}.gemini-cli;
 
     # Use "auto" model selection - gemini-cli will choose the best available model
     # You can override this with GEMINI_MODEL environment variable or --model flag
