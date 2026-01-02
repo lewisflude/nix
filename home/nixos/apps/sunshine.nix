@@ -36,10 +36,11 @@ _: {
         name = "Desktop";
         image-path = "desktop.png";
         # Disable auto-lock and unlock screen when streaming desktop
+        # Use || true to prevent failure if swaylock isn't running
         prep-cmd = [
           {
-            do = "pkill swaylock; systemctl --user stop swayidle.service";
-            undo = "systemctl --user start swayidle.service";
+            do = "pkill swaylock || true; systemctl --user stop swayidle.service || true";
+            undo = "systemctl --user start swayidle.service || true";
           }
         ];
         cmd = [ ];
@@ -47,10 +48,11 @@ _: {
       {
         name = "Steam Big Picture";
         # Disable auto-lock and unlock screen when streaming Steam
+        # Use || true to prevent failure if swaylock isn't running
         prep-cmd = [
           {
-            do = "pkill swaylock; systemctl --user stop swayidle.service";
-            undo = "systemctl --user start swayidle.service";
+            do = "pkill swaylock || true; systemctl --user stop swayidle.service || true";
+            undo = "systemctl --user start swayidle.service || true";
           }
         ];
         # Launch Steam Big Picture - simplified command
