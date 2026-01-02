@@ -14,10 +14,10 @@
   # Jupiter-specific boot configuration
   # Overrides core boot.nix defaults for high-performance gaming
   boot = {
-    # 6.12 LTS kernel for ZFS compatibility
-    # ZFS 2.3.5 supports up to kernel 6.17, so 6.12 LTS is safe
-    # Using mainline LTS instead of XanMod until xanmod_stable is compatible with ZFS
-    kernelPackages = pkgs.linuxPackages_6_12;
+    # XanMod kernel (6.12) for gaming performance with ZFS compatibility
+    # ZFS 2.3.5 supports up to kernel 6.17, so 6.12 is safe
+    # Using linuxPackages_xanmod (6.12) instead of xanmod_latest (6.18)
+    kernelPackages = pkgs.linuxPackages_xanmod;
 
     kernelParams = [
       # NVIDIA & Display Tuning
