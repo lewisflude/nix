@@ -10,6 +10,8 @@ in
 {
   programs.gemini-cli = {
     enable = true;
+    # Use the fixed version from overlay that has makeCacheWritable = true
+    package = pkgs.gemini-cli;
 
     # Use "auto" model selection - gemini-cli will choose the best available model
     # You can override this with GEMINI_MODEL environment variable or --model flag
