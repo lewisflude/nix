@@ -17,11 +17,9 @@
     # Note: claude-code is handled via programs.claude-code in claude-code.nix
     # Note: gemini-cli is handled via programs.gemini-cli in gemini-cli.nix
     pkgs.pgcli
-    pkgs.cursor-cli
+    pkgs.cursor-cli # provides cursor-agent binary
 
     # AI coding agent tools from llm-agents.nix
-    # cursor-agent: Cursor AI CLI agent (complements cursor-cli)
-    inputs.llm-agents.packages.${pkgs.system}.cursor-agent
     # ccusage: Usage analysis tool for Claude Code sessions
     inputs.llm-agents.packages.${pkgs.system}.ccusage
     # coding-agent-search: TUI to search coding agent history
