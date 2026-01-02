@@ -55,12 +55,8 @@ _: {
         ];
         # Launch Steam Big Picture directly without gamescope wrapper
         # Gamescope -e mode crashes on this system
-        cmd = [
-          "steam"
-          "-steamos3"
-          "-steamdeck"
-          "-gamepadui"
-        ];
+        # Use detached to run in background
+        detached = [ "steam -steamos3 -steamdeck -gamepadui" ];
         image-path = "steam.png";
       }
     ];
