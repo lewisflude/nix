@@ -55,6 +55,27 @@ in
     inherit (prev) atuin;
   };
 
+  # Fix gemini-cli build issue with npm cache
+  # The nixpkgs version uses buildNpmPackage which fails when npm dependencies
+  # aren't cached. Setting makeCacheWritable = true allows npm to write to cache.
+  gemini-cli-fix =
+    final: prev:
+    let
+      orig = prev.gemini-cli;
+    in
+    {
+      gemini-cli = prev.buildNpmPackage (
+        {
+          inherit (orig) pname version src;
+          makeCacheWritable = true;
+          meta = orig.meta or { };
+        }
+        // prev.lib.optionalAttrs (orig ? npmDepsHash) {
+          inherit (orig) npmDepsHash;
+        }
+      );
+    };
+
   # Niri compositor (Linux only)
   niri =
     if isLinux && inputs ? niri && inputs.niri ? overlays then
