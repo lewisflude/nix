@@ -2,7 +2,7 @@
 {
   home.packages = [
     pkgs.usbutils
-    pkgs.evhz
+    # pkgs.evhz  # Temporarily disabled due to compilation errors with glibc 2.40
     pkgs.piper
   ];
   services.udiskie = {
