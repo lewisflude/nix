@@ -71,8 +71,23 @@ in
   # Reference: https://github.com/ghostty-org/ghostty/discussions/5951
 
   # SSH control file for GPG agent
-  # Configure your SSH keys in ~/.gnupg/sshcontrol manually or via config
-  # home.file.".gnupg/sshcontrol".text = ''
-  #   YOUR_SSH_KEY_KEYGRIP
-  # '';
+  # Manage SSH keys that can be used via gpg-agent
+  # No TTL specified means it inherits the global cache settings (24 hours)
+  home.file.".gnupg/sshcontrol".text = ''
+    # List of allowed ssh keys.  Only keys present in this file are used
+    # in the SSH protocol.  The ssh-add tool may add new entries to this
+    # file to enable them; you may also add them manually.  Comment
+    # lines, like this one, as well as empty lines are ignored.  Lines do
+    # have a certain length limit but this is not serious limitation as
+    # the format of the entries is fixed and checked by gpg-agent. A
+    # non-comment line starts with optional white spaces, followed by the
+    # keygrip of the key given as 40 hex digits, optionally followed by a
+    # caching TTL in seconds, and another optional field for arbitrary
+    # flags.   Prepend the keygrip with an '!' mark to disable it.
+
+    # Ed25519 key added on: 2025-11-13 11:00:11
+    # Fingerprints:  MD5:54:2b:aa:37:7d:ca:76:b4:d2:c9:57:44:08:a3:ae:8b
+    #                SHA256:0qpx+PSfEdua+Ht9eQ14k2T2DO1WNV/o2uBByk15ZqI
+    408B5C190D65BE8599A3ABBA3DB1E789761C0081
+  '';
 }
