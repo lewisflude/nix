@@ -4,6 +4,11 @@
   system = "x86_64-linux";
   hostname = "jupiter";
 
+  # Hardware configuration
+  hardware = {
+    gpuID = "10de:2684"; # RTX 4090
+  };
+
   features = {
     security = {
       enable = true;

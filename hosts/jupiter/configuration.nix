@@ -10,6 +10,29 @@
   imports = [
     ./hardware-configuration.nix
   ];
+
+  # Jupiter-specific boot configuration
+  # Overrides core boot.nix defaults for high-performance gaming
+  boot = {
+    # XanMod kernel for better gaming performance and RTX 4090 support
+    kernelPackages = pkgs.linuxPackages_xanmod_latest;
+
+    kernelParams = [
+      # NVIDIA & Display Tuning
+      "nvidia-drm.modeset=1"
+      "nvidia-drm.fbdev=1"
+
+      # ZFS ARC Tuning for 64GB RAM system
+      # 16GB limit prevents ZFS from competing with games for memory
+      "zfs.zfs_arc_max=17179869184" # 16GB
+
+      # Intel Gaming Tuning: Low-latency C-states
+      # Prevents CPU latency spikes during gaming
+      "processor.max_cstate=1"
+      "intel_idle.max_cstate=1"
+    ];
+  };
+
   users = {
     mutableUsers = false;
     users.${config.host.username} = {

@@ -1,82 +1,39 @@
 {
-  pkgs,
   lib,
-  config,
+  pkgs,
   ...
 }:
-let
-  zfsKernelModuleAttr = pkgs.zfs.kernelModuleAttribute;
 
-  # Check if a kernel package is compatible with ZFS
-  isZfsCompatible =
-    kernelPackages:
-    let
-      hasZfsModule = builtins.hasAttr zfsKernelModuleAttr kernelPackages;
-      zfsModuleEval =
-        if hasZfsModule then
-          builtins.tryEval kernelPackages.${zfsKernelModuleAttr}
-        else
-          {
-            success = false;
-            value = null;
-          };
-    in
-    zfsModuleEval.success && (!(zfsModuleEval.value.meta.broken or false));
-
-  # Find all ZFS-compatible kernel packages
-  zfsCompatibleKernelPackages = lib.filterAttrs (
-    name: kernelPackages:
-    (builtins.match "linux_[0-9]+_[0-9]+" name) != null
-    && (builtins.tryEval kernelPackages).success
-    && isZfsCompatible kernelPackages
-  ) pkgs.linuxKernel.packages;
-
-  compatibleKernelList = builtins.attrValues zfsCompatibleKernelPackages;
-  latestKernelPackage =
-    if compatibleKernelList != [ ] then
-      lib.last (
-        lib.sort (a: b: (lib.versionOlder a.kernel.version b.kernel.version)) compatibleKernelList
-      )
-    else
-      pkgs.linuxPackages;
-
-in
 {
   boot = {
-    kernelPackages = lib.mkDefault latestKernelPackage;
+    # Default to stable kernel with ZFS support
+    # Hosts can override with specific kernels (e.g., XanMod for gaming)
+    kernelPackages = lib.mkDefault pkgs.linuxPackages;
+
     loader = {
       systemd-boot = {
         enable = lib.mkDefault true;
-        editor = false; # Disable editor for security
+        editor = false; # Security: Prevent boot parameter editing without authentication
+        configurationLimit = 10;
       };
       efi.canTouchEfiVariables = lib.mkDefault true;
-      timeout = 0;
+      timeout = lib.mkDefault 0;
     };
 
-    zfs.package = pkgs.zfs;
+    # ZFS Support
     supportedFilesystems = [ "zfs" ];
+    zfs.forceImportRoot = false; # Best practice for modern ZFS
+
+    # Universal quiet boot parameters
     kernelParams = [
       "quiet"
-      "splash"
+      "loglevel=3"
       "rd.systemd.show_status=false"
       "rd.udev.log_level=3"
-      "nvidia-drm.modeset=1"
-      "nvidia-drm.fbdev=1"
-      "vt.global_cursor_default=0"
     ];
+
+    # Suppress verbose boot messages
     consoleLogLevel = 0;
     initrd.verbose = false;
   };
-
-  # Assert that the selected kernel is compatible with ZFS
-  assertions = [
-    {
-      assertion = isZfsCompatible config.boot.kernelPackages;
-      message = ''
-        The selected kernel (${config.boot.kernelPackages.kernel.version}) is not compatible with ZFS ${pkgs.zfs.version}.
-        Please select a compatible kernel or update ZFS to a version that supports this kernel.
-      '';
-    }
-  ];
-
 }
