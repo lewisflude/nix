@@ -18,9 +18,9 @@ in
     pkgs.wl-screenrec
 
     # Thunar file manager with plugins
-    pkgs.xfce.thunar
-    pkgs.xfce.thunar-archive-plugin
-    pkgs.xfce.thunar-volman
+    pkgs.thunar
+    pkgs.thunar-archive-plugin
+    pkgs.thunar-volman
   ];
 
   services.cliphist = {
