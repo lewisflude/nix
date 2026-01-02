@@ -136,6 +136,18 @@ in
         wireplumber = {
           enable = true;
           extraConfig = {
+            # Disable ALSA sequencer monitoring to prevent crashes
+            # Matches the alsa.seq.disabled setting in PipeWire config
+            "10-disable-alsa-seq"."monitor.alsa.rules" = [
+              {
+                matches = [ { "device.name" = "~alsa_card.*"; } ];
+                actions.update-props = {
+                  "api.alsa.disable-midi" = true;
+                  "api.alsa.disable-seq" = true;
+                };
+              }
+            ];
+
             # Device priorities: prefer stereo bridge for games, lower priority for pro interface
             "10-device-priorities"."monitor.alsa.rules" = [
               {
