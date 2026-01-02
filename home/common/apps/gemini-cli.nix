@@ -9,7 +9,10 @@ let
 in
 {
   programs.gemini-cli = {
-    enable = false; # Temporarily disabled - nixpkgs build is broken (ENOTCACHED error)
+    enable = true; # Enabled using llm-agents.nix overlay (pre-built binaries)
+
+    # Package is overridden via overlay in overlays/default.nix
+    # Uses llm-agents.nix for pre-built binaries - avoids nixpkgs build issues
 
     # Use "auto" model selection - gemini-cli will choose the best available model
     # You can override this with GEMINI_MODEL environment variable or --model flag

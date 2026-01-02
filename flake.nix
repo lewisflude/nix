@@ -100,6 +100,10 @@
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     audio-nix = {
       url = "github:polygon/audio.nix";
       inputs.nixpkgs.follows = "nixpkgs";

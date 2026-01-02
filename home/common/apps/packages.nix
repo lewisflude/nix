@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  inputs,
   ...
 }:
 {
@@ -17,6 +18,14 @@
     # Note: gemini-cli is handled via programs.gemini-cli in gemini-cli.nix
     pkgs.pgcli
     pkgs.cursor-cli
+
+    # AI coding agent tools from llm-agents.nix
+    # cursor-agent: Cursor AI CLI agent (complements cursor-cli)
+    inputs.llm-agents.packages.${pkgs.system}.cursor-agent
+    # ccusage: Usage analysis tool for Claude Code sessions
+    inputs.llm-agents.packages.${pkgs.system}.ccusage
+    # coding-agent-search: TUI to search coding agent history
+    inputs.llm-agents.packages.${pkgs.system}.coding-agent-search
   ]
   # Linux-only packages
   ++ lib.optionals pkgs.stdenv.isLinux [
