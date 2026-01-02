@@ -9,7 +9,7 @@ let
 in
 {
   programs.gemini-cli = {
-    enable = true;
+    enable = false; # Temporarily disabled - nixpkgs build is broken (ENOTCACHED error)
 
     # Use "auto" model selection - gemini-cli will choose the best available model
     # You can override this with GEMINI_MODEL environment variable or --model flag
