@@ -8,7 +8,7 @@ _: {
 
     # Output settings optimized for Quest 3 and RTX 4090 NVENC
     encoder = nvenc
-    adapter_name = /dev/dri/card1
+    adapter_name = /dev/dri/card2
     # Use monitor ID (numeric) - Monitor 0 = DP-3, Monitor 1 = HDMI-A-4 (dummy plug)
     # Target main display (DP-3) for Steam Link streaming
     # Change to output_name = 1 to use dummy HDMI plug instead
