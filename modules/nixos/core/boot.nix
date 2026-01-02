@@ -14,7 +14,7 @@
       systemd-boot = {
         enable = lib.mkDefault true;
         editor = false; # Security: Prevent boot parameter editing without authentication
-        configurationLimit = 10;
+        configurationLimit = lib.mkDefault 10;
       };
       efi.canTouchEfiVariables = lib.mkDefault true;
       timeout = lib.mkDefault 0;
