@@ -15,6 +15,10 @@ in
 {
   config = mkIf cfg.enable (mkMerge [
     (optionalAttrs isLinux {
+      # Enable colord service for color management
+      # This provides system-wide color profile management and improves color accuracy
+      services.colord.enable = mkIf cfg.utilities true;
+
       environment.systemPackages = optionals cfg.utilities [
         pkgs.grim
         pkgs.slurp

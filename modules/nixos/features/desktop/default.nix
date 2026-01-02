@@ -23,6 +23,7 @@ in
       "video"
       "input"
       "networkmanager"
+      "seat" # Required for seatd.sock access (Wayland seat management)
     ];
   };
 }

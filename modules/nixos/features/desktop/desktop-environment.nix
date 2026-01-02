@@ -14,6 +14,11 @@ in
 
   config = lib.mkIf cfg.enable {
     environment.pathsToLink = [ "/share/wayland-sessions" ];
+
+    # seatd is required for libseat-based applications (niri, some games, etc.)
+    # Provides seat management for Wayland compositors
+    services.seatd.enable = true;
+
     programs.niri.enable = true;
     programs.uwsm = {
       enable = true;
