@@ -9,10 +9,10 @@ let
 in
 {
   programs.gemini-cli = {
-    enable = true; # Enabled using llm-agents.nix overlay (pre-built binaries)
+    enable = true; # Using llm-agents.nix (daily builds with binary cache)
 
-    # Package is overridden via overlay in overlays/default.nix
-    # Uses llm-agents.nix for pre-built binaries - avoids nixpkgs build issues
+    # Package comes from llm-agents.nix overlay in overlays/default.nix
+    # This provides pre-built binaries from https://cache.numtide.com
 
     # Use "auto" model selection - gemini-cli will choose the best available model
     # You can override this with GEMINI_MODEL environment variable or --model flag
