@@ -32,9 +32,8 @@
     package = if pkgs.stdenv.isLinux then pkgs.ghostty else null;
     enableZshIntegration = true;
     settings = {
-      # Explicitly set shell to zsh to prevent login prompt issues
-      # On macOS, Ghostty might try to use /bin/login incorrectly without this
-      shell = "/bin/zsh";
+      # Note: shell configuration removed - not supported in ghostty 1.2.3
+      # Ghostty will use the user's default shell from /etc/passwd
 
       font-family = "Iosevka Nerd Font";
       font-feature = "+calt,+liga,+dlig";
