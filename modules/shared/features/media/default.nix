@@ -17,7 +17,7 @@ let
   platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
   inherit (platformLib) isLinux;
   audioNixCfg = cfg.audio.audioNix;
-  rtKernelPackages = pkgs.linuxPackages_rt;
+  rtKernelPackages = pkgs.linuxPackages_latest_rt;
 in
 {
   config = mkIf cfg.enable (mkMerge [
@@ -53,9 +53,9 @@ in
         # Real-time kernel with RT patches
         kernel = {
           realtime = true;
-          # Use stable RT kernel (6.6) - more reliable ZFS support
-          # linuxPackages_latest_rt (6.11) may have ZFS module build issues
-          # Available: linuxPackages_rt (6.6), linuxPackages_latest_rt (6.11)
+          # Use latest RT kernel for better hardware compatibility
+          # linuxPackages_latest_rt provides newer drivers and GPU support
+          # Available: linuxPackages_rt (6.6), linuxPackages_latest_rt (6.11+)
           packages = rtKernelPackages;
         };
 
