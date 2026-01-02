@@ -106,17 +106,14 @@ in
   #   else
   #     (_final: _prev: { });
 
-  # LLM agents overlay - use pre-built binaries from llm-agents.nix
+  # LLM agents - use pre-built binaries from llm-agents.nix
+  # Daily builds with binary cache at https://cache.numtide.com
   llm-agents =
-    _final: prev:
+    _final: _prev:
     if
       inputs ? llm-agents && inputs.llm-agents ? packages && inputs.llm-agents.packages ? ${system}
     then
-      {
-        # Override gemini-cli with pre-built version from llm-agents.nix
-        # This avoids nixpkgs build issues (ENOTCACHED errors)
-        gemini-cli = inputs.llm-agents.packages.${system}.gemini-cli;
-      }
+      inputs.llm-agents.packages.${system}
     else
       { };
 
