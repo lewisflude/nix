@@ -27,9 +27,14 @@
       LoginGraceTime = 30;
 
       # Keepalive settings
-      ClientAliveInterval = 60;
-      ClientAliveCountMax = 3;
-      TCPKeepAlive = true;
+      # Send keepalive probe every 30 seconds
+      ClientAliveInterval = 30;
+      # Allow 10 missed responses before terminating (5 minutes total)
+      # This is more lenient to handle network issues, NAT, and firewalls
+      ClientAliveCountMax = 10;
+      # Use SSH-level keepalive instead of TCP keepalive
+      # SSH keepalive is more reliable through NAT/firewalls
+      TCPKeepAlive = false;
 
       # Forwarding settings
       X11Forwarding = false;
