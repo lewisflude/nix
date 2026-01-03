@@ -17,6 +17,18 @@ _: {
 
         # Send terminal environment variables (fixes backspace on embedded devices)
         sendEnv = [ "TERM" ];
+
+        # Keepalive settings to prevent session termination
+        # Prevents NAT timeout, firewall drops, and idle disconnections
+        extraOptions = {
+          # Send keepalive probe every 15 seconds
+          ServerAliveInterval = "15";
+          # Allow 4 missed responses before terminating (60 seconds total)
+          ServerAliveCountMax = "4";
+          # Use SSH-level keepalive instead of TCP keepalive
+          # SSH keepalive is more reliable through NAT/firewalls
+          TCPKeepAlive = "no";
+        };
       };
 
       "192.168.10.1" = {
