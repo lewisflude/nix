@@ -46,6 +46,17 @@ in
           pkgs.proton-ge-bin # GE-Proton for improved game compatibility
         ];
 
+        # Enable PipeWire screen capture for Steam Link/Remote Play on Wayland
+        # Without this, Steam falls back to "Desktop Black Frame" capture
+        package = pkgs.steam.override {
+          extraEnv = {
+            # Force Steam to use PipeWire for screen capture on Wayland
+            # This works with xdg-desktop-portal-wlr for screen sharing
+            STEAM_FORCE_DESKTOPUI_SCALING = "1";
+          };
+          extraArgs = "-pipewire";
+        };
+
         # Note: VR-specific Steam wrapping (NVIDIA libraries, XR_RUNTIME_JSON)
         # is handled by the VR module (modules/nixos/features/vr.nix) to avoid
         # duplication and conflicts when both features are enabled
@@ -91,18 +102,84 @@ in
         rulesProvider = pkgs.ananicy-rules-cachyos; # Includes quality rules for gamescope and games
       };
 
-      # Sunshine game streaming is configured via home-manager
-      # See: home/nixos/apps/sunshine.nix for KMS capture and NVENC settings
-      # The service itself is enabled in modules/nixos/features/gaming.nix when
-      # cfg.steam is true, with CAP_SYS_ADMIN for KMS capture
+      # Sunshine game streaming for Moonlight clients
+      # Streams from HDMI-A-4 (dummy display) while hiding DP-3 (ultrawide)
+      # Uses NVIDIA RTX 4090 (card2) for NVENC hardware encoding
       sunshine = mkIf cfg.steam {
         enable = true;
         autoStart = true;
-        capSysAdmin = true;
+        capSysAdmin = true; # Required for Wayland KMS capture
         openFirewall = true;
+
         # Enable CUDA support for NVENC hardware encoding
         # Without this, Sunshine can't load libcuda.so.1 and falls back to software encoding
         package = pkgs.sunshine.override { cudaSupport = true; };
+
+        settings = {
+          # GPU Configuration
+          # Verified: card2 = NVIDIA RTX 4090 (vendor 0x10de), both monitors connected
+          adapter_name = "/dev/dri/card2";
+
+          # Monitor Selection - Explicitly set to HDMI-A-4 (dummy display)
+          # Using output name instead of numeric ID to avoid boot-time instability
+          # HDMI-A-4 is the dummy display for streaming (1920x1080@60Hz)
+          # DP-3 (ultrawide) will be hidden during streaming via prep-cmd
+          output_name = "HDMI-A-4";
+
+          # Network settings
+          upnp = "on";
+          port = 47989;
+
+          # Performance settings
+          min_fps_factor = 1;
+          channels = 2;
+        };
+
+        applications =
+          let
+            # Shared prep commands for all apps
+            # Run before ALL streaming sessions to prepare the environment
+            commonPrepCmd = [
+              {
+                # 1. Inhibit system idle and sleep during streaming
+                # Uses systemd-inhibit (proper method) instead of pausing swayidle
+                # Prevents: auto-lock, sleep, and monitor power-off during active sessions
+                # The sleep infinity keeps the inhibitor alive; pkill cleans it up on undo
+                do = "systemd-inhibit --what=idle:sleep --who=Sunshine --why='Remote game streaming' sleep infinity &";
+                undo = "pkill -f 'systemd-inhibit.*Sunshine'";
+              }
+              {
+                # 2. Gracefully unlock swaylock for remote access (convenience mode)
+                # Sends SIGUSR1 to unlock instead of killing the process
+                do = "pkill -SIGUSR1 swaylock || true";
+                undo = "";
+              }
+              {
+                # 3. Turn off physical ultrawide monitor during streaming
+                # Hides streaming session from local display
+                # HDMI-A-4 dummy display continues working for stream
+                # NIRI_SOCKET is available via systemd user environment (no need to find it)
+                do = "niri msg output DP-3 off";
+                undo = "niri msg output DP-3 on";
+              }
+            ];
+          in
+          {
+            env = {
+              PATH = "$(PATH):$(HOME)/.local/bin";
+            };
+            apps = [
+              {
+                name = "Desktop";
+                prep-cmd = commonPrepCmd;
+              }
+              {
+                name = "Steam Big Picture";
+                cmd = "steam -gamepadui";
+                prep-cmd = commonPrepCmd;
+              }
+            ];
+          };
       };
 
       # Controller and Bluetooth udev rules
