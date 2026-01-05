@@ -145,7 +145,8 @@ in
                 # Uses systemd-inhibit (proper method) instead of pausing swayidle
                 # Prevents: auto-lock, sleep, and monitor power-off during active sessions
                 # setsid detaches the process so it survives shell exit; pkill cleans it up on undo
-                do = "setsid systemd-inhibit --what=idle:sleep --who=Sunshine --why='Remote game streaming' sleep infinity";
+                # Use absolute path since Sunshine's PATH may not include /run/current-system/sw/bin
+                do = "setsid /run/current-system/sw/bin/systemd-inhibit --what=idle:sleep --who=Sunshine --why='Remote game streaming' sleep infinity";
                 undo = "pkill -f 'systemd-inhibit.*Sunshine'";
               }
               {
