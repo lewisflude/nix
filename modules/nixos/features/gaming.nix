@@ -144,9 +144,8 @@ in
                 # 1. Inhibit system idle and sleep during streaming
                 # Uses systemd-inhibit (proper method) instead of pausing swayidle
                 # Prevents: auto-lock, sleep, and monitor power-off during active sessions
-                # The sleep infinity keeps the inhibitor alive; pkill cleans it up on undo
-                # Must use bash -c to properly handle the background operator (&)
-                do = "bash -c 'systemd-inhibit --what=idle:sleep --who=Sunshine --why=\"Remote game streaming\" sleep infinity &'";
+                # setsid detaches the process so it survives shell exit; pkill cleans it up on undo
+                do = "setsid systemd-inhibit --what=idle:sleep --who=Sunshine --why='Remote game streaming' sleep infinity";
                 undo = "pkill -f 'systemd-inhibit.*Sunshine'";
               }
               {
