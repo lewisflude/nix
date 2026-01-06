@@ -326,6 +326,17 @@ in
     "Mod+Shift+Ctrl+J".action.move-column-to-monitor-down = { };
     "Mod+Shift+Ctrl+K".action.move-column-to-monitor-up = { };
     "Mod+Shift+Ctrl+L".action.move-column-to-monitor-right = { };
+    # Display output info
+    "Mod+Alt+O" = {
+      action.spawn = [
+        "sh"
+        "-c"
+        ''
+          OUTPUTS=$(niri msg outputs --json | ${pkgs.jq}/bin/jq -r '.[] | "\(.name): \(.mode.width)x\(.mode.height) @ \(.mode.refresh)Hz (scale: \(.scale))"')
+          notify-send "Outputs" "$OUTPUTS" -t 5000
+        ''
+      ];
+    };
     "XF86AudioPlay" = {
       allow-when-locked = true;
       action.spawn = [

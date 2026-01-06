@@ -103,13 +103,15 @@ in
                   "node.description" = "Apogee Stereo Game Bridge";
 
                   # Virtual stereo sink that games see
+                  # Priority set low (50) so regular apps prefer Apogee direct (100)
+                  # Games are forced to this bridge via stream rules anyway, so priority doesn't matter for them
                   "capture.props" = {
                     "media.class" = "Audio/Sink";
                     "audio.position" = [
                       "FL"
                       "FR"
                     ];
-                    "priority.session" = 1900;
+                    "priority.session" = 50; # Lower than Apogee direct (100) - games forced via rules
                     "node.passive" = false;
                     "node.latency" = gamingLatency;
                   };
@@ -148,19 +150,63 @@ in
               }
             ];
 
-            # Device priorities: prefer stereo bridge for games, lower priority for pro interface
+            # Device priorities: Apogee direct for regular apps, lower priority for bridge (games forced via rules)
             "10-device-priorities"."monitor.alsa.rules" = [
               {
-                matches = [ { "node.name" = "~alsa_output.*"; } ];
-                actions.update-props."priority.session" = 1000;
-              }
-              {
+                # Apogee direct - preferred for regular apps (highest priority for physical outputs)
                 matches = [ { "node.name" = "~alsa_output.usb-Apogee.*"; } ];
                 actions.update-props."priority.session" = 100;
+              }
+              {
+                # Generic ALSA outputs - lower priority than Apogee (fallback only)
+                # Note: HDMI devices are disabled separately, so this mainly affects future devices
+                matches = [ { "node.name" = "~alsa_output.*"; } ];
+                actions.update-props."priority.session" = 50;
+              }
+            ];
+
+            # Explicitly set bridge priority in WirePlumber (matches module definition)
+            # Bridge has priority 50 - lower than Apogee (100) so regular apps don't use it
+            # Games are forced to bridge via stream rules anyway
+            "10-bridge-priority"."monitor.rules" = [
+              {
+                matches = [
+                  { "node.name" = "~input.apogee_stereo_game_bridge"; }
+                  { "node.name" = "~output.apogee_stereo_game_bridge"; }
+                ];
+                actions.update-props = {
+                  "priority.session" = 50; # Lower than Apogee direct (100)
+                };
+              }
+            ];
+
+            # Disable unused HDMI audio devices
+            # NVIDIA AD102 is never used and only adds clutter to audio selection menus
+            # Intel PCH is set to very low priority as a backup (but not disabled)
+            "10-disable-hdmi-audio"."monitor.alsa.rules" = [
+              {
+                # Disable NVIDIA HDMI audio completely
+                matches = [
+                  { "device.name" = "~alsa_card.pci-0000_01_00.1"; } # NVIDIA AD102 High Definition Audio Controller
+                ];
+                actions.update-props = {
+                  "device.disabled" = true;
+                };
+              }
+              {
+                # Set Intel PCH to low priority (kept as backup fallback)
+                # Priority 10 allows it to be selected if Apogee disconnects, but not when Apogee is available
+                matches = [
+                  { "device.name" = "~alsa_card.pci-0000_00_1f.3"; } # Intel PCH Built-in Audio
+                ];
+                actions.update-props = {
+                  "priority.session" = 10; # Low priority, but high enough to be fallback if Apogee unavailable
+                };
               }
             ];
 
             # Bluetooth: Enable high-quality codecs
+            # Bluetooth devices get priority 200 when connected (higher than Apogee for auto-selection)
             "10-bluez"."monitor.bluez.properties" = {
               "bluez5.enable-sbc-xq" = true;
               "bluez5.enable-msbc" = true;
@@ -186,6 +232,17 @@ in
               "bluez5.a2dp.ldac.quality" = "hq";
             };
 
+            # Set Bluetooth device priority (higher than Apogee when connected)
+            # Bluetooth sinks get higher priority so they auto-select when connected
+            "10-bluetooth-priority"."monitor.rules" = [
+              {
+                matches = [ { "node.name" = "~bluez_output.*"; } ];
+                actions.update-props = {
+                  "priority.session" = 200; # Higher than Apogee (100) - auto-select when connected
+                };
+              }
+            ];
+
             # Disable audio device suspension to prevent dropouts
             "51-disable-suspension"."monitor.alsa.rules" = [
               {
@@ -198,18 +255,21 @@ in
             ];
 
             # Automatic routing: games use the stereo bridge
+            # Note: Games are forced via stream rules, so bridge priority doesn't matter for them
             "90-gaming-routing" = {
               "monitor.rules" = [
                 {
                   matches = [ { "node.name" = "input.apogee_stereo_game_bridge"; } ];
                   actions.update-props = {
-                    "priority.session" = 1900;
                     "node.passive" = false;
+                    # Priority not set here - games are forced via stream rules anyway
                   };
                 }
               ];
 
               # Route gaming applications to stereo bridge
+              # Note: If Apogee disconnects, bridge will fail silently (node.passive = true)
+              # Games will have no audio in this case - user must reconnect Apogee or manually select another sink
               "monitor.stream.rules" =
                 let
                   gameRouting = {

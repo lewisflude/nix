@@ -113,6 +113,13 @@
     openFirewall = true;
   };
 
+  # Desktop configuration - enable auto-login for Sunshine streaming
+  # This allows Moonlight clients to connect without needing to login via greeter
+  host.features.desktop.autoLogin = {
+    enable = true;
+    user = config.host.username; # Auto-login as the configured user (lewis)
+  };
+
   # Boot optimization: Delay non-essential services to speed up boot
   systemd = {
     services = {

@@ -76,13 +76,13 @@ in
           };
           variable-refresh-rate = true;
         };
-        # Dummy HDMI plug (HDMI-A-4) - configured minimally for Sunshine KMS capture
-        # Used by Sunshine for KMS capture when monitors are off/locked
-        # Positioned off-screen and set to minimal resolution so niri doesn't actively use it
+        # Dummy HDMI plug (HDMI-A-4) - used for Sunshine streaming
+        # Positioned next to DP-3 (ultrawide) for Sunshine to capture properly
+        # DP-3 will be turned off during streaming via Sunshine prep-cmd
         "HDMI-A-4" = {
           position = {
-            x = 10000;
-            y = 10000;
+            x = 2752; # Position to the right of DP-3 (which is 2752 logical pixels wide)
+            y = 0;
           };
           mode = {
             width = 1920;
@@ -191,17 +191,13 @@ in
           };
           open-maximized = true;
         }
-        # Steam Big Picture mode - force to HDMI-A-4 dummy display for streaming
-        # This rule only affects gamepadui mode used for Sunshine streaming
-        # Regular Steam desktop mode remains on DP-3 for normal use
-        # DISABLED: This rule may be causing crashes - needs testing
-        # {
-        #   matches = [
-        #     { app-id = "^steam$"; }
-        #   ];
-        #   open-on-output = "HDMI-A-4";
-        #   open-maximized = true;
-        # }
+        # Steam window rules removed - Steam opens on focused display by default
+        # For Sunshine streaming: Use Mod+Shift+S to move Steam to HDMI-A-4
+        # For normal desktop use: Steam opens on DP-3 (main display)
+        #
+        # Note: If you want Steam to always open on HDMI-A-4 for streaming,
+        # you can manually move it there or configure Sunshine to use a wrapper
+        # script that sets environment variables before launching Steam.
       ];
       animations = {
         enable = true;
@@ -257,6 +253,17 @@ in
             "1.0"
             "--brightness"
             "1.0"
+          ];
+        }
+        # Enable HDMI-A-4 at startup so Sunshine can detect it as Monitor 1
+        # This display is used for streaming and should always be enabled
+        {
+          command = [
+            "${pkgs.niri}/bin/niri"
+            "msg"
+            "output"
+            "HDMI-A-4"
+            "on"
           ];
         }
       ];

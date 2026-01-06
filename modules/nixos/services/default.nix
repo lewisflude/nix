@@ -15,5 +15,6 @@
     ./ssh.nix
     ./syncthing.nix
     ./cockpit.nix
+    ./sunshine.nix
   ];
 }
