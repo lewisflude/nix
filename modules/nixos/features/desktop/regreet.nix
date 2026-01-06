@@ -15,6 +15,15 @@ let
   inherit (theme) colors;
 in
 {
+  options.host.features.desktop.autoLogin = {
+    enable = lib.mkEnableOption "automatic login on boot";
+    user = lib.mkOption {
+      type = lib.types.str;
+      default = config.host.username or "lewis";
+      description = "User to automatically login (defaults to host.username)";
+    };
+  };
+
   config = lib.mkIf cfg.enable {
     # Enable ReGreet greeter for greetd
     programs.regreet = {
@@ -285,6 +294,16 @@ in
           min-width: 1px;
         }
       '';
+    };
+
+    # Greetd configuration with optional auto-login
+    services.greetd = {
+      settings = lib.mkIf cfg.autoLogin.enable {
+        initial_session = {
+          command = "${pkgs.niri}/bin/niri-session";
+          inherit (cfg.autoLogin) user;
+        };
+      };
     };
   };
 }
