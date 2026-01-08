@@ -117,6 +117,8 @@ in
 
           env = {
             EDITOR = "zed --wait";
+            # Ensure Wayland session type is set for applications launched from Zed's terminal
+            XDG_SESSION_TYPE = "wayland";
           };
         };
 

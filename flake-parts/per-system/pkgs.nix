@@ -9,7 +9,7 @@
   perSystem =
     { system, ... }:
     let
-      nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
+      inherit (inputs) nixpkgs;
       pkgsWithOverlays = import nixpkgs {
         inherit system;
         overlays = functionsLib.mkOverlays { inherit inputs system; };

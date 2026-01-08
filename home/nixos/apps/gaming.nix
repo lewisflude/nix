@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 let
   steamRunUrl = pkgs.writeShellApplication {
     name = "steam-run-url";
@@ -6,6 +6,44 @@ let
       echo "$1" > "/run/user/$(id --user)/steam-run-url.fifo"
     '';
     runtimeInputs = [ pkgs.coreutils ];
+  };
+
+  # Helper script to install Media Foundation codecs for Proton/Steam games
+  # Media Foundation is required for proper video codec support in Windows games
+  install-mf-codecs-proton = pkgs.writeShellApplication {
+    name = "install-mf-codecs-proton";
+    text = ''
+      set -euo pipefail
+
+      if [ $# -eq 0 ]; then
+        echo "Error: Steam App ID required"
+        echo ""
+        echo "Usage: install-mf-codecs-proton <STEAM_APP_ID>"
+        echo ""
+        echo "Examples:"
+        echo "  install-mf-codecs-proton 1234567"
+        echo ""
+        echo "To find your Steam App ID:"
+        echo "  1. Right-click game in Steam → Properties → General"
+        echo "  2. Look at the URL: steam://run/APP_ID"
+        echo "  3. Or check: ${config.xdg.dataHome}/Steam/steamapps/"
+        echo ""
+        exit 1
+      fi
+
+      APP_ID="$1"
+      echo "Installing Media Foundation codecs for Steam App ID: $APP_ID"
+      echo "This may take several minutes..."
+
+      ${pkgs.protontricks}/bin/protontricks "$APP_ID" -q mf
+
+      echo ""
+      echo "Media Foundation codecs installed successfully!"
+      echo "You may need to restart the game for the changes to take effect."
+    '';
+    runtimeInputs = [
+      pkgs.protontricks
+    ];
   };
 
   # Lutris wrapper to ensure ESYNC limits are set explicitly
@@ -79,6 +117,7 @@ in
     lutris-systemd
     steam-sunshine
     show-niri-outputs
+    install-mf-codecs-proton
   ];
 
   # Override desktop entry to use wrapper with ESYNC limits

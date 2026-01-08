@@ -10,7 +10,7 @@ let
 
   revision =
     let
-      self = inputs.self or { };
+      inherit (inputs) self;
       revVal = self.rev or null;
       dirtyRevVal = self.dirtyRev or null;
     in

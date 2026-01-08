@@ -9,6 +9,7 @@
 
   imports = [
     ./hardware-configuration.nix
+    ./sunshine.nix
   ];
 
   # Jupiter-specific boot configuration

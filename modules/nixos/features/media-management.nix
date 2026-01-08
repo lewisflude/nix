@@ -12,22 +12,22 @@ in
 
     host.services.mediaManagement = {
       enable = true;
-      dataPath = cfg.dataPath or "/mnt/storage";
-      timezone = cfg.timezone or "Europe/London";
-      prowlarr = cfg.prowlarr or { };
-      radarr = cfg.radarr or { };
-      sonarr = cfg.sonarr or { };
-      lidarr = cfg.lidarr or { };
-      readarr = cfg.readarr or { };
-      listenarr = cfg.listenarr or { };
-      sabnzbd = cfg.sabnzbd or { };
-      qbittorrent = cfg.qbittorrent or { };
-      transmission = cfg.transmission or { };
-      jellyfin = cfg.jellyfin or { };
-      jellyseerr = cfg.jellyseerr or { };
-      flaresolverr = cfg.flaresolverr or { };
-      unpackerr = cfg.unpackerr or { };
-      navidrome = cfg.navidrome or { };
+      inherit (cfg) dataPath;
+      inherit (cfg) timezone;
+      inherit (cfg) prowlarr;
+      inherit (cfg) radarr;
+      inherit (cfg) sonarr;
+      inherit (cfg) lidarr;
+      inherit (cfg) readarr;
+      inherit (cfg) listenarr;
+      inherit (cfg) sabnzbd;
+      inherit (cfg) qbittorrent;
+      inherit (cfg) transmission;
+      inherit (cfg) jellyfin;
+      inherit (cfg) jellyseerr;
+      inherit (cfg) flaresolverr;
+      inherit (cfg) unpackerr;
+      inherit (cfg) navidrome;
     };
   };
 }

@@ -7,6 +7,13 @@ options = []
 includes = ["*.nix"]
 excludes = ["result", "result-*", ".direnv", "node_modules", "flake.lock"]
 
+[formatter.statix]
+command = "statix"
+options = ["fix"]
+includes = ["*.nix"]
+excludes = ["result", "result-*", ".direnv", "node_modules", "flake.lock"]
+# Additional ignores are configured in statix.toml
+
 [formatter.yaml]
 command = "prettier"
 options = ["--write"]
