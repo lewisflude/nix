@@ -169,7 +169,7 @@ in
           zjk = "zellij kill-session";
           zja = "zellij attach";
           zjd = "zellij delete-session";
-          zed = "env -u WAYLAND_DISPLAY zeditor"; # Force XWayland (native Wayland support is buggy)
+          zed = "zeditor"; # Native Wayland support enabled
         }
         (lib.mkIf isLinux {
           # Lock screen styling is handled in programs.swaylock.settings (Signal theme)

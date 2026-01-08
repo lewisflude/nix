@@ -1,19 +1,19 @@
 { inputs }:
 let
-  nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
+  inherit (inputs) nixpkgs;
   inherit (nixpkgs) lib;
 
-  darwin = inputs.darwin or null;
-  home-manager = inputs.home-manager or null;
-  mac-app-util = inputs.mac-app-util or null;
-  nix-homebrew = inputs.nix-homebrew or null;
-  sops-nix = inputs.sops-nix or null;
+  inherit (inputs) darwin;
+  inherit (inputs) home-manager;
+  inherit (inputs) mac-app-util;
+  inherit (inputs) nix-homebrew;
+  inherit (inputs) sops-nix;
 
-  niri = inputs.niri or null;
-  ironbar = inputs.ironbar or null;
-  musnix = inputs.musnix or null;
-  solaar = inputs.solaar or null;
-  determinate = inputs.determinate or null;
+  inherit (inputs) niri;
+  inherit (inputs) ironbar;
+  inherit (inputs) musnix;
+  inherit (inputs) solaar;
+  inherit (inputs) determinate;
 
   functionsLib = import ./functions.nix { inherit lib; };
 
@@ -61,9 +61,9 @@ let
     let
       inherit (attrs) determinate;
       sops-nix = attrs."sops-nix" or null;
-      niri = attrs.niri or null;
-      musnix = attrs.musnix or null;
-      solaar = attrs.solaar or null;
+      inherit (attrs) niri;
+      inherit (attrs) musnix;
+      inherit (attrs) solaar;
 
       nix-topology = attrs."nix-topology" or null;
       vpn-confinement = attrs."vpn-confinement" or null;
@@ -245,8 +245,8 @@ in
           solaar
 
           ;
-        nix-topology = inputs.nix-topology or null;
-        vpn-confinement = inputs.vpn-confinement or null;
+        inherit (inputs) nix-topology;
+        inherit (inputs) vpn-confinement;
         isLinux = hostConfig.system == "x86_64-linux" || hostConfig.system == "aarch64-linux";
       }
       ++ optionalModule (home-manager != null) home-manager.nixosModules.home-manager

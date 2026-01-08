@@ -3,8 +3,8 @@
   hosts,
 }:
 let
-  nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
-  pre-commit-hooks = inputs.pre-commit-hooks or (throw "pre-commit-hooks input is required");
+  inherit (inputs) nixpkgs;
+  inherit (inputs) pre-commit-hooks;
 
   systems = builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
 

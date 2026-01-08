@@ -5,14 +5,13 @@
 }:
 let
   standards = import ../features/development/language-standards.nix;
-  makeIndentString = n: builtins.concatStringsSep "" (builtins.genList (_x: " ") n);
 
   # Helper to get a representative filename for a language (used by Biome to infer file type)
   # Biome uses the filename extension to determine the file type when formatting via stdin
   getLanguageFilename =
     name: value:
     let
-      fileTypes = value.fileTypes or [ name ];
+      inherit (value) fileTypes;
       # Use the first file type as the extension
       extension = builtins.head fileTypes;
       # Fallback map for language names that don't match their file extensions
@@ -48,7 +47,7 @@ let
   # For languages using Biome, add Biome LSP alongside the primary LSP
   # Biome LSP provides linting and diagnostics
   buildLanguageServers =
-    name: value:
+    _name: value:
     if value.formatter == "biome" then
       [
         # Primary LSP for language features (type checking, completion, etc.)
@@ -103,7 +102,7 @@ in
             language-servers = buildLanguageServers name value;
             indent = {
               tab-width = value.indent;
-              unit = value.unit or (makeIndentString value.indent);
+              inherit (value) unit;
             };
             auto-format = value.formatter != null;
           }

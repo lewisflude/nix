@@ -8,7 +8,7 @@ let
 in
 {
   server = {
-    port = janitorrCfg.port or 8090;
+    inherit (janitorrCfg) port;
   };
 
   logging = {

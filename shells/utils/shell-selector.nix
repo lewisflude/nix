@@ -1,9 +1,9 @@
 { pkgs, ... }:
 pkgs.mkShell {
-  buildInputs = with pkgs; [
-    fzf
-    bat
-    fd
+  buildInputs = [
+    pkgs.fzf
+    pkgs.bat
+    pkgs.fd
   ];
   shellHook = ''
     select_dev_shell() {

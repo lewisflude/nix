@@ -1,14 +1,10 @@
 {
   themeContext ? null,
-  themeLib,
   ...
 }:
 let
-  # Generate fallback theme using shared themeLib
-  fallbackTheme = themeLib.generateTheme "dark" { };
-
   # Use Signal theme if available, otherwise use fallback
-  theme = themeContext.theme or fallbackTheme;
+  inherit (themeContext) theme;
   inherit (theme) colors;
 in
 {

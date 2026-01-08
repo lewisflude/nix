@@ -5,7 +5,7 @@
   ...
 }:
 let
-  nixpkgs = inputs.nixpkgs or (throw "nixpkgs input is required");
+  inherit (inputs) nixpkgs;
   inherit (nixpkgs) lib;
 in
 {

@@ -12,17 +12,17 @@ in
 
     host.services.containersSupplemental = {
       enable = true;
-      uid = cfg.uid or 1000;
-      gid = cfg.gid or 100;
-      homarr = cfg.homarr or { };
-      wizarr = cfg.wizarr or { };
-      janitorr = cfg.janitorr or { };
-      doplarr = cfg.doplarr or { };
-      comfyui = cfg.comfyui or { };
-      calcom = cfg.calcom or { };
-      profilarr = cfg.profilarr or { };
-      termix = cfg.termix or { };
-      cleanuparr = cfg.cleanuparr or { };
+      inherit (cfg) uid;
+      inherit (cfg) gid;
+      inherit (cfg) homarr;
+      inherit (cfg) wizarr;
+      inherit (cfg) janitorr;
+      inherit (cfg) doplarr;
+      inherit (cfg) comfyui;
+      inherit (cfg) calcom;
+      inherit (cfg) profilarr;
+      inherit (cfg) termix;
+      inherit (cfg) cleanuparr;
     };
   };
 }
