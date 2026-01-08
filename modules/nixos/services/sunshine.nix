@@ -233,7 +233,8 @@ let
       # Find Niri socket
       NIRI_SOCKET=""
       if [ -d "$XDG_RUNTIME_DIR" ]; then
-          NIRI_SOCKET=$(find "$XDG_RUNTIME_DIR" -name "niri.*.sock" -type s 2>/dev/null | head -n1)
+          # Use explicit path to avoid fd shadowing find
+          NIRI_SOCKET=$(${pkgs.findutils}/bin/find "$XDG_RUNTIME_DIR" -maxdepth 1 -name "niri.*.sock" -type s 2>/dev/null | head -n1)
           if [ -n "$NIRI_SOCKET" ]; then
               log "Found Niri socket: $NIRI_SOCKET"
           else
