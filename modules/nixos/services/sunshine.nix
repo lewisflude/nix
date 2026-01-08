@@ -14,6 +14,7 @@ let
   cfg = config.services.sunshine;
 
   # Sunshine prep script - unlocks screen, disables auto-lock, inhibits sleep, and prepares display
+  # Updated: 2026-01-08 - Fixed fd command shadowing GNU find
   sunshine-prep = pkgs.writeShellApplication {
     name = "sunshine-prep";
     runtimeInputs = [
