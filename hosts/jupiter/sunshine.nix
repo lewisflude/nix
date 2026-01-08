@@ -1,5 +1,12 @@
-# deadnix: skip - statix requires `_` for empty pattern
-{ _ }:
+{
+  # deadnix: skip
+  config,
+  # deadnix: skip
+  lib,
+  # deadnix: skip
+  pkgs,
+  ...
+}:
 {
   # Sunshine streaming configuration for Jupiter gaming PC
   services.sunshine = {
