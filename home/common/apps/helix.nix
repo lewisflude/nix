@@ -102,8 +102,8 @@ in
             language-servers = buildLanguageServers name value;
             indent = {
               tab-width = value.indent;
-              inherit (value) unit;
-            };
+            }
+            // lib.optionalAttrs (value ? unit) { inherit (value) unit; };
             auto-format = value.formatter != null;
           }
           // lib.optionalAttrs (value ? comment) {
