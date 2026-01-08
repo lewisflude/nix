@@ -22,6 +22,7 @@ let
       pkgs.systemd
       pkgs.coreutils
       pkgs.util-linux
+      pkgs.findutils
     ];
     text = ''
       # Exit on error, but allow individual commands to fail gracefully
@@ -45,7 +46,7 @@ let
 
       # Try loginctl first (most reliable for graphical sessions)
       if SESSION_USER=$(loginctl list-sessions --no-legend 2>/dev/null | \
-          awk '$5 == "seat0" && $3 != "" {print $3; exit}'); then
+          awk '$4 == "seat0" && $3 != "" {print $3; exit}'); then
           log "Detected user via loginctl: $SESSION_USER"
       elif [ -n "''${SUDO_USER:-}" ]; then
           SESSION_USER="$SUDO_USER"
@@ -72,9 +73,24 @@ let
 
       log "Using XDG_RUNTIME_DIR: $XDG_RUNTIME_DIR"
 
+      # Find Niri socket
+      NIRI_SOCKET=""
+      if [ -d "$XDG_RUNTIME_DIR" ]; then
+          NIRI_SOCKET=$(find "$XDG_RUNTIME_DIR" -name "niri.*.sock" -type s 2>/dev/null | head -n1)
+          if [ -n "$NIRI_SOCKET" ]; then
+              log "Found Niri socket: $NIRI_SOCKET"
+          else
+              log "Warning: Niri socket not found in $XDG_RUNTIME_DIR"
+          fi
+      fi
+
       # Helper function to run commands as session user
       run_as_user() {
-          sudo -u "$SESSION_USER" env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" "$@"
+          if [ -n "$NIRI_SOCKET" ]; then
+              sudo -u "$SESSION_USER" env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" NIRI_SOCKET="$NIRI_SOCKET" "$@"
+          else
+              sudo -u "$SESSION_USER" env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" "$@"
+          fi
       }
 
       # Stop swayidle to prevent auto-lock during streaming
@@ -89,24 +105,24 @@ let
           log "swayidle is not running"
       fi
 
-      # Kill swaylock if running (unlock screen for capture)
-      log "Unlocking screen (killing swaylock if running)"
+      # Unlock swaylock if running (using SIGUSR1 signal)
+      log "Unlocking screen (sending SIGUSR1 to swaylock if running)"
       if run_as_user pgrep -u "$SESSION_USER" swaylock >/dev/null 2>&1; then
-          if run_as_user pkill -u "$SESSION_USER" swaylock; then
+          if run_as_user pkill --signal SIGUSR1 -u "$SESSION_USER" swaylock; then
               # Wait for swaylock to actually exit (max 2 seconds)
               for _ in {1..10}; do
                   if ! run_as_user pgrep -u "$SESSION_USER" swaylock >/dev/null 2>&1; then
-                      log "swaylock terminated successfully"
+                      log "swaylock unlocked successfully"
                       break
                   fi
                   sleep 0.2
               done
 
               if run_as_user pgrep -u "$SESSION_USER" swaylock >/dev/null 2>&1; then
-                  error "swaylock still running after termination attempt"
+                  error "swaylock still running after unlock attempt"
               fi
           else
-              error "Failed to kill swaylock"
+              error "Failed to unlock swaylock"
           fi
       else
           log "swaylock is not running"
@@ -181,6 +197,7 @@ let
       pkgs.coreutils
       pkgs.swaylock-effects
       pkgs.util-linux
+      pkgs.findutils
     ];
     text = ''
       set -u
@@ -200,7 +217,7 @@ let
       SESSION_USER=""
 
       if SESSION_USER=$(loginctl list-sessions --no-legend 2>/dev/null | \
-          awk '$5 == "seat0" && $3 != "" {print $3; exit}'); then
+          awk '$4 == "seat0" && $3 != "" {print $3; exit}'); then
           log "Detected user via loginctl: $SESSION_USER"
       elif [ -n "''${SUDO_USER:-}" ]; then
           SESSION_USER="$SUDO_USER"
@@ -213,8 +230,23 @@ let
       USER_ID=$(id -u "$SESSION_USER")
       export XDG_RUNTIME_DIR="/run/user/$USER_ID"
 
+      # Find Niri socket
+      NIRI_SOCKET=""
+      if [ -d "$XDG_RUNTIME_DIR" ]; then
+          NIRI_SOCKET=$(find "$XDG_RUNTIME_DIR" -name "niri.*.sock" -type s 2>/dev/null | head -n1)
+          if [ -n "$NIRI_SOCKET" ]; then
+              log "Found Niri socket: $NIRI_SOCKET"
+          else
+              log "Warning: Niri socket not found in $XDG_RUNTIME_DIR"
+          fi
+      fi
+
       run_as_user() {
-          sudo -u "$SESSION_USER" env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" "$@"
+          if [ -n "$NIRI_SOCKET" ]; then
+              sudo -u "$SESSION_USER" env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" NIRI_SOCKET="$NIRI_SOCKET" "$@"
+          else
+              sudo -u "$SESSION_USER" env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" "$@"
+          fi
       }
 
       # Stop the systemd-inhibit process
