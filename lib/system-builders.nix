@@ -5,7 +5,7 @@ let
 
   inherit (inputs) darwin;
   inherit (inputs) home-manager;
-  inherit (inputs) mac-app-util;
+  mac-app-util = inputs.mac-app-util or null;
   inherit (inputs) nix-homebrew;
   inherit (inputs) sops-nix;
 
