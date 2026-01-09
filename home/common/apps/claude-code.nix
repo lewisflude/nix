@@ -321,7 +321,7 @@
               if [[ "$file" == *.nix ]]; then
                 if [ -f "$file" ]; then
                   echo "[post-hook] Formatting $file" >&2
-                  ${pkgs.nixfmt-rfc-style}/bin/nixfmt "$file" 2>/dev/null || true
+                  ${pkgs.nixfmt}/bin/nixfmt "$file" 2>/dev/null || true
                 fi
               fi
             done

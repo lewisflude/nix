@@ -130,7 +130,7 @@ let
   defaultShell = pkgs.mkShell {
     buildInputs = [
 
-      pkgs.nixfmt-rfc-style
+      pkgs.nixfmt
       pkgs.deadnix
       pkgs.statix
       pkgs.treefmt
@@ -160,7 +160,7 @@ let
       echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
       echo ""
       echo "📦 Available Tools:"
-      echo "  • nixfmt-rfc-style - Official Nix formatter (RFC 166)"
+      echo "  • nixfmt           - Official Nix formatter (RFC 166)"
       echo "  • treefmt          - Unified formatter (Nix, YAML, Markdown, Shell)"
       echo "  • deadnix          - Find unused code"
       echo "  • statix           - Lint Nix files"
@@ -196,7 +196,7 @@ let
       git config commit.template "$PWD/.gitmessage"
 
       alias fmt='nix fmt'
-      alias fmt-nix='nixfmt-rfc-style'
+      alias fmt-nix='nixfmt'
       alias fmt-all='treefmt'
       alias lint='statix check .'
       alias check='nix flake check'

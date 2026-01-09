@@ -2,7 +2,7 @@
   languages = {
     nix = {
       lsp = "nixd";
-      formatter = "nixfmt-rfc-style";
+      formatter = "nixfmt";
       indent = 2;
     };
     typescript = {

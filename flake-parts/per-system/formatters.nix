@@ -23,6 +23,6 @@ in
     {
       # Formatter for this system
       # Used by `nix fmt` command
-      formatter = pkgs.nixfmt-rfc-style;
+      formatter = pkgs.nixfmt;
     };
 }

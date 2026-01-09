@@ -421,7 +421,10 @@ in
         # Steam Big Picture - for gaming
         {
           name = "Steam Big Picture";
-          detached = [ "${pkgs.steam}/bin/steam -gamepadui" ];
+          cmd = [
+            "${pkgs.steam}/bin/steam"
+            "steam://open/gamepadui"
+          ];
           prep-cmd = [
             {
               do = "${sunshine-prep}/bin/sunshine-prep";
