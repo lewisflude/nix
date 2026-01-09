@@ -4,7 +4,7 @@
   ...
 }:
 let
-  inherit (inputs) mac-app-util;
+  mac-app-util = inputs.mac-app-util or null;
 in
 {
   # Enables mac-app-util for Nix-installed .app bundles on macOS
