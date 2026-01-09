@@ -76,7 +76,7 @@ let
   ];
 
   formatterPackages = [
-    pkgs.nixfmt-rfc-style
+    pkgs.nixfmt
     pkgs.biome
     pkgs.yamlfmt
     pkgs.gotools # Includes goimports

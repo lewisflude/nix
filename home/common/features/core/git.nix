@@ -113,7 +113,7 @@
 
       # Nix formatter for merge conflicts
       mergetool.nixfmt = {
-        cmd = "${pkgs.nixfmt-rfc-style}/bin/nixfmt-rfc-style --mergetool \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"";
+        cmd = "${pkgs.nixfmt}/bin/nixfmt --mergetool \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"";
         trustExitCode = true;
       };
     };

@@ -6,7 +6,7 @@
 {
   home.packages = [
     # Formatters
-    pkgs.nixfmt-rfc-style
+    pkgs.nixfmt
     pkgs.biome
     pkgs.taplo
     pkgs.yamlfmt

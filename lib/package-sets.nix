@@ -88,7 +88,7 @@ let
     ];
 
     nixTools = [
-      pkgs.nixfmt-rfc-style
+      pkgs.nixfmt
       pkgs.nixd
       pkgs.nix-update
       pkgs.nix-prefetch-github
