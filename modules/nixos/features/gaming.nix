@@ -8,6 +8,7 @@ let
   inherit (lib) mkIf;
   inherit (lib.lists) optionals;
   cfg = config.host.features.gaming;
+  constants = import ../../../lib/constants.nix;
   # GPU ID can be configured per-host via host.hardware.gpuID
   # Default to empty string to allow auto-detection when not set
   gpuID = config.host.hardware.gpuID or "";
@@ -171,12 +172,11 @@ in
     # stricter discovery requirements
     networking.firewall = mkIf cfg.steam {
       allowedUDPPorts = [
-        27031 # Steam Link discovery
-        27036 # Steam Link streaming
-        27037 # Steam Link streaming
-      ];
+        constants.ports.gaming.steamLink.discovery # Steam Link discovery
+      ]
+      ++ constants.ports.gaming.steamLink.streamingUdp; # Steam Link streaming
       allowedTCPPorts = [
-        27036 # Steam Link streaming
+        constants.ports.gaming.steamLink.streamingTcp # Steam Link streaming
       ];
     };
 

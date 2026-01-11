@@ -8,6 +8,7 @@ let
   inherit (lib) mkIf;
   inherit (lib.lists) optionals;
   cfg = config.host.features.vr;
+  constants = import ../../../lib/constants.nix;
 in
 {
   config = mkIf cfg.enable {
@@ -159,23 +160,23 @@ in
       # WiVRn ports (required for Quest 3 discovery and streaming)
       (mkIf cfg.wivrn.enable {
         allowedTCPPorts = [
-          9757 # WiVRn streaming (TCP)
+          constants.ports.vr.wivrn.tcp # WiVRn streaming (TCP)
         ];
         allowedUDPPorts = [
-          5353 # mDNS discovery (Avahi/Bonjour) - Quest 3 server discovery
-          9757 # WiVRn streaming (UDP)
+          constants.ports.vr.mdns # mDNS discovery (Avahi/Bonjour) - Quest 3 server discovery
+          constants.ports.vr.wivrn.udp # WiVRn streaming (UDP)
         ];
       })
 
       # ALVR ports (only if ALVR is enabled)
       (mkIf cfg.alvr {
         allowedTCPPorts = [
-          9943 # ALVR Control channel
-          9944 # ALVR Streaming
+          constants.ports.vr.alvr.control # ALVR Control channel
+          constants.ports.vr.alvr.stream # ALVR Streaming
         ];
         allowedUDPPorts = [
-          9943 # ALVR Discovery
-          9944 # ALVR Video/Audio streaming
+          constants.ports.vr.alvr.control # ALVR Discovery
+          constants.ports.vr.alvr.stream # ALVR Video/Audio streaming
         ];
       })
     ];
