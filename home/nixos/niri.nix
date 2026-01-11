@@ -30,6 +30,9 @@ in
     pkgs.colord-gtk
     pkgs.wl-gammactl
     pkgs.libdrm # Provides modetest for checking DRM/HDR properties
+    # X11 compatibility tools
+    pkgs.labwc # Nested Wayland compositor for X11 apps that need specific positioning
+    pkgs.xsel # X11 clipboard utilities for rootful Xwayland integration
   ]
   ++ [
     inputs.awww.packages.${system}.awww
@@ -224,11 +227,8 @@ in
         };
       };
       spawn-at-startup = [
-        {
-          command = [
-            "${lib.getExe xwayland-satellite}"
-          ];
-        }
+        # xwayland-satellite is automatically managed by niri >= 25.08
+        # It spawns on-demand when X11 clients connect and auto-restarts if it crashes
         {
           command = [
             "${inputs.awww.packages.${system}.awww}/bin/awww-daemon"

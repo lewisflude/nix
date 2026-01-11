@@ -1,14 +1,12 @@
 {
   lib,
   pkgs,
-  config,
   osConfig ? { },
   ...
 }:
 let
   inherit (lib) mkIf;
   vrEnabled = osConfig.host.features.vr.enable or false;
-  opencompositeEnabled = osConfig.host.features.vr.opencomposite or false;
 
   # Helper script to install Media Foundation codecs for Heresphere
   # Media Foundation is required for proper video codec support in Windows VR apps
@@ -54,31 +52,25 @@ mkIf vrEnabled {
     install-mf-codecs
   ];
 
-  # OpenComposite configuration
-  # Allows OpenVR games (including SteamVR) to run on OpenXR runtimes (Monado/WiVRn)
-  # Stored as .vrpath.nix - use 'vr-enable' alias to activate, 'vr-disable' to deactivate
-  # This prevents conflicts with Steam Link and other non-VR Steam features
-  xdg.configFile."openvr/openvrpaths.vrpath.nix" = mkIf opencompositeEnabled {
-    text = ''
-      {
-        "config" :
-        [
-          "${config.xdg.dataHome}/Steam/config"
-        ],
-        "external_drivers" : null,
-        "jsonid" : "vrpathreg",
-        "log" :
-        [
-          "${config.xdg.dataHome}/Steam/logs"
-        ],
-        "runtime" :
-        [
-          "${pkgs.opencomposite}/lib/opencomposite"
-        ],
-        "version" : 1
-      }
-    '';
-  };
+  # OpenXR runtime configuration for sandboxed applications (Steam)
+  # This ensures Steam's FHS environment can locate the OpenXR runtime
+  # Respects WiVRn preference when enabled, otherwise uses Monado
+  xdg.configFile."openxr/1/active_runtime.json".source =
+    if osConfig.host.features.vr.wivrn.enable && osConfig.host.features.vr.wivrn.defaultRuntime then
+      "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json"
+    else
+      "${pkgs.monado}/share/openxr/1/openxr_monado.json";
+
+  # OpenComposite / OpenVR Compatibility Layer
+  # WiVRn v25.8+ automatically manages OpenVR-to-OpenXR translation using Xrizer
+  # Manual OpenComposite configuration is no longer needed and has been removed
+  #
+  # For Monado-only setups (without WiVRn), you can still use OpenComposite if needed:
+  #   1. Enable: host.features.vr.opencomposite = true;
+  #   2. The OpenComposite package will be installed system-wide
+  #   3. Configure manually via ~/.config/openvr/openvrpaths.vrpath if needed
+  #
+  # Note: Most modern VR applications support OpenXR natively and don't need OpenVR
 
   # Shell aliases for VR tools
   programs.zsh.shellAliases = {
@@ -91,11 +83,6 @@ mkIf vrEnabled {
     quest-shell = "adb shell";
     quest-install = "adb install";
     quest-logs = "adb logcat";
-
-    # OpenComposite toggle (for playing OpenVR games on Monado)
-    # Disable when using Steam Link or non-VR Steam features
-    vr-enable = "ln -sf ${config.xdg.configHome}/openvr/openvrpaths.vrpath.nix ${config.xdg.configHome}/openvr/openvrpaths.vrpath";
-    vr-disable = "rm -f ${config.xdg.configHome}/openvr/openvrpaths.vrpath";
 
     # Media Foundation codecs for Heresphere
     # Install Media Foundation codecs for a Wine prefix (defaults to ~/.wine)

@@ -102,6 +102,20 @@ in
         # To enable: mkdir -p ~/.local/share/monado && cd ~/.local/share/monado
         #            git clone https://gitlab.freedesktop.org/monado/utilities/hand-tracking-models
         WMR_HANDTRACKING = "0";
+        # Fix headset view stuttering (recommended by LVRA)
+        U_PACING_COMP_MIN_TIME_MS = "5";
+
+        # NVIDIA-specific VR optimizations (2026 best practices)
+        # Disable VSync - VR compositor handles frame timing
+        __GL_SYNC_TO_VBLANK = "0";
+        # Reduce input latency by limiting render-ahead queue
+        __GL_MaxFramesAllowed = "1";
+        # Enable VRR for VR headset (if supported)
+        __GL_VRR_ALLOWED = "1";
+
+        # Monado performance tuning
+        XRT_COMPOSITOR_FORCE_RANDR = "0"; # Disable RandR on Wayland
+        U_PACING_APP_MIN_TIME_MS = "2"; # Minimum app frame time for low latency
       };
     };
 
@@ -112,19 +126,59 @@ in
         pkgs.openxr-loader
         pkgs.pipewire
       ];
+
+      # OpenXR runtime integration for VR games
+      # Overrides gaming.nix's Steam package (which uses mkDefault) to add VR support
+      # Includes all gaming.nix settings plus VR-specific configuration
+      package = pkgs.steam.override {
+        extraEnv = {
+          # From gaming.nix - Force Steam to use PipeWire for screen capture on Wayland
+          STEAM_FORCE_DESKTOPUI_SCALING = "1";
+        };
+        extraArgs = "-pipewire";
+        extraProfile = ''
+          # VR-specific: Import OpenXR runtimes into Steam's pressure-vessel container
+          # This allows Steam games to detect and use Monado/WiVRn OpenXR runtimes
+          export PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1
+
+          # VR-specific: Fix timezone issues in VR games
+          # Some VR games have timezone handling bugs that cause crashes
+          unset TZ
+
+          # Note: For OpenXR games launched through Steam, you may need to add launch options:
+          #   PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/monado_comp_ipc %command%
+          # Or for WiVRn:
+          #   PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
+          # This grants Steam's pressure-vessel container access to the OpenXR runtime socket
+        '';
+      };
     };
 
-    # Firewall for ALVR
-    networking.firewall = mkIf cfg.alvr {
-      allowedTCPPorts = [
-        9943 # Control channel
-        9944 # Streaming
-      ];
-      allowedUDPPorts = [
-        9943 # Discovery
-        9944 # Video/Audio streaming
-      ];
-    };
+    # Firewall configuration for VR streaming
+    networking.firewall = lib.mkMerge [
+      # WiVRn ports (required for Quest 3 discovery and streaming)
+      (mkIf cfg.wivrn.enable {
+        allowedTCPPorts = [
+          9757 # WiVRn streaming (TCP)
+        ];
+        allowedUDPPorts = [
+          5353 # mDNS discovery (Avahi/Bonjour) - Quest 3 server discovery
+          9757 # WiVRn streaming (UDP)
+        ];
+      })
+
+      # ALVR ports (only if ALVR is enabled)
+      (mkIf cfg.alvr {
+        allowedTCPPorts = [
+          9943 # ALVR Control channel
+          9944 # ALVR Streaming
+        ];
+        allowedUDPPorts = [
+          9943 # ALVR Discovery
+          9944 # ALVR Video/Audio streaming
+        ];
+      })
+    ];
 
     # System packages
     environment.systemPackages = [
@@ -162,6 +216,15 @@ in
         assertion = cfg.opencomposite -> (cfg.monado || cfg.wivrn.enable);
         message = "OpenComposite requires an OpenXR runtime (Monado or WiVRn)";
       }
+    ];
+
+    # Niri compositor limitations for VR
+    # Note: Niri is a scrollable tiling Wayland compositor and does not currently have
+    # documented support for VR desktop overlays (wlx-overlay-s). VR games should work,
+    # but desktop overlay features may be limited or non-functional. For full VR desktop
+    # integration, consider using a compositor with explicit VR overlay support.
+    warnings = lib.optionals (config.host.features.desktop.niri && cfg.enable) [
+      "VR is enabled with Niri compositor. VR games should work, but desktop overlays (wlx-overlay-s) may have limited functionality."
     ];
   };
 }

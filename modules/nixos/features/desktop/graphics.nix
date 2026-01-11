@@ -48,25 +48,39 @@ in
     # is still recommended to prevent the nouveau driver from loading before nvidia
     boot.blacklistedKernelModules = [ "nouveau" ];
 
-    environment.sessionVariables = {
-      # Force NVIDIA GPU (card2) for Wayland/Niri
-      # card1: Intel iGPU (no monitors connected)
-      # card2: NVIDIA RTX 4090 (monitors connected here)
-      WLR_DRM_DEVICES = "/dev/dri/card2";
+    environment.sessionVariables = lib.mkMerge [
+      # NVIDIA-specific configuration
+      {
+        # Force NVIDIA GPU (card2) for Wayland/Niri
+        # card1: Intel iGPU (no monitors connected)
+        # card2: NVIDIA RTX 4090 (monitors connected here)
+        WLR_DRM_DEVICES = "/dev/dri/card2";
 
-      # Hardware video acceleration via nvidia-vaapi-driver
-      LIBVA_DRIVER_NAME = "nvidia";
-      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-      GBM_BACKEND = "nvidia-drm";
+        # Hardware video acceleration via nvidia-vaapi-driver
+        LIBVA_DRIVER_NAME = "nvidia";
+        __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+        GBM_BACKEND = "nvidia-drm";
 
-      # Fix Gamescope segfaults on NVIDIA
-      NVD_BACKEND = "direct";
+        # Fix Gamescope segfaults on NVIDIA
+        NVD_BACKEND = "direct";
 
-      # Note: Shader caching (__GL_SHADER_DISK_CACHE) is enabled by default
-      # for non-root users, so explicit setting is unnecessary.
-      # Threaded optimizations (__GL_THREADED_OPTIMIZATION) should be set
-      # per-application, not system-wide, for best compatibility.
-    };
+        # Note: Shader caching (__GL_SHADER_DISK_CACHE) is enabled by default
+        # for non-root users, so explicit setting is unnecessary.
+        # Threaded optimizations (__GL_THREADED_OPTIMIZATION) should be set
+        # per-application, not system-wide, for best compatibility.
+      }
+
+      # Vulkan configuration - conditional on NVIDIA being enabled
+      (lib.mkIf config.hardware.nvidia.modesetting.enable {
+        # Explicit Vulkan ICD path prevents GPU detection failures in Steam's pressure-vessel container
+        # /run/opengl-driver is NixOS's standard dynamically-managed location for graphics drivers
+        VK_DRIVER_FILES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.x86_64.json";
+
+        # Disable validation layers for production gaming (significant performance impact)
+        # Validation layers can cause 90-95% performance drops in some configurations
+        VK_INSTANCE_LAYERS = "";
+      })
+    ];
 
     # Udev rule to simplify device permissions for Sunshine/Steam
     services.udev.extraRules = ''
