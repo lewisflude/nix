@@ -102,8 +102,10 @@ in
             language-servers = buildLanguageServers name value;
             indent = {
               tab-width = value.indent;
-            }
-            // lib.optionalAttrs (value ? unit) { inherit (value) unit; };
+              # Generate unit from indent value if not explicitly provided
+              # unit is a string of spaces matching the indent width
+              unit = value.unit or (lib.concatStrings (lib.replicate value.indent " "));
+            };
             auto-format = value.formatter != null;
           }
           // lib.optionalAttrs (value ? comment) {
