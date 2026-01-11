@@ -56,6 +56,47 @@
       profilarr = 3001;
       cleanuparr = 11011;
       calcom = 3000;
+
+      # Game streaming services
+      sunshine = {
+        http = 47990;
+        https = 47989;
+        rtsp = 48010;
+        control = 47998;
+        audio = 47999;
+        video = 48000;
+      };
+    };
+
+    # VR streaming and discovery ports
+    vr = {
+      # WiVRn - OpenXR streaming (Quest 3)
+      wivrn = {
+        tcp = 9757;
+        udp = 9757;
+      };
+
+      # ALVR - Alternative VR streaming
+      alvr = {
+        control = 9943; # Control channel
+        stream = 9944; # Video/Audio streaming
+      };
+
+      # mDNS/Avahi for VR headset discovery
+      mdns = 5353;
+    };
+
+    # Gaming network ports
+    gaming = {
+      # Steam Link (Quest 3 compatibility)
+      steamLink = {
+        discovery = 27031; # UDP discovery
+        streamingTcp = 27036; # TCP streaming
+        streamingUdp = [
+          27036
+          27037
+        ]; # UDP streaming
+      };
     };
   };
 

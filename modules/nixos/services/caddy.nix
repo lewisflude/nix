@@ -11,6 +11,7 @@ let
     types
     ;
   cfg = config.host.services.caddy;
+  constants = import ../../../lib/constants.nix;
 in
 {
   options.host.services.caddy = {
@@ -225,7 +226,7 @@ in
         # Sunshine (Gaming) - special transport config
         "sunshine.blmt.io" = {
           extraConfig = ''
-            reverse_proxy https://localhost:47990 {
+            reverse_proxy https://localhost:${toString constants.ports.services.sunshine.http} {
               transport http {
                 tls_insecure_skip_verify
               }
