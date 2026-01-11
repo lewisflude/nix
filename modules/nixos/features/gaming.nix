@@ -224,22 +224,9 @@ in
       uinput.enable = true;
     };
 
-    # Gaming environment variables (2026 best practices)
-    environment.sessionVariables = {
-      # Note: SDL2 (2.0.22+) and SDL3 default to Wayland automatically
-      # SDL_VIDEO_DRIVER/SDL_VIDEODRIVER variables are no longer needed
-
-      # Note: DXVK state cache was removed in DXVK 2.7 (obsolete since 2.0)
-      # The VK_EXT_graphics_pipeline_library extension replaced this feature
-      # DXVK_STATE_CACHE_PATH configuration is no longer needed
-
-      # Proton optimizations for NVIDIA
-      PROTON_ENABLE_NVAPI = "1"; # Enable NVIDIA API for better game compatibility
-      PROTON_HIDE_NVIDIA_GPU = "0"; # Don't hide GPU from games
-
-      # Force Wayland for Qt games
-      QT_QPA_PLATFORM = "wayland";
-    };
+    # Gaming environment variables moved to home-manager (home/nixos/apps/gaming.nix)
+    # Rationale: These are user-level preferences, not system requirements
+    # Benefits: Per-user configuration, doesn't affect non-gaming users
 
     # Assertions to catch configuration mistakes
     assertions = [
