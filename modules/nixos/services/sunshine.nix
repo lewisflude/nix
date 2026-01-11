@@ -595,8 +595,7 @@ in
         {
           name = "Steam Big Picture";
           detached = [
-            "${sunshine-steam-launcher}/bin/sunshine-steam-launcher"
-            "steam://open/gamepadui"
+            "${sunshine-steam-launcher}/bin/sunshine-steam-launcher steam://open/gamepadui"
           ];
           prep-cmd = [
             {
