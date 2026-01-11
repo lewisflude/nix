@@ -3,12 +3,49 @@
 **Date**: 2026-01-11
 **Analysis Target**: `docs/GAMING_VR_STREAMING_OPTIMIZATION_2026.md`
 **Analyzer**: Claude Sonnet 4.5
-**Status**: In Progress - Issue #3 Completed (2026-01-11)
+**Status**: In Progress - Issues #1, #3 Completed (2026-01-11)
 **Last Updated**: 2026-01-11
 
 ---
 
 ## Recent Implementations
+
+### Issue #1: Gaming Environment Variables Placement (COMPLETED - 2026-01-11)
+
+**Implementation Summary:**
+
+Successfully moved gaming environment variables from system-level to user-level (home-manager), following NixOS best practices and project architectural guidelines.
+
+**Changes Made:**
+
+1. **Moved to `home/nixos/apps/gaming.nix`**:
+   - Added `home.sessionVariables` with gaming-specific environment variables:
+     - `PROTON_ENABLE_NVAPI = "1"` - NVIDIA API for game compatibility
+     - `PROTON_HIDE_NVIDIA_GPU = "0"` - Don't hide GPU from games
+     - `QT_QPA_PLATFORM = "wayland"` - Force Wayland for Qt games
+   - Used `osConfig` pattern to conditionally enable when gaming feature is active
+   - Follows same pattern as `vr.nix` for consistency
+
+2. **Removed from `modules/nixos/features/gaming.nix`**:
+   - Deleted `environment.sessionVariables` block
+   - Added comment explaining rationale for move
+   - Maintains system-level features (hardware, services) while moving user preferences
+
+**Benefits:**
+
+- ✅ Per-user configuration - doesn't affect non-gaming users
+- ✅ Follows separation of concerns (system vs user)
+- ✅ Aligns with NixOS/Home Manager best practices
+- ✅ Consistent with project's CLAUDE.md architectural guidelines
+- ✅ Users can override variables individually if needed
+
+**Validation:**
+
+- Configuration validated with `nix flake check` - passed
+- Follows established pattern from `home/nixos/apps/vr.nix`
+- No breaking changes to functionality
+
+---
 
 ### Issue #3: Port Constants (COMPLETED - 2026-01-11)
 
@@ -49,7 +86,7 @@ Successfully centralized all VR and gaming port constants in `lib/constants.nix`
 
 This document identifies architectural and best practice violations found in the gaming and VR configuration following analysis of `GAMING_VR_STREAMING_OPTIMIZATION_2026.md` and its associated module files. Issues range from incorrect module placement (home-manager vs system) to missing constants and potential over-engineering.
 
-**Critical Issues**: 2
+**Critical Issues**: 1 (1 completed ✅)
 **Medium Priority**: 2 (1 completed ✅)
 **Low Priority**: 2
 **Documentation Concerns**: 2
@@ -58,7 +95,7 @@ All findings are backed by official NixOS documentation, community best practice
 
 ---
 
-## Issue #1: Gaming Environment Variables in System Module (CRITICAL)
+## Issue #1: Gaming Environment Variables in System Module (✅ COMPLETED - 2026-01-11)
 
 ### Current State
 
@@ -105,27 +142,44 @@ Gaming environment variables are clearly user-level configuration, not system-le
 - Not portable if different users need different gaming settings
 - Contradicts CLAUDE.md architectural guidelines
 
-### Recommended Fix
+### ✅ Implementation Completed (2026-01-11)
 
-**Move to**: `home/common/apps/gaming.nix` or `home/nixos/apps/gaming.nix`
+**Moved to**: `home/nixos/apps/gaming.nix`
 
 ```nix
-# home/common/apps/gaming.nix
-{ config, lib, ... }:
-lib.mkIf config.host.features.gaming.enable {
+{
+  lib,
+  pkgs,
+  config,
+  osConfig ? { },
+  ...
+}:
+let
+  inherit (lib) mkIf;
+  gamingEnabled = osConfig.host.features.gaming.enable or false;
+in
+mkIf gamingEnabled {
   home.sessionVariables = {
     PROTON_ENABLE_NVAPI = "1";
     PROTON_HIDE_NVIDIA_GPU = "0";
     QT_QPA_PLATFORM = "wayland";
   };
+  # ... rest of gaming config
 }
 ```
 
+**Removed from**: `modules/nixos/features/gaming.nix`
+
+- System module now only contains system-level requirements
+- Comment added explaining the move and rationale
+
+**Result**: Gaming environment variables now properly configured at user-level.
+
 ### References
 
-- [NixOS Environment Variables Wiki](https://wiki.nixos.org/wiki/Environment_variables) (2026-01-11)
-- [Home Manager sessionVariables](https://mynixos.com/home-manager/option/home.sessionVariables) (2026-01-11)
-- [NixOS Discourse: User-specific environment variables](https://discourse.nixos.org/t/is-there-any-way-to-set-user-specific-environment-variables-userly-and-nixily/33046) (2026-01-11)
+- ✅ [NixOS Environment Variables Wiki](https://wiki.nixos.org/wiki/Environment_variables) (2026-01-11)
+- ✅ [Home Manager sessionVariables](https://mynixos.com/home-manager/option/home.sessionVariables) (2026-01-11)
+- ✅ [NixOS Discourse: User-specific environment variables](https://discourse.nixos.org/t/is-there-any-way-to-set-user-specific-environment-variables-userly-and-nixily/33046) (2026-01-11)
 
 ---
 
@@ -793,7 +847,7 @@ Verified that `GAMING_VR_STREAMING_OPTIMIZATION_2026.md` accurately describes th
 
 | Priority | Issue | Effort | Impact | Status |
 |----------|-------|--------|--------|--------|
-| **CRITICAL** | #1: Gaming env vars placement | Medium | High | Pending |
+| **CRITICAL** | #1: Gaming env vars placement | Medium | High | ✅ **COMPLETED** |
 | **CRITICAL** | #2: Monado user service placement | Medium | High | Pending |
 | **MEDIUM** | #3: Missing port constants | Low | Medium | ✅ **COMPLETED** |
 | **MEDIUM** | #4: Hardcoded VR performance values | Medium | Medium | Pending |
@@ -808,7 +862,7 @@ Verified that `GAMING_VR_STREAMING_OPTIMIZATION_2026.md` accurately describes th
 ## Recommended Implementation Order
 
 1. ✅ **Add VR/gaming ports to constants.nix** - **COMPLETED 2026-01-11** (Quick win, low risk)
-2. **Move gaming environment variables to home-manager** (High impact, medium effort)
+2. ✅ **Move gaming environment variables to home-manager** - **COMPLETED 2026-01-11** (High impact, medium effort)
 3. **Move Monado service config to home-manager** (High impact, medium effort)
 4. **Add VR performance tuning options** (Medium impact, medium effort)
 5. **Split Vulkan variables** (Low priority, can be done with #2)

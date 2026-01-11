@@ -1,5 +1,14 @@
-{ pkgs, config, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  osConfig ? { },
+  ...
+}:
 let
+  inherit (lib) mkIf;
+  gamingEnabled = osConfig.host.features.gaming.enable or false;
+
   steamRunUrl = pkgs.writeShellApplication {
     name = "steam-run-url";
     text = ''
@@ -99,7 +108,25 @@ let
     ];
   };
 in
-{
+mkIf gamingEnabled {
+  # Gaming environment variables (user-level, per-user configuration)
+  # Moved from system module as these are user preferences, not system requirements
+  home.sessionVariables = {
+    # Note: SDL2 (2.0.22+) and SDL3 default to Wayland automatically
+    # SDL_VIDEO_DRIVER/SDL_VIDEODRIVER variables are no longer needed
+
+    # Note: DXVK state cache was removed in DXVK 2.7 (obsolete since 2.0)
+    # The VK_EXT_graphics_pipeline_library extension replaced this feature
+    # DXVK_STATE_CACHE_PATH configuration is no longer needed
+
+    # Proton optimizations for NVIDIA
+    PROTON_ENABLE_NVAPI = "1"; # Enable NVIDIA API for better game compatibility
+    PROTON_HIDE_NVIDIA_GPU = "0"; # Don't hide GPU from games
+
+    # Force Wayland for Qt games
+    QT_QPA_PLATFORM = "wayland";
+  };
+
   programs.mangohud = {
     enable = true;
     package = pkgs.mangohud;
