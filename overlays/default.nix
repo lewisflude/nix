@@ -16,27 +16,20 @@ in
     else
       (_final: _prev: { });
 
-  # Zed editor: Use nixpkgs version (Zed flake currently broken - cargo-about@0.8.2 dependency issue)
-  # This allows binary cache hits when available, providing fast, reliable installs
-  # The nixpkgs version can use cache.nixos.org when cached
-  # TODO: Re-enable Zed flake when cargo-about dependency issue is resolved
-  flake-editors = _final: prev: {
-    # Use nixpkgs version - can use cache.nixos.org when available
-    # Removed doCheck=false overlay to allow cache hits
-    inherit (prev) zed-editor;
-  };
-  # flake-editors =
-  #   final: prev:
-  #   if inputs ? zed && inputs.zed ? packages && inputs.zed.packages ? ${system} then
-  #     {
-  #       # Use Zed flake - likely has CI cache from zed.cachix.org
-  #       zed-editor = inputs.zed.packages.${system}.default;
-  #     }
-  #   else
-  #     {
-  #       # Fallback to nixpkgs version - can use cache.nixos.org when available
-  #       inherit (prev) zed-editor;
-  #     };
+  # Zed editor: Try using Zed flake for latest version (has zed.cachix.org cache)
+  # Falls back to nixpkgs if flake is unavailable
+  flake-editors =
+    _final: prev:
+    if inputs ? zed && inputs.zed ? packages && inputs.zed.packages ? ${system} then
+      {
+        # Use Zed flake - likely has CI cache from zed.cachix.org
+        zed-editor = inputs.zed.packages.${system}.default;
+      }
+    else
+      {
+        # Fallback to nixpkgs version - can use cache.nixos.org when available
+        inherit (prev) zed-editor;
+      };
 
   # Rust toolchains from fenix (better than nixpkgs)
   fenix-overlay =

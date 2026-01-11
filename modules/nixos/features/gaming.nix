@@ -48,32 +48,47 @@ in
 
         # Enable PipeWire screen capture for Steam Link/Remote Play on Wayland
         # Without this, Steam falls back to "Desktop Black Frame" capture
-        package = pkgs.steam.override {
-          extraEnv = {
-            # Force Steam to use PipeWire for screen capture on Wayland
-            # This works with xdg-desktop-portal-wlr for screen sharing
-            STEAM_FORCE_DESKTOPUI_SCALING = "1";
-          };
-          extraArgs = "-pipewire";
-        };
+        # Uses mkDefault to allow VR module to extend this configuration
+        package = lib.mkDefault (
+          pkgs.steam.override {
+            extraEnv = {
+              # Force Steam to use PipeWire for screen capture on Wayland
+              # This works with xdg-desktop-portal-wlr for screen sharing
+              STEAM_FORCE_DESKTOPUI_SCALING = "1";
+            };
+            extraArgs = "-pipewire";
+          }
+        );
 
         # Note: VR-specific Steam wrapping (NVIDIA libraries, XR_RUNTIME_JSON)
-        # is handled by the VR module (modules/nixos/features/vr.nix) to avoid
-        # duplication and conflicts when both features are enabled
+        # is handled by the VR module (modules/nixos/features/vr.nix) which
+        # overrides this package definition to add VR-specific configuration
       };
 
       # Gamescope compositor for improved gaming experience
       # Supports HDR, frame limiting, FSR upscaling, and more
       gamescope = mkIf cfg.steam {
         enable = true;
-        # capSysNice doesn't work with Steam's nested bubblewrap (FHS + Steam Runtime)
-        # Use ananicy instead to manage process priority
-        capSysNice = false;
+        # Enable capSysNice for better process scheduling and performance
+        # Allows gamescope to use higher-priority scheduling
+        capSysNice = true;
 
         # Conditionally add GPU preference if gpuID is configured
         # If not set, gamescope will auto-detect the GPU
         args = optionals (gpuID != "") [ "--prefer-vk-device ${gpuID}" ] ++ [
-          "--hdr-enabled"
+          # HDR configuration
+          "--hdr-enabled" # Enable HDR output
+          "--hdr-itm-enable" # Inverse tone mapping for SDR content on HDR displays
+
+          # Force fullscreen for better performance
+          "--fullscreen"
+
+          # Force Wayland backend (explicit)
+          "--backend wayland"
+
+          # VRR Note: Gamescope VRR (--adaptive-sync) has known issues on NVIDIA + Wayland
+          # that cause flickering and instability. Rely on Niri's VRR instead (already enabled on DP-3)
+          # Do NOT add: "--adaptive-sync"
         ];
       };
 
@@ -94,8 +109,8 @@ in
     };
 
     services = {
-      # ananicy-cpp manages process priorities for gamescope and games
-      # This is a workaround for capSysNice not working in Steam's nested bubblewrap
+      # ananicy-cpp manages process priorities for games and system processes
+      # Provides additional priority management beyond gamescope's capSysNice
       ananicy = mkIf cfg.steam {
         enable = true;
         package = pkgs.ananicy-cpp;
@@ -207,6 +222,23 @@ in
         enable32Bit = true;
       };
       uinput.enable = true;
+    };
+
+    # Gaming environment variables (2026 best practices)
+    environment.sessionVariables = {
+      # Note: SDL2 (2.0.22+) and SDL3 default to Wayland automatically
+      # SDL_VIDEO_DRIVER/SDL_VIDEODRIVER variables are no longer needed
+
+      # Note: DXVK state cache was removed in DXVK 2.7 (obsolete since 2.0)
+      # The VK_EXT_graphics_pipeline_library extension replaced this feature
+      # DXVK_STATE_CACHE_PATH configuration is no longer needed
+
+      # Proton optimizations for NVIDIA
+      PROTON_ENABLE_NVAPI = "1"; # Enable NVIDIA API for better game compatibility
+      PROTON_HIDE_NVIDIA_GPU = "0"; # Don't hide GPU from games
+
+      # Force Wayland for Qt games
+      QT_QPA_PLATFORM = "wayland";
     };
 
     # Assertions to catch configuration mistakes

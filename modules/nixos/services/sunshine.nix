@@ -13,6 +13,44 @@ let
 
   cfg = config.services.sunshine;
 
+  # Steam launcher with window focus - ensures Steam window gets focused after launch
+  sunshine-steam-launcher = pkgs.writeShellApplication {
+    name = "sunshine-steam-launcher";
+    runtimeInputs = [
+      pkgs.steam
+      pkgs.niri
+      pkgs.jq
+      pkgs.coreutils
+    ];
+    text = ''
+      # Launch Steam with provided arguments (e.g., steam://open/gamepadui for Big Picture)
+      ${pkgs.steam}/bin/steam "$@" &
+
+      # Wait for Steam window to appear (max 10 seconds)
+      echo "Waiting for Steam window to appear..."
+      for _ in {1..20}; do
+        # Check if a Steam window exists
+        if niri msg --json windows | jq -e '.[] | select(.app_id == "steam")' >/dev/null 2>&1; then
+          echo "Steam window detected, focusing..."
+
+          # Get the Steam window ID
+          WINDOW_ID=$(niri msg --json windows | jq -r '.[] | select(.app_id == "steam") | .id' | head -n1)
+
+          if [ -n "$WINDOW_ID" ]; then
+            # Focus the Steam window
+            niri msg action focus-window --id "$WINDOW_ID"
+            echo "Focused Steam window (ID: $WINDOW_ID)"
+            exit 0
+          fi
+        fi
+        sleep 0.5
+      done
+
+      echo "Warning: Steam window did not appear within 10 seconds"
+      exit 1
+    '';
+  };
+
   # Sunshine prep script - unlocks screen, disables auto-lock, inhibits sleep, and prepares display
   # Updated: 2026-01-08 - Fixed fd command shadowing GNU find
   sunshine-prep = pkgs.writeShellApplication {
@@ -402,6 +440,33 @@ in
         audio_codec = "opus"; # Low-latency, high-quality codec
         channels = 2; # Stereo
         audio_bitrate = 128; # kbps - balance between quality and bandwidth
+
+        # NVENC Encoder Configuration (2026 Best Practices)
+        # Leverages RTX 4090's NVENC Gen 8 encoder for optimal streaming quality
+        encoder = "nvenc"; # Force NVENC hardware encoding
+
+        # Video codec - H.264 for wide compatibility, HEVC for better compression
+        sw_preset = "llhp"; # Low Latency High Performance (optimal for RTX 40-series)
+
+        # Rate control mode - CBR prevents bandwidth spikes
+        nvenc_rc = "cbr"; # Constant Bitrate for consistent network usage
+
+        # Two-pass encoding for better quality (minimal latency on RTX 4090)
+        nvenc_twopass = "quarter_res"; # Quarter resolution analysis pass
+
+        # Bitrate for 1080p60 streaming (HDMI-A-4 output)
+        # Adjust based on network: 15-20 Mbps for 1080p60, 30-40 Mbps for 1440p60
+        bitrate = 20000; # 20 Mbps - good balance for 1080p60
+
+        # Quality settings - QP (Quantization Parameter) range
+        qp = 28; # Default quality (lower = better, 18-28 recommended for streaming)
+
+        # Advanced NVENC features (RTX 40-series)
+        nvenc_spatial_aq = 1; # Spatial Adaptive Quantization (improves quality)
+        nvenc_temporal_aq = 1; # Temporal AQ (reduces motion artifacts)
+
+        # Capture method - KMS is optimal for Wayland + NVIDIA
+        capture = "kms";
       };
 
       # Application definitions with prep-cmd lifecycle hooks
@@ -421,8 +486,8 @@ in
         # Steam Big Picture - for gaming
         {
           name = "Steam Big Picture";
-          cmd = [
-            "${pkgs.steam}/bin/steam"
+          detached = [
+            "${sunshine-steam-launcher}/bin/sunshine-steam-launcher"
             "steam://open/gamepadui"
           ];
           prep-cmd = [
@@ -437,7 +502,9 @@ in
         # Regular Steam - for desktop mode gaming
         {
           name = "Steam";
-          detached = [ "${pkgs.steam}/bin/steam" ];
+          detached = [
+            "${sunshine-steam-launcher}/bin/sunshine-steam-launcher"
+          ];
           prep-cmd = [
             {
               do = "${sunshine-prep}/bin/sunshine-prep";
@@ -453,6 +520,7 @@ in
     environment.systemPackages = [
       sunshine-prep
       sunshine-cleanup
+      sunshine-steam-launcher
     ];
 
     # Ensure sudo rules allow running swaylock as user
