@@ -133,4 +133,25 @@ in
     terminal = false;
     type = "Application";
   };
+
+  # Auto-start Steam on login
+  # Works in conjunction with system-level auto-login configured in host configuration
+  systemd.user.services.steam-autostart = {
+    Unit = {
+      Description = "Auto-start Steam on login";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.steam}/bin/steam -silent";
+      Restart = "on-failure";
+      RestartSec = "5s";
+    };
+
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
+    };
+  };
 }

@@ -21,10 +21,19 @@ let
       pkgs.niri
       pkgs.jq
       pkgs.coreutils
+      pkgs.xdg-utils
     ];
     text = ''
-      # Launch Steam with provided arguments (e.g., steam://open/gamepadui for Big Picture)
-      ${pkgs.steam}/bin/steam "$@" &
+      # Launch Steam with provided arguments
+      # If argument is a steam:// URI, use xdg-open to handle it properly
+      # Otherwise, pass arguments directly to steam binary
+      if [[ "$1" == steam://* ]]; then
+        echo "Opening Steam URI: $1"
+        ${pkgs.xdg-utils}/bin/xdg-open "$1" &
+      else
+        echo "Launching Steam with arguments: $*"
+        ${pkgs.steam}/bin/steam "$@" &
+      fi
 
       # Wait for Steam window to appear (max 10 seconds)
       echo "Waiting for Steam window to appear..."
