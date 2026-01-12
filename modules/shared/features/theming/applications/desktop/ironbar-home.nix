@@ -46,19 +46,38 @@ let
           {
             type = "workspaces";
             class = "workspaces";
+            # Match niri's workspace organization with semantic labels
+            # 1-2: Browser, 3-4: Dev, 5-6: Chat, 7-8: Media, 9: Gaming, 10: Extra
             name_map = {
-              "1" = "1";
-              "2" = "2";
-              "3" = "3";
-              "4" = "4";
-              "5" = "5";
+              "1" = "󰈹"; # Browser primary
+              "2" = "󰖟"; # Browser secondary
+              "3" = "󰨞"; # Development primary
+              "4" = ""; # Development secondary
+              "5" = "󰭹"; # Communication primary
+              "6" = "󰙯"; # Communication secondary
+              "7" = "󰝚"; # Media primary (Spotify/Obsidian)
+              "8" = "󰎆"; # Media secondary
+              "9" = "󰊴"; # Gaming (Steam/games)
+              "10" = "󰋙"; # Extra workspace
             };
+            all_monitors = false;
+            # Ironbar dynamically shows workspaces as niri creates them
+            # Workspaces appear when you navigate to them or windows open on them
+            hide_empty = false;
+            hide_lonely = false;
+            # Force semantic icons instead of application icons
+            icon_size = 18;
+            # Use name_map icons, not focused window icons
+            show_icon = false;
           }
           {
             type = "focused";
             class = "label";
             truncate = "end";
-            length = 40;
+            length = 50;
+            icon_size = 20;
+            show_icon = true;
+            show_title = true;
           }
         ];
         center = [
@@ -74,32 +93,59 @@ let
             type = "sys_info";
             class = "sys-info";
             format = [
-              "  {cpu_percent}%"
-              "  {memory_percent}%"
+              # UX: Simplified format - icons convey meaning, numbers provide data
+              " {cpu_percent}"
+              " {memory_percent}"
             ];
+            tooltip = "CPU: {cpu_percent}% | Memory: {memory_used_gb}GB / {memory_total_gb}GB";
+            interval = 2000;
+          }
+          {
+            type = "script";
+            class = "niri-layout";
+            mode = "poll";
+            format = "{} ";
+            cmd = ''
+              ${pkgs.niri}/bin/niri msg focused-window | ${pkgs.jq}/bin/jq -r '
+                if .is_fullscreen then "󰊓"
+                elif .is_maximized then "󰹑"
+                elif .is_floating then "󰖲"
+                else if .column_width == 1.0 then "󰖯" else "󰕰" end
+                end
+              ' 2>/dev/null || echo "󰕰"
+            '';
+            interval = 500;
+            tooltip = "Window Layout Mode";
           }
           {
             type = "script";
             class = "brightness";
             mode = "poll";
-            format = "󰃠 {}%";
+            # UX: Hide percentage by default - icon sufficient for glanceability
+            # Percentage appears on hover via CSS
+            format = "󰃠";
             cmd = "brightnessctl -m | awk -F '[(),%]' '{print $6}'";
-            interval = 1000;
-            on_click_left = "brightnessctl set 10%-";
-            on_click_right = "brightnessctl set +10%";
-            tooltip = "Brightness: {}%";
+            interval = 2000;
+            on_click_left = "brightnessctl set 5%-";
+            on_click_right = "brightnessctl set +5%";
+            on_click_middle = "brightnessctl set 50%";
+            tooltip = "{}% brightness\n󰍽 -5% | 󰍾 +5% | 󰍿 Reset to 50%";
           }
           {
             type = "volume";
             class = "volume";
-            format = "{icon} {percentage}%";
+            # UX: Icon-only by default, percentage on hover
+            format = "{icon}";
             max_volume = 100;
             icons = {
-              volume_high = " ";
-              volume_medium = " ";
-              volume_low = " ";
-              muted = "󰝟 ";
+              volume_high = "󰕾";
+              volume_medium = "󰖀";
+              volume_low = "󰕿";
+              muted = "󰝟";
             };
+            tooltip = "{percentage}% volume\nClick to mute | Scroll to adjust";
+            on_scroll_up = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+";
+            on_scroll_down = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-";
           }
           {
             type = "tray";
@@ -110,6 +156,7 @@ let
             type = "notifications";
             class = "notifications";
             icon_size = 22;
+            show_count = true;
           }
         ];
       };
@@ -290,16 +337,48 @@ let
         margin-right: 16px;
       }
 
-      /* Individual workspace items - larger touch targets */
+      /* Individual workspace items - icon-based with semantic meaning */
       .workspaces .item {
-        min-width: 40px;
+        min-width: 36px;
         min-height: 32px;
-        margin: 0 2px;
-        padding: 0 12px;
+        margin: 0 3px;
+        padding: 0 8px;
         border: none;
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 400;
         line-height: 32px;
+        opacity: 0.5;
+        transition: opacity 150ms ease, background-color 150ms ease, transform 100ms ease;
+      }
+
+      /* Workspace item hover state */
+      .workspaces .item:hover {
+        opacity: 0.7;
+        background-color: rgba(37, 38, 47, 0.15);
+        border-radius: 8px;
+      }
+
+      /* Active workspace - full opacity with subtle highlight */
+      .workspaces .item.focused,
+      .workspaces .item.active {
+        opacity: 1;
+        font-weight: 600;
+      }
+
+      /* Workspace with windows - medium opacity to show occupancy */
+      .workspaces .item.occupied {
+        opacity: 0.8;
+      }
+
+      /* Urgent workspace - pulsing indicator (matches niri urgent border) */
+      .workspaces .item.urgent {
+        opacity: 1;
+        animation: urgentPulse 1.5s ease-in-out infinite;
+      }
+
+      @keyframes urgentPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
       }
 
       /* First workspace item - no leading margin */
@@ -312,7 +391,7 @@ let
         margin-right: 0;
       }
 
-      /* Focused window title - smaller and lighter (contextual info) */
+      /* Focused window title - icon + text with better spacing */
       .label {
         padding: 0 12px;
         border: none;
@@ -324,10 +403,16 @@ let
         transition: opacity 150ms ease, color 150ms ease;
       }
 
+      /* Icon in focused window title */
+      .label image {
+        margin-right: 8px;
+      }
+
       /* Focused window title when window is active */
       .label.active,
       .label.focused {
         opacity: 1;
+        font-weight: 500;
       }
 
       /* Focused window title when window is inactive or no window */
@@ -358,6 +443,7 @@ let
       /* Sub-group 3: Communications (Tray/Notifications) - separate with more space */
 
       /* System info - monitoring sub-group */
+      /* UX: Cleaner numeric display without % clutter */
       .sys-info {
         padding: 0 12px;
         margin-right: 14px;
@@ -366,32 +452,87 @@ let
         font-weight: 500;
         line-height: 36px;
         min-height: 36px;
+        opacity: 0.85;
+        transition: opacity 150ms ease;
+      }
+
+      /* Emphasize on hover */
+      .sys-info:hover {
+        opacity: 1;
+      }
+
+      /* Alert state for high resource usage */
+      .sys-info.warning {
+        color: #fab387; /* Orange for high usage */
+        opacity: 1;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .sys-info.critical {
+        color: #f38ba8; /* Red for critical usage */
+        opacity: 1;
+        font-weight: 600;
+        animation: pulse 1s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+      }
+
+      /* Niri layout indicator - shows window state */
+      .niri-layout {
+        padding: 0 10px;
+        margin-right: 14px;
+        border: none;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 36px;
+        min-height: 36px;
+        opacity: 0.7;
+        transition: opacity 150ms ease;
+      }
+
+      .niri-layout:hover {
+        opacity: 1;
       }
 
       /* Brightness control - interactive sub-group start */
+      /* UX: Progressive disclosure - icon only, details on hover */
       .brightness {
         padding: 0 12px;
         margin-right: 4px;
-        min-width: 80px;
+        min-width: 50px; /* Reduced from 80px - icon only */
         border: none;
-        font-size: 14px;
+        font-size: 16px; /* Larger icon for better visibility */
         font-weight: 400;
         line-height: 36px;
         min-height: 36px;
-        transition: background-color 150ms ease, transform 50ms ease;
+        transition: background-color 150ms ease, transform 50ms ease, min-width 200ms ease;
+      }
+
+      /* Show details on hover - progressive disclosure */
+      .brightness:hover {
+        min-width: 90px; /* Expand to show percentage */
       }
 
       /* Volume control - interactive sub-group (paired with brightness) */
+      /* UX: Progressive disclosure - icon only, details on hover */
       .volume {
         padding: 0 12px;
         margin-right: 16px;
-        min-width: 80px;
+        min-width: 45px; /* Reduced from 80px - icon only */
         border: none;
-        font-size: 14px;
+        font-size: 16px; /* Larger icon for better visibility */
         font-weight: 400;
         line-height: 36px;
         min-height: 36px;
-        transition: background-color 150ms ease, transform 50ms ease;
+        transition: background-color 150ms ease, transform 50ms ease, min-width 200ms ease;
+      }
+
+      /* Show details on hover - progressive disclosure */
+      .volume:hover {
+        min-width: 90px; /* Expand to show percentage */
       }
 
       /* System tray - communications sub-group start */

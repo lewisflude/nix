@@ -146,5 +146,6 @@ Uses feature flags for modular configuration:
 - `docs/reference/architecture.md` - Detailed architecture guide
 - `docs/FEATURES.md` - Feature flag system documentation
 - `docs/DX_GUIDE.md` - Development experience and workflow guide
+- `docs/TODO.md` - Future refactoring tasks and improvements
 - `docs/QBITTORRENT_GUIDE.md` - Media server setup
 - `docs/SOPS_GUIDE.md` - Secret management guide

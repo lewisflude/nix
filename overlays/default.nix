@@ -110,4 +110,24 @@ in
     else
       { };
 
+  # OneTBB - Disable tests on i686-linux (32-bit)
+  # The onetbb test suite has known flakiness issues on 32-bit systems,
+  # particularly in sandboxed build environments (SIGABRT crashes in threading tests).
+  # This is a common issue affecting immersed and other VR packages that need 32-bit libraries.
+  # Disabling tests on i686-linux is the standard nixpkgs approach for this issue.
+  onetbb-fix = _final: prev: {
+    onetbb =
+      if prev.stdenv.hostPlatform.system == "i686-linux" then
+        prev.onetbb.overrideAttrs (oldAttrs: {
+          doCheck = false;
+          # Document why tests are disabled
+          meta = (oldAttrs.meta or { }) // {
+            description =
+              (oldAttrs.meta.description or "") + " (tests disabled on i686-linux due to flakiness)";
+          };
+        })
+      else
+        prev.onetbb;
+  };
+
 }
