@@ -39,17 +39,7 @@ rec {
   # 4. Default to dark mode
   detectSystemMode =
     _config:
-    # For now, default to dark mode
-    # TODO: Implement actual system detection
-    # This would require:
-    # - Running gsettings commands (not possible in pure Nix evaluation)
-    # - Reading systemd environment (not available at eval time)
-    # - Reading XDG config files (possible but complex)
-    #
-    # Future implementation could:
-    # - Use a systemd service to detect and cache preference
-    # - Use a helper script that runs at build time
-    # - Use environment variables set by the desktop environment
+    # Defaults to dark mode (see docs/TODO.md #7 for system detection implementation)
     "dark";
 
   # Compare two modes (useful for validation)
