@@ -1,42 +1,19 @@
+{ username, ... }:
 {
-  lib,
-  username,
-  ...
-}:
-let
-  # Import shared secret names from the shared module
-  # These match the secrets defined in modules/shared/sops.nix with allowUserRead = true
-  sharedSecrets = [
-    "CIRCLECI_TOKEN"
-    "GITHUB_TOKEN"
-    "KAGI_API_KEY"
-    "OBSIDIAN_API_KEY"
-    "OPENAI_API_KEY"
-  ];
-in
-{
-
   users.groups.sops-secrets = { };
 
   users.users.${username}.extraGroups = [ "sops-secrets" ];
 
-  # Configure NixOS-specific SOPS settings for secrets already defined in modules/shared/sops.nix
-  # The shared module defines the secrets themselves; this module adds NixOS-specific ownership and permissions.
-  # By setting owner/group declaratively, we avoid race conditions with activation scripts.
-  # Don't use neededForUsers - it prevents custom owner/group from being applied
-  sops.secrets =
-    lib.genAttrs sharedSecrets (_: {
-      owner = lib.mkForce "root";
-      group = lib.mkForce "sops-secrets";
-      mode = lib.mkForce "0440"; # Read-only for owner and group
-    })
-    // {
-      # Nix access token needs special permissions for Nix daemon to read it
-      # This file contains the formatted line: "access-tokens = github.com=TOKEN"
-      nix-access-token = {
-        neededForUsers = true;
-        group = "users";
-        mode = "0440"; # Read-only for owner (root) and group (users)
-      };
+  # Secrets are defined in modules/shared/sops.nix with proper defaults.
+  # The shared module's mkSecret function already sets owner/group/mode correctly for allowUserRead secrets.
+  # This module only needs to define NixOS-specific secrets that aren't in the shared configuration.
+  sops.secrets = {
+    # Nix access token needs special permissions for Nix daemon to read it
+    # This file contains the formatted line: "access-tokens = github.com=TOKEN"
+    nix-access-token = {
+      neededForUsers = true;
+      group = "users";
+      mode = "0440"; # Read-only for owner (root) and group (users)
     };
+  };
 }

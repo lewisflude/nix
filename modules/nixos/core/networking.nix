@@ -77,11 +77,7 @@
       };
     };
 
-    # --- TODO: Add your VPN Interface here once you calculate MTU ---
-    # networks."30-vpn" = {
-    #   matchConfig.Name = "tun0"; # Change to your VPN interface name
-    #   linkConfig.MTUBytes = 1400; # Change to your calculated MTU
-    # };
+    # For VPN MTU configuration, see docs/TODO.md #9
   };
 
   services = {

@@ -65,8 +65,10 @@ pog.pog {
         else
           # Use GITHUB_TOKEN if available for higher rate limits
           if [ -r /run/secrets-for-users/GITHUB_TOKEN ]; then
-            export GITHUB_TOKEN="$(cat /run/secrets-for-users/GITHUB_TOKEN)"
-            export NIX_CONFIG="access-tokens = github.com=$GITHUB_TOKEN"
+            GITHUB_TOKEN="$(cat /run/secrets-for-users/GITHUB_TOKEN)"
+            export GITHUB_TOKEN
+            NIX_CONFIG="access-tokens = github.com=$GITHUB_TOKEN"
+            export NIX_CONFIG
           fi
           nix flake update
           green "✅ Flake inputs updated"

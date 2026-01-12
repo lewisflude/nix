@@ -8,9 +8,7 @@
     # Note: libnotify is handled in core-tooling.nix
     # Note: swaylock-effects is handled in apps/swayidle.nix via programs.swaylock
     pkgs.font-awesome
-    # FIXME: aseprite is currently broken in nixpkgs (skia-aseprite build failure)
-    # Temporarily commented out until upstream fix is available
-    # asepriteFixed
+    # aseprite temporarily disabled (see docs/TODO.md #8)
     pkgs.wl-screenrec
 
     # Thunar file manager with plugins

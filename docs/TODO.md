@@ -53,7 +53,7 @@ Gaming module needs to override disk-performance module's value, creating a modu
 
 **Proposed Solution:**
 
-**Option A: Make disk-performance gaming-aware**
+#### Option A: Make disk-performance gaming-aware**
 
 ```nix
 # In modules/nixos/performance/disk-performance.nix
@@ -64,7 +64,7 @@ boot.kernel.sysctl."vm.max_map_count" = lib.mkDefault (
 );
 ```
 
-**Option B: Use priority-based approach**
+#### Option B: Use priority-based approach**
 
 ```nix
 # In lib/sysctl-defaults.nix
@@ -163,12 +163,12 @@ Overriding NixOS module's ExecStart to use modern Sonarr directory instead of le
 
 **Proposed Solutions:**
 
-**Option A: Upstream to nixpkgs**
+#### Option A: Upstream to nixpkgs**
 
 - Submit PR to add `services.sonarr.dataPath` option
 - Or update default path to use modern `.config/Sonarr` instead of `.config/NzbDrone`
 
-**Option B: Local module overlay**
+#### Option B: Local module overlay**
 
 ```nix
 # In overlays/sonarr-fix.nix
@@ -178,7 +178,7 @@ Overriding NixOS module's ExecStart to use modern Sonarr directory instead of le
 }
 ```
 
-**Option C: Check if fixed in newer nixpkgs**
+#### Option C: Check if fixed in newer nixpkgs**
 
 - Verify if nixpkgs 24.11 or unstable has fixed this
 - Remove override if upstream is fixed
@@ -206,12 +206,12 @@ Clearing default session packages to exclusively use UWSM-managed sessions.
 
 **Proposed Solutions:**
 
-**Option A: Check upstream niri options**
+#### Option A: Check upstream niri options**
 
 - Verify if `programs.niri` has option to disable auto-session registration
 - If exists, use proper option instead of mkForce
 
-**Option B: Document reasoning**
+#### Option B: Document reasoning**
 
 ```nix
 # UWSM (Universal Wayland Session Manager) requires exclusive session control.
@@ -221,7 +221,7 @@ Clearing default session packages to exclusively use UWSM-managed sessions.
 services.displayManager.sessionPackages = lib.mkForce [ ];
 ```
 
-**Option C: Upstream feature request**
+#### Option C: Upstream feature request**
 
 - Open issue in nixpkgs for `programs.niri.registerSession = mkDefault true;`
 - Would allow downstream to opt-out without mkForce
@@ -301,9 +301,163 @@ mkTestMachine =
 
 ---
 
+### 7. Implement System Theme Detection
+
+**Location:** `modules/shared/features/theming/mode.nix:43-53`
+
+**Current Issue:**
+
+```nix
+detectSystemMode =
+  _config:
+  # For now, default to dark mode
+  # TODO: Implement actual system detection
+  "dark";
+```
+
+Theme detection currently defaults to dark mode without checking system preferences.
+
+**Proposed Solution:**
+
+Implement multi-source theme detection:
+
+```nix
+detectSystemMode = config: let
+  # Use a systemd service to cache detected theme
+  cachedTheme = readFile "${config.xdg.cacheHome}/theme-mode";
+in
+  if cachedTheme != "" then cachedTheme else "dark";
+```
+
+Create a detection service:
+
+```nix
+systemd.user.services.detect-theme-mode = {
+  description = "Detect system theme preference";
+  wantedBy = [ "default.target" ];
+  serviceConfig = {
+    Type = "oneshot";
+    ExecStart = pkgs.writeShellScript "detect-theme" ''
+      # Try multiple sources in order
+      theme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || echo "")
+      [[ "$theme" =~ "dark" ]] && echo "dark" > ~/.cache/theme-mode || echo "light" > ~/.cache/theme-mode
+    '';
+  };
+};
+```
+
+**Benefits:**
+
+- Respects user's system theme preference
+- Automatic synchronization with desktop environment
+- Fallback to sensible default (dark mode)
+- Could trigger theme switching via home-manager activation
+
+---
+
+## Low Priority
+
+### 8. Re-enable Aseprite Package
+
+**Location:** `home/nixos/desktop-apps.nix:11-13`
+
+**Current Issue:**
+
+```nix
+# FIXME: aseprite is currently broken in nixpkgs (skia-aseprite build failure)
+# Temporarily commented out until upstream fix is available
+# asepriteFixed
+```
+
+Aseprite package is broken due to upstream skia-aseprite build failures.
+
+**Proposed Solution:**
+
+#### Option A: Wait for upstream fix**
+
+- Monitor nixpkgs issues for aseprite fixes
+- Re-enable when package is fixed upstream
+
+#### Option B: Create temporary overlay**
+
+```nix
+# In overlays/aseprite-fix.nix
+final: prev: {
+  aseprite = prev.aseprite.overrideAttrs (old: {
+    # Workaround for skia build issue
+  });
+}
+```
+
+#### Option C: Use alternative package**
+
+- Consider `libresprite` as temporary alternative
+- Or build from source with custom derivation
+
+**Benefits:**
+
+- Restores pixel art editor functionality
+- No long-term maintenance if waiting for upstream
+
+**Status:** ⏳ **Waiting on upstream nixpkgs fix**
+
+---
+
+### 9. VPN Interface MTU Configuration Template
+
+**Location:** `modules/nixos/core/networking.nix:80-84`
+
+**Current Issue:**
+
+```nix
+# --- TODO: Add your VPN Interface here once you calculate MTU ---
+# networks."30-vpn" = {
+#   matchConfig.Name = "tun0"; # Change to your VPN interface name
+#   linkConfig.MTUBytes = 1400; # Change to your calculated MTU
+# };
+```
+
+Placeholder comment for user-specific VPN configuration.
+
+**Proposed Solution:**
+
+#### Option A: Remove comment (not a real TODO)**
+
+This is a user configuration template, not a codebase TODO. Consider removing it or moving to documentation.
+
+#### Option B: Move to documentation**
+
+Add VPN MTU configuration guide to `docs/PROTONVPN_PORT_FORWARDING_SETUP.md`:
+
+```markdown
+## Optional: MTU Optimization
+
+If you experience performance issues:
+
+1. Calculate optimal MTU: `ping -M do -s 1472 1.1.1.1`
+2. Add to networking configuration:
+
+\`\`\`nix
+systemd.network.networks."30-vpn" = {
+  matchConfig.Name = "proton0";
+  linkConfig.MTUBytes = 1400;
+};
+\`\`\`
+```
+
+**Benefits:**
+
+- Cleaner code without stale comments
+- Better documentation for users
+- Clear that it's optional configuration
+
+**Status:** 🤔 **Consider removing or documenting**
+
+---
+
 ## Low Priority (Already Justified)
 
-### 7. Darwin Nix Daemon Management
+### 10. Darwin Nix Daemon Management
 
 **Location:** `modules/darwin/nix.nix:164`
 
@@ -345,4 +499,26 @@ When working on these TODOs:
 
 ## Completed Items
 
-*None yet - mark items with ~~strikethrough~~ and move here when completed*
+### ~~1. Simplify SOPS Secret Permissions~~ ✅
+
+**Completed:** 2026-01-12
+
+**Location:** `modules/nixos/system/sops.nix:29-31` and `modules/shared/sops.nix:16-40`
+
+**Solution Implemented:**
+
+Added `lib.mkDefault` to the shared module's `mkSecret` function for `owner`, `group`, and `mode` attributes. This allows downstream modules to override if needed without requiring `mkForce`.
+
+Removed redundant `mkForce` overrides and the `sharedSecrets` list from `modules/nixos/system/sops.nix` since the shared module now properly sets these values with defaults.
+
+**Changes Made:**
+
+1. `modules/shared/sops.nix:35-37` - Added `lib.mkDefault` to `mode`, `owner`, and `group`
+2. `modules/nixos/system/sops.nix` - Removed redundant `mkForce` overrides and simplified to only define NixOS-specific secrets
+
+**Benefits Achieved:**
+
+- Cleaner, more maintainable configuration
+- Proper use of Nix module system priorities
+- Reduced code duplication
+- Better separation of concerns between shared and NixOS-specific configuration

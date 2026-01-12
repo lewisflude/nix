@@ -32,9 +32,9 @@ let
       resolvedGroup = if isDarwin then "admin" else "sops-secrets";
     in
     {
-      mode = resolvedMode;
-      owner = resolvedOwner;
-      group = resolvedGroup;
+      mode = lib.mkDefault resolvedMode;
+      owner = lib.mkDefault resolvedOwner;
+      group = lib.mkDefault resolvedGroup;
       # Don't use neededForUsers - it prevents custom owner/group from being applied
       # and deploys to /run/secrets-for-users/ as root:root
     };
