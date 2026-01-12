@@ -92,8 +92,8 @@ in
           # Increase maximum number of memory map areas
           # Useful for applications with many mapped files (databases, VMs, games)
           # Gaming workloads need much higher values (games like Cyberpunk 2077 can create millions of memory mappings)
-          # Use mkDefault to allow gaming module to override without mkForce
-          "vm.max_map_count" = lib.mkDefault (
+          # Use mkOverride 40 to override nixpkgs gaming module default (1048576) while still allowing host-specific overrides
+          "vm.max_map_count" = lib.mkOverride 40 (
             if config.host.features.gaming.enable or false then
               2147483642 # Gaming workload (required for Star Citizen, Cyberpunk 2077, etc.)
             else
