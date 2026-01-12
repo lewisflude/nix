@@ -143,6 +143,14 @@ in
           nix-size = "du -sh /nix/store";
           nix-update-lock = "nix flake update --flake ~/.config/nix";
 
+          # Nix flake commands with automatic glob disabling
+          # This prevents zsh from interpreting '#' as a glob pattern
+          nix = "noglob nix";
+          nix-build = "noglob nix build";
+          nix-run = "noglob nix run";
+          nix-develop = "noglob nix develop";
+          nix-shell = "noglob nix-shell";
+
           nh-os = "nh os";
           nh-home = "nh home";
           nh-darwin = "nh darwin";
