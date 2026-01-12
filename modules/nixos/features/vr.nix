@@ -159,6 +159,10 @@ in
               --set LIBVA_DRIVER_NAME "none" \
               --set LIBVA_DRIVERS_PATH "/nonexistent" \
               --set XDG_SESSION_TYPE "x11" \
+              --set GTK_THEME "Adwaita:dark" \
+              --set GTK_USE_PORTAL "1" \
+              --prefix XDG_DATA_DIRS : "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}" \
+              --prefix XDG_DATA_DIRS : "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}" \
               --prefix LD_LIBRARY_PATH : "${
                 pkgs.lib.makeLibraryPath [
                   pkgs.webkitgtk_4_1
