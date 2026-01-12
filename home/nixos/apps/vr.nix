@@ -92,9 +92,11 @@ mkIf vrEnabled {
   # - vapor: Lightweight VR home/launcher
   # - xrbinder: Controller remapping
   # - lovr: Lua-based VR development
-  # - proton-ge-rtsp-bin: Video streaming for VRChat/Resonite
   # - resolute: Resonite mod manager
   # - oscavmgr: OSC Avatar/face tracking manager
+  #
+  # Note: proton-ge-rtsp-bin is not installed as it's a single binary file
+  # If needed for VRChat/Resonite video streams, install as Steam compatibility tool
   #
   # Legacy OpenComposite:
   # For Monado-only setups (without WiVRn), you can still use OpenComposite:
