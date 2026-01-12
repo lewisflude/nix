@@ -4,93 +4,7 @@ This document tracks potential refactorings and improvements identified during c
 
 ## High Priority
 
-### 1. Simplify SOPS Secret Permissions
-
-**Location:** `modules/nixos/system/sops.nix:29-31`
-
-**Current Issue:**
-
-```nix
-sops.secrets =
-  lib.genAttrs sharedSecrets (_: {
-    owner = lib.mkForce "root";
-    group = lib.mkForce "sops-secrets";
-    mode = lib.mkForce "0440";
-  })
-```
-
-Using `mkForce` on every secret to override default permissions is heavy-handed.
-
-**Proposed Solution:**
-
-- Investigate why `mkForce` is needed - check if `modules/shared/sops.nix` has conflicting defaults
-- If shared module uses `mkDefault`, we shouldn't need `mkForce`
-- Consider using `sops.defaultSecretOptions` at NixOS level instead of per-secret overrides
-- Verify if the "neededForUsers" comment/issue can be solved differently
-
-**Benefits:**
-
-- Cleaner configuration
-- More maintainable secret management
-- Better interaction with SOPS module defaults
-
----
-
-### 2. Make Gaming-Aware Sysctl Configuration
-
-**Location:** `modules/nixos/features/gaming.nix:29`
-
-**Current Issue:**
-
-```nix
-boot.kernel.sysctl = {
-  # Must override disk-performance.nix's conservative value (262144)
-  "vm.max_map_count" = lib.mkForce 2147483642;
-};
-```
-
-Gaming module needs to override disk-performance module's value, creating a module priority conflict.
-
-**Proposed Solution:**
-
-#### Option A: Make disk-performance gaming-aware**
-
-```nix
-# In modules/nixos/performance/disk-performance.nix
-boot.kernel.sysctl."vm.max_map_count" = lib.mkDefault (
-  if config.host.features.gaming.enable
-  then 2147483642  # Gaming workload
-  else 262144      # Conservative default
-);
-```
-
-#### Option B: Use priority-based approach**
-
-```nix
-# In lib/sysctl-defaults.nix
-defaults = {
-  vm.max_map_count = {
-    base = 262144;
-    gaming = 2147483642;
-  };
-};
-
-# In disk-performance.nix
-boot.kernel.sysctl."vm.max_map_count" = lib.mkDefault sysctl.vm.max_map_count.base;
-
-# In gaming.nix
-boot.kernel.sysctl."vm.max_map_count" = lib.mkOverride 60 sysctl.vm.max_map_count.gaming;
-```
-
-**Benefits:**
-
-- Removes `mkForce` hack
-- Makes module interactions explicit
-- Easier to reason about configuration precedence
-
----
-
-### 3. Extract Delayed Boot Pattern into Reusable Module
+### 1. Extract Delayed Boot Pattern into Reusable Module
 
 **Location:** `hosts/jupiter/configuration.nix:136-163`
 
@@ -149,7 +63,7 @@ Create `modules/nixos/features/boot-optimization.nix`:
 
 ## Medium Priority
 
-### 4. Upstream Sonarr Data Path Fix
+### 3. Upstream Sonarr Data Path Fix
 
 **Location:** `modules/nixos/services/media-management/sonarr.nix:38`
 
@@ -191,7 +105,7 @@ Overriding NixOS module's ExecStart to use modern Sonarr directory instead of le
 
 ---
 
-### 5. Document or Fix Desktop Session Management
+### 4. Document or Fix Desktop Session Management
 
 **Location:** `modules/nixos/features/desktop/desktop-environment.nix:38`
 
@@ -234,7 +148,7 @@ services.displayManager.sessionPackages = lib.mkForce [ ];
 
 ---
 
-### 6. Consolidate Test VM Configuration
+### 5. Consolidate Test VM Configuration
 
 **Locations:**
 
@@ -301,7 +215,7 @@ mkTestMachine =
 
 ---
 
-### 7. Implement System Theme Detection
+### 6. Implement System Theme Detection
 
 **Location:** `modules/shared/features/theming/mode.nix:43-53`
 
@@ -357,7 +271,7 @@ systemd.user.services.detect-theme-mode = {
 
 ## Low Priority
 
-### 8. Re-enable Aseprite Package
+### 7. Re-enable Aseprite Package
 
 **Location:** `home/nixos/desktop-apps.nix:11-13`
 
@@ -403,7 +317,7 @@ final: prev: {
 
 ---
 
-### 9. VPN Interface MTU Configuration Template
+### 8. VPN Interface MTU Configuration Template
 
 **Location:** `modules/nixos/core/networking.nix:80-84`
 
@@ -457,7 +371,7 @@ systemd.network.networks."30-vpn" = {
 
 ## Low Priority (Already Justified)
 
-### 10. Darwin Nix Daemon Management
+### 9. Darwin Nix Daemon Management
 
 **Location:** `modules/darwin/nix.nix:164`
 
@@ -499,26 +413,33 @@ When working on these TODOs:
 
 ## Completed Items
 
-### ~~1. Simplify SOPS Secret Permissions~~ ✅
+### ~~Make Gaming-Aware Sysctl Configuration~~ ✅
 
 **Completed:** 2026-01-12
 
-**Location:** `modules/nixos/system/sops.nix:29-31` and `modules/shared/sops.nix:16-40`
+**Location:** `modules/nixos/features/gaming.nix:29` and `modules/nixos/system/disk-performance.nix:94`
 
 **Solution Implemented:**
 
-Added `lib.mkDefault` to the shared module's `mkSecret` function for `owner`, `group`, and `mode` attributes. This allows downstream modules to override if needed without requiring `mkForce`.
-
-Removed redundant `mkForce` overrides and the `sharedSecrets` list from `modules/nixos/system/sops.nix` since the shared module now properly sets these values with defaults.
+Implemented Option A - made disk-performance.nix gaming-aware by checking `config.host.features.gaming.enable` and conditionally setting `vm.max_map_count` to the appropriate value (2147483642 for gaming workloads, 262144 for conservative default workloads).
 
 **Changes Made:**
 
-1. `modules/shared/sops.nix:35-37` - Added `lib.mkDefault` to `mode`, `owner`, and `group`
-2. `modules/nixos/system/sops.nix` - Removed redundant `mkForce` overrides and simplified to only define NixOS-specific secrets
+1. `modules/nixos/system/disk-performance.nix:91-101` - Added conditional logic for gaming feature
+2. `modules/nixos/features/gaming.nix:24-27` - Removed `mkForce` override
 
 **Benefits Achieved:**
 
-- Cleaner, more maintainable configuration
-- Proper use of Nix module system priorities
-- Reduced code duplication
-- Better separation of concerns between shared and NixOS-specific configuration
+- Removed `mkForce` hack from gaming module
+- Made module interaction explicit and self-documenting
+- Single source of truth for `vm.max_map_count` configuration
+
+---
+
+### ~~Simplify SOPS Secret Permissions~~ ✅
+
+**Completed:** 2026-01-12
+
+**Solution Implemented:**
+
+Added `lib.mkDefault` to the shared module's `mkSecret` function, allowing downstream modules to override without requiring `mkForce`. Removed redundant overrides from the NixOS-specific module.

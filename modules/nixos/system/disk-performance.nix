@@ -91,7 +91,14 @@ in
         (lib.mkIf cfg.enableIOTuning {
           # Increase maximum number of memory map areas
           # Useful for applications with many mapped files (databases, VMs, games)
-          "vm.max_map_count" = 262144;
+          # Gaming workloads need much higher values (games like Cyberpunk 2077 can create millions of memory mappings)
+          # Use mkDefault to allow gaming module to override without mkForce
+          "vm.max_map_count" = lib.mkDefault (
+            if config.host.features.gaming.enable or false then
+              2147483642 # Gaming workload (required for Star Citizen, Cyberpunk 2077, etc.)
+            else
+              262144 # Conservative default for general workloads
+          );
         })
 
         (lib.mkIf cfg.enableZFSTuning {

@@ -21,16 +21,10 @@ in
     # used as a fallback and requires this setting for Wine/Proton compatibility
     host.systemDefaults.fileDescriptorLimit = lib.mkOverride 60 1048576;
 
-    # Gaming-specific kernel parameters
-    boot.kernel.sysctl = {
-      # Memory management - essential for some Windows games via Wine/Proton
-      # Must override disk-performance.nix's conservative value (262144)
-      # Games like Cyberpunk 2077 can create millions of memory mappings
-      "vm.max_map_count" = lib.mkForce 2147483642;
-
-      # Note: vm.swappiness and vm.vfs_cache_pressure are already optimally
-      # configured in disk-performance.nix (swappiness=10, vfs_cache_pressure=50)
-    };
+    # Note: vm.max_map_count is automatically set to 2147483642 by disk-performance.nix
+    # when gaming is enabled (required for games like Star Citizen, Cyberpunk 2077)
+    # Other kernel parameters (vm.swappiness, vm.vfs_cache_pressure) are already
+    # optimally configured in disk-performance.nix (swappiness=10, vfs_cache_pressure=50)
 
     programs = {
       steam = mkIf cfg.steam {
