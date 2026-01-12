@@ -118,6 +118,13 @@ in
         # 1. Doesn't work on NVIDIA GPUs anyway
         # 2. Causes GStreamer gst_util_floor_log2 symbol errors
         # NVIDIA uses NVDEC/NVENC for hardware acceleration, not VAAPI
+        #
+        # Additional fixes for OAuth sign-in on XWayland:
+        # - webkit2gtk-4.1: Embedded browser for OAuth authentication
+        # - libsecret: Credential storage (AppImages need system libsecret)
+        # - gnome-keyring: Keyring daemon for secure credential storage
+        # - LD_LIBRARY_PATH: Make system libraries available to AppImage
+        # - XDG_SESSION_TYPE: Explicitly set to x11 for XWayland
         package = pkgs.symlinkJoin {
           name = "immersed-xwayland-nvidia";
           paths = [ pkgs.immersed ];
@@ -126,10 +133,26 @@ in
             wrapProgram $out/bin/immersed \
               --unset WAYLAND_DISPLAY \
               --set LIBVA_DRIVER_NAME "none" \
-              --set LIBVA_DRIVERS_PATH "/nonexistent"
+              --set LIBVA_DRIVERS_PATH "/nonexistent" \
+              --set XDG_SESSION_TYPE "x11" \
+              --prefix LD_LIBRARY_PATH : "${
+                pkgs.lib.makeLibraryPath [
+                  pkgs.webkitgtk_4_1
+                  pkgs.libsecret
+                  pkgs.glib
+                  pkgs.gtk3
+                  pkgs.libsoup_3
+                  pkgs.glib-networking
+                ]
+              }"
           '';
         };
       };
+
+      # Ensure gnome-keyring is available for Immersed authentication
+      # Immersed uses OAuth which requires secure credential storage
+      services.gnome.gnome-keyring.enable = lib.mkDefault true;
+      security.pam.services.login.enableGnomeKeyring = lib.mkDefault true;
 
       # Firewall configuration for Immersed
       # Immersed uses these ports for communication between PC and headset
