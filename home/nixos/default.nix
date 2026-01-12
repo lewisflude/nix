@@ -9,7 +9,7 @@
     ./yazi.nix
     ./niri.nix
     ./mcp.nix
-    # Removed: polkit-gnome (niri-flake provides polkit-kde-agent automatically)
+    ./apps/polkit-gnome.nix
     ./apps/wlsunset.nix
     ./apps/swayidle.nix
     ./apps/satty.nix
