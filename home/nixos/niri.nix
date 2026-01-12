@@ -204,7 +204,7 @@ in
             { app-id = "^brave-browser$"; }
             { app-id = "^firefox$"; }
           ];
-          open-on-workspace = 1;
+          open-on-workspace = "1";
         }
         # Development tools - workspace 3
         {
@@ -214,7 +214,7 @@ in
             { app-id = "^com\\.visualstudio\\.code.*"; }
             { app-id = "^dev\\.zed\\.Zed.*"; }
           ];
-          open-on-workspace = 3;
+          open-on-workspace = "3";
         }
         # Communication apps - workspace 5
         {
@@ -224,14 +224,14 @@ in
             { app-id = "^signal$"; }
             { app-id = "^org\\.telegram\\.desktop$"; }
           ];
-          open-on-workspace = 5;
+          open-on-workspace = "5";
         }
         # Email - workspace 5 (same as chat for communication grouping)
         {
           matches = [
             { app-id = "^thunderbird$"; }
           ];
-          open-on-workspace = 5;
+          open-on-workspace = "5";
         }
         # Media apps - workspace 7
         {
@@ -240,7 +240,7 @@ in
             { app-id = "^spotify$"; }
             { app-id = "^md\\.obsidian\\.Obsidian$"; }
           ];
-          open-on-workspace = 7;
+          open-on-workspace = "7";
         }
         # Gaming workspace 9 - isolated for performance and organization
         # This keeps Steam's noisy notifications and pop-ups separate from your work
@@ -249,7 +249,7 @@ in
             { app-id = "^steam$"; }
             { title = "^Steam$"; }
           ];
-          open-on-workspace = 9;
+          open-on-workspace = "9";
         }
         # Gamescope nested compositor - workspace 9 for gaming
         # Opens maximized for optimal gaming experience
@@ -261,7 +261,7 @@ in
             proportion = 1.0;
           };
           open-maximized = true;
-          open-on-workspace = 9;
+          open-on-workspace = "9";
         }
         # Steam games - auto-focus by opening fullscreen on gaming workspace
         # This ensures games launched via Steam are immediately focused and isolated
@@ -271,7 +271,7 @@ in
             { app-id = "^steam_app_.*"; }
           ];
           open-fullscreen = true;
-          open-on-workspace = 9;
+          open-on-workspace = "9";
         }
       ];
       animations = {
