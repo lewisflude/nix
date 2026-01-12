@@ -137,6 +137,13 @@ in
         (lib.getExe pkgs.thunderbird)
       ];
     };
+    # Workspace quick access - semantic shortcuts
+    # These complement the Mod+1-9 number shortcuts with memorable shortcuts
+    "Mod+Alt+B".action.focus-workspace = 1; # Browser
+    "Mod+Alt+D".action.focus-workspace = 3; # Development
+    "Mod+Alt+C".action.focus-workspace = 5; # Communication/Chat
+    "Mod+Alt+M".action.focus-workspace = 7; # Media
+    "Mod+Alt+G".action.focus-workspace = 9; # Gaming
 
     "F16".action.maximize-column = { };
     "F18".action.center-column = { };

@@ -173,6 +173,12 @@ in
       # - 10-bit works with applications using vo=dmabuf-wayland (e.g., mpv)
       # - HDR color management is not yet implemented (see issue #1841)
       # See: https://github.com/YaLTeR/niri/issues/1533 and PR #3158
+      # Workspace Organization:
+      # 1-2: Browser and general browsing
+      # 3-4: Development (terminals, editors)
+      # 5-6: Communication (chat, email)
+      # 7-8: Media (Spotify, Obsidian)
+      # 9: Gaming (Steam, games) - isolated for performance and organization
       window-rules = [
         {
           matches = [
@@ -191,7 +197,62 @@ in
           ];
           shadow.enable = false;
         }
-        # Gamescope nested compositor - opens on focused display for local gaming
+        # Browser windows - workspace 1
+        {
+          matches = [
+            { app-id = "^chromium-browser$"; }
+            { app-id = "^brave-browser$"; }
+            { app-id = "^firefox$"; }
+          ];
+          open-on-workspace = 1;
+        }
+        # Development tools - workspace 3
+        {
+          matches = [
+            { app-id = "^code$"; }
+            { app-id = "^cursor$"; }
+            { app-id = "^com\\.visualstudio\\.code.*"; }
+            { app-id = "^dev\\.zed\\.Zed.*"; }
+          ];
+          open-on-workspace = 3;
+        }
+        # Communication apps - workspace 5
+        {
+          matches = [
+            { app-id = "^discord$"; }
+            { app-id = "^slack$"; }
+            { app-id = "^signal$"; }
+            { app-id = "^org\\.telegram\\.desktop$"; }
+          ];
+          open-on-workspace = 5;
+        }
+        # Email - workspace 5 (same as chat for communication grouping)
+        {
+          matches = [
+            { app-id = "^thunderbird$"; }
+          ];
+          open-on-workspace = 5;
+        }
+        # Media apps - workspace 7
+        {
+          matches = [
+            { app-id = "^obsidian$"; }
+            { app-id = "^spotify$"; }
+            { app-id = "^md\\.obsidian\\.Obsidian$"; }
+          ];
+          open-on-workspace = 7;
+        }
+        # Gaming workspace 9 - isolated for performance and organization
+        # This keeps Steam's noisy notifications and pop-ups separate from your work
+        {
+          matches = [
+            { app-id = "^steam$"; }
+            { title = "^Steam$"; }
+          ];
+          open-on-workspace = 9;
+        }
+        # Gamescope nested compositor - workspace 9 for gaming
+        # Opens maximized for optimal gaming experience
         {
           matches = [
             { app-id = "^gamescope$"; }
@@ -200,22 +261,18 @@ in
             proportion = 1.0;
           };
           open-maximized = true;
+          open-on-workspace = 9;
         }
-        # Steam games - auto-focus by opening fullscreen
-        # This ensures games launched via Steam Link are focused immediately
+        # Steam games - auto-focus by opening fullscreen on gaming workspace
+        # This ensures games launched via Steam are immediately focused and isolated
+        # Performance tip: Disable compositor effects on this workspace if needed
         {
           matches = [
             { app-id = "^steam_app_.*"; }
           ];
           open-fullscreen = true;
+          open-on-workspace = 9;
         }
-        # Steam window rules removed - Steam opens on focused display by default
-        # For Sunshine streaming: Use Mod+Shift+S to move Steam to HDMI-A-4
-        # For normal desktop use: Steam opens on DP-3 (main display)
-        #
-        # Note: If you want Steam to always open on HDMI-A-4 for streaming,
-        # you can manually move it there or configure Sunshine to use a wrapper
-        # script that sets environment variables before launching Steam.
       ];
       animations = {
         enable = true;

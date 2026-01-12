@@ -405,6 +405,15 @@ in
       };
     };
 
+    # Configure GNOME desktop interface preferences via dconf
+    # This is used by xdg-desktop-portal-gnome and Flatpak apps
+    dconf.settings = {
+      "org/gnome/desktop/interface" = {
+        color-scheme = if cfg.mode == "dark" then "prefer-dark" else "prefer-light";
+        gtk-theme = cfg.gtkTheme or "Adwaita";
+      };
+    };
+
     # Generate GTK3 CSS override
     xdg.configFile."gtk-3.0/gtk.css".text = generateGtkCss theme;
 
