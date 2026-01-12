@@ -42,6 +42,7 @@ in
           needsConfigRoot = lib.elem script-name [
             "new-module"
             "update-all"
+            "update-immersed"
             "visualize-modules"
             "calculate-qbittorrent-config"
           ];
@@ -56,6 +57,7 @@ in
             "new-module" = "Scaffold new NixOS/home-manager modules";
             "setup-cachix" = "Configure Cachix binary cache";
             "update-all" = "Update all flake dependencies";
+            "update-immersed" = "Update Immersed VR to the latest version";
             "visualize-modules" = "Generate module dependency graphs";
             "calculate-qbittorrent-config" = "Calculate optimal qBittorrent settings from speed tests";
           };
@@ -78,6 +80,7 @@ in
         new-module = mkPogApp "new-module";
         setup-cachix = mkPogApp "setup-cachix";
         update-all = mkPogApp "update-all";
+        update-immersed = mkPogApp "update-immersed";
         visualize-modules = mkPogApp "visualize-modules";
         # devour-flake: Build all flake outputs efficiently
         devour-flake = {

@@ -1,91 +1,60 @@
-# Overlays Directory
+# Package Overlays
 
-This directory contains Nix overlays for custom packages and package overrides.
+This directory contains package overlays that modify or replace packages from nixpkgs.
 
-## Structure
+## Active Overlays
 
-- `default.nix` - Main overlay file containing all overlays
-- `sources.toml` - nvfetcher configuration for batch source updates
+### System Overlays
 
-## Current Overlays
+- **nh**: Nix helper tool overlay
+- **nix-topology**: Network topology visualization
+- **flake-editors**: Latest Zed editor from flake (with cache)
+- **fenix-overlay**: Rust toolchains from fenix
+- **flake-git-tools**: Lazygit using nixpkgs for binary cache
+- **flake-cli-tools**: Atuin using nixpkgs for binary cache
+- **niri**: Niri compositor (Linux only)
+- **nixpkgs-xr**: VR/AR/XR packages (Linux only)
+- **comfyui**: Native Nix ComfyUI package
+- **audio-nix**: Bitwig Studio and audio plugins with webkit compatibility
+- **llm-agents**: Pre-built binaries from llm-agents.nix with cache
+- **onetbb-fix**: Disable tests on i686-linux due to flakiness
+- **immersed-latest**: Use latest Immersed VR from static download URL
 
-Using nixpkgs versions of packages where available (cursor, claude-code, gemini-cli, etc.).
+### Immersed VR Override
 
-**Available overlays:**
+The `immersed-latest` overlay pulls the latest version directly from Immersed's static download URL instead of using archived versions. This ensures you get the most recent release.
 
-- `nh` - Nix helper tool
-- `nix-topology` - Network topology visualization
-- `flake-editors` - Stable zed-editor from nixpkgs
-- `fenix-overlay` - Rust toolchains
-- `flake-git-tools` - Lazygit from flake
-- `flake-cli-tools` - Atuin from flake
-- `niri` - Niri compositor (Linux only)
-- `comfyui` - ComfyUI native package
+**Current version**: `11.0.0-latest` (fetched from <https://static.immersed.com/dl/>)
 
-## Using nvfetcher
+**Hash verification**:
 
-nvfetcher provides declarative source management for batch updates.
+- x86_64-Linux: `sha256-GbckZ/WK+7/PFQvTfUwwePtufPKVwIwSPh+Bo/cG7ko=`
+- aarch64-Linux: `sha256-3BokV30y6QRjE94K7JQ6iIuQw1t+h3BKZY+nEFGTVHI=` (from nixpkgs)
+- macOS: `sha256-lmSkatB75Bztm19aCC50qrd/NV+HQX9nBMOTxIguaqI=` (from nixpkgs)
 
-### Setup
+**Note**: To update to a new version when Immersed releases updates:
 
-1. Define sources in `sources.toml`:
+1. Download the new AppImage: `curl -L https://static.immersed.com/dl/Immersed-x86_64.AppImage -o /tmp/immersed.AppImage`
+2. Calculate the hash: `nix hash file /tmp/immersed.AppImage`
+3. Update the hash in `overlays/default.nix`
+4. Update the version string if needed
+5. Rebuild: `nh os switch` (or `sudo nixos-rebuild switch`)
 
-   ```toml
-   [gemini-cli]
-   src.github = "google-gemini/gemini-cli"
-   fetch.github = "owner=google-gemini,repo=gemini-cli"
-   git.tag = "latest"
-   ```
+## Disabled Overlays
 
-2. Generate sources:
+- **claude-code-overlay**: Disabled due to runtime errors (Bun Segmenter initialization errors)
+- **filesystem**: Disabled for security
 
-   ```bash
-   nvfetcher -c overlays/sources.toml -o overlays/_sources
-   ```
+## Usage
 
-3. Use in overlay:
+Overlays are automatically applied via `lib/functions.nix:mkOverlays` and used in:
 
-   ```nix
-   let
-     sources = import ./_sources/generated.nix { inherit (prev) fetchFromGitHub; };
-   in
-   {
-     gemini-cli-latest = _final: prev: {
-       gemini-cli = prev.buildNpmPackage {
-         src = sources.gemini-cli;
-         # ... rest of config
-       };
-     };
-   }
-   ```
-
-### Benefits
-
-- Declarative source management
-- Batch updates with one command
-- Automatic hash generation
-- Works well with CI/CD
-
-### Limitations
-
-- For packages requiring additional hashes (like `npmDepsHash`), you still need to update those manually
-- Some packages may need custom fetch logic
-
-## Automated Updates
-
-See `.github/workflows/update-overlays.yml` for automated weekly updates via GitHub Actions.
-
-The workflow updates flake inputs that provide overlays.
+- `flake-parts/per-system/pkgs.nix` - Per-system package sets
+- `lib/system-builders.nix` - NixOS and Darwin configurations
 
 ## Adding New Overlays
 
-1. Add overlay to `overlays/default.nix`
-2. Optionally add to `overlays/sources.toml` for nvfetcher
-3. Add `updateScript` if you want automated updates
-4. Update `.github/workflows/update-overlays.yml` if needed
-
-## References
-
-- [NixOS Overlays Documentation](https://nixos.org/manual/nixpkgs/stable/#chap-overlays)
-- [nvfetcher](https://github.com/berberman/nvfetcher)
-- [nix-update](https://github.com/Mic92/nix-update)
+1. Add the overlay function to `overlays/default.nix`
+2. Format: `nix fmt overlays/default.nix`
+3. Test: `nix flake check`
+4. Rebuild system to apply changes

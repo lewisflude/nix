@@ -49,10 +49,12 @@ mkIf vrEnabled {
   # User VR packages
   # Note: Immersed VR is installed via programs.immersed module at system level
   home.packages = [
-    # WayVR - Desktop overlay for VR (requires both packages)
+    # WayVR - Desktop overlay for VR
+    # wlx-overlay-s: Main overlay app (run when in VR with: vr-desktop)
+    # wayvr-dashboard: Optional GUI for configuration
     # Provided by nixpkgs-xr overlay for latest version
-    pkgs.wlx-overlay-s # Main VR overlay service (backend)
-    pkgs.wayvr-dashboard # Dashboard GUI (frontend)
+    pkgs.wlx-overlay-s
+    pkgs.wayvr-dashboard
     install-mf-codecs
   ];
 
@@ -65,34 +67,66 @@ mkIf vrEnabled {
     else
       "${pkgs.monado}/share/openxr/1/openxr_monado.json";
 
-  # OpenComposite / OpenVR Compatibility Layer
-  # WiVRn v25.8+ automatically manages OpenVR-to-OpenXR translation using Xrizer
-  # Manual OpenComposite configuration is no longer needed and has been removed
+  # Quest 3 VR Workflow with xrizer (Modern SteamVR Translation)
   #
-  # For Monado-only setups (without WiVRn), you can still use OpenComposite if needed:
+  # xrizer is a modern replacement for OpenComposite that translates SteamVR games to OpenXR.
+  # It works seamlessly with WiVRn and Monado on Wayland/Niri.
+  #
+  # Usage:
+  # 1. In Steam, right-click game (e.g., Half-Life: Alyx)
+  # 2. Go to Properties > General > Launch Options
+  # 3. Set: xrizer %command%
+  # 4. Use Proton-GE as compatibility layer
+  #
+  # Workflow:
+  # 1. Start WiVRn: wivrn-server (or auto-start via systemd)
+  # 2. Connect Quest 3: Open WiVRn app on headset
+  # 3. Launch games: Use xrizer launch options in Steam
+  # 4. Desktop overlay: Run wlx-overlay-s or wayvr-dashboard for Niri window interaction
+  #
+  # Available Tools (installed system-wide):
+  # - xrizer: SteamVR->OpenXR translation (preferred over OpenComposite)
+  # - wlx-overlay-s: Desktop overlay (view Niri windows in VR via PipeWire)
+  # - wayvr-dashboard: VR Dashboard for Wayland
+  # - kaon: UEVR manager (inject VR into flat Unreal Engine games)
+  # - vapor: Lightweight VR home/launcher
+  # - xrbinder: Controller remapping
+  # - lovr: Lua-based VR development
+  # - proton-ge-rtsp-bin: Video streaming for VRChat/Resonite
+  # - resolute: Resonite mod manager
+  # - oscavmgr: OSC Avatar/face tracking manager
+  #
+  # Legacy OpenComposite:
+  # For Monado-only setups (without WiVRn), you can still use OpenComposite:
   #   1. Enable: host.features.vr.opencomposite = true;
-  #   2. The OpenComposite package will be installed system-wide
-  #   3. Configure manually via ~/.config/openvr/openvrpaths.vrpath if needed
-  #
-  # Note: Most modern VR applications support OpenXR natively and don't need OpenVR
+  #   2. Configure manually via ~/.config/openvr/openvrpaths.vrpath if needed
+  # However, xrizer is the modern approach and should be preferred.
 
   # Shell aliases for VR tools
   programs.zsh.shellAliases = {
-    # VR logs
+    # VR Runtime Logs
     monado-log = "journalctl --user -u monado -f";
     wivrn-log = "journalctl --user -u wivrn -f";
 
-    # Desktop overlay - start WayVR service first, then show dashboard
-    # WayVR automatically detects the correct Wayland display
-    vr-start = "wlx-overlay-s"; # Start the VR overlay service
-    vr-desktop = "wayvr-dashboard"; # Open the dashboard GUI
+    # Desktop Overlays (view Niri windows in VR)
+    vr-desktop = "wlx-overlay-s --show"; # PipeWire-based desktop overlay
+    vr-dashboard = "wayvr-dashboard"; # VR Dashboard for Wayland
 
-    # Quest ADB shortcuts
+    # Quest 3 Connection (ADB for sideloading)
     quest-connect = "adb connect"; # Usage: quest-connect 192.168.1.X
     quest-devices = "adb devices";
     quest-shell = "adb shell";
     quest-install = "adb install";
     quest-logs = "adb logcat";
+
+    # VR Development & Tools
+    vr-uevr = "kaon"; # UEVR manager (flat-to-VR injection)
+    vr-home = "vapor"; # Lightweight VR launcher
+    vr-remap = "xrbinder"; # Controller remapping
+
+    # Social VR & Tracking
+    vr-resonite-mods = "resolute"; # Resonite mod manager
+    vr-osc = "oscavmgr"; # OSC Avatar/face tracking manager
 
     # Media Foundation codecs for Heresphere
     # Install Media Foundation codecs for a Wine prefix (defaults to ~/.wine)

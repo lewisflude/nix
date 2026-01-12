@@ -52,9 +52,34 @@ in
             ''
           )
         ]
+        # Quest 3 Core Tooling (nixpkgs-xr packages)
+        # xrizer: Modern SteamVR->OpenXR translation (replaces OpenComposite)
+        # Use as Steam launch option: xrizer %command%
+        ++ [ pkgs.xrizer ]
+        # Social VR Media Support
+        # proton-ge-rtsp-bin: Required for VRChat/Resonite video streams
+        ++ [ pkgs.proton-ge-rtsp-bin ]
+        # Resonite Tools
+        # resolute: Mod manager for Resonite
+        # oscavmgr: Face/Eye/Avatar tracking data manager (OSC protocol)
+        ++ [
+          pkgs.resolute
+          pkgs.oscavmgr
+        ]
+        # Advanced VR Tools (nixpkgs-xr)
+        # kaon: UEVR manager for flat-to-VR game injection
+        # vapor: Lightweight VR home/launcher
+        # xrbinder: Controller remapping utility
+        # lovr: Lua-based VR development engine
+        ++ [
+          pkgs.kaon
+          pkgs.vapor
+          pkgs.xrbinder
+          pkgs.lovr
+        ]
+        # Legacy OpenComposite support (optional, prefer xrizer)
         # OpenComposite - OpenVR to OpenXR translation layer
-        # Required for running SteamVR games on Monado without SteamVR
-        # Note: WiVRn v25.8+ includes xrizer which handles this automatically
+        # Note: xrizer is the modern replacement and should be preferred
         ++ lib.optionals cfg.opencomposite [ pkgs.opencomposite ];
 
       # Steam VR support - configure Steam FHS for OpenXR
