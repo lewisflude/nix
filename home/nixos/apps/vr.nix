@@ -47,8 +47,11 @@ let
 in
 mkIf vrEnabled {
   # User VR packages
+  # Note: Immersed VR is installed via programs.immersed module at system level
   home.packages = [
-    pkgs.wlx-overlay-s
+    # WayVR (formerly wlx-overlay-s) - Desktop overlay for VR
+    # Provided by nixpkgs-xr overlay for latest version
+    pkgs.wayvr-dashboard
     install-mf-codecs
   ];
 
@@ -75,7 +78,12 @@ mkIf vrEnabled {
   # Shell aliases for VR tools
   programs.zsh.shellAliases = {
     # VR logs
+    monado-log = "journalctl --user -u monado -f";
     wivrn-log = "journalctl --user -u wivrn -f";
+
+    # Desktop overlay - start WayVR and show working set
+    # WayVR automatically detects the correct Wayland display
+    vr-desktop = "wayvr --show";
 
     # Quest ADB shortcuts
     quest-connect = "adb connect"; # Usage: quest-connect 192.168.1.X

@@ -27,16 +27,37 @@ let
 
   # Helper scripts for streaming - disable auto-lock temporarily
   streamingHelper = pkgs.writeShellScriptBin "streaming-mode" ''
+    OVERRIDE_DIR="''${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/swayidle.service.d"
+    OVERRIDE_FILE="$OVERRIDE_DIR/streaming-override.conf"
+
     case "$1" in
       on)
         echo "Disabling auto-lock for streaming..."
+
+        # Create override to disable restart
+        mkdir -p "$OVERRIDE_DIR"
+        cat > "$OVERRIDE_FILE" <<EOF
+    [Service]
+    Restart=no
+    EOF
+
+        # Reload and stop service
+        systemctl --user daemon-reload
         systemctl --user stop swayidle.service
+
         # Unlock if currently locked
         pkill swaylock 2>/dev/null || true
         echo "Streaming mode enabled. Auto-lock disabled."
         ;;
       off)
         echo "Re-enabling auto-lock..."
+
+        # Remove override
+        rm -f "$OVERRIDE_FILE"
+        rmdir "$OVERRIDE_DIR" 2>/dev/null || true
+
+        # Reload and start service
+        systemctl --user daemon-reload
         systemctl --user start swayidle.service
         echo "Streaming mode disabled. Auto-lock re-enabled."
         ;;
@@ -52,7 +73,8 @@ in
 {
   home.packages = [ streamingHelper ];
   services.swayidle = {
-    enable = true;
+    # Disabled - no auto-lock or idle timeouts
+    enable = false;
     package = pkgs.swayidle;
     systemdTarget = "graphical-session.target";
     timeouts = [

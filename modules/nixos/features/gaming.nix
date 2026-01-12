@@ -54,10 +54,12 @@ in
           pkgs.steam.override {
             extraEnv = {
               # Force Steam to use PipeWire for screen capture on Wayland
-              # This works with xdg-desktop-portal-wlr for screen sharing
+              # This works with XDG desktop portals (GNOME/GTK) for screen sharing
               STEAM_FORCE_DESKTOPUI_SCALING = "1";
             };
-            extraArgs = "-pipewire";
+            # -pipewire: Enable PipeWire screen capture for Steam Link/Remote Play
+            # -system-composer: Fix black windows and flickering on Niri compositor
+            extraArgs = "-pipewire -system-composer";
           }
         );
 

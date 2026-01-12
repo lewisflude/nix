@@ -14,7 +14,8 @@ let
       themeLib
       ;
   };
-  inherit (inputs.niri.packages.${system}) xwayland-satellite-unstable niri-unstable;
+  # Use overlay packages to ensure mesa dependencies match system nixpkgs
+  inherit (pkgs) xwayland-satellite-unstable niri-unstable;
   xwayland-satellite = xwayland-satellite-unstable;
 in
 {
@@ -46,6 +47,12 @@ in
       xwayland-satellite = {
         enable = true;
         path = "${lib.getExe xwayland-satellite}";
+      };
+      # Force NVIDIA RTX 4090 as the primary render device
+      # Use renderD128 (render node) for optimal performance on multi-GPU systems
+      # This ensures Niri doesn't try to use the Intel iGPU for rendering
+      debug = {
+        render-drm-device = "/dev/dri/renderD128";
       };
       input = {
         keyboard = {
@@ -193,6 +200,14 @@ in
             proportion = 1.0;
           };
           open-maximized = true;
+        }
+        # Steam games - auto-focus by opening fullscreen
+        # This ensures games launched via Steam Link are focused immediately
+        {
+          matches = [
+            { app-id = "^steam_app_.*"; }
+          ];
+          open-fullscreen = true;
         }
         # Steam window rules removed - Steam opens on focused display by default
         # For Sunshine streaming: Use Mod+Shift+S to move Steam to HDMI-A-4

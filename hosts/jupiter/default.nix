@@ -42,6 +42,10 @@
         defaultRuntime = true; # WiVRn manages Monado runtime
         openFirewall = true;
       };
+      immersed = {
+        enable = false; # Temporarily disabled due to onetbb i686 test failures
+        openFirewall = true;
+      };
       opencomposite = true; # Required for running OpenVR games on Monado (Wayland)
       steamvr = false; # Not needed on Wayland - Monado replaces SteamVR
       sidequest = true;

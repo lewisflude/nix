@@ -82,6 +82,16 @@
         stream = 9944; # Video/Audio streaming
       };
 
+      # Immersed - VR desktop productivity
+      immersed = {
+        tcp = {
+          start = 5230; # TCP port range start
+        };
+        udp = {
+          start = 5230; # UDP port range start
+        };
+      };
+
       # mDNS/Avahi for VR headset discovery
       mdns = 5353;
     };

@@ -122,10 +122,34 @@ mkIf gamingEnabled {
     # Proton optimizations for NVIDIA
     PROTON_ENABLE_NVAPI = "1"; # Enable NVIDIA API for better game compatibility
     PROTON_HIDE_NVIDIA_GPU = "0"; # Don't hide GPU from games
+    PROTON_ENABLE_NGX_UPDATER = "1"; # Enable DLSS/DLSS 3/Frame Generation support
+
+    # NVIDIA Low-Latency Settings - Critical for Competitive Gaming
+    # Reduces render queue from 3 frames to 1 frame for 1:1 input response
+    # Provides "local-feeling" latency in streaming and native games
+    __GL_MaxFramesAllowed = "1";
+
+    # DXVK configuration for DLSS and Frame Generation
+    # Points to ~/.config/dxvk.conf which enables NVIDIA-specific features in Proton
+    DXVK_CONFIG_FILE = "${config.xdg.configHome}/dxvk.conf";
 
     # Force Wayland for Qt games
     QT_QPA_PLATFORM = "wayland";
   };
+
+  # DXVK configuration for NVIDIA-specific features
+  # This enables DLSS, DLSS 3, and Frame Generation in Proton games
+  xdg.configFile."dxvk.conf".text = ''
+    # Enable NVIDIA-specific features in DXVK/Proton
+    # Setting this to False tells DXVK we have a real NVIDIA GPU
+    # (not pretending to be AMD for compatibility)
+    # This unlocks DLSS, DLSS 3, Frame Generation, Reflex, and other RTX features
+    dxgi.nvapiHack = False
+
+    # Optional: Enable DXVK HUD for debugging (disabled by default)
+    # Uncomment to show FPS and frame timing
+    # dxgi.hud = fps
+  '';
 
   programs.mangohud = {
     enable = true;

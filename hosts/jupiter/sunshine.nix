@@ -21,9 +21,10 @@
     # Lock screen when streaming ends for security
     lockOnStreamEnd = true;
 
-    # Audio sink for streaming (NVIDIA HDMI audio)
-    # Find with: pactl list sinks | grep -A 5 "Name:"
-    audioSink = "alsa_output.pci-0000_01_00.1.hdmi-stereo";
+    # Audio configuration: Games route to Sunshine's virtual sink (sink-sunshine-stereo)
+    # Sunshine captures from its own virtual sink and streams to client
+    # No physical audioSink needed - Sunshine handles audio capture internally
+    audioSink = null;
   };
 
   # Enable CUDA support for NVENC hardware encoding (RTX 4090)
