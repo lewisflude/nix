@@ -23,7 +23,9 @@ in
         extraPackages = [
           pkgs.nvidia-vaapi-driver
           pkgs.egl-wayland
+          pkgs.libva
           pkgs.libva-utils
+          pkgs.libva-vdpau-driver # VDPAU driver for VAAPI (required for Immersed VR)
           pkgs.vulkan-tools
         ];
       };
@@ -33,7 +35,8 @@ in
         open = true; # Correct for 4090 (Turing+)
         package = nvidiaPackage;
         nvidiaSettings = true;
-        powerManagement.enable = false; # Not needed for desktop gaming GPUs
+        powerManagement.enable = true; # Helps with GSP and sleep/wake stability
+        powerManagement.finegrained = false; # Not needed for desktop GPUs
       };
 
       # NVIDIA Container Toolkit - Required for Podman GPU acceleration
@@ -61,6 +64,9 @@ in
         __GLX_VENDOR_LIBRARY_NAME = "nvidia";
         GBM_BACKEND = "nvidia-drm";
 
+        # Enable G-Sync/VRR for smooth streaming (Moonlight, Steam Link)
+        __GL_GSYNC_ALLOWED = "1";
+
         # Fix Gamescope segfaults on NVIDIA
         NVD_BACKEND = "direct";
 
@@ -82,9 +88,15 @@ in
       })
     ];
 
-    # Udev rule to simplify device permissions for Sunshine/Steam
+    # Udev rules for gaming and streaming
     services.udev.extraRules = ''
+      # Simplify device permissions for Sunshine/Steam
       KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess"
+
+      # Prevent NVIDIA GPU from entering low-power states during gaming/VR/streaming
+      # This eliminates micro-stuttering and ensures consistent performance
+      # 0x10de = NVIDIA vendor ID, 0x030000 = VGA-compatible controller
+      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", ATTR{power/control}="on"
     '';
   };
 }

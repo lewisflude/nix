@@ -63,6 +63,12 @@ in
           default = true;
         };
       };
+      immersed = {
+        enable = mkEnableOption "Immersed VR desktop productivity app";
+        openFirewall = mkEnableOption "Open firewall ports for Immersed" // {
+          default = true;
+        };
+      };
       opencomposite = mkEnableOption "OpenComposite (OpenVR to OpenXR translation)";
       steamvr = mkEnableOption "SteamVR support";
       sidequest = mkEnableOption "SideQuest for Quest sideloading" // {

@@ -277,26 +277,35 @@ in
               }
             ];
 
-            # Automatic routing: games use the stereo bridge
-            # Note: Games are forced via stream rules, so bridge priority doesn't matter for them
+            # Automatic routing: games use Sunshine virtual sink for streaming
+            # When not streaming, games will use default sink (Apogee or bridge)
             "90-gaming-routing" = {
               "monitor.rules" = [
                 {
                   matches = [ { "node.name" = "input.apogee_stereo_game_bridge"; } ];
                   actions.update-props = {
                     "node.passive" = false;
-                    # Priority not set here - games are forced via stream rules anyway
+                    # Lower priority - only used when Sunshine sink not available
+                    "priority.session" = 50;
+                  };
+                }
+                {
+                  # Give Sunshine virtual sink higher priority for games
+                  matches = [
+                    { "node.name" = "sink-sunshine-stereo"; }
+                  ];
+                  actions.update-props = {
+                    "priority.session" = 150; # Higher than Apogee bridge (50)
                   };
                 }
               ];
 
-              # Route gaming applications to stereo bridge
-              # Note: If Apogee disconnects, bridge will fail silently (node.passive = true)
-              # Games will have no audio in this case - user must reconnect Apogee or manually select another sink
+              # Route gaming applications to Sunshine virtual sink (highest priority)
+              # Falls back to Apogee bridge if Sunshine sink doesn't exist
               "monitor.stream.rules" =
                 let
                   gameRouting = {
-                    "node.target" = "input.apogee_stereo_game_bridge";
+                    "node.target" = "sink-sunshine-stereo";
                     "node.latency" = gamingLatency;
                     "resample.quality" = 4; # Medium quality to prevent crackling
                     "session.suspend-timeout-seconds" = 0;
