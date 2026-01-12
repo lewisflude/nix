@@ -410,7 +410,7 @@ in
     dconf.settings = {
       "org/gnome/desktop/interface" = {
         color-scheme = if cfg.mode == "dark" then "prefer-dark" else "prefer-light";
-        gtk-theme = cfg.gtkTheme or "Adwaita";
+        gtk-theme = lib.mkDefault (cfg.gtkTheme or "Adwaita");
       };
     };
 
