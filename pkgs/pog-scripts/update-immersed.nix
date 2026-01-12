@@ -44,15 +44,12 @@ pog.pog {
       case "$PLATFORM" in
         x86_64-linux)
           URL="https://static.immersed.com/dl/Immersed-x86_64.AppImage"
-          HASH_LINE="hash = \"sha256-"
           ;;
         aarch64-linux)
           URL="https://static.immersed.com/dl/Immersed-aarch64.AppImage"
-          HASH_LINE="# Note: Hash needs to be verified for aarch64"
           ;;
         *darwin*)
           URL="https://static.immersed.com/dl/Immersed.dmg"
-          HASH_LINE="# Note: Hash needs to be verified for macOS"
           ;;
         *)
           die "Unsupported platform: $PLATFORM"
