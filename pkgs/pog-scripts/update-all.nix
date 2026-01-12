@@ -27,6 +27,12 @@ pog.pog {
       bool = true;
       description = "Skip ZSH plugins update";
     }
+    {
+      name = "skip_immersed";
+      short = "i";
+      bool = true;
+      description = "Skip Immersed VR update";
+    }
   ];
 
   runtimeInputs = [
@@ -102,6 +108,28 @@ pog.pog {
         debug "No overlays/sources.toml found, skipping"
       fi
 
+      # Update Immersed VR (x86_64-linux only)
+      if ! ${flag "skip_immersed"}; then
+        if [[ "$(uname -m)" == "x86_64" ]] && [[ "$(uname)" == "Linux" ]]; then
+          cyan "4️⃣  Updating Immersed VR"
+          if ${flag "dry_run"}; then
+            debug "DRY RUN: Would update Immersed VR to latest version"
+          else
+            cd "$FLAKE_DIR" || die "Failed to change to flake directory"
+            # Call the update-immersed script
+            if command -v update-immersed >/dev/null 2>&1; then
+              update-immersed || yellow "⚠️  Failed to update Immersed (continuing anyway)"
+            else
+              debug "update-immersed command not found in PATH, skipping"
+            fi
+          fi
+        else
+          debug "Immersed update only supported on x86_64-linux, skipping"
+        fi
+      else
+        yellow "Skipping Immersed update"
+      fi
+
       # Summary
       if ! ${flag "dry_run"}; then
         cyan "📊 Update Summary"
@@ -116,6 +144,10 @@ pog.pog {
 
         if [ -d "$FLAKE_DIR/overlays/_sources" ]; then
           git diff --quiet overlays/_sources/ 2>/dev/null && echo "overlays/_sources/: No changes" || echo "overlays/_sources/: Updated"
+        fi
+
+        if ! ${flag "skip_immersed"}; then
+          git diff --quiet overlays/default.nix 2>/dev/null && echo "Immersed VR: No changes" || echo "Immersed VR: Updated"
         fi
 
         echo ""

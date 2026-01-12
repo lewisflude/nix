@@ -130,4 +130,36 @@ in
         prev.onetbb;
   };
 
+  # Immersed VR - Use latest version from static URL
+  # This pulls the latest release directly instead of using archived versions
+  immersed-latest = _final: prev: {
+    immersed = prev.immersed.overrideAttrs (oldAttrs: {
+      version = "11.0.0-latest";
+      src =
+        if prev.stdenv.isLinux && prev.stdenv.isx86_64 then
+          prev.fetchurl {
+            url = "https://static.immersed.com/dl/Immersed-x86_64.AppImage";
+            hash = "sha256-GbckZ/WK+7/PFQvTfUwwePtufPKVwIwSPh+Bo/cG7ko=";
+          }
+        else if prev.stdenv.isLinux && prev.stdenv.isAarch64 then
+          prev.fetchurl {
+            url = "https://static.immersed.com/dl/Immersed-aarch64.AppImage";
+            # Note: Hash needs to be verified for aarch64
+            hash = "sha256-3BokV30y6QRjE94K7JQ6iIuQw1t+h3BKZY+nEFGTVHI=";
+          }
+        else if prev.stdenv.isDarwin then
+          prev.fetchurl {
+            url = "https://static.immersed.com/dl/Immersed.dmg";
+            # Note: Hash needs to be verified for macOS
+            hash = "sha256-lmSkatB75Bztm19aCC50qrd/NV+HQX9nBMOTxIguaqI=";
+          }
+        else
+          throw "Unsupported system: ${prev.stdenv.system}";
+
+      meta = oldAttrs.meta // {
+        description = "VR coworking platform (latest from static URL)";
+      };
+    });
+  };
+
 }

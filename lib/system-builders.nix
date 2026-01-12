@@ -67,6 +67,7 @@ let
 
       nix-topology = attrs."nix-topology" or null;
       vpn-confinement = attrs."vpn-confinement" or null;
+      nixpkgs-xr = attrs."nixpkgs-xr" or null;
     in
     # Core integration modules
     optionalModule (determinate != null) determinate.nixosModules.default
@@ -76,7 +77,9 @@ let
     ++ optionalModule (musnix != null) musnix.nixosModules.musnix
     ++ optionalModule (solaar != null) solaar.nixosModules.default
     ++ optionalModule (nix-topology != null) nix-topology.nixosModules.default
-    ++ optionalModule (vpn-confinement != null) vpn-confinement.nixosModules.default;
+    ++ optionalModule (vpn-confinement != null) vpn-confinement.nixosModules.default
+    # VR/XR support (provides nixpkgs-xr packages + Cachix cache configuration)
+    ++ optionalModule (nixpkgs-xr != null) nixpkgs-xr.nixosModules.nixpkgs-xr;
 
   mkHomeManagerConfig =
     {
@@ -247,6 +250,7 @@ in
           ;
         inherit (inputs) nix-topology;
         inherit (inputs) vpn-confinement;
+        inherit (inputs) nixpkgs-xr;
         isLinux = hostConfig.system == "x86_64-linux" || hostConfig.system == "aarch64-linux";
       }
       ++ optionalModule (home-manager != null) home-manager.nixosModules.home-manager
