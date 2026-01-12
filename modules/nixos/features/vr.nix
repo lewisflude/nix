@@ -56,9 +56,6 @@ in
         # xrizer: Modern SteamVR->OpenXR translation (replaces OpenComposite)
         # Use as Steam launch option: xrizer %command%
         ++ [ pkgs.xrizer ]
-        # Social VR Media Support
-        # proton-ge-rtsp-bin: Required for VRChat/Resonite video streams
-        ++ [ pkgs.proton-ge-rtsp-bin ]
         # Resonite Tools
         # resolute: Mod manager for Resonite
         # oscavmgr: Face/Eye/Avatar tracking data manager (OSC protocol)
@@ -66,6 +63,8 @@ in
           pkgs.resolute
           pkgs.oscavmgr
         ]
+        # Note: proton-ge-rtsp-bin is not added to systemPackages as it's a single binary
+        # If needed for VRChat/Resonite video streams, install it as a Steam compatibility tool
         # Advanced VR Tools (nixpkgs-xr)
         # kaon: UEVR manager for flat-to-VR game injection
         # vapor: Lightweight VR home/launcher
