@@ -35,7 +35,7 @@
     vr = {
       enable = true;
       alvr = false; # ALVR requires SteamVR - use WiVRn for Monado instead
-      monado = true;
+      monado = false; # Not needed - WiVRn has embedded Monado for wireless streaming
       wivrn = {
         enable = true;
         autoStart = true; # Start automatically for convenience
@@ -43,7 +43,7 @@
         openFirewall = true;
       };
       immersed = {
-        enable = false; # Temporarily disabled due to onetbb i686 test failures
+        enable = true;
         openFirewall = true;
       };
       opencomposite = true; # Required for running OpenVR games on Monado (Wayland)

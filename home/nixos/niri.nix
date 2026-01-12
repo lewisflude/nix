@@ -38,6 +38,12 @@ in
   ++ [
     inputs.awww.packages.${system}.awww
   ];
+
+  # Make workspace creation script available
+  home.file.".local/bin/create-niri-workspaces" = {
+    source = ./scripts/create-niri-workspaces.sh;
+    executable = true;
+  };
   imports = [
     ./niri/keybinds.nix
   ];
@@ -304,6 +310,12 @@ in
         {
           command = [
             "${inputs.awww.packages.${system}.awww}/bin/awww-daemon"
+          ];
+        }
+        # Create all workspaces on startup for consistent ironbar display
+        {
+          command = [
+            "${config.home.homeDirectory}/.local/bin/create-niri-workspaces"
           ];
         }
 

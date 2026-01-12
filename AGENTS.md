@@ -5,6 +5,7 @@ This file provides specialized instructions for AI coding agents (Cursor Agent, 
 ## Agent Mode Capabilities
 
 When operating in agent mode, you have access to:
+
 - Multi-file editing capabilities
 - Terminal command execution
 - Code exploration and analysis
@@ -109,6 +110,7 @@ Is this configuration needed?
 ### Commands to NEVER Execute
 
 **Absolute prohibitions** (will break user's system if run without permission):
+
 - `nh os switch`
 - `nh os boot`
 - `sudo nixos-rebuild switch`
@@ -121,6 +123,7 @@ Is this configuration needed?
 ### Commands to Suggest (Not Execute)
 
 When changes are complete, suggest commands like:
+
 ```bash
 # Review changes first
 git diff
@@ -157,23 +160,27 @@ Use these instead of creating modules manually - they ensure correct structure.
 Located in `scripts/`:
 
 **qBittorrent & VPN:**
+
 - `diagnose-qbittorrent-seeding.sh` - Full seeding diagnostics
 - `test-qbittorrent-connectivity.sh` - Network tests
 - `verify-qbittorrent-vpn.sh` - VPN verification
 - `monitor-protonvpn-portforward.sh` - Port forwarding status
 
 **SSH & Network:**
+
 - `diagnose-ssh-slowness.sh` - SSH troubleshooting
 - `test-ssh-performance.sh` - Performance benchmarking
 - `test-vlan2-speed.sh` - Network speed testing
 
 **Validation:**
+
 - `validate-config.sh` - Flake validation
 - `strict-lint-check.sh` - Linting validation
 
 ### Code Formatting
 
 Always format after editing `.nix` files:
+
 ```bash
 # Single file
 nix fmt path/to/file.nix
@@ -187,6 +194,7 @@ treefmt
 ### Antipatterns - Detect and Fix
 
 1. **`with pkgs;` usage**
+
    ```nix
    # If you see this:
    home.packages = with pkgs; [ package1 package2 ];
@@ -196,6 +204,7 @@ treefmt
    ```
 
 2. **Hardcoded values**
+
    ```nix
    # If you see this:
    services.app.port = 8080;
@@ -219,6 +228,7 @@ treefmt
 ### When Adding Features
 
 1. **Module Documentation**
+
    ```nix
    options.features.myFeature = {
      enable = lib.mkEnableOption "my feature";
@@ -237,6 +247,7 @@ treefmt
    - Add guides to `docs/` for complex features
 
 3. **Comment Complex Logic**
+
    ```nix
    # Use PipeWire low-latency settings for pro audio
    # This reduces buffer size to 64 frames at 48kHz
@@ -250,6 +261,7 @@ treefmt
 ### Context Gathering
 
 Before making changes:
+
 1. **Read existing modules** in the same category
 2. **Check documentation** in `docs/`
 3. **Review git history** to understand evolution
@@ -258,6 +270,7 @@ Before making changes:
 ### Multi-File Changes
 
 When changes span multiple files:
+
 1. **Plan the full changeset** before editing
 2. **Make changes atomically** (all related changes together)
 3. **Maintain consistency** across all files
@@ -266,6 +279,7 @@ When changes span multiple files:
 ### Communication
 
 When presenting changes:
+
 1. **Explain the reasoning** behind decisions
 2. **Highlight trade-offs** if any exist
 3. **Document assumptions** you made
@@ -284,6 +298,7 @@ If you encounter errors:
 ## Integration with CI/CD
 
 This repository may have automated checks:
+
 1. **Formatting validation** - All `.nix` files must be formatted
 2. **Lint checks** - No critical linting errors allowed
 3. **Build validation** - Flake must build successfully
@@ -295,6 +310,7 @@ Ensure your changes pass these checks before suggesting commits.
 - **Architecture**: `docs/reference/architecture.md`
 - **Features**: `docs/FEATURES.md`
 - **DX Guide**: `docs/DX_GUIDE.md`
+- **TODO**: `docs/TODO.md` - Future refactoring tasks and improvements
 - **Coding Conventions**: `CONVENTIONS.md`
 - **AI Guidelines**: `CLAUDE.md`
 - **Gemini Rules**: `GEMINI.md`
@@ -310,6 +326,7 @@ Ensure your changes pass these checks before suggesting commits.
 ## Collaboration with Humans
 
 Remember:
+
 - You are an **assistant**, not a replacement for human judgment
 - Always **explain your reasoning** clearly
 - **Suggest, don't dictate** - present options when multiple approaches exist

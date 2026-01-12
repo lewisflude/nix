@@ -330,7 +330,9 @@ See `docs/MCP_ARCHITECTURE.md` for detailed documentation.
 - **Architecture**: `docs/reference/architecture.md`
 - **Features**: `docs/FEATURES.md`
 - **DX Guide**: `docs/DX_GUIDE.md`
+- **TODO**: `docs/TODO.md` - Future refactoring tasks and improvements
 - **Contributing**: `CONTRIBUTING.md`
+- **VR Setup**: `docs/VR_SETUP_GUIDE.md` - WiVRn wireless VR configuration and Steam game launch options
 - **qBittorrent Setup**: `docs/QBITTORRENT_GUIDE.md` - Complete setup, optimization, and troubleshooting
 - **ProtonVPN Port Forwarding**: `docs/PROTONVPN_PORT_FORWARDING_SETUP.md` - Detailed VPN configuration
 - **SOPS Secret Management**: `docs/SOPS_GUIDE.md` - Comprehensive secrets management, key rotation, and best practices

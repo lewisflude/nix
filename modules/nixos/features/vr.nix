@@ -24,7 +24,34 @@ in
       # VR user applications and tools
       environment.systemPackages =
         # SideQuest for Quest device sideloading
-        lib.optionals cfg.sidequest [ pkgs.sidequest ]
+        # Wrapped with compiled GTK schemas to fix file chooser crashes
+        lib.optionals cfg.sidequest [
+          (pkgs.runCommand "sidequest-with-gtk"
+            {
+              nativeBuildInputs = [
+                pkgs.makeWrapper
+                pkgs.glib
+              ];
+              inherit (pkgs.sidequest) meta;
+            }
+            ''
+              mkdir -p $out/bin $out/share/gsettings-schemas/sidequest-with-gtk/glib-2.0/schemas
+
+              # Copy all schema files
+              cp ${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/*/glib-2.0/schemas/*.xml \
+                 $out/share/gsettings-schemas/sidequest-with-gtk/glib-2.0/schemas/ 2>/dev/null || true
+              cp ${pkgs.gtk3}/share/gsettings-schemas/*/glib-2.0/schemas/*.xml \
+                 $out/share/gsettings-schemas/sidequest-with-gtk/glib-2.0/schemas/ 2>/dev/null || true
+
+              # Compile the schemas
+              glib-compile-schemas $out/share/gsettings-schemas/sidequest-with-gtk/glib-2.0/schemas
+
+              # Create wrapper
+              makeWrapper ${pkgs.sidequest}/bin/sidequest $out/bin/sidequest \
+                --prefix XDG_DATA_DIRS : "$out/share/gsettings-schemas/sidequest-with-gtk"
+            ''
+          )
+        ]
         # OpenComposite - OpenVR to OpenXR translation layer
         # Required for running SteamVR games on Monado without SteamVR
         # Note: WiVRn v25.8+ includes xrizer which handles this automatically
@@ -78,7 +105,31 @@ in
     # Provides virtual monitors in VR for working in mixed reality
     (lib.mkIf (cfg.enable && cfg.immersed.enable) {
       # Use native NixOS module for Immersed
-      programs.immersed.enable = true;
+      # Wrapped to use XWayland on Niri (workaround for wl_output protocol bug)
+      programs.immersed = {
+        enable = true;
+        # Force XWayland for compatibility with Niri compositor
+        # Immersed has a bug where it binds to wl_output version 1 but doesn't
+        # handle the 'done' event (opcode 2) added in version 2, causing:
+        # "listener function for opcode 2 of wl_output is NULL"
+        # This is fixed in Immersed on GNOME Wayland but not Niri yet.
+        #
+        # Also disable VAAPI (Intel/AMD video acceleration) which:
+        # 1. Doesn't work on NVIDIA GPUs anyway
+        # 2. Causes GStreamer gst_util_floor_log2 symbol errors
+        # NVIDIA uses NVDEC/NVENC for hardware acceleration, not VAAPI
+        package = pkgs.symlinkJoin {
+          name = "immersed-xwayland-nvidia";
+          paths = [ pkgs.immersed ];
+          buildInputs = [ pkgs.makeWrapper ];
+          postBuild = ''
+            wrapProgram $out/bin/immersed \
+              --unset WAYLAND_DISPLAY \
+              --set LIBVA_DRIVER_NAME "none" \
+              --set LIBVA_DRIVERS_PATH "/nonexistent"
+          '';
+        };
+      };
 
       # Firewall configuration for Immersed
       # Immersed uses these ports for communication between PC and headset
