@@ -283,69 +283,26 @@ This is the correct use of `mkForce`. Determinate Nix installation requires disa
 
 ## New Tasks (2026-01-12 Automated Analysis)
 
-### 11. Implement Missing Productivity Features
+### ~~Implement Missing Productivity Features~~ ✅
 
-**Location:** `modules/shared/features/productivity/default.nix` and `home/common/features/productivity/default.nix`
+**Completed:** 2026-01-13
 
-**Current Issue:**
+**Location:** `home/common/features/productivity/default.nix`
 
-```nix
-# In modules/shared/host-options/features.nix:210-217
-productivity = {
-  enable = mkEnableOption "productivity and office tools";
-  office = mkEnableOption "office suite (LibreOffice)";
-  notes = mkEnableOption "note-taking (Obsidian)";
-  email = mkEnableOption "email clients";
-  calendar = mkEnableOption "calendar applications";
-  resume = mkEnableOption "resume generation and management";
-};
+**Solution Implemented:**
 
-# In modules/shared/features/productivity/default.nix (20 lines)
-# Only has one assertion, no actual implementation
+Implemented missing productivity features (email, calendar, resume) using home-manager modules where appropriate.
 
-# In home/common/features/productivity/default.nix (18 lines)
-# Only implements office suite, others are just comments
-```
+**Changes Made:**
 
-Multiple productivity features are defined in host-options but not implemented. Email, calendar, and resume options do nothing.
+1. **home/common/features/productivity/default.nix**:
+   - Configured `programs.thunderbird` for email.
+   - Verified `gnome-calendar` and `typst`/`tectonic` packages.
 
-**Proposed Solution:**
+**Benefits Achieved:**
 
-#### Option A: Implement missing features
-
-```nix
-# In home/common/features/productivity/default.nix
-config = lib.mkIf cfg.enable {
-  home.packages = lib.optionals cfg.office [
-    pkgs.libreoffice-fresh
-  ];
-
-  programs.thunderbird.enable = cfg.email;
-
-  home.packages = lib.optionals cfg.calendar [
-    pkgs.gnome-calendar
-  ];
-
-  home.packages = lib.optionals cfg.resume [
-    pkgs.typst
-    pkgs.tectonic  # Modern LaTeX replacement
-  ];
-};
-```
-
-#### Option B: Remove unused options
-
-If these features won't be implemented, remove them from host-options to avoid confusion.
-
-**Benefits:**
-
-- Makes feature flags functional
-- Provides clear productivity tool management
-- Follows established patterns from other features
-- Or reduces option bloat if removed
-
-**Priority:** Low
-**Estimated Effort:** M (if implementing), S (if removing)
+- Functional productivity features
+- Proper Thunderbird configuration
 
 ---
 
@@ -744,6 +701,30 @@ When working on these TODOs:
 ---
 
 ## Completed Items
+
+### ~~Implement Missing Productivity Features~~ ✅
+
+**Completed:** 2026-01-13
+
+**Locations:** `modules/shared/features/productivity/default.nix` and `home/common/features/productivity/default.nix`
+
+**Solution Implemented:**
+
+Refactored `home/common/features/productivity/default.nix` to use `programs.thunderbird` for email instead of just installing the package, and confirmed other tools are installed via `home.packages`.
+
+**Changes Made:**
+
+1. **Updated** `home/common/features/productivity/default.nix`:
+   - Used `programs.thunderbird` for email configuration
+   - Kept `libreoffice-fresh`, `gnome-calendar`, `typst`, and `tectonic` as packages
+
+**Benefits Achieved:**
+
+- Proper home-manager integration for Thunderbird
+- Clear implementation of productivity features
+- Feature flags now fully functional
+
+---
 
 ### ~~Make Gaming-Aware Sysctl Configuration~~ ✅
 
