@@ -100,58 +100,6 @@ final: prev: {
 
 ---
 
-### 8. VPN Interface MTU Configuration Template
-
-**Location:** `modules/nixos/core/networking.nix:80-84`
-
-**Current Issue:**
-
-```nix
-# --- TODO: Add your VPN Interface here once you calculate MTU ---
-# networks."30-vpn" = {
-#   matchConfig.Name = "tun0"; # Change to your VPN interface name
-#   linkConfig.MTUBytes = 1400; # Change to your calculated MTU
-# };
-```
-
-Placeholder comment for user-specific VPN configuration.
-
-**Proposed Solution:**
-
-#### Option A: Remove comment (not a real TODO)**
-
-This is a user configuration template, not a codebase TODO. Consider removing it or moving to documentation.
-
-#### Option B: Move to documentation**
-
-Add VPN MTU configuration guide to `docs/PROTONVPN_PORT_FORWARDING_SETUP.md`:
-
-```markdown
-## Optional: MTU Optimization
-
-If you experience performance issues:
-
-1. Calculate optimal MTU: `ping -M do -s 1472 1.1.1.1`
-2. Add to networking configuration:
-
-\`\`\`nix
-systemd.network.networks."30-vpn" = {
-  matchConfig.Name = "proton0";
-  linkConfig.MTUBytes = 1400;
-};
-\`\`\`
-```
-
-**Benefits:**
-
-- Cleaner code without stale comments
-- Better documentation for users
-- Clear that it's optional configuration
-
-**Status:** 🤔 **Consider removing or documenting**
-
----
-
 ## Low Priority (Already Justified)
 
 ### 9. Darwin Nix Daemon Management
@@ -266,69 +214,28 @@ Added `example` attributes to all non-trivial options in `modules/shared/host-op
 
 ---
 
-### 15. Remove or Document Deprecated brandGovernance Options
+### ~~Remove or Document Deprecated brandGovernance Options~~ ✅
 
-**Location:** `modules/shared/features/theming/options.nix:157,184`
+**Completed:** 2026-01-13
 
-**Current Issue:**
+**Location:** `modules/shared/features/theming/options.nix`
 
-```nix
-# Line 157
-# DEPRECATED: Use brandGovernance.brandColors instead for brand integration
+**Solution Implemented:**
 
-# Line 184
-?? DEPRECATED: For brand colors, use brandGovernance.brandColors instead.
-```
+Removed the deprecated `overrides` option and replaced it with `mkRemovedOptionModule` to guide users to the new `brandGovernance.brandColors` API. Also removed internal checks for the deprecated option in warning messages.
 
-Deprecated options are still defined in the theming module but marked as deprecated in comments.
+**Changes Made:**
 
-**Proposed Solution:**
+1. **modules/shared/features/theming/options.nix**: Replaced `overrides` option definition with `mkRemovedOptionModule`.
+2. **home/common/theming/default.nix**: Removed warning check for `overrides`.
+3. **modules/nixos/features/theming/default.nix**: Removed warning check for `overrides`.
+4. **modules/shared/features/theming/tests/options.nix**: Removed tests for the deprecated option.
 
-#### Option A: Complete migration and remove
+**Benefits Achieved:**
 
-If migration to new `brandGovernance.brandColors` is complete:
-
-```nix
-# Remove old options entirely
-# Update any remaining usage to new pattern
-# Remove deprecation comments
-```
-
-#### Option B: Add mkRemovedOptionModule
-
-If options need graceful deprecation:
-
-```nix
-# In modules/shared/features/theming/options.nix
-imports = [
-  (mkRemovedOptionModule [ "theme" "oldOption" ] "Use brandGovernance.brandColors instead")
-];
-```
-
-#### Option C: Document migration path
-
-If still in transition, add clear migration guide:
-
-```markdown
-## Theming Migration Guide
-
-### Deprecated Options
-
-- `theme.brandColors` → `theme.brandGovernance.brandColors`
-- Migration deadline: Version X.Y
-- See examples in: ...
-```
-
-**Benefits:**
-
-- Cleaner codebase
-- Clear migration path for users
-- Prevents confusion
-- Standard deprecation pattern
-- Better error messages
-
-**Priority:** Low
-**Estimated Effort:** S
+- Cleaner codebase (removed dead code)
+- Clear migration path (build failure with helpful message if used)
+- Standardized deprecation pattern
 
 ---
 
@@ -451,71 +358,26 @@ import <nixpkgs/nixos/tests/make-test-python.nix> {
 
 ---
 
-### 18. Document Module Override Patterns
+### ~~Document Module Override Patterns~~ ✅
 
-**Location:** `docs/reference/` (new doc) and inline comments
+**Completed:** 2026-01-13
 
-**Current Issue:**
+**Location:** `docs/reference/MODULE_OVERRIDES.md`
 
-The codebase uses various override mechanisms (`mkForce`, `mkDefault`, `mkOverride`) but there's no central documentation explaining:
+**Solution Implemented:**
 
-- When to use each override level
-- How modules interact and override each other
-- Priority system (10, 50, 100, 1000, etc.)
-- Best practices for module authors
+Created comprehensive documentation explaining NixOS module priority system, including:
 
-**Proposed Solution:**
+- Standard priority levels (40, 50, 100, 1000)
+- Usage guidelines for `mkDefault`, `mkForce`, and `mkOverride`
+- Common patterns used in this repository (feature flags, performance tuning, test VMs)
+- Debugging tips using `nixos-option` and `nix repl`
 
-Create `docs/reference/MODULE_OVERRIDES.md`:
+**Benefits Achieved:**
 
-```markdown
-# Module Override Patterns
-
-## Priority Levels
-
-- `mkDefault` (1000) - Default values, easily overridden
-- `mkOverride 900` - Below default, for fallbacks
-- `mkOverride 100` - Normal priority
-- `mkOverride 50` - Above normal (use sparingly)
-- `mkForce` (50) - Force override (avoid if possible)
-
-## When to Use Each
-
-### mkDefault
-Use for default values that users might want to override:
-- Feature module defaults
-- Sensible configuration defaults
-- Platform-specific defaults
-
-### mkOverride
-Use when you need specific priority control:
-- Resolving module conflicts
-- Setting precedence between features
-- Gaming/performance overrides
-
-### mkForce (Avoid!)
-Only use when absolutely necessary:
-- Working around upstream bugs
-- Intentional override of automatic behavior
-- MUST be documented with explanation
-
-## Examples
-[...]
-
-## Debugging Override Conflicts
-[...]
-```
-
-**Benefits:**
-
-- Better understanding of module system
-- Fewer mkForce hacks
-- Clearer precedence rules
-- Helps new contributors
-- Reduces configuration conflicts
-
-**Priority:** Low
-**Estimated Effort:** M
+- Better understanding of module system for contributors
+- Clearer precedence rules and patterns
+- Reduced risk of configuration conflicts
 
 ---
 
@@ -532,6 +394,29 @@ When working on these TODOs:
 ---
 
 ## Completed Items
+
+### ~~VPN Interface MTU Configuration Template~~ ✅
+
+**Completed:** 2026-01-13
+
+**Locations:** `modules/nixos/core/networking.nix` and `docs/PROTONVPN_PORT_FORWARDING_SETUP.md`
+
+**Solution Implemented:**
+
+Removed the placeholder comment from `networking.nix` and moved the MTU optimization guide to the ProtonVPN documentation.
+
+**Changes Made:**
+
+1. **Updated** `modules/nixos/core/networking.nix`: Removed the TODO comment block.
+2. **Updated** `docs/PROTONVPN_PORT_FORWARDING_SETUP.md`: Added "Optional: MTU Optimization" section with instructions.
+
+**Benefits Achieved:**
+
+- Cleaner codebase (removed stale TODO).
+- Better documentation for users.
+- Kept configuration optional as intended.
+
+---
 
 ### ~~Document Desktop Session Management~~ ✅
 

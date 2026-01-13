@@ -19,4 +19,7 @@
 
   # Disable X server - most tests don't need GUI
   services.xserver.enable = lib.mkForce false;
+
+  # Allow unfree packages (needed for Steam, etc.)
+  nixpkgs.config.allowUnfree = true;
 }

@@ -85,9 +85,7 @@ in
         }
       ];
 
-      warnings =
-        lib.optional (cfg.overrides != { })
-          "You are using color overrides. This may result in inconsistent theming. Consider using brandGovernance.brandColors for brand integration.";
+      warnings = [ ];
     }
   ]);
 }

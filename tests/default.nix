@@ -4,29 +4,10 @@
   ...
 }:
 let
-
-  mkTest = import "${pkgs.path}/nixos/tests/make-test-python.nix";
-
-  mkTestMachine =
-    hostFeatures:
-    { ... }:
-    {
-      imports = [
-        ./lib/vm-base.nix
-        ../modules/shared
-        ../modules/nixos
-      ];
-
-      config.host = {
-        username = "testuser";
-        useremail = "test@example.com";
-        hostname = "test-machine";
-        features = hostFeatures;
-      };
-    };
+  helpers = import ./lib/test-helpers.nix { inherit pkgs; };
+  inherit (helpers) mkTest mkTestMachine;
 in
 {
-
   basic-boot = mkTest {
     name = "basic-boot-test";
 
@@ -40,36 +21,6 @@ in
       machine.start()
       machine.wait_for_unit("multi-user.target")
       machine.succeed("systemctl is-system-running --wait")
-    '';
-  };
-
-  development = mkTest {
-    name = "development-test";
-
-    nodes.machine = mkTestMachine {
-      development = {
-        enable = true;
-        rust = true;
-        python = true;
-        node = true;
-      };
-    };
-
-    testScript = ''
-      machine.start()
-      machine.wait_for_unit("multi-user.target")
-
-
-      machine.succeed("id testuser")
-
-
-      machine.succeed("su - testuser -c 'which git'")
-      machine.succeed("su - testuser -c 'which nix'")
-
-
-      machine.succeed("su - testuser -c 'rustc --version'")
-      machine.succeed("su - testuser -c 'python3 --version'")
-      machine.succeed("su - testuser -c 'node --version'")
     '';
   };
 
@@ -93,4 +44,8 @@ in
       machine.succeed("grep -q 'experimental-features.*flakes' /etc/nix/nix.conf")
     '';
   };
+
+  # Feature tests
+  development = import ./features/development.nix { inherit mkTest mkTestMachine; };
+  gaming = import ./features/gaming.nix { inherit mkTest mkTestMachine; };
 }

@@ -67,22 +67,6 @@ in
     expected = true;
   };
 
-  # Test overrides option exists (deprecated)
-  testOverridesOption = {
-    expr = testModule.options.theming.signal ? overrides;
-    expected = true;
-  };
-
-  # Test overrides option default
-  testOverridesOptionDefault = {
-    expr =
-      let
-        cfg = testModule.config;
-      in
-      cfg.theming.signal.overrides == { };
-    expected = true;
-  };
-
   # Test validation options exist
   testValidationOptions = {
     expr =

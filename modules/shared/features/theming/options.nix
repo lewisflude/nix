@@ -3,6 +3,14 @@ let
   inherit (lib) mkOption mkEnableOption types;
 in
 {
+  imports = [
+    (lib.mkRemovedOptionModule [
+      "theming"
+      "signal"
+      "overrides"
+    ] "Use brandGovernance.brandColors instead.")
+  ];
+
   options.theming.signal = {
     enable = mkEnableOption "Signal OKLCH color palette theme";
 
@@ -151,39 +159,6 @@ in
             };
         '';
       };
-    };
-
-    # Allow users to override specific colors (advanced usage)
-    # DEPRECATED: Use brandGovernance.brandColors instead for brand integration
-    overrides = mkOption {
-      type = types.attrsOf (
-        types.submodule {
-          options = {
-            l = mkOption {
-              type = types.float;
-              description = "Lightness (0.0-1.0)";
-            };
-            c = mkOption {
-              type = types.float;
-              description = "Chroma (0.0-0.4+)";
-            };
-            h = mkOption {
-              type = types.float;
-              description = "Hue (0-360 degrees)";
-            };
-            hex = mkOption {
-              type = types.str;
-              description = "Hex color code";
-            };
-          };
-        }
-      );
-      default = { };
-      description = ''
-        Override specific palette colors. Use with caution.
-        ?? DEPRECATED: For brand colors, use brandGovernance.brandColors instead.
-        Example: { "accent-primary" = { l = 0.7; c = 0.2; h = 130; hex = "#4db368"; }; }
-      '';
     };
 
     # Theme variant support

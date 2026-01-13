@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
@@ -52,6 +53,8 @@ in
       "d ${cfg.configPath}/homarr/data 0755 ${toString cfg.uid} ${toString cfg.gid} -"
     ];
 
-    networking.firewall.allowedTCPPorts = mkIf cfg.homarr.openFirewall [ 7575 ];
+    networking.firewall.allowedTCPPorts = mkIf cfg.homarr.openFirewall [
+      constants.ports.services.homarr
+    ];
   };
 }

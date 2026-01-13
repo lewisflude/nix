@@ -444,6 +444,20 @@ transmission-remote HOST:PORT -n 'user:pass' -l
 
 qBittorrent uses HTTP API calls (handled automatically by the port forwarding script).
 
+## Optional: MTU Optimization
+
+If you experience performance issues:
+
+1. Calculate optimal MTU: `ping -M do -s 1472 1.1.1.1`
+2. Add to networking configuration:
+
+```nix
+systemd.network.networks."30-vpn" = {
+  matchConfig.Name = "proton0";
+  linkConfig.MTUBytes = 1400;
+};
+```
+
 ## Troubleshooting
 
 ### NAT-PMP Fails

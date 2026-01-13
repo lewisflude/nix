@@ -45,6 +45,7 @@
       sabnzbd = 8082;
       navidrome = 4533;
       flaresolverr = 8191;
+      musicAssistant = 8095;
 
       # Container supplemental services
       homarr = 7575;
@@ -54,7 +55,7 @@
       doplarr = 3142;
       comfyui = 8188;
       janitorr = 8485;
-      profilarr = 3001;
+      profilarr = 6868;
       cleanuparr = 11011;
       calcom = 3000;
 

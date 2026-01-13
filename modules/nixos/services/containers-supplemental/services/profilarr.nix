@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
@@ -45,6 +46,8 @@ in
       "d ${cfg.configPath}/profilarr 0755 ${toString cfg.uid} ${toString cfg.gid} -"
     ];
 
-    networking.firewall.allowedTCPPorts = mkIf cfg.profilarr.openFirewall [ 6868 ];
+    networking.firewall.allowedTCPPorts = mkIf cfg.profilarr.openFirewall [
+      constants.ports.services.profilarr
+    ];
   };
 }

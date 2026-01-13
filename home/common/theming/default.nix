@@ -139,11 +139,11 @@ in
             let
               script = pkgs.writeShellScript "detect-theme" ''
                 mkdir -p "${config.xdg.cacheHome}"
-                
+
                 # Try multiple sources in order
                 # 1. GNOME Interface settings (standard for most GTK desktops)
                 theme=$(${pkgs.glib}/bin/gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || echo "")
-                
+
                 # Determine mode based on setting
                 if [[ "$theme" =~ "dark" ]]; then
                   echo "dark" > "${config.xdg.cacheHome}/theme-mode"
@@ -172,9 +172,7 @@ in
         }
       ];
 
-      warnings =
-        lib.optional (cfg.overrides != { })
-          "You are using color overrides. This may result in inconsistent theming. Consider using brandGovernance.brandColors for brand integration.";
+      warnings = [ ];
     }
   ]);
 }
