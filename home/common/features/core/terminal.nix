@@ -35,6 +35,10 @@
       # Note: shell configuration removed - not supported in ghostty 1.2.3
       # Ghostty will use the user's default shell from /etc/passwd
 
+      # Use server-side decorations (SSD) for cleaner border rendering
+      # Works with Niri's prefer-no-csd to draw borders around windows instead of behind them
+      window-decoration = "server";
+
       font-family = "Iosevka Nerd Font";
       font-feature = "+calt,+liga,+dlig";
       font-size = 12;

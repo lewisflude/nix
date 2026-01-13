@@ -50,6 +50,37 @@ in
   programs.niri = {
     package = niri-unstable;
     settings = {
+      # Prefer server-side decorations (no CSD)
+      # This makes Niri draw borders/focus rings around windows instead of behind them
+      # Fixes borders showing through semitransparent windows
+      prefer-no-csd = true;
+
+      # Overview settings for premium look
+      overview = {
+        backdrop-color = themeConstants.niri.colors.shadow;
+        zoom = 0.15; # Moderate zoom out for good visibility
+      };
+
+      # Gestures - optimized for productivity
+      gestures = {
+        # Hot corners to toggle overview (top-left corner)
+        hot-corners.enable = true;
+
+        # Edge scrolling while dragging windows
+        dnd-edge-view-scroll = {
+          delay-ms = 200;
+          trigger-width = 48;
+          max-speed = 1000;
+        };
+
+        # Workspace switching in overview
+        dnd-edge-workspace-switch = {
+          delay-ms = 200;
+          trigger-height = 48;
+          max-speed = 1000;
+        };
+      };
+
       xwayland-satellite = {
         enable = true;
         path = "${lib.getExe xwayland-satellite}";

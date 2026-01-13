@@ -8,7 +8,6 @@ This directory contains package overlays that modify or replace packages from ni
 
 - **nh**: Nix helper tool overlay
 - **nix-topology**: Network topology visualization
-- **flake-editors**: Latest Zed editor from flake (with cache)
 - **fenix-overlay**: Rust toolchains from fenix
 - **flake-git-tools**: Lazygit using nixpkgs for binary cache
 - **flake-cli-tools**: Atuin using nixpkgs for binary cache

@@ -22,6 +22,8 @@ in
         inherit (cfg) readarr;
         inherit (cfg) listenarr;
         inherit (cfg) sabnzbd;
+        inherit (cfg) qbittorrent;
+        inherit (cfg) transmission;
         inherit (cfg) jellyfin;
         inherit (cfg) jellyseerr;
         inherit (cfg) flaresolverr;

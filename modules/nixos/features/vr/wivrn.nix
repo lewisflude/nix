@@ -30,21 +30,20 @@ lib.mkIf (cfg.enable && cfg.wivrn.enable) {
     config = {
       enable = true;
       json = {
-        # High quality scaling (1.0 = native)
-        scale = 1.0;
-        # 150Mbps bitrate (high quality for AV1/HEVC)
-        bitrate = 150000000;
-        encoders = [
-          {
-            encoder = "nvenc";
-            # Quest 3 supports AV1 decoding, RTX 4090 supports AV1 encoding
-            codec = "av1";
-            width = 1.0;
-            height = 1.0;
-            offset_x = 0.0;
-            offset_y = 0.0;
-          }
-        ];
+        # Encoder configuration (singular, not plural)
+        # Can be a string, object, or array for left/right/alpha streams
+        encoder = {
+          encoder = "nvenc";
+          # Quest 3 supports AV1 decoding, RTX 4090 supports AV1 encoding
+          codec = "av1";
+          # 10-bit color depth for better quality (supported by nvenc + av1)
+          bit-depth = 10;
+        };
+        # OpenVR compatibility path:
+        # - xrizer: Modern OpenVR reimplementation on OpenXR (default)
+        # - OpenComposite: Legacy option (when opencomposite = true)
+        # WiVRn configures ~/.config/openvr/openvrpaths.vrpath automatically
+        openvr-compat-path = if cfg.opencomposite then "${pkgs.opencomposite}" else "${pkgs.xrizer}";
       };
     };
 

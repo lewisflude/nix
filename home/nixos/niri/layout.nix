@@ -9,8 +9,19 @@
     always-center-single-column = true;
     empty-workspace-above-first = true;
     default-column-display = "tabbed";
+
+    # Center focused column when it doesn't fit on screen
+    center-focused-column = "on-overflow";
+
+    # Preset column widths for quick switching with Mod+R
+    preset-column-widths = [
+      { proportion = 1.0 / 3.0; }
+      { proportion = 1.0 / 2.0; }
+      { proportion = 2.0 / 3.0; }
+      { proportion = 1.0; }
+    ];
     focus-ring = {
-      width = 2;
+      width = 3;
       active = {
         color = themeConstants.niri.colors.focus-ring.active;
       };
@@ -25,7 +36,7 @@
       bottom = 0;
     };
     border = {
-      width = 1;
+      width = 2;
       active = {
         color = themeConstants.niri.colors.border.active;
       };
@@ -38,11 +49,11 @@
     };
     shadow = {
       enable = true;
-      softness = 50;
-      spread = 4;
+      softness = 80;
+      spread = 6;
       offset = {
         x = 0;
-        y = 8;
+        y = 12;
       };
       color = themeConstants.niri.colors.shadow;
       # Set to false to prevent background "spilling out" beyond borders
