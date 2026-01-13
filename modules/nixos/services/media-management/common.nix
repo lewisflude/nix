@@ -70,6 +70,27 @@ in
             path = "${cfg.dataPath}/usenet/incomplete";
             mode = "0775";
           }
+          # SABnzbd category subdirectories (matches qBittorrent pattern)
+          {
+            path = "${cfg.dataPath}/usenet/complete/tv";
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/usenet/complete/movies";
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/usenet/complete/music";
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/usenet/complete/books";
+            mode = "0775";
+          }
+          {
+            path = "${cfg.dataPath}/usenet/complete/audiobooks";
+            mode = "0775";
+          }
         ];
         mediaTmpfiles = map (dir: mkDirRule (dir // { inherit (cfg) user group; })) mediaDirs;
       in
