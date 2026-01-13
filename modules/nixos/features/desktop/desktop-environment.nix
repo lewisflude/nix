@@ -34,7 +34,10 @@ in
         };
       };
     };
-    # Disable the plain niri session, only use UWSM-managed session
+    # UWSM (Universal Wayland Session Manager) requires exclusive session control.
+    # Niri's default session registration conflicts with UWSM's session management,
+    # causing duplicate session entries and potential startup issues.
+    # We use mkForce to ensure only UWSM-managed sessions are registered.
     services.displayManager.sessionPackages = lib.mkForce [ ];
 
     # ReGreet greeter is configured in ./regreet.nix with Signal theme
