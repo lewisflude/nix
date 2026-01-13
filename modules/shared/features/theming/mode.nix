@@ -38,9 +38,26 @@ rec {
   # 3. XDG config files
   # 4. Default to dark mode
   detectSystemMode =
-    _config:
-    # Defaults to dark mode (see docs/TODO.md #7 for system detection implementation)
-    "dark";
+    cfg:
+    let
+      # Try to read cached theme from XDG cache (Home Manager)
+      # We check for config.xdg.cacheHome existence to ensure we are in a context
+      # where it is available (Home Manager). In NixOS system config, this might not exist.
+      cacheFile =
+        if cfg != null && cfg ? xdg && cfg.xdg ? cacheHome then
+          "${cfg.xdg.cacheHome}/theme-mode"
+        else
+          null;
+
+      cachedTheme =
+        if cacheFile != null && builtins.pathExists cacheFile then
+          builtins.readFile cacheFile
+        else
+          "";
+    in
+    if lib.hasPrefix "light" cachedTheme then "light"
+    else if lib.hasPrefix "dark" cachedTheme then "dark"
+    else "dark"; # Default
 
   # Compare two modes (useful for validation)
   modesEqual = mode1: mode2: normalizeMode mode1 == normalizeMode mode2;
