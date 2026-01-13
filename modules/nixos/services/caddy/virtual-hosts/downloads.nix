@@ -1,9 +1,6 @@
 # Download Services Virtual Hosts
 # qBittorrent, Transmission, SABnzbd, etc.
-{
-  # lib,
-  ...
-}:
+_:
 # let
 #   helpers = import ../helpers.nix { inherit lib; };
 #   inherit (helpers) mkReverseProxyWithHeaders;
@@ -12,7 +9,7 @@
   # qBittorrent (VPN namespace)
   "torrent.blmt.io" = {
     extraConfig = ''
-      reverse_proxy 192.168.15.1:8080 {
+      reverse_proxy localhost:8080 {
         # Standard proxy headers (no Host rewriting - let qBittorrent see original host)
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}

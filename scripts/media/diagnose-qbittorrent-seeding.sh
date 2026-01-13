@@ -5,7 +5,7 @@
 set -euo pipefail
 
 NAMESPACE="qbt"
-WEBUI_IP="192.168.15.1"
+WEBUI_IP="localhost"
 WEBUI_PORT=8080
 WEBUI_URL="http://${WEBUI_IP}:${WEBUI_PORT}"
 TORRENT_PORT=6881
