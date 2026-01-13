@@ -24,16 +24,9 @@ in
       enable = true;
       inherit (cfg) user group;
 
-      settings = {
-        misc = {
-          host = "127.0.0.1";
-          port = constants.ports.services.sabnzbd;
-          auto_browser = 0;
-          check_new_rel = 0;
-          # Allow access via reverse proxy domain
-          host_whitelist = "usenet.blmt.io";
-        };
-      };
+      # Settings removed - let SABnzbd manage its own configuration file
+      # This prevents NixOS from wiping the config on every service restart
+      # You can manually edit /var/lib/sabnzbd/sabnzbd.ini
     };
 
     networking.firewall.allowedTCPPorts = mkIf cfg.sabnzbd.openFirewall [
