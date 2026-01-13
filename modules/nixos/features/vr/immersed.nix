@@ -7,7 +7,7 @@
 }:
 let
   cfg = config.host.features.vr;
-  constants = import ../../../lib/constants.nix;
+  constants = import ../../../../lib/constants.nix;
 in
 lib.mkIf (cfg.enable && cfg.immersed.enable) {
   # Immersed VR desktop productivity application

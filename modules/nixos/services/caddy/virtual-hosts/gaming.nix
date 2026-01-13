@@ -5,7 +5,7 @@
   ...
 }:
 let
-  constants = import ../../../../lib/constants.nix;
+  constants = import ../../../../../lib/constants.nix;
 in
 {
   # Sunshine (Gaming) - special transport config
