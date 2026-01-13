@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
@@ -44,6 +45,8 @@ in
       "d ${cfg.configPath}/wizarr 0755 ${toString cfg.uid} ${toString cfg.gid} -"
     ];
 
-    networking.firewall.allowedTCPPorts = mkIf cfg.wizarr.openFirewall [ 5690 ];
+    networking.firewall.allowedTCPPorts = mkIf cfg.wizarr.openFirewall [
+      constants.ports.services.wizarr
+    ];
   };
 }

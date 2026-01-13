@@ -77,7 +77,6 @@
       };
     };
 
-    # For VPN MTU configuration, see docs/TODO.md #9
   };
 
   services = {

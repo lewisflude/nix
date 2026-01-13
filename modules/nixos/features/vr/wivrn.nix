@@ -21,6 +21,33 @@ lib.mkIf (cfg.enable && cfg.wivrn.enable) {
     # This provides hardware-accelerated video encoding for VR streaming
     package = pkgs.wivrn.override { cudaSupport = true; };
 
+    # Enable Steam integration
+    # Sets PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES to allow Steam to discover WiVRn
+    steam.importOXRRuntimes = true;
+
+    # WiVRn Configuration (JSON)
+    # Optimized for Quest 3 + RTX 4090
+    config = {
+      enable = true;
+      json = {
+        # High quality scaling (1.0 = native)
+        scale = 1.0;
+        # 150Mbps bitrate (high quality for AV1/HEVC)
+        bitrate = 150000000;
+        encoders = [
+          {
+            encoder = "nvenc";
+            # Quest 3 supports AV1 decoding, RTX 4090 supports AV1 encoding
+            codec = "av1";
+            width = 1.0;
+            height = 1.0;
+            offset_x = 0.0;
+            offset_y = 0.0;
+          }
+        ];
+      };
+    };
+
     # Monado environment variables for better performance
     monadoEnvironment = lib.mkIf cfg.performance {
       # Minimum time between compositor frames (milliseconds)
@@ -31,11 +58,6 @@ lib.mkIf (cfg.enable && cfg.wivrn.enable) {
       # Exit Monado when all VR applications disconnect
       # Useful for wireless VR to save resources when not in use
       IPC_EXIT_ON_DISCONNECT = if cfg.wivrn.autoStart then "1" else "0";
-
-      # NVIDIA NVENC low-latency encoding (for RTX 4090)
-      # Reduces encoding latency for wireless streaming
-      WIVRN_ENCODER_PRESET = "p1"; # Ultra low latency preset (was p4)
-      WIVRN_ENCODER_RC_MODE = "cbr"; # Constant bitrate for consistent latency
     };
   };
 }

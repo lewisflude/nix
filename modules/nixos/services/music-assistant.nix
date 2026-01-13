@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
@@ -22,7 +23,9 @@ in
       enable = true;
     };
 
-    # Open firewall port for Music Assistant (default port 8095)
-    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [ 8095 ];
+    # Open firewall port for Music Assistant
+    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [
+      constants.ports.services.musicAssistant
+    ];
   };
 }

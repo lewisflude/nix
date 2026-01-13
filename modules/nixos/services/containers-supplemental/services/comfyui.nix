@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
@@ -86,7 +87,9 @@ in
         '';
       };
 
-      networking.firewall.allowedTCPPorts = mkIf cfg.comfyui.openFirewall [ 8188 ];
+      networking.firewall.allowedTCPPorts = mkIf cfg.comfyui.openFirewall [
+        constants.ports.services.comfyui
+      ];
     }
     (mkIf (config.hardware.nvidia.modesetting.enable or false) {
       hardware.nvidia-container-toolkit.enable = true;
