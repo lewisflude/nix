@@ -1,8 +1,5 @@
 # Niri Window Rules Configuration
-{
-  ...
-}:
-{
+_: {
   window-rules = [
     {
       matches = [

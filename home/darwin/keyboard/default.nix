@@ -1,8 +1,6 @@
 # Keyboard Configuration - Main Entry Point
 # Manages keyboard layouts and Vial definitions
-{
-  ...
-}:
+_:
 let
   mnk88Layout = import ./layouts/mnk88.nix { };
 in

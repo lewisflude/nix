@@ -32,5 +32,5 @@ in
   # Note: author is NOT in ThemeContent - it's only in ThemeFamilyContent
   appearance = mode; # "light" or "dark"
   name = "Signal ${variantName}";
-  style = properties.style;
+  inherit (properties) style;
 }

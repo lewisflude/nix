@@ -1,9 +1,6 @@
 # Mouse/Wheel Keybindings
 # Mouse wheel bindings for workspace and column navigation
-{
-  ...
-}:
-{
+_: {
   # Workspace navigation with mouse wheel
   "Mod+WheelScrollDown" = {
     cooldown-ms = 150;

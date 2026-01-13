@@ -1,7 +1,4 @@
-{
-  ...
-}:
-{
+_: {
   type = "clock";
   class = "clock";
   format = "%H:%M";

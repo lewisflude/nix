@@ -14,7 +14,7 @@ let
   optional = import ./optional.nix { inherit pkgs config; };
   secrets = import ./secrets.nix {
     inherit pkgs;
-    rustdocsServer = rustdocs.rustdocsServer;
+    inherit (rustdocs) rustdocsServer;
   };
 in
 core // optional // secrets

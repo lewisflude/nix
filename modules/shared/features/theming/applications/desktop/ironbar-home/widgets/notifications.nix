@@ -1,7 +1,4 @@
-{
-  ...
-}:
-{
+_: {
   type = "notifications";
   class = "notifications";
   icon_size = 22;

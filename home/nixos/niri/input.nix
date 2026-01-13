@@ -1,8 +1,5 @@
 # Niri Input Configuration
-{
-  ...
-}:
-{
+_: {
   input = {
     keyboard = {
       xkb = {

@@ -23,9 +23,9 @@ in
         left = 0;
         right = 0;
       };
-      start = widgets.start;
-      center = widgets.center;
-      end = widgets.end;
+      inherit (widgets) start;
+      inherit (widgets) center;
+      inherit (widgets) end;
     };
   };
 }

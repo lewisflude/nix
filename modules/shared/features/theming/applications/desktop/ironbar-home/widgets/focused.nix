@@ -1,7 +1,4 @@
-{
-  ...
-}:
-{
+_: {
   type = "focused";
   class = "label";
   truncate = "end";

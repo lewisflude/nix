@@ -163,6 +163,6 @@ let
   };
 in
 {
-  preferencesCfg = preferencesCfg;
-  bittorrentSession = bittorrentSession;
+  inherit preferencesCfg;
+  inherit bittorrentSession;
 }

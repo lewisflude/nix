@@ -5,7 +5,7 @@
 # solution to a functional problem. Built on the principles of perceptual uniformity (Oklch)
 # and accessibility (APCA), its purpose is to create a clear, effortless, and predictable
 # user experience. It is a framework for engineering clarity.
-{ ... }:
+_:
 let
   # Import helpers
   helpers = import ./helpers.nix;

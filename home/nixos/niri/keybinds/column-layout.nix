@@ -1,9 +1,6 @@
 # Column Layout Keybindings
 # Column width, height, positioning, and manipulation
-{
-  ...
-}:
-{
+_: {
   # Column width adjustment
   "Mod+R".action.switch-preset-column-width = { };
   "Mod+Minus".action.set-column-width = "-10%";
