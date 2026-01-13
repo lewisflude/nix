@@ -1,7 +1,4 @@
-{
-  ...
-}:
-{
+_: {
   type = "sys_info";
   class = "sys-info";
   format = [

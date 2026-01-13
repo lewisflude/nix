@@ -1,8 +1,6 @@
 # MNK88 Keyboard Layout Definition
 # Vial-compatible keyboard layout configuration
-{
-  ...
-}:
+_:
 builtins.toJSON {
   name = "MNK88";
   vendorId = 19280;

@@ -30,20 +30,16 @@ let
         lightPalette = themeLib.generateTheme "light" { };
 
         # Generate both theme variants (dark and light)
-        darkTheme = (
-          import ./variant.nix {
-            themePalette = darkPalette;
-            variantName = "Dark";
-            inherit themeLib rawPalette;
-          }
-        );
-        lightTheme = (
-          import ./variant.nix {
-            themePalette = lightPalette;
-            variantName = "Light";
-            inherit themeLib rawPalette;
-          }
-        );
+        darkTheme = import ./variant.nix {
+          themePalette = darkPalette;
+          variantName = "Dark";
+          inherit themeLib rawPalette;
+        };
+        lightTheme = import ./variant.nix {
+          themePalette = lightPalette;
+          variantName = "Light";
+          inherit themeLib rawPalette;
+        };
       in
       {
         # ThemeFamilyContent required fields (must match schema exactly)

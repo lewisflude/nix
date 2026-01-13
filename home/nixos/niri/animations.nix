@@ -1,8 +1,5 @@
 # Niri Animations Configuration
-{
-  ...
-}:
-{
+_: {
   animations = {
     enable = true;
     slowdown = 1.0;

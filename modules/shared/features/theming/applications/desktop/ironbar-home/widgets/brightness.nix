@@ -1,7 +1,4 @@
-{
-  ...
-}:
-{
+_: {
   type = "script";
   class = "brightness";
   mode = "poll";

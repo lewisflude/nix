@@ -1,8 +1,5 @@
 # Niri Output/Display Configuration
-{
-  ...
-}:
-{
+_: {
   outputs = {
     "DP-3" = {
       scale = 1.25;

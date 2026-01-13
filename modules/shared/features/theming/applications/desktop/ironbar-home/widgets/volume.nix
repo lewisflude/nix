@@ -1,7 +1,4 @@
-{
-  ...
-}:
-{
+_: {
   type = "volume";
   class = "volume";
   # UX: Icon-only by default, percentage on hover

@@ -1,7 +1,4 @@
-{
-  ...
-}:
-{
+_: {
   type = "workspaces";
   class = "workspaces";
   # Match niri's workspace organization with semantic labels

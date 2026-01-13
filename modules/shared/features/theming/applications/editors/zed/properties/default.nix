@@ -35,7 +35,7 @@ in
     // diagnostics
     // {
       accents = [ ];
-      players = players;
-      syntax = syntax;
+      inherit players;
+      inherit syntax;
     };
 }

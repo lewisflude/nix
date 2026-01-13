@@ -1,9 +1,6 @@
 # Gaming Services Virtual Hosts
 # Sunshine streaming, etc.
-{
-  # lib,
-  ...
-}:
+_:
 let
   constants = import ../../../../../lib/constants.nix;
 in

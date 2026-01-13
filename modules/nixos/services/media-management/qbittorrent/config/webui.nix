@@ -63,5 +63,5 @@ in
   ];
 
   # WebUI config for serverConfig
-  webUICfg = webUICfg;
+  inherit webUICfg;
 }

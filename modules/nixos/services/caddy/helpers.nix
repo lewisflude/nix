@@ -1,9 +1,6 @@
 # Caddy Helper Functions
 # Reduces repetition in virtual host definitions
-{
-  # lib,
-  ...
-}:
+_:
 let
   # inherit (lib) concatStringsSep;
 

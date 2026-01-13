@@ -21,7 +21,7 @@ let
   };
   bittorrentConfig = import ./bittorrent.nix {
     inherit lib qbittorrentCfg;
-    webUICfg = webUIConfig.webUICfg;
+    inherit (webUIConfig) webUICfg;
   };
   serviceConfig = import ./service.nix {
     inherit
@@ -32,9 +32,9 @@ let
       qbittorrentCfg
       webUI
       ;
-    webUICfg = webUIConfig.webUICfg;
-    preferencesCfg = bittorrentConfig.preferencesCfg;
-    bittorrentSession = bittorrentConfig.bittorrentSession;
+    inherit (webUIConfig) webUICfg;
+    inherit (bittorrentConfig) preferencesCfg;
+    inherit (bittorrentConfig) bittorrentSession;
   };
 in
 mkMerge [

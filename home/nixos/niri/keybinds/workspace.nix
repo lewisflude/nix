@@ -1,9 +1,6 @@
 # Workspace Navigation Keybindings
 # Workspace focus, movement, and navigation
-{
-  ...
-}:
-{
+_: {
   # Workspace quick access - semantic shortcuts
   # These complement the Mod+1-9 number shortcuts with memorable shortcuts
   "Mod+Alt+B".action.focus-workspace = 1; # Browser
