@@ -24,9 +24,14 @@ in
       enable = true;
       inherit (cfg) user group;
 
-      # Settings removed - let SABnzbd manage its own configuration file
-      # This prevents NixOS from wiping the config on every service restart
-      # You can manually edit /var/lib/sabnzbd/sabnzbd.ini
+      # Only set port and host_whitelist - other settings are managed by SABnzbd itself
+      # The merge operation will preserve other config values like servers
+      settings = {
+        misc = {
+          port = constants.ports.services.sabnzbd;
+          host_whitelist = "usenet.blmt.io";
+        };
+      };
     };
 
     networking.firewall.allowedTCPPorts = mkIf cfg.sabnzbd.openFirewall [
