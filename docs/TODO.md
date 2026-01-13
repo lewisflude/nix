@@ -52,49 +52,6 @@ Overriding NixOS module's ExecStart to use modern Sonarr directory instead of le
 
 ---
 
-### 3. Document or Fix Desktop Session Management
-
-**Location:** `modules/nixos/features/desktop/desktop-environment.nix:38`
-
-**Current Issue:**
-
-```nix
-# Disable the plain niri session, only use UWSM-managed session
-services.displayManager.sessionPackages = lib.mkForce [ ];
-```
-
-Clearing default session packages to exclusively use UWSM-managed sessions.
-
-**Proposed Solutions:**
-
-#### Option A: Check upstream niri options**
-
-- Verify if `programs.niri` has option to disable auto-session registration
-- If exists, use proper option instead of mkForce
-
-#### Option B: Document reasoning**
-
-```nix
-# UWSM (Universal Wayland Session Manager) requires exclusive session control.
-# Niri's default session registration conflicts with UWSM's session management,
-# causing duplicate session entries and potential startup issues.
-# We use mkForce to ensure only UWSM-managed sessions are registered.
-services.displayManager.sessionPackages = lib.mkForce [ ];
-```
-
-#### Option C: Upstream feature request**
-
-- Open issue in nixpkgs for `programs.niri.registerSession = mkDefault true;`
-- Would allow downstream to opt-out without mkForce
-
-**Benefits:**
-
-- Better code documentation
-- Potentially upstreamable improvement
-- Clearer intent for future maintainers
-
----
-
 ### ~~Implement Missing Productivity Features~~ ✅
 
 ### 7. Re-enable Aseprite Package
@@ -615,6 +572,28 @@ When working on these TODOs:
 ---
 
 ## Completed Items
+
+### ~~Document Desktop Session Management~~ ✅
+
+**Completed:** 2026-01-13
+
+**Location:** `modules/nixos/features/desktop/desktop-environment.nix`
+
+**Solution Implemented:**
+
+Documented the reasoning for using `lib.mkForce [ ]` in `services.displayManager.sessionPackages`.
+
+**Changes Made:**
+
+1. **Updated** `modules/nixos/features/desktop/desktop-environment.nix`:
+   - Added clear comment explaining conflict between Niri's default session registration and UWSM's exclusive session management.
+
+**Benefits Achieved:**
+
+- Clearer intent for future maintainers.
+- Justified use of `mkForce`.
+
+---
 
 ### ~~Implement Missing Productivity Features~~ ✅
 
