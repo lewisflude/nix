@@ -22,25 +22,7 @@ in
   config = mkIf (cfg.enable && cfg.sabnzbd.enable) {
     services.sabnzbd = {
       enable = true;
-      inherit (cfg) user;
-      inherit (cfg) group;
-    };
-
-    systemd.services.sabnzbd = {
-      environment = {
-        TZ = cfg.timezone;
-      };
-
-      preStart = ''
-        # Create usenet download directories
-        mkdir -p ${cfg.dataPath}/usenet/complete || true
-        mkdir -p ${cfg.dataPath}/usenet/incomplete || true
-      '';
-
-      serviceConfig = {
-        ProtectSystem = false;
-        ProtectHome = false;
-      };
+      inherit (cfg) user group;
     };
 
     networking.firewall.allowedTCPPorts = mkIf cfg.sabnzbd.openFirewall [
