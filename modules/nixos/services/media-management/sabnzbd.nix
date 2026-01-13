@@ -24,13 +24,18 @@ in
       enable = true;
       inherit (cfg) user group;
 
-      # Only set port and host_whitelist - other settings are managed by SABnzbd itself
-      # The merge operation will preserve other config values like servers
       settings = {
         misc = {
           port = constants.ports.services.sabnzbd;
           host_whitelist = "usenet.blmt.io";
         };
+      };
+    };
+
+    # Override the systemd service to remove the pre-start script that wipes config
+    systemd.services.sabnzbd = {
+      serviceConfig = {
+        ExecStartPre = lib.mkForce "";
       };
     };
 
