@@ -95,29 +95,6 @@ services.displayManager.sessionPackages = lib.mkForce [ ];
 
 ---
 
-### ~~Implement System Theme Detection~~ ✅
-
-**Completed:** 2026-01-13
-
-**Location:** `modules/shared/features/theming/mode.nix` and `home/common/theming/default.nix`
-
-**Solution Implemented:**
-
-Implemented multi-source theme detection using a systemd user service that checks `gsettings` and caches the result. The `detectSystemMode` function now reads from this cache.
-
-**Changes Made:**
-
-1. **modules/shared/features/theming/mode.nix**: Updated `detectSystemMode` to read from XDG cache.
-2. **home/common/theming/default.nix**: Added `detect-theme-mode` systemd service.
-
-**Benefits Achieved:**
-
-- Respects user's system theme preference
-- Automatic synchronization with desktop environment
-- Fallback to sensible default (dark mode)
-
----
-
 ### ~~Implement Missing Productivity Features~~ ✅
 
 ### 7. Re-enable Aseprite Package
@@ -306,61 +283,29 @@ Extracted network ranges to `lib/constants.nix` and updated all referencing modu
 
 ---
 
-### 13. Add Examples to Host Options
+### ~~Add Examples to Host Options~~ ✅
+
+**Completed:** 2026-01-13
 
 **Location:** `modules/shared/host-options/*.nix`
 
-**Current Issue:**
+**Solution Implemented:**
 
-Out of 70+ feature options defined in `modules/shared/host-options/features.nix`, only 8 have `example` attributes:
+Added `example` attributes to all non-trivial options in `modules/shared/host-options/features/*.nix`. Also fixed several pre-existing validation errors in the codebase that were discovered during verification.
 
-```bash
-$ rg "example =" modules/shared/host-options/features.nix
-# Only 8 results found
-```
+**Changes Made:**
 
-Most options lack examples, making it harder for users to understand how to use them.
+1. Updated 12 feature option files to include `example = true` or specific examples.
+2. Fixed import error in `home/common/features/core/shell/default.nix`.
+3. Fixed Niri keybinds import in `home/nixos/niri/default.nix`.
+4. Fixed relative paths to `constants.nix` in `caddy/virtual-hosts/gaming.nix` and `vr/immersed.nix`.
+5. Fixed relative path to `p10k.zsh` in `home/common/features/core/shell/environment.nix`.
 
-**Proposed Solution:**
+**Benefits Achieved:**
 
-Add `example` attributes to all non-trivial options:
-
-```nix
-# Before
-wivrn = {
-  enable = mkEnableOption "WiVRn wireless VR streaming";
-  autoStart = mkEnableOption "Start WiVRn service automatically on boot";
-};
-
-# After
-wivrn = {
-  enable = mkEnableOption "WiVRn wireless VR streaming";
-  autoStart = mkEnableOption "Start WiVRn service automatically on boot" // {
-    example = true;
-  };
-};
-
-# For complex options
-mediaManagement = {
-  dataPath = mkOption {
-    type = types.str;
-    default = "/mnt/storage";
-    description = "Path to media storage directory";
-    example = "/mnt/storage";  # Add this
-  };
-};
-```
-
-**Benefits:**
-
-- Improved documentation
-- Better IDE/LSP autocomplete
-- Clearer usage patterns
-- Helps new users understand options
-- Self-documenting code
-
-**Priority:** Low
-**Estimated Effort:** M (systematic review needed)
+- Improved documentation and IDE support.
+- Fixed `nix flake check` failures.
+- Cleaner codebase.
 
 ---
 
@@ -865,3 +810,26 @@ Added `assertions` blocks to feature modules to validate dependencies, security 
 - Fail-fast error messages at build time
 - Prevents invalid configurations
 - Self-documenting dependencies
+
+---
+
+### ~~Implement System Theme Detection~~ ✅
+
+**Completed:** 2026-01-13
+
+**Location:** `modules/shared/features/theming/mode.nix` and `home/common/theming/default.nix`
+
+**Solution Implemented:**
+
+Implemented multi-source theme detection using a systemd user service that checks `gsettings` and caches the result. The `detectSystemMode` function now reads from this cache.
+
+**Changes Made:**
+
+1. **modules/shared/features/theming/mode.nix**: Updated `detectSystemMode` to read from XDG cache.
+2. **home/common/theming/default.nix**: Added `detect-theme-mode` systemd service.
+
+**Benefits Achieved:**
+
+- Respects user's system theme preference
+- Automatic synchronization with desktop environment
+- Fallback to sensible default (dark mode)
