@@ -19,5 +19,12 @@
     gaming = {
       enable = true;
     };
+
+    vr = {
+      enable = true;
+      immersed = {
+        enable = true;
+      };
+    };
   };
 }
