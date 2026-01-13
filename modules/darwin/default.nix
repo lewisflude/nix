@@ -13,6 +13,7 @@
     ./apps.nix
     ./audio.nix
     ./gaming.nix
+    ./vr.nix
 
     ./keyboard.nix
     ./karabiner.nix
