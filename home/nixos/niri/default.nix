@@ -33,6 +33,9 @@ let
       system
       ;
   };
+  binds = import ./keybinds/default.nix {
+    inherit config pkgs lib;
+  };
 in
 {
   home.packages = packagesList;
@@ -43,7 +46,6 @@ in
     executable = true;
   };
   imports = [
-    ./keybinds.nix
   ];
   programs.niri = {
     package = niri-unstable;
@@ -64,6 +66,9 @@ in
     // layout
     // window-rules
     // animations
-    // startup;
+    // startup
+    // {
+      inherit binds;
+    };
   };
 }
