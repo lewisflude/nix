@@ -26,6 +26,7 @@
       restic = 8000;
       ollama = 11434;
       openWebui = 7000;
+      homeAssistant = 8123;
       cockpit = 9090;
       dante = 1080;
       eternalTerminal = 2022;
@@ -136,6 +137,28 @@
   hosts = {
     jupiter = {
       ipv4 = "192.168.10.210";
+    };
+  };
+
+  # Network ranges and constants
+  networks = {
+    lan = {
+      primary = "192.168.10.0/24"; # Main Home LAN
+      secondary = "192.168.0.0/16"; # Wider range for trusted devices
+      prefix = "192.168.10."; # Prefix for legacy configs (Samba)
+      secondaryPrefix = "192.168.0."; # Prefix for wider range
+    };
+    vpn = {
+      cidr = "10.2.0.0/24"; # WireGuard VPN subnet
+    };
+    localhost = {
+      ipv4 = "127.0.0.1";
+      ipv6 = "::1";
+      cidr = "127.0.0.1/32";
+    };
+    all = {
+      ipv4 = "0.0.0.0";
+      cidr = "0.0.0.0/0";
     };
   };
 }

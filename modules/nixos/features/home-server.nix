@@ -6,6 +6,7 @@
 let
   inherit (lib) mkIf mkMerge;
   cfg = config.host.features.homeServer;
+  constants = import ../../../lib/constants.nix;
 in
 {
   config = mkIf cfg.enable {
@@ -24,8 +25,8 @@ in
             http = {
               server_host = "0.0.0.0";
               trusted_proxies = [
-                "127.0.0.1"
-                "::1"
+                constants.networks.localhost.ipv4
+                constants.networks.localhost.ipv6
               ];
             };
           };
@@ -41,8 +42,9 @@ in
               "server string" = config.host.hostname;
               "netbios name" = config.host.hostname;
               "security" = "user";
-              "hosts allow" = "192.168.10. 192.168.0. 127.0.0.1 localhost";
-              "hosts deny" = "0.0.0.0/0";
+              "hosts allow" =
+                "${constants.networks.lan.prefix} ${constants.networks.lan.secondaryPrefix} ${constants.networks.localhost.ipv4} localhost";
+              "hosts deny" = constants.networks.all.cidr;
               "guest account" = "nobody";
               "map to guest" = "bad user";
             };
@@ -68,7 +70,7 @@ in
 
     networking.firewall = mkMerge [
       (mkIf cfg.homeAssistant {
-        allowedTCPPorts = [ 8123 ];
+        allowedTCPPorts = [ constants.ports.services.homeAssistant ];
       })
       (mkIf cfg.fileSharing {
         allowedTCPPorts = [
