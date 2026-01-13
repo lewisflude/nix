@@ -23,7 +23,7 @@ let
 in
 {
   imports = [
-    (./zsh-config.nix {
+    (import ./zsh-config.nix {
       inherit
         config
         pkgs
@@ -31,10 +31,10 @@ in
         system
         ;
     })
-    (./completion.nix { inherit config pkgs; })
-    (./aliases.nix { inherit lib hostSystem; })
-    (./plugins.nix { inherit sources; })
-    (./init-content.nix {
+    (import ./completion.nix { inherit config pkgs; })
+    (import ./aliases.nix { inherit lib hostSystem; })
+    (import ./plugins.nix { inherit sources; })
+    (import ./init-content.nix {
       inherit
         config
         pkgs
@@ -44,6 +44,6 @@ in
         shellHelpers
         ;
     })
-    (./environment.nix { inherit config pkgs; })
+    (import ./environment.nix { inherit config pkgs; })
   ];
 }

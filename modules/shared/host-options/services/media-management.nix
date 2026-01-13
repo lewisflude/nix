@@ -30,6 +30,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable Prowlarr indexer manager";
+        example = true;
       };
     };
 
@@ -38,6 +39,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable Radarr movie management";
+        example = true;
       };
     };
 
@@ -46,6 +48,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable Sonarr TV show management";
+        example = true;
       };
     };
 
@@ -54,6 +57,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable Lidarr music management";
+        example = true;
       };
     };
 
@@ -62,6 +66,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable Readarr book management";
+        example = true;
       };
     };
 
@@ -70,6 +75,7 @@ in
         type = types.bool;
         default = false;
         description = "Enable Listenarr audiobook management";
+        example = true;
       };
       publicUrl = mkOption {
         type = types.nullOr types.str;
@@ -84,6 +90,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable SABnzbd usenet downloader";
+        example = true;
       };
     };
 
@@ -104,6 +111,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable Jellyfin media server";
+        example = true;
       };
     };
 
@@ -112,6 +120,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable Jellyseerr request management";
+        example = true;
       };
     };
 
@@ -120,6 +129,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable FlareSolverr cloudflare bypass";
+        example = true;
       };
     };
 
@@ -128,6 +138,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable Unpackerr archive extractor";
+        example = true;
       };
     };
 
@@ -136,6 +147,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable Navidrome music server";
+        example = true;
       };
     };
   };

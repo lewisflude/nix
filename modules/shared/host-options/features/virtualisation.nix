@@ -8,8 +8,14 @@ let
 in
 {
   virtualisation = {
-    enable = mkEnableOption "virtual machines and containers";
-    docker = mkEnableOption "Docker containers";
-    podman = mkEnableOption "Podman containers";
+    enable = mkEnableOption "virtual machines and containers" // {
+      example = true;
+    };
+    docker = mkEnableOption "Docker containers" // {
+      example = true;
+    };
+    podman = mkEnableOption "Podman containers" // {
+      example = true;
+    };
   };
 }

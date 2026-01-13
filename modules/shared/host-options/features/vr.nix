@@ -8,29 +8,45 @@ let
 in
 {
   vr = {
-    enable = mkEnableOption "virtual reality support and optimizations";
+    enable = mkEnableOption "virtual reality support and optimizations" // {
+      example = true;
+    };
     alvr = mkEnableOption "ALVR wireless VR streaming" // {
       default = true;
+      example = true;
     };
     monado = mkEnableOption "Monado OpenXR runtime" // {
       default = true;
+      example = true;
     };
     wivrn = {
-      enable = mkEnableOption "WiVRn wireless VR streaming";
-      autoStart = mkEnableOption "Start WiVRn service automatically on boot";
-      defaultRuntime = mkEnableOption "Set WiVRn as default OpenXR runtime";
+      enable = mkEnableOption "WiVRn wireless VR streaming" // {
+        example = true;
+      };
+      autoStart = mkEnableOption "Start WiVRn service automatically on boot" // {
+        example = true;
+      };
+      defaultRuntime = mkEnableOption "Set WiVRn as default OpenXR runtime" // {
+        example = true;
+      };
       openFirewall = mkEnableOption "Open firewall ports for WiVRn" // {
         default = true;
+        example = true;
       };
     };
     immersed = {
-      enable = mkEnableOption "Immersed VR desktop productivity app";
+      enable = mkEnableOption "Immersed VR desktop productivity app" // {
+        example = true;
+      };
       openFirewall = mkEnableOption "Open firewall ports for Immersed" // {
         default = true;
+        example = true;
       };
     };
     virtualMonitors = {
-      enable = mkEnableOption "virtual monitor support for VR productivity (Immersed)";
+      enable = mkEnableOption "virtual monitor support for VR productivity (Immersed)" // {
+        example = true;
+      };
       method = mkOption {
         type = types.enum [
           "hardware"
@@ -58,15 +74,22 @@ in
       };
       diagnosticTools = mkEnableOption "install diagnostic tools (pciutils, wlr-randr)" // {
         default = true;
+        example = true;
       };
     };
-    opencomposite = mkEnableOption "OpenComposite (OpenVR to OpenXR translation)";
-    steamvr = mkEnableOption "SteamVR support";
+    opencomposite = mkEnableOption "OpenComposite (OpenVR to OpenXR translation)" // {
+      example = true;
+    };
+    steamvr = mkEnableOption "SteamVR support" // {
+      example = true;
+    };
     sidequest = mkEnableOption "SideQuest for Quest sideloading" // {
       default = true;
+      example = true;
     };
     performance = mkEnableOption "VR-specific performance optimizations" // {
       default = true;
+      example = true;
     };
   };
 }

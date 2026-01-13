@@ -8,10 +8,20 @@ let
 in
 {
   gaming = {
-    enable = mkEnableOption "gaming platforms and optimizations";
-    steam = mkEnableOption "Steam gaming platform";
-    performance = mkEnableOption "gaming performance optimizations";
-    lutris = mkEnableOption "Lutris game manager";
-    emulators = mkEnableOption "gaming emulators";
+    enable = mkEnableOption "gaming platforms and optimizations" // {
+      example = true;
+    };
+    steam = mkEnableOption "Steam gaming platform" // {
+      example = true;
+    };
+    performance = mkEnableOption "gaming performance optimizations" // {
+      example = true;
+    };
+    lutris = mkEnableOption "Lutris game manager" // {
+      example = true;
+    };
+    emulators = mkEnableOption "gaming emulators" // {
+      example = true;
+    };
   };
 }

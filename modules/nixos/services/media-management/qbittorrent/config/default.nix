@@ -38,6 +38,6 @@ let
   };
 in
 mkMerge [
-  webUIConfig
+  (removeAttrs webUIConfig [ "webUICfg" ])
   serviceConfig
 ]

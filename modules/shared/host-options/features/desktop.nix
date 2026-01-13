@@ -10,24 +10,30 @@ in
   desktop = {
     enable = mkEnableOption "desktop environment and customization" // {
       default = true;
+      example = true;
     };
     niri = mkEnableOption "Niri Wayland compositor" // {
       default = false;
+      example = true;
     };
     hyprland = mkEnableOption "Hyprland Wayland compositor" // {
       default = false;
+      example = true;
     };
     theming = mkEnableOption "system-wide theming" // {
       default = true;
+      example = true;
     };
     utilities = mkEnableOption "desktop utilities" // {
       default = false;
+      example = true;
     };
 
     # Signal theme options
     signalTheme = {
       enable = mkEnableOption "Signal OKLCH color palette theme" // {
         default = true;
+        example = true;
       };
       mode = mkOption {
         type = types.enum [

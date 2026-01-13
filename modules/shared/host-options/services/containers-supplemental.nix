@@ -30,6 +30,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable Homarr dashboard";
+        example = true;
       };
     };
 
@@ -38,6 +39,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable Wizarr invitation system";
+        example = true;
       };
     };
 
@@ -47,6 +49,7 @@ in
         enable = true;
       };
       description = "Janitorr media cleanup automation configuration";
+      example = { enable = true; };
     };
 
     jellystat = {
@@ -54,6 +57,7 @@ in
         type = types.bool;
         default = false;
         description = "Enable Jellystat statistics dashboard for Jellyfin";
+        example = true;
       };
 
       port = mkOption {
@@ -67,6 +71,7 @@ in
         type = types.bool;
         default = true;
         description = "Use sops-nix for Jellystat secrets management";
+        example = true;
       };
     };
 
@@ -75,6 +80,7 @@ in
         type = types.bool;
         default = false;
         description = "Enable Doplarr Discord bot";
+        example = true;
       };
     };
 
@@ -83,6 +89,7 @@ in
         type = types.bool;
         default = true;
         description = "Enable Profilarr configuration management tool for Radarr/Sonarr";
+        example = true;
       };
     };
 
@@ -92,6 +99,7 @@ in
         enable = false;
       };
       description = "Cleanuparr download queue cleanup automation configuration";
+      example = { enable = true; };
     };
 
     termix = {
@@ -99,6 +107,7 @@ in
         type = types.bool;
         default = false;
         description = "Enable Termix terminal sharing service";
+        example = true;
       };
 
       port = mkOption {
@@ -114,6 +123,7 @@ in
         type = types.bool;
         default = false;
         description = "Enable ComfyUI AI image generation";
+        example = true;
       };
     };
 
@@ -122,6 +132,7 @@ in
         type = types.bool;
         default = false;
         description = "Enable Cal.com scheduling platform";
+        example = true;
       };
 
       port = mkOption {
@@ -142,24 +153,28 @@ in
         type = types.bool;
         default = false;
         description = "Use sops-nix for Cal.com secrets management";
+        example = true;
       };
 
       nextauthSecret = mkOption {
         type = types.nullOr types.str;
         default = null;
         description = "NextAuth secret for Cal.com session encryption";
+        example = "super-secret-key-123";
       };
 
       calendarEncryptionKey = mkOption {
         type = types.nullOr types.str;
         default = null;
         description = "Calendar encryption key for Cal.com";
+        example = "encryption-key-456";
       };
 
       dbPassword = mkOption {
         type = types.nullOr types.str;
         default = null;
         description = "PostgreSQL database password for Cal.com";
+        example = "db-password-789";
       };
 
       email = {
@@ -202,6 +217,7 @@ in
           type = types.nullOr types.str;
           default = null;
           description = "SMTP authentication password (only used if useSops is false)";
+          example = "smtp-password";
         };
       };
 
@@ -232,12 +248,14 @@ in
         type = types.bool;
         default = true;
         description = "Disable public user registration (recommended for personal use)";
+        example = true;
       };
 
       disableTelemetry = mkOption {
         type = types.bool;
         default = true;
         description = "Disable anonymous usage telemetry";
+        example = true;
       };
 
       availabilityInterval = mkOption {
@@ -258,12 +276,14 @@ in
         type = types.nullOr types.str;
         default = null;
         description = "API key for cron jobs";
+        example = "cron-api-key";
       };
 
       serviceAccountEncryptionKey = mkOption {
         type = types.nullOr types.str;
         default = null;
         description = "Encryption key for service account credentials";
+        example = "service-account-key";
       };
 
       googleCalendar = {
@@ -271,12 +291,14 @@ in
           type = types.bool;
           default = false;
           description = "Enable Google Calendar integration and Login with Google";
+          example = true;
         };
 
         credentials = mkOption {
           type = types.nullOr types.str;
           default = null;
           description = "Google API credentials JSON string";
+          example = ''{"web":{"client_id":"..."}}'';
         };
       };
     };

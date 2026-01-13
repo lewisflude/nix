@@ -8,10 +8,20 @@ let
 in
 {
   security = {
-    enable = mkEnableOption "security and privacy tools";
-    yubikey = mkEnableOption "YubiKey hardware support";
-    gpg = mkEnableOption "GPG/PGP encryption";
-    firewall = mkEnableOption "advanced firewall configuration (NixOS only)";
-    fail2ban = mkEnableOption "fail2ban intrusion detection (NixOS only)";
+    enable = mkEnableOption "security and privacy tools" // {
+      example = true;
+    };
+    yubikey = mkEnableOption "YubiKey hardware support" // {
+      example = true;
+    };
+    gpg = mkEnableOption "GPG/PGP encryption" // {
+      example = true;
+    };
+    firewall = mkEnableOption "advanced firewall configuration (NixOS only)" // {
+      example = true;
+    };
+    fail2ban = mkEnableOption "fail2ban intrusion detection (NixOS only)" // {
+      example = true;
+    };
   };
 }
