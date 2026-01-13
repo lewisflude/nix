@@ -95,61 +95,30 @@ services.displayManager.sessionPackages = lib.mkForce [ ];
 
 ---
 
-### 4. Implement System Theme Detection
+### ~~Implement System Theme Detection~~ ✅
 
-**Location:** `modules/shared/features/theming/mode.nix:43-53`
+**Completed:** 2026-01-13
 
-**Current Issue:**
+**Location:** `modules/shared/features/theming/mode.nix` and `home/common/theming/default.nix`
 
-```nix
-detectSystemMode =
-  _config:
-  # For now, default to dark mode
-  # TODO: Implement actual system detection
-  "dark";
-```
+**Solution Implemented:**
 
-Theme detection currently defaults to dark mode without checking system preferences.
+Implemented multi-source theme detection using a systemd user service that checks `gsettings` and caches the result. The `detectSystemMode` function now reads from this cache.
 
-**Proposed Solution:**
+**Changes Made:**
 
-Implement multi-source theme detection:
+1. **modules/shared/features/theming/mode.nix**: Updated `detectSystemMode` to read from XDG cache.
+2. **home/common/theming/default.nix**: Added `detect-theme-mode` systemd service.
 
-```nix
-detectSystemMode = config: let
-  # Use a systemd service to cache detected theme
-  cachedTheme = readFile "${config.xdg.cacheHome}/theme-mode";
-in
-  if cachedTheme != "" then cachedTheme else "dark";
-```
-
-Create a detection service:
-
-```nix
-systemd.user.services.detect-theme-mode = {
-  description = "Detect system theme preference";
-  wantedBy = [ "default.target" ];
-  serviceConfig = {
-    Type = "oneshot";
-    ExecStart = pkgs.writeShellScript "detect-theme" ''
-      # Try multiple sources in order
-      theme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || echo "")
-      [[ "$theme" =~ "dark" ]] && echo "dark" > ~/.cache/theme-mode || echo "light" > ~/.cache/theme-mode
-    '';
-  };
-};
-```
-
-**Benefits:**
+**Benefits Achieved:**
 
 - Respects user's system theme preference
 - Automatic synchronization with desktop environment
 - Fallback to sensible default (dark mode)
-- Could trigger theme switching via home-manager activation
 
 ---
 
-## Low Priority
+### ~~Implement Missing Productivity Features~~ ✅
 
 ### 7. Re-enable Aseprite Package
 
