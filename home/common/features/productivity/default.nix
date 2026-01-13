@@ -8,11 +8,21 @@ let
   cfg = systemConfig.host.features.productivity;
 in
 {
+  imports = [
+    ../../apps/obsidian.nix
+  ];
+
   config = lib.mkIf cfg.enable {
-    home.packages = lib.optionals cfg.office [
-      pkgs.libreoffice-fresh
+    home.packages = lib.flatten [
+      (lib.optional cfg.office pkgs.libreoffice-fresh)
+      (lib.optional cfg.calendar pkgs.gnome-calendar)
+      (lib.optional cfg.email pkgs.thunderbird)
+      (lib.optionals cfg.resume [
+        pkgs.typst
+        pkgs.tectonic # Modern LaTeX replacement
+      ])
     ];
-    # Note: obsidian is handled via programs.obsidian in apps/obsidian.nix
-    # Note: thunderbird is handled via programs.thunderbird in apps/thunderbird.nix
+
+    programs.obsidian.enable = cfg.notes;
   };
 }

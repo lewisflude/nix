@@ -1,6 +1,6 @@
 {
   pkgs,
-  lib,
+  # lib,
   ...
 }:
 let
@@ -12,16 +12,10 @@ let
     { ... }:
     {
       imports = [
+        ./lib/vm-base.nix
         ../modules/shared
         ../modules/nixos
       ];
-
-      boot.loader.grub.enable = false;
-      boot.loader.systemd-boot.enable = lib.mkForce false;
-      fileSystems."/" = {
-        device = "/dev/vda";
-        fsType = "ext4";
-      };
 
       config.host = {
         username = "testuser";
@@ -29,9 +23,6 @@ let
         hostname = "test-machine";
         features = hostFeatures;
       };
-
-      services.xserver.enable = lib.mkForce false;
-      virtualisation.graphics = false;
     };
 in
 {

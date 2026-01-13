@@ -15,12 +15,14 @@ in
       type = types.str;
       default = "/mnt/storage";
       description = "Path to media storage directory";
+      example = "/mnt/storage";
     };
 
     timezone = mkOption {
       type = types.str;
       default = "Europe/London";
       description = "Timezone for media services";
+      example = "America/New_York";
     };
 
     prowlarr = {
@@ -73,6 +75,7 @@ in
         type = types.nullOr types.str;
         default = null;
         description = "Public URL for Listenarr (optional, used by Discord bot)";
+        example = "https://listenarr.example.com";
       };
     };
 

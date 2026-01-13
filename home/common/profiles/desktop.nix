@@ -6,7 +6,6 @@
     ../features/desktop
     ../theme.nix
     ../apps/audio
-    ../apps/obsidian.nix
 
     ../system
   ];

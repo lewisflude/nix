@@ -1,6 +1,6 @@
 {
   pkgs,
-  lib,
+  # lib,
   inputs,
   ...
 }:
@@ -16,7 +16,10 @@ mkTest {
   nodes.machine =
     { ... }:
     {
-      imports = [ hmModule ];
+      imports = [
+        ../lib/vm-base.nix
+        hmModule
+      ];
 
       users.users.testuser = {
         isNormalUser = true;
@@ -29,7 +32,7 @@ mkTest {
         users.testuser = {
           home.stateVersion = "24.11";
 
-          imports = [ ../../home/common/modules/mcp.nix ];
+          imports = [ ../../home/common/modules/mcp/default.nix ];
 
           services.mcp = {
             enable = true;
@@ -41,14 +44,6 @@ mkTest {
           };
         };
       };
-
-      boot.loader.grub.enable = false;
-      boot.loader.systemd-boot.enable = lib.mkForce false;
-      fileSystems."/" = {
-        device = "/dev/vda";
-        fsType = "ext4";
-      };
-      virtualisation.graphics = false;
     };
 
   testScript = ''

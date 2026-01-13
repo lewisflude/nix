@@ -111,17 +111,30 @@ pog.pog {
             ;;
         esac
 
-        # Format the file
-        cyan "🎨 Formatting overlay file..."
-        nix fmt "$OVERLAY_FILE" 2>/dev/null || true
+        # Also update the VR module which has an explicit override
+        VR_MODULE="$ROOT/modules/nixos/features/vr.nix"
+        if [[ -f "$VR_MODULE" ]]; then
+          cyan "📝 Updating VR module..."
+          case "$PLATFORM" in
+            x86_64-linux)
+              # Update the hash in the immersedLatest override
+              sed -i "/url = \"https:\/\/static.immersed.com\/dl\/Immersed-x86_64.AppImage\"/,/};/ s|hash = \"sha256-[^\"]*\"|hash = \"$NEW_HASH\"|" "$VR_MODULE"
+              ;;
+          esac
+        fi
 
-        green "✅ Immersed overlay updated!"
+        # Format the files
+        cyan "🎨 Formatting files..."
+        nix fmt "$OVERLAY_FILE" 2>/dev/null || true
+        [[ -f "$VR_MODULE" ]] && nix fmt "$VR_MODULE" 2>/dev/null || true
+
+        green "✅ Immersed overlay and VR module updated!"
         cyan "📋 Changes:"
         echo "  Platform: $PLATFORM"
         echo "  New hash: $NEW_HASH"
         echo ""
         cyan "Next steps:"
-        echo "  1. Review: git diff overlays/default.nix"
+        echo "  1. Review: git diff overlays/default.nix modules/nixos/features/vr.nix"
         echo "  2. Test build: nh os build"
         echo "  3. Apply: nh os switch"
         echo "  4. Commit: git commit -am 'chore(vr): update Immersed to latest version'"
