@@ -9,11 +9,11 @@ let
   inherit (helpers) mkReverseProxy;
 in
 {
-  "home.blmt.io" = mkReverseProxy "localhost:8123"; # Home Assistant
+  "home.blmt.io" = mkReverseProxy "127.0.0.1:8123"; # Home Assistant
 
   "cal.blmt.io" = {
     extraConfig = ''
-      reverse_proxy localhost:3000 {
+      reverse_proxy 127.0.0.1:3000 {
         header_up Host {host}
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
@@ -24,13 +24,13 @@ in
     '';
   };
 
-  "dockge.blmt.io" = mkReverseProxy "localhost:5001";
+  "dockge.blmt.io" = mkReverseProxy "127.0.0.1:5001";
 
-  "termix.blmt.io" = mkReverseProxy "localhost:8083"; # SSH Management
+  "termix.blmt.io" = mkReverseProxy "127.0.0.1:8083"; # SSH Management
 
-  "checkrr.blmt.io" = mkReverseProxy "localhost:8585";
+  "checkrr.blmt.io" = mkReverseProxy "127.0.0.1:8585";
 
-  "time.blmt.io" = mkReverseProxy "localhost:8001"; # Time tracking
+  "time.blmt.io" = mkReverseProxy "127.0.0.1:8001"; # Time tracking
 
-  "invite.blmt.io" = mkReverseProxy "localhost:5690"; # Wizarr
+  "invite.blmt.io" = mkReverseProxy "127.0.0.1:5690"; # Wizarr
 }

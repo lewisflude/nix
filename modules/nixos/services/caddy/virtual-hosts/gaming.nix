@@ -8,7 +8,7 @@ in
   # Sunshine (Gaming) - special transport config
   "sunshine.blmt.io" = {
     extraConfig = ''
-      reverse_proxy https://localhost:${toString constants.ports.services.sunshine.http} {
+      reverse_proxy https://127.0.0.1:${toString constants.ports.services.sunshine.http} {
         transport http {
           tls_insecure_skip_verify
         }

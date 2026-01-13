@@ -23,7 +23,7 @@ _:
   # Transmission (Host network - not VPN)
   "transmission.blmt.io" = {
     extraConfig = ''
-      reverse_proxy localhost:9091 {
+      reverse_proxy 127.0.0.1:9091 {
         # CSRF Protection Fix: Tell Transmission the request is coming from localhost
         header_up Host localhost:9091
         header_up Origin http://localhost:9091
@@ -41,7 +41,7 @@ _:
   # SABnzbd (Usenet)
   "usenet.blmt.io" = {
     extraConfig = ''
-      reverse_proxy localhost:8082 {
+      reverse_proxy 127.0.0.1:8082 {
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
         header_up X-Forwarded-Proto {scheme}
