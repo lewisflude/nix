@@ -111,7 +111,8 @@ mkIf vrEnabled {
     wivrn-log = "journalctl --user -u wivrn -f";
 
     # Desktop Overlays (view Niri windows in VR)
-    vr-desktop = "wlx-overlay-s --show"; # PipeWire-based desktop overlay
+    # Low-latency mode: Reduced capture interval for better responsiveness
+    vr-desktop = "PIPEWIRE_LATENCY=64/48000 wlx-overlay-s --show --capture-rate 90"; # PipeWire-based desktop overlay
     vr-dashboard = "wayvr-dashboard"; # VR Dashboard for Wayland
 
     # Quest 3 Connection (ADB for sideloading)

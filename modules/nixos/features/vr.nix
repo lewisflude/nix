@@ -115,14 +115,121 @@ in
         monadoEnvironment = lib.mkIf cfg.performance {
           # Minimum time between compositor frames (milliseconds)
           # Lower values reduce latency but increase CPU usage
-          # 5ms is a good balance for most systems
-          U_PACING_COMP_MIN_TIME_MS = "5";
+          # Reduced to 2ms for VR desktop overlay responsiveness
+          U_PACING_COMP_MIN_TIME_MS = "2";
 
           # Exit Monado when all VR applications disconnect
           # Useful for wireless VR to save resources when not in use
           IPC_EXIT_ON_DISCONNECT = if cfg.wivrn.autoStart then "1" else "0";
+
+          # NVIDIA NVENC low-latency encoding (for RTX 4090)
+          # Reduces encoding latency for wireless streaming
+          WIVRN_ENCODER_PRESET = "p1"; # Ultra low latency preset (was p4)
+          WIVRN_ENCODER_RC_MODE = "cbr"; # Constant bitrate for consistent latency
         };
       };
+    })
+
+    # Virtual Monitors for VR Productivity (Immersed)
+    # Hardware-based solution using dummy HDMI/DisplayPort adapters
+    # On Wayland, this is currently the most robust solution until native protocol support
+    (lib.mkIf (cfg.enable && cfg.virtualMonitors.enable) {
+      # Diagnostic tools for virtual monitor detection and configuration
+      environment.systemPackages =
+        lib.optionals cfg.virtualMonitors.diagnosticTools [
+          pkgs.pciutils # lspci for GPU/video output detection
+          pkgs.wlr-randr # Wayland equivalent of xrandr for display management
+        ]
+        ++ [
+          # Virtual monitor detection and setup helper script
+          (pkgs.writeShellScriptBin "vr-detect-displays" ''
+            #!/usr/bin/env bash
+            # Virtual Monitor Detection Script for VR Setup
+            # Detects GPU, display outputs, and dummy adapters
+
+            set -euo pipefail
+
+            echo "=== VR Virtual Monitor Detection ==="
+            echo
+
+            # Detect GPU(s)
+            echo "🎮 Graphics Cards:"
+            if command -v lspci &>/dev/null; then
+              ${pkgs.pciutils}/bin/lspci | grep -i vga || echo "  ⚠️  No VGA devices found"
+            else
+              echo "  ⚠️  lspci not available"
+            fi
+            echo
+
+            # Detect display server type
+            echo "🖥️  Display Server:"
+            if [ -n "''${WAYLAND_DISPLAY:-}" ] || [ "''${XDG_SESSION_TYPE:-}" = "wayland" ]; then
+              echo "  ✅ Wayland detected"
+              echo "     Session: ''${XDG_SESSION_TYPE:-unknown}"
+              echo "     Display: ''${WAYLAND_DISPLAY:-unknown}"
+            elif [ -n "''${DISPLAY:-}" ]; then
+              echo "  ✅ X11 detected"
+              echo "     Display: ''${DISPLAY}"
+            else
+              echo "  ⚠️  No display server detected"
+            fi
+            echo
+
+            # Detect connected displays (Wayland)
+            if command -v wlr-randr &>/dev/null && [ -n "''${WAYLAND_DISPLAY:-}" ]; then
+              echo "📺 Connected Displays (wlr-randr):"
+              ${pkgs.wlr-randr}/bin/wlr-randr || echo "  ⚠️  Failed to query displays"
+              echo
+            fi
+
+            # Detect connected displays (X11)
+            if command -v xrandr &>/dev/null && [ -n "''${DISPLAY:-}" ]; then
+              echo "📺 Connected Displays (xrandr):"
+              xrandr | grep -E "connected|disconnected" || echo "  ⚠️  Failed to query displays"
+              echo
+            fi
+
+            # Configuration recommendations
+            echo "💡 Configuration Recommendations:"
+            echo
+            echo "Current config: features.vr.virtualMonitors ="
+            echo "  enable = true;"
+            echo "  method = \"${cfg.virtualMonitors.method}\";"
+            echo "  hardwareAdapterCount = ${toString cfg.virtualMonitors.hardwareAdapterCount};"
+            echo "  defaultResolution = \"${cfg.virtualMonitors.defaultResolution}\";"
+            echo
+            echo "📖 For setup instructions, see: docs/VR_SETUP_GUIDE.md"
+            echo
+
+            # Hardware adapter recommendations
+            if [ "${cfg.virtualMonitors.method}" = "hardware" ]; then
+              echo "🔌 Hardware Method Selected:"
+              echo "  - You need ${toString cfg.virtualMonitors.hardwareAdapterCount} dummy HDMI/DisplayPort adapters"
+              echo "  - Search for: '4K headless ghost adapter' or 'HDMI dummy plug'"
+              echo "  - Recommended: Adapters with EDID chip for 4K support"
+              echo "  - Cost: ~\$10-20 per adapter"
+              echo
+              echo "  Popular options:"
+              echo "  - Headless Ghost 4K (search on Amazon/AliExpress)"
+              echo "  - FUERAN 4K HDMI Dummy Plug"
+              echo "  - Any EDID emulator with 3840x1600+ support"
+              echo
+            fi
+
+            echo "✅ Detection complete!"
+          '')
+        ];
+
+      # Documentation and assertions for hardware method
+      assertions = lib.optionals (cfg.virtualMonitors.method == "hardware") [
+        {
+          assertion = cfg.virtualMonitors.hardwareAdapterCount > 0;
+          message = ''
+            Virtual monitors with hardware method requires at least 1 dummy adapter.
+            Set features.vr.virtualMonitors.hardwareAdapterCount to the number of adapters you have.
+          '';
+        }
+      ];
     })
 
     # Immersed VR desktop productivity application
@@ -143,38 +250,74 @@ in
         # 2. Causes GStreamer gst_util_floor_log2 symbol errors
         # NVIDIA uses NVDEC/NVENC for hardware acceleration, not VAAPI
         #
-        # Additional fixes for OAuth sign-in on XWayland:
+        # Additional fixes for OAuth sign-in and rendering:
         # - webkit2gtk-4.1: Embedded browser for OAuth authentication
         # - libsecret: Credential storage (AppImages need system libsecret)
         # - gnome-keyring: Keyring daemon for secure credential storage
         # - LD_LIBRARY_PATH: Make system libraries available to AppImage
-        # - XDG_SESSION_TYPE: Explicitly set to x11 for XWayland
-        package = pkgs.symlinkJoin {
-          name = "immersed-xwayland-nvidia";
-          paths = [ pkgs.immersed ];
-          buildInputs = [ pkgs.makeWrapper ];
-          postBuild = ''
-            wrapProgram $out/bin/immersed \
-              --unset WAYLAND_DISPLAY \
-              --set LIBVA_DRIVER_NAME "none" \
-              --set LIBVA_DRIVERS_PATH "/nonexistent" \
-              --set XDG_SESSION_TYPE "x11" \
-              --set GTK_THEME "Adwaita:dark" \
-              --set GTK_USE_PORTAL "1" \
-              --prefix XDG_DATA_DIRS : "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}" \
-              --prefix XDG_DATA_DIRS : "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}" \
-              --prefix LD_LIBRARY_PATH : "${
-                pkgs.lib.makeLibraryPath [
-                  pkgs.webkitgtk_4_1
-                  pkgs.libsecret
-                  pkgs.glib
-                  pkgs.gtk3
-                  pkgs.libsoup_3
-                  pkgs.glib-networking
-                ]
-              }"
-          '';
-        };
+        #
+        # Force XWayland due to wl_output protocol bug:
+        # - Immersed binds to wl_output version 1 but doesn't handle the 'done' event (opcode 2)
+        #   added in version 2, causing: "listener function for opcode 2 of wl_output is NULL"
+        # - Fixed in Immersed on GNOME Wayland but NOT on Niri as of 2026-01-12
+        # - Must use XWayland until Immersed fixes wl_output protocol handling
+        #
+        # DPI/Scaling fixes for XWayland with fractional scaling (1.25x):
+        # - GDK_SCALE=2: GTK base scaling (2x for HiDPI)
+        # - GDK_DPI_SCALE=0.625: Fine-tune to 1.25x total (2 * 0.625 = 1.25)
+        # - ELECTRON_OZONE_PLATFORM_HINT: Tell Electron to use Ozone (even via XWayland)
+        # - --force-device-scale-factor=1.25: Explicitly set Electron's UI scaling
+        # - --enable-features=UseOzonePlatform: Enable Ozone platform layer
+        # - --ozone-platform-hint=auto: Let Electron choose best platform (X11 via Ozone)
+        # Alternative if above doesn't work: Use GDK_SCALE=1 + --force-device-scale-factor=1.5
+        #
+        # VAAPI disabled for NVIDIA compatibility:
+        # - NVIDIA uses NVDEC/NVENC, not VAAPI
+        # - Prevents GStreamer symbol errors
+        package =
+          let
+            # Explicitly override Immersed to use latest version
+            # The overlay should handle this, but we're being explicit here
+            immersedLatest = pkgs.immersed.overrideAttrs (_: {
+              version = "11.0.0-latest";
+              src = pkgs.fetchurl {
+                url = "https://static.immersed.com/dl/Immersed-x86_64.AppImage";
+                hash = "sha256-GbckZ/WK+7/PFQvTfUwwePtufPKVwIwSPh+Bo/cG7ko=";
+              };
+            });
+          in
+          pkgs.symlinkJoin {
+            name = "immersed-xwayland-nvidia";
+            paths = [ immersedLatest ];
+            buildInputs = [ pkgs.makeWrapper ];
+            postBuild = ''
+              wrapProgram $out/bin/immersed \
+                --unset WAYLAND_DISPLAY \
+                --set ELECTRON_OZONE_PLATFORM_HINT "auto" \
+                --set LIBVA_DRIVER_NAME "none" \
+                --set LIBVA_DRIVERS_PATH "/nonexistent" \
+                --set XDG_SESSION_TYPE "x11" \
+                --set GDK_SCALE "2" \
+                --set GDK_DPI_SCALE "0.625" \
+                --set GTK_THEME "Adwaita:dark" \
+                --set GTK_USE_PORTAL "1" \
+                --add-flags "--force-device-scale-factor=1.25" \
+                --add-flags "--enable-features=UseOzonePlatform" \
+                --add-flags "--ozone-platform-hint=auto" \
+                --prefix XDG_DATA_DIRS : "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}" \
+                --prefix XDG_DATA_DIRS : "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}" \
+                --prefix LD_LIBRARY_PATH : "${
+                  pkgs.lib.makeLibraryPath [
+                    pkgs.webkitgtk_4_1
+                    pkgs.libsecret
+                    pkgs.glib
+                    pkgs.gtk3
+                    pkgs.libsoup_3
+                    pkgs.glib-networking
+                  ]
+                }"
+            '';
+          };
       };
 
       # Ensure gnome-keyring is available for Immersed authentication
