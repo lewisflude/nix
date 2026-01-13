@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   osConfig ? { },
@@ -58,18 +59,6 @@ mkIf vrEnabled {
     install-mf-codecs
   ];
 
-  # OpenXR runtime configuration for sandboxed applications (Steam)
-  # This ensures Steam's FHS environment can locate the OpenXR runtime
-  # Respects WiVRn preference when enabled, otherwise uses Monado
-  xdg.configFile."openxr/1/active_runtime.json" = {
-    source =
-      if osConfig.host.features.vr.wivrn.enable && osConfig.host.features.vr.wivrn.defaultRuntime then
-        "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json"
-      else
-        "${pkgs.monado}/share/openxr/1/openxr_monado.json";
-    force = true;
-  };
-
   # Set XR_RUNTIME_JSON environment variable for non-sandboxed VR applications
   # This is required for apps that don't check ~/.config/openxr/1/active_runtime.json
   home.sessionVariables.XR_RUNTIME_JSON =
@@ -77,6 +66,53 @@ mkIf vrEnabled {
       "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json"
     else
       "${pkgs.monado}/share/openxr/1/openxr_monado.json";
+
+  xdg.configFile = {
+    # OpenXR runtime configuration for sandboxed applications (Steam)
+    # This ensures Steam's FHS environment can locate the OpenXR runtime
+    # Respects WiVRn preference when enabled, otherwise uses Monado
+    "openxr/1/active_runtime.json" = {
+      source =
+        if osConfig.host.features.vr.wivrn.enable && osConfig.host.features.vr.wivrn.defaultRuntime then
+          "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json"
+        else
+          "${pkgs.monado}/share/openxr/1/openxr_monado.json";
+      force = true;
+    };
+
+    # OpenVR paths configuration for SteamVR compatibility (xrizer/OpenComposite)
+    # This file tells OpenVR games where to find the OpenXR translation layer
+    # Declarative management ensures paths stay valid after system updates
+    # Source: https://lvra.gitlab.io/docs/distros/nixos/#steam-games-and-openvr-apps
+    "openvr/openvrpaths.vrpath".text =
+      let
+        steam = "${config.xdg.dataHome}/Steam";
+      in
+      builtins.toJSON {
+        version = 1;
+        jsonid = "vrpathreg";
+
+        external_drivers = null;
+        config = [ "${steam}/config" ];
+
+        log = [ "${steam}/logs" ];
+
+        "runtime" = [
+          "${pkgs.xrizer}/lib/xrizer"
+          # OR (if using OpenComposite instead of xrizer)
+          #"${pkgs.opencomposite}/lib/opencomposite"
+        ];
+      };
+
+    # WayVR Dashboard configuration for wlx-overlay-s
+    # This assigns the dashboard application to WayVR overlay
+    "wlxoverlay/wayvr.conf.d/dashboard.yaml".text = ''
+      dashboard:
+        exec: "${pkgs.wayvr-dashboard}/bin/wayvr-dashboard"
+        args: ""
+        env: []
+    '';
+  };
 
   # Quest 3 VR Workflow with xrizer (2026 Best Practices)
   #
@@ -86,7 +122,7 @@ mkIf vrEnabled {
   # Why xrizer?
   # - Performance: Lower overhead for Quest 3's high resolutions (up to 2064x2208 per eye)
   # - Wayland/Nvidia: Better explicit sync and buffer sharing on modern compositors
-  # - Automation: WiVRn manages openvrpaths.vrpath automatically
+  # - Declarative: openvrpaths.vrpath managed by home-manager (stays valid after updates)
   #
   # Steam Launch Options:
   #
@@ -122,7 +158,7 @@ mkIf vrEnabled {
   # Legacy OpenComposite:
   # For Monado-only setups (without WiVRn), you can still use OpenComposite:
   #   1. Enable: host.features.vr.opencomposite = true;
-  #   2. Configure manually via ~/.config/openvr/openvrpaths.vrpath if needed
+  #   2. Uncomment OpenComposite line in xdg.configFile."openvr/openvrpaths.vrpath" above
   # However, xrizer is the modern approach and should be preferred in 2026.
 
   # Shell aliases for VR tools
