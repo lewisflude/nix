@@ -77,6 +77,36 @@ Should show:
 - **Active**: `active (running)`
 - **Ports**: 5353 (mDNS discovery), 9757 (VR streaming)
 
+### Environment Variables
+
+The OpenXR runtime requires the `XR_RUNTIME_JSON` environment variable to be set. This is configured automatically in `home/nixos/apps/vr.nix`:
+
+```nix
+home.sessionVariables.XR_RUNTIME_JSON = "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";
+```
+
+**Verify it's set:**
+
+```bash
+echo $XR_RUNTIME_JSON
+# Should output: /nix/store/.../share/openxr/1/openxr_wivrn.json
+```
+
+**If not set:**
+
+1. Rebuild your home-manager configuration
+2. Log out and back in (or restart your terminal)
+3. Run diagnostic: `./scripts/diagnose-xrizer.sh`
+
+**Common Error Without XR_RUNTIME_JSON:**
+
+```
+OpenVR failed to initialize with the given error:
+VRInitError_Init_InterfaceNotFound
+```
+
+This error occurs when VR apps can't locate the OpenXR runtime.
+
 ---
 
 ## Virtual Monitors for Immersed (VR Productivity)
@@ -261,32 +291,30 @@ For now, hardware adapters remain the **most reliable solution** on Niri.
 
 ---
 
-## Steam VR Game Launch Options
+## Steam VR Game Launch Options (2026 Update)
 
 ### Why Launch Options Are Needed
 
-Steam games run inside a **pressure-vessel container** which isolates them from the host system. By default, this container cannot:
-
-1. See your OpenXR runtime configuration
-2. Access the Monado IPC socket that WiVRn creates
+Steam games run inside a **pressure-vessel container** which isolates them from the host system. By default, this container cannot access the WiVRn IPC socket that enables VR communication with your Quest 3.
 
 ### Required Launch Options
 
 For **ALL** VR games in Steam, set these launch options:
 
 ```bash
-PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1 PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/monado_comp_ipc %command%
+PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
 ```
 
 #### What Each Part Does
 
 | Variable | Purpose |
 |----------|---------|
-| `PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1` | Imports host OpenXR runtime into container |
-| `PRESSURE_VESSEL_FILESYSTEMS_RW=...` | Mounts Monado IPC socket for communication |
+| `PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc` | Mounts WiVRn IPC socket for VR communication |
 | `%command%` | Placeholder for game executable |
 
-**Without these:** Game cannot find VR runtime and crashes immediately.
+**Note:** `PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1` is automatically handled by `services.wivrn.steam.importOXRRuntimes = true` in your configuration, so you don't need to include it manually.
+
+**Without this variable:** Game will launch in "Desktop Mode" or fail to find the headset entirely, even if WiVRn says "Connection Ready."
 
 ### Setting Launch Options
 
@@ -299,8 +327,115 @@ PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1 PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_R
 ```
 Game: Half-Life: Alyx (App ID: 546560)
 Launch Options:
-  PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1 PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/monado_comp_ipc %command%
+  PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
 ```
+
+### Using xrizer for SteamVR Games
+
+For games that use **SteamVR** (OpenVR API), you can translate them to OpenXR using **xrizer**:
+
+```bash
+xrizer PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
+```
+
+**xrizer** is the modern replacement for OpenComposite and provides:
+
+- Lower overhead for Quest 3's high resolutions
+- Better Wayland/Nvidia compatibility with explicit sync
+- Automatic OpenVR path management (prevents SteamVR hijacking)
+
+Your system is configured to use xrizer by default (`opencomposite = false`).
+
+---
+
+## xrizer: Modern OpenVR-to-OpenXR Translation (2026)
+
+### Why xrizer Instead of OpenComposite?
+
+In 2026, **xrizer** has become the preferred choice for translating SteamVR (OpenVR) games to OpenXR on Linux:
+
+**Performance Benefits:**
+
+- Lower overhead translating OpenVR calls to OpenXR
+- Crucial for Quest 3's higher resolutions (up to 2064x2208 per eye)
+- Reduces encoding load on your RTX 4090
+
+**Wayland/Nvidia Compatibility:**
+
+- Better handling of explicit sync in modern Wayland compositors
+- Works seamlessly with Nvidia's proprietary drivers
+- Supports buffer sharing requirements of Plasma 6+ and Niri
+
+**Automatic Path Management:**
+
+- WiVRn configures `~/.config/openvr/openvrpaths.vrpath` automatically
+- Prevents SteamVR from hijacking the OpenXR runtime
+- No manual configuration needed
+
+### Configuration Status
+
+Your system is already configured to use xrizer:
+
+```nix
+# hosts/jupiter/default.nix
+opencomposite = false;  # Uses xrizer by default
+
+# modules/nixos/features/vr/wivrn.nix
+openvr-compat-path = "${pkgs.xrizer}";  # Set automatically
+```
+
+### Locking OpenVR Paths (Preventing SteamVR Override)
+
+If SteamVR keeps opening instead of WiVRn, you can make your OpenVR paths file read-only using Home Manager. Add this to `home/nixos/apps/vr.nix`:
+
+```nix
+# Lock OpenVR paths to prevent SteamVR from overriding WiVRn
+xdg.configFile."openvr/openvrpaths.vrpath" = {
+  text = builtins.toJSON {
+    config = [
+      "${config.xdg.dataHome}/Steam/config"
+    ];
+    external_drivers = null;
+    jsonid = "vrpathreg";
+    log = [
+      "${config.xdg.dataHome}/Steam/logs"
+    ];
+    runtime = [
+      # Point to xrizer's OpenVR compatibility layer
+      "${pkgs.xrizer}/lib/openxr/opencomposite"
+    ];
+    version = 1;
+  };
+  # Force read-only to prevent Steam from modifying
+  force = true;
+  onChange = ''
+    # Make file immutable so Steam can't overwrite it
+    ${pkgs.e2fsprogs}/bin/chattr +i ${config.xdg.configHome}/openvr/openvrpaths.vrpath || true
+  '';
+};
+```
+
+**Note:** This is optional. WiVRn typically manages this file automatically, but locking it provides extra protection against SteamVR interference.
+
+### Troubleshooting xrizer
+
+**SteamVR Opens Instead of WiVRn:**
+
+1. Check `~/.config/openvr/openvrpaths.vrpath` points to xrizer
+2. Verify WiVRn is running: `systemctl --user status wivrn`
+3. Try the locked Home Manager configuration above
+
+**Game Crashes with xrizer:**
+
+1. Check if the game has native OpenXR support (don't use xrizer)
+2. Verify launch options: `xrizer PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%`
+3. Check WiVRn logs: `journalctl --user -u wivrn -f`
+
+**Performance Issues:**
+
+1. Verify AV1 codec is enabled in WiVRn dashboard (RTX 40-series)
+2. Use H.265 if you have RTX 30-series or older
+3. Check explicit sync is working: Look for warnings in compositor logs
 
 ---
 
@@ -439,8 +574,16 @@ nix-shell -p openxr-loader --run "hello_xr -g Vulkan"
 
 ### Steam Launch Options Template
 
+**For Native OpenXR Games:**
+
 ```bash
-PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1 PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/monado_comp_ipc %command%
+PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
 ```
 
-Copy this for every VR game in Steam.
+**For SteamVR (OpenVR) Games:**
+
+```bash
+xrizer PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
+```
+
+Copy the appropriate command for each VR game in Steam.

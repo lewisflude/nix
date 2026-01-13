@@ -70,21 +70,39 @@ mkIf vrEnabled {
     force = true;
   };
 
-  # Quest 3 VR Workflow with xrizer (Modern SteamVR Translation)
+  # Set XR_RUNTIME_JSON environment variable for non-sandboxed VR applications
+  # This is required for apps that don't check ~/.config/openxr/1/active_runtime.json
+  home.sessionVariables.XR_RUNTIME_JSON =
+    if osConfig.host.features.vr.wivrn.enable && osConfig.host.features.vr.wivrn.defaultRuntime then
+      "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json"
+    else
+      "${pkgs.monado}/share/openxr/1/openxr_monado.json";
+
+  # Quest 3 VR Workflow with xrizer (2026 Best Practices)
   #
-  # xrizer is a modern replacement for OpenComposite that translates SteamVR games to OpenXR.
-  # It works seamlessly with WiVRn and Monado on Wayland/Niri.
+  # xrizer is the modern replacement for OpenComposite, translating SteamVR (OpenVR) games to OpenXR.
+  # In 2026, it's the preferred choice for Quest 3 on NixOS with Nvidia and Wayland.
   #
-  # Usage:
-  # 1. In Steam, right-click game (e.g., Half-Life: Alyx)
-  # 2. Go to Properties > General > Launch Options
-  # 3. Set: xrizer %command%
-  # 4. Use Proton-GE as compatibility layer
+  # Why xrizer?
+  # - Performance: Lower overhead for Quest 3's high resolutions (up to 2064x2208 per eye)
+  # - Wayland/Nvidia: Better explicit sync and buffer sharing on modern compositors
+  # - Automation: WiVRn manages openvrpaths.vrpath automatically
+  #
+  # Steam Launch Options:
+  #
+  # For NATIVE OpenXR games (Half-Life: Alyx, Bonelab):
+  #   PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
+  #
+  # For SteamVR (OpenVR) games (Beat Saber, Pavlov VR):
+  #   xrizer PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
+  #
+  # Note: PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES is handled automatically by
+  # services.wivrn.steam.importOXRRuntimes = true in wivrn.nix
   #
   # Workflow:
-  # 1. Start WiVRn: wivrn-server (or auto-start via systemd)
+  # 1. Start WiVRn: Auto-starts on login (or: systemctl --user start wivrn)
   # 2. Connect Quest 3: Open WiVRn app on headset
-  # 3. Launch games: Use xrizer launch options in Steam
+  # 3. Launch games: Use launch options above in Steam
   # 4. Desktop overlay: Run wlx-overlay-s or wayvr-dashboard for Niri window interaction
   #
   # Available Tools (installed system-wide):
@@ -105,7 +123,7 @@ mkIf vrEnabled {
   # For Monado-only setups (without WiVRn), you can still use OpenComposite:
   #   1. Enable: host.features.vr.opencomposite = true;
   #   2. Configure manually via ~/.config/openvr/openvrpaths.vrpath if needed
-  # However, xrizer is the modern approach and should be preferred.
+  # However, xrizer is the modern approach and should be preferred in 2026.
 
   # Shell aliases for VR tools
   programs.zsh.shellAliases = {

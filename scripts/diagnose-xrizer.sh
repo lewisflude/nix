@@ -46,8 +46,22 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "📦 Phase 2: OpenXR Runtime Configuration"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
+echo "✓ XR_RUNTIME_JSON Environment Variable:"
+if [ -n "${XR_RUNTIME_JSON:-}" ]; then
+    echo "  Set to: $XR_RUNTIME_JSON"
+    if [ -f "$XR_RUNTIME_JSON" ]; then
+        echo "  ✓ File exists"
+    else
+        echo "  ❌ File does not exist!"
+    fi
+else
+    echo "  ❌ Not set! This is required for VR apps."
+    echo "  Expected in home.sessionVariables.XR_RUNTIME_JSON"
+fi
+
+echo
 if [ -f ~/.config/openxr/1/active_runtime.json ]; then
-    echo "✓ Active OpenXR Runtime:"
+    echo "✓ Active OpenXR Runtime (Config File):"
     cat ~/.config/openxr/1/active_runtime.json | grep -E '"name"|"library_path"'
 else
     echo "❌ No active_runtime.json found!"
@@ -59,11 +73,33 @@ echo "✓ WiVRn Service Status:"
 systemctl --user is-active wivrn || echo "  WiVRn is NOT running"
 
 echo
-echo "✓ Monado IPC Socket:"
-if [ -S "$XDG_RUNTIME_DIR/monado_comp_ipc" ]; then
-    echo "  Socket exists: $XDG_RUNTIME_DIR/monado_comp_ipc"
+echo "✓ WiVRn IPC Socket (2026):"
+if [ -S "$XDG_RUNTIME_DIR/wivrn/comp_ipc" ]; then
+    echo "  Socket exists: $XDG_RUNTIME_DIR/wivrn/comp_ipc"
 else
     echo "  Socket NOT found (created when VR app starts)"
+    echo "  Legacy path check..."
+    if [ -S "$XDG_RUNTIME_DIR/monado_comp_ipc" ]; then
+        echo "  ⚠️  Found LEGACY socket: $XDG_RUNTIME_DIR/monado_comp_ipc"
+        echo "  Consider updating WiVRn to use new socket path"
+    fi
+fi
+
+echo
+echo "✓ OpenVR Paths Configuration:"
+if [ -f ~/.config/openvr/openvrpaths.vrpath ]; then
+    echo "  openvrpaths.vrpath exists"
+    if grep -q "xrizer" ~/.config/openvr/openvrpaths.vrpath; then
+        echo "  ✓ Configured for xrizer"
+    elif grep -q "opencomposite" ~/.config/openvr/openvrpaths.vrpath; then
+        echo "  ⚠️  Configured for OpenComposite (legacy)"
+    else
+        echo "  ❌ Unknown configuration"
+    fi
+    echo "  Runtime path:"
+    cat ~/.config/openvr/openvrpaths.vrpath | grep -A1 '"runtime"' | tail -1
+else
+    echo "  File not found (WiVRn creates this automatically)"
 fi
 
 echo
