@@ -53,7 +53,7 @@
         defaultResolution = "3840x1600"; # Ultra-wide for VR productivity
         diagnosticTools = true;
       };
-      opencomposite = true; # OpenVR to OpenXR translation for SteamVR games
+      opencomposite = false; # Use xrizer instead (modern OpenVR → OpenXR translation)
       steamvr = false; # Not needed on Wayland - Monado replaces SteamVR
       sidequest = true;
       performance = true;
