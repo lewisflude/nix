@@ -45,10 +45,11 @@ lib.mkIf (cfg.enable && cfg.wivrn.enable) {
         # xrizer is the modern choice for Quest 3 on NixOS with Nvidia and Wayland:
         # - Lower overhead for high-resolution VR (Quest 3: up to 2064x2208 per eye)
         # - Better Wayland explicit sync and buffer sharing
-        # - Automatic OpenVR path management (prevents SteamVR hijacking)
+        # - Declarative path management via home-manager (prevents stale /nix/store paths)
         #
-        # WiVRn automatically configures ~/.config/openvr/openvrpaths.vrpath to use
-        # this library, allowing SteamVR (OpenVR) games to work via OpenXR.
+        # The actual ~/.config/openvr/openvrpaths.vrpath is managed declaratively
+        # in home/nixos/apps/vr.nix to ensure paths stay valid after system updates.
+        # This setting documents which library to use (xrizer vs opencomposite).
         #
         # Usage in Steam launch options:
         #   xrizer PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
