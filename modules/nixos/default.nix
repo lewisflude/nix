@@ -11,6 +11,7 @@
     ./features/media-management.nix
     ./features/ai-tools.nix
     ./features/containers-supplemental.nix
+    ./features/boot-optimization.nix
 
     ./core
     ./hardware

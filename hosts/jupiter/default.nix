@@ -46,6 +46,13 @@
         enable = true;
         openFirewall = true;
       };
+      virtualMonitors = {
+        enable = true;
+        method = "hardware";
+        hardwareAdapterCount = 1; # You have 1 dummy HDMI adapter plugged in
+        defaultResolution = "3840x1600"; # Ultra-wide for VR productivity
+        diagnosticTools = true;
+      };
       opencomposite = true; # Required for running OpenVR games on Monado (Wayland)
       steamvr = false; # Not needed on Wayland - Monado replaces SteamVR
       sidequest = true;
@@ -86,8 +93,9 @@
 
         # Professional audio configuration for Apogee Symphony Desktop
         # Ultra-low latency: 64 frames @ 48kHz = ~1.3ms (for recording/monitoring)
+        # Also beneficial for VR desktop overlay (WayVR) to reduce input lag
         # Set to false for general use (256 frames = ~5.3ms)
-        ultraLowLatency = false;
+        ultraLowLatency = true;
 
         # USB audio interface optimizations
         usbAudioInterface = {

@@ -1,5 +1,4 @@
 {
-  lib,
   pkgs,
   config,
   constants,
@@ -102,12 +101,6 @@
   #   enable = false;
   # };
 
-  # Caddy reverse proxy
-  host.services.caddy = {
-    enable = true;
-    email = "lewis@lewisflude.com";
-  };
-
   # Avahi mDNS for Moonlight auto-discovery
   # Enables Moonlight clients to automatically find the PC on the network
   services.avahi = {
@@ -125,39 +118,31 @@
     openFirewall = true;
   };
 
-  # Desktop configuration - enable auto-login for Sunshine streaming
-  # This allows Moonlight clients to connect without needing to login via greeter
-  host.features.desktop.autoLogin = {
-    enable = true;
-    user = config.host.username; # Auto-login as the configured user (lewis)
-  };
-
-  # Boot optimization: Delay non-essential services to speed up boot
-  systemd = {
-    services = {
-      # AI services don't need to start immediately at boot
-      ollama.wantedBy = lib.mkForce [ ];
-      open-webui.wantedBy = lib.mkForce [ ];
-
-      # Start delayed services 30 seconds after boot
-      delayed-services = {
-        description = "Start non-essential services after boot";
-        script = ''
-          ${lib.optionalString config.services.ollama.enable "${pkgs.systemd}/bin/systemctl start ollama.service"}
-          ${lib.optionalString config.services.open-webui.enable "${pkgs.systemd}/bin/systemctl start open-webui.service"}
-        '';
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-        };
-      };
+  # Host-level configurations
+  host = {
+    # Caddy reverse proxy
+    services.caddy = {
+      enable = true;
+      email = "lewis@lewisflude.com";
     };
 
-    timers.delayed-services = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnBootSec = "30s";
-        Unit = "delayed-services.service";
+    features = {
+      # Desktop configuration - enable auto-login for Sunshine streaming
+      # This allows Moonlight clients to connect without needing to login via greeter
+      desktop.autoLogin = {
+        enable = true;
+        user = config.host.username; # Auto-login as the configured user (lewis)
+      };
+
+      # Boot optimization: Delay non-essential services to speed up boot
+      # AI services don't need to start immediately at boot
+      bootOptimization = {
+        enable = true;
+        delayedServices = [
+          "ollama"
+          "open-webui"
+        ];
+        delaySeconds = 30;
       };
     };
   };
