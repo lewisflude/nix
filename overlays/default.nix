@@ -16,20 +16,8 @@ in
     else
       (_final: _prev: { });
 
-  # Zed editor: Try using Zed flake for latest version (has zed.cachix.org cache)
-  # Falls back to nixpkgs if flake is unavailable
-  flake-editors =
-    _final: prev:
-    if inputs ? zed && inputs.zed ? packages && inputs.zed.packages ? ${system} then
-      {
-        # Use Zed flake - likely has CI cache from zed.cachix.org
-        zed-editor = inputs.zed.packages.${system}.default;
-      }
-    else
-      {
-        # Fallback to nixpkgs version - can use cache.nixos.org when available
-        inherit (prev) zed-editor;
-      };
+  # Zed editor - using nixpkgs version for binary cache stability
+  flake-editors = _final: _prev: { };
 
   # Rust toolchains from fenix (better than nixpkgs)
   fenix-overlay =

@@ -8,7 +8,7 @@
     # Note: libnotify is handled in core-tooling.nix
     # Note: swaylock-effects is handled in apps/swayidle.nix via programs.swaylock
     pkgs.font-awesome
-    # aseprite temporarily disabled (see docs/TODO.md #8)
+    pkgs.aseprite
     pkgs.wl-screenrec
 
     # Thunar file manager with plugins
