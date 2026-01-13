@@ -36,8 +36,9 @@ lib.mkIf (cfg.enable && cfg.wivrn.enable) {
           encoder = "nvenc";
           # Quest 3 supports AV1 decoding, RTX 4090 supports AV1 encoding
           codec = "av1";
-          # 10-bit color depth for better quality (supported by nvenc + av1)
-          bit-depth = 10;
+          # 8-bit color depth (10-bit not supported by current WiVRn/nvenc setup)
+          # WiVRn warns: "GPU does not have sufficient support for 10-bit images"
+          bit-depth = 8;
         };
         # OpenVR compatibility path:
         # - xrizer: Modern OpenVR reimplementation on OpenXR (default)
