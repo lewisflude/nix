@@ -9,7 +9,7 @@
 let
   cfg = config.host.features.vr;
 
-  runtime = import ./runtime.nix { inherit config lib; };
+  runtime = import ./runtime.nix { inherit config pkgs lib; };
   tools = import ./tools.nix { inherit config pkgs lib; };
   steam = import ./steam.nix { inherit config pkgs lib; };
   wivrn = import ./wivrn.nix { inherit config pkgs lib; };

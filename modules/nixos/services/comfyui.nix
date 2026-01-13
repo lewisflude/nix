@@ -12,6 +12,7 @@
   config,
   lib,
   pkgs,
+  constants,
   ...
 }:
 let
@@ -35,7 +36,7 @@ in
 
     port = mkOption {
       type = types.int;
-      default = 8188;
+      default = constants.ports.services.comfyui;
       description = "Port for ComfyUI web interface.";
     };
 
@@ -65,6 +66,10 @@ in
       type = types.bool;
       default = true;
       description = "Enable GPU acceleration (automatically detected by flake).";
+    };
+
+    openFirewall = mkEnableOption "Open firewall ports for ComfyUI" // {
+      default = true;
     };
   };
 
@@ -135,6 +140,6 @@ in
     # Configure NVIDIA drivers at the host level if needed
 
     # Firewall configuration
-    networking.firewall.allowedTCPPorts = [ cfg.port ];
+    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [ cfg.port ];
   };
 }

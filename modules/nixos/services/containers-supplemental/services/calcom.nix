@@ -47,6 +47,10 @@ in
       default = false;
     };
 
+    openFirewall = mkEnableOption "Open firewall ports for Cal.com" // {
+      default = true;
+    };
+
     resources = {
       app = mkResourceOptions {
         memory = "2g";
@@ -310,6 +314,8 @@ in
         "d ${cfg.configPath}/calcom/postgres 0755 999 999 -"
         "d ${cfg.configPath}/calcom/app_data 0755 ${toString cfg.uid} ${toString cfg.gid} -"
       ];
+
+      networking.firewall.allowedTCPPorts = mkIf calCfg.openFirewall [ calCfg.port ];
     }
     (mkIf calCfg.useSops {
       sops.secrets = {

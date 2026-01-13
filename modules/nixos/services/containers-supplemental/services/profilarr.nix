@@ -16,6 +16,10 @@ in
       default = true;
     };
 
+    openFirewall = mkEnableOption "Open firewall ports for Profilarr" // {
+      default = true;
+    };
+
     resources = mkResourceOptions {
       memory = "512m";
       cpus = "0.5";
@@ -40,5 +44,7 @@ in
     systemd.tmpfiles.rules = [
       "d ${cfg.configPath}/profilarr 0755 ${toString cfg.uid} ${toString cfg.gid} -"
     ];
+
+    networking.firewall.allowedTCPPorts = mkIf cfg.profilarr.openFirewall [ 6868 ];
   };
 }

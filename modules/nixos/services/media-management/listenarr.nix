@@ -21,6 +21,10 @@ in
       default = false;
     };
 
+    openFirewall = mkEnableOption "Open firewall ports for Listenarr" // {
+      default = true;
+    };
+
     publicUrl = mkOption {
       type = types.nullOr types.str;
       default = null;
@@ -60,6 +64,8 @@ in
     };
 
     # Open firewall port
-    networking.firewall.allowedTCPPorts = [ constants.ports.services.listenarr ];
+    networking.firewall.allowedTCPPorts = mkIf cfg.listenarr.openFirewall [
+      constants.ports.services.listenarr
+    ];
   };
 }

@@ -16,6 +16,10 @@ in
       default = true;
     };
 
+    openFirewall = mkEnableOption "Open firewall ports for Homarr" // {
+      default = true;
+    };
+
     resources = mkResourceOptions {
       memory = "512m";
       cpus = "0.5";
@@ -47,5 +51,7 @@ in
       "d ${cfg.configPath}/homarr/icons 0755 ${toString cfg.uid} ${toString cfg.gid} -"
       "d ${cfg.configPath}/homarr/data 0755 ${toString cfg.uid} ${toString cfg.gid} -"
     ];
+
+    networking.firewall.allowedTCPPorts = mkIf cfg.homarr.openFirewall [ 7575 ];
   };
 }

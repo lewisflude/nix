@@ -1,30 +1,43 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
-  inherit (lib) mkEnableOption mkIf mkAfter;
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    mkAfter
+    ;
   inherit (lib.lists) optional;
   cfg = config.host.services.mediaManagement;
 in
 {
-  options.host.services.mediaManagement.sonarr.enable =
-    mkEnableOption "Sonarr TV show management"
-    // {
+  options.host.services.mediaManagement.sonarr = {
+    enable = mkEnableOption "Sonarr TV show management" // {
       default = true;
     };
+
+    openFirewall = mkEnableOption "Open firewall ports for Sonarr" // {
+      default = true;
+    };
+  };
 
   config = mkIf (cfg.enable && cfg.sonarr.enable) {
     services.sonarr = {
       enable = true;
-      openFirewall = true;
+      openFirewall = false; # We handle this manually to use our constants
       inherit (cfg) user;
       inherit (cfg) group;
       # Use the modern Sonarr directory instead of legacy NzbDrone
       # The dataDir option sets the base directory, and Sonarr will use .config/Sonarr inside it
       dataDir = "/var/lib/sonarr";
     };
+
+    networking.firewall.allowedTCPPorts = mkIf cfg.sonarr.openFirewall [
+      constants.ports.services.sonarr
+    ];
 
     systemd.services.sonarr = {
       environment = {

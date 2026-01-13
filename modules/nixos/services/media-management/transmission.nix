@@ -19,6 +19,10 @@ in
   options.host.services.mediaManagement.transmission = {
     enable = mkEnableOption "Transmission BitTorrent client";
 
+    openFirewall = mkEnableOption "Open firewall ports for Transmission" // {
+      default = true;
+    };
+
     webUIPort = mkOption {
       type = types.port;
       default = constants.ports.services.transmission;
@@ -95,7 +99,7 @@ in
     # Firewall configuration
     # - WebUI port: Always open for web interface access
     # - Peer port: Open when VPN disabled (when VPN enabled, handled in VPN namespace)
-    networking.firewall = {
+    networking.firewall = mkIf transmissionCfg.openFirewall {
       allowedTCPPorts = [
         transmissionCfg.webUIPort
       ]

@@ -1,32 +1,40 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.host.services.mediaManagement.prowlarr;
+  parentCfg = config.host.services.mediaManagement;
 in
 {
   options.host.services.mediaManagement.prowlarr = {
     enable = mkEnableOption "Prowlarr indexer manager" // {
       default = true;
     };
+
+    openFirewall = mkEnableOption "Open firewall ports for Prowlarr" // {
+      default = true;
+    };
   };
 
-  config = mkIf (config.host.services.mediaManagement.enable && cfg.enable) {
+  config = mkIf (parentCfg.enable && cfg.enable) {
     services.prowlarr = {
       enable = true;
-      openFirewall = true;
+      openFirewall = false;
     };
+
+    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [ constants.ports.services.prowlarr ];
 
     systemd.services.prowlarr = {
       environment = {
-        TZ = config.host.services.mediaManagement.timezone;
+        TZ = parentCfg.timezone;
       };
       serviceConfig = {
-        User = config.host.services.mediaManagement.user;
-        Group = config.host.services.mediaManagement.group;
+        User = parentCfg.user;
+        Group = parentCfg.group;
       };
     };
   };

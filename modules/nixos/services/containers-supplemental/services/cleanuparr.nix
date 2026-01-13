@@ -23,6 +23,10 @@ in
       default = false;
     };
 
+    openFirewall = mkEnableOption "Open firewall ports for Cleanuparr" // {
+      default = true;
+    };
+
     port = mkOption {
       type = types.port;
       default = constants.ports.services.cleanuparr;
@@ -85,5 +89,7 @@ in
     systemd.services."podman-cleanuparr" = {
       path = [ pkgs.curl ];
     };
+
+    networking.firewall.allowedTCPPorts = mkIf cfg.cleanuparr.openFirewall [ cfg.cleanuparr.port ];
   };
 }

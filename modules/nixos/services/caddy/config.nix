@@ -20,6 +20,10 @@ in
       default = false;
     };
 
+    openFirewall = mkEnableOption "Open firewall ports (80/443) for Caddy" // {
+      default = true;
+    };
+
     email = mkOption {
       type = types.str;
       default = "";
@@ -34,7 +38,7 @@ in
     };
 
     # Open firewall for HTTP and HTTPS
-    networking.firewall.allowedTCPPorts = [
+    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [
       80
       443
     ];
