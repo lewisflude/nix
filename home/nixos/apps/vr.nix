@@ -61,11 +61,14 @@ mkIf vrEnabled {
   # OpenXR runtime configuration for sandboxed applications (Steam)
   # This ensures Steam's FHS environment can locate the OpenXR runtime
   # Respects WiVRn preference when enabled, otherwise uses Monado
-  xdg.configFile."openxr/1/active_runtime.json".source =
-    if osConfig.host.features.vr.wivrn.enable && osConfig.host.features.vr.wivrn.defaultRuntime then
-      "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json"
-    else
-      "${pkgs.monado}/share/openxr/1/openxr_monado.json";
+  xdg.configFile."openxr/1/active_runtime.json" = {
+    source =
+      if osConfig.host.features.vr.wivrn.enable && osConfig.host.features.vr.wivrn.defaultRuntime then
+        "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json"
+      else
+        "${pkgs.monado}/share/openxr/1/openxr_monado.json";
+    force = true;
+  };
 
   # Quest 3 VR Workflow with xrizer (Modern SteamVR Translation)
   #
