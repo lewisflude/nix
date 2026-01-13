@@ -15,12 +15,14 @@ in
       type = types.int;
       default = 1000;
       description = "User ID for container processes";
+      example = 1000;
     };
 
     gid = mkOption {
       type = types.int;
       default = 100;
       description = "Group ID for container processes";
+      example = 100;
     };
 
     homarr = {
@@ -58,6 +60,7 @@ in
         type = types.int;
         default = 3004;
         description = "Port to expose Jellystat on";
+        example = 3004;
       };
 
       useSops = mkOption {
@@ -102,6 +105,7 @@ in
         type = types.int;
         default = 8081;
         description = "Port to expose Termix on";
+        example = 8081;
       };
     };
 
@@ -124,12 +128,14 @@ in
         type = types.int;
         default = 3000;
         description = "Port to expose Cal.com on";
+        example = 3000;
       };
 
       webappUrl = mkOption {
         type = types.str;
         default = "http://localhost:3000";
         description = "Public URL for Cal.com (e.g., https://cal.example.com)";
+        example = "https://cal.example.com";
       };
 
       useSops = mkOption {
@@ -161,30 +167,35 @@ in
           type = types.str;
           default = "localhost";
           description = "SMTP server host for sending emails";
+          example = "smtp.gmail.com";
         };
 
         port = mkOption {
           type = types.int;
           default = 587;
           description = "SMTP server port (587 for STARTTLS, 465 for SSL)";
+          example = 587;
         };
 
         from = mkOption {
           type = types.str;
           default = "noreply@localhost";
           description = "Email address to send emails from";
+          example = "notifications@example.com";
         };
 
         fromName = mkOption {
           type = types.str;
           default = "Cal.com";
           description = "Display name for outgoing emails";
+          example = "My Scheduling App";
         };
 
         username = mkOption {
           type = types.str;
           default = "";
           description = "SMTP authentication username";
+          example = "apikey";
         };
 
         password = mkOption {
@@ -199,18 +210,21 @@ in
           type = types.str;
           default = "Cal.com";
           description = "Application name shown in the interface";
+          example = "My Calendar";
         };
 
         companyName = mkOption {
           type = types.str;
           default = "Cal.com, Inc.";
           description = "Company name for legal/footer information";
+          example = "My Company LLC";
         };
 
         supportEmail = mkOption {
           type = types.str;
           default = "help@cal.com";
           description = "Support email address for user assistance";
+          example = "support@example.com";
         };
       };
 
@@ -230,12 +244,14 @@ in
         type = types.nullOr types.int;
         default = 15;
         description = "Time slot interval in minutes for availability scheduling";
+        example = 30;
       };
 
       logLevel = mkOption {
         type = types.int;
         default = 3;
         description = "Logging level (0=silly, 1=trace, 2=debug, 3=info, 4=warn, 5=error, 6=fatal)";
+        example = 4;
       };
 
       cronApiKey = mkOption {

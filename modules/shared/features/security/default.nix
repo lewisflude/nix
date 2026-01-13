@@ -31,6 +31,12 @@ in
         ];
       }
 
+      {
+        home-manager.users.${config.host.username} = mkIf cfg.gpg {
+          imports = [ ../../../../home/common/features/core/gpg.nix ];
+        };
+      }
+
       (optionalAttrs isLinux {
         security = {
           doas = {

@@ -438,64 +438,6 @@ mediaManagement = {
 
 ---
 
-### 14. Add Validation Assertions to Features
-
-**Location:** `modules/nixos/features/*.nix` and `modules/shared/features/*.nix`
-
-**Current Issue:**
-
-Only 4 feature modules have assertions for validation:
-
-- `modules/nixos/features/gaming.nix`
-- `modules/nixos/features/vr.nix`
-- `modules/nixos/features/desktop/audio.nix`
-- `modules/nixos/features/theming/default.nix`
-
-Many features lack proper validation of dependencies and configuration.
-
-**Proposed Solution:**
-
-Add assertions to feature modules:
-
-```nix
-# Example: modules/nixos/features/home-server.nix
-assertions = [
-  {
-    assertion = cfg.homeAssistant -> cfg.enable;
-    message = "homeAssistant requires homeServer.enable to be true";
-  }
-  {
-    assertion = cfg.fileSharing -> (config.networking.firewall.enable or true);
-    message = "fileSharing requires firewall to be enabled for security";
-  }
-  {
-    assertion = cfg.backups -> (config.sops.secrets.restic-password or null) != null;
-    message = "backups requires restic-password secret to be configured";
-  }
-];
-```
-
-**Common Assertions to Add:**
-
-1. **Dependency checks** - Feature X requires Feature Y
-2. **Security validations** - Ensure secure defaults
-3. **Configuration completeness** - Required secrets/paths exist
-4. **Platform compatibility** - Linux-only features on NixOS
-5. **Conflicting options** - Mutually exclusive features
-
-**Benefits:**
-
-- Fail-fast error messages at build time
-- Better user experience
-- Prevents misconfiguration
-- Self-documenting dependencies
-- Reduces debugging time
-
-**Priority:** Medium
-**Estimated Effort:** L (requires reviewing all features)
-
----
-
 ### 15. Remove or Document Deprecated brandGovernance Options
 
 **Location:** `modules/shared/features/theming/options.nix:157,184`
@@ -937,3 +879,39 @@ Updated `modules/shared/features/security/default.nix` to conditionally import t
 - Made GPG support properly opt-in via feature flag
 - Leveraged existing home-manager module structure
 - Maintained separation of concerns (system flag triggers user config)
+
+---
+
+### ~~Add Validation Assertions to Features~~ ✅
+
+**Completed:** 2026-01-13
+
+**Locations:**
+
+- `modules/nixos/features/home-server.nix`
+- `modules/nixos/features/gaming.nix`
+- `modules/nixos/features/desktop/audio.nix`
+- `modules/nixos/features/vr/default.nix`
+- `modules/nixos/features/security.nix`
+- `modules/nixos/features/media-management.nix`
+- `modules/nixos/features/ai-tools.nix`
+
+**Solution Implemented:**
+
+Added `assertions` blocks to feature modules to validate dependencies, security requirements, and configuration completeness. Ensured assertions are placed correctly (outside `mkIf cfg.enable` where appropriate) to catch configuration errors even when the main feature is disabled but sub-features are enabled.
+
+**Changes Made:**
+
+1. **home-server.nix**: Added checks for dependencies (fileSharing -> firewall, homeAssistant -> enable) and security (backups -> restic-password existence).
+2. **gaming.nix**: Moved `emulators -> enable` assertion outside `mkIf` block to ensure it triggers correctly.
+3. **audio.nix**: Moved `noiseCancellation` and `echoCancellation` assertions outside `mkIf` block.
+4. **vr/default.nix**: Added assertions to ensure sub-features (SteamVR, WiVRn, ALVR, Immersed, Virtual Monitors) require the main VR feature to be enabled.
+5. **security.nix**: Added assertions to ensure `yubikey` and `gpg` sub-features require the main `security` feature to be enabled.
+6. **media-management.nix**: Added assertions for all media services (Sonarr, Radarr, Jellyfin, etc.) to require the `mediaManagement` feature to be enabled.
+7. **ai-tools.nix**: Added assertions for `ollama` and `openWebui` to require `aiTools` feature. Added validation that `ollama.acceleration = "cuda"` requires `hardware.graphics.enable`.
+
+**Benefits Achieved:**
+
+- Fail-fast error messages at build time
+- Prevents invalid configurations
+- Self-documenting dependencies

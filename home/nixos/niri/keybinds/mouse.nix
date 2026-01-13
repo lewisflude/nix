@@ -1,0 +1,34 @@
+# Mouse/Wheel Keybindings
+# Mouse wheel bindings for workspace and column navigation
+{
+  ...
+}:
+{
+  # Workspace navigation with mouse wheel
+  "Mod+WheelScrollDown" = {
+    cooldown-ms = 150;
+    action.focus-workspace-down = { };
+  };
+  "Mod+WheelScrollUp" = {
+    cooldown-ms = 150;
+    action.focus-workspace-up = { };
+  };
+  "Mod+Ctrl+WheelScrollDown" = {
+    cooldown-ms = 150;
+    action.move-column-to-workspace-down = { };
+  };
+  "Mod+Ctrl+WheelScrollUp" = {
+    cooldown-ms = 150;
+    action.move-column-to-workspace-up = { };
+  };
+
+  # Column navigation with mouse wheel
+  "Mod+WheelScrollRight".action.focus-column-right = { };
+  "Mod+WheelScrollLeft".action.focus-column-left = { };
+  "Mod+Ctrl+WheelScrollRight".action.move-column-right = { };
+  "Mod+Ctrl+WheelScrollLeft".action.move-column-left = { };
+  "Mod+Shift+WheelScrollDown".action.focus-column-right = { };
+  "Mod+Shift+WheelScrollUp".action.focus-column-left = { };
+  "Mod+Ctrl+Shift+WheelScrollDown".action.move-column-right = { };
+  "Mod+Ctrl+Shift+WheelScrollUp".action.move-column-left = { };
+}
