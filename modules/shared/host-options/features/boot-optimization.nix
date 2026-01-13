@@ -10,6 +10,7 @@ in
   bootOptimization = {
     enable = mkEnableOption "boot optimization with delayed service startup" // {
       default = false;
+      example = true;
     };
 
     delayedServices = mkOption {

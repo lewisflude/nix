@@ -8,9 +8,17 @@ let
 in
 {
   homeServer = {
-    enable = mkEnableOption "home server and self-hosting";
-    homeAssistant = mkEnableOption "Home Assistant home automation";
-    fileSharing = mkEnableOption "Samba/NFS file sharing";
-    backups = mkEnableOption "Restic backup services";
+    enable = mkEnableOption "home server and self-hosting" // {
+      example = true;
+    };
+    homeAssistant = mkEnableOption "Home Assistant home automation" // {
+      example = true;
+    };
+    fileSharing = mkEnableOption "Samba/NFS file sharing" // {
+      example = true;
+    };
+    backups = mkEnableOption "Restic backup services" // {
+      example = true;
+    };
   };
 }

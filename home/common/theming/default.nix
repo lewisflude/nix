@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   palette,
   themeLib,
   ...
@@ -118,6 +119,43 @@ in
       # This ensures themes are generated for Zed on all platforms (not just NixOS)
       theming.signal.applications.zed.enable = lib.mkDefault true;
     }
+
+    (mkIf pkgs.stdenv.isLinux {
+      # Service to detect system theme preference
+      # This runs on login and when requested to update the cached theme mode
+      systemd.user.services.detect-theme-mode = {
+        Unit = {
+          Description = "Detect system theme preference";
+          Documentation = "man:gsettings(1)";
+        };
+
+        Install = {
+          WantedBy = [ "default.target" ];
+        };
+
+        Service = {
+          Type = "oneshot";
+          ExecStart =
+            let
+              script = pkgs.writeShellScript "detect-theme" ''
+                mkdir -p "${config.xdg.cacheHome}"
+                
+                # Try multiple sources in order
+                # 1. GNOME Interface settings (standard for most GTK desktops)
+                theme=$(${pkgs.glib}/bin/gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || echo "")
+                
+                # Determine mode based on setting
+                if [[ "$theme" =~ "dark" ]]; then
+                  echo "dark" > "${config.xdg.cacheHome}/theme-mode"
+                else
+                  echo "light" > "${config.xdg.cacheHome}/theme-mode"
+                fi
+              '';
+            in
+            "${script}";
+        };
+      };
+    })
 
     # Assertions and warnings
     {

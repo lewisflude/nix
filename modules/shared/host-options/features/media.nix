@@ -10,12 +10,19 @@ in
   media = {
     enable = mkEnableOption "media production tools and environments" // {
       default = false;
+      example = true;
     };
 
     audio = {
-      enable = mkEnableOption "audio production and music";
-      production = mkEnableOption "DAW and audio tools";
-      realtime = mkEnableOption "real-time audio optimizations (musnix)";
+      enable = mkEnableOption "audio production and music" // {
+        example = true;
+      };
+      production = mkEnableOption "DAW and audio tools" // {
+        example = true;
+      };
+      realtime = mkEnableOption "real-time audio optimizations (musnix)" // {
+        example = true;
+      };
 
       # Low-latency settings for professional audio work
       ultraLowLatency = mkOption {
@@ -27,7 +34,11 @@ in
 
       # USB audio interface optimization
       usbAudioInterface = {
-        enable = mkEnableOption "USB audio interface optimizations (disable autosuspend, set IRQ priorities)";
+        enable =
+          mkEnableOption "USB audio interface optimizations (disable autosuspend, set IRQ priorities)"
+          // {
+            example = true;
+          };
 
         # PCI ID of the USB controller (not the audio device itself)
         # Find with: lspci | grep -i usb
@@ -101,15 +112,23 @@ in
     };
 
     video = {
-      enable = mkEnableOption "video production and editing tools";
+      enable = mkEnableOption "video production and editing tools" // {
+        example = true;
+      };
 
-      editing = mkEnableOption "video editing tools (kdenlive, ffmpeg, handbrake, imagemagick, gimp)";
+      editing = mkEnableOption "video editing tools (kdenlive, ffmpeg, handbrake, imagemagick, gimp)" // {
+        example = true;
+      };
 
-      streaming = mkEnableOption "video streaming tools (v4l2loopback for virtual camera)";
+      streaming = mkEnableOption "video streaming tools (v4l2loopback for virtual camera)" // {
+        example = true;
+      };
     };
 
     streaming = {
-      enable = mkEnableOption "media streaming and recording (OBS Studio)";
+      enable = mkEnableOption "media streaming and recording (OBS Studio)" // {
+        example = true;
+      };
     };
   };
 }

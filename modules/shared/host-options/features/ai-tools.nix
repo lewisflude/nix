@@ -10,11 +10,13 @@ in
   aiTools = {
     enable = mkEnableOption "AI tools stack (Ollama, Open WebUI) - NixOS only" // {
       default = false;
+      example = true;
     };
 
     ollama = {
       enable = mkEnableOption "Ollama LLM backend" // {
         default = true;
+        example = true;
       };
       acceleration = mkOption {
         type = types.nullOr (
@@ -41,6 +43,7 @@ in
     openWebui = {
       enable = mkEnableOption "Open WebUI interface for LLMs" // {
         default = true;
+        example = true;
       };
       port = mkOption {
         type = types.port;

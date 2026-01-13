@@ -13,9 +13,13 @@ let
 in
 {
   imports = [
-    (import ./options/default.nix { inherit lib constants; })
+    # Import options
+    (import ./options/default.nix {
+      inherit lib constants;
+    })
   ];
 
+  # Import config (only when enabled)
   config = mkIf (cfg.enable && qbittorrentCfg.enable) (
     import ./config/default.nix {
       inherit
