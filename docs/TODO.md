@@ -332,69 +332,29 @@ If still in transition, add clear migration guide:
 
 ---
 
-### 16. Audit Service Firewall Port Documentation
+### ~~Audit Service Firewall Port Documentation~~ ✅
 
-**Location:** `modules/nixos/services/*.nix`
+**Completed:** 2026-01-13
 
-**Current Issue:**
+**Location:** `modules/nixos/services/*.nix` and `modules/nixos/services/containers-supplemental/services/*.nix`
 
-11 service modules properly manage their own firewall ports (good!), but we should audit all services for:
+**Solution Implemented:**
 
-1. **Missing firewall configuration** - Services that need ports but don't open them
-2. **Hardcoded port numbers** - Should use constants
-3. **Missing port documentation** - Users should know what ports are opened
+Audited all service modules for firewall port configuration. Added `openFirewall` options to all modules that open ports, allowing users to opt-out of automatic firewall configuration. Ensured ports are documented and use constants where available.
 
-**Proposed Solution:**
+**Changes Made:**
 
-Create a systematic audit:
+1. **Media Management**: Added `openFirewall` options to Sonarr, Radarr, Lidarr, Readarr, Prowlarr, SABnzbd, Jellyseerr, Listenarr, Jellyfin, Unpackerr, Navidrome, FlareSolverr, qBittorrent, Transmission.
+2. **Infrastructure**: Verified Dante, Cockpit, Mosh, Samba, Sunshine already had options or were correct. Updated Eternal Terminal to add `openFirewall` option.
+3. **System**: Refactored `home-assistant.nix` to use standard option. Added `openFirewall` option to `music-assistant.nix` and `caddy/config.nix`.
+4. **Containers**: Added `openFirewall` options to Homarr, Wizarr, Jellystat, Profilarr, Janitorr, Termix, Cleanuparr, Cal.com, and ComfyUI (container).
 
-```bash
-# Check all service modules
-fd -e nix . modules/nixos/services/ -x grep -l "allowedTCPPorts\|allowedUDPPorts" {}
+**Benefits Achieved:**
 
-# For each service, verify:
-# 1. Ports are documented in module description
-# 2. Ports use constants where appropriate
-# 3. Firewall rules are conditional on service enable
-```
-
-Add documentation to services:
-
-```nix
-# Example format
-{
-  options.host.services.myService = {
-    enable = mkEnableOption "My Service";
-
-    openFirewall = mkEnableOption "Open firewall ports for My Service" // {
-      default = true;
-    };
-
-    port = mkOption {
-      type = types.port;
-      default = 8080;
-      description = ''
-        Port for My Service web interface.
-        Firewall rule will be added if openFirewall is enabled.
-      '';
-    };
-  };
-
-  config = mkIf cfg.enable {
-    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [ cfg.port ];
-  };
-}
-```
-
-**Benefits:**
-
-- Better security documentation
-- Consistent firewall management pattern
-- Easy to audit what ports are open
-- Users can opt-out of firewall rules if needed
-
-**Priority:** Low
-**Estimated Effort:** M
+- Consistent configuration interface across all services
+- Better security (ports explicit and optional)
+- Improved documentation via `openFirewall` option descriptions
+- Easier auditing of open ports
 
 ---
 

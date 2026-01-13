@@ -50,7 +50,8 @@
       "Bash(pactl list:*)",
       "Bash(top:*)",
       "Bash(ps:*)",
-      "Bash(pipewire:*)"
+      "Bash(pipewire:*)",
+      "Bash(xrizer --version:*)"
     ],
     "deny": [
       "Read(**/.env)",

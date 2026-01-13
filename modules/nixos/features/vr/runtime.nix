@@ -1,6 +1,7 @@
 # Monado OpenXR Runtime Configuration
 {
   config,
+  pkgs,
   lib,
   ...
 }:
@@ -16,4 +17,12 @@ lib.mkIf cfg.enable {
     defaultRuntime = !cfg.wivrn.enable || !cfg.wivrn.defaultRuntime;
     highPriority = cfg.performance; # Enable high priority for better frame timing
   };
+
+  # Required packages for OpenXR to work correctly
+  environment.systemPackages = [
+    pkgs.openxr-loader
+    pkgs.vulkan-loader
+    pkgs.libglvnd # Provides libGL
+    pkgs.xorg.libX11
+  ];
 }

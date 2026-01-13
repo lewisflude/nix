@@ -10,6 +10,10 @@ let
       default = true;
     };
 
+    openFirewall = mkEnableOption "Open firewall ports for qBittorrent" // {
+      default = true;
+    };
+
     categories = mkOption {
       type = types.nullOr (types.attrsOf types.str);
       default = null;

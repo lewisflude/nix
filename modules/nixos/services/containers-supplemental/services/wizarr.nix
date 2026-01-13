@@ -15,6 +15,10 @@ in
       default = true;
     };
 
+    openFirewall = mkEnableOption "Open firewall ports for Wizarr" // {
+      default = true;
+    };
+
     resources = mkResourceOptions {
       memory = "256m";
       cpus = "0.25";
@@ -39,5 +43,7 @@ in
     systemd.tmpfiles.rules = [
       "d ${cfg.configPath}/wizarr 0755 ${toString cfg.uid} ${toString cfg.gid} -"
     ];
+
+    networking.firewall.allowedTCPPorts = mkIf cfg.wizarr.openFirewall [ 5690 ];
   };
 }

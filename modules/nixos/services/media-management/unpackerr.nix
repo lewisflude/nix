@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  constants,
   ...
 }:
 let
@@ -28,7 +29,7 @@ let
     dir_mode = "0755"
 
     [sonarr]
-    url = "http://localhost:8989"
+    url = "http://localhost:${toString constants.ports.services.sonarr}"
     paths = ["${cfg.dataPath}/torrents", "${cfg.dataPath}/usenet"]
     protocols = "torrent,usenet"
     timeout = "10s"
@@ -36,7 +37,7 @@ let
     delete_delay = "5m"
 
     [radarr]
-    url = "http://localhost:7878"
+    url = "http://localhost:${toString constants.ports.services.radarr}"
     paths = ["${cfg.dataPath}/torrents", "${cfg.dataPath}/usenet"]
     protocols = "torrent,usenet"
     timeout = "10s"
@@ -44,7 +45,7 @@ let
     delete_delay = "5m"
 
     [lidarr]
-    url = "http://localhost:8686"
+    url = "http://localhost:${toString constants.ports.services.lidarr}"
     paths = ["${cfg.dataPath}/torrents", "${cfg.dataPath}/usenet"]
     protocols = "torrent,usenet"
     timeout = "10s"
@@ -52,7 +53,7 @@ let
     delete_delay = "5m"
 
     [readarr]
-    url = "http://localhost:8787"
+    url = "http://localhost:${toString constants.ports.services.readarr}"
     paths = ["${cfg.dataPath}/torrents", "${cfg.dataPath}/usenet"]
     protocols = "torrent,usenet"
     timeout = "10s"

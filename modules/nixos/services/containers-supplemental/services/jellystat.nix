@@ -22,6 +22,10 @@ in
       default = false;
     };
 
+    openFirewall = mkEnableOption "Open firewall ports for Jellystat" // {
+      default = true;
+    };
+
     port = mkOption {
       type = types.int;
       default = 3004;
@@ -86,6 +90,8 @@ in
       ];
 
       sops.secrets = secretEntries;
+
+      networking.firewall.allowedTCPPorts = mkIf jellystatCfg.openFirewall [ jellystatCfg.port ];
     }
   );
 }

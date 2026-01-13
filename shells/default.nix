@@ -92,6 +92,8 @@ let
     };
   };
   devShellsLinuxOnly = lib.optionalAttrs platformLib.isLinux {
+    vr = import ./projects/vr.nix { inherit pkgs lib; };
+
     love2d = pkgs.mkShell {
       buildInputs = [
         pkgs.love

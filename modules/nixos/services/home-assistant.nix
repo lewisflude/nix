@@ -223,5 +223,4 @@ in
       Group = "hass";
     };
   };
-  networking.firewall.allowedTCPPorts = [ constants.ports.services.homeAssistant ];
 }

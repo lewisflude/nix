@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
@@ -16,6 +17,10 @@ in
 {
   options.host.services.syncthing = {
     enable = mkEnableOption "Syncthing peer-to-peer file synchronization";
+
+    openFirewall = mkEnableOption "Open firewall ports for Syncthing" // {
+      default = true;
+    };
 
     devices = mkOption {
       type = types.attrsOf (
@@ -118,9 +123,13 @@ in
       };
     };
 
-    # Note: Firewall configuration should be handled at the host level for NixOS systems
-    # Example for NixOS hosts:
-    # networking.firewall.allowedTCPPorts = [ 22000 ];
-    # networking.firewall.allowedUDPPorts = [ 22000 21027 ];
+    # Firewall configuration
+    networking.firewall = mkIf cfg.openFirewall {
+      allowedTCPPorts = [ constants.ports.services.syncthing.sync ];
+      allowedUDPPorts = [
+        constants.ports.services.syncthing.sync
+        constants.ports.services.syncthing.discovery
+      ];
+    };
   };
 }

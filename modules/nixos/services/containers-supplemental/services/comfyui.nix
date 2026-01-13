@@ -21,6 +21,10 @@ in
       default = false;
     };
 
+    openFirewall = mkEnableOption "Open firewall ports for ComfyUI" // {
+      default = true;
+    };
+
     image = mkOption {
       type = types.str;
       default = "docker.io/runpod/comfyui:latest";
@@ -81,6 +85,8 @@ in
             ${cfg.comfyui.dataPath}/basedir
         '';
       };
+
+      networking.firewall.allowedTCPPorts = mkIf cfg.comfyui.openFirewall [ 8188 ];
     }
     (mkIf (config.hardware.nvidia.modesetting.enable or false) {
       hardware.nvidia-container-toolkit.enable = true;

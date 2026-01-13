@@ -26,6 +26,10 @@ in
       default = true;
     };
 
+    openFirewall = mkEnableOption "Open firewall ports for Janitorr" // {
+      default = true;
+    };
+
     useSops = mkOption {
       type = types.bool;
       default = true;
@@ -175,6 +179,8 @@ in
         mode = "0400";
         owner = "root";
       };
+
+      networking.firewall.allowedTCPPorts = mkIf cfg.janitorr.openFirewall [ cfg.janitorr.port ];
     }
   );
 }

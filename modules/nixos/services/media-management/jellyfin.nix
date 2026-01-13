@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
@@ -8,26 +9,32 @@ let
   cfg = config.host.services.mediaManagement;
 in
 {
-  options.host.services.mediaManagement.jellyfin.enable = mkEnableOption "Jellyfin media server" // {
-    default = true;
+  options.host.services.mediaManagement.jellyfin = {
+    enable = mkEnableOption "Jellyfin media server" // {
+      default = true;
+    };
+
+    openFirewall = mkEnableOption "Open firewall ports for Jellyfin" // {
+      default = true;
+    };
   };
 
   config = mkIf (cfg.enable && cfg.jellyfin.enable) {
     services.jellyfin = {
       enable = true;
-      openFirewall = true;
+      openFirewall = false; # We manage it manually to ensure consistency
       inherit (cfg) user;
       inherit (cfg) group;
     };
 
-    networking.firewall = {
+    networking.firewall = mkIf cfg.jellyfin.openFirewall {
       allowedTCPPorts = [
-        8096
-        8920
+        constants.ports.services.jellyfin # 8096
+        8920 # HTTPS
       ];
       allowedUDPPorts = [
-        7359
-
+        1900 # DLNA
+        7359 # Discovery
       ];
     };
 

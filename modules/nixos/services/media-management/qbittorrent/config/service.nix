@@ -15,7 +15,7 @@ with lib;
   # Firewall configuration
   # When VPN is enabled, only WebUI port needs to be open on host
   # When VPN is disabled, both WebUI and torrent ports need to be open
-  networking.firewall = {
+  networking.firewall = mkIf qbittorrentCfg.openFirewall {
     allowedTCPPorts = [
       (if webUI != null then webUI.port else constants.ports.services.qbittorrent)
     ] # WebUI always accessible

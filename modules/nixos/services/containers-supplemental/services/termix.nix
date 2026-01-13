@@ -21,6 +21,10 @@ in
       default = false;
     };
 
+    openFirewall = mkEnableOption "Open firewall ports for Termix" // {
+      default = true;
+    };
+
     port = mkOption {
       type = types.int;
       default = 8080;
@@ -57,5 +61,7 @@ in
     systemd.tmpfiles.rules = [
       "d ${cfg.configPath}/termix 0755 ${toString cfg.uid} ${toString cfg.gid} -"
     ];
+
+    networking.firewall.allowedTCPPorts = mkIf termixCfg.openFirewall [ termixCfg.port ];
   };
 }

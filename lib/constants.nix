@@ -58,6 +58,11 @@
       cleanuparr = 11011;
       calcom = 3000;
 
+      syncthing = {
+        sync = 22000;
+        discovery = 21027;
+      };
+
       # Game streaming services
       sunshine = {
         http = 47990;
