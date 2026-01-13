@@ -19,12 +19,29 @@ lib.mkIf cfg.enable {
         # Source: https://lvra.gitlab.io/docs/distros/nixos/#vrchat--resonite
         unset TZ
 
-        # Allow Steam's pressure-vessel container to discover OpenXR runtimes
-        # This enables VR games to connect to Monado/WiVRn inside the Steam FHS
-        # CRITICAL: Required for all OpenXR apps running under Steam
-        # Source: https://lvra.gitlab.io/docs/distros/nixos/#steam-games-and-openvr-apps
-        export PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1
+        # Note: PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1 is handled by
+        # services.wivrn.steam.importOXRRuntimes = true in wivrn.nix
+        # No need to set it manually here
       '';
+
+      # Add graphics libraries to Steam FHS environment for OpenXR/VR
+      # Required for xrizer and OpenXR runtimes to access GPU
+      extraLibraries =
+        pkgs: with pkgs; [
+          # OpenXR and Vulkan support
+          openxr-loader
+          vulkan-loader
+          vulkan-validation-layers
+
+          # OpenGL support
+          libglvnd
+          libGL
+
+          # X11 support (some OpenVR games need this)
+          xorg.libX11
+          xorg.libXrandr
+          xorg.libXi
+        ];
     }
   );
 }
