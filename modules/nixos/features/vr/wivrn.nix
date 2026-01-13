@@ -40,10 +40,20 @@ lib.mkIf (cfg.enable && cfg.wivrn.enable) {
           # WiVRn warns: "GPU does not have sufficient support for 10-bit images"
           bit-depth = 8;
         };
-        # OpenVR compatibility path:
-        # - xrizer: Modern OpenVR reimplementation on OpenXR (default)
-        # - OpenComposite: Legacy option (when opencomposite = true)
-        # WiVRn configures ~/.config/openvr/openvrpaths.vrpath automatically
+        # OpenVR compatibility library (2026 Best Practice)
+        #
+        # xrizer is the modern choice for Quest 3 on NixOS with Nvidia and Wayland:
+        # - Lower overhead for high-resolution VR (Quest 3: up to 2064x2208 per eye)
+        # - Better Wayland explicit sync and buffer sharing
+        # - Automatic OpenVR path management (prevents SteamVR hijacking)
+        #
+        # WiVRn automatically configures ~/.config/openvr/openvrpaths.vrpath to use
+        # this library, allowing SteamVR (OpenVR) games to work via OpenXR.
+        #
+        # Usage in Steam launch options:
+        #   xrizer PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
+        #
+        # Legacy: Set opencomposite = true to use OpenComposite instead of xrizer
         openvr-compat-path = if cfg.opencomposite then "${pkgs.opencomposite}" else "${pkgs.xrizer}";
       };
     };
