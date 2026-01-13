@@ -5,45 +5,29 @@
   ...
 }:
 let
-  # Inline language configuration
-  mkBiomeLanguage =
-    tabSize: extra:
-    let
-      extraAttrs = if builtins.isAttrs extra then extra else { };
-    in
-    {
-      tab_size = tabSize;
-      code_actions_on_format = {
-        "source.fixAll.biome" = true;
-      };
-      formatter = {
-        language_server = {
-          name = "biome";
-        };
-      };
-    }
-    // extraAttrs;
-
-  mkTypeScriptLanguage =
-    tabSize:
-    mkBiomeLanguage tabSize {
-      inlay_hints = {
-        enabled = true;
-        show_parameter_hints = false;
-        show_other_hints = true;
-        show_type_hints = true;
-      };
-    };
-
   # Signal theme configuration
   signalThemeEnabled = config.theming.signal.enable or false;
   signalThemeFamily = config.theming.signal.applications.zed.themes or null;
   themesAvailable = signalThemeEnabled && signalThemeFamily != null;
+
   themeMode =
     let
       mode = config.theming.signal.mode or "dark";
     in
     if mode == "auto" then "system" else mode;
+
+  # Biome configuration helper
+  mkBiomeConfig = tabSize: {
+    tab_size = tabSize;
+    code_actions_on_format = {
+      "source.fixAll.biome" = true;
+    };
+    formatter = {
+      language_server = {
+        name = "biome";
+      };
+    };
+  };
 in
 {
   programs.zed-editor = {
@@ -51,7 +35,6 @@ in
     extraPackages = [ pkgs.nixd ];
     mutableUserSettings = false;
 
-    # Use extensions list instead of auto_install_extensions
     extensions = [
       "biome"
       "docker-compose"
@@ -69,6 +52,11 @@ in
       "terraform"
       "toml"
     ];
+
+    # Install the Signal theme if available using the native option
+    themes = lib.mkIf themesAvailable {
+      "Signal" = signalThemeFamily;
+    };
 
     userSettings = {
       telemetry = {
@@ -115,6 +103,13 @@ in
 
       vertical_scroll_margin = 6;
       inlay_hints.enabled = true;
+
+      # Theme settings
+      theme = lib.mkIf themesAvailable {
+        mode = themeMode;
+        light = "Signal Light";
+        dark = "Signal Dark";
+      };
 
       # Language Server configurations
       lsp = {
@@ -200,11 +195,18 @@ in
 
       # Language-specific settings
       languages = {
-        JavaScript = mkBiomeLanguage 2 { };
-        TypeScript = mkTypeScriptLanguage 2;
-        TSX = mkBiomeLanguage 2 { };
-        CSS = mkBiomeLanguage 2 { };
-        HTML = mkBiomeLanguage 2 {
+        JavaScript = mkBiomeConfig 2;
+        TypeScript = mkBiomeConfig 2 // {
+          inlay_hints = {
+            enabled = true;
+            show_parameter_hints = false;
+            show_other_hints = true;
+            show_type_hints = true;
+          };
+        };
+        TSX = mkBiomeConfig 2;
+        CSS = mkBiomeConfig 2;
+        HTML = mkBiomeConfig 2 // {
           format_on_save = "on";
         };
         JSON = {
@@ -291,19 +293,6 @@ in
         ];
         env = { };
       };
-
-      # Theme configuration
-      theme = lib.mkIf themesAvailable {
-        mode = themeMode;
-        light = "Signal Light";
-        dark = "Signal Dark";
-      };
     };
-  };
-
-  # Write Signal theme family file (contains both light and dark variants)
-  home.file.".config/zed/themes/Signal.json" = lib.mkIf themesAvailable {
-    text = builtins.toJSON signalThemeFamily;
-    force = true;
   };
 }
