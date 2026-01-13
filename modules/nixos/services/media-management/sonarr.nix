@@ -31,8 +31,7 @@ in
       inherit (cfg) user;
       inherit (cfg) group;
       # Use the modern Sonarr directory instead of legacy NzbDrone
-      # The dataDir option sets the base directory, and Sonarr will use .config/Sonarr inside it
-      dataDir = "/var/lib/sonarr";
+      dataDir = "/var/lib/sonarr/.config/Sonarr";
     };
 
     networking.firewall.allowedTCPPorts = mkIf cfg.sonarr.openFirewall [
@@ -45,10 +44,6 @@ in
       };
 
       after = mkAfter (optional cfg.prowlarr.enable "prowlarr.service");
-
-      # Override ExecStart to use the modern Sonarr directory instead of legacy NzbDrone
-      # The NixOS module defaults to .config/NzbDrone, but Sonarr now uses .config/Sonarr
-      serviceConfig.ExecStart = lib.mkForce "${config.services.sonarr.package}/bin/Sonarr -nobrowser -data=/var/lib/sonarr/.config/Sonarr";
     };
 
     # Handle legacy NzbDrone path migration (Sonarr was previously called NzbDrone)
