@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   pkgs,
   osConfig ? { },
@@ -80,29 +79,9 @@ mkIf vrEnabled {
       force = true;
     };
 
-    # OpenVR paths configuration for SteamVR compatibility (xrizer/OpenComposite)
-    # This file tells OpenVR games where to find the OpenXR translation layer
-    # Declarative management ensures paths stay valid after system updates
-    # Source: https://lvra.gitlab.io/docs/distros/nixos/#steam-games-and-openvr-apps
-    "openvr/openvrpaths.vrpath".text =
-      let
-        steam = "${config.xdg.dataHome}/Steam";
-      in
-      builtins.toJSON {
-        version = 1;
-        jsonid = "vrpathreg";
-
-        external_drivers = null;
-        config = [ "${steam}/config" ];
-
-        log = [ "${steam}/logs" ];
-
-        "runtime" = [
-          "${pkgs.xrizer}/lib/xrizer"
-          # OR (if using OpenComposite instead of xrizer)
-          #"${pkgs.opencomposite}/lib/opencomposite"
-        ];
-      };
+    # Note: OpenVR paths (openvr/openvrpaths.vrpath) are managed automatically by WiVRn v0.23+
+    # The openvr-compat-path setting in wivrn.nix tells WiVRn which OpenXR translation layer to use
+    # No need for declarative home-manager configuration here
 
     # WayVR Dashboard configuration for wlx-overlay-s
     # This assigns the dashboard application to WayVR overlay
@@ -122,15 +101,18 @@ mkIf vrEnabled {
   # Why xrizer?
   # - Performance: Lower overhead for Quest 3's high resolutions (up to 2064x2208 per eye)
   # - Wayland/Nvidia: Better explicit sync and buffer sharing on modern compositors
-  # - Declarative: openvrpaths.vrpath managed by home-manager (stays valid after updates)
+  # - WiVRn Integration: WiVRn v0.23+ automatically manages openvrpaths.vrpath for xrizer
   #
   # Steam Launch Options:
   #
   # For NATIVE OpenXR games (Half-Life: Alyx, Bonelab):
   #   PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
   #
-  # For SteamVR (OpenVR) games (Beat Saber, Pavlov VR):
-  #   xrizer PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
+  # For SteamVR (OpenVR) games (Beat Saber, Pavlov VR, Google Earth VR):
+  #   PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
+  #
+  # Note: xrizer is loaded automatically via openvrpaths.vrpath (it's a library, not a command)
+  # WiVRn v0.23+ manages this file automatically using the openvr-compat-path setting
   #
   # Note: PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES is handled automatically by
   # services.wivrn.steam.importOXRRuntimes = true in wivrn.nix
@@ -155,10 +137,14 @@ mkIf vrEnabled {
   # Note: proton-ge-rtsp-bin is not installed as it's a single binary file
   # If needed for VRChat/Resonite video streams, install as Steam compatibility tool
   #
+  # WlxOverlay-S in Steam FHS:
+  # Due to NixOS's unique filesystem, wlx-overlay-s must be run via steam-run when using SteamVR:
+  #   steam-run wlx-overlay-s
+  # This is not needed when using WiVRn/Monado directly (OpenXR mode)
+  #
   # Legacy OpenComposite:
-  # For Monado-only setups (without WiVRn), you can still use OpenComposite:
-  #   1. Enable: host.features.vr.opencomposite = true;
-  #   2. Uncomment OpenComposite line in xdg.configFile."openvr/openvrpaths.vrpath" above
+  # For Monado-only setups (without WiVRn), you can configure OpenComposite manually
+  # by setting openvr-compat-path to ${pkgs.opencomposite}/lib/opencomposite instead
   # However, xrizer is the modern approach and should be preferred in 2026.
 
   # Shell aliases for VR tools

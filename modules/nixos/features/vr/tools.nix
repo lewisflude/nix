@@ -41,8 +41,8 @@ lib.mkIf cfg.enable {
       )
     ]
     # Quest 3 Core Tooling (nixpkgs-xr packages)
-    # xrizer: Modern SteamVR->OpenXR translation (replaces OpenComposite)
-    # Use as Steam launch option: xrizer %command%
+    # xrizer: Modern SteamVR->OpenXR translation library (replaces OpenComposite)
+    # Loaded automatically by OpenVR games via openvrpaths.vrpath
     ++ [ pkgs.xrizer ]
     # Resonite Tools
     # resolute: Mod manager for Resonite
