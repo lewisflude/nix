@@ -14,6 +14,7 @@ let
   cfg = config.host.services.mediaManagement;
   qbittorrentCfg = cfg.qbittorrent or { };
   vpnCfg = qbittorrentCfg.vpn or { };
+  constants = import ../../../../lib/constants.nix;
 in
 {
   options.host.services.mediaManagement.qbittorrent.vpn = {
@@ -39,7 +40,7 @@ in
 
     webUIBindAddress = mkOption {
       type = types.str;
-      default = "192.168.10.210";
+      default = constants.hosts.jupiter.ipv4;
       description = "IP address to bind WebUI to on the host network";
     };
   };
@@ -120,17 +121,17 @@ in
 
       # Allow access from main network (192.168.10.0/24)
       accessibleFrom = [
-        "192.168.10.0/24"
+        constants.networks.lan.primary
       ];
 
       # Port forwarding for WebUI (host network ? namespace)
       portMappings = [
         {
-          from = 8080; # qBittorrent WebUI
+          from = constants.ports.services.qbittorrent; # qBittorrent WebUI
           to = 8080;
         }
         {
-          from = 9091; # Transmission WebUI
+          from = constants.ports.services.transmission; # Transmission WebUI
           to = 9091;
         }
       ];
@@ -179,7 +180,7 @@ in
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = "yes";
-          ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${vpnCfg.namespace} ${pkgs.iproute2}/bin/ip route add 10.2.0.0/24 dev ${vpnCfg.namespace}0";
+          ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${vpnCfg.namespace} ${pkgs.iproute2}/bin/ip route add ${constants.networks.vpn.cidr} dev ${vpnCfg.namespace}0";
           # Don't fail if route already exists
           SuccessExitStatus = [
             0

@@ -11,6 +11,7 @@ let
     types
     ;
   cfg = config.services.dante-proxy;
+  constants = import ../../../lib/constants.nix;
 in
 {
   options.services.dante-proxy = {
@@ -18,7 +19,7 @@ in
 
     port = mkOption {
       type = types.port;
-      default = 1080;
+      default = constants.ports.services.dante;
       description = "Port to listen on for SOCKS connections";
     };
 
@@ -30,20 +31,20 @@ in
 
     listenAddress = mkOption {
       type = types.str;
-      default = "0.0.0.0";
+      default = constants.networks.all.ipv4;
       description = "Address to listen on (0.0.0.0 = all interfaces, 127.0.0.1 = localhost only)";
     };
 
     allowedClients = mkOption {
       type = types.listOf types.str;
       default = [
-        "127.0.0.1/32"
-        "192.168.0.0/16"
+        constants.networks.localhost.cidr
+        constants.networks.lan.secondary
       ];
       description = "List of client IP addresses/ranges allowed to connect";
       example = [
-        "127.0.0.1/32"
-        "192.168.10.0/24"
+        constants.networks.localhost.cidr
+        constants.networks.lan.primary
       ];
     };
 
@@ -78,12 +79,12 @@ in
 
         # Client access rules
         ${lib.concatMapStringsSep "\n" (
-          client: "client pass { from: ${client} to: 0.0.0.0/0 }"
+          client: "client pass { from: ${client} to: ${constants.networks.all.cidr} }"
         ) cfg.allowedClients}
 
         # Target access rules - allow all destinations
         socks pass {
-          from: 0.0.0.0/0 to: 0.0.0.0/0
+          from: ${constants.networks.all.cidr} to: ${constants.networks.all.cidr}
           protocol: tcp udp
         }
       '';

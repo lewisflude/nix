@@ -5,6 +5,7 @@
 }:
 let
   intent_script_yaml = ./home-assistant/intent-scripts/intent_script.yaml;
+  constants = import ../../../lib/constants.nix;
 in
 {
   sops.templates."hass-secrets.yaml" = {
@@ -188,10 +189,10 @@ in
       ];
       http = {
         base_url = "!secret base_url";
-        server_host = [ "0.0.0.0" ];
-        server_port = 8123;
+        server_host = [ constants.networks.all.ipv4 ];
+        server_port = constants.ports.services.homeAssistant;
         use_x_forwarded_for = true;
-        trusted_proxies = [ "192.168.10.0/24" ];
+        trusted_proxies = [ constants.networks.lan.primary ];
       };
       default_config = { };
     };
@@ -222,5 +223,5 @@ in
       Group = "hass";
     };
   };
-  networking.firewall.allowedTCPPorts = [ 8123 ];
+  networking.firewall.allowedTCPPorts = [ constants.ports.services.homeAssistant ];
 }
