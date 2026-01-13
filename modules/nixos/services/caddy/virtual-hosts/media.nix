@@ -9,9 +9,9 @@ let
   inherit (helpers) mkReverseProxy;
 in
 {
-  "jellyfin.blmt.io" = mkReverseProxy "localhost:8096";
+  "jellyfin.blmt.io" = mkReverseProxy "127.0.0.1:8096";
 
-  "music.blmt.io" = mkReverseProxy "localhost:8095";
+  "music.blmt.io" = mkReverseProxy "127.0.0.1:8095";
 
-  "comics.blmt.io" = mkReverseProxy "localhost:5656"; # Komga
+  "comics.blmt.io" = mkReverseProxy "127.0.0.1:5656"; # Komga
 }

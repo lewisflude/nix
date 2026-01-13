@@ -21,9 +21,9 @@ in
     '';
   };
 
-  "cockpit.blmt.io" = mkReverseProxy "localhost:9090";
+  "cockpit.blmt.io" = mkReverseProxy "127.0.0.1:9090";
 
   "unifi.blmt.io" = mkReverseProxy "192.168.10.1:443";
 
-  "blmt.io" = mkReverseProxy "localhost:7575"; # Homarr Dashboard
+  "blmt.io" = mkReverseProxy "127.0.0.1:7575"; # Homarr Dashboard
 }
