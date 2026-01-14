@@ -35,7 +35,8 @@ in
       { proportion = 1.0; }
     ];
 
-    # Focus ring: drawn ONLY around active window, doesn't affect window size
+    # Focus ring: visual indicator for focused window
+    # With prefer-no-csd = true, focus ring is drawn correctly around windows
     focus-ring = {
       width = 3;
       active = {

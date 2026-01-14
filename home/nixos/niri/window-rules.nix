@@ -1,6 +1,25 @@
 # Niri Window Rules Configuration
 # Organized by: Visual Hierarchy → Security → Performance → Usability → Workspace Assignment
-_: {
+{
+  themeLib,
+  ...
+}:
+let
+  # Generate theme to access raw colors
+  theme = themeLib.generateTheme "dark" { };
+  inherit (theme) colors;
+
+  # Screencast indicator colors - uses danger/urgent colors for visibility
+  screencastColors = {
+    active = colors."accent-danger".hex;
+    inactive = "#7d0d2d"; # Darker variant of danger for inactive state
+    shadow = "#7d0d2d70"; # With transparency
+  };
+
+  # Floating window shadow - matches layout shadow color
+  floatingShadowColor = "${colors."surface-base".hex}aa";
+in
+{
   window-rules = [
     # ============================================================================
     # VISUAL HIERARCHY & FOCUS
@@ -34,7 +53,7 @@ _: {
           x = 0;
           y = 5;
         };
-        color = "#00000064";
+        color = floatingShadowColor;
       };
     }
 
@@ -45,26 +64,26 @@ _: {
       ];
       focus-ring = {
         active = {
-          color = "#f38ba8";
+          color = screencastColors.active;
         };
         inactive = {
-          color = "#7d0d2d";
+          color = screencastColors.inactive;
         };
       };
       border = {
         inactive = {
-          color = "#7d0d2d";
+          color = screencastColors.inactive;
         };
       };
       shadow = {
-        color = "#7d0d2d70";
+        color = screencastColors.shadow;
       };
       tab-indicator = {
         active = {
-          color = "#f38ba8";
+          color = screencastColors.active;
         };
         inactive = {
-          color = "#7d0d2d";
+          color = screencastColors.inactive;
         };
       };
     }

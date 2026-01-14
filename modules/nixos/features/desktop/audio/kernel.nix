@@ -14,6 +14,7 @@ in
     # Blacklist ALSA sequencer kernel modules to prevent PipeWire crashes
     # These modules cause snd_seq_event_input crashes in PipeWire < 1.4.10
     # Since we're disabling alsa.seq in PipeWire config, we don't need these
+    # TODO: Remove this workaround after nixpkgs updates to PipeWire 1.4.10+
     boot.blacklistedKernelModules = [
       "snd_seq"
       "snd_seq_dummy"
@@ -22,6 +23,8 @@ in
     ];
 
     # CPU frequency governor for stable audio performance
-    powerManagement.cpuFreqGovernor = "performance";
+    # Use "performance" ONLY with realtime=true (RT kernel)
+    # For non-RT kernels (XanMod), schedutil provides good latency with better efficiency
+    powerManagement.cpuFreqGovernor = if cfg.realtime then "performance" else lib.mkDefault "schedutil";
   };
 }

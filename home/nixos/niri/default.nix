@@ -24,7 +24,7 @@ let
   layout = import ./layout.nix {
     inherit lib themeLib themeConstants;
   };
-  window-rules = import ./window-rules.nix { };
+  window-rules = import ./window-rules.nix { inherit lib themeLib; };
   animations = import ./animations.nix { };
   startup = import ./startup.nix {
     inherit

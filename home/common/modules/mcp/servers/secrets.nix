@@ -8,11 +8,12 @@
 {
   # Documentation indexing and search (requires OPENAI_API_KEY)
   # Note: Uses Node.js 20 for better-sqlite3 compatibility
+  # Force reinstall to avoid npx cache issues with native modules
   docs = {
     command = "${pkgs.nodejs_20}/bin/npx";
     args = [
-      "-y"
-      "@arabold/docs-mcp-server"
+      "--yes"
+      "@arabold/docs-mcp-server@latest"
     ];
     secret = "OPENAI_API_KEY";
     enabled = false; # Disabled - requires OPENAI_API_KEY secret
@@ -39,10 +40,12 @@
   }; # Disabled - requires OPENAI_API_KEY secret
 
   # GitHub API integration (requires GITHUB_TOKEN)
+  # Note: Package name is github-mcp-server, MCP binary is github-mcp-server-mcp
   github = {
     command = "${pkgs.nodejs}/bin/npx";
     args = [
       "-y"
+      "--package=github-mcp-server"
       "github-mcp-server-mcp"
     ];
     secret = "GITHUB_TOKEN";

@@ -92,10 +92,11 @@
         realtime = false;
 
         # Professional audio configuration for Apogee Symphony Desktop
-        # Ultra-low latency: 64 frames @ 48kHz = ~1.3ms (for recording/monitoring)
-        # Also beneficial for VR desktop overlay (WayVR) to reduce input lag
-        # Set to false for general use (256 frames = ~5.3ms)
-        ultraLowLatency = true;
+        # Ultra-low latency: 64 frames @ 48kHz = ~1.3ms (requires realtime = true)
+        # Standard latency: 256 frames @ 48kHz = ~5.3ms (works well with XanMod)
+        # Set to true ONLY when doing actual recording AND enable realtime = true
+        # Current: false for stable daily use (gaming + VR streaming)
+        ultraLowLatency = false;
 
         # USB audio interface optimizations
         usbAudioInterface = {

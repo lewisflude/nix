@@ -1,31 +1,24 @@
 # Workspace Navigation Keybindings
 # Workspace focus, movement, and navigation
 _: {
-  # Workspace quick access - semantic shortcuts
-  # These complement the Mod+1-9 number shortcuts with memorable shortcuts
-  "Mod+Alt+B".action.focus-workspace = 1; # Browser
-  "Mod+Alt+D".action.focus-workspace = 3; # Development
-  "Mod+Alt+C".action.focus-workspace = 5; # Communication/Chat
-  "Mod+Alt+M".action.focus-workspace = 7; # Media
-  "Mod+Alt+G".action.focus-workspace = 9; # Gaming
-
   # Workspace navigation
+  # U/I are above J/K on keyboard, so U=up and I=down (matching J=down, K=up pattern)
   "Mod+Page_Down".action.focus-workspace-down = { };
   "Mod+Page_Up".action.focus-workspace-up = { };
-  "Mod+U".action.focus-workspace-down = { };
-  "Mod+I".action.focus-workspace-up = { };
+  "Mod+U".action.focus-workspace-up = { };
+  "Mod+I".action.focus-workspace-down = { };
 
-  # Move column to workspace
+  # Move column to workspace (+Ctrl = move instead of focus)
   "Mod+Ctrl+Page_Down".action.move-column-to-workspace-down = { };
   "Mod+Ctrl+Page_Up".action.move-column-to-workspace-up = { };
-  "Mod+Ctrl+U".action.move-column-to-workspace-down = { };
-  "Mod+Ctrl+I".action.move-column-to-workspace-up = { };
+  "Mod+Ctrl+U".action.move-column-to-workspace-up = { };
+  "Mod+Ctrl+I".action.move-column-to-workspace-down = { };
 
-  # Move workspace
+  # Move workspace (+Shift = move the workspace itself)
   "Mod+Shift+Page_Down".action.move-workspace-down = { };
   "Mod+Shift+Page_Up".action.move-workspace-up = { };
-  "Mod+Shift+U".action.move-workspace-down = { };
-  "Mod+Shift+I".action.move-workspace-up = { };
+  "Mod+Shift+U".action.move-workspace-up = { };
+  "Mod+Shift+I".action.move-workspace-down = { };
 
   # Numbered workspace shortcuts
   "Mod+1".action.focus-workspace = 1;

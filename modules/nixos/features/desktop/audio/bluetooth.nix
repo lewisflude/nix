@@ -39,13 +39,14 @@ in
         "bluez5.a2dp.ldac.quality" = "hq";
       };
 
-      # Set Bluetooth device priority (higher than Apogee when connected)
-      # Bluetooth sinks get higher priority so they auto-select when connected
+      # Set Bluetooth device priority
+      # Lowered from 200 to 80 - manual device selection preferred over auto-switching
+      # Prevents accidental switches when Bluetooth devices connect
       "10-bluetooth-priority"."monitor.rules" = [
         {
           matches = [ { "node.name" = "~bluez_output.*"; } ];
           actions.update-props = {
-            "priority.session" = 200; # Higher than Apogee (100) - auto-select when connected
+            "priority.session" = 80; # Below Apogee (100) - manual selection required
           };
         }
       ];
