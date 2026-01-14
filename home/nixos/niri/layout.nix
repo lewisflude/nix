@@ -1,8 +1,19 @@
 # Niri Layout Configuration
 {
+  lib,
+  themeLib,
   themeConstants,
   ...
 }:
+let
+  # Generate theme to access raw colors
+  theme = themeLib.generateTheme "dark" { };
+  inherit (theme) colors;
+
+  # Shadow colors with different opacity levels
+  shadowColor = lib.mkDefault "${colors."surface-base".hex}aa"; # 66% opacity for active
+  inactiveShadowColor = "${colors."surface-base".hex}66"; # 40% opacity for inactive
+in
 {
   layout = {
     # Window spacing
@@ -60,9 +71,9 @@
         x = 0;
         y = 12;
       };
-      color = themeConstants.niri.colors.shadow;
+      color = shadowColor;
       # Dimmer shadows for inactive windows (more transparent - 40% opacity instead of 66%)
-      inactive-color = "#1e1f2666";
+      inactive-color = inactiveShadowColor;
       # False because we use prefer-no-csd (draws shadows correctly with rounded corners)
       draw-behind-window = false;
     };

@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   osConfig ? { },
@@ -56,7 +57,60 @@ mkIf vrEnabled {
     pkgs.wlx-overlay-s
     pkgs.wayvr-dashboard
     install-mf-codecs
+
+    # GStreamer plugins for wayvr-dashboard media support
+    # Required for video playback and media features in the dashboard UI
+    pkgs.gst_all_1.gstreamer
+    pkgs.gst_all_1.gst-plugins-base
+    pkgs.gst_all_1.gst-plugins-good
   ];
+
+  # WayVR systemd service - Auto-start desktop overlay with WiVRn
+  # Follows WayVR best practices for OpenXR runtimes (WiVRn/Monado)
+  # The overlay will show a home environment with passthrough by default
+  systemd.user.services.wayvr = mkIf (osConfig.host.features.vr.wivrn.enable or false) {
+    Unit = {
+      Description = "WayVR Desktop Overlay for VR";
+      Documentation = "https://github.com/wlx-team/wayvr";
+      # Start after WiVRn is ready
+      After = [ "wivrn.service" ];
+      # Bind to WiVRn - stop WayVR when WiVRn stops
+      BindsTo = [ "wivrn.service" ];
+      # Only start if WiVRn is enabled and running
+      ConditionPathExists = "%t/wivrn";
+    };
+
+    Service = {
+      Type = "simple";
+      # OpenXR mode with --show flag (recommended for WiVRn)
+      # This shows a home environment with passthrough by default
+      ExecStart = "${pkgs.wlx-overlay-s}/bin/wlx-overlay-s --openxr --show";
+      Restart = "on-failure";
+      RestartSec = "5s";
+
+      # Environment variables
+      Environment = [
+        # Low-latency PipeWire capture
+        "PIPEWIRE_LATENCY=64/48000"
+        # Ensure OpenXR runtime is set
+        "XR_RUNTIME_JSON=${
+          if osConfig.host.features.vr.wivrn.enable && osConfig.host.features.vr.wivrn.defaultRuntime then
+            "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json"
+          else
+            "${pkgs.monado}/share/openxr/1/openxr_monado.json"
+        }"
+      ];
+
+      # Logging
+      StandardOutput = "journal";
+      StandardError = "journal";
+    };
+
+    Install = {
+      # Auto-start when WiVRn starts
+      WantedBy = [ "wivrn.service" ];
+    };
+  };
 
   # Set XR_RUNTIME_JSON environment variable for non-sandboxed VR applications
   # This is required for apps that don't check ~/.config/openxr/1/active_runtime.json
@@ -79,17 +133,52 @@ mkIf vrEnabled {
       force = true;
     };
 
-    # Note: OpenVR paths (openvr/openvrpaths.vrpath) are managed automatically by WiVRn v0.23+
-    # The openvr-compat-path setting in wivrn.nix tells WiVRn which OpenXR translation layer to use
-    # No need for declarative home-manager configuration here
+    # OpenVR paths configuration - Lock to prevent SteamVR from overriding
+    # WiVRn v0.23+ should manage this, but we're being explicit to prevent SteamVR interference
+    # xrizer MUST be first in the runtime list so Wine/Proton games use it instead of SteamVR
+    "openvr/openvrpaths.vrpath" = mkIf (osConfig.host.features.vr.wivrn.enable or false) {
+      text = builtins.toJSON {
+        config = [
+          "${config.home.homeDirectory}/.local/share/Steam/config"
+        ];
+        external_drivers = null;
+        jsonid = "vrpathreg";
+        log = [
+          "${config.home.homeDirectory}/.local/share/Steam/logs"
+        ];
+        runtime = [
+          # xrizer FIRST - translates OpenVR to OpenXR for WiVRn
+          "${pkgs.xrizer}/lib/xrizer"
+          # Note: SteamVR intentionally omitted to prevent it from hijacking OpenVR games
+        ];
+        version = 1;
+      };
+      force = true;
+    };
 
-    # WayVR Dashboard configuration for wlx-overlay-s
-    # This assigns the dashboard application to WayVR overlay
-    "wlxoverlay/wayvr.conf.d/dashboard.yaml".text = ''
-      dashboard:
-        exec: "${pkgs.wayvr-dashboard}/bin/wayvr-dashboard"
-        args: ""
-        env: []
+    # WayVR configuration for optimal WiVRn integration
+    # This configures WayVR to work properly with WiVRn's OpenXR runtime
+    "wlxoverlay/conf.yaml".text = ''
+      # WayVR Configuration
+      # Optimized for WiVRn + Quest 3 + Niri
+
+      # PipeWire capture settings
+      capture:
+        method: pipewire
+        rate: 90  # Match Quest 3 refresh rate
+
+      # Display settings
+      display:
+        show_on_start: false  # Don't auto-show (use double-tap B/Y)
+
+      # Performance optimizations
+      performance:
+        low_latency: true
+
+      # OpenXR mode (for WiVRn compatibility)
+      runtime:
+        mode: openxr
+        show: false  # Start hidden, show with controller binding
     '';
   };
 
@@ -118,10 +207,10 @@ mkIf vrEnabled {
   # services.wivrn.steam.importOXRRuntimes = true in wivrn.nix
   #
   # Workflow:
-  # 1. Start WiVRn: Auto-starts on login (or: systemctl --user start wivrn)
+  # 1. Start WiVRn: Auto-starts on login (systemctl --user status wivrn)
   # 2. Connect Quest 3: Open WiVRn app on headset
-  # 3. Launch games: Use launch options above in Steam
-  # 4. Desktop overlay: Run wlx-overlay-s or wayvr-dashboard for Niri window interaction
+  # 3. Desktop overlay: WayVR auto-starts with WiVRn (double-tap B/Y to show/hide)
+  # 4. Launch games: Use launch options above in Steam
   #
   # Available Tools (installed system-wide):
   # - xrizer: SteamVR->OpenXR translation (preferred over OpenComposite)
@@ -152,11 +241,24 @@ mkIf vrEnabled {
     # VR Runtime Logs
     monado-log = "journalctl --user -u monado -f";
     wivrn-log = "journalctl --user -u wivrn -f";
+    wayvr-log = "journalctl --user -u wayvr -f"; # WayVR overlay logs
+
+    # WayVR Service Control (auto-starts with WiVRn by default)
+    wayvr-start = "systemctl --user start wayvr"; # Manually start WayVR overlay
+    wayvr-stop = "systemctl --user stop wayvr"; # Stop WayVR overlay
+    wayvr-restart = "systemctl --user restart wayvr"; # Restart WayVR overlay
+    wayvr-status = "systemctl --user status wayvr"; # Check WayVR status
 
     # Desktop Overlays (view Niri windows in VR)
-    # Low-latency mode: Reduced capture interval for better responsiveness
-    vr-desktop = "PIPEWIRE_LATENCY=64/48000 wlx-overlay-s --show --capture-rate 90"; # PipeWire-based desktop overlay
-    vr-dashboard = "wayvr-dashboard"; # VR Dashboard for Wayland
+    # NOTE: WayVR now auto-starts with WiVRn - use these for manual control
+    vr-desktop = "PIPEWIRE_LATENCY=64/48000 wlx-overlay-s --show"; # Manual WayVR start (if service disabled)
+    vr-desktop-openxr = "PIPEWIRE_LATENCY=64/48000 wlx-overlay-s --openxr --show"; # OpenXR mode with home environment
+    vr-dashboard = "wayvr-dashboard"; # Optional management GUI (requires wlx-overlay-s running)
+
+    # VR Audio Control
+    # Redirect audio to Quest 3 headset (run while VR app is playing)
+    vr-audio-fix = "pactl list sink-inputs short | grep -E 'hlvr|alyx|steam|proton' | awk '{print $1}' | xargs -I {} pactl move-sink-input {} wivrn.sink";
+    vr-audio-status = "pactl list sinks short | grep wivrn"; # Check if WiVRn audio device exists
 
     # Quest 3 Connection (ADB for sideloading)
     quest-connect = "adb connect"; # Usage: quest-connect 192.168.1.X

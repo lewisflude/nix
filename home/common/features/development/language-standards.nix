@@ -47,6 +47,7 @@
     yaml = {
       lsp = "yaml-language-server";
       formatter = "yamlfmt";
+      formatterArgs = [ "-" ]; # Read from stdin, output to stdout
       indent = 2;
       fileTypes = [
         "yaml"

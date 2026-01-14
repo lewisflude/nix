@@ -7,8 +7,9 @@
 }:
 {
   # Documentation indexing and search (requires OPENAI_API_KEY)
+  # Note: Uses Node.js 20 for better-sqlite3 compatibility
   docs = {
-    command = "${pkgs.nodejs}/bin/npx";
+    command = "${pkgs.nodejs_20}/bin/npx";
     args = [
       "-y"
       "@arabold/docs-mcp-server"
@@ -42,7 +43,7 @@
     command = "${pkgs.nodejs}/bin/npx";
     args = [
       "-y"
-      "@cyanheads/github-mcp-server"
+      "github-mcp-server-mcp"
     ];
     secret = "GITHUB_TOKEN";
     enabled = false; # Disabled - requires GITHUB_TOKEN secret
