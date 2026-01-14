@@ -273,15 +273,4 @@ in
     # Use /memory show to see loaded context
     # Use /memory refresh to reload context files
   };
-
-  # Force overwrite settings.json to handle backup file conflicts
-  # Home Manager tries to back up settings.json to settings.json.backup,
-  # but if that file already exists, it causes an error.
-  # By managing settings.json manually with force=true, we allow Home Manager
-  # to overwrite the existing backup file.
-  home.file.".gemini/settings.json" = lib.mkIf cfg.enable {
-    force = true; # Overwrite existing backup file if needed
-    text = builtins.toJSON cfg.settings;
-  };
-
 }

@@ -1,70 +1,34 @@
 # Rustdocs MCP Server Builder
-# Special case - needs Nix build with platform-specific dependencies
+# Uses the rust-docs-mcp flake input for a clean, declarative package
+#
+# This server provides comprehensive access to Rust crate documentation,
+# source code analysis, dependency trees, and module structure visualization.
+#
+# Usage:
+#   - Enable in your platform-specific MCP config (home/{nixos,darwin}/mcp.nix)
+#   - Use MCP tools like `cache_crate` to load crates dynamically
+#   - No pre-loading needed - crates are cached on-demand
+#
+# Available tools:
+#   - cache_crate: Download and cache crates (crates.io, GitHub, local)
+#   - search_items: Search documentation with fuzzy matching
+#   - get_item_details: View detailed type/function signatures
+#   - get_dependencies: Analyze dependency trees
+#   - structure: Generate module hierarchy visualizations
 {
-  pkgs,
-  lib,
+  rust-docs-mcp,
+  ...
 }:
 let
-  inherit (pkgs.stdenv) isLinux isDarwin;
-
-  # Platform-specific build dependencies
-  linuxPkgs = lib.optionals isLinux [
-    pkgs.alsa-lib
-    pkgs.systemd
-    pkgs.systemd.dev
-  ];
-
-  buildDeps = [
-    pkgs.pkg-config
-    pkgs.openssl
-    pkgs.openssl.dev
-    pkgs.cacert
-  ]
-  ++ linuxPkgs;
-
-  pkgConfigPath =
-    if isLinux then
-      "${pkgs.alsa-lib.dev}/lib/pkgconfig:${pkgs.openssl.dev}/lib/pkgconfig:${pkgs.systemd.dev}/lib/pkgconfig"
-    else
-      "${pkgs.openssl.dev}/lib/pkgconfig";
-
-  nixShellPkgs = builtins.concatStringsSep " " (map (p: "${p}") buildDeps);
-
-  rustdocsWrapper = pkgs.writeShellScript "rustdocs-mcp-build" ''
-    set -euo pipefail
-
-    # Cache directory
-    CACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/mcp"
-    OUT_LINK="$CACHE_DIR/rustdocs-mcp-server"
-    mkdir -p "$CACHE_DIR"
-
-    # Build if not cached
-    if [ ! -e "$OUT_LINK" ] || [ ! -x "$OUT_LINK/bin/rustdocs_mcp_server" ]; then
-      echo "[mcp] Building rustdocs-mcp-server..." >&2
-      ${pkgs.nix}/bin/nix build github:Govcraft/rust-docs-mcp-server --out-link "$OUT_LINK.tmp"
-      ${if isDarwin then ''mv "$OUT_LINK.tmp" "$OUT_LINK"'' else ''mv -T "$OUT_LINK.tmp" "$OUT_LINK"''}
-    fi
-
-    # Set up build environment
-    export PKG_CONFIG_PATH="${pkgConfigPath}:''${PKG_CONFIG_PATH:-}"
-    export OPENSSL_DIR="${pkgs.openssl.out}"
-    export OPENSSL_LIB_DIR="${pkgs.openssl.out}/lib"
-    export OPENSSL_INCLUDE_DIR="${pkgs.openssl.dev}/include"
-    export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-
-    # Run in nix shell with build dependencies
-    exec ${pkgs.nix}/bin/nix shell ${nixShellPkgs} \
-      -c "$OUT_LINK/bin/rustdocs_mcp_server" "$@"
-  '';
+  # Use the default package from the rust-docs-mcp flake input
+  # This provides the 'rust-docs-mcp' binary built with proper dependencies
+  rust-docs-mcp-pkg = rust-docs-mcp.packages.${rust-docs-mcp.system}.default or rust-docs-mcp.defaultPackage.${rust-docs-mcp.system};
 in
 {
   rustdocsServer = {
-    command = "${rustdocsWrapper}";
-    args = [
-      "bevy@0.16.1"
-      "-F"
-      "default"
-    ];
-    secret = "OPENAI_API_KEY";
+    command = "${rust-docs-mcp-pkg}/bin/rust-docs-mcp";
+    args = [ ];
+    # No secret required for basic functionality
+    # OPENAI_API_KEY only needed if using OpenAI features (optional)
   };
 }

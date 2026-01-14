@@ -38,10 +38,12 @@
     enabled = false; # Disabled - requires OPENAI_API_KEY secret
   };
 
-  # Rust documentation - Bevy (requires OPENAI_API_KEY)
+  # Rust documentation (no secrets required for basic functionality)
+  # Uses MCP tools like cache_crate to load crates on-demand
+  # OPENAI_API_KEY is only needed for optional OpenAI features
   rustdocs = rustdocsServer // {
-    enabled = false;
-  }; # Disabled - requires OPENAI_API_KEY secret
+    enabled = false; # Disabled by default - enable in platform config
+  };
 
   # GitHub API integration (requires GITHUB_TOKEN)
   # Note: Package name is github-mcp-server, MCP binary is github-mcp-server-mcp
