@@ -16,18 +16,21 @@ lib.mkIf cfg.enable {
   };
 
   # Monado systemd service environment variables for performance and lifecycle
+  # Only add these when monado is explicitly enabled (not when WiVRn manages it)
   # Managed via systemd user service: systemctl --user start/stop monado
   # Automatically starts via monado.socket when OpenXR apps connect
-  systemd.user.services.monado.environment = lib.mkIf cfg.monado {
-    # Auto-stop Monado when all XR applications disconnect
-    # Reduces resource usage when VR is not in active use
-    IPC_EXIT_ON_DISCONNECT = "1";
+  systemd.user.services.monado = lib.mkIf cfg.monado {
+    environment = {
+      # Auto-stop Monado when all XR applications disconnect
+      # Reduces resource usage when VR is not in active use
+      IPC_EXIT_ON_DISCONNECT = "1";
 
-    # Performance optimization: Minimum compositor frame time in milliseconds
-    # Lower values reduce latency but increase CPU usage
-    # Adjust as needed for headset view stuttering (try values: 3-10)
-    # Default: 5ms for Quest 3 high-refresh-rate support (90Hz/120Hz)
-    U_PACING_COMP_MIN_TIME_MS = "5";
+      # Performance optimization: Minimum compositor frame time in milliseconds
+      # Lower values reduce latency but increase CPU usage
+      # Adjust as needed for headset view stuttering (try values: 3-10)
+      # Default: 5ms for Quest 3 high-refresh-rate support (90Hz/120Hz)
+      U_PACING_COMP_MIN_TIME_MS = "5";
+    };
   };
 
   # Required packages for OpenXR to work correctly
