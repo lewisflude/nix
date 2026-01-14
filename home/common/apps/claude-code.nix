@@ -13,7 +13,7 @@
   # See: https://github.com/NixOS/nixpkgs/issues/
 
   programs.claude-code = {
-    enable = false; # Temporarily disabled due to apple_sdk_11_0 deprecation
+    enable = true;
 
     # Use llm-agents.nix for daily updates and pre-built binaries from Numtide cache
     # This provides better maintenance and faster builds than claude-code-nix
