@@ -42,7 +42,12 @@ in
   home.packages = packagesList;
 
   imports = [
+    inputs.hyprcursor-phinger.homeManagerModules.hyprcursor-phinger
   ];
+
+  # Enable hyprcursor-phinger theme
+  programs.hyprcursor-phinger.enable = true;
+
   programs.niri = {
     package = niri-unstable;
     settings = {
@@ -106,7 +111,7 @@ in
       # Use renderD128 (render node) for optimal performance on multi-GPU systems
       # This ensures Niri doesn't try to use the Intel iGPU for rendering
       debug = {
-        render-drm-device = "/dev/dri/renderD128";
+        render-drm-device = "/dev/dri/renderD129";
       };
     }
     // input

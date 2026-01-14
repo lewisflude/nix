@@ -116,6 +116,9 @@
       url = "github:snowmead/rust-docs-mcp";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hyprcursor-phinger = {
+      url = "github:jappie3/hyprcursor-phinger";
+    };
   };
 
   outputs =

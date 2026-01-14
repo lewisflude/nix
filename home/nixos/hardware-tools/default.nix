@@ -7,5 +7,6 @@
     ./yubikey-touch-detector.nix
     ./networking.nix
     ./gnome-keyring.nix
+    ./graphics-diagnostics.nix
   ];
 }
