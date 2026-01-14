@@ -21,6 +21,7 @@ in
       # Gaming Compatibility Bridge for Pro Audio Interface
       # Creates a stereo virtual sink that routes to the Apogee Symphony Desktop
       # This solves the issue where games/Proton fail with multi-channel devices
+      # Used for LOCAL gaming (non-Sunshine); when streaming, games route to Sunshine sink
       pipewire."90-stereo-bridge" = {
         "context.modules" = [
           {
@@ -50,15 +51,18 @@ in
 
               # Routes to physical hardware (Pro Audio profile)
               # Find your device with: pw-link -o | grep -i apogee
+              # Note: If Apogee not found, PipeWire will auto-select default output
               "playback.props" = {
                 "audio.position" = [
                   "FL"
                   "FR"
                 ];
                 "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0";
-                "node.passive" = true; # Changed to true - prevents hanging if device not found
+                "node.passive" = true; # Prevents hanging if device not found
                 "stream.dont-remix" = true;
                 "node.latency" = gamingLatency;
+                # Allow fallback to other sinks if Apogee unavailable
+                "node.autoconnect" = true;
               };
             };
           }

@@ -30,10 +30,14 @@ _: {
   "Mod+L".action.focus-column-right = { };
   "Mod+Home".action.focus-column-first = { };
   "Mod+End".action.focus-column-last = { };
+
+  # Move column (+Ctrl = move instead of focus)
   "Mod+Ctrl+Home".action.move-column-to-first = { };
   "Mod+Ctrl+End".action.move-column-to-last = { };
   "Mod+Ctrl+Left".action.move-column-left = { };
   "Mod+Ctrl+Right".action.move-column-right = { };
+  "Mod+Ctrl+H".action.move-column-left = { };
+  "Mod+Ctrl+L".action.move-column-right = { };
 
   # Function keys for column layout
   "F16".action.maximize-column = { };
