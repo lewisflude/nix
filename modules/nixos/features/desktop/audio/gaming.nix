@@ -76,11 +76,21 @@ in
       "90-gaming-routing" = {
         "monitor.rules" = [
           {
+            # Lower Apogee hardware priority below game bridge
+            # This ensures when Sunshine sink doesn't exist, games fall back to bridge
+            matches = [
+              { "node.name" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0"; }
+            ];
+            actions.update-props = {
+              "priority.session" = 25; # Below game bridge (100) for gaming fallback
+            };
+          }
+          {
             matches = [ { "node.name" = "input.apogee_stereo_game_bridge"; } ];
             actions.update-props = {
               "node.passive" = false;
-              # Lower priority - only used when Sunshine sink not available
-              "priority.session" = 50;
+              # Medium priority - used when Sunshine sink not available
+              "priority.session" = 100;
             };
           }
           {
@@ -89,7 +99,7 @@ in
               { "node.name" = "sink-sunshine-stereo"; }
             ];
             actions.update-props = {
-              "priority.session" = 150; # Higher than Apogee bridge (50)
+              "priority.session" = 150; # Higher than game bridge (100)
             };
           }
         ];

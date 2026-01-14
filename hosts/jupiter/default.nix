@@ -35,7 +35,7 @@
     vr = {
       enable = true;
       alvr = false; # ALVR requires SteamVR - use WiVRn for Monado instead
-      monado = true; # Enable native Monado OpenXR runtime with systemd service management
+      monado = false; # Enable native Monado OpenXR runtime with systemd service management
       wivrn = {
         enable = true;
         autoStart = true; # Start automatically for convenience
