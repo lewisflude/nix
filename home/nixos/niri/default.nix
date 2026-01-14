@@ -45,7 +45,15 @@ in
     inputs.hyprcursor-phinger.homeManagerModules.hyprcursor-phinger
   ];
 
-  # Enable hyprcursor-phinger theme
+  # Configure cursor theme using phinger-cursors package
+  home.pointerCursor = {
+    name = "phinger-cursors-light";
+    package = pkgs.phinger-cursors;
+    size = 32;
+    gtk.enable = true;
+  };
+
+  # Enable hyprcursor-phinger theme for Wayland
   programs.hyprcursor-phinger.enable = true;
 
   programs.niri = {

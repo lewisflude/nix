@@ -112,13 +112,15 @@ mkIf vrEnabled {
     };
   };
 
-  # Set XR_RUNTIME_JSON environment variable for non-sandboxed VR applications
-  # This is required for apps that don't check ~/.config/openxr/1/active_runtime.json
-  home.sessionVariables.XR_RUNTIME_JSON =
-    if osConfig.host.features.vr.wivrn.enable && osConfig.host.features.vr.wivrn.defaultRuntime then
-      "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json"
-    else
-      "${pkgs.monado}/share/openxr/1/openxr_monado.json";
+  # DO NOT set XR_RUNTIME_JSON globally - it causes all games to try VR initialization
+  # Instead, set it per-game in Steam launch options when you want VR:
+  #   XR_RUNTIME_JSON=${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json %command%
+  #
+  # The active runtime is already set in ~/.config/openxr/1/active_runtime.json
+  # by the xdg.configFile below, which is the proper way to configure OpenXR.
+  # Setting XR_RUNTIME_JSON globally overrides this and forces VR for all apps.
+  #
+  # home.sessionVariables.XR_RUNTIME_JSON = ... # REMOVED - DO NOT SET GLOBALLY
 
   xdg.configFile = {
     # OpenXR runtime configuration for sandboxed applications (Steam)
