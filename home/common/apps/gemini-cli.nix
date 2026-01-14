@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   inputs,
   system,
   ...
@@ -285,9 +284,4 @@ in
     text = builtins.toJSON cfg.settings;
   };
 
-  # Declaratively create the checkpoint directory to ensure it persists
-  # across reboots. gemini-cli stores session data here.
-  home.file.".gemini/tmp".source = pkgs.runCommand "gemini-tmp-dir" { } ''
-    mkdir -p $out
-  '';
 }

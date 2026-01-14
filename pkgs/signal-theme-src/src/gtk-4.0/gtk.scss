@@ -136,7 +136,7 @@ button {
 entry {
   @include entry-base;
 
-  &:focus-within {
+  &:focus {
     @include entry-focus;
   }
 
