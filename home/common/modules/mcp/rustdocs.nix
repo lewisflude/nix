@@ -22,7 +22,9 @@
 let
   # Use the default package from the rust-docs-mcp flake input
   # This provides the 'rust-docs-mcp' binary built with proper dependencies
-  rust-docs-mcp-pkg = rust-docs-mcp.packages.${rust-docs-mcp.system}.default or rust-docs-mcp.defaultPackage.${rust-docs-mcp.system};
+  rust-docs-mcp-pkg =
+    rust-docs-mcp.packages.${rust-docs-mcp.system}.default
+      or rust-docs-mcp.defaultPackage.${rust-docs-mcp.system};
 in
 {
   rustdocsServer = {
