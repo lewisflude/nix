@@ -1,11 +1,20 @@
 # Niri Animations Configuration
 # Optimized for high-end hardware (13900K + RTX 4090)
+#
+# Animation types:
+# - Spring: Physics-based, better for interactive/gestural elements (respects velocity)
+# - Easing: Duration-based with curves, better for non-interactive timed animations
+#
+# Spring parameters:
+# - damping-ratio: 1.0 = critically damped (no bounce, minimum time)
+# - stiffness: Higher = faster (800-1200 tuned for high-end hardware)
+# - epsilon: When to stop animating (0.0001 = very precise)
 _: {
   animations = {
     enable = true;
     slowdown = 1.0;
 
-    # Workspace switching - fast and snappy
+    # Workspace switching - fast and snappy spring
     workspace-switch = {
       enable = true;
       kind = {
@@ -45,13 +54,13 @@ _: {
       enable = true;
       kind = {
         easing = {
-          duration-ms = 125;
-          curve = "ease-out-cubic";
+          duration-ms = 150;
+          curve = "ease-out-quad";
         };
       };
     };
 
-    # Window resize - smooth and responsive
+    # Window resize - very responsive (higher stiffness for high-end hardware)
     window-resize = {
       enable = true;
       kind = {
@@ -63,7 +72,7 @@ _: {
       };
     };
 
-    # Horizontal view movement - smooth scrolling between workspaces
+    # Horizontal view movement - snappy scrolling (higher stiffness for responsiveness)
     horizontal-view-movement = {
       enable = true;
       kind = {
@@ -75,13 +84,49 @@ _: {
       };
     };
 
-    # Config notification - subtle feedback
+    # Config notification - subtle bounce for feedback
     config-notification-open-close = {
+      enable = true;
+      kind = {
+        spring = {
+          damping-ratio = 0.6;
+          stiffness = 1000;
+          epsilon = 0.001;
+        };
+      };
+    };
+
+    # Exit confirmation dialog - gentle bounce
+    exit-confirmation-open-close = {
+      enable = true;
+      kind = {
+        spring = {
+          damping-ratio = 0.6;
+          stiffness = 500;
+          epsilon = 0.01;
+        };
+      };
+    };
+
+    # Screenshot UI - smooth open
+    screenshot-ui-open = {
       enable = true;
       kind = {
         easing = {
           duration-ms = 200;
           curve = "ease-out-quad";
+        };
+      };
+    };
+
+    # Overview (workspace overview) - smooth toggle
+    overview-open-close = {
+      enable = true;
+      kind = {
+        spring = {
+          damping-ratio = 1.0;
+          stiffness = 800;
+          epsilon = 0.0001;
         };
       };
     };

@@ -19,11 +19,23 @@ _: {
     action.move-column-to-workspace-up = { };
   };
 
-  # Column navigation with mouse wheel
-  "Mod+WheelScrollRight".action.focus-column-right = { };
-  "Mod+WheelScrollLeft".action.focus-column-left = { };
-  "Mod+Ctrl+WheelScrollRight".action.move-column-right = { };
-  "Mod+Ctrl+WheelScrollLeft".action.move-column-left = { };
+  # Column navigation with mouse wheel (horizontal scroll)
+  "Mod+WheelScrollRight" = {
+    cooldown-ms = 150;
+    action.focus-column-right = { };
+  };
+  "Mod+WheelScrollLeft" = {
+    cooldown-ms = 150;
+    action.focus-column-left = { };
+  };
+  "Mod+Ctrl+WheelScrollRight" = {
+    cooldown-ms = 150;
+    action.move-column-right = { };
+  };
+  "Mod+Ctrl+WheelScrollLeft" = {
+    cooldown-ms = 150;
+    action.move-column-left = { };
+  };
   "Mod+Shift+WheelScrollDown".action.focus-column-right = { };
   "Mod+Shift+WheelScrollUp".action.focus-column-left = { };
   "Mod+Ctrl+Shift+WheelScrollDown".action.move-column-right = { };

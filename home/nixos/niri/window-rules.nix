@@ -112,6 +112,39 @@ _: {
     # USABILITY & SMART BEHAVIORS
     # ============================================================================
 
+    # File pickers - floating for easier file selection
+    {
+      matches = [
+        { title = "^Open File$"; }
+        { title = "^Save File$"; }
+        { title = "^Save As$"; }
+        { title = "^Select.*"; }
+        { app-id = "^org\\.gnome\\.NautilusPreviewer$"; }
+        { app-id = "^xdg-desktop-portal-gtk$"; }
+        { app-id = "^xdg-desktop-portal-kde$"; }
+      ];
+      open-floating = true;
+      default-column-width = {
+        fixed = 900;
+      };
+      default-window-height = {
+        fixed = 600;
+      };
+    }
+
+    # System dialogs - floating for better UX
+    {
+      matches = [
+        { app-id = "^org\\.freedesktop\\.impl\\.portal\\.desktop\\..*"; }
+        { app-id = "^polkit-gnome-authentication-agent-.*"; }
+        { app-id = "^gcr-prompter$"; }
+        { app-id = "^zenity$"; }
+        { app-id = "^yad$"; }
+      ];
+      open-floating = true;
+      max-width = 600;
+    }
+
     # Picture-in-Picture windows - positioned at bottom-right corner
     {
       matches = [
