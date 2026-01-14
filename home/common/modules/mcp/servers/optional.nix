@@ -14,6 +14,9 @@
       "@modelcontextprotocol/server-filesystem"
       config.home.homeDirectory
     ];
+    env = {
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
+    };
     enabled = false; # Disabled by default for security - enable in platform config if needed
   };
 
@@ -24,6 +27,9 @@
       "-y"
       "@modelcontextprotocol/server-sequential-thinking"
     ];
+    env = {
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
+    };
     enabled = false; # Disabled by default - enable if needed
   };
 
@@ -34,6 +40,9 @@
       "-y"
       "mcp-server-fetch-typescript"
     ];
+    env = {
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
+    };
     enabled = false; # Disabled - enable if needed
   };
 
@@ -53,6 +62,9 @@
       "-y"
       "@modelcontextprotocol/server-puppeteer"
     ];
+    env = {
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
+    };
     enabled = false; # Disabled by default - enable if needed for browser automation
   };
 }

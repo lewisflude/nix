@@ -8,7 +8,7 @@
 {
   # Documentation indexing and search (requires OPENAI_API_KEY)
   # Note: Uses Node.js 20 for better-sqlite3 compatibility
-  # Force reinstall to avoid npx cache issues with native modules
+  # Uses version-specific npx cache to avoid native module version mismatches
   docs = {
     command = "${pkgs.nodejs_20}/bin/npx";
     args = [
@@ -16,6 +16,9 @@
       "@arabold/docs-mcp-server@latest"
     ];
     secret = "OPENAI_API_KEY";
+    env = {
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
+    };
     enabled = false; # Disabled - requires OPENAI_API_KEY secret
   };
 
@@ -30,6 +33,7 @@
     env = {
       DOCS_RS = "1";
       RUSTDOCFLAGS = "--cfg=docsrs";
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
     };
     enabled = false; # Disabled - requires OPENAI_API_KEY secret
   };
@@ -49,6 +53,9 @@
       "github-mcp-server-mcp"
     ];
     secret = "GITHUB_TOKEN";
+    env = {
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
+    };
     enabled = false; # Disabled - requires GITHUB_TOKEN secret
   };
 
@@ -68,6 +75,9 @@
       "@brave/brave-search-mcp-server"
     ];
     secret = "BRAVE_API_KEY";
+    env = {
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
+    };
     enabled = false; # Disabled - requires BRAVE_API_KEY secret
   };
 }

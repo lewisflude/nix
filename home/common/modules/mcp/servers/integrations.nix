@@ -11,16 +11,30 @@ let
     pkgs.writeShellScript "${name}-mcp" ''
       set -euo pipefail
 
+      # Detect platform for better error messages
+      if [ "$(uname)" = "Darwin" ]; then
+        EXPECTED_GROUP="admin"
+      else
+        EXPECTED_GROUP="sops-secrets"
+      fi
+
       ${pkgs.lib.concatMapStringsSep "\n" (secret: ''
         SECRET_PATH="/run/secrets/${secret}"
         if [ ! -r "$SECRET_PATH" ]; then
           echo "Error: ${name} requires ${secret} secret" >&2
           echo "Secret not found or not readable at $SECRET_PATH" >&2
-          echo "Ensure you're in the 'sops-secrets' group and the secret is configured in SOPS" >&2
+          echo "Ensure you're in the '$EXPECTED_GROUP' group and the secret is configured in SOPS" >&2
+          echo "Current groups: $(id -Gn | tr ' ' ',')" >&2
           exit 1
         fi
         export ${secret}="$(cat "$SECRET_PATH")"
       '') secrets}
+
+      # Set NPM_CONFIG_REGISTRY for npx commands if not already set
+      # This ensures npx uses the public registry even if user has CodeArtifact configured
+      if echo "${cmd}" | grep -q "npx"; then
+        export NPM_CONFIG_REGISTRY="''${NPM_CONFIG_REGISTRY:-https://registry.npmjs.org/}"
+      fi
 
       exec ${cmd} "$@"
     '';

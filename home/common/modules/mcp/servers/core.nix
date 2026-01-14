@@ -12,6 +12,9 @@
       "-y"
       "@modelcontextprotocol/server-memory"
     ];
+    env = {
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
+    };
   };
 
   # Git operations (no secrets required)
@@ -21,6 +24,9 @@
       "-y"
       "@cyanheads/git-mcp-server"
     ];
+    env = {
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
+    };
   };
 
   # Time and timezone utilities (no secrets required)
@@ -30,6 +36,9 @@
       "-y"
       "@odgrim/mcp-datetime"
     ];
+    env = {
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
+    };
   };
 
   # SQLite database access (no secrets required)
@@ -40,6 +49,9 @@
       "mcp-server-sqlite-npx"
       "${config.home.homeDirectory}/.local/share/mcp/data.db"
     ];
+    env = {
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
+    };
   };
 
   # MCP reference/test server (no secrets required)
@@ -49,5 +61,8 @@
       "-y"
       "@modelcontextprotocol/server-everything"
     ];
+    env = {
+      NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/";
+    };
   };
 }
