@@ -8,7 +8,8 @@
     pkgs.glmark2
 
     # Vulkan benchmarking suite
-    pkgs.vkmark
+    # FIXME: vkmark currently broken due to Vulkan API incompatibility
+    # pkgs.vkmark
 
     # X11 display information (useful with XWayland)
     pkgs.xorg.xdpyinfo
