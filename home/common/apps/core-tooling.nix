@@ -5,7 +5,7 @@
 }:
 {
   home.packages = [
-    pkgs.nix-cacert # Provides SSL certificates for tools like curl
+    pkgs.cacert # Provides SSL certificates for tools like curl
     pkgs.curl
     pkgs.wget
     # Note: yq is handled via programs.yq in home/common/apps/yq.nix
