@@ -43,4 +43,16 @@
     args = [ "mcp-nixos" ];
     enabled = false; # Disabled - requires uv package
   };
+
+  # Puppeteer - Browser automation and web scraping
+  # No API key required - uses local Chromium
+  # Navigate pages, take screenshots, interact with forms, capture console logs
+  puppeteer = {
+    command = "${pkgs.nodejs}/bin/npx";
+    args = [
+      "-y"
+      "@modelcontextprotocol/server-puppeteer"
+    ];
+    enabled = false; # Disabled by default - enable if needed for browser automation
+  };
 }

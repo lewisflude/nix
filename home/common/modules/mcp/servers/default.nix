@@ -1,5 +1,5 @@
 # Default MCP Server Configurations
-# Combines core, optional, and secret-requiring servers
+# Combines core, optional, secret-requiring, and integration servers
 {
   config,
   pkgs,
@@ -16,5 +16,6 @@ let
     inherit pkgs;
     inherit (rustdocs) rustdocsServer;
   };
+  integrations = import ./integrations.nix { inherit pkgs; };
 in
-core // optional // secrets
+core // optional // secrets // integrations
