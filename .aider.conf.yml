@@ -10,10 +10,6 @@ read:
   - docs/DX_GUIDE.md
   - docs/FEATURES.md
 
-# Model configuration
-# Use Claude Sonnet 4.5 for best Nix understanding
-model: anthropic/claude-sonnet-4-5-20250929
-
 # Git integration
 auto-commits: true
 dirty-commits: false

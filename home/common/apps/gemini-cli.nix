@@ -16,10 +16,6 @@ in
     # This avoids the broken buildNpmPackage in nixpkgs
     package = inputs.llm-agents.packages.${system}.gemini-cli;
 
-    # Use "auto" model selection - gemini-cli will choose the best available model
-    # You can override this with GEMINI_MODEL environment variable or --model flag
-    defaultModel = "auto";
-
     # Custom commands for common workflows
     # Usage: Type the command name in the gemini-cli prompt (e.g., /review)
     commands = {
