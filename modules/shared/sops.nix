@@ -60,6 +60,18 @@ in
       KAGI_API_KEY = mkSecret { allowUserRead = true; };
       OBSIDIAN_API_KEY = mkSecret { allowUserRead = true; };
       OPENAI_API_KEY = mkSecret { allowUserRead = true; };
+
+      # MCP Integration Secrets
+      LINEAR_API_KEY = mkSecret { allowUserRead = true; };
+      SLACK_BOT_TOKEN = mkSecret { allowUserRead = true; };
+      SLACK_TEAM_ID = mkSecret { allowUserRead = true; };
+      DISCORD_BOT_TOKEN = mkSecret { allowUserRead = true; };
+      YOUTUBE_API_KEY = mkSecret { allowUserRead = true; };
+      POSTGRES_CONNECTION_STRING = mkSecret { allowUserRead = true; };
+      QDRANT_URL = mkSecret { allowUserRead = true; };
+      QDRANT_API_KEY = mkSecret { allowUserRead = true; };
+      PINECONE_API_KEY = mkSecret { allowUserRead = true; };
+      E2B_API_KEY = mkSecret { allowUserRead = true; };
     };
   };
 
