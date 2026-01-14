@@ -27,6 +27,7 @@ let
   # Helper to build formatter configuration
   # Biome requires special handling with --stdin-file-path argument
   # Biome uses the filename extension to determine the file type
+  # Other formatters can specify custom args via formatterArgs in language standards
   buildFormatter =
     name: value:
     if value.formatter == "biome" then
@@ -41,6 +42,9 @@ let
     else
       {
         command = value.formatter;
+      }
+      // lib.optionalAttrs (value ? formatterArgs) {
+        args = value.formatterArgs;
       };
 
   # Helper to build language server list

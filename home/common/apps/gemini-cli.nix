@@ -11,9 +11,7 @@ let
 in
 {
   programs.gemini-cli = {
-    enable = false; # Temporarily disabled - upstream npm 11 cache validation bug
-    # See: https://github.com/numtide/llm-agents.nix/issues/1644
-    # Re-enable once PR #1647 is merged and flake is updated
+    enable = true;
 
     # Use gemini-cli from llm-agents.nix instead of nixpkgs
     # This avoids the broken buildNpmPackage in nixpkgs

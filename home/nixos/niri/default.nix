@@ -21,7 +21,9 @@ let
   };
   input = import ./input.nix { };
   outputs = import ./outputs.nix { };
-  layout = import ./layout.nix { inherit themeConstants; };
+  layout = import ./layout.nix {
+    inherit lib themeLib themeConstants;
+  };
   window-rules = import ./window-rules.nix { };
   animations = import ./animations.nix { };
   startup = import ./startup.nix {

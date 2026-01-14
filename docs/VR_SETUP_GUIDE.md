@@ -23,14 +23,24 @@ Quest Headset
     ↓ (WiFi)
 WiVRn Server (with embedded Monado)
     ↓ (OpenXR)
-Steam Games (via pressure-vessel container)
+    ├─ WayVR Desktop Overlay (auto-starts)
+    └─ Steam Games (via pressure-vessel container)
 ```
 
 **Key Points:**
 
 - ✅ WiVRn handles both streaming AND the OpenXR runtime
+- ✅ WayVR auto-starts when WiVRn connects (systemd service)
 - ❌ Standalone Monado service is disabled (redundant and incompatible with Niri)
 - ✅ OpenXR games work directly (no SteamVR needed)
+
+### Services
+
+| Service | Status | Purpose |
+|---------|--------|---------|
+| `wivrn.service` | Auto-start (enabled) | Wireless VR streaming to Quest 3 |
+| `wayvr.service` | Auto-start (bound to wivrn) | Desktop overlay in VR |
+| `monado.service` | Disabled | Standalone runtime (not needed with WiVRn) |
 
 ---
 
@@ -291,6 +301,69 @@ For now, hardware adapters remain the **most reliable solution** on Niri.
 
 ---
 
+## Audio Setup
+
+### Overview
+
+WiVRn creates a **virtual audio device** that routes audio to your Quest 3 headset over the network.
+
+**Audio Device Name:** `WiVRn` (output) and `WiVRn(microphone)` (input)
+
+### Automatic vs Manual Audio Routing
+
+**By default**, VR games will use your **desktop speakers** unless you redirect them.
+
+You have two options:
+
+#### Option 1: Manual Redirect (Recommended)
+
+**While the VR game is running**, redirect its audio:
+
+```bash
+vr-audio-fix
+```
+
+This moves the game's audio to your Quest 3 headset without affecting desktop apps.
+
+#### Option 2: Per-Application Assignment
+
+Use `pavucontrol` or your desktop's audio settings to permanently assign VR games to the WiVRn device:
+
+1. Launch `pavucontrol`
+2. Go to "Playback" tab
+3. Find your VR game (e.g., "hlvr", "steam")
+4. Select "WiVRn" from the dropdown
+
+This setting is remembered per-application.
+
+#### Option 3: Set WiVRn as Default (Not Recommended)
+
+This routes **all** audio (including desktop) to your headset:
+
+```bash
+pactl set-default-sink wivrn.sink
+```
+
+**Downside:** You won't hear desktop audio on your speakers while wearing the headset.
+
+### Microphone Setup
+
+1. **In your Quest 3**, go to WiVRn settings
+2. **Enable microphone**
+3. **Grant permission** when prompted
+4. The microphone appears as **"WiVRn(microphone)"** in your audio settings
+5. **Assign applications** to use it (same process as output device)
+
+### Audio Status Check
+
+```bash
+vr-audio-status  # Check if WiVRn audio device exists
+pactl list sinks short  # List all audio output devices
+pactl list sources short  # List all audio input devices (including mic)
+```
+
+---
+
 ## Steam VR Game Launch Options (2026 Update)
 
 ### Why Launch Options Are Needed
@@ -386,36 +459,33 @@ openvr-compat-path = "${pkgs.xrizer}";  # Set automatically
 
 ### Locking OpenVR Paths (Preventing SteamVR Override)
 
-If SteamVR keeps opening instead of WiVRn, you can make your OpenVR paths file read-only using Home Manager. Add this to `home/nixos/apps/vr.nix`:
+**UPDATE:** This is now configured automatically in `home/nixos/apps/vr.nix`.
+
+WiVRn configures `~/.config/openvr/openvrpaths.vrpath` to use xrizer, but **SteamVR can override this file** when it launches, breaking VR games.
+
+The configuration now **locks the OpenVR paths** to ensure xrizer is always used:
 
 ```nix
-# Lock OpenVR paths to prevent SteamVR from overriding WiVRn
+# In home/nixos/apps/vr.nix (already configured)
 xdg.configFile."openvr/openvrpaths.vrpath" = {
   text = builtins.toJSON {
-    config = [
-      "${config.xdg.dataHome}/Steam/config"
-    ];
-    external_drivers = null;
-    jsonid = "vrpathreg";
-    log = [
-      "${config.xdg.dataHome}/Steam/logs"
-    ];
     runtime = [
-      # Point to xrizer's OpenVR compatibility layer
-      "${pkgs.xrizer}/lib/openxr/opencomposite"
+      "${pkgs.xrizer}/lib/xrizer"  # xrizer FIRST
+      # SteamVR intentionally omitted
     ];
-    version = 1;
   };
-  # Force read-only to prevent Steam from modifying
-  force = true;
-  onChange = ''
-    # Make file immutable so Steam can't overwrite it
-    ${pkgs.e2fsprogs}/bin/chattr +i ${config.xdg.configHome}/openvr/openvrpaths.vrpath || true
-  '';
+  force = true;  # Prevent Steam from modifying
 };
 ```
 
-**Note:** This is optional. WiVRn typically manages this file automatically, but locking it provides extra protection against SteamVR interference.
+**Why this matters:**
+
+- Without this, SteamVR appears first in the runtime list
+- Wine/Proton games probe for OpenVR at startup
+- They find SteamVR and try to use it instead of xrizer
+- Result: Games fail to start or show "No headset detected"
+
+**After rebuilding home-manager**, your `openvrpaths.vrpath` will **only** contain xrizer, forcing all OpenVR games to use OpenXR via WiVRn.
 
 ### Troubleshooting xrizer
 
@@ -441,6 +511,17 @@ xdg.configFile."openvr/openvrpaths.vrpath" = {
 
 ## Usage Workflow
 
+**Quick Start:**
+
+1. ✅ WiVRn auto-starts on login
+2. ✅ Connect Quest 3 to WiVRn
+3. ✅ WayVR overlay auto-starts when connected
+4. ✅ Put on headset and double-tap B/Y to show desktop
+
+**Everything is automatic!** Just connect your headset and WayVR will be waiting for you.
+
+---
+
 ### 1. Start WiVRn (Auto-starts on login)
 
 Verify it's running:
@@ -456,14 +537,217 @@ systemctl --user status wivrn
 - Select **jupiter** from server list
 - Wait for "Connected" status
 
-### 3. Launch VR Game
+### 3. WayVR Desktop Overlay (Auto-starts)
 
-- Launch game from Steam
+**WayVR automatically starts when WiVRn connects!** It runs in OpenXR mode with a home environment.
+
+**Service Status:**
+
+```bash
+wayvr-status  # Check if WayVR is running
+wayvr-log     # View real-time logs
+```
+
+**Service Control:**
+
+```bash
+wayvr-start   # Manually start WayVR
+wayvr-stop    # Stop WayVR overlay
+wayvr-restart # Restart WayVR
+```
+
+**First-time setup:**
+
+- When WayVR starts, a screen selection dialog will appear
+- Check your **notifications** or terminal for the correct screen order
+- Select screens in the order requested
+- If you select wrong: In VR, go to Settings → "Clear PipeWire tokens" → "Restart software"
+
+**Controls in VR:**
+
+- **Double-tap B or Y** (left controller): Show/hide desktop overlays
+- **Check left wrist**: Watch interface for controls
+- **Blue laser**: Left-click
+- **Orange laser**: Right-click (squeeze grip while pointing)
+- **Purple laser**: Middle-click
+- **Analog stick up/down**: Scroll wheel
+
+**Home Environment:**
+WayVR shows a home environment with headset passthrough by default. You can customize the background via Settings or check the [OpenXR Skybox wiki](https://github.com/wlx-team/wayvr/wiki/OpenXR-Skybox).
+
+**Optional Management Dashboard:**
+
+```bash
+vr-dashboard
+```
+
+**Note:** The dashboard is a companion GUI that connects to the main WayVR overlay. Most users won't need it—just use the in-VR watch interface.
+
+**Manual Launch (if service disabled):**
+
+```bash
+vr-desktop          # Launch WayVR in basic mode
+vr-desktop-openxr   # Launch WayVR with OpenXR home environment
+```
+
+### 4. Launch VR Games
+
+- Launch game from Steam (with proper launch options)
 - Game should start in VR automatically
 
 ---
 
 ## Troubleshooting
+
+### No Audio in VR Games
+
+**Problem:** Game is running but you don't hear audio in your Quest 3 headset.
+
+**Cause:** The game is outputting to your desktop speakers instead of the WiVRn virtual audio device.
+
+**Quick Fix (while game is running):**
+
+```bash
+vr-audio-fix
+```
+
+This redirects the game's audio to your Quest 3.
+
+**Permanent Fix - Using pavucontrol:**
+
+1. **Install pavucontrol** (if not already installed):
+
+   ```bash
+   nix-shell -p pavucontrol --run pavucontrol
+   ```
+
+2. **Switch to "Playback" tab**
+
+3. **Find your VR game** (e.g., "hlvr" for Half-Life: Alyx)
+
+4. **Click the dropdown next to the game** and select **"WiVRn"**
+
+**Alternative - Set WiVRn as Default:**
+
+This makes **all** audio go to your Quest 3 (not recommended for desktop use):
+
+```bash
+pactl set-default-sink wivrn.sink
+```
+
+To revert:
+
+```bash
+pactl set-default-sink @DEFAULT_SINK@
+```
+
+**Pro Tip:** Most audio control panels (pavucontrol, your DE's audio settings) let you assign specific applications to specific output devices. Set your VR games to always use "WiVRn" and desktop apps to use your speakers.
+
+### WayVR Dashboard Shows "Connection Refused"
+
+**Error:**
+
+```
+WARN: Failed to connect to the WayVR IPC: Connection refused (os error 111)
+```
+
+**Solution:** Run the main WayVR overlay first:
+
+```bash
+vr-desktop  # Start this first!
+```
+
+Then in another terminal:
+
+```bash
+vr-dashboard  # This will now connect
+```
+
+**Why:** `vr-dashboard` is a management GUI that connects to `wlx-overlay-s`. You must run the main overlay before the dashboard can connect.
+
+**Note:** Most users don't need the dashboard—you can control everything in VR using the watch on your left wrist.
+
+### WayVR Not Visible in Headset
+
+**Checklist:**
+
+1. **Is WiVRn connected?**
+
+   ```bash
+   systemctl --user status wivrn
+   # Should show "active (running)" with client connected
+   ```
+
+2. **Is WayVR running?**
+
+   ```bash
+   wayvr-status
+   # Should show "active (running)"
+   ```
+
+3. **Did you select screens when prompted?**
+   - Check terminal output or notifications
+   - Select screens in the order requested
+   - If you missed it, restart: `wayvr-restart`
+
+4. **Are overlays hidden?**
+   - Double-tap B or Y on left controller to show/hide
+
+5. **Check WayVR logs:**
+
+   ```bash
+   wayvr-log  # Real-time systemd journal
+   # Or check legacy log:
+   tail -f /tmp/wayvr.log
+   ```
+
+**If WayVR service failed to start:**
+
+```bash
+# Check the error
+journalctl --user -u wayvr -n 50
+
+# Common fixes:
+wayvr-restart              # Restart the service
+systemctl --user reset-failed wayvr  # Clear failed state
+```
+
+### Disabling WayVR Auto-Start
+
+If you prefer to launch WayVR manually instead of auto-starting:
+
+```nix
+# In home/nixos/apps/vr.nix, disable the systemd service
+systemd.user.services.wayvr.Install.WantedBy = lib.mkForce [ ];
+```
+
+Then rebuild home-manager:
+
+```bash
+nh home switch
+```
+
+Now WayVR won't auto-start. Launch manually with:
+
+```bash
+vr-desktop-openxr  # Launch with OpenXR home environment
+```
+
+### Mouse Not Aligned with Laser Pointer
+
+**Screens selected in wrong order:**
+
+1. In VR settings, press "Clear PipeWire tokens"
+2. Press "Restart software"
+3. Check **notifications** or terminal for correct screen order
+4. Select screens in the requested order
+
+**Or restart the service:**
+
+```bash
+wayvr-restart
+# Then select screens when prompted
+```
 
 ### Game Crashes Immediately
 
