@@ -7,9 +7,10 @@
 }:
 {
   # Nix settings for darwin
-  # Note: Determinate Nix will automatically handle writing these to /etc/nix/nix.custom.conf
-  # when the determinate-nix module is enabled
-  nix.settings = {
+  # Using determinate-nix.customSettings instead of nix.settings
+  # because Determinate Nix manages /etc/nix/nix.conf directly
+  # See: https://docs.determinate.systems/determinate-nix/use-with/nix-darwin
+  determinate-nix.customSettings = {
     # Determinate-specific settings
     flake-registry = "/etc/nix/flake-registry.json";
     sandbox = "relaxed";
