@@ -17,67 +17,64 @@
     # 4. Enable server below and rebuild again
     servers = {
       # ═══════════════════════════════════════════════════════════
-      # ENABLED SERVERS (Secrets configured in SOPS)
+      # CORE SERVERS (enabled by default, no secrets)
       # ═══════════════════════════════════════════════════════════
+      # memory, git, time, sqlite, everything - always enabled
 
-      # Development & Documentation
+      # ═══════════════════════════════════════════════════════════
+      # DEVELOPMENT & DOCUMENTATION
+      # ═══════════════════════════════════════════════════════════
       github.enabled = true; # GITHUB_TOKEN
       openai.enabled = true; # OPENAI_API_KEY
       docs.enabled = true; # OPENAI_API_KEY
-      rustdocs.enabled = true; # OPENAI_API_KEY
+      # rustdocs.enabled = true; # TEMPORARILY DISABLED: upstream apple_sdk_11_0 deprecation
 
-      # Search & Research
+      # ═══════════════════════════════════════════════════════════
+      # SEARCH & RESEARCH
+      # ═══════════════════════════════════════════════════════════
       kagi.enabled = true; # KAGI_API_KEY
+      brave.enabled = true; # BRAVE_API_KEY
 
-      # Utilities (no secrets required)
+      # ═══════════════════════════════════════════════════════════
+      # UTILITIES (no secrets required)
+      # ═══════════════════════════════════════════════════════════
       filesystem.enabled = true;
       sequentialthinking.enabled = true;
       fetch.enabled = true;
       nixos.enabled = true;
-      puppeteer.enabled = true; # Browser automation - no secrets required
+      puppeteer.enabled = true; # Browser automation
 
       # ═══════════════════════════════════════════════════════════
-      # AVAILABLE INTEGRATIONS (Add secrets to enable)
+      # PROJECT MANAGEMENT
       # ═══════════════════════════════════════════════════════════
-
-      # Project Management
-      # linear.enabled = true;  # Requires: LINEAR_API_KEY
-      # Get key: https://linear.app/settings/api
-
-      # Communication
-      # slack.enabled = true;  # Requires: SLACK_BOT_TOKEN, SLACK_TEAM_ID
-      # Get credentials: https://api.slack.com/apps
-      #
-      # discord.enabled = true;  # Requires: DISCORD_BOT_TOKEN
-      # Get token: https://discord.com/developers/applications
-
-      # Research & Content
-      # youtube.enabled = true;  # Requires: YOUTUBE_API_KEY
-      # Get key: https://console.cloud.google.com/apis/credentials
-      # Enable YouTube Data API v3
-
-      # Database
-      # postgres.enabled = true;  # Requires: POSTGRES_CONNECTION_STRING
-      # Format: postgresql://user:password@host:port/database
-
-      # Vector Databases (for RAG workflows)
-      # qdrant.enabled = true;  # Requires: QDRANT_URL, QDRANT_API_KEY
-      # Get credentials: https://cloud.qdrant.io/
-      #
-      # pinecone.enabled = true;  # Requires: PINECONE_API_KEY
-      # Get key: https://www.pinecone.io/
-      # Note: Choose qdrant OR pinecone based on your needs
-
-      # Code Execution
-      # e2b.enabled = true;  # Requires: E2B_API_KEY
-      # Get key: https://e2b.dev/
-      # Enables secure Python/JavaScript code execution
+      linear.enabled = true; # LINEAR_API_KEY
 
       # ═══════════════════════════════════════════════════════════
-      # DISABLED ALTERNATIVES
+      # COMMUNICATION
       # ═══════════════════════════════════════════════════════════
+      slack.enabled = true; # SLACK_BOT_TOKEN, SLACK_TEAM_ID
+      discord.enabled = true; # DISCORD_BOT_TOKEN
 
-      # brave.enabled = false;  # Disabled - using Kagi for search instead
+      # ═══════════════════════════════════════════════════════════
+      # RESEARCH & CONTENT
+      # ═══════════════════════════════════════════════════════════
+      youtube.enabled = true; # YOUTUBE_API_KEY
+
+      # ═══════════════════════════════════════════════════════════
+      # DATABASE
+      # ═══════════════════════════════════════════════════════════
+      postgres.enabled = true; # POSTGRES_CONNECTION_STRING
+
+      # ═══════════════════════════════════════════════════════════
+      # VECTOR DATABASES (for RAG workflows)
+      # ═══════════════════════════════════════════════════════════
+      qdrant.enabled = true; # QDRANT_URL, QDRANT_API_KEY
+      pinecone.enabled = true; # PINECONE_API_KEY
+
+      # ═══════════════════════════════════════════════════════════
+      # CODE EXECUTION
+      # ═══════════════════════════════════════════════════════════
+      e2b.enabled = true; # E2B_API_KEY
     };
   };
 }

@@ -21,7 +21,6 @@
   config,
   lib,
   pkgs,
-  rust-docs-mcp,
   ...
 }:
 let
@@ -50,7 +49,7 @@ let
   # Import sub-modules
   serverTypes = import ./types.nix { inherit lib; };
   builders = import ./builders.nix { inherit pkgs lib; };
-  defaultServers = import ./servers/default.nix { inherit config pkgs rust-docs-mcp; };
+  defaultServers = import ./servers/default.nix { inherit config pkgs; };
 
   inherit (serverTypes) serverType;
   inherit (builders) mkServerConfig;

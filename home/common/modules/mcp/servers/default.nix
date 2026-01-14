@@ -3,12 +3,11 @@
 {
   config,
   pkgs,
-  rust-docs-mcp,
   ...
 }:
 let
   rustdocs = import ../rustdocs.nix {
-    inherit rust-docs-mcp;
+    inherit pkgs;
   };
   core = import ./core.nix { inherit config pkgs; };
   optional = import ./optional.nix { inherit pkgs config; };

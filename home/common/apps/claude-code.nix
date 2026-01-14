@@ -8,9 +8,12 @@
   # Claude Code CLI - agentic coding assistant
   # Uses llm-agents.nix for daily updates and pre-built binaries
   # MCP servers configured in home/{nixos,darwin}/mcp.nix
+  #
+  # TEMPORARILY DISABLED: Waiting for upstream fix for apple_sdk_11_0 deprecation
+  # See: https://github.com/NixOS/nixpkgs/issues/
 
   programs.claude-code = {
-    enable = true;
+    enable = false; # Temporarily disabled due to apple_sdk_11_0 deprecation
 
     # Use llm-agents.nix for daily updates and pre-built binaries from Numtide cache
     # This provides better maintenance and faster builds than claude-code-nix

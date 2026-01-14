@@ -1,8 +1,11 @@
 # Rustdocs MCP Server Builder
-# Uses the rust-docs-mcp flake input for a clean, declarative package
+# TEMPORARILY DISABLED: Upstream uses deprecated apple_sdk_11_0
 #
 # This server provides comprehensive access to Rust crate documentation,
 # source code analysis, dependency trees, and module structure visualization.
+#
+# TODO: Re-enable once upstream fixes apple_sdk_11_0 deprecation
+# See: https://github.com/snowmead/rust-docs-mcp
 #
 # Usage:
 #   - Enable in your platform-specific MCP config (home/{nixos,darwin}/mcp.nix)
@@ -16,21 +19,14 @@
 #   - get_dependencies: Analyze dependency trees
 #   - structure: Generate module hierarchy visualizations
 {
-  rust-docs-mcp,
+  pkgs,
   ...
 }:
-let
-  # Use the default package from the rust-docs-mcp flake input
-  # This provides the 'rust-docs-mcp' binary built with proper dependencies
-  rust-docs-mcp-pkg =
-    rust-docs-mcp.packages.${rust-docs-mcp.system}.default
-      or rust-docs-mcp.defaultPackage.${rust-docs-mcp.system};
-in
 {
   rustdocsServer = {
-    command = "${rust-docs-mcp-pkg}/bin/rust-docs-mcp";
-    args = [ ];
-    # No secret required for basic functionality
-    # OPENAI_API_KEY only needed if using OpenAI features (optional)
+    # Placeholder command - server is disabled due to upstream build issue
+    command = "${pkgs.coreutils}/bin/echo";
+    args = [ "rust-docs-mcp is temporarily disabled due to upstream apple_sdk_11_0 deprecation" ];
+    enabled = false;
   };
 }
