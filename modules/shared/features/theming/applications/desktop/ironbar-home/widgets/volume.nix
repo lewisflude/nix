@@ -1,8 +1,8 @@
 _: {
   type = "volume";
   class = "volume";
-  # UX: Icon-only by default, percentage on hover
-  format = "{icon}";
+  # Clean format: icon + subtle value (no % clutter)
+  format = "{icon} {percentage}";
   max_volume = 100;
   icons = {
     volume_high = "󰕾";
@@ -10,7 +10,7 @@ _: {
     volume_low = "󰕿";
     muted = "󰝟";
   };
-  tooltip = "{percentage}% volume\nClick to mute | Scroll to adjust";
+  tooltip = "Volume: {percentage}%\nClick to mute | Scroll to adjust";
   on_scroll_up = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+";
   on_scroll_down = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-";
 }

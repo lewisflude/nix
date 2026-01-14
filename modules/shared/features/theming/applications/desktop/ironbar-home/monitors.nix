@@ -15,13 +15,13 @@ in
       popup_gap = 10;
       popup_autohide = false;
       start_hidden = false;
-      anchor_to_edges = false;
+      anchor_to_edges = true;
       icon_theme = "Papirus";
       margin = {
         top = 8;
         bottom = 0;
-        left = 0;
-        right = 0;
+        left = 8;
+        right = 8;
       };
       inherit (widgets) start;
       inherit (widgets) center;

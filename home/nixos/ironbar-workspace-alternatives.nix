@@ -1,5 +1,9 @@
 # Alternative workspace configurations for ironbar
 # Use if name_map icons don't display properly
+#
+# NOTE: Some CSS techniques below (::before pseudo-elements, content property)
+# are NOT supported by GTK CSS. They are included for reference only.
+# GTK CSS is a subset of CSS3 - see gtk-css-spec.md for supported properties.
 
 {
   # Option 1: Simple text labels (most reliable)
@@ -32,8 +36,10 @@
     show_icon = false;
   };
 
-  # CSS to add icons via ::before (works with Option 2)
-  # Add to style.css:
+  # CSS to add icons via ::before
+  # WARNING: This does NOT work in GTK CSS - ::before/::after pseudo-elements
+  # and the content property are not supported. Kept for reference only.
+  # Consider using name_map with Unicode/emoji icons instead.
   workspacesCssIcons = ''
     /* Add semantic icons before workspace numbers */
     .workspaces button[data-name="1"]::before { content: "󰈹 "; }

@@ -41,11 +41,6 @@ in
 {
   home.packages = packagesList;
 
-  # Make workspace creation script available
-  home.file.".local/bin/create-niri-workspaces" = {
-    source = ../scripts/create-niri-workspaces.sh;
-    executable = true;
-  };
   imports = [
   ];
   programs.niri = {
@@ -55,6 +50,10 @@ in
       # This makes Niri draw borders/focus rings around windows instead of behind them
       # Fixes borders showing through semitransparent windows
       prefer-no-csd = true;
+
+      # Hide the "Important Hotkeys" popup at startup
+      # Can still be shown with Mod+Shift+Slash
+      hotkey-overlay.skip-at-startup = true;
 
       # Overview settings for premium look
       overview = {
@@ -98,10 +97,10 @@ in
       environment = {
         # Force Qt apps to use Wayland
         QT_QPA_PLATFORM = "wayland";
-        # Remove DISPLAY to prevent X11 fallback
-        DISPLAY = null;
         # Enable Wayland for Electron/Chromium apps
         NIXOS_OZONE_WL = "1";
+        # Note: DISPLAY is automatically managed by niri >= 25.08 for xwayland-satellite
+        # Do NOT set DISPLAY here - let niri export it when X11 clients connect
       };
       # Force NVIDIA RTX 4090 as the primary render device
       # Use renderD128 (render node) for optimal performance on multi-GPU systems

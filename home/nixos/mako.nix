@@ -12,9 +12,10 @@ _: {
       icons = true;
       icon-path = "/run/current-system/sw/share/icons/Papirus";
       layer = "overlay";
-      # Position below ironbar: bar height (42px) + gap (10px) = 52px
+      # Ironbar's exclusive zone automatically reserves space; margin-top is additional gap
+      # Match ironbar's top margin for visual consistency
       # Format: "top,right,bottom,left"
-      margin = "52,10,0,0";
+      margin = "8,8,0,0";
       markup = true;
       max-icon-size = 48;
       max-visible = 5;

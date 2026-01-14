@@ -3,16 +3,39 @@
   ...
 }:
 let
-  # Base CSS - minimal, let Signal theme do the work
+  # Import design tokens
+  tokens = import ./tokens.nix;
+
+  # Destructure for cleaner access
+  inherit (tokens)
+    spacing
+    widget
+    island
+    sizing
+    opacity
+    typography
+    radius
+    shadow
+    transition
+    ;
+  interactionColors = tokens.colors;
+
+  # ============================================================================
+  # BASE CSS
+  # ============================================================================
+  # Minimal reset, let Signal GTK theme handle defaults
   baseCss = ''
-    /* Let Signal GTK theme handle all base styling */
+    /* Base bar styling */
     #bar {
-      padding: 6px 20px;
-      min-height: 44px;
+      padding: 7px ${spacing."3xl"};
+      min-height: ${sizing.barHeight};
     }
   '';
 
-  # Signal theme colors - Floating island containers
+  # ============================================================================
+  # THEME CSS (Signal Colors)
+  # ============================================================================
+  # Floating islands design - requires theme colors
   themeCss =
     if colors != null then
       ''
@@ -20,46 +43,47 @@ let
         color: ${colors."text-primary".hex};
 
         /* ===== FLOATING ISLANDS ===== */
-        /* Three distinct floating sections with backgrounds */
 
-        /* Island 1: Navigation block (left) */
+        /* Island 1: Navigation (left) */
         #bar #start {
           background-color: ${colors."surface-base".hex};
-          border-radius: 12px;
-          padding: 4px 8px;
-          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+          border-radius: ${radius.lg};
+          padding: ${island.padding};
+          box-shadow: ${shadow.island};
         }
 
-        /* Island 2: Time block (center) */
+        /* Island 2: Time (center) - visual anchor */
         #bar #center {
           background-color: ${colors."surface-base".hex};
-          border-radius: 12px;
-          padding: 4px 8px;
-          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+          border-radius: ${radius.lg};
+          padding: ${island.paddingCenter};
+          box-shadow: ${shadow.islandCenter};
         }
 
-        /* Island 3: Status block (right) */
+        /* Island 3: Status (right) */
         #bar #end {
           background-color: ${colors."surface-base".hex};
-          border-radius: 12px;
-          padding: 4px 8px;
-          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+          border-radius: ${radius.lg};
+          padding: ${island.padding};
+          box-shadow: ${shadow.island};
         }
       ''
     else
       "";
 
-  # Signal theme colors - Widget styling (transparent by default)
+  # ============================================================================
+  # WIDGET THEME CSS (Interactive States)
+  # ============================================================================
   widgetThemeCss =
     if colors != null then
       ''
 
-        /* Let Signal GTK theme style widgets by default */
+        /* Signal GTK theme handles default widget styling */
 
-        /* Only style the focused workspace - let Signal theme handle the rest */
+        /* Focused workspace highlight */
         #bar #start .workspaces button.focused {
           background-color: ${colors."surface-subtle".hex} !important;
-          border-radius: 8px;
+          border-radius: ${radius.md};
         }
 
         /* Popup styling - match island aesthetic */
@@ -68,445 +92,408 @@ let
           border: 1px solid ${colors."surface-emphasis".hex};
         }
 
-        /* Interactive widget hover states */
+        /* Interactive controls - hover states */
         .brightness:hover,
         .volume:hover {
-          background-color: rgba(37, 38, 47, 0.25);
-          border-radius: 8px;
-          cursor: pointer;
+          background-color: ${interactionColors.hoverBg};
         }
 
-        /* Interactive widget active states */
+        /* Interactive controls - active/pressed states */
         .brightness:active,
         .volume:active {
-          transform: scale(0.98);
+          background-color: ${interactionColors.activeBg};
+          opacity: 0.9;
         }
 
-        /* Tray button hover states */
+        /* Tray button hover */
         .tray button:hover {
-          background-color: rgba(37, 38, 47, 0.25);
-          border-radius: 6px;
+          background-color: ${interactionColors.activeBg};
+          border-radius: ${radius.sm};
         }
 
-        /* Tray button active states */
+        /* Tray button active */
         .tray button:active {
-          transform: scale(0.95);
+          opacity: 0.9;
         }
 
-        /* Universal focus indicator for keyboard navigation */
+        /* Focus indicator for keyboard navigation */
         *:focus-visible {
           outline: 2px solid ${colors."accent-focus".hex};
           outline-offset: 2px;
-          border-radius: 8px;
+          border-radius: ${radius.md};
         }
       ''
     else
       "";
 
+  # ============================================================================
+  # LAYOUT CSS (Structure & Spacing)
+  # ============================================================================
   layoutCss = ''
 
-    /* ===== FLOATING ISLAND SPACING ===== */
-    /* Islands are separated by natural bar gap */
+    /* ===== ISLAND STRUCTURE ===== */
     #bar #start,
     #bar #center,
     #bar #end {
-      min-height: 36px;
+      min-height: ${sizing.widgetHeight};
     }
 
-    /* Center island gets slightly more visual weight */
-    #bar #center {
-      padding: 6px 12px;
-      box-shadow: 0 3px 16px rgba(0, 0, 0, 0.12);
-    }
-
-    /* ===== MODULE POSITIONING ===== */
-    /* Widget containers - minimal spacing within islands */
+    /* ===== WIDGET CONTAINERS ===== */
     .widget-container {
-      margin: 0;
-      min-height: 36px;
+      margin: ${spacing.none};
+      min-height: ${sizing.widgetHeight};
     }
 
-    /* Widget containers - ensure flex children are centered */
     .widget-container > box {
-      min-height: 36px;
+      min-height: ${sizing.widgetHeight};
     }
 
-    /* All widgets - consistent height */
     .widget {
-      min-height: 36px;
+      min-height: ${sizing.widgetHeight};
       border: none;
     }
 
-    /* ===== ISLAND 1: NAVIGATION (Workspaces + Focused Window) ===== */
-    /* Gestalt: Proximity - Workspaces grouped tightly, separated from window title */
+    /* ===== ISLAND 1: NAVIGATION ===== */
+    /* Workspaces + Focused Window Title */
 
-    /* Workspace widget - tight internal spacing */
     .workspaces {
-      padding: 2px 4px;
-      margin-right: 16px;
+      padding: ${widget.paddingTight};
+      margin-right: ${widget.gapLarge};
     }
 
-    /* Individual workspace items - icon-based with semantic meaning */
     .workspaces .item {
-      min-width: 36px;
-      min-height: 32px;
-      margin: 0 3px;
-      padding: 0 8px;
+      min-width: ${sizing.workspaceItem};
+      min-height: ${sizing.itemHeight};
+      margin: ${spacing.none} ${spacing.xs};
+      padding: ${spacing.none} ${spacing.sm};
       border: none;
-      font-size: 16px;
-      font-weight: 400;
-      line-height: 32px;
-      opacity: 0.5;
-      transition: opacity 150ms ease, background-color 150ms ease, transform 100ms ease;
+      font-size: ${typography.size.md};
+      font-weight: ${typography.weight.normal};
+      line-height: ${typography.lineHeight.item};
+      opacity: ${opacity.disabled};
+      border-radius: ${radius.md};
+      transition: ${transition.interactive};
     }
 
-    /* Workspace item hover state */
     .workspaces .item:hover {
-      opacity: 0.7;
-      background-color: rgba(37, 38, 47, 0.15);
-      border-radius: 8px;
+      opacity: ${opacity.hoverSubtle};
+      background-color: ${interactionColors.hoverBgSubtle};
     }
 
-    /* Active workspace - full opacity with subtle highlight */
     .workspaces .item.focused,
     .workspaces .item.active {
-      opacity: 1;
-      font-weight: 600;
+      opacity: ${opacity.full};
+      font-weight: ${typography.weight.semibold};
     }
 
-    /* Workspace with windows - medium opacity to show occupancy */
     .workspaces .item.occupied {
-      opacity: 0.8;
+      opacity: ${opacity.secondary};
     }
 
-    /* Urgent workspace - pulsing indicator (matches niri urgent border) */
     .workspaces .item.urgent {
-      opacity: 1;
+      opacity: ${opacity.full};
       animation: urgentPulse 1.5s ease-in-out infinite;
     }
 
     @keyframes urgentPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
+      0%, 100% { opacity: ${opacity.full}; }
+      50% { opacity: 0.5; }
     }
 
-    /* First workspace item - no leading margin */
     .workspaces .item:first-child {
-      margin-left: 0;
+      margin-left: ${spacing.none};
     }
 
-    /* Last workspace item - no trailing margin */
     .workspaces .item:last-child {
-      margin-right: 0;
+      margin-right: ${spacing.none};
     }
 
-    /* Focused window title - icon + text with better spacing */
+    /* Focused window title */
     .label {
-      padding: 0 12px;
+      padding: ${spacing.none} 14px;
       border: none;
-      font-size: 13px;
-      font-weight: 400;
-      line-height: 36px;
-      min-height: 36px;
-      opacity: 0.9;
-      transition: opacity 150ms ease, color 150ms ease;
+      font-size: ${typography.size.xs};
+      font-weight: ${typography.weight.normal};
+      line-height: ${typography.lineHeight.widget};
+      min-height: ${sizing.widgetHeight};
+      max-width: ${sizing.labelMaxWidth};
+      opacity: ${opacity.tertiary};
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: ${transition.opacity};
     }
 
-    /* Icon in focused window title */
     .label image {
-      margin-right: 8px;
+      margin-right: 9px;
     }
 
-    /* Focused window title when window is active */
     .label.active,
     .label.focused {
-      opacity: 1;
-      font-weight: 500;
+      opacity: ${opacity.emphasis};
+      font-weight: ${typography.weight.medium};
     }
 
-    /* Focused window title when window is inactive or no window */
     .label.inactive,
     .label:empty {
-      opacity: 0.5;
+      opacity: ${opacity.muted};
     }
 
-    /* ===== ISLAND 2: TIME (Clock as Visual Anchor) ===== */
-    /* Gestalt: Figure-ground - Clock is the primary visual anchor */
+    /* ===== ISLAND 2: TIME ===== */
+    /* Clock as visual anchor */
 
-    /* Clock widget - largest and most prominent element */
     .clock {
-      padding: 0 20px;
+      padding: ${spacing.none} ${spacing."3xl"};
       border: none;
-      font-size: 17px;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      min-width: 110px;
-      min-height: 36px;
-      line-height: 36px;
+      font-size: ${typography.size.lg};
+      font-weight: ${typography.weight.bold};
+      font-variant-numeric: ${typography.features.tabularNums};
+      letter-spacing: ${typography.letterSpacing.clock};
+      min-width: ${sizing.clockWidth};
+      min-height: ${sizing.widgetHeight};
+      line-height: ${typography.lineHeight.widget};
+      text-align: center;
+      opacity: ${opacity.emphasis};
     }
 
-    /* ===== ISLAND 3: SYSTEM STATUS (Monitoring + Controls) ===== */
-    /* Gestalt: Proximity - Three sub-groups with varying spacing */
-    /* Sub-group 1: Monitoring (CPU/RAM) - tight spacing */
-    /* Sub-group 2: Controls (Brightness/Volume) - medium spacing */
-    /* Sub-group 3: Communications (Tray/Notifications) - separate with more space */
+    /* ===== ISLAND 3: SYSTEM STATUS ===== */
+    /* Three logical groups:
+       1. Monitoring: sys-info + niri-layout
+       2. Controls: brightness + volume
+       3. Communications: tray + notifications */
 
-    /* System info - monitoring sub-group */
-    /* UX: Cleaner numeric display without % clutter */
+    /* Visual separators between widget groups
+       Note: GTK CSS doesn't support ::before/::after pseudo-elements or positioning.
+       Separators are achieved via margin/padding spacing instead. */
+
+    /* System info - Group 1 */
     .sys-info {
-      padding: 0 12px;
-      margin-right: 14px;
+      padding: ${spacing.none} ${spacing.lg};
+      margin-right: ${widget.gapSection};
       border: none;
-      font-size: 14px;
-      font-weight: 500;
-      line-height: 36px;
-      min-height: 36px;
-      opacity: 0.85;
-      transition: opacity 150ms ease;
+      font-size: ${typography.size.xs};
+      font-weight: ${typography.weight.semibold};
+      font-variant-numeric: ${typography.features.tabularNums};
+      line-height: ${typography.lineHeight.widget};
+      min-height: ${sizing.widgetHeight};
+      opacity: ${opacity.primary};
+      transition: ${transition.all};
     }
 
-    /* Emphasize on hover */
     .sys-info:hover {
-      opacity: 1;
+      opacity: ${opacity.hoverFull};
+      background-color: ${interactionColors.hoverBg};
+      border-radius: ${radius.md};
     }
 
-    /* Alert state for high resource usage */
     .sys-info.warning {
-      color: #fab387; /* Orange for high usage */
-      opacity: 1;
+      color: ${interactionColors.warning};
+      opacity: ${opacity.full};
       animation: pulse 2s ease-in-out infinite;
     }
 
     .sys-info.critical {
-      color: #f38ba8; /* Red for critical usage */
-      opacity: 1;
-      font-weight: 600;
+      color: ${interactionColors.critical};
+      opacity: ${opacity.full};
+      font-weight: ${typography.weight.bold};
       animation: pulse 1s ease-in-out infinite;
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
+      0%, 100% { opacity: ${opacity.full}; }
+      50% { opacity: ${opacity.secondary}; }
     }
 
-    /* Niri layout indicator - shows window state */
+    /* Niri layout indicator - Group 1 */
     .niri-layout {
-      padding: 0 10px;
-      margin-right: 14px;
+      padding: ${spacing.none} 10px;
+      margin-right: ${widget.gapSection};
       border: none;
-      font-size: 16px;
-      font-weight: 400;
-      line-height: 36px;
-      min-height: 36px;
-      opacity: 0.7;
-      transition: opacity 150ms ease;
+      font-size: ${typography.size.md};
+      font-weight: ${typography.weight.normal};
+      line-height: ${typography.lineHeight.widget};
+      min-height: ${sizing.widgetHeight};
+      opacity: ${opacity.secondary};
+      transition: ${transition.all};
     }
 
     .niri-layout:hover {
-      opacity: 1;
+      opacity: ${opacity.hoverFull};
+      background-color: ${interactionColors.hoverBg};
+      border-radius: ${radius.md};
     }
 
-    /* Brightness control - interactive sub-group start */
-    /* UX: Progressive disclosure - icon only, details on hover */
+    /* Brightness control - Group 2 */
     .brightness {
-      padding: 0 12px;
-      margin-right: 4px;
-      min-width: 50px; /* Reduced from 80px - icon only */
+      padding: ${spacing.sm} 10px;
+      margin-right: ${widget.gapTight};
+      min-width: ${sizing.controlWidget};
       border: none;
-      font-size: 16px; /* Larger icon for better visibility */
-      font-weight: 400;
-      line-height: 36px;
-      min-height: 36px;
-      transition: background-color 150ms ease, transform 50ms ease, min-width 200ms ease;
+      border-radius: ${radius.md};
+      font-size: ${typography.size.sm};
+      font-weight: ${typography.weight.normal};
+      line-height: ${typography.lineHeight.compact};
+      min-height: ${sizing.widgetHeight};
+      text-align: center;
+      transition: ${transition.control};
     }
 
-    /* Show details on hover - progressive disclosure */
-    .brightness:hover {
-      min-width: 90px; /* Expand to show percentage */
-    }
-
-    /* Volume control - interactive sub-group (paired with brightness) */
-    /* UX: Progressive disclosure - icon only, details on hover */
+    /* Volume control - Group 2 */
     .volume {
-      padding: 0 12px;
-      margin-right: 16px;
-      min-width: 45px; /* Reduced from 80px - icon only */
+      padding: ${spacing.sm} 10px;
+      margin-right: ${widget.gapSection};
+      min-width: ${sizing.controlWidget};
       border: none;
-      font-size: 16px; /* Larger icon for better visibility */
-      font-weight: 400;
-      line-height: 36px;
-      min-height: 36px;
-      transition: background-color 150ms ease, transform 50ms ease, min-width 200ms ease;
+      border-radius: ${radius.md};
+      font-size: ${typography.size.sm};
+      font-weight: ${typography.weight.normal};
+      line-height: ${typography.lineHeight.compact};
+      min-height: ${sizing.widgetHeight};
+      text-align: center;
+      transition: ${transition.control};
     }
 
-    /* Show details on hover - progressive disclosure */
-    .volume:hover {
-      min-width: 90px; /* Expand to show percentage */
-    }
-
-    /* System tray - communications sub-group start */
+    /* System tray - Group 3 */
     .tray {
-      padding: 7px 10px;
-      margin-right: 8px;
+      padding: ${widget.paddingComfortable};
+      margin-right: ${widget.gapNormal};
       border: none;
-      min-height: 36px;
+      min-height: ${sizing.widgetHeight};
     }
 
-    /* Tray buttons - larger touch targets */
     .tray button {
-      min-height: 22px;
-      min-width: 22px;
-      padding: 0;
-      margin: 0 4px;
+      min-height: ${sizing.touchTarget};
+      min-width: ${sizing.touchTarget};
+      padding: ${spacing.xs};
+      margin: ${spacing.none} 3px;
       background: transparent;
       border: none;
-      transition: background-color 150ms ease, transform 50ms ease;
+      border-radius: ${radius.sm};
+      transition: ${transition.control};
     }
 
-    /* Tray button images - increased size for accessibility */
     .tray button image {
-      min-height: 22px;
-      min-width: 22px;
-      padding: 0;
-      margin: 0;
+      min-height: 20px;
+      min-width: 20px;
+      padding: ${spacing.none};
+      margin: ${spacing.none};
     }
 
-    /* Notifications - end of communications sub-group */
+    /* Notifications - Group 3 */
     .notifications {
-      padding: 0 12px;
+      padding: ${spacing.none} 10px;
       border: none;
-      min-width: 45px;
-      min-height: 36px;
-      line-height: 36px;
+      min-width: ${sizing.notificationWidth};
+      min-height: ${sizing.widgetHeight};
+      line-height: ${typography.lineHeight.widget};
+      opacity: ${opacity.primary};
+      transition: ${transition.all};
     }
 
-    /* ===== TYPOGRAPHY & ALIGNMENT ===== */
-    /* Gestalt: Similarity - Similar elements use similar typography */
-    /* Size hierarchy: Clock (17px) > System info (14px) > Controls (14px) > Context (13px) */
+    .notifications:hover {
+      opacity: ${opacity.hoverFull};
+      background-color: ${interactionColors.hoverBg};
+      border-radius: ${radius.md};
+    }
 
-    /* All labels - consistent baseline alignment */
+    /* ===== TYPOGRAPHY DEFAULTS ===== */
+
     label {
-      font-size: 14px;
-      font-weight: 400;
-      line-height: 36px;
+      font-size: ${typography.size.sm};
+      font-weight: ${typography.weight.normal};
+      line-height: ${typography.lineHeight.widget};
     }
 
-    /* Icon-label combinations - ensure vertical centering */
     box > label,
     button > label {
-      line-height: 36px;
+      line-height: ${typography.lineHeight.widget};
     }
 
     /* ===== INTERACTIVE ELEMENTS ===== */
-    /* All buttons - accessible touch targets with feedback */
+
     button {
-      min-width: 36px;
-      min-height: 36px;
-      padding: 0 12px;
+      min-width: ${sizing.buttonMinWidth};
+      min-height: ${sizing.widgetHeight};
+      padding: ${spacing.none} ${spacing.lg};
       background: transparent;
       border: none;
       box-shadow: none;
-      font-size: 14px;
-      font-weight: 400;
-      line-height: 36px;
-      cursor: pointer;
+      font-size: ${typography.size.sm};
+      font-weight: ${typography.weight.normal};
+      line-height: ${typography.lineHeight.widget};
     }
 
-    /* Button labels - vertically centered, no styling */
     button label {
-      line-height: 36px;
-      font-size: 14px;
-      font-weight: 400;
+      line-height: ${typography.lineHeight.widget};
+      font-size: ${typography.size.sm};
+      font-weight: ${typography.weight.normal};
       background: transparent;
     }
 
-    /* ===== ICON ALIGNMENT ===== */
-    /* Icons in status widgets - centered vertically */
+    /* ===== ICONS ===== */
+
     image {
-      min-height: 18px;
-      min-width: 18px;
-      -gtk-icon-size: 18px;
+      min-height: ${sizing.iconSmall};
+      min-width: ${sizing.iconSmall};
+      -gtk-icon-size: ${sizing.iconSmall};
       margin-top: auto;
       margin-bottom: auto;
     }
 
-    /* Tray icons - larger for accessibility */
     .tray image {
-      min-height: 22px;
-      min-width: 22px;
-      -gtk-icon-size: 22px;
+      min-height: ${sizing.iconLarge};
+      min-width: ${sizing.iconLarge};
+      -gtk-icon-size: ${sizing.iconLarge};
       margin-top: auto;
       margin-bottom: auto;
     }
 
-    /* Notification icon - standard sizing */
     .notifications image {
-      min-height: 18px;
-      min-width: 18px;
-      -gtk-icon-size: 18px;
+      min-height: ${sizing.iconSmall};
+      min-width: ${sizing.iconSmall};
+      -gtk-icon-size: ${sizing.iconSmall};
       margin-top: auto;
       margin-bottom: auto;
     }
 
     /* ===== POPUPS ===== */
-    /* Popup windows - match floating island style with entrance animation */
+
     .popup {
-      padding: 16px;
-      border-radius: 12px;
-      margin-top: 8px;
-      font-size: 14px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-      animation: slideDown 150ms ease-out;
+      padding: ${widget.paddingSpacious};
+      border-radius: ${radius.xl};
+      margin-top: ${spacing.md};
+      font-size: ${typography.size.sm};
+      box-shadow: ${shadow.popup};
+      animation: fadeIn ${transition.duration.normal} ${transition.easing.out};
     }
 
-    /* Popup entrance animation */
-    @keyframes slideDown {
+    /* GTK CSS doesn't support transform, using opacity-only animation */
+    @keyframes fadeIn {
       from {
-        opacity: 0;
-        transform: translateY(-8px);
+        opacity: ${opacity.invisible};
       }
       to {
-        opacity: 1;
-        transform: translateY(0);
+        opacity: ${opacity.full};
       }
     }
 
-    /* Popup labels - proper line height */
     .popup label {
-      line-height: 1.5;
+      line-height: ${typography.lineHeight.popup};
     }
 
-    /* Popup headers - clear hierarchy */
     .popup label:first-child {
-      font-weight: 600;
-      font-size: 16px;
+      font-weight: ${typography.weight.bold};
+      font-size: ${typography.size.lg};
       margin-bottom: 10px;
-      line-height: 1.4;
+      line-height: ${typography.lineHeight.popupHeader};
     }
 
-    /* Clock popup - calendar view */
     .popup-clock {
-      padding: 20px;
-      min-width: 320px;
-      font-size: 15px;
+      padding: ${spacing."2xl"};
+      min-width: ${sizing.popupWidth};
+      font-size: ${typography.size.md};
     }
 
-    /* ===== VISUAL SEPARATORS ===== */
-    /* Gestalt: Common region - Use subtle separators to show sub-grouping */
-    /* Add visual separator between workspaces and window title */
-    .workspaces::after {
-      content: "";
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 1px;
-      height: 20px;
-      opacity: 0;
-    }
-
-    /* Subtle visual breathing room through spacing (proximity) */
-    /* Already implemented via margin-right variations */
   '';
 in
 baseCss + themeCss + widgetThemeCss + layoutCss

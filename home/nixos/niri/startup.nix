@@ -31,14 +31,6 @@
       ];
     }
 
-    # Create all workspaces on startup for consistent ironbar display
-    # Ensures ironbar shows all workspace indicators immediately
-    {
-      command = [
-        "${config.home.homeDirectory}/.local/bin/create-niri-workspaces"
-      ];
-    }
-
     # Apply ICC color profile for AW3423DWF monitor
     # ArgyllCMS dispwin loads the calibrated color profile
     # Note: If this fails, displays might not be ready yet (rare race condition)

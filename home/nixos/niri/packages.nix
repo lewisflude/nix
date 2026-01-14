@@ -27,10 +27,10 @@
   pkgs.colord-gtk # Color daemon GTK integration
   pkgs.wl-gammactl # Gamma/brightness correction tool
 
-  # X11 compatibility
-  pkgs.xwayland-satellite-unstable # XWayland satellite (auto-managed by niri >= 25.08)
-  pkgs.labwc # Nested Wayland compositor for X11 apps needing specific positioning
-  pkgs.xsel # X11 clipboard utilities for rootful Xwayland integration
+  # X11 compatibility (see niri docs: XWayland.md)
+  pkgs.xwayland-satellite-unstable # XWayland satellite >= 0.7 (auto-managed by niri >= 25.08)
+  pkgs.labwc # Nested Wayland compositor for X11 apps needing specific window positioning
+  pkgs.xsel # X11 clipboard utilities for rootful Xwayland clipboard sync
 
   # Window management
   inputs.awww.packages.${system}.awww # Auto window width/height daemon
