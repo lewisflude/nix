@@ -14,8 +14,7 @@ let
     inherit lib themeLib;
   };
   # Use overlay packages to ensure mesa dependencies match system nixpkgs
-  inherit (pkgs) xwayland-satellite-unstable niri-unstable;
-  xwayland-satellite = xwayland-satellite-unstable;
+  inherit (pkgs) niri-unstable;
 
   packagesList = import ./packages.nix {
     inherit pkgs inputs system;
@@ -58,7 +57,7 @@ in
       # Overview settings for premium look
       overview = {
         backdrop-color = themeConstants.niri.colors.shadow;
-        zoom = 0.15; # Moderate zoom out for good visibility
+        zoom = 0.5; # Balanced zoom level for good visibility
       };
 
       # Gestures - optimized for productivity
@@ -81,9 +80,26 @@ in
         };
       };
 
-      xwayland-satellite = {
-        enable = true;
-        path = "${lib.getExe xwayland-satellite}";
+      # XWayland compatibility layer (auto-detected from PATH)
+      xwayland-satellite.enable = true;
+
+      # Screenshots saved to ~/Pictures/Screenshots with timestamp
+      screenshot-path = "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
+
+      # Cursor theme and size
+      cursor = {
+        theme = "phinger-cursors-light";
+        size = 32;
+      };
+
+      # Environment variables for niri-spawned processes
+      environment = {
+        # Force Qt apps to use Wayland
+        QT_QPA_PLATFORM = "wayland";
+        # Remove DISPLAY to prevent X11 fallback
+        DISPLAY = null;
+        # Enable Wayland for Electron/Chromium apps
+        NIXOS_OZONE_WL = "1";
       };
       # Force NVIDIA RTX 4090 as the primary render device
       # Use renderD128 (render node) for optimal performance on multi-GPU systems

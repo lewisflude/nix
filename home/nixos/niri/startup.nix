@@ -1,4 +1,15 @@
 # Niri Startup Commands Configuration
+#
+# Note: Keep spawn-at-startup minimal. Background services should be systemd user services:
+# - Notification daemon (mako/swaync) - handled by home-manager service
+# - Status bar (ironbar) - handled by home-manager service
+# - Authentication agent (polkit) - handled by home-manager service
+# - Portal daemons - auto-started by systemd
+#
+# spawn-at-startup is best for:
+# - One-off initialization commands
+# - Display configuration
+# - Workspace setup
 {
   config,
   pkgs,
@@ -10,18 +21,27 @@
   spawn-at-startup = [
     # xwayland-satellite is automatically managed by niri >= 25.08
     # It spawns on-demand when X11 clients connect and auto-restarts if it crashes
+    # No need to spawn it manually here
+
+    # Auto window width/height daemon
+    # Automatically adjusts window sizes based on content
     {
       command = [
         "${inputs.awww.packages.${system}.awww}/bin/awww-daemon"
       ];
     }
+
     # Create all workspaces on startup for consistent ironbar display
+    # Ensures ironbar shows all workspace indicators immediately
     {
       command = [
         "${config.home.homeDirectory}/.local/bin/create-niri-workspaces"
       ];
     }
 
+    # Apply ICC color profile for AW3423DWF monitor
+    # ArgyllCMS dispwin loads the calibrated color profile
+    # Note: If this fails, displays might not be ready yet (rare race condition)
     {
       command = [
         "${pkgs.argyllcms}/bin/dispwin"
@@ -30,9 +50,10 @@
         "${config.home.homeDirectory}/.local/share/icc/aw3423dwf.icc"
       ];
     }
-    # Gamma correction for better display quality
-    # Adjust gamma values if needed (default: 1.0 for all channels)
-    # For OLED displays, slight gamma adjustment can improve perceived contrast
+
+    # Gamma and brightness correction for display quality
+    # For OLED displays (AW3423DWF), gamma 1.0 provides accurate color reproduction
+    # Adjust if needed: gamma >1.0 brightens, <1.0 darkens
     {
       command = [
         "${pkgs.wl-gammactl}/bin/wl-gammactl"
@@ -42,8 +63,10 @@
         "1.0"
       ];
     }
-    # Enable HDMI-A-4 at startup so Sunshine can detect it as Monitor 1
-    # This display is used for streaming and should always be enabled
+
+    # Enable dummy HDMI output for Sunshine game streaming
+    # This ensures HDMI-A-4 is always available as Monitor 1 for streaming
+    # Alternative: Could be handled via output config, but explicit enable ensures reliability
     {
       command = [
         "${pkgs.niri}/bin/niri"
