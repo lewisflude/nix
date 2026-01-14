@@ -9,7 +9,7 @@
   home = {
     sessionVariables = {
       # Use Nix-provided SSL certificates
-      NIX_SSL_CERT_FILE = "${pkgs.nix-cacert}/etc/ssl/certs/cacert.pem";
+      NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
       EDITOR = "hx";
       # NH_FLAKE is set in home/common/nh.nix
 
