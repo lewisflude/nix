@@ -178,44 +178,49 @@ in
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo
 
-        # Validate which servers can actually run
-        SERVERS_OK=()
-        SERVERS_MISSING_SECRET=()
+        # Count servers by secret availability
+        SERVERS_OK=0
+        SERVERS_MISSING=0
 
+        echo "✓ Available servers:"
         ${lib.concatStringsSep "\n" (
           lib.mapAttrsToList (name: server: ''
-            SERVER_NAME="${name}"
             ${
               if (server.secret or null) != null then
                 ''
-                  SECRET_PATH="/run/secrets/${server.secret}"
-                  if [ -r "$SECRET_PATH" ]; then
-                    SERVERS_OK+=("$SERVER_NAME")
+                  if [ -r "/run/secrets/${server.secret}" ]; then
+                    echo "  • ${name}"
+                    SERVERS_OK=$((SERVERS_OK + 1))
                   else
-                    SERVERS_MISSING_SECRET+=("$SERVER_NAME (needs ${server.secret})")
+                    SERVERS_MISSING=$((SERVERS_MISSING + 1))
                   fi
                 ''
               else
                 ''
-                  SERVERS_OK+=("$SERVER_NAME")
+                  echo "  • ${name}"
+                  SERVERS_OK=$((SERVERS_OK + 1))
                 ''
             }
           '') activeServers
         )}
 
-        if [ ''${#SERVERS_OK[@]} -gt 0 ]; then
-          echo "✓ Available servers (''${#SERVERS_OK[@]}):"
-          for server in "''${SERVERS_OK[@]}"; do
-            echo "  • $server"
-          done
-        fi
-
-        if [ ''${#SERVERS_MISSING_SECRET[@]} -gt 0 ]; then
+        if [ "$SERVERS_MISSING" -gt 0 ]; then
           echo
-          echo "⚠ Disabled servers - missing secrets (''${#SERVERS_MISSING_SECRET[@]}):"
-          for server in "''${SERVERS_MISSING_SECRET[@]}"; do
-            echo "  • $server"
-          done
+          echo "⚠ Disabled servers (missing secrets):"
+          ${lib.concatStringsSep "\n" (
+            lib.mapAttrsToList (name: server: ''
+              ${
+                if (server.secret or null) != null then
+                  ''
+                    if [ ! -r "/run/secrets/${server.secret}" ]; then
+                      echo "  • ${name} (needs ${server.secret})"
+                    fi
+                  ''
+                else
+                  ""
+              }
+            '') activeServers
+          )}
           echo
           echo "These servers will exit gracefully and won't cause MCP errors."
           echo "Configure secrets in SOPS and rebuild to enable them."

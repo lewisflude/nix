@@ -17,7 +17,9 @@ let
 
   # Import Ironbar design tokens for Niri synchronization
   # This ensures Niri windows use the same gaps and radii as Ironbar islands
-  ironbarTokens = import ../../../modules/shared/features/theming/applications/desktop/ironbar-home/tokens.nix;
+  ironbarTokens =
+    import ../../../modules/shared/features/theming/applications/desktop/ironbar-home/tokens.nix
+      { };
 
   # Use overlay packages to ensure mesa dependencies match system nixpkgs
   inherit (pkgs) niri-unstable;
