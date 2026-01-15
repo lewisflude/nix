@@ -44,7 +44,7 @@ in
   # Get API key: https://linear.app/settings/api
   linear = {
     command = toString (
-      wrapMultiSecret "linear" "${pkgs.nodejs}/bin/npx -y @modelcontextprotocol/server-linear" [
+      wrapMultiSecret "linear" "${pkgs.nodejs}/bin/npx -y mcp-server-linear" [
         "LINEAR_API_KEY"
       ]
     );
@@ -82,7 +82,7 @@ in
   # Get API key: https://console.cloud.google.com/apis/credentials (enable YouTube Data API v3)
   youtube = {
     command = toString (
-      wrapMultiSecret "youtube" "${pkgs.nodejs}/bin/npx -y @adhikasp/mcp-youtube" [ "YOUTUBE_API_KEY" ]
+      wrapMultiSecret "youtube" "${pkgs.nodejs}/bin/npx -y mcp-server-youtube" [ "YOUTUBE_API_KEY" ]
     );
     args = [ ];
     enabled = false;
@@ -104,7 +104,7 @@ in
   # Get credentials: https://cloud.qdrant.io/ (create cluster, get URL and API key)
   qdrant = {
     command = toString (
-      wrapMultiSecret "qdrant" "${pkgs.nodejs}/bin/npx -y @quantgeekdev/qdrant-mcp" [
+      wrapMultiSecret "qdrant" "${pkgs.nodejs}/bin/npx -y mcp-server-qdrant" [
         "QDRANT_URL"
         "QDRANT_API_KEY"
       ]
