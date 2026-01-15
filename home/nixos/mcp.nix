@@ -58,7 +58,7 @@
       # ═══════════════════════════════════════════════════════════
       # RESEARCH & CONTENT
       # ═══════════════════════════════════════════════════════════
-      youtube.enabled = true; # YOUTUBE_API_KEY
+      youtube.enabled = true; # YUTU_CREDENTIAL, YUTU_CACHE_TOKEN
 
       # ═══════════════════════════════════════════════════════════
       # DATABASE
