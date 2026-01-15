@@ -96,6 +96,11 @@ in
         prev.onetbb;
   };
 
+  # yutu - YouTube MCP server and CLI
+  yutu = _final: prev: {
+    yutu = prev.callPackage ../pkgs/yutu.nix { };
+  };
+
   # Immersed VR - Use latest version from static URL
   # This pulls the latest release directly instead of using archived versions
   immersed-latest = _final: prev: {

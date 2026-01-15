@@ -78,14 +78,44 @@ in
     enabled = false;
   };
 
-  # YouTube - Video search, transcripts, and captions
-  # Get API key: https://console.cloud.google.com/apis/credentials (enable YouTube Data API v3)
-  # Package: youtube-data-mcp-server (working alternative to zubeid-youtube-mcp-server)
+  # YouTube - Full-featured MCP server using yutu (Go-based)
+  # Setup:
+  #   1. Create OAuth client in Google Cloud Console (https://console.cloud.google.com)
+  #   2. Enable YouTube Data API v3, YouTube Analytics API (optional), YouTube Reporting API (optional)
+  #   3. Create OAuth 2.0 Client ID with redirect URI: http://localhost:8216
+  #   4. Download client_secret.json and run: yutu auth --credential client_secret.json
+  #   5. Store both client_secret.json and youtube.token.json contents in SOPS
+  # Package: yutu (https://github.com/eat-pray-ai/yutu)
+  # Note: yutu expects file paths via YUTU_CREDENTIAL and YUTU_CACHE_TOKEN env vars
   youtube = {
     command = toString (
-      wrapMultiSecret "youtube" "${pkgs.nodejs}/bin/npx -y youtube-data-mcp-server" [
-        "YOUTUBE_API_KEY"
-      ]
+      pkgs.writeShellScript "youtube-mcp" ''
+        set -euo pipefail
+
+        # Detect platform for better error messages
+        if [ "$(uname)" = "Darwin" ]; then
+          EXPECTED_GROUP="admin"
+        else
+          EXPECTED_GROUP="sops-secrets"
+        fi
+
+        # Check secrets exist
+        if [ ! -r "/run/secrets/YUTU_CREDENTIAL" ] || [ ! -r "/run/secrets/YUTU_CACHE_TOKEN" ]; then
+          echo "Warning: yutu MCP server disabled - YUTU_CREDENTIAL or YUTU_CACHE_TOKEN not available" >&2
+          echo "Secrets not found or not readable" >&2
+          echo "To enable this server:" >&2
+          echo "  1. Ensure you're in the '$EXPECTED_GROUP' group: $(id -Gn | tr ' ' ',')" >&2
+          echo "  2. Configure secrets in SOPS (secrets/secrets.yaml)" >&2
+          echo "  3. Rebuild system and restart MCP client" >&2
+          exit 0
+        fi
+
+        # yutu expects env vars to point to file paths, not contain the content
+        export YUTU_CREDENTIAL="/run/secrets/YUTU_CREDENTIAL"
+        export YUTU_CACHE_TOKEN="/run/secrets/YUTU_CACHE_TOKEN"
+
+        exec ${pkgs.yutu}/bin/yutu mcp "$@"
+      ''
     );
     args = [ ];
     enabled = false;

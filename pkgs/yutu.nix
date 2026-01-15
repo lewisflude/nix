@@ -1,0 +1,33 @@
+{
+  lib,
+  buildGoModule,
+  fetchFromGitHub,
+}:
+
+buildGoModule rec {
+  pname = "yutu";
+  version = "0.10.4";
+
+  src = fetchFromGitHub {
+    owner = "eat-pray-ai";
+    repo = "yutu";
+    rev = "v${version}";
+    hash = "sha256-353SQGH+5FiVTsLwYU3lMjl0CXzEP6hGVYKRghUwSvg=";
+  };
+
+  vendorHash = "sha256-z6qRI/v6JwVWcHBgV9gC2yBU6hLSoBz8lOqG8WSOfPk=";
+
+  ldflags = [
+    "-s"
+    "-w"
+    "-X=github.com/eat-pray-ai/yutu/cmd.Version=${version}"
+  ];
+
+  meta = {
+    description = "Fully functional MCP server and CLI for YouTube";
+    homepage = "https://github.com/eat-pray-ai/yutu";
+    license = lib.licenses.asl20;
+    maintainers = [ ];
+    mainProgram = "yutu";
+  };
+}
