@@ -80,10 +80,10 @@ in
 
   # YouTube - Video search, transcripts, and captions
   # Get API key: https://console.cloud.google.com/apis/credentials (enable YouTube Data API v3)
-  # Package: zubeid-youtube-mcp-server
+  # Package: youtube-data-mcp-server (working alternative to zubeid-youtube-mcp-server)
   youtube = {
     command = toString (
-      wrapMultiSecret "youtube" "${pkgs.nodejs}/bin/npx -y zubeid-youtube-mcp-server" [
+      wrapMultiSecret "youtube" "${pkgs.nodejs}/bin/npx -y youtube-data-mcp-server" [
         "YOUTUBE_API_KEY"
       ]
     );
