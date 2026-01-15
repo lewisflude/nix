@@ -11,17 +11,18 @@ _: {
       repeat-rate = 25;
     };
 
-    # Focus follows mouse for faster workflow
-    # max-scroll-amount: won't focus if it would scroll view more than 10% of screen width
+    # Focus follows mouse for "tape scrolling" metaphor
+    # max-scroll-amount = "0": instant focus without delay
+    # In a scrolling UI, the cursor acts as a "read head"
     focus-follows-mouse = {
       enable = true;
-      max-scroll-amount = "10%";
+      max-scroll-amount = "0";
     };
 
-    # Warp mouse cursor to window when focused via keyboard
-    # Complements focus-follows-mouse for keyboard-driven navigation
+    # Warp mouse disabled - prevents disorientation during keyboard navigation
+    # Per guide: "Disable warping - it disorients the user"
     warp-mouse-to-focus = {
-      enable = true;
+      enable = false;
     };
 
     # Quick workspace switching - press same keybind twice to toggle back
