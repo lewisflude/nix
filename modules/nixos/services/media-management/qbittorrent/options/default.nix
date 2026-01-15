@@ -3,8 +3,8 @@
   constants,
   ...
 }:
-with lib;
 let
+  inherit (lib) mkEnableOption mkOption types;
   qbittorrentOptions = {
     enable = mkEnableOption "qBittorrent BitTorrent client" // {
       default = true;

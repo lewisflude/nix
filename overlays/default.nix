@@ -78,15 +78,6 @@ in
     else
       (_final: _prev: { });
 
-  # Claude Code overlay disabled due to runtime errors
-  # The overlay version (2.0.55) has Bun Segmenter initialization errors
-  # Using nixpkgs version (2.0.54) instead
-  # claude-code-overlay =
-  #   if inputs ? claude-code-overlay && inputs.claude-code-overlay ? overlays then
-  #     inputs.claude-code-overlay.overlays.default
-  #   else
-  #     (_final: _prev: { });
-
   # LLM agents - use pre-built binaries from llm-agents.nix
   # Daily builds with binary cache at https://cache.numtide.com
   llm-agents =

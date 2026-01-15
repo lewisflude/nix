@@ -3,7 +3,9 @@
   constants,
   ...
 }:
-with lib;
+let
+  inherit (lib) mkOption types;
+in
 {
   webUI = mkOption {
     type = types.nullOr (

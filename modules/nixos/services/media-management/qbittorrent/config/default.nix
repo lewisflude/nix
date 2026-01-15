@@ -7,8 +7,8 @@
   webUI,
   ...
 }:
-with lib;
 let
+  inherit (lib) mkMerge;
   # Import config modules
   webUIConfig = import ./webui.nix {
     inherit

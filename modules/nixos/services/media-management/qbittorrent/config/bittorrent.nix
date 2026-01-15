@@ -4,8 +4,8 @@
   webUICfg ? { },
   ...
 }:
-with lib;
 let
+  inherit (lib) optionalAttrs;
   # Build Preferences with optional fields
   # Note: Modern qBittorrent uses Session\ prefixed keys in [BitTorrent] section
   # This section includes WebUI config, AutoTMM, paths, ratio settings, and Advanced settings

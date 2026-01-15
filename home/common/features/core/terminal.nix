@@ -22,7 +22,6 @@
   ]
   # Linux-only packages
   ++ lib.optionals pkgs.stdenv.isLinux [
-    pkgs.networkmanager
     pkgs.lsof
     pkgs.wtype
   ];

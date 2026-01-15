@@ -5,8 +5,8 @@
   constants,
   ...
 }:
-with lib;
 let
+  inherit (lib) mkIf;
   cfg = config.host.services.mediaManagement;
   qbittorrentCfg = cfg.qbittorrent;
   inherit (qbittorrentCfg) webUI;

@@ -17,12 +17,12 @@ let
       rev = "v${version}";
       hash = "sha256-iFsRDm1a5/8nqs36ro+ZZxYT/cIF4dyGoT0nCdyWs9I=";
     };
-    meta = with lib; {
+    meta = {
       changelog = "https://github.com/acon96/home-llm/releases/tag/v${version}";
       description = "Home LLM is a Home Assistant custom component that allows you to use LLMs to interact with your home automation system.";
       homepage = "https://github.com/acon96/home-llm";
-      license = licenses.mit;
-      maintainers = with maintainers; [ ];
+      license = lib.licenses.mit;
+      maintainers = [ ];
     };
   };
 in

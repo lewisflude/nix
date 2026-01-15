@@ -10,10 +10,10 @@ let
   # Import design tokens for synchronized values
   tokens = import ./tokens.nix;
   inherit (tokens) niriSync;
+  inherit (tokens.sizing) barHeight; # "40px" or "48px"
 
   # Extract numeric values from token strings
   # barHeight and margin come from the 8pt grid system
-  barHeight = tokens.sizing.barHeight; # "40px" or "48px"
   barHeightNum = builtins.fromJSON (builtins.head (builtins.match "([0-9]+)px" barHeight));
   marginNum = niriSync.barMargin; # Already a number from tokens
 in

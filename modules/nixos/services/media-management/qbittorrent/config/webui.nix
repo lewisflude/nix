@@ -1,13 +1,16 @@
 {
-  # config,
   lib,
   pkgs,
-  # qbittorrentCfg,
   webUI,
   ...
 }:
-with lib;
 let
+  inherit (lib)
+    mkIf
+    mkMerge
+    optionals
+    optionalAttrs
+    ;
   # Build WebUI config cleanly
   webUICfg =
     if webUI != null then
