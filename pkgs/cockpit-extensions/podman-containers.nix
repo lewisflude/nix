@@ -31,11 +31,11 @@ stdenv.mkDerivation rec {
 
   dontBuild = true;
 
-  meta = with lib; {
+  meta = {
     description = "Cockpit UI for podman containers";
-    license = licenses.lgpl21;
+    license = lib.licenses.lgpl21;
     homepage = "https://github.com/cockpit-project/cockpit-podman";
-    platforms = platforms.linux;
-    maintainers = with maintainers; [ ];
+    platforms = lib.platforms.linux;
+    maintainers = [ ];
   };
 }

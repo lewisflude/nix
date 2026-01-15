@@ -2,7 +2,9 @@
   lib,
   ...
 }:
-with lib;
+let
+  inherit (lib) mkOption types;
+in
 {
   torrentPort = mkOption {
     type = types.port;

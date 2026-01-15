@@ -7,7 +7,7 @@
     ./swaync.nix
     ./desktop-apps.nix
     ./yazi.nix
-    ./niri.nix
+    ./niri
     ./mcp.nix
     ./apps/polkit-gnome.nix
     ./apps/wlsunset.nix

@@ -95,22 +95,6 @@
     };
   };
 
-  # Dante SOCKS proxy - disabled (VLAN2 removed)
-  # services.dante-proxy = {
-  #   enable = false;
-  # };
-
-  # Avahi mDNS for Moonlight auto-discovery
-  # Enables Moonlight clients to automatically find the PC on the network
-  services.avahi = {
-    enable = true;
-    nssmdns4 = true;
-    publish = {
-      enable = true;
-      userServices = true;
-    };
-  };
-
   # Open-WebUI configuration (enabled via host.features.aiTools)
   services.open-webui = {
     port = constants.ports.services.openWebui; # 7000

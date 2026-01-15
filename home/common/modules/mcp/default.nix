@@ -31,7 +31,6 @@ let
     types
     mapAttrs
     filterAttrs
-    # optionalAttrs
     ;
 
   cfg = config.services.mcp;

@@ -1,11 +1,9 @@
 {
-  # config,
   lib,
   pkgs,
   cfg,
   ...
 }:
-with lib;
 let
   # Helper to create shell application from script file
   mkScriptApp =

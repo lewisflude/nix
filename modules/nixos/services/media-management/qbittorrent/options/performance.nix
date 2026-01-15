@@ -2,7 +2,9 @@
   lib,
   ...
 }:
-with lib;
+let
+  inherit (lib) mkOption types;
+in
 {
   diskCacheSize = mkOption {
     type = types.int;

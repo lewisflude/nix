@@ -4,7 +4,6 @@
   pkgs,
   ...
 }:
-with lib;
 let
   inherit (lib)
     mkOption

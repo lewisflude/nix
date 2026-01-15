@@ -67,13 +67,14 @@ let
 
         /* ===== FLOATING ISLANDS ===== */
         /* Common island styling - Gestalt Law of Common Region */
+        /* FIX #1: Etched Glass Border - alpha() creates transparent glaze effect */
         #bar #start,
         #bar #center,
         #bar #end {
           background-color: ${colors."surface-base".hex};
-          border: 1px solid ${colors."surface-subtle".hex};
+          border: 1px solid alpha(${colors."surface-subtle".hex}, 0.3);
           border-radius: ${radius.lg};
-          box-shadow: ${shadow.island};
+          box-shadow: ${shadow.island}, inset 0 1px 0 alpha(${colors."text-primary".hex}, 0.05);
         }
 
         /* Island 1: Navigation (left) - Workspaces + System Info */
@@ -123,11 +124,13 @@ let
         }
 
         /* Active workspace - accent color with glow effect */
+        /* FIX #3: Visual Hierarchy - Interactive controls get heavier weight */
         .workspaces button.focused,
         .workspaces button.active {
           color: ${colors."accent-focus".hex};
           background-color: ${colors."surface-subtle".hex};
           border-radius: ${radius.md};
+          font-weight: ${typography.weight.bold};
         }
 
         /* Occupied but not focused */
@@ -156,14 +159,15 @@ let
           color: ${colors."text-primary".hex};
         }
 
-        /* ===== CLOCK - VISUAL ANCHOR ===== */
-        /* Principle #2: Clock gets extra visual weight as anchor */
+        /* ===== CLOCK - AMBIENT DATA ===== */
+        /* FIX #3: Visual Hierarchy - Passive data gets lighter weight than interactive controls */
         .clock {
           background-color: ${colors."surface-subtle".hex};
           padding: ${spacing.sm} ${spacing.lg};
           border-radius: ${radius.md};
           color: ${colors."text-primary".hex};
-          font-weight: ${typography.weight.bold};
+          font-weight: ${typography.weight.medium};
+          opacity: 0.9;
         }
 
         /* ===== POWER BUTTON - DESTRUCTIVE ACTION ===== */
@@ -222,8 +226,10 @@ let
 
         /* ===== BATTERY WIDGET ===== */
         /* Only shown on laptop hosts (conditional via hasBattery option) */
+        /* FIX #2: Font Stability - Monospace ensures physical stability */
         .battery {
           padding: ${spacing.xs} ${spacing.md};
+          font-family: ${typography.fontMono};
           font-variant-numeric: ${typography.features.tabularNums};
           transition: ${transition.all};
         }
@@ -259,6 +265,11 @@ let
     #bar #center,
     #bar #end {
       min-height: ${sizing.widgetHeight};
+    }
+
+    /* FIX #5: Smooth Tray Jitter - widgets slide smoothly when tray expands/contracts */
+    #bar #end > * {
+      transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     /* ===== WIDGET CONTAINERS ===== */
@@ -303,10 +314,11 @@ let
       background-color: ${interactionColors.hoverBgSubtle};
     }
 
+    /* FIX #3: Visual Hierarchy - Interactive controls get heavier weight */
     .workspaces .item.focused,
     .workspaces .item.active {
       opacity: ${opacity.full};
-      font-weight: ${typography.weight.semibold};
+      font-weight: ${typography.weight.bold};
     }
 
     .workspaces .item.occupied {
@@ -357,9 +369,17 @@ let
       font-weight: ${typography.weight.medium};
     }
 
-    .label.inactive,
-    .label:empty {
+    .label.inactive {
       opacity: ${opacity.muted};
+    }
+
+    /* FIX #4: Empty Desktop Collapse - gracefully hide empty state */
+    .label:empty {
+      min-width: 0px;
+      min-height: 0px;
+      padding: 0px;
+      margin: 0px;
+      opacity: 0;
     }
 
     /* ===== ISLAND 2: FOCUS CONTEXT ===== */
@@ -376,21 +396,33 @@ let
       opacity: ${opacity.emphasis};
     }
 
+    /* FIX #4: Empty Desktop Collapse - center island collapses when no window focused */
+    #center .label:empty,
+    #center box:empty {
+      min-width: 0px;
+      min-height: 0px;
+      padding: 0px;
+      margin: 0px;
+      opacity: 0;
+    }
+
     /* ===== CLOCK (Now in End Island) ===== */
-    /* Visual anchor with extra weight */
+    /* Ambient data - lighter weight than interactive workspaces */
+    /* FIX #2: Font Stability - Monospace prevents jitter as time changes */
 
     .clock {
       padding: ${spacing.sm} ${spacing.lg};
       border: none;
+      font-family: ${typography.fontMono};
       font-size: ${typography.size.lg};
-      font-weight: ${typography.weight.bold};
+      font-weight: ${typography.weight.medium};
       font-variant-numeric: ${typography.features.tabularNums};
       letter-spacing: ${typography.letterSpacing.clock};
       min-width: ${sizing.clockWidth};
       min-height: ${sizing.widgetHeight};
       line-height: ${typography.lineHeight.widget};
       text-align: center;
-      opacity: ${opacity.emphasis};
+      opacity: 0.9;
     }
 
     /* ===== ISLAND 3: SYSTEM STATUS ===== */
@@ -398,9 +430,11 @@ let
        Grouped by function: Communications → State → Controls → Time → Action */
 
     /* System info (in Start island, after separator) */
+    /* FIX #2: Font Stability - Monospace prevents jitter as CPU/RAM values change */
     .sys-info {
       padding: ${spacing.none} ${spacing.md};
       border: none;
+      font-family: ${typography.fontMono};
       font-size: ${typography.size.xs};
       font-weight: ${typography.weight.semibold};
       font-variant-numeric: ${typography.features.tabularNums};

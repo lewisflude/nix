@@ -50,9 +50,9 @@ stdenvNoCC.mkDerivation {
     EOF
   '';
 
-  meta = with lib; {
+  meta = {
     description = "Signal theme for GTK: Perception, engineered.";
-    license = licenses.mit;
-    platforms = platforms.all;
+    license = lib.licenses.mit;
+    platforms = lib.platforms.all;
   };
 }

@@ -5,12 +5,19 @@
   constants,
   qbittorrentCfg,
   webUI,
-  # webUICfg,
   preferencesCfg,
   bittorrentSession,
   ...
 }:
-with lib;
+let
+  inherit (lib)
+    mkIf
+    mkMerge
+    optionals
+    optionalAttrs
+    mapAttrs
+    ;
+in
 {
   # Firewall configuration
   # When VPN is enabled, only WebUI port needs to be open on host

@@ -152,6 +152,9 @@ in
       semibold = "500";
       bold = "600";
     };
+    # Font family for data widgets (clock, sys-info, battery)
+    # Enforces physical stability - numbers won't shift as values change
+    fontMono = "monospace";
     lineHeight = {
       widget = "${toString widgetHeight}px";
       item = "${toString (p.barHeight - 8)}px";

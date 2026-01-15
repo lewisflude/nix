@@ -3,11 +3,11 @@
   ...
 }:
 pkgs.mkShell {
-  buildInputs = with pkgs; [
-    openxr-loader
-    vulkan-loader
-    libglvnd # Provides libGL
-    xorg.libX11
+  buildInputs = [
+    pkgs.openxr-loader
+    pkgs.vulkan-loader
+    pkgs.libglvnd # Provides libGL
+    pkgs.xorg.libX11
   ];
 
   shellHook = ''
