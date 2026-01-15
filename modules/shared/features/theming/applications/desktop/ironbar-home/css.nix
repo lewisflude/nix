@@ -57,11 +57,10 @@ let
         /* PRINCIPLE 1: The "Island" Strategy
            Main bar background has subtle tint for depth separation.
            Border-radius creates "floating capsule" aesthetic.
-           Enhanced shadow compensates for lack of backdrop blur in GTK CSS. */
+           NOTE: GTK CSS only supports inset shadows - outset shadows removed */
         window {
           background-color: rgba(0, 0, 0, 0.02);
           border-radius: ${radius.lg}; /* 12px (compact) or 16px (relaxed) */
-          box-shadow: 0 0 20px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
         /* Global text color from theme */
@@ -71,23 +70,25 @@ let
 
         /* ===== FLOATING ISLANDS ===== */
         /* Common island styling - Gestalt Law of Common Region */
-        /* FIX #1: Etched Glass Border - rgba() creates transparent glaze effect */
+        /* Strengthened border for better visual separation */
+        /* Using inset highlight for depth (GTK CSS limitation) */
         #bar #start,
         #bar #center,
         #bar #end {
           background-color: ${colors."surface-base".hex};
-          border: 1px solid rgba(0, 0, 0, 0.15);
+          border: 1px solid rgba(0, 0, 0, 0.3);
           border-radius: ${radius.lg};
-          box-shadow: ${shadow.island}, inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          box-shadow: ${shadow.island};
         }
 
         /* Island 1: Navigation (left) - Workspaces + System Info */
         #bar #start {
           padding: ${island.padding};
-          margin-right: ${spacing.md};
+          margin-right: ${spacing.lg};
         }
 
         /* Island 2: Focus (center) - Window Title */
+        /* Center island has stronger highlight for emphasis */
         #bar #center {
           padding: ${island.paddingCenter};
           box-shadow: ${shadow.islandCenter};
@@ -96,7 +97,7 @@ let
         /* Island 3: Status (right) - Controls + Clock + Power */
         #bar #end {
           padding: ${island.padding};
-          margin-left: ${spacing.md};
+          margin-left: ${spacing.lg};
         }
       ''
     else
@@ -138,9 +139,9 @@ let
           border-radius: ${radius.md};
           font-weight: ${typography.weight.bold};
           
-          /* The "light under the dock" - physical indicator */
+          /* The "light under the dock" - stronger glow for "energy" */
           border-bottom: 2px solid ${colors."accent-focus".hex};
-          box-shadow: 0 2px 8px rgba(137, 180, 250, 0.3);
+          box-shadow: 0 4px 12px rgba(122, 162, 247, 0.4);
         }
 
         /* Occupied but not focused */
@@ -149,10 +150,10 @@ let
         }
 
         /* ===== SEPARATOR STYLING ===== */
-        /* Subtle etched divider - low opacity to not compete with content */
+        /* Visual divider between widget groups */
         .separator {
           color: ${colors."divider-primary".hex};
-          opacity: 0.3;
+          opacity: 0.5;
           padding: 0px ${spacing.xs};
           font-size: ${typography.size.sm};
           font-weight: ${typography.weight.normal};
@@ -205,6 +206,15 @@ let
         }
 
         /* ===== INTERACTIVE CONTROLS ===== */
+        /* FIX #1: Remove Blue Bracket Glitch - force remove borders/shadows */
+        .brightness,
+        .volume,
+        .popup-button {
+          border: none;
+          box-shadow: none;
+          outline: none;
+        }
+
         /* Hover states for brightness/volume */
         .brightness:hover,
         .volume:hover {
@@ -220,6 +230,13 @@ let
         }
 
         /* ===== TRAY STYLING ===== */
+        /* FIX #2: Give tray its own "pill" container to match other groups */
+        .tray {
+          background-color: ${colors."surface-subtle".hex};
+          border-radius: ${radius.md};
+          padding: ${spacing.xs} ${spacing.sm};
+        }
+
         .tray button {
           background: transparent;
           border-radius: ${radius.sm};
@@ -240,7 +257,6 @@ let
         .battery {
           padding: ${spacing.xs} ${spacing.md};
           font-family: ${typography.fontMono};
-          font-variant-numeric: ${typography.features.tabularNums};
           transition: ${transition.all};
         }
 
@@ -406,13 +422,11 @@ let
        Visual centering achieved through symmetric padding */
 
     .clock {
-      padding: ${spacing.sm} ${spacing.lg};
+      padding: 0 ${spacing.lg};
       border: none;
       font-family: ${typography.fontMono};
       font-size: ${typography.size.lg};
       font-weight: ${typography.weight.medium};
-      font-variant-numeric: ${typography.features.tabularNums};
-      letter-spacing: ${typography.letterSpacing.clock};
       min-width: ${sizing.clockWidth};
       min-height: ${sizing.widgetHeight};
       line-height: ${typography.lineHeight.widget};
@@ -431,7 +445,6 @@ let
       font-family: ${typography.fontMono};
       font-size: ${typography.size.xs};
       font-weight: ${typography.weight.semibold};
-      font-variant-numeric: ${typography.features.tabularNums};
       line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
       opacity: ${opacity.primary};
@@ -462,10 +475,10 @@ let
       50% { opacity: ${opacity.secondary}; }
     }
 
-    /* Niri layout indicator - Group 1 */
+    /* Niri layout indicator - State indicator group */
     .niri-layout {
       padding: ${spacing.none} 10px;
-      margin-right: ${widget.gapSection};
+      margin-right: ${spacing.md};
       border: none;
       font-size: ${typography.size.md};
       font-weight: ${typography.weight.normal};
@@ -481,40 +494,38 @@ let
       border-radius: ${radius.md};
     }
 
-    /* Brightness control - Group 2
-       Visual centering achieved through symmetric padding */
+    /* Brightness control - Hardware controls group */
     .brightness {
-      padding: ${spacing.sm} 10px;
-      margin-right: ${widget.gapTight};
+      padding: 0 10px;
+      margin-right: ${spacing.sm};
       min-width: ${sizing.controlWidget};
       border: none;
       border-radius: ${radius.md};
       font-size: ${typography.size.sm};
       font-weight: ${typography.weight.normal};
-      line-height: ${typography.lineHeight.compact};
+      line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
       transition: ${transition.control};
     }
 
-    /* Volume control - Group 2
-       Visual centering achieved through symmetric padding */
+    /* Volume control - Hardware controls group */
     .volume {
-      padding: ${spacing.sm} 10px;
-      margin-right: ${widget.gapSection};
+      padding: 0 10px;
+      margin-right: ${spacing.lg};
       min-width: ${sizing.controlWidget};
       border: none;
       border-radius: ${radius.md};
       font-size: ${typography.size.sm};
       font-weight: ${typography.weight.normal};
-      line-height: ${typography.lineHeight.compact};
+      line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
       transition: ${transition.control};
     }
 
-    /* System tray - Group 3 */
+    /* System tray - Communications group */
     .tray {
       padding: ${widget.paddingComfortable};
-      margin-right: ${widget.gapNormal};
+      margin-right: ${spacing.sm};
       border: none;
       min-height: ${sizing.widgetHeight};
     }
@@ -530,16 +541,20 @@ let
       transition: ${transition.control};
     }
 
-    .tray button image {
-      min-width: 20px;
-      min-height: 20px;
-      padding: 0;
-      margin: 0;
-    }
+        /* FIX #4: Normalize tray icon sizes - force standard bounding box */
+        .tray button image {
+          min-width: 16px;
+          min-height: 16px;
+          max-width: 20px;
+          max-height: 20px;
+          padding: 2px;
+          margin: 0;
+        }
 
-    /* Notifications - Group 3 */
+    /* Notifications - Communications group */
     .notifications {
       padding: ${spacing.none} 10px;
+      margin-right: ${spacing.lg};
       border: none;
       min-width: ${sizing.notificationWidth};
       min-height: ${sizing.widgetHeight};
