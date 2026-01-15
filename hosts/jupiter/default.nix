@@ -7,6 +7,7 @@
   # Hardware configuration
   hardware = {
     gpuID = "10de:2684"; # RTX 4090
+    renderDevice = "/dev/dri/renderD129"; # Force NVIDIA as primary render device
   };
 
   features = {

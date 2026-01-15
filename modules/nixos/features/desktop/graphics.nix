@@ -32,6 +32,10 @@ in
     services.xserver.videoDrivers = [ "nvidia" ];
 
     # Host-specific: NVIDIA GPU is card2 (Intel iGPU is card1, no monitors)
-    environment.sessionVariables.WLR_DRM_DEVICES = "/dev/dri/card2";
+    environment.sessionVariables = {
+      WLR_DRM_DEVICES = "/dev/dri/card2";
+      # Enable Wayland for Electron/Chromium apps system-wide
+      NIXOS_OZONE_WL = "1";
+    };
   };
 }

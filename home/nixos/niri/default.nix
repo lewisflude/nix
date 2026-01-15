@@ -7,6 +7,7 @@
   inputs,
   system,
   themeLib,
+  osConfig,
   ...
 }:
 let
@@ -120,16 +121,14 @@ in
       environment = {
         # Force Qt apps to use Wayland
         QT_QPA_PLATFORM = "wayland";
-        # Enable Wayland for Electron/Chromium apps
-        NIXOS_OZONE_WL = "1";
+        # Note: NIXOS_OZONE_WL is set system-wide in modules/nixos/features/desktop/graphics.nix
         # Note: DISPLAY is automatically managed by niri >= 25.08 for xwayland-satellite
         # Do NOT set DISPLAY here - let niri export it when X11 clients connect
       };
-      # Force NVIDIA RTX 4090 as the primary render device
-      # Use renderD128 (render node) for optimal performance on multi-GPU systems
-      # This ensures Niri doesn't try to use the Intel iGPU for rendering
-      debug = {
-        render-drm-device = "/dev/dri/renderD129";
+      # Force specific GPU as primary render device on multi-GPU systems
+      # Configured per-host via host.hardware.renderDevice
+      debug = lib.mkIf (osConfig.host.hardware.renderDevice or null != null) {
+        render-drm-device = osConfig.host.hardware.renderDevice;
       };
     }
     // input

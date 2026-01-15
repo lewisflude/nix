@@ -16,7 +16,6 @@
     ./zed-editor.nix
     ./obsidian.nix
     ./aws.nix
-    ./docker.nix
     ./atuin.nix
     ./lazygit.nix
     ./lazydocker.nix

@@ -1,4 +1,8 @@
-{ lib, ... }:
+{
+  lib,
+  constants,
+  ...
+}:
 let
   inherit (lib) mkEnableOption mkOption types;
 in
@@ -26,7 +30,7 @@ in
 
     timezone = mkOption {
       type = types.str;
-      default = "Europe/London";
+      default = constants.defaults.timezone;
       description = "Timezone for all media services.";
     };
   };

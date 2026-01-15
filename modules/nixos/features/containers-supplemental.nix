@@ -1,3 +1,6 @@
+# Bridge module: Forwards host.features.containersSupplemental to host.services.containersSupplemental
+# TODO: Consolidate feature and service options to eliminate this indirection
+# See docs/reference/REFACTORING_EXAMPLES.md for the recommended pattern
 {
   config,
   lib,
@@ -9,20 +12,21 @@ let
 in
 {
   config = mkIf cfg.enable {
-
     host.services.containersSupplemental = {
       enable = true;
-      inherit (cfg) uid;
-      inherit (cfg) gid;
-      inherit (cfg) homarr;
-      inherit (cfg) wizarr;
-      inherit (cfg) janitorr;
-      inherit (cfg) doplarr;
-      inherit (cfg) comfyui;
-      inherit (cfg) calcom;
-      inherit (cfg) profilarr;
-      inherit (cfg) termix;
-      inherit (cfg) cleanuparr;
+      inherit (cfg)
+        uid
+        gid
+        homarr
+        wizarr
+        janitorr
+        doplarr
+        comfyui
+        calcom
+        profilarr
+        termix
+        cleanuparr
+        ;
     };
   };
 }

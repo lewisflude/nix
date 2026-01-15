@@ -38,7 +38,7 @@ in
         "${cfg.configPath}/homarr/icons:/app/public/icons"
         "${cfg.configPath}/homarr/data:/data"
       ];
-      ports = [ "7575:7575" ];
+      ports = [ "${toString constants.ports.services.homarr}:7575" ];
       extraOptions =
         mkHealthFlags {
           cmd = "wget --no-verbose --tries=1 --spider http://localhost:7575/ || exit 1";

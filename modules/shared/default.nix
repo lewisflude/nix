@@ -1,7 +1,7 @@
 {
   imports = [
     ./host-options/core.nix
-    ./host-options/features.nix
+    ./host-options/features
     ./host-options/hardware.nix
     ./host-options/system.nix
     ./host-options/services/media-management.nix
