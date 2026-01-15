@@ -22,7 +22,7 @@ let
   sysInfo = import ./sys-info.nix { };
 
   # Focus widget (Center island)
-  focused = import ./focused.nix { };
+  focused = import ./focused.nix { inherit pkgs; };
 
   # Status widgets (End island)
   tray = import ./tray.nix { };
