@@ -4,7 +4,7 @@ _: {
     settings = {
       actions = true;
       anchor = "top-right";
-      border-radius = 8;
+      border-radius = 12; # Match Niri window border radius for visual consistency
       border-size = 2;
       default-timeout = 5000;
       font = "Iosevka Nerd Font 11";
@@ -12,10 +12,10 @@ _: {
       icons = true;
       icon-path = "/run/current-system/sw/share/icons/Papirus";
       layer = "overlay";
-      # Ironbar's exclusive zone automatically reserves space; margin-top is additional gap
-      # Match ironbar's top margin for visual consistency
+      # Position notifications BELOW Ironbar to prevent overlap
+      # Calculation: globalGap (8px) + barHeight (40px) = 48px
       # Format: "top,right,bottom,left"
-      margin = "8,8,0,0";
+      margin = "48,8,0,0";
       markup = true;
       max-icon-size = 48;
       max-visible = 5;

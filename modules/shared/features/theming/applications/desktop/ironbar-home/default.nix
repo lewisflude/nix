@@ -29,7 +29,7 @@ let
 
   # Import modular components
   defaultIronbarConfig = import ./monitors.nix { inherit pkgs lib hasBattery; };
-  ironbarCss = import ./css.nix { inherit colors; };
+  ironbarCss = import ./css.nix { inherit colors theme; };
 
   hostSystem =
     if pkgs ? stdenv && pkgs.stdenv ? hostPlatform && pkgs.stdenv.hostPlatform ? system then

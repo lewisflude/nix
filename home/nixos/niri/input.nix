@@ -12,11 +12,11 @@ _: {
     };
 
     # Focus follows mouse for "tape scrolling" metaphor
-    # max-scroll-amount = "0": instant focus without delay
+    # max-scroll-amount = "0%": instant focus without delay
     # In a scrolling UI, the cursor acts as a "read head"
     focus-follows-mouse = {
       enable = true;
-      max-scroll-amount = "0";
+      max-scroll-amount = "0%";
     };
 
     # Warp mouse disabled - prevents disorientation during keyboard navigation

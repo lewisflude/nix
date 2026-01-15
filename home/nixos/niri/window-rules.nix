@@ -24,8 +24,8 @@ let
   # Screencast indicator colors - uses danger/urgent colors for visibility
   screencastColors = {
     active = colors."accent-danger".hex;
-    inactive = "#7d0d2d"; # Darker variant of danger for inactive state
-    shadow = "#7d0d2d70"; # With transparency
+    inactive = theme._internal.accent.Lc45-h040.hex; # Darker variant of danger for inactive state
+    shadow = theme.withAlpha theme._internal.accent.Lc45-h040 0.44; # Darker danger with transparency (~70/255)
   };
 
   # Floating window shadow - matches layout shadow color

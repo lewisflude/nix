@@ -45,31 +45,23 @@ in
       { proportion = 1.0; }
     ];
 
-    # Focus ring: visual indicator for focused window
+    # Focus ring: primary visual indicator for focused window
     # With prefer-no-csd = true, focus ring is drawn correctly around windows
+    # Uses Signal theme accent-focus color for consistency
     focus-ring = {
       width = 3;
       active = {
-        color = themeConstants.niri.colors.focus-ring.active;
+        color = colors."accent-focus".hex;
       };
       inactive = {
         color = themeConstants.niri.colors.focus-ring.inactive;
       };
     };
 
-    # Border: drawn around ALL windows, shrinks windows to make space
-    # Narrower than focus ring to create visual hierarchy
+    # Border: disabled in favor of focus ring for cleaner aesthetic
+    # Per guide: "Disable standard borders to prefer the smoother focus ring"
     border = {
-      width = 2;
-      active = {
-        color = themeConstants.niri.colors.border.active;
-      };
-      inactive = {
-        color = themeConstants.niri.colors.border.inactive;
-      };
-      urgent = {
-        color = themeConstants.niri.colors.border.urgent;
-      };
+      enable = false;
     };
 
     # Drop shadows for depth

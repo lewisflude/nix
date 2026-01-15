@@ -62,6 +62,7 @@ in
     package = pkgs.phinger-cursors;
     size = 32;
     gtk.enable = true;
+    x11.enable = true; # Enable for XWayland apps (Discord, Slack, Electron)
   };
 
   # Enable hyprcursor-phinger theme for Wayland

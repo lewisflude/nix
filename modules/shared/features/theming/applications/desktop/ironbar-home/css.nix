@@ -1,10 +1,11 @@
 {
   colors,
+  theme,
   ...
 }:
 let
-  # Import design tokens
-  tokens = import ./tokens.nix;
+  # Import design tokens with Signal theme colors
+  tokens = import ./tokens.nix { inherit colors theme; };
 
   # Destructure for cleaner access
   inherit (tokens)
@@ -18,7 +19,7 @@ let
     shadow
     transition
     ;
-  interactionColors = tokens.colors;
+  interactionColors = tokens.interactionColors;
 
   # Helper to convert hex to rgba with opacity
   # Note: GTK CSS doesn't support alpha() function, so we use pre-computed values
@@ -54,14 +55,13 @@ let
     if colors != null then
       ''
         /* PRINCIPLE 1: The "Island" Strategy
-           Main bar background is transparent WITH BLUR.
+           Main bar background has subtle tint for depth separation.
            Border-radius creates "floating capsule" aesthetic.
-           Creates depth: windows slide "under" a frosted glass layer. */
+           Enhanced shadow compensates for lack of backdrop blur in GTK CSS. */
         window {
-          background-color: transparent;
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px); /* Fallback for compatibility */
+          background-color: rgba(0, 0, 0, 0.02);
           border-radius: ${radius.lg}; /* 12px (compact) or 16px (relaxed) */
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
         /* Global text color from theme */
@@ -71,14 +71,14 @@ let
 
         /* ===== FLOATING ISLANDS ===== */
         /* Common island styling - Gestalt Law of Common Region */
-        /* FIX #1: Etched Glass Border - alpha() creates transparent glaze effect */
+        /* FIX #1: Etched Glass Border - rgba() creates transparent glaze effect */
         #bar #start,
         #bar #center,
         #bar #end {
           background-color: ${colors."surface-base".hex};
-          border: 1px solid alpha(${colors."surface-subtle".hex}, 0.3);
+          border: 1px solid rgba(0, 0, 0, 0.15);
           border-radius: ${radius.lg};
-          box-shadow: ${shadow.island}, inset 0 1px 0 alpha(${colors."text-primary".hex}, 0.05);
+          box-shadow: ${shadow.island}, inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         /* Island 1: Navigation (left) - Workspaces + System Info */
@@ -140,7 +140,7 @@ let
           
           /* The "light under the dock" - physical indicator */
           border-bottom: 2px solid ${colors."accent-focus".hex};
-          box-shadow: 0 2px 8px alpha(${colors."accent-focus".hex}, 0.3);
+          box-shadow: 0 2px 8px rgba(137, 180, 250, 0.3);
         }
 
         /* Occupied but not focused */
@@ -255,8 +255,9 @@ let
         }
 
         /* ===== FOCUS INDICATOR ===== */
-        /* Keyboard navigation accessibility */
-        *:focus-visible {
+        /* Keyboard navigation accessibility
+           Note: Using :focus instead of :focus-visible (CSS Level 4, not supported in GTK) */
+        *:focus {
           outline: 2px solid ${colors."accent-focus".hex};
           outline-offset: 2px;
           border-radius: ${radius.md};
@@ -353,7 +354,8 @@ let
       margin-right: ${spacing.none};
     }
 
-    /* Focused window title */
+    /* Focused window title
+       Note: Text truncation handled by widget config (truncate.mode/max_length) */
     .label {
       padding: ${spacing.none} 14px;
       border: none;
@@ -361,11 +363,7 @@ let
       font-weight: ${typography.weight.normal};
       line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
-      max-width: ${sizing.labelMaxWidth};
       opacity: ${opacity.tertiary};
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
       transition: ${transition.opacity};
     }
 
@@ -384,17 +382,11 @@ let
     }
 
     /* FIX #4: Empty Desktop Collapse - gracefully hide empty state */
-    .label:empty {
-      min-width: 0px;
-      min-height: 0px;
-      padding: 0px;
-      margin: 0px;
-      opacity: 0;
-    }
+    /* Note: GTK CSS doesn't support :empty pseudo-class, handled by Ironbar config */
 
     /* ===== ISLAND 2: FOCUS CONTEXT ===== */
-    /* Focused window title - "what am I working on" indicator */
-    /* Native 'focused' widget with built-in truncation */
+    /* Focused window title - "what am I working on" indicator
+       Text truncation handled by widget config (truncate.mode/max_length) */
 
     #center .label {
       padding: ${spacing.none} ${spacing.lg};
@@ -402,23 +394,16 @@ let
       font-weight: ${typography.weight.normal};
       line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
-      max-width: ${sizing.labelMaxWidth};
       opacity: ${opacity.emphasis};
     }
 
     /* FIX #4: Empty Desktop Collapse - center island collapses when no window focused */
-    #center .label:empty,
-    #center box:empty {
-      min-width: 0px;
-      min-height: 0px;
-      padding: 0px;
-      margin: 0px;
-      opacity: 0;
-    }
+    /* Note: GTK CSS doesn't support :empty pseudo-class, handled by Ironbar config */
 
     /* ===== CLOCK (Now in End Island) ===== */
-    /* Ambient data - lighter weight than interactive workspaces */
-    /* FIX #2: Font Stability - Monospace prevents jitter as time changes */
+    /* Ambient data - lighter weight than interactive workspaces
+       FIX #2: Font Stability - Monospace prevents jitter as time changes
+       Visual centering achieved through symmetric padding */
 
     .clock {
       padding: ${spacing.sm} ${spacing.lg};
@@ -431,7 +416,6 @@ let
       min-width: ${sizing.clockWidth};
       min-height: ${sizing.widgetHeight};
       line-height: ${typography.lineHeight.widget};
-      text-align: center;
       opacity: 0.9;
     }
 
@@ -497,7 +481,8 @@ let
       border-radius: ${radius.md};
     }
 
-    /* Brightness control - Group 2 */
+    /* Brightness control - Group 2
+       Visual centering achieved through symmetric padding */
     .brightness {
       padding: ${spacing.sm} 10px;
       margin-right: ${widget.gapTight};
@@ -508,11 +493,11 @@ let
       font-weight: ${typography.weight.normal};
       line-height: ${typography.lineHeight.compact};
       min-height: ${sizing.widgetHeight};
-      text-align: center;
       transition: ${transition.control};
     }
 
-    /* Volume control - Group 2 */
+    /* Volume control - Group 2
+       Visual centering achieved through symmetric padding */
     .volume {
       padding: ${spacing.sm} 10px;
       margin-right: ${widget.gapSection};
@@ -523,7 +508,6 @@ let
       font-weight: ${typography.weight.normal};
       line-height: ${typography.lineHeight.compact};
       min-height: ${sizing.widgetHeight};
-      text-align: center;
       transition: ${transition.control};
     }
 
@@ -547,10 +531,10 @@ let
     }
 
     .tray button image {
-      min-height: 20px;
       min-width: 20px;
-      padding: ${spacing.none};
-      margin: ${spacing.none};
+      min-height: 20px;
+      padding: 0;
+      margin: 0;
     }
 
     /* Notifications - Group 3 */
@@ -610,24 +594,18 @@ let
       min-height: ${sizing.iconSmall};
       min-width: ${sizing.iconSmall};
       -gtk-icon-size: ${sizing.iconSmall};
-      margin-top: auto;
-      margin-bottom: auto;
     }
 
     .tray image {
       min-height: ${sizing.iconLarge};
       min-width: ${sizing.iconLarge};
       -gtk-icon-size: ${sizing.iconLarge};
-      margin-top: auto;
-      margin-bottom: auto;
     }
 
     .notifications image {
       min-height: ${sizing.iconSmall};
       min-width: ${sizing.iconSmall};
       -gtk-icon-size: ${sizing.iconSmall};
-      margin-top: auto;
-      margin-bottom: auto;
     }
 
     /* ===== POPUPS ===== */

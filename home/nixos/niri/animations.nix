@@ -38,13 +38,15 @@ _: {
       };
     };
 
-    # Window open - elegant fade and scale
+    # Window open - "The Pop" spring animation
+    # High stiffness (1000) for fast opening that feels responsive
     window-open = {
       enable = true;
       kind = {
-        easing = {
-          duration-ms = 150;
-          curve = "ease-out-expo";
+        spring = {
+          damping-ratio = 1.0;
+          stiffness = 1000;
+          epsilon = 0.0001;
         };
       };
     };
