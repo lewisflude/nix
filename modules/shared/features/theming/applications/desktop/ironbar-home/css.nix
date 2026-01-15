@@ -117,10 +117,14 @@ let
         .workspaces button {
           background: transparent;
           color: ${colors."text-tertiary".hex};
-          padding: 0px ${spacing.sm};
+          padding: ${spacing.xs} ${spacing.sm};
+          margin: 0 1px; /* Minimal gap for visual separation */
           min-width: ${sizing.workspaceItem};
           border-radius: ${radius.md};
           transition: ${transition.interactive};
+          border: none;
+          box-shadow: none;
+          outline: none;
         }
 
         .workspaces button:hover {
@@ -128,20 +132,19 @@ let
           background-color: ${interactionColors.hoverBgSubtle};
         }
 
-        /* Active workspace - accent color with glow effect */
-        /* FIX #3: Visual Hierarchy - Interactive controls get heavier weight */
-        /* ADDED: Bottom border indicator for spatial permanence */
-        /* Implements NeXTSTEP "light under the dock" metaphor */
+        /* Active workspace - clean accent with subtle bottom indicator */
+        /* Visual Hierarchy: Bold weight for active state */
+        /* Implements subtle "light under" metaphor without distracting glow */
         .workspaces button.focused,
         .workspaces button.active {
           color: ${colors."accent-focus".hex};
           background-color: ${colors."surface-subtle".hex};
           border-radius: ${radius.md};
           font-weight: ${typography.weight.bold};
-          
-          /* The "light under the dock" - stronger glow for "energy" */
+          border: none;
           border-bottom: 2px solid ${colors."accent-focus".hex};
-          box-shadow: 0 4px 12px rgba(122, 162, 247, 0.4);
+          box-shadow: none;
+          outline: none;
         }
 
         /* Occupied but not focused */
@@ -151,23 +154,32 @@ let
 
         /* ===== SEPARATOR STYLING ===== */
         /* Visual divider between widget groups */
+        /* FIX: Explicit transparent background to prevent artifact */
         .separator {
           color: ${colors."divider-primary".hex};
           opacity: 0.5;
           padding: 0px ${spacing.xs};
           font-size: ${typography.size.sm};
           font-weight: ${typography.weight.normal};
+          background: transparent;
+          background-color: transparent;
+          border: none;
+          box-shadow: none;
         }
 
         /* ===== PRINCIPLE 9: FOCUS CONTEXT (Window Title) ===== */
+        /* Consistent typography for crisp rendering */
         .label {
           color: ${colors."text-secondary".hex};
           transition: ${transition.opacity};
+          font-family: sans-serif;
+          font-weight: ${typography.weight.medium};
         }
 
         .label.focused,
         .label.active {
           color: ${colors."text-primary".hex};
+          font-weight: ${typography.weight.semibold};
         }
 
         /* ===== CLOCK - AMBIENT DATA ===== */
@@ -207,12 +219,18 @@ let
 
         /* ===== INTERACTIVE CONTROLS ===== */
         /* FIX #1: Remove Blue Bracket Glitch - force remove borders/shadows */
+        /* FIX: Explicit border removal to prevent disjointed container borders */
         .brightness,
         .volume,
         .popup-button {
           border: none;
+          border-left: none;
+          border-right: none;
+          border-top: none;
+          border-bottom: none;
           box-shadow: none;
           outline: none;
+          background: transparent;
         }
 
         /* Hover states for brightness/volume */
@@ -271,12 +289,11 @@ let
         }
 
         /* ===== FOCUS INDICATOR ===== */
-        /* Keyboard navigation accessibility
+        /* Keyboard navigation accessibility - DISABLED for cleaner appearance
+           The blue outline was creating visual artifacts on workspace buttons
            Note: Using :focus instead of :focus-visible (CSS Level 4, not supported in GTK) */
         *:focus {
-          outline: 2px solid ${colors."accent-focus".hex};
-          outline-offset: 2px;
-          border-radius: ${radius.md};
+          outline: none;
         }
       ''
     else
@@ -325,9 +342,11 @@ let
     .workspaces .item {
       min-width: ${sizing.workspaceItem};
       min-height: ${sizing.itemHeight};
-      margin: ${spacing.none} ${spacing.xs};
-      padding: ${spacing.none} ${spacing.sm};
+      margin: 0 1px; /* Consistent minimal gap */
+      padding: ${spacing.xs} ${spacing.sm};
       border: none;
+      box-shadow: none;
+      outline: none;
       font-size: ${typography.size.md};
       font-weight: ${typography.weight.normal};
       line-height: ${typography.lineHeight.item};
@@ -341,11 +360,15 @@ let
       background-color: ${interactionColors.hoverBgSubtle};
     }
 
-    /* FIX #3: Visual Hierarchy - Interactive controls get heavier weight */
+    /* Visual Hierarchy: Bold weight for active state, clean appearance */
     .workspaces .item.focused,
     .workspaces .item.active {
       opacity: ${opacity.full};
       font-weight: ${typography.weight.bold};
+      border: none;
+      border-bottom: 2px solid ${colors."accent-focus".hex};
+      box-shadow: none;
+      outline: none;
     }
 
     .workspaces .item.occupied {
@@ -372,11 +395,13 @@ let
 
     /* Focused window title
        Note: Text truncation handled by widget config (truncate.mode/max_length) */
+    /* Consistent font rendering for crisp appearance */
     .label {
       padding: ${spacing.none} 14px;
       border: none;
-      font-size: ${typography.size.xs};
-      font-weight: ${typography.weight.normal};
+      font-family: sans-serif;
+      font-size: ${typography.size.sm};
+      font-weight: ${typography.weight.medium};
       line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
       opacity: ${opacity.tertiary};
@@ -402,12 +427,14 @@ let
 
     /* ===== ISLAND 2: FOCUS CONTEXT ===== */
     /* Focused window title - "what am I working on" indicator
-       Text truncation handled by widget config (truncate.mode/max_length) */
+       Text truncation handled by widget config (truncate.mode/max_length)
+       FIX: Vertical padding prevents text clipping (ascenders like 'D', 'h', 'b') */
 
     #center .label {
-      padding: ${spacing.none} ${spacing.lg};
+      padding: ${spacing.xs} ${spacing.lg};
+      font-family: sans-serif;
       font-size: ${typography.size.sm};
-      font-weight: ${typography.weight.normal};
+      font-weight: ${typography.weight.medium};
       line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
       opacity: ${opacity.emphasis};
@@ -495,31 +522,39 @@ let
     }
 
     /* Brightness control - Hardware controls group */
+    /* FIX: Explicit border removal on all sides to prevent visual seams */
     .brightness {
       padding: 0 10px;
       margin-right: ${spacing.sm};
       min-width: ${sizing.controlWidget};
       border: none;
+      border-left: none;
+      border-right: none;
       border-radius: ${radius.md};
       font-size: ${typography.size.sm};
       font-weight: ${typography.weight.normal};
       line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
       transition: ${transition.control};
+      background: transparent;
     }
 
     /* Volume control - Hardware controls group */
+    /* FIX: Explicit border removal on all sides to prevent visual seams */
     .volume {
       padding: 0 10px;
       margin-right: ${spacing.lg};
       min-width: ${sizing.controlWidget};
       border: none;
+      border-left: none;
+      border-right: none;
       border-radius: ${radius.md};
       font-size: ${typography.size.sm};
       font-weight: ${typography.weight.normal};
       line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
       transition: ${transition.control};
+      background: transparent;
     }
 
     /* System tray - Communications group */
@@ -541,19 +576,30 @@ let
       transition: ${transition.control};
     }
 
-        /* FIX #4: Normalize tray icon sizes - force standard bounding box */
-        .tray button image {
-          min-width: 16px;
-          min-height: 16px;
-          max-width: 20px;
-          max-height: 20px;
-          padding: 2px;
+        /* Normalize tray icon sizes for consistent appearance */
+        /* Target both 'image' (GTK3 legacy) and 'picture' (GTK4) widgets */
+        /* Use -gtk-icon-size for sizing (GTK-supported property) */
+        /* Add opacity to reduce visual prominence of colorful icons */
+        .tray button image,
+        .tray button picture {
+          -gtk-icon-size: 18px;
+          min-width: 18px;
+          min-height: 18px;
+          padding: 0px;
           margin: 0;
+          opacity: 0.85;
+        }
+        
+        /* Reduce prominence of colorful icons on hover */
+        .tray button:hover image,
+        .tray button:hover picture {
+          opacity: 1.0;
         }
 
     /* Notifications - Communications group */
+    /* FIX: Reduced padding to tighten icon/count spacing */
     .notifications {
-      padding: ${spacing.none} 10px;
+      padding: ${spacing.none} ${spacing.sm};
       margin-right: ${spacing.lg};
       border: none;
       min-width: ${sizing.notificationWidth};
@@ -561,6 +607,15 @@ let
       line-height: ${typography.lineHeight.widget};
       opacity: ${opacity.primary};
       transition: ${transition.all};
+    }
+
+    /* Tighter spacing between notification icon and count */
+    .notifications > * {
+      margin: 0;
+    }
+
+    .notifications label {
+      margin-left: ${spacing.xs};
     }
 
     .notifications:hover {
@@ -604,23 +659,28 @@ let
     }
 
     /* ===== ICONS ===== */
+    /* Target both 'image' (GTK3) and 'picture' (GTK4) widgets */
 
-    image {
+    image,
+    picture {
       min-height: ${sizing.iconSmall};
       min-width: ${sizing.iconSmall};
       -gtk-icon-size: ${sizing.iconSmall};
     }
 
-    .tray image {
-      min-height: ${sizing.iconLarge};
-      min-width: ${sizing.iconLarge};
-      -gtk-icon-size: ${sizing.iconLarge};
+    .tray image,
+    .tray picture {
+      min-height: 18px;
+      min-width: 18px;
+      -gtk-icon-size: 18px;
     }
 
-    .notifications image {
+    .notifications image,
+    .notifications picture {
       min-height: ${sizing.iconSmall};
       min-width: ${sizing.iconSmall};
       -gtk-icon-size: ${sizing.iconSmall};
+      margin-right: ${spacing.xs};
     }
 
     /* ===== POPUPS ===== */
@@ -663,10 +723,17 @@ let
 
     /* ===== SEPARATOR ===== */
     /* Visual divider between widget groups within an island */
-    .separator {
+    /* FIX: High-specificity rules to prevent background artifacts */
+    .separator,
+    label.separator,
+    #bar .separator {
       padding: ${spacing.none} ${spacing.xs};
       min-height: ${sizing.widgetHeight};
       line-height: ${typography.lineHeight.widget};
+      background: transparent;
+      background-color: transparent;
+      border: none;
+      box-shadow: none;
     }
 
     /* ===== POWER BUTTON ===== */
