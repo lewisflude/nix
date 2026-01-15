@@ -61,7 +61,7 @@ in
       # ReGreet TOML configuration
       settings = {
         background = {
-          path = "/usr/share/backgrounds/nixos/nix-wallpaper-nineish-dark-gray.png";
+          path = "/usr/share/backgrounds/nixos/nix-wallpaper-simple-blue.png";
           fit = "Cover";
         };
 

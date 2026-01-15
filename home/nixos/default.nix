@@ -9,6 +9,7 @@
     ./yazi.nix
     ./niri
     ./mcp.nix
+    ./apps/ironbar.nix
     ./apps/polkit-gnome.nix
     ./apps/wlsunset.nix
     ./apps/swayidle.nix
