@@ -16,12 +16,9 @@ mkIf vrEnabled {
   # User VR packages
   # Note: Immersed VR is installed via programs.immersed module at system level
   home.packages = [
-    # WayVR - Desktop overlay for VR
-    # wlx-overlay-s: Main overlay app (run when in VR with: vr-desktop)
-    # wayvr-dashboard: Optional GUI for configuration
+    # WayVR - Desktop overlay for VR (merged from wlx-overlay-s + wayvr-dashboard)
     # Provided by nixpkgs-xr overlay for latest version
-    pkgs.wlx-overlay-s
-    pkgs.wayvr-dashboard
+    pkgs.wayvr
   ];
 
   xdg.configFile."openvr/openvrpaths.vrpath".text =
