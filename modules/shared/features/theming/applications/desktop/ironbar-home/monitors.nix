@@ -1,31 +1,41 @@
 {
   pkgs,
+  lib ? pkgs.lib,
+  hasBattery ? false, # Set true for laptop hosts
   ...
 }:
 let
-  widgets = import ./widgets/default.nix { inherit pkgs; };
+  widgets = import ./widgets/default.nix { inherit pkgs lib hasBattery; };
+
+  # Import design tokens for synchronized values
+  tokens = import ./tokens.nix;
+  inherit (tokens) niriSync;
+
+  # Extract numeric values from token strings
+  # barHeight and margin come from the 8pt grid system
+  barHeight = tokens.sizing.barHeight; # "40px" or "48px"
+  barHeightNum = builtins.fromJSON (builtins.head (builtins.match "([0-9]+)px" barHeight));
+  marginNum = niriSync.barMargin; # Already a number from tokens
 in
 {
   monitors = {
     "DP-3" = {
       position = "top";
-      height = 44;
+      height = barHeightNum;
       layer = "top";
       exclusive_zone = true;
-      popup_gap = 10;
+      popup_gap = marginNum + 2; # Slightly more than margin for visual separation
       popup_autohide = false;
       start_hidden = false;
       anchor_to_edges = true;
       icon_theme = "Papirus";
       margin = {
-        top = 8;
+        top = marginNum;
         bottom = 0;
-        left = 8;
-        right = 8;
+        left = marginNum;
+        right = marginNum;
       };
-      inherit (widgets) start;
-      inherit (widgets) center;
-      inherit (widgets) end;
+      inherit (widgets) start center end;
     };
   };
 }

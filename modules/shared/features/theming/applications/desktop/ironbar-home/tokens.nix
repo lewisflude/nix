@@ -1,140 +1,170 @@
 # Ironbar Design Tokens
 #
-# This file defines the design system for Ironbar's visual language.
-# All CSS values should reference these tokens for consistency.
+# Mathematical UI Physics - 8-Point Grid System
+#
+# This file defines the design system using professional spatial mathematics.
+# All values follow the 8pt grid (multiples of 8, with 4pt micro-grid for fine details).
 #
 # Design Principles:
-# 1. 4px base unit for spacing (follows Material Design / 8pt grid)
-# 2. Consistent opacity scale for visual hierarchy
-# 3. Modular type scale for typography
-# 4. Semantic naming for intent, not values
-{
+# 1. 8pt Grid: All major dimensions are multiples of 8 (8, 16, 24, 32, 40, 48)
+# 2. 4pt Micro-grid: Fine details use multiples of 4 (4, 12, 20)
+# 3. Modular Typography: 1.125 (Major Second) scale for font sizes
+# 4. Optical Balance: Icons are 2-4px larger than adjacent text
+# 5. Gestalt Synchronization: Niri and Ironbar share the same radii and gaps
+#
+# Profile Selection:
+# - compact: 40px bar, 8px gaps (optimized for 1080p)
+# - relaxed: 48px bar, 12px gaps (optimized for 1440p/4K)
+let
   # ============================================================================
-  # SPACING SCALE
+  # PROFILE SELECTION
   # ============================================================================
-  # Based on 4px base unit (common in design systems)
-  # Named semantically: xs, sm, md, lg, xl, 2xl, 3xl
-  spacing = {
-    none = "0";
-    xs = "2px"; # 0.5 units - tight spacing
-    sm = "4px"; # 1 unit - small gaps
-    md = "8px"; # 2 units - standard spacing
-    lg = "12px"; # 3 units - comfortable spacing
-    xl = "16px"; # 4 units - section separation
-    "2xl" = "20px"; # 5 units - large gaps
-    "3xl" = "24px"; # 6 units - major sections
+  # Change this to "relaxed" for 1440p+ displays
+  profile = "compact";
+
+  # Profile-specific values
+  profiles = {
+    compact = {
+      barHeight = 40;
+      globalGap = 8; # Distance from screen edge AND between islands
+      islandRadius = 12; # Height / 3 ≈ 13, rounded to 12 for grid
+      fontSize = 13;
+      iconSize = 16; # fontSize + 3 (optical balance)
+      itemPadding = 12; # Horizontal breathing room
+      borderWidth = 1;
+    };
+    relaxed = {
+      barHeight = 48;
+      globalGap = 12; # Airier spacing for larger displays
+      islandRadius = 16; # Height / 3 = 16
+      fontSize = 14;
+      iconSize = 18; # fontSize + 4 (optical balance)
+      itemPadding = 16; # More generous padding
+      borderWidth = 2;
+    };
   };
 
-  # Widget-specific spacing (derived from scale)
-  widget = {
-    # Internal padding
-    paddingTight = "4px 8px"; # sm md - compact widgets
-    paddingNormal = "5px 10px"; # ~sm+xs ~md+xs - standard widgets
-    paddingComfortable = "7px 12px"; # lg variant - tray, larger targets
-    paddingSpacious = "16px"; # xl - popups
+  # Active profile
+  p = profiles.${profile};
 
-    # External margins (gap between widgets)
-    gapTight = "8px"; # md - closely related items
-    gapNormal = "12px"; # lg - standard separation
-    gapSection = "16px"; # xl - between logical groups
-    gapLarge = "18px"; # xl+xs - major sections (e.g., workspaces to focused)
+  # Derived calculations (Mathematical UI Physics)
+  widgetHeight = p.barHeight - 4; # Allow 2px padding top/bottom for island
+in
+{
+  # ============================================================================
+  # EXPORTED PROFILE VALUES (for Niri synchronization)
+  # ============================================================================
+  inherit profile;
+
+  # CRITICAL: These values MUST match your Niri configuration
+  # The bar should feel like "just another window" in the system
+  niriSync = {
+    windowGap = p.globalGap; # Niri layout.gaps
+    windowRadius = p.islandRadius; # Niri geometry-corner-radius
+    barMargin = p.globalGap; # Distance from screen edges
+  };
+
+  # ============================================================================
+  # SPACING SCALE (8pt Grid)
+  # ============================================================================
+  spacing = {
+    none = "0";
+    xs = "4px"; # 1 micro-unit - fine details
+    sm = "8px"; # 1 unit - standard small gaps
+    md = "12px"; # 1.5 units - comfortable spacing
+    lg = "16px"; # 2 units - section separation
+    xl = "20px"; # 2.5 units - generous gaps
+    "2xl" = "24px"; # 3 units - major sections
+    "3xl" = "32px"; # 4 units - large separation
+  };
+
+  # Widget-specific spacing
+  widget = {
+    paddingTight = "0 ${toString (p.itemPadding - 4)}px";
+    paddingNormal = "0 ${toString p.itemPadding}px";
+    paddingComfortable = "0 ${toString (p.itemPadding + 4)}px";
+    gapTight = "${toString p.globalGap}px";
+    gapNormal = "${toString (p.globalGap + 4)}px";
+    gapSection = "${toString (p.globalGap * 2)}px";
+    gapLarge = "${toString (p.globalGap + 8)}px";
+    paddingSpacious = "${toString (p.itemPadding + 8)}px";
   };
 
   # Island container spacing
   island = {
-    padding = "5px 10px"; # Consistent island internal padding
-    paddingCenter = "5px 6px"; # Slightly tighter for clock (visual balance)
-    margin = "8px"; # Gap from screen edges
-    borderRadius = "11px"; # Softer than 12px, more refined
+    padding = "4px ${toString p.itemPadding}px";
+    paddingCenter = "4px ${toString (p.itemPadding + 4)}px";
+    margin = "${toString p.globalGap}px";
+    borderRadius = "${toString p.islandRadius}px";
   };
 
   # ============================================================================
   # SIZING SCALE
   # ============================================================================
-  # Fixed dimensions for consistent layout
   sizing = {
-    # Heights
-    barHeight = "44px"; # Total bar height
-    widgetHeight = "36px"; # Standard widget row height
-    itemHeight = "32px"; # Workspace items, smaller elements
-    touchTarget = "24px"; # Minimum touch target (tray buttons)
-    iconSmall = "18px"; # Standard icons
-    iconMedium = "20px"; # Focused window icon
-    iconLarge = "22px"; # Tray icons (accessibility)
-
-    # Widths
-    workspaceItem = "32px"; # Individual workspace button
-    controlWidget = "70px"; # Brightness/volume (icon + value)
-    clockWidth = "130px"; # Prevents layout shift
-    labelMaxWidth = "300px"; # Focused window title truncation
-    notificationWidth = "40px"; # Notification indicator
-    buttonMinWidth = "36px"; # Standard button
-    popupWidth = "320px"; # Calendar popup
+    barHeight = "${toString p.barHeight}px";
+    widgetHeight = "${toString widgetHeight}px";
+    itemHeight = "${toString (p.barHeight - 8)}px";
+    touchTarget = "24px";
+    iconSmall = "${toString p.iconSize}px";
+    iconMedium = "${toString (p.iconSize + 2)}px";
+    iconLarge = "${toString (p.iconSize + 4)}px";
+    workspaceItem = "${toString (p.barHeight - 8)}px";
+    controlWidget = "72px";
+    clockWidth = "128px";
+    labelMaxWidth = "296px";
+    notificationWidth = "40px";
+    buttonMinWidth = "${toString widgetHeight}px";
+    popupWidth = "320px";
   };
 
   # ============================================================================
   # OPACITY SCALE
   # ============================================================================
-  # Semantic opacity levels for visual hierarchy
-  # Follows accessibility guidelines (WCAG contrast)
   opacity = {
-    # Content visibility
-    invisible = "0"; # Hidden elements
-    hint = "0.1"; # Subtle separators, dividers
-    disabled = "0.4"; # Inactive/empty workspaces
-    muted = "0.45"; # Inactive window titles
-    secondary = "0.7"; # Occupied workspaces, layout indicator
-    tertiary = "0.75"; # Focused window title (normal)
-    primary = "0.8"; # System info, notifications
-    emphasis = "0.95"; # Active window title, clock
-    full = "1"; # Focused workspace, alerts
-
-    # Hover state modifiers
-    hoverSubtle = "0.65"; # Workspace hover (from 0.4)
-    hoverFull = "1"; # System info hover (from 0.8)
+    invisible = "0";
+    hint = "0.1";
+    disabled = "0.4";
+    muted = "0.45";
+    secondary = "0.7";
+    tertiary = "0.75";
+    primary = "0.8";
+    emphasis = "0.95";
+    full = "1";
+    hoverSubtle = "0.65";
+    hoverFull = "1";
   };
 
   # ============================================================================
-  # TYPOGRAPHY SCALE
+  # TYPOGRAPHY SCALE (Modular: 1.125 Major Second)
   # ============================================================================
-  # Modular type scale for hierarchy
-  # Base: 14px, Scale: ~1.125 (Major Second)
   typography = {
-    # Font sizes
     size = {
-      xs = "13px"; # Secondary info (focused title, sys-info)
-      sm = "14px"; # Base size (controls, buttons, labels)
-      md = "15px"; # Workspace icons, layout indicator
-      lg = "16px"; # Clock (visual anchor)
-      xl = "17px"; # Popup headers (not currently used, reserved)
+      xs = "${toString (p.fontSize - 1)}px"; # Micro text
+      sm = "${toString p.fontSize}px"; # Base text
+      md = "${toString (p.fontSize + 1)}px"; # Workspace icons
+      lg = "${toString (p.fontSize + 3)}px"; # Large text
+      xl = "${toString (p.fontSize + 5)}px"; # Popup headers
     };
-
-    # Font weights
     weight = {
-      normal = "400"; # Default text
-      medium = "450"; # Active window title (subtle emphasis)
-      semibold = "500"; # Active workspace, sys-info
-      bold = "600"; # Clock, popup headers, critical alerts
+      normal = "400";
+      medium = "450";
+      semibold = "500";
+      bold = "600";
     };
-
-    # Line heights (match widget heights for vertical centering)
     lineHeight = {
-      widget = "36px"; # Standard widget alignment
-      item = "32px"; # Workspace items
-      compact = "28px"; # Brightness/volume (tighter)
-      popup = "1.5"; # Popup text (relative)
-      popupHeader = "1.4"; # Popup headers
+      widget = "${toString widgetHeight}px";
+      item = "${toString (p.barHeight - 8)}px";
+      compact = "${toString (p.barHeight - 12)}px";
+      popup = "1.5";
+      popupHeader = "1.4";
     };
-
-    # Letter spacing
     letterSpacing = {
-      normal = "0"; # Default
-      clock = "0.02em"; # Slight tracking for clock
+      normal = "0";
+      clock = "0.02em";
     };
-
-    # Special features
     features = {
-      tabularNums = "tabular-nums"; # Prevent width shifts on numbers
+      tabularNums = "tabular-nums";
     };
   };
 
@@ -143,58 +173,46 @@
   # ============================================================================
   radius = {
     none = "0";
-    sm = "6px"; # Tray buttons, small interactive elements
-    md = "8px"; # Workspace items, hover states, focus rings
-    lg = "11px"; # Island containers
-    xl = "12px"; # Popups
+    sm = "${toString (p.islandRadius - 6)}px";
+    md = "${toString (p.islandRadius - 4)}px";
+    lg = "${toString p.islandRadius}px";
+    xl = "${toString (p.islandRadius + 2)}px";
   };
 
   # ============================================================================
   # SHADOWS
   # ============================================================================
   shadow = {
-    # Island shadows (subtle elevation)
     island = "0 2px 10px rgba(0, 0, 0, 0.06)";
-    islandCenter = "0 2px 14px rgba(0, 0, 0, 0.08)"; # Slightly stronger for clock
+    islandCenter = "0 2px 14px rgba(0, 0, 0, 0.08)";
     popup = "0 4px 16px rgba(0, 0, 0, 0.12)";
   };
 
   # ============================================================================
-  # COLORS (Non-theme, hardcoded values that should be extracted)
+  # COLORS (Interaction states - theme-independent)
   # ============================================================================
-  # These are the rgba values currently hardcoded in the CSS
-  # They represent interaction states independent of theme
   colors = {
-    # Hover/active backgrounds (neutral overlay)
-    hoverBgSubtle = "rgba(37, 38, 47, 0.12)"; # Workspace hover
-    hoverBg = "rgba(37, 38, 47, 0.15)"; # Standard hover
-    activeBg = "rgba(37, 38, 47, 0.25)"; # Active/pressed state
-
-    # Alert colors (should ideally come from theme)
-    warning = "#fab387"; # Orange - high resource usage
-    critical = "#f38ba8"; # Red - critical usage
+    hoverBgSubtle = "rgba(37, 38, 47, 0.12)";
+    hoverBg = "rgba(37, 38, 47, 0.15)";
+    activeBg = "rgba(37, 38, 47, 0.25)";
+    warning = "#fab387";
+    critical = "#f38ba8";
   };
 
   # ============================================================================
   # TRANSITIONS
   # ============================================================================
-  # Consistent animation timing
   transition = {
-    # Durations
     duration = {
-      fast = "50ms"; # Press feedback (transform)
-      normal = "150ms"; # Standard transitions
-      slow = "200ms"; # Width expansions (if used)
+      fast = "50ms";
+      normal = "150ms";
+      slow = "200ms";
     };
-
-    # Easing functions
     easing = {
       default = "ease";
-      out = "ease-out"; # Popup entrance
-      inOut = "ease-in-out"; # Animations (pulse)
+      out = "ease-out";
+      inOut = "ease-in-out";
     };
-
-    # Common transition strings
     opacity = "opacity 150ms ease";
     background = "background-color 150ms ease";
     transform = "transform 50ms ease";
@@ -204,7 +222,7 @@
   };
 
   # ============================================================================
-  # Z-INDEX (if needed in future)
+  # Z-INDEX
   # ============================================================================
   zIndex = {
     base = "0";

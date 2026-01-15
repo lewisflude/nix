@@ -32,7 +32,6 @@ in
 
       # Core PipeWire configuration - low-latency settings
       extraConfig = {
-        # Low-latency configuration for PipeWire core
         pipewire."92-low-latency" = {
           "context.properties" = {
             "default.clock.rate" = 48000;
@@ -60,10 +59,6 @@ in
           ];
         };
 
-        # Low-latency configuration for PulseAudio backend
-        # Note: libpipewire-module-protocol-pulse is already loaded by the base
-        # pipewire-pulse.conf when services.pipewire.pulse.enable = true
-        # We only need to configure the pulse properties here
         pipewire-pulse."92-low-latency" = {
           "pulse.properties" = {
             "pulse.min.req" = latency;
@@ -74,25 +69,13 @@ in
           };
           "stream.properties" = {
             "node.latency" = latency;
-            "resample.quality" = 4; # Medium quality (was 1) - prevents crackling
+            "resample.quality" = 4; # Medium quality - prevents crackling
           };
         };
       };
     };
 
-    # Audio utilities and environment
-    environment = {
-      sessionVariables = {
-        PIPEWIRE_LATENCY = latency;
-        SDL_AUDIODRIVER = "pulseaudio"; # For SDL2 games
-        PULSE_LATENCY_MSEC = "60"; # Balance for gaming
-      };
-
-      systemPackages = [
-        pkgs.pulseaudio # pactl and compatibility tools
-        pkgs.alsa-utils
-        pkgs.alsa-tools
-      ];
-    };
+    # pactl for debugging/control (wpctl is the PipeWire-native alternative)
+    environment.systemPackages = [ pkgs.pulseaudio ];
   };
 }

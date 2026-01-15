@@ -6,97 +6,32 @@
 }:
 let
   cfg = config.host.features.desktop;
-  # Use the latest stable production driver for the 4090 to avoid RT kernel segfaults
-  # Real-time kernels use a strict interrupt model that NVIDIA's beta drivers
-  # (like 590.x) can't always handle. The stable branch (565/570) has much better
-  # "Bar Mapping" stability and RT kernel compatibility.
-  nvidiaPackage = config.boot.kernelPackages.nvidiaPackages.stable;
 in
 {
   config = lib.mkIf cfg.enable {
     hardware = {
       graphics = {
         enable = true;
-        # 32-bit support is now global for desktop - needed for almost all games/VR
-        # Previously conditional on gaming.enable, but VR and Steam both require it
-        enable32Bit = true;
+        enable32Bit = true; # Required for Steam/Wine/VR
         extraPackages = [
-          pkgs.nvidia-vaapi-driver
-          pkgs.egl-wayland
-          pkgs.libva
-          pkgs.libva-utils
-          pkgs.libva-vdpau-driver # VDPAU driver for VAAPI (required for Immersed VR)
-          pkgs.vulkan-tools
+          pkgs.nvidia-vaapi-driver # Hardware video decode
+          pkgs.libva-vdpau-driver # Required for Immersed VR
         ];
       };
 
       nvidia = {
-        modesetting.enable = true;
-        open = true; # Correct for 4090 (Turing+)
-        package = nvidiaPackage;
-        nvidiaSettings = true;
-        powerManagement.enable = true; # Helps with GSP and sleep/wake stability
-        powerManagement.finegrained = false; # Not needed for desktop GPUs
+        modesetting.enable = true; # Required for Wayland
+        open = true; # Required for Turing+ (RTX 4090)
+        package = config.boot.kernelPackages.nvidiaPackages.stable;
       };
 
-      # NVIDIA Container Toolkit - Required for Podman GPU acceleration
-      # Enables GPU access in containers for AI workloads (Ollama, etc.)
+      # GPU access in containers (Ollama, etc.)
       nvidia-container-toolkit.enable = true;
     };
 
     services.xserver.videoDrivers = [ "nvidia" ];
 
-    # Explicit nouveau blacklist to prevent race conditions during boot
-    # While nvidia-utils blacklists nouveau by default, explicit blacklisting
-    # is still recommended to prevent the nouveau driver from loading before nvidia
-    boot.blacklistedKernelModules = [ "nouveau" ];
-
-    environment.sessionVariables = lib.mkMerge [
-      # NVIDIA-specific configuration
-      {
-        # Force NVIDIA GPU (card2) for Wayland/Niri
-        # card1: Intel iGPU (no monitors connected)
-        # card2: NVIDIA RTX 4090 (monitors connected here)
-        WLR_DRM_DEVICES = "/dev/dri/card2";
-
-        # Hardware video acceleration via nvidia-vaapi-driver
-        LIBVA_DRIVER_NAME = "nvidia";
-        __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-        GBM_BACKEND = "nvidia-drm";
-
-        # Enable G-Sync/VRR for smooth streaming (Moonlight, Steam Link)
-        __GL_GSYNC_ALLOWED = "1";
-
-        # Fix Gamescope segfaults on NVIDIA
-        NVD_BACKEND = "direct";
-
-        # Note: Shader caching (__GL_SHADER_DISK_CACHE) is enabled by default
-        # for non-root users, so explicit setting is unnecessary.
-        # Threaded optimizations (__GL_THREADED_OPTIMIZATION) should be set
-        # per-application, not system-wide, for best compatibility.
-      }
-
-      # Vulkan configuration - conditional on NVIDIA being enabled
-      (lib.mkIf config.hardware.nvidia.modesetting.enable {
-        # Explicit Vulkan ICD path prevents GPU detection failures in Steam's pressure-vessel container
-        # /run/opengl-driver is NixOS's standard dynamically-managed location for graphics drivers
-        VK_DRIVER_FILES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.x86_64.json";
-
-        # Disable validation layers for production gaming (significant performance impact)
-        # Validation layers can cause 90-95% performance drops in some configurations
-        VK_INSTANCE_LAYERS = "";
-      })
-    ];
-
-    # Udev rules for gaming and streaming
-    services.udev.extraRules = ''
-      # Simplify device permissions for Sunshine/Steam
-      KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess"
-
-      # Prevent NVIDIA GPU from entering low-power states during gaming/VR/streaming
-      # This eliminates micro-stuttering and ensures consistent performance
-      # 0x10de = NVIDIA vendor ID, 0x030000 = VGA-compatible controller
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", ATTR{power/control}="on"
-    '';
+    # Host-specific: NVIDIA GPU is card2 (Intel iGPU is card1, no monitors)
+    environment.sessionVariables.WLR_DRM_DEVICES = "/dev/dri/card2";
   };
 }

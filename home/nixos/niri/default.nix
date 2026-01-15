@@ -13,6 +13,11 @@ let
   themeConstants = import ../theme-constants.nix {
     inherit lib themeLib;
   };
+
+  # Import Ironbar design tokens for Niri synchronization
+  # This ensures Niri windows use the same gaps and radii as Ironbar islands
+  ironbarTokens = import ../../../modules/shared/features/theming/applications/desktop/ironbar-home/tokens.nix;
+
   # Use overlay packages to ensure mesa dependencies match system nixpkgs
   inherit (pkgs) niri-unstable;
 
@@ -22,9 +27,14 @@ let
   input = import ./input.nix { };
   outputs = import ./outputs.nix { };
   layout = import ./layout.nix {
-    inherit lib themeLib themeConstants;
+    inherit
+      lib
+      themeLib
+      themeConstants
+      ironbarTokens
+      ;
   };
-  window-rules = import ./window-rules.nix { inherit lib themeLib; };
+  window-rules = import ./window-rules.nix { inherit lib themeLib ironbarTokens; };
   animations = import ./animations.nix { };
   startup = import ./startup.nix {
     inherit

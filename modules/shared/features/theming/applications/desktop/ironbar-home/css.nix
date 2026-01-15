@@ -20,103 +20,226 @@ let
     ;
   interactionColors = tokens.colors;
 
+  # Helper to convert hex to rgba with opacity
+  # Note: GTK CSS doesn't support alpha() function, so we use pre-computed values
+  # The theme's surface colors already have appropriate darkness
+
   # ============================================================================
-  # BASE CSS
+  # BASE CSS - Global Reset & Typography
   # ============================================================================
-  # Minimal reset, let Signal GTK theme handle defaults
+  # Implements Principle #2: Visual Hierarchy through typography
   baseCss = ''
-    /* Base bar styling */
+    /* GLOBAL RESET & TYPOGRAPHY */
+    * {
+      font-size: ${typography.size.sm};
+      font-weight: ${typography.weight.semibold};
+      border: none;
+      border-radius: 0px;
+      box-shadow: none;
+    }
+
+    /* Base bar styling - minimal padding, islands handle their own */
     #bar {
-      padding: 7px ${spacing."3xl"};
+      padding: 0px ${spacing.md};
       min-height: ${sizing.barHeight};
     }
   '';
 
   # ============================================================================
-  # THEME CSS (Signal Colors)
+  # THEME CSS - Floating Islands Design
   # ============================================================================
-  # Floating islands design - requires theme colors
+  # Implements Principle #1: Law of Common Region
+  # The main bar background is TRANSPARENT - only islands get color
   themeCss =
     if colors != null then
       ''
-        /* Signal Theme: Floating Islands Design */
-        color: ${colors."text-primary".hex};
+        /* PRINCIPLE 1: The "Island" Strategy
+           Main bar background is transparent.
+           Only the containers (start, center, end) get color. */
+        window {
+          background-color: transparent;
+        }
+
+        /* Global text color from theme */
+        * {
+          color: ${colors."text-primary".hex};
+        }
 
         /* ===== FLOATING ISLANDS ===== */
-
-        /* Island 1: Navigation (left) */
-        #bar #start {
+        /* Common island styling - Gestalt Law of Common Region */
+        #bar #start,
+        #bar #center,
+        #bar #end {
           background-color: ${colors."surface-base".hex};
+          border: 1px solid ${colors."surface-subtle".hex};
           border-radius: ${radius.lg};
-          padding: ${island.padding};
           box-shadow: ${shadow.island};
         }
 
-        /* Island 2: Time (center) - visual anchor */
+        /* Island 1: Navigation (left) - Workspaces + System Info */
+        #bar #start {
+          padding: ${island.padding};
+          margin-right: ${spacing.md};
+        }
+
+        /* Island 2: Focus (center) - Window Title */
         #bar #center {
-          background-color: ${colors."surface-base".hex};
-          border-radius: ${radius.lg};
           padding: ${island.paddingCenter};
           box-shadow: ${shadow.islandCenter};
         }
 
-        /* Island 3: Status (right) */
+        /* Island 3: Status (right) - Controls + Clock + Power */
         #bar #end {
-          background-color: ${colors."surface-base".hex};
-          border-radius: ${radius.lg};
           padding: ${island.padding};
-          box-shadow: ${shadow.island};
+          margin-left: ${spacing.md};
         }
       ''
     else
       "";
 
   # ============================================================================
-  # WIDGET THEME CSS (Interactive States)
+  # WIDGET THEME CSS (Interactive States & Accents)
   # ============================================================================
+  # Implements Principle #4: Active State Pop
+  # Implements Principle #7: Strip Visualization for workspaces
   widgetThemeCss =
     if colors != null then
       ''
 
-        /* Signal GTK theme handles default widget styling */
+        /* ===== PRINCIPLE 4 & 7: WORKSPACE STRIP VISUALIZATION ===== */
+        /* Workspaces styled as a filmstrip with clear active state */
+        .workspaces button {
+          background: transparent;
+          color: ${colors."text-tertiary".hex};
+          padding: 0px ${spacing.sm};
+          min-width: ${sizing.workspaceItem};
+          border-radius: ${radius.md};
+          transition: ${transition.interactive};
+        }
 
-        /* Focused workspace highlight */
-        #bar #start .workspaces button.focused {
-          background-color: ${colors."surface-subtle".hex} !important;
+        .workspaces button:hover {
+          color: ${colors."text-primary".hex};
+          background-color: ${interactionColors.hoverBgSubtle};
+        }
+
+        /* Active workspace - accent color with glow effect */
+        .workspaces button.focused,
+        .workspaces button.active {
+          color: ${colors."accent-focus".hex};
+          background-color: ${colors."surface-subtle".hex};
           border-radius: ${radius.md};
         }
 
-        /* Popup styling - match island aesthetic */
-        .popup {
-          background-color: ${colors."surface-base".hex};
-          border: 1px solid ${colors."surface-emphasis".hex};
+        /* Occupied but not focused */
+        .workspaces button.visible {
+          color: ${colors."text-secondary".hex};
         }
 
-        /* Interactive controls - hover states */
-        .brightness:hover,
-        .volume:hover {
+        /* ===== SEPARATOR STYLING ===== */
+        /* Subtle etched divider - low opacity to not compete with content */
+        .separator {
+          color: ${colors."divider-primary".hex};
+          opacity: 0.3;
+          padding: 0px ${spacing.xs};
+          font-size: ${typography.size.sm};
+          font-weight: ${typography.weight.normal};
+        }
+
+        /* ===== PRINCIPLE 9: FOCUS CONTEXT (Window Title) ===== */
+        .label {
+          color: ${colors."text-secondary".hex};
+          transition: ${transition.opacity};
+        }
+
+        .label.focused,
+        .label.active {
+          color: ${colors."text-primary".hex};
+        }
+
+        /* ===== CLOCK - VISUAL ANCHOR ===== */
+        /* Principle #2: Clock gets extra visual weight as anchor */
+        .clock {
+          background-color: ${colors."surface-subtle".hex};
+          padding: ${spacing.sm} ${spacing.lg};
+          border-radius: ${radius.md};
+          color: ${colors."text-primary".hex};
+          font-weight: ${typography.weight.bold};
+        }
+
+        /* ===== POWER BUTTON - DESTRUCTIVE ACTION ===== */
+        /* Red accent for destructive action, rightmost position */
+        .power-btn button {
+          color: ${colors."accent-danger".hex};
+          background: transparent;
+          padding: ${spacing.xs} ${spacing.md};
+          margin-left: ${spacing.sm};
+          border-radius: ${radius.md};
+          transition: ${transition.control};
+        }
+
+        .power-btn button:hover {
           background-color: ${interactionColors.hoverBg};
         }
 
-        /* Interactive controls - active/pressed states */
+        /* ===== POPUP STYLING ===== */
+        /* Match island aesthetic for consistency */
+        .popup {
+          background-color: ${colors."surface-base".hex};
+          border: 1px solid ${colors."surface-emphasis".hex};
+          border-radius: ${radius.xl};
+          box-shadow: ${shadow.popup};
+        }
+
+        /* ===== INTERACTIVE CONTROLS ===== */
+        /* Hover states for brightness/volume */
+        .brightness:hover,
+        .volume:hover {
+          background-color: ${interactionColors.hoverBg};
+          border-radius: ${radius.md};
+        }
+
+        /* Active/pressed states */
         .brightness:active,
         .volume:active {
           background-color: ${interactionColors.activeBg};
           opacity: 0.9;
         }
 
-        /* Tray button hover */
-        .tray button:hover {
-          background-color: ${interactionColors.activeBg};
+        /* ===== TRAY STYLING ===== */
+        .tray button {
+          background: transparent;
           border-radius: ${radius.sm};
+          transition: ${transition.control};
         }
 
-        /* Tray button active */
+        .tray button:hover {
+          background-color: ${interactionColors.activeBg};
+        }
+
         .tray button:active {
           opacity: 0.9;
         }
 
-        /* Focus indicator for keyboard navigation */
+        /* ===== BATTERY WIDGET ===== */
+        /* Only shown on laptop hosts (conditional via hasBattery option) */
+        .battery {
+          padding: ${spacing.xs} ${spacing.md};
+          font-variant-numeric: ${typography.features.tabularNums};
+          transition: ${transition.all};
+        }
+
+        /* Low battery warning states */
+        .battery.warning {
+          color: ${interactionColors.warning};
+        }
+
+        .battery.critical {
+          color: ${interactionColors.critical};
+          animation: pulse 1s ease-in-out infinite;
+        }
+
+        /* ===== FOCUS INDICATOR ===== */
+        /* Keyboard navigation accessibility */
         *:focus-visible {
           outline: 2px solid ${colors."accent-focus".hex};
           outline-offset: 2px;
@@ -154,11 +277,11 @@ let
     }
 
     /* ===== ISLAND 1: NAVIGATION ===== */
-    /* Workspaces + Focused Window Title */
+    /* Workspaces + Separator + System Info */
 
     .workspaces {
       padding: ${widget.paddingTight};
-      margin-right: ${widget.gapLarge};
+      margin-right: ${spacing.sm};
     }
 
     .workspaces .item {
@@ -239,11 +362,25 @@ let
       opacity: ${opacity.muted};
     }
 
-    /* ===== ISLAND 2: TIME ===== */
-    /* Clock as visual anchor */
+    /* ===== ISLAND 2: FOCUS CONTEXT ===== */
+    /* Focused window title - "what am I working on" indicator */
+    /* Native 'focused' widget with built-in truncation */
+
+    #center .label {
+      padding: ${spacing.none} ${spacing.lg};
+      font-size: ${typography.size.sm};
+      font-weight: ${typography.weight.normal};
+      line-height: ${typography.lineHeight.widget};
+      min-height: ${sizing.widgetHeight};
+      max-width: ${sizing.labelMaxWidth};
+      opacity: ${opacity.emphasis};
+    }
+
+    /* ===== CLOCK (Now in End Island) ===== */
+    /* Visual anchor with extra weight */
 
     .clock {
-      padding: ${spacing.none} ${spacing."3xl"};
+      padding: ${spacing.sm} ${spacing.lg};
       border: none;
       font-size: ${typography.size.lg};
       font-weight: ${typography.weight.bold};
@@ -257,19 +394,12 @@ let
     }
 
     /* ===== ISLAND 3: SYSTEM STATUS ===== */
-    /* Three logical groups:
-       1. Monitoring: sys-info + niri-layout
-       2. Controls: brightness + volume
-       3. Communications: tray + notifications */
+    /* Widget order: Tray → Layout → Brightness → Volume → Notifications → Clock → Power
+       Grouped by function: Communications → State → Controls → Time → Action */
 
-    /* Visual separators between widget groups
-       Note: GTK CSS doesn't support ::before/::after pseudo-elements or positioning.
-       Separators are achieved via margin/padding spacing instead. */
-
-    /* System info - Group 1 */
+    /* System info (in Start island, after separator) */
     .sys-info {
-      padding: ${spacing.none} ${spacing.lg};
-      margin-right: ${widget.gapSection};
+      padding: ${spacing.none} ${spacing.md};
       border: none;
       font-size: ${typography.size.xs};
       font-weight: ${typography.weight.semibold};
@@ -492,6 +622,30 @@ let
       padding: ${spacing."2xl"};
       min-width: ${sizing.popupWidth};
       font-size: ${typography.size.md};
+    }
+
+    /* ===== SEPARATOR ===== */
+    /* Visual divider between widget groups within an island */
+    .separator {
+      padding: ${spacing.none} ${spacing.xs};
+      min-height: ${sizing.widgetHeight};
+      line-height: ${typography.lineHeight.widget};
+    }
+
+    /* ===== POWER BUTTON ===== */
+    /* Destructive action - positioned rightmost */
+    .power-btn {
+      margin-left: ${spacing.sm};
+    }
+
+    .power-btn button {
+      min-width: ${sizing.buttonMinWidth};
+      min-height: ${sizing.widgetHeight};
+      padding: ${spacing.xs} ${spacing.md};
+      background: transparent;
+      border: none;
+      font-size: ${typography.size.md};
+      line-height: ${typography.lineHeight.widget};
     }
 
   '';

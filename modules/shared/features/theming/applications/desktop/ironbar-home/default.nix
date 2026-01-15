@@ -24,8 +24,11 @@ let
   theme = if themeContext != null then themeContext.theme else null;
   colors = if theme != null then theme.colors else null;
 
+  # Check if this host has a battery (for conditional battery widget)
+  hasBattery = appCfg.hasBattery or false;
+
   # Import modular components
-  defaultIronbarConfig = import ./monitors.nix { inherit pkgs; };
+  defaultIronbarConfig = import ./monitors.nix { inherit pkgs lib hasBattery; };
   ironbarCss = import ./css.nix { inherit colors; };
 
   hostSystem =
@@ -88,6 +91,15 @@ in
       description = ''
         Compile-time Ironbar features to enable (for example "battery" or "lua").
         Passed through to `programs.ironbar.features`.
+      '';
+    };
+
+    hasBattery = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Whether this host has a battery. When true, adds a UPower battery
+        widget to the status bar. Set to true for laptop hosts.
       '';
     };
   };

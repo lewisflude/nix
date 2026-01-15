@@ -1,13 +1,25 @@
 # Niri Window Rules Configuration
 # Organized by: Visual Hierarchy → Security → Performance → Usability → Workspace Assignment
+#
+# IMPORTANT: Corner radius is synchronized with Ironbar tokens
+# to create visual harmony between windows and the bar.
+# See: modules/shared/features/theming/applications/desktop/ironbar-home/tokens.nix
 {
   themeLib,
+  ironbarTokens,
   ...
 }:
 let
   # Generate theme to access raw colors
   theme = themeLib.generateTheme "dark" { };
   inherit (theme) colors;
+
+  # Synchronized values from Ironbar design tokens
+  # This ensures Niri windows use the same corner radius as Ironbar islands
+  inherit (ironbarTokens) niriSync;
+
+  # Convert integer to float for Niri config
+  cornerRadius = niriSync.windowRadius * 1.0;
 
   # Screencast indicator colors - uses danger/urgent colors for visibility
   screencastColors = {
@@ -26,13 +38,14 @@ in
     # ============================================================================
 
     # Global rounded corners for all windows
+    # Radius synchronized with Ironbar island radius (8pt grid: compact = 12px, relaxed = 16px)
     # Applied first so specific rules can override if needed
     {
       geometry-corner-radius = {
-        top-left = 12.0;
-        top-right = 12.0;
-        bottom-right = 12.0;
-        bottom-left = 12.0;
+        top-left = cornerRadius;
+        top-right = cornerRadius;
+        bottom-right = cornerRadius;
+        bottom-left = cornerRadius;
       };
       clip-to-geometry = true;
     }
@@ -50,15 +63,16 @@ in
     }
 
     # Floating windows - enhanced aesthetics with rounded corners and shadows
+    # Corner radius synchronized with Ironbar islands
     {
       matches = [
         { is-floating = true; }
       ];
       geometry-corner-radius = {
-        top-left = 12.0;
-        top-right = 12.0;
-        bottom-right = 12.0;
-        bottom-left = 12.0;
+        top-left = cornerRadius;
+        top-right = cornerRadius;
+        bottom-right = cornerRadius;
+        bottom-left = cornerRadius;
       };
       clip-to-geometry = true;
       shadow = {

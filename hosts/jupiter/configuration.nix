@@ -72,13 +72,12 @@
   boot.loader.systemd-boot.configurationLimit = 5;
 
   # Disk performance optimizations
+  # Note: ZFS ARC max is set to 16GB in kernelParams above (gaming priority)
   system.diskPerformance = {
     enable = true;
-    enableVMTuning = true; # VM subsystem tuning for 64GB RAM
-    enableIOTuning = true; # I/O scheduler and readahead optimization
-    enableZFSTuning = true; # ZFS ARC, compression, and atime optimization
-    ramSizeGB = 64; # i9-13900K system with 64GB RAM
-    zfsARCMaxGB = 48; # Cap ZFS ARC at 48GB (75% of RAM)
+    enableVMTuning = true;
+    enableIOTuning = true;
+    enableZFSTuning = false; # ARC handled by kernelParams, datasets by hardware-configuration
   };
 
   # Network configuration
