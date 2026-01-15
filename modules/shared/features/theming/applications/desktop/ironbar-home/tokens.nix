@@ -15,6 +15,10 @@
 # Profile Selection:
 # - compact: 40px bar, 8px gaps (optimized for 1080p)
 # - relaxed: 48px bar, 12px gaps (optimized for 1440p/4K)
+{
+  colors ? null,
+  theme ? null,
+}:
 let
   # ============================================================================
   # PROFILE SELECTION
@@ -192,15 +196,28 @@ in
   };
 
   # ============================================================================
-  # COLORS (Interaction states - theme-independent)
+  # COLORS (Interaction states using Signal theme)
   # ============================================================================
-  colors = {
-    hoverBgSubtle = "rgba(37, 38, 47, 0.12)";
-    hoverBg = "rgba(37, 38, 47, 0.15)";
-    activeBg = "rgba(37, 38, 47, 0.25)";
-    warning = "#fab387";
-    critical = "#f38ba8";
-  };
+  interactionColors =
+    if colors != null && theme != null then
+      {
+        # Use Signal theme surface colors with transparency for interactions
+        hoverBgSubtle = "rgba(${theme.formats.rgbString colors."surface-emphasis"}, 0.12)";
+        hoverBg = "rgba(${theme.formats.rgbString colors."surface-emphasis"}, 0.15)";
+        activeBg = "rgba(${theme.formats.rgbString colors."surface-emphasis"}, 0.25)";
+        # Use Signal theme accent colors for status indicators
+        warning = colors."accent-warning".hex;
+        critical = colors."accent-danger".hex;
+      }
+    else
+      {
+        # Fallback colors (should rarely be used)
+        hoverBgSubtle = "rgba(37, 38, 47, 0.12)";
+        hoverBg = "rgba(37, 38, 47, 0.15)";
+        activeBg = "rgba(37, 38, 47, 0.25)";
+        warning = "#fab387";
+        critical = "#f38ba8";
+      };
 
   # ============================================================================
   # TRANSITIONS

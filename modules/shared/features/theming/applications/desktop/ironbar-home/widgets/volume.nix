@@ -11,6 +11,7 @@ _: {
     muted = "󰝟";
   };
   tooltip = "Volume: {percentage}%\nClick to mute | Scroll to adjust";
+  on_click_left = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
   on_scroll_up = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+";
   on_scroll_down = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-";
 }

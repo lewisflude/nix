@@ -8,9 +8,9 @@ _: {
       layer = "overlay";
       control-center-layer = "top";
       cssPriority = "user"; # Ensure our CSS overrides GTK theme backgrounds
-      # Ironbar's exclusive zone automatically reserves space; margin-top is additional gap
-      # Match ironbar's top margin for visual consistency
-      control-center-margin-top = 8;
+      # Position control center BELOW Ironbar to prevent overlap
+      # Calculation: globalGap (8px) + barHeight (40px) = 48px
+      control-center-margin-top = 48;
       control-center-margin-bottom = 0;
       control-center-margin-right = 8;
       control-center-margin-left = 0;

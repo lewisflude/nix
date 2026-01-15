@@ -88,6 +88,20 @@
     ];
   };
 
+  # Standard region screenshot (Windows/macOS muscle memory)
+  "Mod+Shift+S" = {
+    allow-inhibiting = false;
+    action.spawn = [
+      "sh"
+      "-c"
+      ''
+        FILE="$HOME/Pictures/Screenshots/region-$(date +%Y%m%d-%H%M%S).png"
+        grim -g "$(slurp)" - | tee "$FILE" | wl-copy && \
+        notify-send "Region Captured" "Saved to $FILE and Clipboard" -i "$FILE"
+      ''
+    ];
+  };
+
   "Mod+Shift+C" = {
     action.spawn = [
       (lib.getExe pkgs.hyprpicker)

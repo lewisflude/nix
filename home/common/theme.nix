@@ -41,5 +41,15 @@ in
     };
   };
 
+  # Qt theming to match GTK Signal theme
+  qt = lib.mkIf platformLib.isLinux {
+    enable = true;
+    platformTheme.name = "adwaita"; # Use Adwaita platform theme to match GTK
+    style = {
+      name = "adwaita-dark"; # Match dark mode of Signal theme
+      package = pkgs.adwaita-qt;
+    };
+  };
+
   fonts.fontconfig.enable = lib.mkIf platformLib.isLinux true;
 }

@@ -25,11 +25,15 @@ let
       # Secrets are in /run/secrets/ with group ownership
       SECRET_PATH="/run/secrets/${secretName}"
       if [ ! -r "$SECRET_PATH" ]; then
-        echo "Error: ${name} requires ${secretName} secret" >&2
+        # Graceful degradation: log warning but exit successfully
+        # This prevents MCP client crashes when secrets are temporarily unavailable
+        echo "Warning: ${name} MCP server disabled - ${secretName} secret not available" >&2
         echo "Secret not found or not readable at $SECRET_PATH" >&2
-        echo "Ensure you're in the '$EXPECTED_GROUP' group and the secret is configured in SOPS" >&2
-        echo "Current groups: $(id -Gn | tr ' ' ',')" >&2
-        exit 1
+        echo "To enable this server:" >&2
+        echo "  1. Ensure you're in the '$EXPECTED_GROUP' group: $(id -Gn | tr ' ' ',')" >&2
+        echo "  2. Configure secret in SOPS (secrets/secrets.yaml)" >&2
+        echo "  3. Rebuild system and restart MCP client" >&2
+        exit 0  # Exit gracefully to prevent connection closed errors
       fi
 
       export ${secretName}="$(cat "$SECRET_PATH")"

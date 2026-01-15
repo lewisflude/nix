@@ -10,6 +10,7 @@ in
   imports = [
     ./audio.nix
     ./desktop-environment.nix
+    ./fonts.nix
     ./graphics.nix
     ./hardware-support.nix
     ./niri.nix

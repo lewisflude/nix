@@ -170,19 +170,57 @@ in
         # See home/common/apps/claude-code.nix
       };
 
-      # Activation message
+      # Activation message with secret validation
       activation.mcpStatus = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         echo
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "MCP Configuration Updated"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo
-        echo "Active servers:"
+
+        # Validate which servers can actually run
+        SERVERS_OK=()
+        SERVERS_MISSING_SECRET=()
+
         ${lib.concatStringsSep "\n" (
-          lib.mapAttrsToList (name: _server: ''
-            echo "  • ${name}"
+          lib.mapAttrsToList (name: server: ''
+            SERVER_NAME="${name}"
+            ${
+              if (server.secret or null) != null then
+                ''
+                  SECRET_PATH="/run/secrets/${server.secret}"
+                  if [ -r "$SECRET_PATH" ]; then
+                    SERVERS_OK+=("$SERVER_NAME")
+                  else
+                    SERVERS_MISSING_SECRET+=("$SERVER_NAME (needs ${server.secret})")
+                  fi
+                ''
+              else
+                ''
+                  SERVERS_OK+=("$SERVER_NAME")
+                ''
+            }
           '') activeServers
         )}
+
+        if [ ''${#SERVERS_OK[@]} -gt 0 ]; then
+          echo "✓ Available servers (''${#SERVERS_OK[@]}):"
+          for server in "''${SERVERS_OK[@]}"; do
+            echo "  • $server"
+          done
+        fi
+
+        if [ ''${#SERVERS_MISSING_SECRET[@]} -gt 0 ]; then
+          echo
+          echo "⚠ Disabled servers - missing secrets (''${#SERVERS_MISSING_SECRET[@]}):"
+          for server in "''${SERVERS_MISSING_SECRET[@]}"; do
+            echo "  • $server"
+          done
+          echo
+          echo "These servers will exit gracefully and won't cause MCP errors."
+          echo "Configure secrets in SOPS and rebuild to enable them."
+        fi
+
         echo
         echo "Configuration files:"
         echo "  • Cursor: ~/.cursor/mcp.json"
