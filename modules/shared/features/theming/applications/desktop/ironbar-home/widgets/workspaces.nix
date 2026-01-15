@@ -24,4 +24,10 @@ _: {
   icon_size = 18;
   # Use name_map icons, not focused window icons
   show_icon = false;
+
+  # CRITICAL FIX: Enable scroll navigation
+  # Allows "scrubbing" workspaces directly from top bar
+  # Implements Power User pattern (Unity, macOS style)
+  on_scroll_up = "niri msg action focus-workspace-down";
+  on_scroll_down = "niri msg action focus-workspace-up";
 }

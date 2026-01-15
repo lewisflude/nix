@@ -54,10 +54,14 @@ let
     if colors != null then
       ''
         /* PRINCIPLE 1: The "Island" Strategy
-           Main bar background is transparent.
-           Only the containers (start, center, end) get color. */
+           Main bar background is transparent WITH BLUR.
+           Border-radius creates "floating capsule" aesthetic.
+           Creates depth: windows slide "under" a frosted glass layer. */
         window {
           background-color: transparent;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px); /* Fallback for compatibility */
+          border-radius: ${radius.lg}; /* 12px (compact) or 16px (relaxed) */
         }
 
         /* Global text color from theme */
@@ -125,12 +129,18 @@ let
 
         /* Active workspace - accent color with glow effect */
         /* FIX #3: Visual Hierarchy - Interactive controls get heavier weight */
+        /* ADDED: Bottom border indicator for spatial permanence */
+        /* Implements NeXTSTEP "light under the dock" metaphor */
         .workspaces button.focused,
         .workspaces button.active {
           color: ${colors."accent-focus".hex};
           background-color: ${colors."surface-subtle".hex};
           border-radius: ${radius.md};
           font-weight: ${typography.weight.bold};
+          
+          /* The "light under the dock" - physical indicator */
+          border-bottom: 2px solid ${colors."accent-focus".hex};
+          box-shadow: 0 2px 8px alpha(${colors."accent-focus".hex}, 0.3);
         }
 
         /* Occupied but not focused */
