@@ -66,7 +66,9 @@ in
       SLACK_BOT_TOKEN = mkSecret { allowUserRead = true; };
       SLACK_TEAM_ID = mkSecret { allowUserRead = true; };
       DISCORD_BOT_TOKEN = mkSecret { allowUserRead = true; };
-      YOUTUBE_API_KEY = mkSecret { allowUserRead = true; };
+      # YouTube OAuth credentials (yutu)
+      YUTU_CREDENTIAL = mkSecret { allowUserRead = true; }; # client_secret.json content
+      YUTU_CACHE_TOKEN = mkSecret { allowUserRead = true; }; # youtube.token.json content
       POSTGRES_CONNECTION_STRING = mkSecret { allowUserRead = true; };
       QDRANT_URL = mkSecret { allowUserRead = true; };
       QDRANT_API_KEY = mkSecret { allowUserRead = true; };
