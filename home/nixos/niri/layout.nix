@@ -1,8 +1,13 @@
 # Niri Layout Configuration
+#
+# IMPORTANT: Gap and radius values are synchronized with Ironbar tokens
+# to create visual harmony between the bar and window manager.
+# See: modules/shared/features/theming/applications/desktop/ironbar-home/tokens.nix
 {
   lib,
   themeLib,
   themeConstants,
+  ironbarTokens,
   ...
 }:
 let
@@ -10,14 +15,19 @@ let
   theme = themeLib.generateTheme "dark" { };
   inherit (theme) colors;
 
+  # Synchronized values from Ironbar design tokens
+  # This ensures Niri windows use the same gaps and radii as Ironbar islands
+  inherit (ironbarTokens) niriSync;
+
   # Shadow colors with different opacity levels
   shadowColor = lib.mkDefault "${colors."surface-base".hex}aa"; # 66% opacity for active
   inactiveShadowColor = "${colors."surface-base".hex}66"; # 40% opacity for inactive
 in
 {
   layout = {
-    # Window spacing
-    gaps = 16;
+    # Window spacing - synchronized with Ironbar bar margin
+    # 8pt Grid: compact = 8px, relaxed = 12px
+    gaps = niriSync.windowGap;
 
     # Layout behavior
     always-center-single-column = true;
