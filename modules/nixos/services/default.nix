@@ -4,7 +4,7 @@
     ./media-management
     ./containers-supplemental
 
-    ./caddy.nix
+    ./caddy
     ./dante-proxy.nix
     ./eternal-terminal.nix
     ./fail2ban.nix
@@ -15,6 +15,6 @@
     ./ssh.nix
     ./syncthing.nix
     ./cockpit.nix
-    ./sunshine.nix
+    ./sunshine
   ];
 }

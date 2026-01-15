@@ -5,7 +5,7 @@
     ./features/theming
     ./features/security.nix
     ./features/gaming.nix
-    ./features/vr.nix
+    ./features/vr
     ./features/home-server.nix
     ./features/restic.nix
     ./features/media-management.nix

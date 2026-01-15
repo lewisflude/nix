@@ -2,6 +2,8 @@
 # Simplified to include only essential cross-platform helpers
 { lib }:
 let
+  constants = import ./constants.nix;
+
   # Platform detection (simple helpers)
   isLinux = system: lib.hasSuffix "-linux" system;
   isDarwin = system: lib.hasSuffix "-darwin" system;
@@ -26,7 +28,12 @@ let
       "${homeDir system username}/.cache";
 
   # Platform-specific state version
-  platformStateVersion = system: if isDarwin system then 6 else "25.05";
+  platformStateVersion =
+    system:
+    if isDarwin system then
+      constants.defaults.darwinStateVersion
+    else
+      constants.defaults.stateVersion;
 
   # Platform-specific package selection
   # Selects a single package based on platform

@@ -16,25 +16,12 @@ in
     else
       (_final: _prev: { });
 
-  # Zed editor - using nixpkgs version for binary cache stability
-  flake-editors = _final: _prev: { };
-
   # Rust toolchains from fenix (better than nixpkgs)
   fenix-overlay =
     if inputs ? fenix && inputs.fenix ? overlays then
       inputs.fenix.overlays.default
     else
       (_final: _prev: { });
-
-  # Lazygit - using nixpkgs version for binary cache
-  flake-git-tools = _final: prev: {
-    inherit (prev) lazygit;
-  };
-
-  # Atuin - using nixpkgs version for binary cache
-  flake-cli-tools = _final: prev: {
-    inherit (prev) atuin;
-  };
 
   # Niri compositor (Linux only)
   niri =

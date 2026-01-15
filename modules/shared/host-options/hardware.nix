@@ -15,5 +15,17 @@ in
       '';
       example = "10de:2684";
     };
+
+    renderDevice = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        DRM render device path for Wayland compositors on multi-GPU systems.
+        Forces the compositor to use a specific GPU for rendering.
+        Find with: ls -la /dev/dri/
+        Example: "/dev/dri/renderD129" for discrete GPU on multi-GPU system
+      '';
+      example = "/dev/dri/renderD129";
+    };
   };
 }

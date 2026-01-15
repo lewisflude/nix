@@ -112,7 +112,7 @@ pog.pog {
         esac
 
         # Also update the VR module which has an explicit override
-        VR_MODULE="$ROOT/modules/nixos/features/vr.nix"
+        VR_MODULE="$ROOT/modules/nixos/features/vr/immersed.nix"
         if [[ -f "$VR_MODULE" ]]; then
           cyan "📝 Updating VR module..."
           case "$PLATFORM" in
@@ -134,7 +134,7 @@ pog.pog {
         echo "  New hash: $NEW_HASH"
         echo ""
         cyan "Next steps:"
-        echo "  1. Review: git diff overlays/default.nix modules/nixos/features/vr.nix"
+        echo "  1. Review: git diff overlays/default.nix modules/nixos/features/vr/"
         echo "  2. Test build: nh os build"
         echo "  3. Apply: nh os switch"
         echo "  4. Commit: git commit -am 'chore(vr): update Immersed to latest version'"

@@ -168,9 +168,6 @@ in
 
         # Note: Claude Code CLI uses programs.claude-code.mcpServers instead
         # See home/common/apps/claude-code.nix
-
-        # Also save to generated directory for reference
-        ".mcp-generated/config.json".text = configJson;
       };
 
       # Activation message
