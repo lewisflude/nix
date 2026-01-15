@@ -30,10 +30,7 @@ let
   # Platform-specific state version
   platformStateVersion =
     system:
-    if isDarwin system then
-      constants.defaults.darwinStateVersion
-    else
-      constants.defaults.stateVersion;
+    if isDarwin system then constants.defaults.darwinStateVersion else constants.defaults.stateVersion;
 
   # Platform-specific package selection
   # Selects a single package based on platform

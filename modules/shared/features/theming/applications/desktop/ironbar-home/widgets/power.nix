@@ -31,6 +31,7 @@ in
       class = "power-btn";
       label = "";
       on_click = "${powerMenuScript}";
+      tooltip = "Power Menu (Logout/Suspend/Reboot/Shutdown)";
     }
   ];
 }

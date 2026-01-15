@@ -166,13 +166,8 @@ in
       popup = "1.5";
       popupHeader = "1.4";
     };
-    letterSpacing = {
-      normal = "0";
-      clock = "0.02em";
-    };
-    features = {
-      tabularNums = "tabular-nums";
-    };
+    # NOTE: letter-spacing and font-variant-numeric are not supported in GTK CSS
+    # Removed: letterSpacing, features.tabularNums
   };
 
   # ============================================================================
@@ -189,10 +184,12 @@ in
   # ============================================================================
   # SHADOWS
   # ============================================================================
+  # NOTE: GTK CSS only supports inset shadows reliably
+  # Using inset highlights instead of outset drop shadows
   shadow = {
-    island = "0 2px 10px rgba(0, 0, 0, 0.06)";
-    islandCenter = "0 2px 14px rgba(0, 0, 0, 0.08)";
-    popup = "0 4px 16px rgba(0, 0, 0, 0.12)";
+    island = "inset 0 1px 0 rgba(255, 255, 255, 0.08)";
+    islandCenter = "inset 0 1px 0 rgba(255, 255, 255, 0.1)";
+    popup = "inset 0 1px 0 rgba(255, 255, 255, 0.12)";
   };
 
   # ============================================================================
@@ -222,6 +219,7 @@ in
   # ============================================================================
   # TRANSITIONS
   # ============================================================================
+  # NOTE: GTK CSS does not support transform property
   transition = {
     duration = {
       fast = "50ms";
@@ -235,10 +233,9 @@ in
     };
     opacity = "opacity 150ms ease";
     background = "background-color 150ms ease";
-    transform = "transform 50ms ease";
     all = "opacity 150ms ease, background-color 150ms ease";
-    interactive = "opacity 150ms ease, background-color 150ms ease, transform 80ms ease";
-    control = "background-color 150ms ease, transform 50ms ease";
+    interactive = "opacity 150ms ease, background-color 150ms ease";
+    control = "background-color 150ms ease";
   };
 
   # ============================================================================

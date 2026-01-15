@@ -33,7 +33,7 @@
       # SEARCH & RESEARCH
       # ═══════════════════════════════════════════════════════════
       kagi.enabled = true; # KAGI_API_KEY
-      brave.enabled = true; # BRAVE_API_KEY
+      brave.enabled = false; # BRAVE_API_KEY - NOT CONFIGURED
 
       # ═══════════════════════════════════════════════════════════
       # UTILITIES (no secrets required)
@@ -52,8 +52,8 @@
       # ═══════════════════════════════════════════════════════════
       # COMMUNICATION
       # ═══════════════════════════════════════════════════════════
-      slack.enabled = true; # SLACK_BOT_TOKEN, SLACK_TEAM_ID
-      discord.enabled = true; # DISCORD_BOT_TOKEN
+      slack.enabled = false; # SLACK_BOT_TOKEN, SLACK_TEAM_ID - PLACEHOLDER VALUES
+      discord.enabled = false; # DISCORD_BOT_TOKEN - PLACEHOLDER VALUE
 
       # ═══════════════════════════════════════════════════════════
       # RESEARCH & CONTENT
@@ -63,7 +63,7 @@
       # ═══════════════════════════════════════════════════════════
       # DATABASE
       # ═══════════════════════════════════════════════════════════
-      postgres.enabled = true; # POSTGRES_CONNECTION_STRING
+      postgres.enabled = false; # POSTGRES_CONNECTION_STRING - PLACEHOLDER VALUE
 
       # ═══════════════════════════════════════════════════════════
       # VECTOR DATABASES (for RAG workflows)
