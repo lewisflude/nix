@@ -112,101 +112,15 @@ let
     if colors != null then
       ''
 
-        /* ===== PRINCIPLE 4 & 7: WORKSPACE STRIP VISUALIZATION ===== */
-        /* Workspaces styled as a filmstrip with clear active state */
-        .workspaces button {
-          background: transparent;
-          color: ${colors."text-tertiary".hex};
-          padding: ${spacing.xs} ${spacing.sm};
-          margin: 0 1px; /* Minimal gap for visual separation */
-          min-width: ${sizing.workspaceItem};
-          border-radius: ${radius.md};
-          transition: ${transition.interactive};
-          border: none;
-          box-shadow: none;
-          outline: none;
-        }
 
-        .workspaces button:hover {
-          color: ${colors."text-primary".hex};
-          background-color: ${interactionColors.hoverBgSubtle};
-        }
 
-        /* Active workspace - clean accent with subtle bottom indicator */
-        /* Visual Hierarchy: Bold weight for active state */
-        /* Implements subtle "light under" metaphor without distracting glow */
-        .workspaces button.focused,
-        .workspaces button.active {
-          color: ${colors."accent-focus".hex};
-          background-color: ${colors."surface-subtle".hex};
-          border-radius: ${radius.md};
-          font-weight: ${typography.weight.bold};
-          border: none;
-          border-bottom: 2px solid ${colors."accent-focus".hex};
-          box-shadow: none;
-          outline: none;
-        }
 
-        /* Occupied but not focused */
-        .workspaces button.visible {
-          color: ${colors."text-secondary".hex};
-        }
 
-        /* ===== SEPARATOR STYLING ===== */
-        /* Visual divider between widget groups */
-        /* FIX: Explicit transparent background to prevent artifact */
-        .separator {
-          color: ${colors."divider-primary".hex};
-          opacity: 0.5;
-          padding: 0px ${spacing.xs};
-          font-size: ${typography.size.sm};
-          font-weight: ${typography.weight.normal};
-          background: transparent;
-          background-color: transparent;
-          border: none;
-          box-shadow: none;
-        }
 
-        /* ===== PRINCIPLE 9: FOCUS CONTEXT (Window Title) ===== */
-        /* Consistent typography for crisp rendering */
-        .label {
-          color: ${colors."text-secondary".hex};
-          transition: ${transition.opacity};
-          font-family: sans-serif;
-          font-weight: ${typography.weight.medium};
-        }
 
-        .label.focused,
-        .label.active {
-          color: ${colors."text-primary".hex};
-          font-weight: ${typography.weight.semibold};
-        }
 
-        /* ===== CLOCK - AMBIENT DATA ===== */
-        /* FIX #3: Visual Hierarchy - Passive data gets lighter weight than interactive controls */
-        .clock {
-          background-color: ${colors."surface-subtle".hex};
-          padding: ${spacing.sm} ${spacing.lg};
-          border-radius: ${radius.md};
-          color: ${colors."text-primary".hex};
-          font-weight: ${typography.weight.medium};
-          opacity: 0.9;
-        }
 
-        /* ===== POWER BUTTON - DESTRUCTIVE ACTION ===== */
-        /* Red accent for destructive action, rightmost position */
-        .power-btn button {
-          color: ${colors."accent-danger".hex};
-          background: transparent;
-          padding: ${spacing.xs} ${spacing.md};
-          margin-left: ${spacing.sm};
-          border-radius: ${radius.md};
-          transition: ${transition.control};
-        }
 
-        .power-btn button:hover {
-          background-color: ${interactionColors.hoverBg};
-        }
 
         /* ===== POPUP STYLING ===== */
         /* Match island aesthetic for consistency */
@@ -218,56 +132,24 @@ let
         }
 
         /* ===== INTERACTIVE CONTROLS ===== */
-        /* FIX #1: Remove Blue Bracket Glitch - force remove borders/shadows */
-        /* FIX: Explicit border removal to prevent disjointed container borders */
+        /* Base state: clean, no borders or shadows */
         .brightness,
         .volume,
         .popup-button {
           border: none;
-          border-left: none;
-          border-right: none;
-          border-top: none;
-          border-bottom: none;
           box-shadow: none;
           outline: none;
           background: transparent;
         }
 
-        /* Hover states for brightness/volume */
-        .brightness:hover,
-        .volume:hover {
-          background-color: ${interactionColors.hoverBg};
-          border-radius: ${radius.md};
+        /* Active popup button with left accent bar */
+        .popup-button:active,
+        .popup-button.active,
+        .popup-button.open {
+          border-left: 3px solid ${colors."accent-focus".hex};
         }
 
-        /* Active/pressed states */
-        .brightness:active,
-        .volume:active {
-          background-color: ${interactionColors.activeBg};
-          opacity: 0.9;
-        }
 
-        /* ===== TRAY STYLING ===== */
-        /* FIX #2: Give tray its own "pill" container to match other groups */
-        .tray {
-          background-color: ${colors."surface-subtle".hex};
-          border-radius: ${radius.md};
-          padding: ${spacing.xs} ${spacing.sm};
-        }
-
-        .tray button {
-          background: transparent;
-          border-radius: ${radius.sm};
-          transition: ${transition.control};
-        }
-
-        .tray button:hover {
-          background-color: ${interactionColors.activeBg};
-        }
-
-        .tray button:active {
-          opacity: 0.9;
-        }
 
         /* ===== BATTERY WIDGET ===== */
         /* Only shown on laptop hosts (conditional via hasBattery option) */
@@ -278,14 +160,19 @@ let
           transition: ${transition.all};
         }
 
-        /* Low battery warning states */
+        /* Low battery warning state with left accent bar */
         .battery.warning {
           color: ${interactionColors.warning};
+          border-left: 3px solid ${interactionColors.warning};
+          padding-left: calc(${spacing.md} - 3px);
         }
 
+        /* Critical battery state with left accent bar and pulse */
         .battery.critical {
           color: ${interactionColors.critical};
           animation: pulse 1s ease-in-out infinite;
+          border-left: 3px solid ${interactionColors.critical};
+          padding-left: calc(${spacing.md} - 3px);
         }
 
         /* ===== FOCUS INDICATOR ===== */
@@ -328,7 +215,6 @@ let
 
     .widget {
       min-height: ${sizing.widgetHeight};
-      border: none;
     }
 
     /* ===== ISLAND 1: NAVIGATION ===== */
@@ -336,7 +222,6 @@ let
 
     .workspaces {
       padding: ${widget.paddingTight};
-      margin-right: ${spacing.sm};
     }
 
     .workspaces .item {
@@ -344,31 +229,32 @@ let
       min-height: ${sizing.itemHeight};
       margin: 0 1px; /* Consistent minimal gap */
       padding: ${spacing.xs} ${spacing.sm};
-      border: none;
-      box-shadow: none;
-      outline: none;
       font-size: ${typography.size.md};
       font-weight: ${typography.weight.normal};
       line-height: ${typography.lineHeight.item};
-      opacity: ${opacity.disabled};
+      color: ${colors."text-tertiary".hex};
       border-radius: ${radius.md};
       transition: ${transition.interactive};
     }
 
     .workspaces .item:hover {
+      color: ${colors."text-primary".hex};
       opacity: ${opacity.hoverSubtle};
       background-color: ${interactionColors.hoverBgSubtle};
     }
 
-    /* Visual Hierarchy: Bold weight for active state, clean appearance */
+    /* Visual Hierarchy: Bold weight for active state with left accent bar */
+    /* Material Design pattern - combines color, shape, and position */
+    /* Right-side-only radius integrates accent bar cleanly */
     .workspaces .item.focused,
     .workspaces .item.active {
-      opacity: ${opacity.full};
       font-weight: ${typography.weight.bold};
-      border: none;
-      border-bottom: 2px solid ${colors."accent-focus".hex};
-      box-shadow: none;
-      outline: none;
+      border-left: 3px solid ${colors."accent-focus".hex};
+      background-color: ${colors."surface-subtle".hex};
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-top-right-radius: ${radius.md};
+      border-bottom-right-radius: ${radius.md};
     }
 
     .workspaces .item.occupied {
@@ -398,13 +284,13 @@ let
     /* Consistent font rendering for crisp appearance */
     .label {
       padding: ${spacing.none} 14px;
-      border: none;
       font-family: sans-serif;
       font-size: ${typography.size.sm};
       font-weight: ${typography.weight.medium};
       line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
       opacity: ${opacity.tertiary};
+      color: ${colors."text-secondary".hex};
       transition: ${transition.opacity};
     }
 
@@ -412,10 +298,18 @@ let
       margin-right: 9px;
     }
 
+    /* Active/focused label state with left accent bar */
+    /* Right-side-only radius for clean integration */
     .label.active,
     .label.focused {
-      opacity: ${opacity.emphasis};
-      font-weight: ${typography.weight.medium};
+      color: ${colors."text-primary".hex};
+      font-weight: ${typography.weight.semibold};
+      border-left: 3px solid ${colors."accent-focus".hex};
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-top-right-radius: ${radius.md};
+      border-bottom-right-radius: ${radius.md};
+      padding-left: calc(14px - 3px); /* Compensate border to prevent content shift */
     }
 
     .label.inactive {
@@ -430,6 +324,7 @@ let
        Text truncation handled by widget config (truncate.mode/max_length)
        FIX: Vertical padding prevents text clipping (ascenders like 'D', 'h', 'b') */
 
+    /* Center island label - base state without accent bar */
     #center .label {
       padding: ${spacing.xs} ${spacing.lg};
       font-family: sans-serif;
@@ -438,6 +333,19 @@ let
       line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
       opacity: ${opacity.emphasis};
+      border-left: none;
+    }
+
+    /* When focused/active, add left accent bar with padding compensation */
+    /* Right-side-only radius for seamless accent bar */
+    #center .label.active,
+    #center .label.focused {
+      border-left: 3px solid ${colors."accent-focus".hex};
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-top-right-radius: ${radius.md};
+      border-bottom-right-radius: ${radius.md};
+      padding-left: calc(${spacing.lg} - 3px);
     }
 
     /* FIX #4: Empty Desktop Collapse - center island collapses when no window focused */
@@ -450,7 +358,6 @@ let
 
     .clock {
       padding: 0 ${spacing.lg};
-      border: none;
       font-family: ${typography.fontMono};
       font-size: ${typography.size.lg};
       font-weight: ${typography.weight.medium};
@@ -458,55 +365,19 @@ let
       min-height: ${sizing.widgetHeight};
       line-height: ${typography.lineHeight.widget};
       opacity: 0.9;
+      background-color: ${colors."surface-subtle".hex};
+      border-radius: ${radius.md};
+      color: ${colors."text-primary".hex};
     }
 
     /* ===== ISLAND 3: SYSTEM STATUS ===== */
     /* Widget order: Tray → Layout → Brightness → Volume → Notifications → Clock → Power
        Grouped by function: Communications → State → Controls → Time → Action */
 
-    /* System info (in Start island, after separator) */
-    /* FIX #2: Font Stability - Monospace prevents jitter as CPU/RAM values change */
-    .sys-info {
-      padding: ${spacing.none} ${spacing.md};
-      border: none;
-      font-family: ${typography.fontMono};
-      font-size: ${typography.size.xs};
-      font-weight: ${typography.weight.semibold};
-      line-height: ${typography.lineHeight.widget};
-      min-height: ${sizing.widgetHeight};
-      opacity: ${opacity.primary};
-      transition: ${transition.all};
-    }
-
-    .sys-info:hover {
-      opacity: ${opacity.hoverFull};
-      background-color: ${interactionColors.hoverBg};
-      border-radius: ${radius.md};
-    }
-
-    .sys-info.warning {
-      color: ${interactionColors.warning};
-      opacity: ${opacity.full};
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    .sys-info.critical {
-      color: ${interactionColors.critical};
-      opacity: ${opacity.full};
-      font-weight: ${typography.weight.bold};
-      animation: pulse 1s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: ${opacity.full}; }
-      50% { opacity: ${opacity.secondary}; }
-    }
-
     /* Niri layout indicator - State indicator group */
     .niri-layout {
       padding: ${spacing.none} 10px;
       margin-right: ${spacing.md};
-      border: none;
       font-size: ${typography.size.md};
       font-weight: ${typography.weight.normal};
       line-height: ${typography.lineHeight.widget};
@@ -521,22 +392,23 @@ let
       border-radius: ${radius.md};
     }
 
+    /* Active niri-layout state (when popup is open) with left accent bar */
+    .niri-layout:active,
+    .niri-layout.active,
+    .niri-layout.open {
+      opacity: ${opacity.full};
+      background-color: ${interactionColors.activeBg};
+      border-left: 3px solid ${colors."accent-focus".hex};
+      padding-left: calc(10px - 3px);
+      border-radius: ${radius.md};
+    }
+
     /* Brightness control - Hardware controls group */
     /* FIX: Explicit border removal on all sides to prevent visual seams */
     .brightness {
       padding: 0 10px;
-      margin-right: ${spacing.sm};
-      min-width: ${sizing.controlWidget};
-      border: none;
-      border-left: none;
-      border-right: none;
-      border-radius: ${radius.md};
-      font-size: ${typography.size.sm};
-      font-weight: ${typography.weight.normal};
-      line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
       transition: ${transition.control};
-      background: transparent;
     }
 
     /* Volume control - Hardware controls group */
@@ -544,25 +416,38 @@ let
     .volume {
       padding: 0 10px;
       margin-right: ${spacing.lg};
-      min-width: ${sizing.controlWidget};
-      border: none;
-      border-left: none;
-      border-right: none;
-      border-radius: ${radius.md};
-      font-size: ${typography.size.sm};
-      font-weight: ${typography.weight.normal};
-      line-height: ${typography.lineHeight.widget};
       min-height: ${sizing.widgetHeight};
       transition: ${transition.control};
       background: transparent;
+    }
+
+    /* Hover states for brightness/volume */
+    .brightness:hover,
+    .volume:hover {
+      background-color: ${interactionColors.hoverBg};
+      border-radius: ${radius.md};
+    }
+
+    /* Active/pressed states with left accent bar */
+    .brightness:active,
+    .brightness.active,
+    .brightness.open,
+    .volume:active,
+    .volume.active,
+    .volume.open {
+      background-color: ${interactionColors.activeBg};
+      opacity: 0.9;
+      border-left: 3px solid ${colors."accent-focus".hex};
+      padding-left: calc(10px - 3px); /* Compensate for 10px left padding */
     }
 
     /* System tray - Communications group */
     .tray {
       padding: ${widget.paddingComfortable};
       margin-right: ${spacing.sm};
-      border: none;
       min-height: ${sizing.widgetHeight};
+      background-color: ${colors."surface-subtle".hex};
+      border-radius: ${radius.md};
     }
 
     .tray button {
@@ -570,10 +455,20 @@ let
       min-width: ${sizing.touchTarget};
       padding: ${spacing.xs};
       margin: ${spacing.none} 3px;
-      background: transparent;
-      border: none;
-      border-radius: ${radius.sm};
       transition: ${transition.control};
+    }
+
+    /* Active tray button state with left accent bar */
+    .tray button:active,
+    .tray button.active,
+    .tray button.focused {
+      opacity: 0.9;
+      border-left: 3px solid ${colors."accent-focus".hex};
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-top-right-radius: ${radius.sm};
+      border-bottom-right-radius: ${radius.sm};
+      padding-left: calc(${spacing.xs} - 3px);
     }
 
         /* Normalize tray icon sizes for consistent appearance */
@@ -601,7 +496,6 @@ let
     .notifications {
       padding: ${spacing.none} ${spacing.sm};
       margin-right: ${spacing.lg};
-      border: none;
       min-width: ${sizing.notificationWidth};
       min-height: ${sizing.widgetHeight};
       line-height: ${typography.lineHeight.widget};
@@ -624,6 +518,21 @@ let
       border-radius: ${radius.md};
     }
 
+    /* Active notification state (when popup is open) with left accent bar */
+    /* Right-side-only radius for clean accent bar integration */
+    .notifications:active,
+    .notifications.active,
+    .notifications.open {
+      opacity: ${opacity.full};
+      background-color: ${interactionColors.activeBg};
+      border-left: 3px solid ${colors."accent-focus".hex};
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-top-right-radius: ${radius.md};
+      border-bottom-right-radius: ${radius.md};
+      padding-left: calc(${spacing.sm} - 3px);
+    }
+
     /* ===== TYPOGRAPHY DEFAULTS ===== */
 
     label {
@@ -634,27 +543,28 @@ let
 
     box > label,
     button > label {
-      line-height: ${typography.lineHeight.widget};
     }
 
     /* ===== INTERACTIVE ELEMENTS ===== */
 
+    /* Generic button base state */
     button {
       min-width: ${sizing.buttonMinWidth};
       min-height: ${sizing.widgetHeight};
       padding: ${spacing.none} ${spacing.lg};
-      background: transparent;
-      border: none;
-      box-shadow: none;
       font-size: ${typography.size.sm};
       font-weight: ${typography.weight.normal};
       line-height: ${typography.lineHeight.widget};
     }
 
+    /* Generic button active state with left accent bar */
+    button:active,
+    button.active {
+      border-left: 3px solid ${colors."accent-focus".hex};
+      padding-left: calc(${spacing.lg} - 3px);
+    }
+
     button label {
-      line-height: ${typography.lineHeight.widget};
-      font-size: ${typography.size.sm};
-      font-weight: ${typography.weight.normal};
       background: transparent;
     }
 
@@ -721,21 +631,6 @@ let
       font-size: ${typography.size.md};
     }
 
-    /* ===== SEPARATOR ===== */
-    /* Visual divider between widget groups within an island */
-    /* FIX: High-specificity rules to prevent background artifacts */
-    .separator,
-    label.separator,
-    #bar .separator {
-      padding: ${spacing.none} ${spacing.xs};
-      min-height: ${sizing.widgetHeight};
-      line-height: ${typography.lineHeight.widget};
-      background: transparent;
-      background-color: transparent;
-      border: none;
-      box-shadow: none;
-    }
-
     /* ===== POWER BUTTON ===== */
     /* Destructive action - positioned rightmost */
     .power-btn {
@@ -746,10 +641,23 @@ let
       min-width: ${sizing.buttonMinWidth};
       min-height: ${sizing.widgetHeight};
       padding: ${spacing.xs} ${spacing.md};
-      background: transparent;
-      border: none;
       font-size: ${typography.size.md};
       line-height: ${typography.lineHeight.widget};
+      color: ${colors."accent-danger".hex};
+      margin-left: ${spacing.sm};
+      border-radius: ${radius.md};
+      transition: ${transition.control};
+    }
+
+    .power-btn button:hover {
+      background-color: ${interactionColors.hoverBg};
+    }
+
+    /* Active power button state with danger-colored left accent bar */
+    .power-btn button:active,
+    .power-btn button.active {
+      border-left: 3px solid ${colors."accent-danger".hex};
+      padding-left: calc(${spacing.md} - 3px);
     }
 
   '';

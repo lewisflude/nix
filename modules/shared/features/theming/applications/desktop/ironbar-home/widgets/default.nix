@@ -1,7 +1,7 @@
 # Floating Modular Bar Layout - "Barbell" Design
 #
 # Three distinct islands implementing Gestalt principles:
-# - Start (Navigation): Workspaces + System Info
+# - Start (Navigation): Workspaces
 # - Center (Focus): Focused Window Title
 # - End (Status): Tray + Controls + Clock + Power
 #
@@ -18,8 +18,6 @@
 let
   # Navigation widgets (Start island)
   workspaces = import ./workspaces.nix { };
-  separator = import ./separator.nix { };
-  sysInfo = import ./sys-info.nix { };
 
   # Focus widget (Center island)
   focused = import ./focused.nix { inherit pkgs; };
@@ -36,11 +34,9 @@ let
 in
 {
   # Island 1: Navigation
-  # Workspaces for spatial orientation + System resources for monitoring
+  # Workspaces for spatial orientation
   start = [
     workspaces
-    separator
-    sysInfo
   ];
 
   # Island 2: Focus Context
