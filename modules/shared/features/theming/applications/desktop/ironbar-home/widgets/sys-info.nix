@@ -2,10 +2,11 @@ _: {
   type = "sys_info";
   class = "sys-info";
   format = [
-    # Clean format: icon + value, no % clutter
-    " {cpu_percent}"
-    " {memory_percent}"
+    # Clear format with % signs for explicit meaning
+    # Integer formatting prevents decimal aliasing issues
+    "  {cpu_percent:.0f}%"
+    "  {memory_percent:.0f}%"
   ];
-  tooltip = "CPU: {cpu_percent}% | Memory: {memory_used_gb}GB / {memory_total_gb}GB ({memory_percent}%)";
+  tooltip = "CPU: {cpu_percent:.0f}% | Memory: {memory_used_gb:.1f}GB / {memory_total_gb:.1f}GB ({memory_percent:.0f}%)";
   interval = 2000;
 }
