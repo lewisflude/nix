@@ -80,9 +80,12 @@ in
 
   # YouTube - Video search, transcripts, and captions
   # Get API key: https://console.cloud.google.com/apis/credentials (enable YouTube Data API v3)
+  # Package: zubeid-youtube-mcp-server
   youtube = {
     command = toString (
-      wrapMultiSecret "youtube" "${pkgs.nodejs}/bin/npx -y mcp-server-youtube" [ "YOUTUBE_API_KEY" ]
+      wrapMultiSecret "youtube" "${pkgs.nodejs}/bin/npx -y zubeid-youtube-mcp-server" [
+        "YOUTUBE_API_KEY"
+      ]
     );
     args = [ ];
     enabled = false;
@@ -100,11 +103,13 @@ in
     enabled = false;
   };
 
-  # Qdrant - Vector database for RAG workflows
+  # Qdrant - Vector database for RAG workflows with semantic memory
   # Get credentials: https://cloud.qdrant.io/ (create cluster, get URL and API key)
+  # Package: mcp-server-qdrant (Python-based, uses uvx)
+  # Supports local mode with QDRANT_LOCAL_PATH or cloud with QDRANT_URL
   qdrant = {
     command = toString (
-      wrapMultiSecret "qdrant" "${pkgs.nodejs}/bin/npx -y mcp-server-qdrant" [
+      wrapMultiSecret "qdrant" "${pkgs.uv}/bin/uvx mcp-server-qdrant" [
         "QDRANT_URL"
         "QDRANT_API_KEY"
       ]
@@ -113,12 +118,15 @@ in
     enabled = false;
   };
 
-  # Pinecone - Alternative vector database for RAG
-  # Get API key: https://www.pinecone.io/ (create index, get API key)
-  # Note: Alternative to qdrant, choose one based on your needs
+  # Pinecone - Vector database for RAG workflows with integrated inference
+  # Get API key: https://app.pinecone.io/ (generate API key in console)
+  # Package: @pinecone-database/mcp
+  # Note: Only supports indexes with integrated inference
   pinecone = {
     command = toString (
-      wrapMultiSecret "pinecone" "${pkgs.nodejs}/bin/npx -y mcp-server-pinecone" [ "PINECONE_API_KEY" ]
+      wrapMultiSecret "pinecone" "${pkgs.nodejs}/bin/npx -y @pinecone-database/mcp" [
+        "PINECONE_API_KEY"
+      ]
     );
     args = [ ];
     enabled = false;
