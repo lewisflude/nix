@@ -22,7 +22,7 @@ in
       nvidia = {
         modesetting.enable = true; # Required for Wayland
         open = true; # Required for Turing+ (RTX 4090)
-        package = config.boot.kernelPackages.nvidiaPackages.stable;
+        package = config.boot.kernelPackages.nvidiaPackages.beta;
       };
 
       # GPU access in containers (Ollama, etc.)
