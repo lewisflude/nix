@@ -3,6 +3,8 @@
 { pkgs, lib, ... }:
 let
   tokens = import ./tokens.nix { };
+  commands = tokens.commands pkgs;
+  widgets = import ./widgets.nix { inherit lib pkgs tokens; };
 in
 {
   # Bar configuration for Relaxed profile (1440p+)
@@ -41,19 +43,8 @@ in
         sort = "id"; # Sort by workspace ID
         hide_empty = false; # Show all workspaces
 
-        # Icon configuration - using circled Unicode numbers ①-⑩
-        icons = {
-          "1" = "①";
-          "2" = "②";
-          "3" = "③";
-          "4" = "④";
-          "5" = "⑤";
-          "6" = "⑥";
-          "7" = "⑦";
-          "8" = "⑧";
-          "9" = "⑨";
-          "10" = "⑩";
-        };
+        # Icon configuration - using centralized workspace icons
+        icons = tokens.icons.glyphs.workspace;
 
         # Niri integration
         compositor = "niri";
@@ -83,68 +74,48 @@ in
     # End Island - Status Widgets (ordered deliberately per design spec)
     end = [
       # 1. Layout Indicator Widget
-      {
-        type = "script";
+      (widgets.mkScriptWidget {
         name = "layout-indicator";
         class = "niri-layout control-button";
-
-        # Poll niri for layout mode
-        cmd = "${pkgs.niri-unstable}/bin/niri msg focused-window | ${pkgs.jq}/bin/jq -r '.layout_mode // \"tiled\"'";
-        mode = "poll";
-        interval = 1000;
-
-        # Format output with appropriate icon
-        format = "{output}";
-
-        # Map layout modes to icons
-        # Note: Icon mapping handled via script output or custom formatting
+        cmd = commands.niri.layoutMode;
         tooltip = "Window Layout Mode";
-      }
+      })
 
       # 2. Brightness Control Widget
-      {
+      (widgets.mkControlWidget {
         type = "brightness";
         name = "brightness";
-        class = "brightness control-button";
-
-        # Display format
-        format = "󰃠 {percent}%";
-
-        # Interaction
-        on_click_left = "${pkgs.brightnessctl}/bin/brightnessctl set 5%-";
-        on_click_right = "${pkgs.brightnessctl}/bin/brightnessctl set +5%";
-        on_click_middle = "${pkgs.brightnessctl}/bin/brightnessctl set 50%";
-
+        format = "${tokens.icons.glyphs.brightness} {percent}%";
+        interactions = {
+          on_click_left = commands.brightness.decrease;
+          on_click_right = commands.brightness.increase;
+          on_click_middle = commands.brightness.reset;
+        };
         tooltip = "Brightness: {percent}%\nLeft click: -5% | Right click: +5% | Middle: Reset to 50%";
-      }
+      })
 
       # 3. Volume Control Widget
-      {
+      (widgets.mkControlWidget {
         type = "volume";
         name = "volume";
-        class = "volume control-button";
-
-        # Display format with dynamic icon
         format = "{icon} {percentage}%";
-
-        # Icon mapping based on volume level
-        icons = {
-          volume_high = "󰕾"; # > 66%
-          volume_medium = "󰖀"; # 33-66%
-          volume_low = "󰕿"; # 1-32%
-          muted = "󰝟"; # 0% or muted
+        interactions = {
+          on_click_left = commands.volume.toggleMute;
+          on_scroll_up = commands.volume.increaseBy "2%";
+          on_scroll_down = commands.volume.decreaseBy "2%";
         };
-
-        # Max volume cap
-        max_volume = 100;
-
-        # Interaction
-        on_click_left = "{{${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle}}";
-        on_scroll_up = "{{${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+}}";
-        on_scroll_down = "{{${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-}}";
-
+        extraConfig = {
+          # Icon mapping based on volume level
+          icons = {
+            volume_high = tokens.icons.glyphs.volume.high;
+            volume_medium = tokens.icons.glyphs.volume.medium;
+            volume_low = tokens.icons.glyphs.volume.low;
+            muted = tokens.icons.glyphs.volume.muted;
+          };
+          max_volume = 100;
+        };
         tooltip = "Volume: {percentage}%\nClick to mute | Scroll to adjust";
-      }
+      })
 
       # 4. System Tray Widget
       {
@@ -173,21 +144,20 @@ in
       }
 
       # 6. Notification Button Widget
-      {
+      (widgets.mkControlWidget {
         type = "notifications";
         name = "notifications";
         class = "notifications";
-
-        # Icon configuration
-        icon = ""; # Bell icon (nerd font)
-        icon_size = tokens.icons.small;
-
-        # Show notification count
-        show_count = true;
-
-        # Integration with swaync
-        on_click_left = "${pkgs.swaynotificationcenter}/bin/swaync-client -t";
-      }
+        format = ""; # Handled by widget internally
+        interactions = {
+          on_click_left = commands.notifications.toggle;
+        };
+        extraConfig = {
+          icon = tokens.icons.glyphs.bell;
+          icon_size = tokens.icons.small;
+          show_count = true;
+        };
+      })
 
       # 7. Clock Widget
       {
@@ -209,31 +179,14 @@ in
       }
 
       # 8. Power Button Widget
-      {
-        type = "launcher";
+      (widgets.mkLauncherWidget {
         name = "power";
         class = "power control-button danger";
-
-        # Power icon
-        icon = ""; # Power icon (nerd font)
-        icon_size = tokens.icons.medium;
-
-        # Launch power menu using fuzzel
-        # Power menu options: Logout, Suspend, Hibernate, Reboot, Shutdown
-        cmd = ''
-          echo -e "Logout\nSuspend\nHibernate\nReboot\nShutdown" | \
-          ${pkgs.fuzzel}/bin/fuzzel --dmenu | \
-          ${pkgs.gnused}/bin/sed \
-            -e 's/^Logout$/loginctl terminate-user $USER/' \
-            -e 's/^Suspend$/systemctl suspend/' \
-            -e 's/^Hibernate$/systemctl hibernate/' \
-            -e 's/^Reboot$/systemctl reboot/' \
-            -e 's/^Shutdown$/systemctl poweroff/' | \
-          sh
-        '';
-
+        cmd = commands.power.menu;
+        icon = tokens.icons.glyphs.power;
+        iconSize = tokens.icons.medium;
         tooltip = "Power Menu (Logout/Suspend/Reboot/Shutdown)";
-      }
+      })
     ];
   };
 }

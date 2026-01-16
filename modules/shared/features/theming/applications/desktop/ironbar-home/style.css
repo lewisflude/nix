@@ -275,7 +275,7 @@ label.xl {
   font-size: 15px;
   color: @text_tertiary;
   opacity: 0.7;
-  transition: opacity 150ms ease, background-color 150ms ease;
+  transition: background-color 150ms ease;
 }
 
 .workspaces button:hover {
@@ -283,7 +283,7 @@ label.xl {
   color: @text_primary;
 }
 
-/* Focused workspace */
+/* Focused workspace - uses Active State Pattern */
 .workspaces button.focused {
   border-left: 3px solid @accent_focus;
   border-top-left-radius: 0;
@@ -314,7 +314,7 @@ label.xl {
   background-color: transparent;
   border: none;
   opacity: 0.8;
-  transition: opacity 150ms ease, background-color 150ms ease;
+  transition: background-color 150ms ease;
 }
 
 .control-button:hover {
@@ -357,7 +357,7 @@ label.xl {
   border-radius: 10px;
   background-color: transparent;
   opacity: 0.85;
-  transition: opacity 150ms ease, background-color 150ms ease;
+  transition: background-color 150ms ease;
 }
 
 .tray .item:hover {
@@ -469,12 +469,7 @@ label.xl {
   opacity: 1.0;
 }
 
-.niri-layout.active {
-  border-left: 3px solid @accent_focus;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  padding-left: 7px;
-}
+/* Active state handled by control-button.active via class inheritance */
 
 /* -----------------------------------------------------------------------------
    Organism: Brightness Control Widget
@@ -530,7 +525,7 @@ label.xl {
   padding: 4px 12px;
   font-family: monospace;
   min-height: 44px;
-  transition: all 150ms ease;
+  transition: background-color 150ms ease;
 }
 
 .battery label {
@@ -573,7 +568,7 @@ label.xl {
   min-width: 40px;
   min-height: 44px;
   opacity: 0.8;
-  transition: all 150ms ease;
+  transition: background-color 150ms ease;
 }
 
 .notifications:hover {

@@ -1,6 +1,10 @@
 # Ironbar Design Tokens - Relaxed Profile (1440p+)
 # Complete design token system for the Signal theme
 # Based on formal design specification v1.0
+#
+# Usage:
+#   tokens = import ./tokens.nix { };
+#   commands = tokens.commands pkgs;  # Shell commands need pkgs
 { }:
 rec {
   # Profile: Relaxed (optimized for 1440p+ displays)
@@ -43,6 +47,36 @@ rec {
     medium = 20; # Standalone icons, buttons (px)
     large = 22; # Emphasized icons (px)
     tray = 22; # System tray icons (fixed) (px)
+
+    # Widget icon glyphs (Nerd Fonts)
+    # Centralized to allow easy theme switching
+    glyphs = {
+      brightness = "󰃠";
+      bell = "";
+      power = "";
+
+      # Volume icons (dynamic based on level)
+      volume = {
+        high = "󰕾"; # > 66%
+        medium = "󰖀"; # 33-66%
+        low = "󰕿"; # 1-32%
+        muted = "󰝟"; # 0% or muted
+      };
+
+      # Workspace numbers (circled Unicode)
+      workspace = {
+        "1" = "①";
+        "2" = "②";
+        "3" = "③";
+        "4" = "④";
+        "5" = "⑤";
+        "6" = "⑥";
+        "7" = "⑦";
+        "8" = "⑧";
+        "9" = "⑨";
+        "10" = "⑩";
+      };
+    };
   };
 
   # Semantic Text Colors (Signal Theme - Dark Mode, OKLCH)
@@ -196,5 +230,44 @@ rec {
   niriSync = {
     windowRadius = radius.lg; # 16px - window corners match island borders
     windowGap = bar.margin; # 12px - window gaps match bar margin
+  };
+
+  # Shell commands used by widgets
+  # Centralized for maintainability and testing
+  # Pass pkgs when importing: (tokens.commands pkgs)
+  commands = pkgs: {
+    niri = {
+      layoutMode = "${pkgs.niri-unstable}/bin/niri msg focused-window | ${pkgs.jq}/bin/jq -r '.layout_mode // \"tiled\"'";
+    };
+
+    brightness = {
+      decrease = "${pkgs.brightnessctl}/bin/brightnessctl set 5%-";
+      increase = "${pkgs.brightnessctl}/bin/brightnessctl set +5%";
+      reset = "${pkgs.brightnessctl}/bin/brightnessctl set 50%";
+    };
+
+    volume = {
+      toggleMute = "{{${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle}}";
+      increaseBy = amount: "{{${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ ${amount}+}}";
+      decreaseBy = amount: "{{${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ ${amount}-}}";
+    };
+
+    notifications = {
+      toggle = "${pkgs.swaynotificationcenter}/bin/swaync-client -t";
+    };
+
+    power = {
+      menu = ''
+        echo -e "Logout\nSuspend\nHibernate\nReboot\nShutdown" | \
+        ${pkgs.fuzzel}/bin/fuzzel --dmenu | \
+        ${pkgs.gnused}/bin/sed \
+          -e 's/^Logout$/loginctl terminate-user $USER/' \
+          -e 's/^Suspend$/systemctl suspend/' \
+          -e 's/^Hibernate$/systemctl hibernate/' \
+          -e 's/^Reboot$/systemctl reboot/' \
+          -e 's/^Shutdown$/systemctl poweroff/' | \
+        sh
+      '';
+    };
   };
 }

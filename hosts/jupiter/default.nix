@@ -33,6 +33,8 @@
       lutris = true;
     };
 
+    flatpak.enable = true;
+
     vr = {
       enable = true;
       alvr = false; # ALVR requires SteamVR - use WiVRn for Monado instead

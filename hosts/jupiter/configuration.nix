@@ -130,4 +130,9 @@
     };
   };
 
+  # Home Manager configuration
+  home-manager.users.${config.host.username} = {
+    programs.hytale-launcher.enable = true;
+  };
+
 }

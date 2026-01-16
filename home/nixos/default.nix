@@ -19,6 +19,7 @@
     ./apps/vr.nix
     ./apps/mpv.nix
     ./apps/obs.nix
+    ./apps/hytale.nix
   ];
 
 }

@@ -12,6 +12,7 @@
     ./features/ai-tools.nix
     ./features/containers-supplemental.nix
     ./features/boot-optimization.nix
+    ./features/flatpak.nix
 
     ./core
     ./hardware
