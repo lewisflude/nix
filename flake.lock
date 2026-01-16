@@ -850,6 +850,27 @@
         "type": "github"
       }
     },
+    "home-manager_2": {
+      "inputs": {
+        "nixpkgs": [
+          "signal",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1768530555,
+        "narHash": "sha256-EBXKDho4t1YSgodAL6C8M3UTm8MGMZNQ9rQnceR5+6c=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "d21bee5abf9fb4a42b2fa7728bf671f8bb246ba6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
     "homebrew-j178": {
       "flake": false,
       "locked": {
@@ -1798,6 +1819,7 @@
         "process-compose-flake": "process-compose-flake",
         "rust-docs-mcp": "rust-docs-mcp",
         "services-flake": "services-flake",
+        "signal": "signal",
         "solaar": "solaar",
         "sops-nix": "sops-nix",
         "vpn-confinement": "vpn-confinement"
@@ -1966,6 +1988,43 @@
       "original": {
         "owner": "juspay",
         "repo": "services-flake",
+        "type": "github"
+      }
+    },
+    "signal": {
+      "inputs": {
+        "home-manager": "home-manager_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "signal-palette": "signal-palette"
+      },
+      "locked": {
+        "lastModified": 1768578087,
+        "narHash": "sha256-asu3vcXxBpIFxdMYeuGcgxB796UKPWTE58NpsHECf3o=",
+        "owner": "lewisflude",
+        "repo": "signal-nix",
+        "rev": "831e9b0756b52c7f27820d27da8b1f643375afc0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lewisflude",
+        "repo": "signal-nix",
+        "type": "github"
+      }
+    },
+    "signal-palette": {
+      "locked": {
+        "lastModified": 1768577269,
+        "narHash": "sha256-rxpU87t6nK4fVOx9QP1YafBjrxEKFo3o0DEETh2Hoyk=",
+        "owner": "lewisflude",
+        "repo": "signal-palette",
+        "rev": "e566a406056d0475737e99a4d24bb84d2c7ef740",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lewisflude",
+        "repo": "signal-palette",
         "type": "github"
       }
     },

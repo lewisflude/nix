@@ -30,6 +30,6 @@
     ../modules.nix
 
     # Theming system
-    ../theming
+    ../theming/signal.nix
   ];
 }
