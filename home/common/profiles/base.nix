@@ -29,7 +29,7 @@
     # Custom modules
     ../modules.nix
 
-    # Theming system
-    ../theming/signal.nix
+    # Local theming modules (cursor, zed, satty) + theme context
+    ../theming/default.nix
   ];
 }

@@ -10,7 +10,7 @@ let
   inherit (themeContext) theme;
 in
 {
-  config = mkIf (cfg.enable && cfg.applications.satty.enable && theme != null) {
+  config = mkIf (cfg.enable && cfg.local.applications.satty.enable && theme != null) {
     # Satty theme configuration
     # Satty uses TOML configuration with hex color values
     xdg.configFile."satty/config.toml".text = ''

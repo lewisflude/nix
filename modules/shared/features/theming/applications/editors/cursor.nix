@@ -263,7 +263,7 @@ let
     };
 in
 {
-  config = mkIf (cfg.enable && cfg.applications.cursor.enable && theme != null) {
+  config = mkIf (cfg.enable && cfg.local.applications.cursor.enable && theme != null) {
     # Generate and install the theme file
     xdg.configFile."Cursor/User/themes/signal-${cfg.mode}.json" = {
       text = builtins.toJSON (generateVSCodeTheme theme cfg.mode);

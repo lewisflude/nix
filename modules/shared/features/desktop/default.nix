@@ -46,26 +46,33 @@ in
           enable = true;
           inherit (cfg.signalTheme) mode;
 
-          applications = {
-            # Code editors and terminals
-            cursor.enable = true;
-            helix.enable = true;
-            zed.enable = true;
+          # Signal flake applications
+          helix.enable = true;
+          gtk.enable = lib.mkDefault isLinux;
+          ironbar.enable = false; # Using local ironbar module instead
+          fuzzel.enable = false; # Using local fuzzel module instead
+
+          terminals = {
             ghostty.enable = true;
+          };
 
-            # Desktop environment (Linux)
-            gtk.enable = lib.mkDefault isLinux;
-            ironbar.enable = lib.mkDefault isLinux;
-            satty.enable = lib.mkDefault isLinux;
-
-            # Command-line tools
+          cli = {
             bat.enable = true;
             fzf.enable = true;
             lazygit.enable = true;
             yazi.enable = true;
-            zellij.enable = true;
+          };
+
+          # Local applications (not in signal flake)
+          local.applications = {
+            cursor.enable = true;
+            zed.enable = true;
+            satty.enable = lib.mkDefault isLinux;
           };
         };
+
+        # Enable local ironbar module
+        theming.ironbar.enable = lib.mkDefault isLinux;
       };
     })
 

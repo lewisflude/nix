@@ -16,6 +16,7 @@ let
   inherit (inputs) solaar;
   inherit (inputs) determinate;
   nix-flatpak = inputs.nix-flatpak or null;
+  signal = inputs.signal or null;
 
   functionsLib = import ./functions.nix { inherit lib; };
 
@@ -105,6 +106,7 @@ let
           ironbar != null && ironbar ? homeManagerModules
         ) ironbar.homeManagerModules.default
         ++ optionalModule (nix-flatpak != null) nix-flatpak.homeManagerModules.nix-flatpak
+        ++ optionalModule (signal != null) signal.homeManagerModules.default
         ++ extraSharedModules;
       users.${hostConfig.username} = import ../home;
     };

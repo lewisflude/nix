@@ -6,7 +6,7 @@
 }:
 let
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
-  signal-theme = pkgs.callPackage ../../pkgs/signal-theme.nix { };
+  # signal-theme now provided by signal flake
 in
 {
 
@@ -22,19 +22,17 @@ in
 
   gtk = lib.mkIf platformLib.isLinux {
     enable = true;
-    theme = {
-      name = "Signal";
-      package = signal-theme;
-    };
-    iconTheme = {
+    # GTK theme now handled by signal flake
+    # Override signal flake's GTK defaults with custom settings
+    iconTheme = lib.mkForce {
       name = "Papirus-Dark";
       package = pkgs.papirus-icon-theme;
     };
-    cursorTheme = {
+    cursorTheme = lib.mkForce {
       name = "DMZ-White";
       package = pkgs.vanilla-dmz;
     };
-    font = {
+    font = lib.mkForce {
       name = "Iosevka";
       package = pkgs.iosevka-bin;
       size = 12;

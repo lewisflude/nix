@@ -353,10 +353,11 @@ in
               theming.signal = {
                 enable = true;
                 mode = "dark";
-                applications = {
+                local.applications = {
                   cursor.enable = true;
-                  helix.enable = true;
+                  zed.enable = true;
                 };
+                helix.enable = true;
               };
             };
           }
