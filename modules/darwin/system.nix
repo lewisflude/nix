@@ -28,9 +28,6 @@
     computerName = hostname;
     localHostName = hostname;
   };
-  services.openssh = {
-    enable = true;
-  };
   system = {
     primaryUser = username;
     defaults = lib.mkMerge [

@@ -24,5 +24,6 @@
     ./sops.nix
     ./atuin.nix
     ./mac-app-util.nix
+    ./ssh.nix
   ];
 }
