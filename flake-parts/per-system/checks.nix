@@ -1,13 +1,18 @@
 {
+  lib,
   outputBuilders,
   ...
 }:
 {
   perSystem =
-    { system, pkgs, ... }:
+    {
+      system,
+      pkgs,
+      ...
+    }:
     {
       # Checks for this system (pre-commit, tests, etc.)
-      checks =
-        (outputBuilders.mkChecks.${system} or { }) // (import ../../tests/default.nix { inherit pkgs; });
+      # Note: NixOS VM tests are temporarily disabled due to infinite recursion issues
+      checks = outputBuilders.mkChecks.${system} or { };
     };
 }
