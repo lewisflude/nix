@@ -5,6 +5,110 @@ let
   tokens = import ./tokens.nix { };
   commands = tokens.commands pkgs;
   widgets = import ./widgets.nix { inherit lib pkgs tokens; };
+
+  # Widget Definitions
+  # Extracted for clarity, maintainability, and conditional inclusion
+  widgetDefs = {
+    # 1. Layout Indicator - Shows current Niri window layout mode
+    layoutIndicator = widgets.mkScriptWidget {
+      name = "layout-indicator";
+      class = "niri-layout control-button";
+      cmd = commands.niri.layoutMode;
+      tooltip = "Window Layout Mode";
+    };
+
+    # 2. Brightness Control - Interactive brightness adjustment
+    brightness = widgets.mkControlWidget {
+      type = "brightness";
+      name = "brightness";
+      format = "${tokens.icons.glyphs.brightness} {percent}%";
+      interactions = {
+        on_click_left = commands.brightness.decrease;
+        on_click_right = commands.brightness.increase;
+        on_click_middle = commands.brightness.reset;
+      };
+      tooltip = "Brightness: {percent}%\nLeft click: -5% | Right click: +5% | Middle: Reset to 50%";
+    };
+
+    # 3. Volume Control - Audio level management
+    volume = widgets.mkControlWidget {
+      type = "volume";
+      name = "volume";
+      format = "{icon} {percentage}%";
+      interactions = {
+        on_click_left = commands.volume.toggleMute;
+        on_scroll_up = commands.volume.increaseBy "2%";
+        on_scroll_down = commands.volume.decreaseBy "2%";
+      };
+      extraConfig = {
+        icons = {
+          volume_high = tokens.icons.glyphs.volume.high;
+          volume_medium = tokens.icons.glyphs.volume.medium;
+          volume_low = tokens.icons.glyphs.volume.low;
+          muted = tokens.icons.glyphs.volume.muted;
+        };
+        max_volume = 100;
+      };
+      tooltip = "Volume: {percentage}%\nClick to mute | Scroll to adjust";
+    };
+
+    # 4. System Tray - Application indicators
+    tray = {
+      type = "tray";
+      name = "system-tray";
+      class = "tray";
+      icon_size = tokens.icons.tray;
+      icon_theme = "Adwaita";
+    };
+
+    # 5. Battery Indicator - Power status (laptop only)
+    battery = {
+      type = "upower";
+      name = "battery";
+      class = "battery";
+      format = "{percentage}%";
+      show_if = "test -e /sys/class/power_supply/BAT0";
+    };
+
+    # 6. Notifications - Notification center toggle
+    notifications = widgets.mkControlWidget {
+      type = "notifications";
+      name = "notifications";
+      class = "notifications";
+      format = "";
+      interactions = {
+        on_click_left = commands.notifications.toggle;
+      };
+      extraConfig = {
+        icon = tokens.icons.glyphs.bell;
+        icon_size = tokens.icons.small;
+        show_count = true;
+      };
+    };
+
+    # 7. Clock - Time display with calendar popup
+    clock = {
+      type = "clock";
+      name = "clock";
+      class = "clock";
+      format = "%H:%M";
+      tooltip_format = "%A, %B %d, %Y";
+      popup = {
+        type = "calendar";
+        format = "%A, %B %d, %Y";
+      };
+    };
+
+    # 8. Power Menu - System power actions
+    power = widgets.mkLauncherWidget {
+      name = "power";
+      class = "power control-button danger";
+      cmd = commands.power.menu;
+      icon = tokens.icons.glyphs.power;
+      iconSize = tokens.icons.medium;
+      tooltip = "Power Menu (Logout/Suspend/Reboot/Shutdown)";
+    };
+  };
 in
 {
   # Bar configuration for Relaxed profile (1440p+)
@@ -16,12 +120,7 @@ in
     anchor_to_edges = true;
 
     # Margin synchronized with Niri layout gaps
-    margin = {
-      top = tokens.bar.margin;
-      bottom = tokens.bar.margin;
-      left = tokens.bar.margin;
-      right = tokens.bar.margin;
-    };
+    margin = lib.genAttrs [ "top" "bottom" "left" "right" ] (_: tokens.bar.margin);
 
     # Layer shell configuration
     layer = "top";
@@ -72,121 +171,15 @@ in
     ];
 
     # End Island - Status Widgets (ordered deliberately per design spec)
-    end = [
-      # 1. Layout Indicator Widget
-      (widgets.mkScriptWidget {
-        name = "layout-indicator";
-        class = "niri-layout control-button";
-        cmd = commands.niri.layoutMode;
-        tooltip = "Window Layout Mode";
-      })
-
-      # 2. Brightness Control Widget
-      (widgets.mkControlWidget {
-        type = "brightness";
-        name = "brightness";
-        format = "${tokens.icons.glyphs.brightness} {percent}%";
-        interactions = {
-          on_click_left = commands.brightness.decrease;
-          on_click_right = commands.brightness.increase;
-          on_click_middle = commands.brightness.reset;
-        };
-        tooltip = "Brightness: {percent}%\nLeft click: -5% | Right click: +5% | Middle: Reset to 50%";
-      })
-
-      # 3. Volume Control Widget
-      (widgets.mkControlWidget {
-        type = "volume";
-        name = "volume";
-        format = "{icon} {percentage}%";
-        interactions = {
-          on_click_left = commands.volume.toggleMute;
-          on_scroll_up = commands.volume.increaseBy "2%";
-          on_scroll_down = commands.volume.decreaseBy "2%";
-        };
-        extraConfig = {
-          # Icon mapping based on volume level
-          icons = {
-            volume_high = tokens.icons.glyphs.volume.high;
-            volume_medium = tokens.icons.glyphs.volume.medium;
-            volume_low = tokens.icons.glyphs.volume.low;
-            muted = tokens.icons.glyphs.volume.muted;
-          };
-          max_volume = 100;
-        };
-        tooltip = "Volume: {percentage}%\nClick to mute | Scroll to adjust";
-      })
-
-      # 4. System Tray Widget
-      {
-        type = "tray";
-        name = "system-tray";
-        class = "tray";
-
-        # Icon configuration
-        icon_size = tokens.icons.tray;
-        icon_theme = "Adwaita"; # Fallback theme
-
-        # Spacing between items handled by CSS
-      }
-
-      # 5. Battery Indicator Widget (conditional on hardware)
-      {
-        type = "upower";
-        name = "battery";
-        class = "battery";
-
-        # Display format (percentage only)
-        format = "{percentage}%";
-
-        # Show only when battery is present
-        show_if = "test -e /sys/class/power_supply/BAT0";
-      }
-
-      # 6. Notification Button Widget
-      (widgets.mkControlWidget {
-        type = "notifications";
-        name = "notifications";
-        class = "notifications";
-        format = ""; # Handled by widget internally
-        interactions = {
-          on_click_left = commands.notifications.toggle;
-        };
-        extraConfig = {
-          icon = tokens.icons.glyphs.bell;
-          icon_size = tokens.icons.small;
-          show_count = true;
-        };
-      })
-
-      # 7. Clock Widget
-      {
-        type = "clock";
-        name = "clock";
-        class = "clock";
-
-        # Time format (24-hour, HH:MM)
-        format = "%H:%M";
-
-        # Tooltip with full date
-        tooltip_format = "%A, %B %d, %Y";
-
-        # Popup configuration
-        popup = {
-          type = "calendar";
-          format = "%A, %B %d, %Y";
-        };
-      }
-
-      # 8. Power Button Widget
-      (widgets.mkLauncherWidget {
-        name = "power";
-        class = "power control-button danger";
-        cmd = commands.power.menu;
-        icon = tokens.icons.glyphs.power;
-        iconSize = tokens.icons.medium;
-        tooltip = "Power Menu (Logout/Suspend/Reboot/Shutdown)";
-      })
+    end = with widgetDefs; [
+      layoutIndicator
+      brightness
+      volume
+      tray
+      battery
+      notifications
+      clock
+      power
     ];
   };
 }

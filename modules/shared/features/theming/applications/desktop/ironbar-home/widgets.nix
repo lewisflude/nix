@@ -7,7 +7,16 @@
   tokens,
 }:
 let
-  inherit (lib) mkMerge optionalAttrs;
+  inherit (lib) mkMerge filterAttrs;
+
+  # Helper: Build widget with optional attributes
+  # Filters out null values and merges base config with optional attrs
+  mkWidget =
+    baseConfig: optionalConfig:
+    mkMerge [
+      baseConfig
+      (filterAttrs (_: v: v != null) optionalConfig)
+    ];
 in
 {
   # Control widget builder (brightness, volume, etc.)
@@ -23,7 +32,7 @@ in
       extraConfig ? { },
       tooltip ? null,
     }:
-    mkMerge [
+    mkWidget
       {
         inherit
           type
@@ -32,11 +41,13 @@ in
           class
           ;
       }
-      (optionalAttrs (icon != null) { inherit icon; })
-      (optionalAttrs (tooltip != null) { inherit tooltip; })
-      interactions
-      extraConfig
-    ];
+      (
+        {
+          inherit icon tooltip;
+        }
+        // interactions
+        // extraConfig
+      );
 
   # Script widget builder (layout indicator, custom scripts)
   # For polling or watching external commands
@@ -50,20 +61,17 @@ in
       interval ? 1000,
       tooltip ? null,
     }:
-    mkMerge [
-      {
-        type = "script";
-        inherit
-          name
-          class
-          cmd
-          format
-          mode
-          interval
-          ;
-      }
-      (optionalAttrs (tooltip != null) { inherit tooltip; })
-    ];
+    mkWidget {
+      type = "script";
+      inherit
+        name
+        class
+        cmd
+        format
+        mode
+        interval
+        ;
+    } { inherit tooltip; };
 
   # Launcher widget builder (power button, app launchers)
   # Executes commands when clicked
@@ -76,13 +84,13 @@ in
       iconSize ? null,
       tooltip ? null,
     }:
-    mkMerge [
+    mkWidget
       {
         type = "launcher";
         inherit name class cmd;
       }
-      (optionalAttrs (icon != null) { inherit icon; })
-      (optionalAttrs (iconSize != null) { icon_size = iconSize; })
-      (optionalAttrs (tooltip != null) { inherit tooltip; })
-    ];
+      {
+        inherit icon tooltip;
+        icon_size = iconSize;
+      };
 }
