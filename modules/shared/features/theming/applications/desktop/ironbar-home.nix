@@ -1,4 +1,9 @@
-# Backward compatibility shim - redirects to new modular structure
-# This file is kept for compatibility with existing imports
-# New code should import modules/shared/features/theming/applications/desktop/ironbar-home/default.nix directly
+# Backward compatibility shim for imports
+# Maintains compatibility with existing system configurations that import:
+#   modules/shared/features/theming/applications/desktop/ironbar-home.nix
+#
+# This allows gradual migration to the direct import:
+#   modules/shared/features/theming/applications/desktop/ironbar-home/default.nix
+#
+# Can be removed once all system configs are updated.
 import ./ironbar-home/default.nix

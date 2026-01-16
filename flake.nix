@@ -119,6 +119,9 @@
     hyprcursor-phinger = {
       url = "github:jappie3/hyprcursor-phinger";
     };
+    nix-flatpak = {
+      url = "github:gmodena/nix-flatpak/?ref=latest";
+    };
   };
 
   outputs =

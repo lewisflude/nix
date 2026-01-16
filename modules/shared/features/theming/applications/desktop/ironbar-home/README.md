@@ -16,12 +16,39 @@ The module is structured in layers following atomic design principles:
 
 ```
 ironbar-home/
-├── tokens.nix          # Design tokens (colors, spacing, typography, etc.)
-├── config.nix          # Widget configuration generator
+├── tokens.nix          # Design tokens (colors, spacing, typography, icons, commands)
+├── widgets.nix         # Widget builder helpers for reducing boilerplate
+├── config.nix          # Widget configuration using tokens and builders
 ├── style.css           # Complete CSS implementation (atoms → templates)
 ├── default.nix         # Home-manager module entry point
 └── README.md           # This file
 ```
+
+### File Responsibilities
+
+**tokens.nix**
+- Design tokens (colors, spacing, typography, opacity, shadows, transitions)
+- Icon glyphs (centralized for theme switching)
+- Shell commands (centralized for maintainability)
+- Niri synchronization values
+
+**widgets.nix**
+- `mkControlWidget` - Builder for interactive widgets (brightness, volume)
+- `mkScriptWidget` - Builder for script-based widgets (layout indicator)
+- `mkLauncherWidget` - Builder for launcher widgets (power button)
+
+**config.nix**
+- Bar structure (height, margins, positioning)
+- Widget instantiation using builders
+- Widget configuration values
+- Uses tokens for all design values
+- Uses widget builders for consistency
+
+**style.css**
+- GTK CSS implementation
+- Atomic design hierarchy (atoms → molecules → organisms → templates)
+- Active state patterns (3px accent bar)
+- Animations and transitions (GTK-compliant)
 
 ### Design System Hierarchy
 
@@ -340,7 +367,34 @@ When modifying this design system:
 - **GTK CSS**: https://docs.gtk.org/gtk4/css-overview.html
 - **Atomic Design**: https://atomicdesign.bradfrost.com/
 
+## Refactoring Improvements (2026-01-16)
+
+**Code Reduction:**
+- `config.nix`: Reduced from 240 lines to ~150 lines (38% reduction)
+- `style.css`: Consolidated active state patterns (removed ~80 lines of duplication)
+
+**Architecture Improvements:**
+- **Centralized Icons**: All icons now in `tokens.nix` for easy theme switching
+- **Shell Commands**: Extracted to `tokens.commands` for reusability and testing
+- **Widget Builders**: New `widgets.nix` with type-safe builders for consistency
+- **GTK CSS Fixes**: Removed non-working opacity transitions per GTK documentation
+- **Better Documentation**: Improved inline comments and module option descriptions
+
+**Benefits:**
+- Easier to add new widgets (use builders)
+- Easier to change icon theme (modify `tokens.icons.glyphs`)
+- Easier to test commands (isolated in `tokens.commands`)
+- More consistent widget structure
+- Better maintainability
+
 ## Version History
+
+- **v1.1** (2026-01-16): Refactoring and code quality improvements
+  - Centralized icons and shell commands in tokens
+  - Added widget builder helpers
+  - Reduced code duplication by 38%
+  - Fixed GTK CSS non-compliant transitions
+  - Enhanced documentation
 
 - **v1.0** (2026-01-15): Initial complete implementation
   - All 10 widgets from design spec
