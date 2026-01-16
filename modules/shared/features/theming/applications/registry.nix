@@ -14,15 +14,7 @@ rec {
       modulePath = "modules/shared/features/theming/applications/editors/cursor.nix";
     };
 
-    helix = {
-      name = "helix";
-      displayName = "Helix Editor";
-      platform = "home";
-      category = "editor";
-      description = "Helix editor theme";
-      dependencies = [ ];
-      modulePath = "modules/shared/features/theming/applications/editors/helix.nix";
-    };
+    # helix - now provided by Signal flake
 
     zed = {
       name = "zed";
@@ -35,36 +27,11 @@ rec {
     };
 
     # Terminals
-    ghostty = {
-      name = "ghostty";
-      displayName = "Ghostty Terminal";
-      platform = "home";
-      category = "terminal";
-      description = "Ghostty terminal ANSI colors";
-      dependencies = [ ];
-      modulePath = "modules/shared/features/theming/applications/terminals/ghostty.nix";
-    };
-
-    zellij = {
-      name = "zellij";
-      displayName = "Zellij";
-      platform = "home";
-      category = "terminal";
-      description = "Zellij terminal multiplexer theme";
-      dependencies = [ ];
-      modulePath = "modules/shared/features/theming/applications/terminals/zellij.nix";
-    };
+    # ghostty - now provided by Signal flake
+    # zellij - now provided by Signal flake
 
     # Desktop (Wayland/Linux)
-    fuzzel = {
-      name = "fuzzel";
-      displayName = "Fuzzel";
-      platform = "nixos";
-      category = "desktop";
-      description = "Fuzzel application launcher theme";
-      dependencies = [ ];
-      modulePath = "modules/shared/features/theming/applications/desktop/fuzzel.nix";
-    };
+    # fuzzel - now provided by Signal flake
 
     ironbar = {
       name = "ironbar";
@@ -107,56 +74,13 @@ rec {
       modulePath = "modules/shared/features/theming/applications/desktop/satty.nix";
     };
 
-    gtk = {
-      name = "gtk";
-      displayName = "GTK";
-      platform = "home";
-      category = "desktop";
-      description = "GTK3/GTK4 application theme";
-      dependencies = [ ];
-      modulePath = "modules/shared/features/theming/applications/desktop/gtk.nix";
-    };
+    # gtk - now provided by Signal flake
 
     # CLI Tools
-    bat = {
-      name = "bat";
-      displayName = "bat";
-      platform = "home";
-      category = "cli";
-      description = "bat syntax highlighter theme";
-      dependencies = [ ];
-      modulePath = "modules/shared/features/theming/applications/cli/bat.nix";
-    };
-
-    fzf = {
-      name = "fzf";
-      displayName = "fzf";
-      platform = "home";
-      category = "cli";
-      description = "fzf fuzzy finder theme";
-      dependencies = [ ];
-      modulePath = "modules/shared/features/theming/applications/cli/fzf.nix";
-    };
-
-    lazygit = {
-      name = "lazygit";
-      displayName = "lazygit";
-      platform = "home";
-      category = "cli";
-      description = "lazygit Git TUI theme";
-      dependencies = [ ];
-      modulePath = "modules/shared/features/theming/applications/cli/lazygit.nix";
-    };
-
-    yazi = {
-      name = "yazi";
-      displayName = "yazi";
-      platform = "home";
-      category = "cli";
-      description = "yazi file manager theme";
-      dependencies = [ ];
-      modulePath = "modules/shared/features/theming/applications/cli/yazi.nix";
-    };
+    # bat - now provided by Signal flake
+    # fzf - now provided by Signal flake
+    # lazygit - now provided by Signal flake
+    # yazi - now provided by Signal flake
   };
 
   # Query functions

@@ -32,78 +32,29 @@ let
   };
 in
 {
-  # Import shared options (single source of truth) and application-specific theme modules
+  # Note: Most theming is now handled by Signal flake
+  # This file provides local application theming (cursor, zed, satty, ironbar) and theme context
   imports = [
-    ../../../modules/shared/features/theming/options.nix
-    # Code editors
     ../../../modules/shared/features/theming/applications/editors/cursor.nix
-    ../../../modules/shared/features/theming/applications/editors/helix.nix
     ../../../modules/shared/features/theming/applications/editors/zed.nix
-
-    # Terminals
-    ../../../modules/shared/features/theming/applications/terminals/ghostty.nix
-    ../../../modules/shared/features/theming/applications/terminals/zellij.nix
-
-    # Desktop environment (Linux)
-    ../../../modules/shared/features/theming/applications/desktop/gtk.nix
-    ../../../modules/shared/features/theming/applications/desktop/ironbar-home.nix
     ../../../modules/shared/features/theming/applications/desktop/satty.nix
-
-    # Command-line tools
-    ../../../modules/shared/features/theming/applications/cli/bat.nix
-    ../../../modules/shared/features/theming/applications/cli/fzf.nix
-    ../../../modules/shared/features/theming/applications/cli/lazygit.nix
-    ../../../modules/shared/features/theming/applications/cli/yazi.nix
+    ../../../modules/shared/features/theming/applications/desktop/ironbar-home.nix
   ];
 
-  # Define Home Manager-specific application options
-  options.theming.signal.applications = {
-    cursor = {
-      enable = mkEnableOption "Apply theme to Cursor/VS Code";
-    };
+  # Define local application options (apps not in signal flake or have local customizations)
+  options.theming.signal.local = {
+    applications = {
+      cursor = {
+        enable = mkEnableOption "Apply theme to Cursor/VS Code";
+      };
 
-    helix = {
-      enable = mkEnableOption "Apply theme to Helix editor";
-    };
+      zed = {
+        enable = mkEnableOption "Apply theme to Zed editor";
+      };
 
-    zed = {
-      enable = mkEnableOption "Apply theme to Zed editor";
-    };
-
-    ghostty = {
-      enable = mkEnableOption "Apply theme to Ghostty terminal";
-    };
-
-    gtk = {
-      enable = mkEnableOption "Apply theme to GTK applications";
-    };
-
-    ironbar = {
-      enable = mkEnableOption "Apply theme to Ironbar status bar";
-    };
-
-    bat = {
-      enable = mkEnableOption "Apply theme to bat (syntax highlighting)";
-    };
-
-    fzf = {
-      enable = mkEnableOption "Apply theme to fzf (fuzzy finder)";
-    };
-
-    lazygit = {
-      enable = mkEnableOption "Apply theme to lazygit (Git TUI)";
-    };
-
-    yazi = {
-      enable = mkEnableOption "Apply theme to yazi (file manager)";
-    };
-
-    zellij = {
-      enable = mkEnableOption "Apply theme to zellij (terminal multiplexer)";
-    };
-
-    satty = {
-      enable = mkEnableOption "Apply theme to satty (screenshot annotation tool)";
+      satty = {
+        enable = mkEnableOption "Apply theme to satty (screenshot annotation tool)";
+      };
     };
   };
 
@@ -114,10 +65,6 @@ in
         inherit themeContext;
         signalThemeLib = themeLib;
       };
-
-      # Enable Zed theming by default when Signal theme is enabled
-      # This ensures themes are generated for Zed on all platforms (not just NixOS)
-      theming.signal.applications.zed.enable = lib.mkDefault true;
     }
 
     (mkIf pkgs.stdenv.isLinux {

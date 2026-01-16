@@ -7,7 +7,7 @@
 let
   # Signal theme configuration
   signalThemeEnabled = config.theming.signal.enable or false;
-  signalThemeFamily = config.theming.signal.applications.zed.themes or null;
+  signalThemeFamily = config.theming.signal.local.applications.zed.themes or null;
   themesAvailable = signalThemeEnabled && signalThemeFamily != null;
 
   themeMode =

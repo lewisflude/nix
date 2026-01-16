@@ -10,22 +10,10 @@ in
 
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
-
-      # System-level Signal theme configuration (NixOS only)
-      (lib.mkIf cfg.signalTheme.enable {
-        theming.signal = {
-          enable = true;
-          inherit (cfg.signalTheme) mode;
-
-          applications = {
-            # Enable all Wayland/Linux desktop components
-            fuzzel.enable = lib.mkDefault true;
-            ironbar.enable = lib.mkDefault true;
-            mako.enable = lib.mkDefault true;
-            swaync.enable = lib.mkDefault true;
-          };
-        };
-      })
+      # Note: System-level theming has been migrated to Signal flake
+      # Theming is now configured in home-manager (home/common/theming/signal.nix)
+      # NixOS-specific theming (mako, swaync) remains in modules/nixos/features/theming/
+      { }
     ]
   );
 }

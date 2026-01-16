@@ -10,7 +10,7 @@ let
   inherit (themeContext) theme;
 in
 {
-  config = mkIf (cfg.enable && cfg.applications.ironbar.enable && theme != null) {
+  config = mkIf (cfg.enable && cfg.local.applications.ironbar.enable && theme != null) {
     # Ironbar theme configuration would go here
     # Ironbar styling can be done through SCSS variables
     # This module can be extended to generate ironbar CSS

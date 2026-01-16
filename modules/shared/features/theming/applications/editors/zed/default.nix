@@ -55,7 +55,7 @@ let
       null;
 in
 {
-  options.theming.signal.applications.zed.themes = mkOption {
+  options.theming.signal.local.applications.zed.themes = mkOption {
     type = types.nullOr (
       types.submodule {
         options = {
@@ -79,8 +79,8 @@ in
     internal = true; # Mark as internal since it's generated, not user-configured
   };
 
-  config = mkIf (cfg.enable && cfg.applications.zed.enable && themeContext != null) {
+  config = mkIf (cfg.enable && cfg.local.applications.zed.enable && themeContext != null) {
     # Export theme family for use in home-manager
-    theming.signal.applications.zed.themes = themeFamily;
+    theming.signal.local.applications.zed.themes = themeFamily;
   };
 }

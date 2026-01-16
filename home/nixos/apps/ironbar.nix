@@ -1,11 +1,8 @@
 # Ironbar Desktop Status Bar
 # Platform: NixOS (Linux)
 # Status bar with Signal theme for Niri compositor
+# Note: Configuration is now done in home/common/theming/signal.nix
 { ... }:
 {
-  # Enable Ironbar with Signal theme design system
-  theming.ironbar.enable = true;
-
-  # Additional ironbar configuration can be added via extraConfig
-  # theming.ironbar.extraConfig = { };
+  # Ironbar is enabled and configured via Signal flake in signal.nix
 }

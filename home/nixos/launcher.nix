@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   themeContext ? null,
   themeLib,
   ...
@@ -34,8 +35,8 @@ in
         match-mode = "fuzzy";
       };
       border = {
-        width = 2;
-        radius = 10;
+        width = lib.mkDefault 2;
+        radius = lib.mkDefault 10;
       };
       colors = {
         background = colors."surface-base".hex + "ff";
