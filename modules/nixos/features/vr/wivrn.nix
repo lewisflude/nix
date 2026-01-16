@@ -29,9 +29,8 @@ lib.mkIf (cfg.enable && cfg.wivrn.enable) {
     config = {
       enable = true;
       json = {
-        # Auto-start WayVR desktop overlay (package only, no args)
-        # Testing if module works without arguments
-        application = pkgs.wayvr;
+        # Auto-start WayVR desktop overlay (array format as required by WiVRn)
+        application = [ pkgs.wayvr ];
 
         # RTX 4090 optimizations
         bitrate = 150000000; # 150 Mbps - explicit quality target for WiFi 6
