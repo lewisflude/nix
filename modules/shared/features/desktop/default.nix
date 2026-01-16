@@ -47,10 +47,13 @@ in
           inherit (cfg.signalTheme) mode;
 
           # Signal flake applications
-          helix.enable = true;
           gtk.enable = lib.mkDefault isLinux;
           ironbar.enable = false; # Using local ironbar module instead
           fuzzel.enable = false; # Using local fuzzel module instead
+
+          editors = {
+            helix.enable = true;
+          };
 
           terminals = {
             ghostty.enable = true;
