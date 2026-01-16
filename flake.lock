@@ -1978,11 +1978,11 @@
         "signal-palette": "signal-palette"
       },
       "locked": {
-        "lastModified": 1768581775,
-        "narHash": "sha256-WkdrzYevCgFEiDeFnT5w6dtuIFp1HzrzQIII40ivhi4=",
+        "lastModified": 1768583009,
+        "narHash": "sha256-IDLAbF1uXfZEZG74Rnd03IieW557XiNH7Xx9YczDiKo=",
         "owner": "lewisflude",
         "repo": "signal-nix",
-        "rev": "85b362fed340c4b8fd249d03e8c751d3b33f94f8",
+        "rev": "7b3c59ae65dda5d5e63ffba2470a152839833827",
         "type": "github"
       },
       "original": {
