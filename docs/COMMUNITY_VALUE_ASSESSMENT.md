@@ -26,6 +26,13 @@ This configuration contains several high-value components that solve real proble
 
 **Location**: `home/common/modules/mcp/`
 
+**Status**: ✅ **EXTRACTION COMPLETE** (2026-01-16)
+- Repository: `/home/lewis/Code/mcp-home-manager`
+- Initial commit: 929b480 (basic extraction)
+- Refactoring commit: db2d1be (generic configuration)
+- Current Phase: Week 1 - Testing complete, ready for documentation and CI/CD
+- Next Steps: Comprehensive README, GitHub Actions, public release
+
 #### What It Provides
 
 A complete, declarative MCP server management system for AI coding tools:
@@ -92,28 +99,38 @@ home/common/modules/mcp/
 
 #### Extraction Path
 
-**Option 1: Submit to nixpkgs**
-- Clean up user-specific defaults
-- Make secret paths configurable
-- Add comprehensive documentation
-- Submit as `services.mcp` module
+**✅ CHOSEN: Option 2 - Standalone Flake** (COMPLETED)
 
-**Option 2: Standalone Flake**
+Extraction completed with the following improvements:
+- ✅ Fully generic configuration (no user-specific defaults)
+- ✅ Configurable `secretsPath` option (supports sops-nix, agenix, custom)
+- ✅ Configurable `clients` option (cursor, claude-desktop)
+- ✅ Comprehensive test suite (5 test configurations, all passing)
+- ✅ Platform detection (Linux/macOS)
+- ✅ Graceful degradation for missing secrets
+
+Usage:
 ```nix
 {
   inputs.mcp-home-manager.url = "github:username/mcp-home-manager";
 
   imports = [ inputs.mcp-home-manager.homeManagerModules.default ];
+
+  services.mcp = {
+    enable = true;
+    secretsPath = "/run/secrets";  # configurable
+    clients = [ "cursor" "claude-desktop" ];  # selective
+  };
 }
 ```
 
-**Option 3: Home Manager Upstream**
-- Contribute directly to home-manager repository
-- Best long-term solution for ecosystem
+**Future Options**:
+- Option 1: Submit to nixpkgs after community validation
+- Option 3: Contribute to home-manager upstream (long-term)
 
 #### Extraction Difficulty
 
-**Low** - Already well-modularized, minimal user-specific code.
+**Low** - ✅ COMPLETED. Module was already well-modularized, refactoring for full generalization was straightforward.
 
 #### Target Audience
 
