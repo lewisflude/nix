@@ -532,10 +532,33 @@ systemctl --user status wivrn
 
 ### 2. Connect Quest Headset
 
+**Wireless (Recommended):**
+
 - Put on Quest headset
 - Open **WiVRn** app (installed via SideQuest)
 - Select **jupiter** from server list
 - Wait for "Connected" status
+
+**Wired (USB Fallback):**
+
+If WiFi is unavailable or unstable, you can use a wired USB connection:
+
+1. **Connect Quest to PC via USB-C cable**
+2. **Enable USB debugging** on Quest:
+   - Go to Settings → System → Developer → Enable USB debugging
+3. **Allow USB debugging** when prompted on headset
+4. **Verify ADB connection**:
+   ```bash
+   adb devices
+   # Should show your Quest device
+   ```
+5. **Open WiVRn app** on Quest and connect as normal
+
+The connection will automatically use USB instead of WiFi for lower latency and more stable performance.
+
+**ADB Support:**
+
+ADB (Android Debug Bridge) is automatically available for wired VR support. Modern systemd (258+) handles USB device access automatically, so no special group membership is needed.
 
 ### 3. WayVR Desktop Overlay (Auto-starts)
 
@@ -802,6 +825,67 @@ ls -la $XDG_RUNTIME_DIR/monado_comp_ipc
 ```
 
 Should be created when VR app starts.
+
+### Wired VR Connection Issues
+
+**ADB Device Not Found:**
+
+Check if the Quest is detected:
+
+```bash
+adb devices
+```
+
+**Expected output:**
+```
+List of devices attached
+1234567890ABCDEF    device
+```
+
+**If no devices shown:**
+
+1. **Enable USB debugging** on Quest:
+   - Settings → System → Developer → Enable USB debugging
+2. **Check USB cable** - Some cables are charge-only, not data cables
+3. **Try different USB port** - Use USB 3.0/3.1 ports for best performance
+4. **Restart ADB server**:
+   ```bash
+   adb kill-server
+   adb start-server
+   ```
+
+**If device shows "unauthorized":**
+
+1. Put on the Quest headset
+2. Look for the USB debugging authorization prompt
+3. Check "Always allow from this computer"
+4. Click "OK"
+
+**Performance Issues on Wired:**
+
+1. **Use USB 3.0 or higher** - USB 2.0 will bottleneck video streaming
+2. **Check cable quality** - Use official Oculus Link cable or equivalent
+3. **Verify USB mode**:
+   ```bash
+   adb shell getprop sys.usb.config
+   # Should show: mtp,adb or similar
+   ```
+
+**Permissions Issues:**
+
+Modern systemd (258+) automatically grants USB device access through uaccess rules. If you encounter permission issues:
+
+1. **Verify udev rules are loaded**:
+   ```bash
+   udevadm control --reload-rules
+   udevadm trigger
+   ```
+
+2. **Check device permissions**:
+   ```bash
+   ls -la /dev/bus/usb/*/  # Find your Quest device
+   # Should show your user has read/write access
+   ```
 
 ---
 
