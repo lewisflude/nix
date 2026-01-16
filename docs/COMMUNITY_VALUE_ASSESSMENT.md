@@ -11,8 +11,8 @@ Analysis of components in this Nix configuration that could benefit the wider Ni
 
 This configuration contains several high-value components that solve real problems in the Nix ecosystem:
 
-- **MCP Home Manager Module**: Declarative MCP server management for AI tools
-- **Signal Theme for Ironbar**: Professional atomic design system for status bars
+- **MCP Home Manager Module**: Declarative MCP server management for AI tools ✅ **EXTRACTED**
+- **Signal Design System**: OKLCH-based theming system with atomic design patterns ✅ **EXTRACTED**
 - **ProtonVPN Port Forwarding**: Automated NAT-PMP integration for VPN torrenting
 - **Cross-Platform Patterns**: NixOS + nix-darwin configuration sharing
 - **WiVRn VR Configuration**: Wireless VR streaming setup
@@ -142,13 +142,20 @@ Usage:
 
 ---
 
-### 2. Signal Theme for Ironbar ⭐⭐⭐
+### 2. Signal Design System ⭐⭐⭐
 
-**Location**: `modules/shared/features/theming/applications/desktop/ironbar-home/`
+**Location**: `modules/shared/features/theming/` (legacy), now extracted
+
+**Status**: ✅ **EXTRACTION COMPLETE** (2026-01-16)
+- Palette Repository: `github:lewisflude/signal-palette`
+- Nix Integration: `github:lewisflude/signal-nix`
+- Architecture: Hybrid 2-repo approach (platform-agnostic colors + Nix modules)
+- Current Phase: Production-ready, integrated into personal config
+- Next Steps: Community documentation, example configurations, CI/CD
 
 #### What It Provides
 
-A complete **atomic design system** implementation for ironbar status bar - the only known formal design system for Wayland bars.
+A complete **scientific, OKLCH-based design system** with atomic design patterns - the only known formal design system for NixOS/Home Manager theming.
 
 #### Architecture
 
@@ -353,19 +360,89 @@ niriSync = {
 - Well-structured and maintainable
 - Follows industry best practices
 
+#### Extraction Architecture
+
+**✅ CHOSEN: Hybrid 2-Repo Architecture** (COMPLETED)
+
+The Signal Design System was extracted into two complementary repositories:
+
+**1. `signal-palette` - Platform-Agnostic Color Definitions**
+
+```nix
+{
+  inputs.signal-palette.url = "github:lewisflude/signal-palette";
+  
+  # Access colors directly
+  colors = signal-palette.palette.tonal.dark."base-L100";
+}
+```
+
+Features:
+- Single source of truth: `palette.json` with OKLCH values
+- Multiple export formats: Nix, CSS, JS, TypeScript, SCSS, YAML
+- Node.js generation script for automatic exports
+- Zero dependencies for Nix consumption
+- MIT licensed for maximum reusability
+
+**2. `signal-nix` - Nix/Home Manager Integration**
+
+```nix
+{
+  inputs.signal-nix.url = "github:lewisflude/signal-nix";
+  
+  imports = [ inputs.signal-nix.homeManagerModules.default ];
+  
+  theming.signal = {
+    enable = true;
+    mode = "dark";  # or "light", "auto"
+    
+    # Per-application enables
+    ironbar.enable = true;
+    gtk.enable = true;
+    helix.enable = true;
+    ghostty.enable = true;
+    
+    # Brand governance for decorative colors
+    brandGovernance = {
+      policy = "functional-override";
+      decorativeBrandColors = { /* ... */ };
+    };
+  };
+}
+```
+
+Features:
+- Home Manager modules for 10+ applications
+- Library functions for color manipulation
+- Brand governance system for custom colors
+- Simplified accessibility checks
+- Modular architecture (per-app modules)
+- Follows Catppuccin pattern
+
+**Applications Currently Supported**:
+- **Desktop**: Ironbar (atomic design system), GTK, Fuzzel
+- **Editors**: Helix
+- **Terminals**: Ghostty, Zellij
+- **CLI Tools**: bat, fzf, lazygit, yazi
+
 #### Target Audience
 
-- Wayland/Niri users
-- r/unixporn community
+- NixOS/Home Manager users wanting consistent theming
 - Design-conscious Linux users
-- Ironbar users
-- Anyone wanting professional theming examples
+- Wayland/Niri users
+- Ironbar users (atomic design system showcase)
+- Anyone wanting OKLCH-based, accessible themes
+- r/unixporn community
 
-#### Extraction Paths
+#### Why Two Repos?
 
-**Option 1: Standalone Theme Repository** (Recommended)
+**Separation of Concerns**:
+- Colors are platform-agnostic (can be used outside Nix)
+- Nix modules depend on colors, not vice versa
+- Easier to version independently
+- Non-Nix users can consume `signal-palette`
 
-Package as "ironbar-signal-theme" flake:
+**Package as "ironbar-signal-theme" flake (SUPERSEDED BY EXTRACTED REPOS)**:
 
 ```nix
 {
@@ -415,14 +492,35 @@ Write comprehensive guide covering:
   - Wayland/Niri Discord/Matrix
   - Hacker News
 
-#### Extraction Difficulty
+#### Extraction Implementation
 
-**Medium** - Currently integrated with user's Nix structure. Needs:
-- Generalization for reusability
-- Documentation of design decisions
-- Example configurations
-- Screenshots/demos
-- Adaptation guide
+**✅ COMPLETED** - Successfully extracted with the following steps:
+
+1. **Phase 1: Palette Extraction**
+   - Created `signal-palette` repository
+   - Converted Nix colors to `palette.json` (OKLCH with hex/RGB)
+   - Built Node.js generation script for multi-format exports
+   - Generated Nix, CSS, JS, TypeScript, SCSS, YAML exports
+   - Comprehensive documentation and philosophy docs
+
+2. **Phase 2: Nix Module Migration**
+   - Created `signal-nix` repository with flake structure
+   - Extracted and adapted all application modules
+   - Built common module interface with options
+   - Created library functions (color manipulation, brand governance)
+   - Added example configurations (basic, full-desktop, custom-brand)
+
+3. **Phase 3: Integration**
+   - Updated personal config to use extracted flakes
+   - Created integration bridge module
+   - Tested all applications (Ironbar, GTK, Helix, terminals, CLI tools)
+   - Verified color consistency across all apps
+
+**Lessons Learned**:
+- Two-repo architecture adds complexity but provides flexibility
+- OKLCH color space requires hex/RGB for broad compatibility
+- Per-app modules enable selective adoption
+- Brand governance is crucial for real-world use
 
 #### Additional Notes
 
@@ -1111,11 +1209,14 @@ Private tracker users, seedbox operators.
 
 ### Short-Term (High Impact, Medium Effort)
 
-2. **Signal Theme for Ironbar**
-   - Showcase piece
-   - Unique in ecosystem
-   - Needs screenshots/demos
-   - **Action**: Create theme repository with documentation
+2. **Signal Design System** ✅ **COMPLETED**
+   - Extracted to `github:lewisflude/signal-palette` and `github:lewisflude/signal-nix`
+   - Needs: Screenshots, demo videos, community examples
+   - **Next Actions**: 
+     - Create showcase website with live demos
+     - Record video tutorials
+     - Share on r/unixporn, r/NixOS
+     - Submit Ironbar theme as official example
 
 3. **ProtonVPN Port Forwarding**
    - Solves real pain point
@@ -1253,9 +1354,9 @@ Private tracker users, seedbox operators.
 
 This Nix configuration contains several production-ready components that solve real problems in the ecosystem:
 
-**Tier 1A (Must Extract)**:
-- MCP Home Manager Module
-- Signal Theme for Ironbar
+**Tier 1A (Extracted)**:
+- MCP Home Manager Module ✅
+- Signal Design System ✅
 
 **Tier 1B (High Value)**:
 - ProtonVPN Port Forwarding
