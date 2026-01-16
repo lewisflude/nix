@@ -47,6 +47,14 @@ lib.mkIf (cfg.enable && cfg.wivrn.enable) {
     };
   };
 
+  # Fix: Remove --systemd flag that the current WiVRn version doesn't support
+  # The NixOS module adds this flag but wivrn-server doesn't recognize it
+  # We override the ExecStart to remove --systemd while keeping the config file
+  systemd.user.services.wivrn.serviceConfig.ExecStart = lib.mkForce [
+    "" # Clear the default ExecStart
+    "/run/wrappers/bin/wivrn-server -f ${pkgs.writeText "wivrn-config.json" (builtins.toJSON config.services.wivrn.config.json)}"
+  ];
+
   # System packages for WiVRn
   environment.systemPackages = [
     pkgs.wayvr # Desktop overlay for VR

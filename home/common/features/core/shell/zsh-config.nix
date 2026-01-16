@@ -54,6 +54,7 @@ in
 
     sessionVariables = {
       DIRSTACKSIZE = "20";
+      NH_SEARCH_CHANNEL = "nixpkgs-unstable";
     };
 
     history = {

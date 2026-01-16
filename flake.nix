@@ -60,7 +60,8 @@
       url = "https://flakehub.com/f/TaserudConsulting/jsonresume-nix/*.tar.gz";
     };
     nh = {
-      url = "https://flakehub.com/f/nix-community/nh/4.2.0-beta5.tar.gz";
+      url = "github:nix-community/nh";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";

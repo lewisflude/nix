@@ -1,4 +1,8 @@
-_: {
+{ config, ... }:
+let
+  constants = import ../../../../lib/constants.nix;
+in
+{
   programs.ssh = {
     enable = true;
     # Disable default config to avoid deprecation warning
@@ -47,6 +51,17 @@ _: {
         # This avoids passphrase prompts from the redundant file-based key.
         identitiesOnly = true;
         # No identityFile specified = only use agent-provided keys
+      };
+
+      # Internal hosts
+      "jupiter" = {
+        hostname = constants.hosts.jupiter.ipv4;
+        user = config.home.username;
+      };
+
+      "mercury" = {
+        hostname = constants.hosts.mercury.ipv4;
+        user = config.home.username;
       };
     };
   };

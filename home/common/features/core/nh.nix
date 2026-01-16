@@ -15,8 +15,8 @@ in
     # Integrated cleanup is more reliable than manual session variables
     clean = {
       enable = true;
-      dates = "weekly";  # Runs weekly via systemd timer (NixOS) or launchd (Darwin)
-      extraArgs = "--keep-since 4d --keep 3";  # Keep 4 days OR 3 most recent generations
+      dates = "weekly"; # Runs weekly via systemd timer (NixOS) or launchd (Darwin)
+      extraArgs = "--keep-since 4d --keep 3"; # Keep 4 days OR 3 most recent generations
     };
 
     flake = "${platformLib.configDir config.home.username}/nix";
