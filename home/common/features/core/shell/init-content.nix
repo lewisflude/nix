@@ -25,10 +25,7 @@ in
       export DIRENV_LOG_FORMAT=""
       export DIRENV_WARN_TIMEOUT=0
 
-      # Only load p10k instant prompt in interactive shells
-      if [[ -o interactive && -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
-        source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
-      fi
+      # Note: p10k instant prompt is now handled by the powerlevel10k module
     '')
 
     (lib.mkAfter ''
@@ -159,14 +156,8 @@ in
       # ════════════════════════════════════════════════════════════════
       # SECTION 7: Powerlevel10k (Prompt) - Load After Plugins
       # ════════════════════════════════════════════════════════════════
-      if [[ -o interactive ]]; then
-        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-        if [[ -f ${config.home.homeDirectory}/.p10k.zsh ]]; then
-          source ${config.home.homeDirectory}/.p10k.zsh
-        else
-          echo "Warning: ~/.p10k.zsh not found. Run 'home-manager switch' to create it."
-        fi
-      fi
+      # Note: Powerlevel10k is now configured via the dedicated Nix module
+      # See home/common/apps/powerlevel10k.nix for configuration
 
       # ════════════════════════════════════════════════════════════════
       # SECTION 8: Zoxide (Navigation) - Before Syntax Highlighting

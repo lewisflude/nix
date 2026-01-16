@@ -1,73 +1,16 @@
 #!/usr/bin/env bash
 # Sunshine prep script - unlocks screen, disables auto-lock, inhibits sleep, and prepares display
-# Updated: 2026-01-08 - Fixed fd command shadowing GNU find
 set -u
 set -o pipefail
 
-# Logging function
-log() {
-    echo "[sunshine-prep] $*" | systemd-cat -t sunshine-prep -p info
-}
+export SCRIPT_NAME="sunshine-prep"
 
-error() {
-    echo "[sunshine-prep] ERROR: $*" | systemd-cat -t sunshine-prep -p err
-}
+# Common functions are inlined by Nix build (see scripts/default.nix)
 
 log "Starting Sunshine stream preparation"
 
-# Detect the active graphical session user
-# Priority: loginctl > SUDO_USER > fallback
-SESSION_USER=""
-
-# Try loginctl first (most reliable for graphical sessions)
-if SESSION_USER=$(loginctl list-sessions --no-legend 2>/dev/null | \
-    awk '$4 == "seat0" && $3 != "" {print $3; exit}'); then
-    log "Detected user via loginctl: $SESSION_USER"
-elif [ -n "${SUDO_USER:-}" ]; then
-    SESSION_USER="$SUDO_USER"
-    log "Detected user via SUDO_USER: $SESSION_USER"
-else
-    error "Could not determine active graphical session user"
-    exit 1
-fi
-
-# Validate user exists
-if ! id "$SESSION_USER" >/dev/null 2>&1; then
-    error "User '$SESSION_USER' does not exist"
-    exit 1
-fi
-
-# Get user's runtime directory
-USER_ID=$(id -u "$SESSION_USER")
-export XDG_RUNTIME_DIR="/run/user/$USER_ID"
-
-if [ ! -d "$XDG_RUNTIME_DIR" ]; then
-    error "XDG_RUNTIME_DIR does not exist: $XDG_RUNTIME_DIR"
-    exit 1
-fi
-
-log "Using XDG_RUNTIME_DIR: $XDG_RUNTIME_DIR"
-
-# Find Niri socket
-NIRI_SOCKET=""
-if [ -d "$XDG_RUNTIME_DIR" ]; then
-    # Use explicit path to avoid fd shadowing find
-    NIRI_SOCKET=$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -name "niri.*.sock" -type s 2>/dev/null | head -n1)
-    if [ -n "$NIRI_SOCKET" ]; then
-        log "Found Niri socket: $NIRI_SOCKET"
-    else
-        log "Warning: Niri socket not found in $XDG_RUNTIME_DIR"
-    fi
-fi
-
-# Helper function to run commands as session user
-run_as_user() {
-    if [ -n "$NIRI_SOCKET" ]; then
-        sudo -u "$SESSION_USER" env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" NIRI_SOCKET="$NIRI_SOCKET" "$@"
-    else
-        sudo -u "$SESSION_USER" env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" "$@"
-    fi
-}
+# Initialize session
+detect_session_user || exit 1
 
 # Stop swayidle to prevent auto-lock during streaming
 log "Disabling auto-lock (stopping swayidle)"

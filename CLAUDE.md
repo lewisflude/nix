@@ -275,7 +275,7 @@ This configuration includes built-in MCP server support for AI coding tools (Cla
 
 ### Configuration
 
-MCP servers are configured in `home/common/modules/mcp.nix` and automatically deployed to:
+MCP servers are configured using the [mcp-home-manager](https://github.com/lewisflude/mcp-home-manager) flake module and automatically deployed to:
 
 - **Claude Code**: `~/.config/claude/claude_desktop_config.json` (Linux) or `~/Library/Application Support/Claude/` (macOS)
 - **Cursor**: `~/.cursor/mcp.json`
@@ -323,7 +323,7 @@ To enable servers that require API keys:
 
 4. **Rebuild system**: The secret will be available at `/run/secrets-for-users/MY_SECRET`
 
-See `docs/MCP_ARCHITECTURE.md` for detailed documentation.
+For detailed documentation, see the [mcp-home-manager repository](https://github.com/lewisflude/mcp-home-manager).
 
 ## Documentation
 

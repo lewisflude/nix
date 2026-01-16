@@ -5,32 +5,13 @@
 # to create visual harmony between windows and the bar.
 # See: modules/shared/features/theming/applications/desktop/ironbar-home/tokens.nix
 {
-  themeLib,
-  ironbarTokens,
+  lib,
+  cornerRadius,
+  floatingShadowColor,
+  screencastColors,
+  colors,
   ...
 }:
-let
-  # Generate theme to access raw colors
-  theme = themeLib.generateTheme "dark" { };
-  inherit (theme) colors;
-
-  # Synchronized values from Ironbar design tokens
-  # This ensures Niri windows use the same corner radius as Ironbar islands
-  inherit (ironbarTokens) niriSync;
-
-  # Convert integer to float for Niri config
-  cornerRadius = niriSync.windowRadius * 1.0;
-
-  # Screencast indicator colors - uses danger/urgent colors for visibility
-  screencastColors = {
-    active = colors."accent-danger".hex;
-    inactive = theme._internal.accent.Lc45-h040.hex; # Darker variant of danger for inactive state
-    shadow = theme.withAlpha theme._internal.accent.Lc45-h040 0.44; # Darker danger with transparency (~70/255)
-  };
-
-  # Floating window shadow - matches layout shadow color
-  floatingShadowColor = "${colors."surface-base".hex}aa";
-in
 {
   window-rules = [
     # ============================================================================

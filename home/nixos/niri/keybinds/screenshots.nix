@@ -5,107 +5,55 @@
   lib,
   ...
 }:
+let
+  cmd = import ../lib/shell-commands.nix { inherit pkgs lib; };
+in
 {
+  # Full screen - save and copy to clipboard
   "Print" = {
     allow-inhibiting = false;
-    action.spawn = [
-      "sh"
-      "-c"
-      ''
-        FILE="$HOME/Pictures/Screenshots/screenshot-$(date +%Y%m%d-%H%M%S).png"
-        grim -t png "$FILE" && wl-copy < "$FILE" && notify-send "Screenshot" "Saved and copied to clipboard" -i "$FILE"
-      ''
-    ];
+    action.spawn = cmd.screenshot.fullScreenCopy;
   };
 
+  # Area selection with satty annotation
   "Mod+Shift+Print" = {
     allow-inhibiting = false;
-    action.spawn = [
-      "sh"
-      "-c"
-      ''
-        GEOM=$(slurp) && if [ -n "$GEOM" ]; then
-          FILE="$HOME/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png"
-          grim -g "$GEOM" -t ppm - | satty --filename - --fullscreen --output-filename "$FILE"
-          notify-send "Screenshot" "Area saved" -i "$FILE"
-        fi
-      ''
-    ];
+    action.spawn = cmd.screenshot.areaSatty;
   };
 
+  # Area selection with satty annotation (alternative binding)
   "Shift+Print" = {
     allow-inhibiting = false;
-    action.spawn = [
-      "sh"
-      "-c"
-      ''
-        GEOM=$(slurp) && if [ -n "$GEOM" ]; then
-          FILE="$HOME/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png"
-          grim -g "$GEOM" -t ppm - | satty --filename - --fullscreen --output-filename "$FILE"
-          notify-send "Screenshot" "Area saved" -i "$FILE"
-        fi
-      ''
-    ];
+    action.spawn = cmd.screenshot.areaSatty;
   };
 
+  # Full screen with satty annotation
   "Ctrl+Print" = {
     allow-inhibiting = false;
-    action.spawn = [
-      "sh"
-      "-c"
-      ''
-        FILE="$HOME/Pictures/Screenshots/satty-$(date +%Y%m%d-%H%M%S).png"
-        grim -t ppm - | satty --filename - --fullscreen --output-filename "$FILE"
-        notify-send "Screenshot" "Screen saved" -i "$FILE"
-      ''
-    ];
+    action.spawn = cmd.screenshot.fullScreenSatty;
   };
 
+  # Area to clipboard only (no file save)
   "Alt+Print" = {
     allow-inhibiting = false;
-    action.spawn = [
-      "sh"
-      "-c"
-      ''
-        GEOM=$(slurp) && if [ -n "$GEOM" ]; then
-          grim -g "$GEOM" -t png | wl-copy && notify-send "Screenshot" "Area copied to clipboard"
-        fi
-      ''
-    ];
+    action.spawn = cmd.screenshot.areaClipboard;
   };
 
+  # Area - save and copy to clipboard
   "Mod+Ctrl+Shift+Print" = {
     allow-inhibiting = false;
-    action.spawn = [
-      "sh"
-      "-c"
-      ''
-        GEOM=$(slurp) && if [ -n "$GEOM" ]; then
-          FILE="$HOME/Pictures/Screenshots/screenshot-$(date +%Y%m%d-%H%M%S).png"
-          grim -g "$GEOM" -t png "$FILE" && wl-copy < "$FILE" && notify-send "Screenshot" "Area saved and copied to clipboard" -i "$FILE"
-        fi
-      ''
-    ];
+    action.spawn = cmd.screenshot.areaSaveAndCopy;
   };
 
   # Standard region screenshot (Windows/macOS muscle memory)
   "Mod+Shift+S" = {
     allow-inhibiting = false;
-    action.spawn = [
-      "sh"
-      "-c"
-      ''
-        FILE="$HOME/Pictures/Screenshots/region-$(date +%Y%m%d-%H%M%S).png"
-        grim -g "$(slurp)" - | tee "$FILE" | wl-copy && \
-        notify-send "Region Captured" "Saved to $FILE and Clipboard" -i "$FILE"
-      ''
-    ];
+    action.spawn = cmd.screenshot.regionCapture;
   };
 
-  "Mod+Shift+C" = {
-    action.spawn = [
-      (lib.getExe pkgs.hyprpicker)
-      "-a"
-    ];
-  };
+  # Color picker
+  "Mod+Shift+C".action.spawn = [
+    (lib.getExe pkgs.hyprpicker)
+    "-a"
+  ];
 }

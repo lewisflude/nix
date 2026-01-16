@@ -104,6 +104,10 @@
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    mcp-home-manager = {
+      url = "github:lewisflude/mcp-home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     audio-nix = {
       url = "github:polygon/audio.nix";
       inputs.nixpkgs.follows = "nixpkgs";

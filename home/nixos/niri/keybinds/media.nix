@@ -7,8 +7,17 @@
   ...
 }:
 let
+  inherit (lib) getExe;
+
   brightness = "${config.home.homeDirectory}/bin/brightness";
-  terminal = lib.getExe pkgs.ghostty;
+  terminal = getExe pkgs.ghostty;
+
+  # Helper: Launch terminal with command
+  termWith = cmd: [
+    terminal
+    "-e"
+    cmd
+  ];
 in
 {
   # Audio playback controls
@@ -91,10 +100,6 @@ in
   };
 
   # Audio mixer shortcuts
-  "Mod+Alt+V".action.spawn = [ (lib.getExe pkgs.pwvucontrol) ];
-  "Mod+Ctrl+V".action.spawn = [
-    terminal
-    "-e"
-    "pulsemixer"
-  ];
+  "Mod+Alt+V".action.spawn = [ (getExe pkgs.pwvucontrol) ];
+  "Mod+Ctrl+V".action.spawn = termWith "pulsemixer";
 }

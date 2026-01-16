@@ -13,18 +13,25 @@
     enable = true;
 
     # Display configuration for streaming
-    # DP-3: Primary 4K display
+    # DP-3: Primary 4K display (disabled during streaming)
     # HDMI-A-4: Dummy output for streaming (always enabled)
-    primaryDisplay = "DP-3";
-    streamingDisplay = "HDMI-A-4";
+    display = {
+      primary = "DP-3";
+      streaming = "HDMI-A-4";
+    };
 
-    # Lock screen when streaming ends for security
-    lockOnStreamEnd = true;
+    # Behavior settings
+    behavior = {
+      lockOnStreamEnd = true; # Lock screen when streaming ends for security
+      autoFocusSteam = true; # Focus Steam window after launch
+    };
 
-    # Audio configuration: Games route to Sunshine's virtual sink (sink-sunshine-stereo)
+    # Audio configuration
+    # Games route to Sunshine's virtual sink (sink-sunshine-stereo)
     # Sunshine captures from its own virtual sink and streams to client
-    # No physical audioSink needed - Sunshine handles audio capture internally
-    audioSink = null;
+    audio = {
+      sink = null; # Use default sink
+    };
   };
 
   # Enable CUDA support for NVENC hardware encoding (RTX 4090)

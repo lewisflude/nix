@@ -26,13 +26,8 @@
     ];
   };
 
-  # Declaratively manage p10k configuration
-  # This file must exist for p10k to work - if it doesn't, p10k will show the wizard
-  home.file.".p10k.zsh" = {
-    source = ../../../lib/p10k.zsh;
-    # Ensure the file is readable and executable
-    executable = false;
-  };
+  # Note: p10k configuration is now managed by the powerlevel10k Nix module
+  # See home/common/apps/powerlevel10k.nix
 
   home.file.".config/direnv/lib/layout_zellij.sh".text = ''
     layout_zellij() {

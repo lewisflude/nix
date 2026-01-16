@@ -3,64 +3,27 @@
 set -u
 set -o pipefail
 
-# Logging function
+export SCRIPT_NAME="sunshine-steam-launcher"
+
+# Override log/error to also echo to stdout for immediate feedback
+# (common.sh functions are inlined by Nix derivation, but we want stdout too)
+_common_log="$(declare -f log)"
+_common_error="$(declare -f error)"
+
 log() {
-  echo "[sunshine-steam-launcher] $*" | systemd-cat -t sunshine-steam-launcher -p info
-  echo "[sunshine-steam-launcher] $*"
+    local script_name="${SCRIPT_NAME:-sunshine}"
+    echo "[$script_name] $*" | systemd-cat -t "$script_name" -p info
+    echo "[$script_name] $*"
 }
 
 error() {
-  echo "[sunshine-steam-launcher] ERROR: $*" | systemd-cat -t sunshine-steam-launcher -p err
-  echo "[sunshine-steam-launcher] ERROR: $*"
+    local script_name="${SCRIPT_NAME:-sunshine}"
+    echo "[$script_name] ERROR: $*" | systemd-cat -t "$script_name" -p err
+    echo "[$script_name] ERROR: $*"
 }
 
-# Detect the active graphical session user
-SESSION_USER=""
-if SESSION_USER=$(loginctl list-sessions --no-legend 2>/dev/null | \
-    awk '$4 == "seat0" && $3 != "" {print $3; exit}'); then
-    log "Detected user via loginctl: $SESSION_USER"
-elif [ -n "${SUDO_USER:-}" ]; then
-    SESSION_USER="$SUDO_USER"
-    log "Detected user via SUDO_USER: $SESSION_USER"
-elif [ -n "${USER:-}" ]; then
-    SESSION_USER="$USER"
-    log "Using current USER: $SESSION_USER"
-else
-    error "Could not determine active graphical session user"
-    exit 1
-fi
-
-# Get user's runtime directory
-USER_ID=$(id -u "$SESSION_USER")
-export XDG_RUNTIME_DIR="/run/user/$USER_ID"
-
-if [ ! -d "$XDG_RUNTIME_DIR" ]; then
-    error "XDG_RUNTIME_DIR does not exist: $XDG_RUNTIME_DIR"
-    exit 1
-fi
-
-log "Using XDG_RUNTIME_DIR: $XDG_RUNTIME_DIR"
-
-# Find Niri socket
-NIRI_SOCKET=""
-if [ -d "$XDG_RUNTIME_DIR" ]; then
-    NIRI_SOCKET=$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -name "niri.*.sock" -type s 2>/dev/null | head -n1)
-    if [ -n "$NIRI_SOCKET" ]; then
-        export NIRI_SOCKET
-        log "Found Niri socket: $NIRI_SOCKET"
-    else
-        error "Niri socket not found in $XDG_RUNTIME_DIR"
-    fi
-fi
-
-# Helper function to run commands as session user
-run_as_user() {
-    if [ -n "$NIRI_SOCKET" ]; then
-        sudo -u "$SESSION_USER" env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" NIRI_SOCKET="$NIRI_SOCKET" "$@"
-    else
-        sudo -u "$SESSION_USER" env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" "$@"
-    fi
-}
+# Initialize session (detect_session_user and run_as_user are from common.sh, inlined by Nix)
+detect_session_user || exit 1
 
 # Determine launch mode based on arguments
 LAUNCH_BIG_PICTURE=0

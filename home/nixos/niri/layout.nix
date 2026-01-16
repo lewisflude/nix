@@ -5,24 +5,13 @@
 # See: modules/shared/features/theming/applications/desktop/ironbar-home/tokens.nix
 {
   lib,
-  themeLib,
   themeConstants,
-  ironbarTokens,
+  niriSync,
+  shadowColor,
+  inactiveShadowColor,
+  colors,
   ...
 }:
-let
-  # Generate theme to access raw colors
-  theme = themeLib.generateTheme "dark" { };
-  inherit (theme) colors;
-
-  # Synchronized values from Ironbar design tokens
-  # This ensures Niri windows use the same gaps and radii as Ironbar islands
-  inherit (ironbarTokens) niriSync;
-
-  # Shadow colors with different opacity levels
-  shadowColor = lib.mkDefault "${colors."surface-base".hex}aa"; # 66% opacity for active
-  inactiveShadowColor = "${colors."surface-base".hex}66"; # 40% opacity for inactive
-in
 {
   layout = {
     # Window spacing - synchronized with Ironbar bar margin

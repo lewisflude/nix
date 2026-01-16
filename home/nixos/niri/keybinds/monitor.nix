@@ -2,8 +2,12 @@
 # Multi-monitor navigation and column movement
 {
   pkgs,
+  lib,
   ...
 }:
+let
+  cmd = import ../lib/shell-commands.nix { inherit pkgs lib; };
+in
 {
   # Monitor focus
   "Mod+Shift+Left".action.focus-monitor-left = { };
@@ -26,14 +30,5 @@
   "Mod+Shift+Ctrl+L".action.move-column-to-monitor-right = { };
 
   # Display output info
-  "Mod+Alt+O" = {
-    action.spawn = [
-      "sh"
-      "-c"
-      ''
-        OUTPUTS=$(niri msg outputs --json | ${pkgs.jq}/bin/jq -r '.[] | "\(.name): \(.mode.width)x\(.mode.height) @ \(.mode.refresh)Hz (scale: \(.scale))"')
-        notify-send "Outputs" "$OUTPUTS" -t 5000
-      ''
-    ];
-  };
+  "Mod+Alt+O".action.spawn = cmd.monitor.showOutputInfo;
 }

@@ -2,16 +2,36 @@
   lib,
   pkgs,
   cfg,
+  constants,
   ...
 }:
 let
-  # Helper to create shell application from script file
-  mkScriptApp =
-    name: scriptPath: runtimeInputs:
-    pkgs.writeShellApplication {
-      inherit name runtimeInputs;
-      text = builtins.readFile scriptPath;
-    };
+  # Common runtime inputs for all scripts
+  commonRuntimeInputs = [
+    pkgs.coreutils
+    pkgs.systemd
+    pkgs.util-linux
+    pkgs.findutils
+  ];
+
+  # Niri-specific inputs for display management
+  niriRuntimeInputs = [
+    pkgs.niri
+    pkgs.jq
+  ];
+
+  # Build environment variables from config
+  mkScriptEnv = lib.concatStringsSep "\n" (
+    lib.optional (cfg.display.streaming != null) "export STREAMING_DISPLAY=\"${cfg.display.streaming}\""
+    ++ lib.optional (cfg.display.primary != null) "export PRIMARY_DISPLAY=\"${cfg.display.primary}\""
+    ++ [
+      # Export timing constants as JSON for scripts to parse
+      "export SUNSHINE_CONSTANTS='${builtins.toJSON constants.timing}'"
+    ]
+  );
+
+  # Inline common functions (more reliable than sourcing with writeShellApplication)
+  commonFunctions = builtins.readFile ./common.sh;
 
   # Script paths
   steamLauncherScript = ./steam-launcher.sh;
@@ -19,60 +39,31 @@ let
   cleanupScript = ./cleanup.sh;
 in
 {
-  # Steam launcher script
-  sunshine-steam-launcher = mkScriptApp "sunshine-steam-launcher" steamLauncherScript [
-    pkgs.steam
-    pkgs.niri
-    pkgs.jq
-    pkgs.coreutils
-    pkgs.procps
-    pkgs.systemd
-    pkgs.findutils
-    pkgs.util-linux
-  ];
+  # Steam launcher script with window focusing
+  sunshine-steam-launcher = pkgs.writeShellApplication {
+    name = "sunshine-steam-launcher";
+    runtimeInputs = commonRuntimeInputs ++ niriRuntimeInputs ++ [ pkgs.steam ];
+    text = commonFunctions + "\n" + builtins.readFile steamLauncherScript;
+  };
 
   # Prep script with environment variable substitution
   sunshine-prep = pkgs.writeShellApplication {
     name = "sunshine-prep";
-    runtimeInputs = [
-      pkgs.niri
-      pkgs.jq
-      pkgs.systemd
-      pkgs.coreutils
-      pkgs.util-linux
-      pkgs.findutils
-    ];
-    text = ''
-      ${lib.optionalString (cfg.streamingDisplay != null) ''
-        export STREAMING_DISPLAY="${cfg.streamingDisplay}"
-      ''}
-      ${lib.optionalString (cfg.primaryDisplay != null) ''
-        export PRIMARY_DISPLAY="${cfg.primaryDisplay}"
-      ''}
-      ${builtins.readFile prepScript}
-    '';
+    runtimeInputs = commonRuntimeInputs ++ niriRuntimeInputs;
+    text = mkScriptEnv + "\n" + commonFunctions + "\n" + builtins.readFile prepScript;
   };
 
   # Cleanup script with environment variable substitution
   sunshine-cleanup = pkgs.writeShellApplication {
     name = "sunshine-cleanup";
-    runtimeInputs = [
-      pkgs.niri
-      pkgs.systemd
-      pkgs.coreutils
-      pkgs.swaylock-effects
-      pkgs.util-linux
-      pkgs.findutils
-    ];
-    text = ''
-      ${lib.optionalString (cfg.streamingDisplay != null) ''
-        export STREAMING_DISPLAY="${cfg.streamingDisplay}"
-      ''}
-      ${lib.optionalString (cfg.primaryDisplay != null) ''
-        export PRIMARY_DISPLAY="${cfg.primaryDisplay}"
-      ''}
-      export LOCK_ON_STREAM_END="${lib.boolToString cfg.lockOnStreamEnd}"
-      ${builtins.readFile cleanupScript}
-    '';
+    runtimeInputs = commonRuntimeInputs ++ niriRuntimeInputs ++ [ pkgs.swaylock-effects ];
+    text =
+      mkScriptEnv
+      + "\nexport LOCK_ON_STREAM_END=\""
+      + lib.boolToString cfg.behavior.lockOnStreamEnd
+      + "\"\n"
+      + commonFunctions
+      + "\n"
+      + builtins.readFile cleanupScript;
   };
 }
