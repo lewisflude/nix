@@ -144,6 +144,9 @@
     jupiter = {
       ipv4 = "192.168.10.210";
     };
+    mercury = {
+      ipv4 = "192.168.10.220";
+    };
   };
 
   # Network ranges and constants

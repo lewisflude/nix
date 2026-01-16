@@ -11,7 +11,7 @@
       # Use Nix-provided SSL certificates
       NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
       EDITOR = "hx";
-      # NH_FLAKE is set in home/common/nh.nix
+      # NH_FLAKE and NH_SEARCH_CHANNEL are set in home/common/features/core/nh.nix
 
       # Direnv performance optimizations
       # Suppress verbose output (already set, kept for clarity)
