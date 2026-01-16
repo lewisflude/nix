@@ -1,10 +1,12 @@
 # Home-Manager Flatpak Integration
 # Ensures flatpak desktop entries are visible in application launchers
-{ lib, ... }:
+# Per nix-flatpak documentation: https://github.com/gmodena/nix-flatpak/issues/31
+{ ... }:
 {
-  # Add flatpak exports to XDG_DATA_DIRS so desktop entries are visible in launchers (wofi, rofi, etc.)
-  # Use mkAfter to append to the existing XDG_DATA_DIRS set by home-manager
-  home.sessionVariables = {
-    XDG_DATA_DIRS = lib.mkAfter "$HOME/.local/share/flatpak/exports/share\${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}";
-  };
+  # Add flatpak exports to XDG_DATA_DIRS so desktop entries are visible in launchers
+  # This is the proper Home Manager way to extend XDG_DATA_DIRS
+  xdg.systemDirs.data = [
+    "/var/lib/flatpak/exports/share" # System-wide flatpaks
+    "$HOME/.local/share/flatpak/exports/share" # User flatpaks
+  ];
 }

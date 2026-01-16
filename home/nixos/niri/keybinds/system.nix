@@ -6,6 +6,7 @@
   ...
 }:
 let
+  cmd = import ../lib/shell-commands.nix { inherit pkgs lib; };
   screenLocker = lib.getExe pkgs.swaylock-effects;
 in
 {
@@ -22,13 +23,7 @@ in
   ];
 
   "Mod+Shift+P".action.power-off-monitors = { };
-  "Mod+Shift+D" = {
-    action.spawn = [
-      "sh"
-      "-c"
-      "niri msg action power-off-monitors && sleep 2 && niri msg action power-on-monitors"
-    ];
-  };
+  "Mod+Shift+D".action.spawn = cmd.system.toggleDisplays;
 
   "Mod+Shift+E".action.quit = { };
   "Ctrl+Alt+Delete".action.quit = { };
@@ -40,23 +35,7 @@ in
     "reload-config"
   ];
 
-  "Mod+X" = {
-    action.spawn = [
-      "sh"
-      "-c"
-      ''
-        OPTIONS="Logout\nSuspend\nHibernate\nReboot\nShutdown"
-        CHOICE=$(echo -e "$OPTIONS" | fuzzel --dmenu --prompt 'Power:')
-        case "$CHOICE" in
-          Logout) niri msg action quit ;;
-          Suspend) systemctl suspend ;;
-          Hibernate) systemctl hibernate ;;
-          Reboot) systemctl reboot ;;
-          Shutdown) systemctl poweroff ;;
-        esac
-      ''
-    ];
-  };
+  "Mod+X".action.spawn = cmd.system.powerMenu;
 
   "Mod+Alt+S" = {
     action.spawn = [

@@ -8,6 +8,7 @@ let
   mac-app-util = inputs.mac-app-util or null;
   inherit (inputs) nix-homebrew;
   inherit (inputs) sops-nix;
+  mcp-home-manager = inputs.mcp-home-manager or null;
 
   inherit (inputs) niri;
   inherit (inputs) ironbar;
@@ -99,6 +100,7 @@ let
       };
       sharedModules =
         optionalModule (sops-nix != null) sops-nix.homeManagerModules.sops
+        ++ optionalModule (mcp-home-manager != null) mcp-home-manager.homeManagerModules.default
         ++ optionalModule (
           ironbar != null && ironbar ? homeManagerModules
         ) ironbar.homeManagerModules.default

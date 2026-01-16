@@ -3,52 +3,14 @@
 set -u
 set -o pipefail
 
-log() {
-    echo "[sunshine-cleanup] $*" | systemd-cat -t sunshine-cleanup -p info
-}
+export SCRIPT_NAME="sunshine-cleanup"
 
-error() {
-    echo "[sunshine-cleanup] ERROR: $*" | systemd-cat -t sunshine-cleanup -p err
-}
+# Common functions are inlined by Nix build (see scripts/default.nix)
 
 log "Starting Sunshine stream cleanup"
 
-# Detect session user (same logic as prep script)
-SESSION_USER=""
-
-if SESSION_USER=$(loginctl list-sessions --no-legend 2>/dev/null | \
-    awk '$4 == "seat0" && $3 != "" {print $3; exit}'); then
-    log "Detected user via loginctl: $SESSION_USER"
-elif [ -n "${SUDO_USER:-}" ]; then
-    SESSION_USER="$SUDO_USER"
-    log "Detected user via SUDO_USER: $SESSION_USER"
-else
-    error "Could not determine active graphical session user"
-    exit 1
-fi
-
-USER_ID=$(id -u "$SESSION_USER")
-export XDG_RUNTIME_DIR="/run/user/$USER_ID"
-
-# Find Niri socket
-NIRI_SOCKET=""
-if [ -d "$XDG_RUNTIME_DIR" ]; then
-    # Use explicit path to avoid fd shadowing find
-    NIRI_SOCKET=$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -name "niri.*.sock" -type s 2>/dev/null | head -n1)
-    if [ -n "$NIRI_SOCKET" ]; then
-        log "Found Niri socket: $NIRI_SOCKET"
-    else
-        log "Warning: Niri socket not found in $XDG_RUNTIME_DIR"
-    fi
-fi
-
-run_as_user() {
-    if [ -n "$NIRI_SOCKET" ]; then
-        sudo -u "$SESSION_USER" env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" NIRI_SOCKET="$NIRI_SOCKET" "$@"
-    else
-        sudo -u "$SESSION_USER" env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" "$@"
-    fi
-}
+# Initialize session
+detect_session_user || exit 1
 
 # Stop the systemd-inhibit process
 if [ -f "$XDG_RUNTIME_DIR/sunshine-inhibit.pid" ]; then

@@ -1,5 +1,15 @@
 # MCP Architecture Documentation
 
+> **⚠️ DEPRECATED**: This documentation describes the old custom MCP module implementation.
+>
+> This configuration now uses the external [mcp-home-manager](https://github.com/lewisflude/mcp-home-manager) module.
+>
+> For current documentation, see the mcp-home-manager repository.
+>
+> This file is kept for historical reference only.
+
+---
+
 Enterprise-Grade Model Context Protocol Configuration
 
 This document describes the comprehensive, production-ready MCP (Model Context Protocol) architecture implemented across this Nix configuration.

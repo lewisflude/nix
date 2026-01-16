@@ -19,6 +19,7 @@
     ../apps/core-tooling.nix
     ../apps/gemini-cli.nix
     ../apps/claude-code.nix
+    ../apps/powerlevel10k.nix
 
     ../apps/packages.nix
 
