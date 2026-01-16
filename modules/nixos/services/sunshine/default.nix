@@ -153,7 +153,10 @@ in
 
       settings = {
         # Monitor configuration
-        output_name = mkIf (cfg.display.streaming != null) "1";
+        # When display management is enabled, prep-cmd disables the primary display,
+        # leaving only the streaming display active. Sunshine auto-detects it.
+        # We don't set output_name here because it requires numeric indices,
+        # and the index changes when displays are enabled/disabled.
 
         # Audio configuration - optimized for low-latency streaming
         audio_sink = mkIf (cfg.audio.sink != null) cfg.audio.sink;
