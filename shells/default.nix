@@ -18,7 +18,6 @@ let
   ];
   devShellsCommon = {
     # Project-specific shells
-    qmk = import ./projects/qmk.nix { inherit pkgs lib system; };
     nextjs = import ./projects/nextjs.nix { inherit pkgs lib system; };
     react-native = import ./projects/react-native.nix {
       inherit pkgs lib system;
@@ -91,6 +90,11 @@ let
       '';
     };
   };
+  # QMK requires gcc-arm-embedded which is not available on x86_64-darwin
+  devShellsQMK = lib.optionalAttrs (system != "x86_64-darwin") {
+    qmk = import ./projects/qmk.nix { inherit pkgs lib system; };
+  };
+
   devShellsLinuxOnly = lib.optionalAttrs platformLib.isLinux {
     vr = import ./projects/vr.nix { inherit pkgs lib; };
 
@@ -209,5 +213,5 @@ let
   };
 in
 {
-  devShells = devShellsCommon // devShellsLinuxOnly // { default = defaultShell; };
+  devShells = devShellsCommon // devShellsLinuxOnly // devShellsQMK // { default = defaultShell; };
 }

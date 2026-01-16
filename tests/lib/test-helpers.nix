@@ -1,6 +1,14 @@
 { pkgs }:
 let
-  mkTest = import "${pkgs.path}/nixos/tests/make-test-python.nix";
+  # Create a wrapper around nixos/tests/make-test-python.nix that provides pkgs
+  makeTest = import "${pkgs.path}/nixos/tests/make-test-python.nix";
+
+  mkTest =
+    testDef:
+    makeTest testDef {
+      inherit pkgs;
+      inherit (pkgs) system;
+    };
 
   mkTestMachine =
     hostFeatures:
