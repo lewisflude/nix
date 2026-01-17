@@ -22,8 +22,8 @@ in
 
   gtk = lib.mkIf platformLib.isLinux {
     enable = true;
-    # GTK theme now handled by signal flake
-    # Override signal flake's GTK defaults with custom settings
+    # GTK theme now handled by signal-nix
+    # Override signal-nix's GTK defaults with custom settings
     iconTheme = lib.mkForce {
       name = "Papirus-Dark";
       package = pkgs.papirus-icon-theme;
@@ -39,15 +39,9 @@ in
     };
   };
 
-  # Qt theming to match GTK Signal theme
-  qt = lib.mkIf platformLib.isLinux {
-    enable = true;
-    platformTheme.name = "adwaita"; # Use Adwaita platform theme to match GTK
-    style = {
-      name = "adwaita-dark"; # Match dark mode of Signal theme
-      package = pkgs.adwaita-qt;
-    };
-  };
+  # Qt theming handled by signal-nix (via autoEnable)
+  # Just enable Qt to activate the integration
+  qt.enable = lib.mkIf platformLib.isLinux true;
 
   fonts.fontconfig.enable = lib.mkIf platformLib.isLinux true;
 }

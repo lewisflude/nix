@@ -110,7 +110,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     signal = {
-      url = "path:/home/lewis/Code/signal-nix";
+      url = "github:lewisflude/signal-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     audio-nix = {

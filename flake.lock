@@ -1108,11 +1108,11 @@
         "xwayland-satellite-unstable": "xwayland-satellite-unstable"
       },
       "locked": {
-        "lastModified": 1768669983,
-        "narHash": "sha256-OGl180QZ1QIirJ7Cy9Tqrgn/XEglaKGBeb5pys/sS7Y=",
+        "lastModified": 1768684335,
+        "narHash": "sha256-YLjGGcSNE2lK+TUqDFEX6IBjPZNjLaoxAXji3mmZbvs=",
         "owner": "sodiboo",
         "repo": "niri-flake",
-        "rev": "b90da048a6ae94b49ff489bacac4a49206670c18",
+        "rev": "c133a45b02dba5fd229532067d6a22d5209436d6",
         "type": "github"
       },
       "original": {
@@ -1141,11 +1141,11 @@
     "niri-unstable": {
       "flake": false,
       "locked": {
-        "lastModified": 1768653140,
-        "narHash": "sha256-8/u6/KHghsTHb3zmw8hYbwRQIp7UgMyQyqn4zVFN1S0=",
+        "lastModified": 1768678265,
+        "narHash": "sha256-Ub8eed4DsfIDWyg30xEe+8bSxL/z5Af/gCjmvJ0V/Hs=",
         "owner": "YaLTeR",
         "repo": "niri",
-        "rev": "3ccb06f5644c4bcdf74ad2e4d388a13ac65207af",
+        "rev": "d7184a04b904e07113f4623610775ae78d32394c",
         "type": "github"
       },
       "original": {
@@ -1435,11 +1435,11 @@
     },
     "nixpkgs-stable": {
       "locked": {
-        "lastModified": 1768484090,
-        "narHash": "sha256-HBIfbB9MF9oqQTxs/W5440mzVaYDBWU9tuX95aZ8h64=",
+        "lastModified": 1768621446,
+        "narHash": "sha256-6YwHV1cjv6arXdF/PQc365h1j+Qje3Pydk501Rm4Q+4=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d4fa45dc2d4d32c10cb7c6b530a6b4b7d2429442",
+        "rev": "72ac591e737060deab2b86d6952babd1f896d7c5",
         "type": "github"
       },
       "original": {
@@ -1994,23 +1994,26 @@
         "signal-palette": "signal-palette"
       },
       "locked": {
-        "lastModified": 1768681736,
-        "narHash": "sha256-PfPUwPG/GG2j9r4wPsvWVxQqJMydBIWFZz8bYuGcflg=",
-        "path": "/home/lewis/Code/signal-nix",
-        "type": "path"
+        "lastModified": 1768686028,
+        "narHash": "sha256-umkOJQ3MqanMdsZ1/YIX+B2vMthNoMLANnC7/GlDaaA=",
+        "owner": "lewisflude",
+        "repo": "signal-nix",
+        "rev": "6fcbcddaf74f8a6359635a78646e937b04832007",
+        "type": "github"
       },
       "original": {
-        "path": "/home/lewis/Code/signal-nix",
-        "type": "path"
+        "owner": "lewisflude",
+        "repo": "signal-nix",
+        "type": "github"
       }
     },
     "signal-palette": {
       "locked": {
-        "lastModified": 1768577269,
-        "narHash": "sha256-rxpU87t6nK4fVOx9QP1YafBjrxEKFo3o0DEETh2Hoyk=",
+        "lastModified": 1768685232,
+        "narHash": "sha256-0sn0ugGm3Ae8sEZhtpL+gz8fo81D+2x6HH5wBdYpji8=",
         "owner": "lewisflude",
         "repo": "signal-palette",
-        "rev": "e566a406056d0475737e99a4d24bb84d2c7ef740",
+        "rev": "398cafbf15772892350a3cc822e285842e292388",
         "type": "github"
       },
       "original": {
