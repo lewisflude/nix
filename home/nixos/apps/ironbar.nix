@@ -29,6 +29,7 @@ in
 {
   programs.ironbar = {
     enable = true;
+    systemd = true;
 
     # Import Signal color palette and apply custom styling
     style = pkgs.writeText "ironbar-style.css" ''
