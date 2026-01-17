@@ -5,17 +5,6 @@
   ...
 }:
 let
-  # Signal theme configuration
-  signalThemeEnabled = config.theming.signal.enable or false;
-  signalThemeFamily = config.theming.signal.local.applications.zed.themes or null;
-  themesAvailable = signalThemeEnabled && signalThemeFamily != null;
-
-  themeMode =
-    let
-      mode = config.theming.signal.mode or "dark";
-    in
-    if mode == "auto" then "system" else mode;
-
   # Biome configuration helper
   mkBiomeConfig = tabSize: {
     tab_size = tabSize;
@@ -52,11 +41,6 @@ in
       "terraform"
       "toml"
     ];
-
-    # Install the Signal theme if available using the native option
-    themes = lib.mkIf themesAvailable {
-      "Signal" = signalThemeFamily;
-    };
 
     userSettings = {
       telemetry = {
@@ -103,13 +87,6 @@ in
 
       vertical_scroll_margin = 6;
       inlay_hints.enabled = true;
-
-      # Theme settings
-      theme = lib.mkIf themesAvailable {
-        mode = themeMode;
-        light = "Signal Light";
-        dark = "Signal Dark";
-      };
 
       # Language Server configurations
       lsp = {

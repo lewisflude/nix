@@ -39,55 +39,11 @@ in
       ++ optional cfg.niri "render";
     })
 
-    # Signal theme integration (configured at home-manager level)
-    (mkIf cfg.signalTheme.enable {
-      home-manager.users.${config.host.username} = {
-        theming.signal = {
-          enable = true;
-          inherit (cfg.signalTheme) mode;
-
-          # Signal flake applications
-          gtk.enable = lib.mkDefault isLinux;
-          ironbar.enable = false; # Using local ironbar module instead
-          fuzzel.enable = false; # Using local fuzzel module instead
-
-          editors = {
-            helix.enable = true;
-          };
-
-          terminals = {
-            ghostty.enable = true;
-          };
-
-          cli = {
-            bat.enable = true;
-            fzf.enable = true;
-            lazygit.enable = true;
-            yazi.enable = true;
-          };
-
-          # Local applications (not in signal flake)
-          local.applications = {
-            cursor.enable = true;
-            zed.enable = true;
-            satty.enable = lib.mkDefault isLinux;
-          };
-        };
-
-        # Enable local ironbar module
-        theming.ironbar.enable = lib.mkDefault isLinux;
-      };
-    })
-
     {
       assertions = [
         {
           assertion = cfg.niri -> !cfg.hyprland || isLinux;
           message = "Niri and Hyprland cannot both be enabled";
-        }
-        {
-          assertion = cfg.theming -> cfg.enable;
-          message = "Theming requires desktop feature to be enabled";
         }
         {
           assertion = cfg.signalTheme.enable -> cfg.enable;
