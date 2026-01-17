@@ -21,9 +21,9 @@
 
     # AI coding agent tools from llm-agents.nix
     # ccusage: Usage analysis tool for Claude Code sessions
-    inputs.llm-agents.packages.${pkgs.system}.ccusage
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.ccusage
     # coding-agent-search: TUI to search coding agent history
-    inputs.llm-agents.packages.${pkgs.system}.coding-agent-search
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.coding-agent-search
   ]
   # Linux-only packages
   ++ lib.optionals pkgs.stdenv.isLinux [
