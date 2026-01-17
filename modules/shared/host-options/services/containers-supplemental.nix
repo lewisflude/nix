@@ -49,7 +49,9 @@ in
         enable = true;
       };
       description = "Janitorr media cleanup automation configuration";
-      example = { enable = true; };
+      example = {
+        enable = true;
+      };
     };
 
     jellystat = {
@@ -99,7 +101,9 @@ in
         enable = false;
       };
       description = "Cleanuparr download queue cleanup automation configuration";
-      example = { enable = true; };
+      example = {
+        enable = true;
+      };
     };
 
     termix = {
