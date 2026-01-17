@@ -54,7 +54,7 @@ let
     let
       # Shared resources (eliminates fragile relative imports)
       constants = import ../lib/constants.nix;
-      # Note: palette and themeLib are now provided by Signal flake via _module.args
+      # Note: signalPalette, signalLib, and signalColors are provided by Signal flake via _module.args
     in
     inputs
     // hostConfig
@@ -66,7 +66,7 @@ let
       inherit (inputs) nix-colorizer;
       # Add shared resources
       inherit constants;
-      # Note: palette and themeLib provided by Signal's homeManagerModule
+      # Note: signalPalette, signalLib, signalColors provided by Signal's homeManagerModule
     }
     // lib.optionalAttrs includeUserFields {
       inherit (hostConfig) username useremail hostname;

@@ -22,8 +22,8 @@ let
 
   # Shared resources (eliminates fragile relative imports)
   constants = import ../lib/constants.nix;
-  # Note: palette and themeLib are now provided by Signal flake via _module.args
-  # as signalPalette and signalLib
+  # Note: signalPalette, signalLib, and signalColors are now provided by Signal flake via _module.args
+  # as exposed module arguments from the home-manager module
 
   commonModules = [
     ../modules/shared
@@ -130,7 +130,7 @@ in
           inherit (hostConfig) hostname;
           # Shared resources
           inherit constants;
-          # Note: palette and themeLib provided by Signal flake
+          # Note: signalPalette, signalLib, signalColors provided by Signal flake
         };
 
         # Module list follows flake-parts best practices:
@@ -215,7 +215,7 @@ in
         inherit (inputs) nix-colorizer;
         # Shared resources
         inherit constants;
-        # Note: palette and themeLib provided by Signal flake
+        # Note: signalPalette, signalLib, signalColors provided by Signal flake
       };
 
       # Module list follows flake-parts best practices:
