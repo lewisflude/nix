@@ -1,23 +1,8 @@
 {
   pkgs,
-  themeContext ? null,
-  themeLib,
   ...
 }:
 let
-  # Generate fallback theme using shared themeLib
-  fallbackTheme = themeLib.generateTheme "dark" { };
-
-  # Use Signal theme if available, otherwise use fallback
-  signalTheme =
-    if themeContext != null && themeContext ? theme && themeContext.theme != null then
-      themeContext.theme
-    else
-      fallbackTheme;
-  inherit (signalTheme) colors;
-
-  withAlpha = color: alpha: "${color}${alpha}";
-
   lockCommand = pkgs.writeShellScript "signal-lock-screen" ''
     exec ${pkgs.swaylock-effects}/bin/swaylock -f
   '';
@@ -95,47 +80,12 @@ in
     };
   };
 
-  # Configure swaylock-effects with Signal theme (OKLCH perceptual color system)
-  # Signal: Perception, engineered - scientifically designed for clarity and accessibility
+  # Note: swaylock theming removed - should come from signal-nix when swaylock support is added
+  # Using swaylock-effects defaults for now
   programs.swaylock = {
     enable = true;
     package = pkgs.swaylock-effects;
     settings = {
-      # === Signal Theme Colors ===
-      # Ring colors (state feedback with semantic meaning)
-      ring-color = colors."accent-focus".hexRaw; # Blue - Default/focus state
-      ring-ver-color = colors."accent-primary".hexRaw; # Green - Verifying (success)
-      ring-clear-color = colors."accent-info".hexRaw; # Cyan - Clearing input
-      ring-wrong-color = colors."accent-danger".hexRaw; # Red - Wrong password
-
-      # Line colors (separator between ring and inside)
-      line-color = "00000000"; # Transparent - clean aesthetic
-      line-ver-color = colors."accent-primary".hexRaw; # Green when verifying
-      line-clear-color = colors."accent-info".hexRaw; # Cyan when clearing
-      line-wrong-color = colors."accent-danger".hexRaw; # Red when wrong
-
-      # Inside colors (indicator background with alpha for depth)
-      inside-color = withAlpha colors."surface-base".hexRaw "dd"; # Base with transparency
-      inside-ver-color = withAlpha colors."surface-subtle".hexRaw "dd"; # Subtle variation when verifying
-      inside-clear-color = withAlpha colors."surface-base".hexRaw "bb"; # More transparent when clearing
-      inside-wrong-color = withAlpha colors."surface-emphasis".hexRaw "dd"; # Emphasized on error
-
-      # Separator (not visible, kept for completeness)
-      separator-color = "00000000"; # Transparent
-
-      # Text colors (high contrast for readability)
-      text-color = colors."text-primary".hexRaw; # Primary text (time/date)
-      text-ver-color = colors."accent-primary".hexRaw; # Green when verifying
-      text-clear-color = colors."accent-info".hexRaw; # Cyan when clearing
-      text-wrong-color = colors."accent-danger".hexRaw; # Red on wrong password
-
-      # Highlight colors (keyboard feedback)
-      key-hl-color = colors."accent-info".hexRaw; # Cyan for key highlight
-      bs-hl-color = colors."accent-danger".hexRaw; # Red for backspace
-
-      # Layout/Background colors
-      color = colors."surface-base".hexRaw; # Fallback background color
-
       # === Visual Effects (swaylock-effects exclusive) ===
       screenshots = true; # Use actual screenshot as background
       effect-blur = "7x5"; # Gaussian blur for privacy and aesthetics

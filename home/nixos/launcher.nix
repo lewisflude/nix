@@ -1,17 +1,8 @@
 {
   pkgs,
   lib,
-  themeContext ? null,
-  themeLib,
   ...
 }:
-let
-  # Generate fallback theme using shared themeLib
-  fallbackTheme = themeLib.generateTheme "dark" { };
-
-  # Use Signal theme if available, otherwise use fallback
-  inherit (themeContext.theme or fallbackTheme) colors;
-in
 {
   programs.fuzzel = {
     enable = true;
@@ -38,15 +29,8 @@ in
         width = lib.mkDefault 2;
         radius = lib.mkDefault 10;
       };
-      colors = {
-        background = colors."surface-base".hex + "ff";
-        text = colors."text-primary".hex + "ff";
-        match = colors."accent-special".hex + "ff";
-        selection = colors."surface-emphasis".hex + "ff";
-        selection-text = colors."text-primary".hex + "ff";
-        selection-match = colors."accent-special".hex + "ff";
-        border = colors."accent-focus".hex + "ff";
-      };
+      # Note: Colors removed - should come from signal-nix when Fuzzel support is added
+      # Using fuzzel defaults for now
       dmenu = {
         exit-immediately-if-empty = true;
       };

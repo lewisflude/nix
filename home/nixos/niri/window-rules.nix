@@ -1,15 +1,14 @@
 # Niri Window Rules Configuration
 # Organized by: Visual Hierarchy → Security → Performance → Usability → Workspace Assignment
 #
-# IMPORTANT: Corner radius is synchronized with Ironbar tokens
+# IMPORTANT: Corner radius is synchronized with Ironbar design tokens
 # to create visual harmony between windows and the bar.
-# See: modules/shared/features/theming/applications/desktop/ironbar-home/tokens.nix
+# Ironbar tokens are now provided by Signal flake
+#
+# Note: All color theming removed - should come from signal-nix when Niri support is added
 {
   lib,
   cornerRadius,
-  floatingShadowColor,
-  screencastColors,
-  colors,
   ...
 }:
 {
@@ -43,8 +42,7 @@
       opacity = 0.95;
     }
 
-    # Floating windows - enhanced aesthetics with rounded corners and shadows
-    # Corner radius synchronized with Ironbar islands
+    # Floating windows - corner radius only (shadow disabled until signal-nix provides colors)
     {
       matches = [
         { is-floating = true; }
@@ -56,48 +54,8 @@
         bottom-left = cornerRadius;
       };
       clip-to-geometry = true;
-      shadow = {
-        enable = true;
-        softness = 40;
-        spread = 5;
-        offset = {
-          x = 0;
-          y = 5;
-        };
-        color = floatingShadowColor;
-      };
     }
-
-    # Screencast indicator - visual feedback when window is being recorded
-    {
-      matches = [
-        { is-window-cast-target = true; }
-      ];
-      focus-ring = {
-        active = {
-          color = screencastColors.active;
-        };
-        inactive = {
-          color = screencastColors.inactive;
-        };
-      };
-      border = {
-        inactive = {
-          color = screencastColors.inactive;
-        };
-      };
-      shadow = {
-        color = screencastColors.shadow;
-      };
-      tab-indicator = {
-        active = {
-          color = screencastColors.active;
-        };
-        inactive = {
-          color = screencastColors.inactive;
-        };
-      };
-    }
+    # Note: Screencast indicator disabled until signal-nix provides colors
 
     # Disable shadows for notifications (SwayNC)
     # Fixes background "spilling out" beyond borders issue

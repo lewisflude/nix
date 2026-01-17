@@ -1,43 +1,34 @@
 # Unified theme imports for niri configuration
-# Consolidates theme constants and Ironbar token imports
-{ lib, themeLib }:
+# Note: Colors removed - should come from signal-nix when Niri support is added
+{
+  lib,
+}:
 let
-  themeConstants = import ../../theme-constants.nix {
-    inherit lib themeLib;
+  # Ironbar design tokens for Niri synchronization
+  # Hardcoded geometric values only (not colors)
+  ironbarTokens = {
+    niriSync = {
+      windowRadius = 12; # Border radius (px)
+      windowGap = 12; # Gap between windows, synced with bar.margin (px)
+    };
   };
 
-  # Import Ironbar design tokens for Niri synchronization
-  # This ensures Niri windows use the same gaps and radii as Ironbar islands
-  ironbarTokens =
-    import ../../../../modules/shared/features/theming/applications/desktop/ironbar-home/tokens.nix
-      { };
-
-  # Generate theme to access raw colors
-  theme = themeLib.generateTheme "dark" { };
-
-  # Extract niriSync from Ironbar tokens
+  # Extract niriSync for convenience
   inherit (ironbarTokens) niriSync;
 in
 {
-  inherit themeConstants ironbarTokens theme;
-  inherit (theme) colors;
-  inherit niriSync;
+  inherit ironbarTokens niriSync;
 
-  # Convenience helpers for common theme values
+  # Convenience helpers for geometric values only
   cornerRadius = niriSync.windowRadius * 1.0; # Convert to float for Niri config
   windowGap = niriSync.windowGap;
 
-  # Shadow colors with different opacity levels
-  shadowColor = lib.mkDefault "${theme.colors."surface-base".hex}aa"; # 66% opacity
-  inactiveShadowColor = "${theme.colors."surface-base".hex}66"; # 40% opacity
-
-  # Floating window shadow color
-  floatingShadowColor = "${theme.colors."surface-base".hex}aa";
-
-  # Screencast indicator colors
-  screencastColors = {
-    active = theme.colors."accent-danger".hex;
-    inactive = theme._internal.accent.Lc45-h040.hex; # Darker variant of danger
-    shadow = theme.withAlpha theme._internal.accent.Lc45-h040 0.44; # ~70/255 opacity
-  };
+  # Empty placeholders for features that were using colors
+  # These will be populated by signal-nix when support is added
+  colors = { };
+  shadowColor = null;
+  inactiveShadowColor = null;
+  floatingShadowColor = null;
+  screencastColors = null;
+  themeConstants = null;
 }

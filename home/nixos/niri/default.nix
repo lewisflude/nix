@@ -6,13 +6,12 @@
   lib,
   inputs,
   system,
-  themeLib,
   osConfig,
   ...
 }:
 let
   # Unified theme helper with all theme imports and conveniences
-  theme = import ./lib/theme.nix { inherit lib themeLib; };
+  theme = import ./lib/theme.nix { inherit lib; };
 
   # Use overlay packages to ensure mesa dependencies match system nixpkgs
   inherit (pkgs) niri-unstable;
@@ -25,20 +24,13 @@ let
   layout = import ./layout.nix {
     inherit lib;
     inherit (theme)
-      themeConstants
       niriSync
-      shadowColor
-      inactiveShadowColor
-      colors
       ;
   };
   window-rules = import ./window-rules.nix {
     inherit lib;
     inherit (theme)
       cornerRadius
-      floatingShadowColor
-      screencastColors
-      colors
       ;
   };
   animations = import ./animations.nix { };
@@ -85,9 +77,9 @@ in
       # Can still be shown with Mod+Shift+Slash
       hotkey-overlay.skip-at-startup = true;
 
-      # Overview settings for premium look
+      # Overview settings 
       overview = {
-        backdrop-color = theme.themeConstants.niri.colors.shadow;
+        # Note: backdrop-color disabled until signal-nix provides colors
         zoom = 0.5; # Balanced zoom level for good visibility
       };
 

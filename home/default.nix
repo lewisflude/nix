@@ -2,6 +2,7 @@
   username,
   system,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -29,4 +30,7 @@ in
     home-manager.enable = true;
     git.enable = true;
   };
+  
+  # tig doesn't have a home-manager module yet, install as package
+  home.packages = [ pkgs.tig ];
 }

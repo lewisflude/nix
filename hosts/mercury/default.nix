@@ -26,5 +26,12 @@
         enable = true;
       };
     };
+
+    desktop = {
+      signalTheme = {
+        enable = true;
+        mode = "dark";
+      };
+    };
   };
 }

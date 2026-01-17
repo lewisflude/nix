@@ -27,16 +27,14 @@ let
   # These eliminate fragile relative imports throughout the codebase
   constants = import ../lib/constants.nix;
 
-  # Theming library and palette
-  palette = import ../modules/shared/features/theming/palette.nix { };
-  themeLib = import ../modules/shared/features/theming/lib.nix {
-    inherit lib;
-    palette = import ../modules/shared/features/theming/palette.nix { };
-  };
+  # Theming library and palette - provided by Signal flake's homeManagerModule
+  # Signal's module exports palette and themeLib via _module.args
+  # Do not override them here - let Signal provide the colors
 in
 {
   # Module arguments available to all flake-parts modules
   # These can be referenced in any module using the same attribute names
+  # Note: palette and themeLib are provided by Signal's homeManagerModule
   _module.args = {
     inherit
       hosts
@@ -45,8 +43,6 @@ in
       outputBuilders
       functionsLib
       constants
-      palette
-      themeLib
       ;
   };
 }

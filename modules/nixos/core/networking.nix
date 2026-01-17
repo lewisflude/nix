@@ -38,7 +38,6 @@
     resolved = {
       enable = true;
       fallbackDns = [ ];
-      extraConfig = "DNSStubListener=yes";
     };
     avahi = {
       enable = true;

@@ -2,13 +2,8 @@
   username,
   useremail,
   pkgs,
-  themeLib,
   ...
 }:
-let
-  # Generate dark theme for git diff colors
-  theme = themeLib.generateTheme "dark" { };
-in
 {
   programs.git = {
     enable = true;
@@ -162,10 +157,9 @@ in
       # Styling
       features = "side-by-side line-numbers decorations";
 
-      # Color customization for added/removed lines
-      # Uses Signal theme: darker green for additions, darker red for deletions
-      plus-style = "syntax ${theme._internal.accent.Lc45-h130.hex}";
-      minus-style = "syntax ${theme._internal.accent.Lc45-h040.hex}";
+      # Note: Color customization removed - should come from signal-nix when git support is added
+      # plus-style = "syntax ...";
+      # minus-style = "syntax ...";
     };
   };
 }

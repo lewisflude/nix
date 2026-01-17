@@ -2,7 +2,7 @@
   imports = [
 
     ./features/desktop
-    ./features/theming
+    # Note: ./features/theming removed - all theming now from signal-nix
     ./features/security.nix
     ./features/gaming.nix
     ./features/vr
