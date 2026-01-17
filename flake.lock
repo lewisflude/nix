@@ -1994,8 +1994,8 @@
         "signal-palette": "signal-palette"
       },
       "locked": {
-        "lastModified": 1768681539,
-        "narHash": "sha256-uzVDycd0MvSj8gyiln+luMkQiFQyFtb4iCf1vadRgdk=",
+        "lastModified": 1768681736,
+        "narHash": "sha256-PfPUwPG/GG2j9r4wPsvWVxQqJMydBIWFZz8bYuGcflg=",
         "path": "/home/lewis/Code/signal-nix",
         "type": "path"
       },
