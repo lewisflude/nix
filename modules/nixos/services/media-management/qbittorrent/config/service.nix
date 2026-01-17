@@ -35,62 +35,67 @@ in
   };
 
   # Set umask for qBittorrent service to ensure group-writable files
-  systemd.services.qbittorrent.serviceConfig = mkMerge [
-    {
-      UMask = "0002";
-
-      # CPU Scheduling: Use "batch" policy for smoother network throughput
-      # Batch scheduling prevents qBittorrent from interrupting the networking stack
-      # Nice=5 gives slightly lower priority than system processes (Nice=0)
-      # but higher than background tasks (Nice=19)
-      CPUSchedulingPolicy = "batch";
-      Nice = 5;
-
-      # I/O Scheduling: Best-effort with priority 5 (middle priority)
-      # This prevents qBittorrent I/O from blocking Jellyfin streaming
-      # but still prioritizes it over background tasks
-      IOSchedulingClass = "best-effort";
-      IOSchedulingPriority = 5;
-
-      # Restart configuration for resilience to transient failures
-      # Restart on failure (e.g., when VPN namespace isn't ready yet)
-      Restart = "on-failure";
-      # Wait 10 seconds before retrying to give VPN time to establish
-      RestartSec = "10s";
+  systemd.services.qbittorrent = {
+    unitConfig = {
       # Limit restart attempts to prevent infinite loops
       StartLimitBurst = 5;
       StartLimitIntervalSec = "5min";
-    }
-    # Conditional ExecStartPre for SOPS credential injection
-    (mkIf (webUI != null && webUI.useSops) {
-      # Inject SOPS secrets into qBittorrent config at runtime
-      # This follows the best practice of never reading secrets into the Nix store
-      ExecStartPre = pkgs.writeShellScript "qbittorrent-inject-credentials" ''
-        set -euo pipefail
+    };
 
-        CONFIG_DIR="/var/lib/qbittorrent/.config/qBittorrent"
-        CONFIG_FILE="$CONFIG_DIR/qBittorrent.conf"
+    serviceConfig = mkMerge [
+      {
+        UMask = "0002";
 
-        # Wait for config file to be created by qBittorrent service
-        if [ ! -f "$CONFIG_FILE" ]; then
-          echo "Config file not found, will be created on first run"
-          exit 0
-        fi
+        # CPU Scheduling: Use "batch" policy for smoother network throughput
+        # Batch scheduling prevents qBittorrent from interrupting the networking stack
+        # Nice=5 gives slightly lower priority than system processes (Nice=0)
+        # but higher than background tasks (Nice=19)
+        CPUSchedulingPolicy = "batch";
+        Nice = 5;
 
-        # Read secrets from SOPS-managed files
-        USERNAME=$(${pkgs.coreutils}/bin/cat ${config.sops.secrets."qbittorrent/webui/username".path})
-        PASSWORD=$(${pkgs.coreutils}/bin/cat ${config.sops.secrets."qbittorrent/webui/password".path})
+        # I/O Scheduling: Best-effort with priority 5 (middle priority)
+        # This prevents qBittorrent I/O from blocking Jellyfin streaming
+        # but still prioritizes it over background tasks
+        IOSchedulingClass = "best-effort";
+        IOSchedulingPriority = 5;
 
-        # Use sed to update config file with actual secret values
-        ${pkgs.gnused}/bin/sed -i \
-          -e "s|^WebUI\\\\Username=.*|WebUI\\\\Username=$USERNAME|" \
-          -e "s|^WebUI\\\\Password_PBKDF2=.*|WebUI\\\\Password_PBKDF2=$PASSWORD|" \
-          "$CONFIG_FILE"
+        # Restart configuration for resilience to transient failures
+        # Restart on failure (e.g., when VPN namespace isn't ready yet)
+        Restart = "on-failure";
+        # Wait 10 seconds before retrying to give VPN time to establish
+        RestartSec = "10s";
+      }
+      # Conditional ExecStartPre for SOPS credential injection
+      (mkIf (webUI != null && webUI.useSops) {
+        # Inject SOPS secrets into qBittorrent config at runtime
+        # This follows the best practice of never reading secrets into the Nix store
+        ExecStartPre = pkgs.writeShellScript "qbittorrent-inject-credentials" ''
+          set -euo pipefail
 
-        echo "Injected SOPS credentials into qBittorrent config"
-      '';
-    })
-  ];
+          CONFIG_DIR="/var/lib/qbittorrent/.config/qBittorrent"
+          CONFIG_FILE="$CONFIG_DIR/qBittorrent.conf"
+
+          # Wait for config file to be created by qBittorrent service
+          if [ ! -f "$CONFIG_FILE" ]; then
+            echo "Config file not found, will be created on first run"
+            exit 0
+          fi
+
+          # Read secrets from SOPS-managed files
+          USERNAME=$(${pkgs.coreutils}/bin/cat ${config.sops.secrets."qbittorrent/webui/username".path})
+          PASSWORD=$(${pkgs.coreutils}/bin/cat ${config.sops.secrets."qbittorrent/webui/password".path})
+
+          # Use sed to update config file with actual secret values
+          ${pkgs.gnused}/bin/sed -i \
+            -e "s|^WebUI\\\\Username=.*|WebUI\\\\Username=$USERNAME|" \
+            -e "s|^WebUI\\\\Password_PBKDF2=.*|WebUI\\\\Password_PBKDF2=$PASSWORD|" \
+            "$CONFIG_FILE"
+
+          echo "Injected SOPS credentials into qBittorrent config"
+        '';
+      })
+    ];
+  };
 
   services.qbittorrent = {
     enable = true;
