@@ -7,10 +7,10 @@
   ...
 }:
 let
-  cfg = config.system.diskPerformance;
+  cfg = config.nixosConfig.diskPerformance;
 in
 {
-  options.system.diskPerformance = {
+  options.nixosConfig.diskPerformance = {
     enable = lib.mkEnableOption "disk performance optimizations";
 
     enableVMTuning = lib.mkOption {

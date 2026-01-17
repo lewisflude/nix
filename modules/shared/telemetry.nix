@@ -68,7 +68,7 @@ let
     {
       "version": "1.0.0",
       "timestamp": "$TIMESTAMP",
-      "hostname": "${config.networking.hostName or config.system.name or "unknown"}",
+      "hostname": "${config.networking.hostName or "unknown"}",
       "system": {
         "platform": "${hostSystem}",
         "nixVersion": "$(nix --version | awk '{print $3}')"
