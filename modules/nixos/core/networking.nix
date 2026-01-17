@@ -37,7 +37,7 @@
   services = {
     resolved = {
       enable = true;
-      fallbackDns = [ ];
+      settings.Resolve.FallbackDNS = [ ];
     };
     avahi = {
       enable = true;
