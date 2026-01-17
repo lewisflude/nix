@@ -1994,11 +1994,11 @@
         "signal-palette": "signal-palette"
       },
       "locked": {
-        "lastModified": 1768670607,
-        "narHash": "sha256-hRo6wJ51FBX/x5MAwjS3XhyvPCV9XkZQiu19xRa0NrE=",
+        "lastModified": 1768674721,
+        "narHash": "sha256-SCepMR8m50VcZAkdUgQG/qXiSufefS7wjMnpdpSHdgE=",
         "owner": "lewisflude",
         "repo": "signal-nix",
-        "rev": "430ebf147655ab3438d19a97e0d185e3794c720f",
+        "rev": "9d6a50d78bc14fcf898d1d266ff640f7825dfbc0",
         "type": "github"
       },
       "original": {
