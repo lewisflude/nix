@@ -1994,17 +1994,14 @@
         "signal-palette": "signal-palette"
       },
       "locked": {
-        "lastModified": 1768674721,
-        "narHash": "sha256-SCepMR8m50VcZAkdUgQG/qXiSufefS7wjMnpdpSHdgE=",
-        "owner": "lewisflude",
-        "repo": "signal-nix",
-        "rev": "9d6a50d78bc14fcf898d1d266ff640f7825dfbc0",
-        "type": "github"
+        "lastModified": 1768681539,
+        "narHash": "sha256-uzVDycd0MvSj8gyiln+luMkQiFQyFtb4iCf1vadRgdk=",
+        "path": "/home/lewis/Code/signal-nix",
+        "type": "path"
       },
       "original": {
-        "owner": "lewisflude",
-        "repo": "signal-nix",
-        "type": "github"
+        "path": "/home/lewis/Code/signal-nix",
+        "type": "path"
       }
     },
     "signal-palette": {
