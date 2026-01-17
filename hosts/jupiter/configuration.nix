@@ -75,7 +75,7 @@
 
   # Disk performance optimizations
   # Note: ZFS ARC max is set to 16GB in kernelParams above (gaming priority)
-  system.diskPerformance = {
+  nixosConfig.diskPerformance = {
     enable = true;
     enableVMTuning = true;
     enableIOTuning = true;
