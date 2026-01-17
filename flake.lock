@@ -110,11 +110,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1768617850,
-        "narHash": "sha256-dEqrnk0nld4hmdt9sqQfWEknbLDD2PD6P8J7mA60DxE=",
+        "lastModified": 1768669700,
+        "narHash": "sha256-6uTEuPDzQyczPLI70vgCahKFI03fVsqJYo5nbPc7xLw=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "b125155ec32fb00eacd6ba1b34a1be6c9d127a8e",
+        "rev": "2dfb6a7283abd7c6c529d7545182b2bd5e84d12d",
         "type": "github"
       },
       "original": {
@@ -1083,11 +1083,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1767903726,
-        "narHash": "sha256-Iwesk5vXbgGMJQiUn6qFRSu9ktgMIMY2IgC3GFQ5IoI=",
+        "lastModified": 1768664597,
+        "narHash": "sha256-Os7seaXYWMm+ss+DaaZkyJFed9cBx4efYeAyuBmj5Z4=",
         "owner": "nix-community",
         "repo": "nh",
-        "rev": "ec31d400f7c8efde85ab4fd5913845713c869efc",
+        "rev": "7d5ae0607b197115e68e14dcf780070331ff2aa2",
         "type": "github"
       },
       "original": {
@@ -1108,11 +1108,11 @@
         "xwayland-satellite-unstable": "xwayland-satellite-unstable"
       },
       "locked": {
-        "lastModified": 1768658031,
-        "narHash": "sha256-zUru61bYkikBwRNE0vzLrroQr56aTe3UTiWXtXyy+3s=",
+        "lastModified": 1768669983,
+        "narHash": "sha256-OGl180QZ1QIirJ7Cy9Tqrgn/XEglaKGBeb5pys/sS7Y=",
         "owner": "sodiboo",
         "repo": "niri-flake",
-        "rev": "5ea4a8fef8084b9308f6174ad02d66dfb44d6410",
+        "rev": "b90da048a6ae94b49ff489bacac4a49206670c18",
         "type": "github"
       },
       "original": {
@@ -1435,11 +1435,11 @@
     },
     "nixpkgs-stable": {
       "locked": {
-        "lastModified": 1768323494,
-        "narHash": "sha256-yBXJLE6WCtrGo7LKiB6NOt6nisBEEkguC/lq/rP3zRQ=",
+        "lastModified": 1768484090,
+        "narHash": "sha256-HBIfbB9MF9oqQTxs/W5440mzVaYDBWU9tuX95aZ8h64=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "2c3e5ec5df46d3aeee2a1da0bfedd74e21f4bf3a",
+        "rev": "d4fa45dc2d4d32c10cb7c6b530a6b4b7d2429442",
         "type": "github"
       },
       "original": {
@@ -1994,11 +1994,11 @@
         "signal-palette": "signal-palette"
       },
       "locked": {
-        "lastModified": 1768663236,
-        "narHash": "sha256-/H60fabJsBZ6t4VuLJJpGG44GlvvoGYf9ERPiTFs7M0=",
+        "lastModified": 1768670607,
+        "narHash": "sha256-hRo6wJ51FBX/x5MAwjS3XhyvPCV9XkZQiu19xRa0NrE=",
         "owner": "lewisflude",
         "repo": "signal-nix",
-        "rev": "38a05aa3f7d39251d8c5b596170885090fcd0df7",
+        "rev": "430ebf147655ab3438d19a97e0d185e3794c720f",
         "type": "github"
       },
       "original": {

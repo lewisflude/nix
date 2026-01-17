@@ -67,5 +67,8 @@
     "type": "command",
     "command": "\"$CLAUDE_PROJECT_DIR\"/scripts/hooks/statusline.sh",
     "padding": 0
+  },
+  "enabledPlugins": {
+    "ralph-wiggum@claude-plugins-official": true
   }
 }
