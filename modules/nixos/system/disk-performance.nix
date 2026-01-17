@@ -85,8 +85,8 @@ in
       # HDD: NCQ depth + 2MB readahead for sequential reads
       ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{device/queue_depth}="31"
       ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{bdi/read_ahead_kb}="2048"
-      # NVMe: queue depth + readahead
-      ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/nr_requests}="1024"
+      # NVMe: queue depth + readahead (max is 1023, not 1024)
+      ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/nr_requests}="1023"
       ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{bdi/read_ahead_kb}="512"
     '';
   };
