@@ -1,0 +1,11 @@
+# Alejandra Nix formatter configuration
+# https://github.com/kamadorueda/alejandra
+
+# Line length before wrapping
+line_length = 100
+
+# Indentation size (spaces)
+indent_size = 2
+
+# Use spaces instead of tabs
+use_tabs = false

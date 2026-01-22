@@ -1,0 +1,23 @@
+# Cocogitto configuration
+# See: https://docs.cocogitto.io/config/
+
+[changelog]
+path = "CHANGELOG.md"
+template = "default"
+
+# Conventional commit types based on .gitmessage
+[commit_types]
+feat = { changelog_title = "Features" }
+fix = { changelog_title = "Bug Fixes" }
+docs = { changelog_title = "Documentation" }
+style = { changelog_title = "Code Style" }
+refactor = { changelog_title = "Refactoring" }
+perf = { changelog_title = "Performance Improvements" }
+test = { changelog_title = "Tests" }
+build = { changelog_title = "Build System" }
+ci = { changelog_title = "CI/CD" }
+chore = { changelog_title = "Miscellaneous Chores" }
+revert = { changelog_title = "Reverts" }
+
+# Conventional commit scopes (optional - can be omitted for flexibility)
+# [commit_scopes]

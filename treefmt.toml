@@ -1,0 +1,33 @@
+# treefmt - unified code formatter configuration
+# https://github.com/numtide/treefmt
+
+[formatter.nixfmt-rfc-style]
+command = "nixfmt"
+options = []
+includes = ["*.nix"]
+excludes = ["result", "result-*", ".direnv", "node_modules", "flake.lock"]
+
+[formatter.statix]
+command = "statix"
+options = ["fix"]
+includes = ["*.nix"]
+excludes = ["result", "result-*", ".direnv", "node_modules", "flake.lock"]
+# Additional ignores are configured in statix.toml
+
+[formatter.yaml]
+command = "prettier"
+options = ["--write"]
+includes = ["*.yaml", "*.yml"]
+excludes = [
+  "secrets/*.yaml", # Don't format encrypted secrets
+]
+
+[formatter.markdown]
+command = "prettier"
+options = ["--write", "--prose-wrap", "always"]
+includes = ["*.md"]
+
+[formatter.shell]
+command = "shfmt"
+options = ["-i", "2", "-s", "-w"]
+includes = ["*.sh", "*.bash", "*.zsh"]

@@ -1,0 +1,33 @@
+# React Native/Mobile project environment
+use flake ~/.config/nix#react-native
+
+# React Native environment variables
+export REACT_NATIVE_CLI_PATH="$(which react-native)"
+export FLIPPER_DISABLE_PLUGIN_AUTO_UPDATE=1
+export RCT_METRO_PORT=8081
+
+# iOS Development (macOS only)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
+  export REACT_NATIVE_CLI_PATH="$(which react-native)"
+fi
+
+# Android Development
+export ANDROID_HOME="$HOME/Library/Android/sdk"
+export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools:$PATH"
+
+# Development aliases
+alias rn="npx react-native"
+alias ios="npx react-native run-ios"
+alias android="npx react-native run-android"
+alias metro="npx react-native start"
+alias pods="cd ios && pod install && cd .."
+alias clean="npx react-native clean"
+
+# Auto-install pods for iOS if needed
+if [[ -d "ios" && -f "ios/Podfile" ]]; then
+  if [[ ios/Podfile -nt ios/Podfile.lock ]]; then
+    echo "📱 Installing iOS pods..."
+    cd ios && pod install && cd ..
+  fi
+fi

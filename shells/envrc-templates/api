@@ -1,0 +1,29 @@
+# API Backend project environment
+use flake ~/.config/nix#api-backend
+
+# Environment variables for API development
+export NODE_ENV=development
+export LOG_LEVEL=debug
+export PORT=3000
+
+# Database configuration
+export DATABASE_URL="postgresql://localhost:5432/$(basename $PWD)"
+export REDIS_URL="redis://localhost:6379"
+
+# JWT/Auth settings for development
+export JWT_SECRET="dev-secret-key"
+export JWT_EXPIRES_IN="7d"
+
+# API development aliases
+alias dev="pnpm dev"
+alias db:migrate="pnpm db:migrate"
+alias db:seed="pnpm db:seed"
+alias db:studio="pnpm db:studio"
+alias api:test="pnpm test"
+alias api:docs="pnpm docs:serve"
+
+# Auto-setup database
+if [[ -f "prisma/schema.prisma" && ! -f ".env" ]]; then
+  echo "🗄️  Setting up database configuration..."
+  echo "DATABASE_URL=\"$DATABASE_URL\"" > .env
+fi

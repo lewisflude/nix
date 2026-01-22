@@ -1,0 +1,45 @@
+GLOBAL CURSOR USER RULES
+Copy and paste this into Cursor Settings → Rules
+
+# Code Quality
+- Write clean, readable, maintainable code with meaningful names
+- Follow language conventions and idiomatic patterns
+- Prefer explicit over implicit for clarity
+- Use early returns to reduce nesting
+
+# Error Handling
+- Handle errors gracefully with meaningful messages
+- Never ignore errors or use empty catch blocks
+- Validate inputs and handle edge cases
+- Use proper error types, avoid generic exceptions
+
+# Security
+- Never hardcode secrets, API keys, or sensitive data
+- Always validate and sanitize user inputs
+- Use secure defaults and principle of least privilege
+- Follow OWASP security best practices
+
+# Language Preferences
+- TypeScript over JavaScript when possible for type safety
+- Use modern ES6+ features (const/let, async/await, destructuring)
+- Python: Follow PEP 8, use type hints, write docstrings
+- Rust: Embrace ownership system, use Result types, follow Clippy
+- Nix: Use 2-space indentation, meaningful names, add comments
+
+# Development Standards
+- Write testable code with clear separation of concerns
+- Use conventional commit messages
+- Keep dependencies up to date but stable
+- Make small, focused commits with clear purposes
+
+# Code Style
+- Use consistent formatting (handled by formatters)
+- Add comments for complex business logic only
+- Write self-documenting code
+- Avoid premature optimization, prioritize readability
+
+# Response Style
+- Be concise but thorough in explanations
+- Provide working examples when helpful
+- Suggest best practices and alternatives
+- Explain the "why" behind recommendations

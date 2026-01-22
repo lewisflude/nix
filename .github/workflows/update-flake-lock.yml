@@ -1,0 +1,61 @@
+name: Update Flake Lock
+
+on:
+  schedule:
+    # Run weekly on Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+    # Allow manual triggering
+
+# Cancel in-progress runs on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-flake-lock:
+    name: Update Flake Lock
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v21
+
+      - name: Setup Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v13
+
+      - name: Update flake.lock
+        uses: DeterminateSystems/update-flake-lock@main
+        with:
+          pr-title: "chore: update flake inputs"
+          pr-labels: |
+            automated
+            dependencies
+          commit-message: |
+            chore: update flake inputs
+
+            Update all flake inputs to latest versions
+          pr-body: |
+            ## Automated Flake Updates
+
+            This PR contains automated updates to flake inputs.
+
+            ### Changes
+
+            ```
+            {{ env.GIT_COMMIT_MESSAGE }}
+            ```
+
+            ### Next Steps
+            - Review the changes in `flake.lock`
+            - Test the build: `nix flake check`
+            - Verify functionality on target systems
+
+            ---
+            *This PR was created automatically by the update-flake-lock action*

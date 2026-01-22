@@ -1,0 +1,77 @@
+# SOPS Encryption Configuration
+# This file defines encryption keys and rules for secrets management
+# See: docs/SOPS_GUIDE.md for usage instructions and secret rotation procedures
+
+keys:
+  # Admin keys (can decrypt all secrets)
+  - &admin_lewis_gpg 7369D9C25A365E6C926ADBAB48B34CF9C735A6AE
+  - &admin_lewis_age age1lzf4exwy6guezs2wqftd5hf5ftkcjmcvd7lyukvud66py9pk4aeqwx2p9h
+
+  # Host keys (machine-specific, generated on each system)
+  - &jupiter_age age1dn3panz9kx6g6petqm8lyund72gslwt29p6grlq9cf5t3cd68gcqxlv289
+  - &mercury_age age15q885zhzw0x5kk75upc30cql3nhkj7ugrxr0gs80tds988acgetszzd4px
+  - &macbook_age age164pr400e5gz2vnwarmq3uwymj2krhagvsx5dh0nautczkha8eqds2jq2k2
+
+  # Additional host key (identify which host this is for and rename accordingly)
+  - &unknown_host_age age16n0u0yyq4rnasr02a2e09x9pnsqx0ztynzkaada4x2k8haqne53svfd8zp
+
+creation_rules:
+  # System secrets - encrypted for all hosts and admin
+  # NOTE: Do not add dashes before 'age' or 'pgp' - this enables shamir secret sharing (multi-key requirement)
+  - path_regex: secrets/secrets\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_lewis_gpg
+        age:
+          - *admin_lewis_age
+          - *jupiter_age
+          - *mercury_age
+          - *macbook_age
+          - *unknown_host_age
+
+  # User secrets - encrypted for admin and Darwin host only
+  - path_regex: secrets/user\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_lewis_gpg
+        age:
+          - *admin_lewis_age
+          - *macbook_age
+
+  # Host-specific secrets (example: hosts/jupiter/secrets.yaml)
+  # Only encrypted for specific host + admin
+  - path_regex: hosts/jupiter/secrets\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_lewis_gpg
+        age:
+          - *admin_lewis_age
+          - *jupiter_age
+
+  - path_regex: hosts/mercury/secrets\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_lewis_gpg
+        age:
+          - *admin_lewis_age
+          - *mercury_age
+
+  # Catch-all: Other secrets default to Jupiter + Mercury + admin
+  - path_regex: secrets/.*\.(yaml|json)$
+    key_groups:
+      - pgp:
+          - *admin_lewis_gpg
+        age:
+          - *admin_lewis_age
+          - *jupiter_age
+          - *mercury_age
+
+  # Catch-all: Host secrets not matching specific hosts
+  - path_regex: hosts/.*/secrets\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_lewis_gpg
+        age:
+          - *admin_lewis_age
+          - *jupiter_age
+          - *mercury_age

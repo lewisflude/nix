@@ -1,0 +1,671 @@
+# System Architecture Documentation
+
+This document describes the architecture of this Nix configuration system, explaining how components interact and how configuration flows from host definitions to final system builds.
+
+## Overview
+
+This configuration uses a feature-based, modular architecture that separates concerns between:
+
+- **Host Configuration**: High-level feature flags per machine
+- **Feature Modules**: Declarative feature implementations
+- **Service Modules**: Platform-specific service configurations
+- **System Builders**: Build-time orchestration
+
+## Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      flake.nix                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │   inputs     │  │  nixConfig   │  │   outputs    │     │
+│  │              │  │              │  │              │     │
+│  │ - nixpkgs    │  │ - caches     │  │ - darwin     │     │
+│  │ - darwin     │  │ - features   │  │ - nixos      │     │
+│  │ - home-mgr   │  │ - build-time │  │ - home       │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 flake-parts/core.nix                        │
+│  - Host discovery (lib/hosts.nix)                          │
+│  - System builders (lib/system-builders.nix)               │
+│  - Output builders (lib/output-builders.nix)               │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│              hosts/<hostname>/default.nix                   │
+│  ┌────────────────────────────────────────────────────┐    │
+│  │ host = {                                            │    │
+│  │   username = "lewis";                               │    │
+│  │   features.gaming.enable = true;                    │    │
+│  │   features.development.enable = true;               │    │
+│  │ };                                                  │    │
+│  └────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│            lib/system-builders.nix                         │
+│  ┌────────────────────────────────────────────────────┐    │
+│  │ mkNixosSystem / mkDarwinSystem                      │    │
+│  │  1. Apply overlays (lib/functions.nix)              │    │
+│  │  2. Import platform modules                         │    │
+│  │  3. Import feature modules                         │    │
+│  │  4. Build system configuration                       │    │
+│  └────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│         modules/nixos/features/*.nix                        │
+│  ┌────────────────────────────────────────────────────┐    │
+│  │ config = mkIf cfg.enable {                         │    │
+│  │   environment.systemPackages = [...];               │    │
+│  │   services.steam.enable = true;                     │    │
+│  │ };                                                  │    │
+│  └────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Final NixOS/Darwin System                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Configuration Flow
+
+### 1. Host Definition
+
+Hosts are defined in `hosts/<hostname>/default.nix`:
+
+```nix
+{
+  username = "lewis";
+  useremail = "lewis@example.com";
+  hostname = "jupiter";
+  system = "x86_64-linux";
+
+  features = {
+    gaming = {
+      enable = true;
+      steam = true;
+    };
+    development = {
+      enable = true;
+      rust = true;
+    };
+  };
+}
+```
+
+### 2. Host Discovery
+
+`lib/hosts.nix` discovers and validates hosts:
+
+- Scans `hosts/` directory for host configurations
+- Validates host configuration structure
+- Separates Darwin and NixOS hosts
+- Provides helper functions for host access
+
+### 3. Security and Networking Patterns
+
+#### Firewall Management
+
+Services declare their own firewall rules using `lib/firewall.nix`:
+
+```nix
+# In service modules
+networking.firewall.allowedTCPPorts = [ 8080 6881 ]; # qBittorrent WebUI and torrenting
+```
+
+**Core networking** (`modules/nixos/core/networking.nix`) only contains:
+
+- Essential system ports (SSH: 22, NTP: 123)
+- NetworkManager and systemd-resolved configuration
+- WireGuard performance optimizations
+
+**Service modules** declare their own firewall ports for proper separation of concerns.
+
+#### Secrets Management
+
+Sensitive credentials use SOPS encryption:
+
+```nix
+# In service modules
+sops.secrets."qbittorrent/webui/username" = {
+  neededForUsers = true;
+};
+
+# In configuration
+services.qbittorrent = {
+  # Uses config.sops.secrets."qbittorrent/webui/username".path
+};
+```
+
+All secrets are stored encrypted in `secrets/secrets.yaml` and decrypted at runtime.
+
+### 4. System Building
+
+`lib/system-builders.nix` orchestrates system construction:
+
+**For NixOS**:
+
+```nix
+mkNixosSystem hostName hostConfig {self}:
+  nixpkgs.lib.nixosSystem {
+    system = hostConfig.system;
+
+    modules = [
+      # Host configuration
+      ../hosts/${hostName}/configuration.nix
+
+      # Apply overlays
+      {
+        nixpkgs = {
+          overlays = functionsLib.mkOverlays {...};
+          config = functionsLib.mkPkgsConfig;
+        };
+      }
+
+      # Platform modules
+      ../modules/nixos/default.nix
+
+      # Feature modules (imported via modules/nixos/default.nix)
+      # - modules/nixos/features/gaming.nix
+      # - modules/shared/features/development/default.nix (shared feature)
+      # etc.
+    ];
+  };
+```
+
+**For Darwin**:
+Similar structure but uses `darwin.lib.darwinSystem` instead.
+
+### 4. Overlay Application
+
+Overlays are applied in `lib/system-builders.nix` via `functionsLib.mkOverlays`:
+
+```nix
+# lib/functions.nix
+mkOverlays = {inputs, system}:
+  lib.attrValues (
+    import ../overlays {
+      inherit inputs;
+      inherit system;
+    }
+  );
+```
+
+**Overlay Application Order**:
+
+1. Core overlays (unstable, localPkgs)
+2. Application overlays (npm-packages, flake package integrations)
+3. Platform-specific overlays (niri, etc.)
+
+**Key Point**: Overlays are applied **before** modules are evaluated, so modules receive packages with overlays already applied.
+
+### 5. Feature Module Processing
+
+Feature modules in `modules/nixos/features/` translate feature flags into configuration:
+
+```nix
+# modules/nixos/features/gaming.nix
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
+  cfg = config.host.features.gaming;
+in {
+  config = mkIf cfg.enable {
+    programs.steam.enable = mkIf cfg.steam true;
+    services.sunshine.enable = mkIf cfg.steam true;
+    # ... more configuration
+  };
+}
+```
+
+### 6. Service Module Integration
+
+Some features bridge to service modules:
+
+```nix
+# modules/nixos/features/media-management.nix
+config = mkIf (cfg.enable or false) {
+  host.services.mediaManagement = {
+    enable = true;
+    # Maps feature options to service options
+  };
+};
+```
+
+Service modules in `modules/nixos/services/` handle the actual service configuration.
+
+## Component Relationships
+
+### Host Options → Feature Modules
+
+- **Host Options** (`modules/shared/host-options.nix`): Defines the option schema
+- **Feature Modules** (`modules/nixos/features/*.nix`): Implements the options
+- **Relationship**: Feature modules read `config.host.features.*` and generate NixOS/Darwin configuration
+
+### Feature Modules → Service Modules
+
+- **Feature Modules**: High-level feature flags
+- **Service Modules**: Low-level service configuration
+- **Relationship**: Features can bridge to services (e.g., `media-management.nix` → `qbittorrent-standard.nix`)
+
+### Overlays → Packages
+
+- **Overlays** (`overlays/*.nix`): Modify or add packages
+- **Packages**: Used by modules via `pkgs`
+- **Relationship**: Overlays are applied to nixpkgs before modules receive `pkgs`
+
+### System Builders → Modules
+
+- **System Builders** (`lib/system-builders.nix`): Orchestrate module imports
+- **Modules**: Provide configuration fragments
+- **Relationship**: System builders compose modules into final system configuration
+
+## Overlay Application Mechanism
+
+Overlays are applied in `lib/system-builders.nix`:
+
+```nix
+# In mkNixosSystem / mkDarwinSystem
+modules = [
+  # Apply overlays from overlays/ directory
+  {
+    nixpkgs = {
+      overlays = functionsLib.mkOverlays {
+        inherit inputs;
+        inherit (hostConfig) system;
+      };
+      config = functionsLib.mkPkgsConfig;
+    };
+  }
+
+  # ... other modules (which can now use modified pkgs)
+];
+```
+
+**How it works**:
+
+1. `functionsLib.mkOverlays` imports `overlays/default.nix`
+2. `overlays/default.nix` returns an attribute set of overlays
+3. `lib.attrValues` converts the set to a list
+4. NixOS/Darwin applies the overlay list to nixpkgs
+5. All subsequent modules receive `pkgs` with overlays applied
+
+**Important**: Overlays are applied **early** in the module list, so all modules receive modified packages.
+
+## Feature System Flow
+
+```
+┌──────────────────┐
+│  Host Config     │
+│  features.gaming │
+│  .enable = true  │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│  host-options.nix│
+│  Defines schema  │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│  gaming.nix      │
+│  Reads cfg.enable│
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│  NixOS Config    │
+│  programs.steam  │
+│  .enable = true  │
+└──────────────────┘
+```
+
+## Module Import Order
+
+Modules are imported in this order (in `lib/system-builders.nix`):
+
+1. **Host Configuration**: `hosts/${hostName}/configuration.nix`
+2. **Host Options Set**: `{ config.host = hostConfig; }`
+3. **Overlays Applied**: `{ nixpkgs = { overlays = ...; }; }`
+4. **Platform Modules**: `../modules/nixos/default.nix`
+5. **Integration Modules**: `sops-nix`, `home-manager`, etc.
+6. **Home Manager Config**: `{ home-manager = ...; }`
+7. **Validation**: `mkValidationModule`
+8. **Common Modules**: `../modules/shared`
+
+## Special Arguments Flow
+
+Special arguments are passed through multiple layers:
+
+```nix
+# flake-parts/core.nix
+mkNixosSystem hostName hostConfig {self}
+
+# lib/system-builders.nix
+specialArgs = {
+  inherit inputs;
+  inherit (hostConfig) system username useremail hostname;
+  keysDirectory = "${self}/keys";
+};
+
+# Available in all modules
+{pkgs, inputs, system, username, ...}: {
+  # Can use specialArgs here
+}
+```
+
+## Validation System
+
+Validation happens via assertions:
+
+```nix
+# lib/system-builders.nix
+mkValidationModule = {config, ...}: {
+  assertions = [
+    {
+      assertion = hostCheck.status != "fail";
+      message = "[Validation] ${hostCheck.name}: ${hostCheck.message}";
+    }
+  ];
+};
+```
+
+Validation checks:
+
+- Host configuration completeness (username, useremail, hostname, system)
+- Secrets configuration (SOPS setup)
+- Feature dependencies (via feature module assertions)
+
+## Home Manager Integration
+
+Home Manager is integrated via:
+
+```nix
+# lib/system-builders.nix
+mkHomeManagerConfig = {hostConfig, ...}: {
+  useGlobalPkgs = true;
+  extraSpecialArgs = inputs // hostConfig // {...};
+  sharedModules = [sops-nix.homeManagerModules.sops ...];
+  users.${hostConfig.username} = import ../home;
+};
+```
+
+**Key Points**:
+
+- Uses same `pkgs` as system (via `useGlobalPkgs`)
+- Receives same specialArgs as system modules
+- Shares overlays with system configuration
+
+## Cross-Platform Considerations
+
+### Platform Detection
+
+Modules detect platform via:
+
+```nix
+# In feature modules
+environment.systemPackages = with pkgs;
+  optionals pkgs.stdenv.isLinux [linux-pkg]
+  ++ optionals pkgs.stdenv.isDarwin [darwin-pkg];
+```
+
+### Platform-Specific Modules
+
+- **NixOS**: `modules/nixos/` - Linux-specific configuration
+- **Darwin**: `modules/darwin/` - macOS-specific configuration
+- **Shared**: `modules/shared/` - Cross-platform configuration
+
+### Platform-Specific Overlays
+
+Overlays can be conditional:
+
+```nix
+# overlays/default.nix
+niri = mkConditional isLinux inputs.niri.overlays.niri;
+```
+
+## Build-Time Inputs
+
+Build-time inputs are marked in `flake.nix`:
+
+```nix
+homebrew-j178 = {
+  url = "github:j178/homebrew-tap";
+  flake = false;
+  buildTime = true;  # Fetched only during build, not evaluation
+};
+```
+
+**Impact**: These inputs are not available during evaluation, only during build/realization.
+
+## Testing Architecture
+
+Tests are organized in `tests/`:
+
+- **evaluation.nix**: Tests that configurations evaluate
+- **integration/**: Integration tests for specific features
+- **home-manager.nix**: Home Manager configuration tests
+
+## Extension Points
+
+### Adding a New Feature
+
+1. Define options in `modules/shared/host-options.nix`
+2. Create module in `modules/nixos/features/my-feature.nix`
+3. Import in `modules/nixos/default.nix`
+4. Use in host config: `host.features.myFeature.enable = true`
+
+### Adding a New Overlay
+
+1. Create `overlays/my-overlay.nix`
+2. Import in `overlays/default.nix`
+3. Overlay automatically applied to all systems
+
+### Adding a New Service
+
+1. Create `modules/nixos/services/my-service.nix`
+2. Import in `modules/nixos/services/default.nix`
+3. Optionally create feature bridge in `modules/nixos/features/`
+
+## Key Design Decisions
+
+### Why Feature-Based?
+
+- **Declarative**: High-level intent vs low-level configuration
+- **Composable**: Features can be combined easily
+- **Maintainable**: Changes in one place affect all hosts
+- **Testable**: Features can be tested in isolation
+
+### Why Overlay Early Application?
+
+- **Consistency**: All modules see same modified packages
+- **Predictability**: No surprises from late overlay application
+- **Performance**: Overlays applied once, not per-module
+
+### Why Separate Host Options?
+
+- **Type Safety**: Options defined in one place
+- **Discoverability**: Clear schema for available options
+- **Validation**: Centralized validation logic
+
+## Home-Manager vs System Configuration Guidelines
+
+Understanding the boundary between home-manager and system-level configuration is critical for maintainable Nix configurations.
+
+### System-Level Configuration (NixOS/nix-darwin)
+
+These belong in `modules/nixos/` or `modules/darwin/`:
+
+- **System Services**: systemd services (NixOS), launchd services (Darwin)
+- **Kernel Configuration**: Kernel modules, boot parameters, kernel packages
+- **Hardware Configuration**: Graphics drivers, hardware-specific settings
+- **System Daemons**: Services that run as root or system users
+- **Network Configuration**: System-wide networking, firewall, DNS
+- **User/Group Management**: System users and groups
+- **Container Runtimes**: Docker daemon, Podman system service
+- **Boot Configuration**: Bootloader, initrd, kernel parameters
+- **System-Wide Policies**: Security policies, system limits
+
+**Examples**:
+
+```nix
+# ✅ CORRECT: System-level in modules/nixos/features/virtualisation.nix
+virtualisation.podman = {
+  enable = true;
+  dockerCompat = true;
+};
+
+# ✅ CORRECT: Graphics drivers in modules/nixos/features/desktop/graphics.nix
+hardware.graphics = {
+  enable = true;
+  extraPackages = [ pkgs.mesa pkgs.nvidia-vaapi-driver ];
+};
+```
+
+### Home-Manager Configuration
+
+These belong in `home/common/` or `home/{nixos,darwin}/`:
+
+- **User Applications**: Command-line tools, desktop applications
+- **User Services**: systemd --user services (NixOS), user-level Launch Agents (Darwin)
+- **Dotfiles**: User configuration files (~/.config/)
+- **Development Tools**: Language servers, formatters, linters
+- **Desktop Applications**: Browsers, editors, terminal emulators
+- **User-Level Services**: Tray applets, user notification daemons
+- **Shell Configuration**: Shell aliases, functions, environment variables
+- **Editor Configuration**: Vim, Emacs, Helix, VS Code settings
+
+**Examples**:
+
+```nix
+# ✅ CORRECT: User tools in home/nixos/hardware-tools/audio.nix
+home.packages = [
+  pkgs.pwvucontrol  # User audio mixer
+  pkgs.playerctl    # Media player control
+];
+
+# ✅ CORRECT: User service in home/nixos/hardware-tools/audio.nix
+systemd.user.services.setup-audio-routing = {
+  # User-level systemd service
+};
+```
+
+### Gray Areas (Context Dependent)
+
+Some components span both layers:
+
+**GPG/SSH**:
+
+- **System**: Key storage directories, agent sockets, PAM integration
+- **Home**: User keys, agent configuration, user-specific settings
+
+**Audio**:
+
+- **System**: PipeWire/PulseAudio daemon, hardware configuration
+- **Home**: User audio mixers, per-user routing rules
+
+**Containers**:
+
+- **System**: Container runtime (Podman/Docker daemon)
+- **Home**: User-facing CLI tools (docker, podman-compose) - *use carefully*
+
+### Common Antipatterns
+
+#### ❌ WRONG: Container Tools in Home-Manager
+
+```nix
+# ❌ WRONG: home/nixos/system/podman.nix (DELETED)
+home.packages = [
+  pkgs.podman
+  pkgs.podman-compose
+];
+```
+
+**Why Wrong**: Container runtimes require system privileges and are already configured at system-level.
+
+**Fix**: Remove from home-manager, use system configuration:
+
+```nix
+# ✅ CORRECT: modules/nixos/features/virtualisation.nix
+virtualisation.podman.enable = true;
+```
+
+#### ❌ WRONG: System Packages Duplicated in Home
+
+```nix
+# ❌ WRONG: home/nixos/system/graphics.nix (DELETED)
+home.packages = [
+  pkgs.vulkan-tools
+  pkgs.mesa-demos
+];
+```
+
+**Why Wrong**: System graphics libraries already installed at system-level.
+
+**Fix**: Remove from home-manager, packages available via system config:
+
+```nix
+# ✅ CORRECT: modules/nixos/features/desktop/graphics.nix
+hardware.graphics.extraPackages = [ pkgs.vulkan-tools pkgs.mesa-demos ];
+```
+
+#### ❌ WRONG: Hardcoded Values in Feature Modules
+
+```nix
+# ❌ WRONG: Timezone in modules/nixos/features/desktop/desktop-environment.nix
+time.timeZone = "Europe/London";
+```
+
+**Why Wrong**: Inflexible, prevents per-host configuration.
+
+**Fix**: Set per-host or use constants:
+
+```nix
+# ✅ CORRECT: hosts/jupiter/default.nix
+{ lib, ... }:
+let
+  constants = import ../../lib/constants.nix;
+in
+{
+  time.timeZone = constants.defaults.timezone;
+}
+```
+
+### Decision Tree
+
+When adding a package or service, ask:
+
+1. **Does it require root/system privileges?** → System-level
+2. **Does it run as a system daemon?** → System-level
+3. **Is it hardware configuration?** → System-level
+4. **Is it a user application?** → Home-Manager
+5. **Does it configure dotfiles?** → Home-Manager
+6. **Is it a tray applet or user service?** → Home-Manager
+
+### Module Placement Guidelines
+
+When creating or modifying modules:
+
+1. **System Services**: `modules/nixos/services/` or `modules/darwin/`
+2. **User Applications**: `home/common/apps/` or `home/{nixos,darwin}/apps/`
+3. **Features**: `modules/shared/features/` or `modules/nixos/features/`
+4. **Hardware**: `modules/nixos/hardware/`
+
+## Further Reading
+
+- [Feature Module Guide](./FEATURES.md) - How to create and use features
+- [Performance Tuning](./PERFORMANCE_TUNING.md) - Performance considerations
+- [Development Guide](./DX_GUIDE.md) - Development practices
+- [Module Templates](../templates/) - Templates for new modules

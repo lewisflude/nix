@@ -1,0 +1,99 @@
+{
+  "cleanupPeriodDays": 30,
+  "env": {},
+  "permissions": {
+    "allow": [
+      "Bash(nix:*)",
+      "Bash(git:*)",
+      "Bash(nh:*)",
+      "Bash(home-manager:*)",
+      "Bash(ls:*)",
+      "Bash(tree:*)",
+      "Bash(which:*)",
+      "Bash(echo:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(./scripts/:*)",
+      "Edit",
+      "Write",
+      "NotebookEdit",
+      "SlashCommand",
+      "WebSearch",
+      "WebFetch",
+      "Bash(chmod:*)",
+      "Bash(./scripts/block-dangerous-commands.sh:*)",
+      "Bash(./scripts/auto-format-nix.sh)",
+      "Bash(./scripts/load-context.sh:*)",
+      "Bash(sudo cat:*)",
+      "Bash(gpg --list-secret-keys:*)",
+      "Bash(treefmt)",
+      "Bash(treefmt:*)",
+      "Bash(lsblk:*)",
+      "mcp__general-filesystem__write_file",
+      "Bash(/bin/cat ~/.ssh/authorized_keys)",
+      "Bash(systemctl is-active:*)",
+      "Bash(systemctl show-environment:*)",
+      "Bash(systemctl --user show-environment:*)",
+      "Bash(systemctl show:*)",
+      "Bash(systemctl:*)",
+      "Bash(ulimit:*)",
+      "Bash(nixos-option:*)",
+      "Bash(statix fix:*)",
+      "Bash(journalctl:*)",
+      "Bash(/bin/ls:*)",
+      "Bash(test:*)",
+      "Bash(pw-metadata:*)",
+      "Bash(pw-top:*)",
+      "Bash(pactl list:*)",
+      "Bash(top:*)",
+      "Bash(ps:*)",
+      "Bash(pipewire:*)",
+      "Bash(xrizer --version:*)"
+    ],
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Edit(**/.env)",
+      "Edit(**/.env.*)",
+      "Read(**/secrets/**)",
+      "Edit(**/secrets/**)",
+      "Read(**/*secret*)",
+      "Edit(**/*secret*)",
+      "Read(**/*credentials*)",
+      "Edit(**/*credentials*)",
+      "Bash(nh os switch:*)",
+      "Bash(nh os boot:*)",
+      "Bash(sudo nixos-rebuild:*)",
+      "Bash(sudo darwin-rebuild:*)",
+      "Bash(darwin-rebuild switch:*)",
+      "Bash(darwin-rebuild activate:*)",
+      "Bash(nixos-rebuild switch:*)",
+      "Bash(nixos-rebuild boot:*)",
+      "Bash(rm -rf:*)",
+      "Bash(sudo rm:*)"
+    ],
+    "ask": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -fd:*)"
+    ]
+  },
+  "model": "claude-sonnet-4-5-20250929",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$FILE_PATH\" == *.nix ]]; then nix fmt \"$FILE_PATH\" 2>/dev/null || true; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

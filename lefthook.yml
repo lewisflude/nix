@@ -1,0 +1,45 @@
+commit-msg:
+  commands:
+    conventional-commits:
+      run: |
+        msg_file="${1:-{{.MsgFile}}}"
+        if [ -z "$msg_file" ] || [ ! -f "$msg_file" ]; then
+          msg_file="$(git rev-parse --git-path COMMIT_EDITMSG 2>/dev/null || true)"
+        fi
+        if [ ! -f "$msg_file" ]; then
+          echo "commit-msg: missing commit message file"
+          exit 1
+        fi
+
+        first_line="$(head -n1 "$msg_file" | tr -d '\r')"
+        if [ "$first_line" = "STDIN" ]; then
+          echo "Commit message subject cannot be STDIN."
+          exit 1
+        fi
+
+        if echo "$first_line" | grep -Eq '^(Merge |Revert )'; then
+          exit 0
+        fi
+
+        if ! command -v cog >/dev/null 2>&1; then
+          echo "cocogitto not found. Use 'nix develop' to enter the dev shell."
+          exit 1
+        fi
+
+        cog verify --file "$msg_file"
+
+# Uncomment to automatically update CHANGELOG.md on new tags
+# post-commit:
+#   commands:
+#     changelog:
+#       run: |
+#         if git describe --exact-match HEAD 2>/dev/null; then
+#           git-cliff --output CHANGELOG.md
+#           git add CHANGELOG.md
+#         fi
+
+# Uncomment to validate changelog can be generated before pushing
+# pre-push:
+#   commands:
+#     verify-changelog:
+#       run: git-cliff --unreleased --strip all
