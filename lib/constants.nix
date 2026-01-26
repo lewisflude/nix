@@ -72,6 +72,9 @@
         audio = 47999;
         video = 48000;
       };
+
+      # Game servers
+      hytaleServer = 5520;
     };
 
     # VR streaming and discovery ports

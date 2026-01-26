@@ -14,6 +14,7 @@
     ./features/boot-optimization.nix
     ./features/flatpak.nix
     ./features/xfs.nix
+    ./features/hytale-server.nix
 
     ./core
     ./hardware

@@ -9,6 +9,7 @@
     ./eternal-terminal.nix
     ./fail2ban.nix
     ./home-assistant.nix
+    ./hytale-server
     ./mosh.nix
     ./music-assistant.nix
     ./samba.nix

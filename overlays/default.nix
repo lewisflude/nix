@@ -95,6 +95,48 @@ in
     yutu = prev.callPackage ../pkgs/yutu.nix { };
   };
 
+  # Java 25 for Hytale server
+  # Hytale officially requires Java 25 (Adoptium/Temurin recommended)
+  # See: https://support.hytale.com/hc/en-us/articles/hytale-server-manual
+  java25 =
+    final: prev:
+    let
+      # Check if jdk25 or temurin_25_jdk exists in nixpkgs
+      # If not, we'll use the latest available JDK and warn
+      jdk25 =
+        if prev ? temurin_25_jdk then
+          prev.temurin_25_jdk
+        else if prev ? jdk25 then
+          prev.jdk25
+        else if prev ? openjdk25 then
+          prev.openjdk25
+        else
+          # Fallback to latest JDK with a prominent warning
+          builtins.trace ''
+
+            ╔═══════════════════════════════════════════════════════════════════════╗
+            ║ WARNING: Java 25 not found in nixpkgs                                ║
+            ║ Falling back to JDK ${prev.jdk.version}                                          ║
+            ╚═══════════════════════════════════════════════════════════════════════╝
+
+            Hytale officially requires Java 25 (Adoptium/Temurin recommended).
+            The server may work with other Java versions but this is UNSUPPORTED.
+
+            To use Java 25:
+              1. Update nixpkgs to a version that includes Java 25
+              2. Use a flake input for Adoptium Temurin
+              3. Override with a custom Java 25 package
+
+            See: https://adoptium.net/temurin/releases/
+
+          '' prev.jdk;
+    in
+    {
+      jdk25 = jdk25;
+      # Also provide as java25 for consistency
+      java25 = jdk25;
+    };
+
   # Immersed VR - Use latest version from static URL
   # This pulls the latest release directly instead of using archived versions
   immersed-latest = _final: prev: {
