@@ -43,14 +43,12 @@
     };
     niri = {
       url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     awww = {
       url = "git+https://codeberg.org/LGFae/awww";
     };
     ironbar = {
       url = "github:JakeStanger/ironbar";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     musnix = {
       url = "github:musnix/musnix";
@@ -75,7 +73,6 @@
     };
     fenix = {
       url = "github:nix-community/fenix";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     lazygit = {
       url = "github:jesseduffield/lazygit";
@@ -101,7 +98,6 @@
     };
     comfyui = {
       url = "github:utensils/nix-comfyui";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
@@ -149,7 +145,6 @@
     };
     nixpkgs-wayland = {
       url = "github:nix-community/nixpkgs-wayland";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 

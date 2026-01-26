@@ -13,8 +13,7 @@
     pkgs.gotools # Includes goimports
     pkgs.clang-tools # Includes clang-format
 
-    # Language servers
-    pkgs.marksman
+
 
     # Linters
     pkgs.luaPackages.luacheck

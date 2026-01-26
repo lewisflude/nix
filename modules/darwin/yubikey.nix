@@ -8,7 +8,7 @@ in
   security.pam.services = {
     sudo_local = {
       touchIdAuth = true;
-      watchIdAuth = true;
+      watchIdAuth = false;
       text = ''
         auth sufficient ${pkgs.pam_u2f}/lib/security/pam_u2f.so authfile=/etc/u2f-mappings cue origin=pam://yubi pinverification=1 userpresence=1
       '';

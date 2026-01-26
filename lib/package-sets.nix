@@ -117,7 +117,6 @@ let
       general = [
         pkgs.biome
         pkgs.taplo
-        pkgs.marksman
       ];
     };
   };

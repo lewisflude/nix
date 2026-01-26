@@ -72,7 +72,6 @@ let
     # GraphQL LSP support disabled until a suitable package is found or added
     pkgs.yaml-language-server
     pkgs.taplo
-    pkgs.marksman
     pkgs.gopls
     pkgs.rust-analyzer
     pkgs.pyright

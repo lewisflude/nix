@@ -2,15 +2,17 @@
 let
   standards = import ../../features/development/language-standards.nix;
   formatterMap = {
-    biome = "biomejs.biome";
-    black = "ms-python.black-formatter";
-    rustfmt = "rust-lang.rust-analyzer";
-    nixfmt = "jnoortheen.nix-ide";
-    nixfmt-rfc-style = "jnoortheen.nix-ide";
-    goimports = "golang.go";
-    yamlfmt = "redhat.vscode-yaml";
-    taplo = "tamasfe.even-better-toml";
-    clang-format = "ms-vscode.cpptools";
+    "nixfmt-rfc-style" = "jnordberg.nix-instantiate"; 
+        "biome" = "biomejs.biome";
+        "ruff" = "charliermarsh.ruff";
+        "gofumpt" = "golang.go"; 
+        "rustfmt" = "rust-lang.rust-analyzer";
+        "clang-format" = "ms-vscode.cpptools";
+        "taplo" = "tamasfe.even-better-toml";
+        "yamlfmt" = "288g.yamlfmt"; 
+        "nixfmt" = "jnordberg.nix-instantiate";
+        "goimports" = "golang.go";
+        "black" = "ms-python.python";
   };
   baseLanguages = builtins.attrNames standards.languages;
   reactVariants = [

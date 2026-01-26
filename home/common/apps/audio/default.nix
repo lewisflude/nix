@@ -9,8 +9,7 @@
     pkgs.lame
     pkgs.opusTools
 
-    # Media players
-    pkgs.mpv
+
   ];
 
   # Note: MPV is configured separately in home/nixos/apps/mpv.nix
