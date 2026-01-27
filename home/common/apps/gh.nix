@@ -31,16 +31,4 @@
       ];
     };
   };
-
-  # 4. Copilot CLI & Shell Integration (Replacing the old extension)
-  # Note: github-copilot-cli is unfree but allowed at system level
-  home.packages = [ pkgs.github-copilot-cli ];
-  
-  # Add aliases to your shell (assuming zsh/bash)
-  home.shellAliases = {
-    ghcs = "copilot suggest";
-    ghce = "copilot explain";
-    # Use 'copilot' for the new 2026 agentic mode
-    ask = "copilot"; 
-  };
 }
