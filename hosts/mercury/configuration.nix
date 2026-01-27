@@ -45,18 +45,19 @@
   '';
   time.timeZone = constants.defaults.timezone;
 
-  host.features.restic = {
-    enable = true;
-    backups.macbook-home = {
-      enable = true;
-      path = "/Users/${config.host.username}/.config/nix";
-      # Use IPv4 address to avoid IPv6 connectivity issues
-      repository = "rest:http://${constants.hosts.jupiter.ipv4}:8000/macos-${config.host.hostname}";
-      passwordFile = config.sops.secrets.restic-password.path;
-      timer = "daily";
-      user = config.host.username;
-      initialize = false;
-      createWrapper = false;
-    };
-  };
+  # Disabled: SOPS password file not available, causing service failures
+  # host.features.restic = {
+  #   enable = true;
+  #   backups.macbook-home = {
+  #     enable = true;
+  #     path = "/Users/${config.host.username}/.config/nix";
+  #     # Use IPv4 address to avoid IPv6 connectivity issues
+  #     repository = "rest:http://${constants.hosts.jupiter.ipv4}:8000/macos-${config.host.hostname}";
+  #     passwordFile = config.sops.secrets.restic-password.path;
+  #     timer = "daily";
+  #     user = config.host.username;
+  #     initialize = false;
+  #     createWrapper = false;
+  #   };
+  # };
 }

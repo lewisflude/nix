@@ -23,7 +23,8 @@
     ./per-system/checks.nix
     ./per-system/devShells.nix
     ./per-system/apps.nix
-    ./per-system/topology.nix
+    # Disabled: nix-topology flakeModule disabled
+    # ./per-system/topology.nix
     ./per-system/process-compose.nix
     # Flake-level outputs
     ./outputs/darwin.nix

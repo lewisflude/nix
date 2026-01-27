@@ -6,8 +6,7 @@
   programs.zellij = {
     enable = true;
 
-    enableZshIntegration = true;
-
+    enableZshIntegration = false;
 
     layouts.default = ''
       layout {

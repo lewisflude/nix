@@ -153,7 +153,8 @@
     inputs.flake-parts.lib.mkFlake { inherit inputs self; } {
       imports = [
         ./flake-parts/core.nix
-        inputs.nix-topology.flakeModule
+        # Disabled: causes "unknown flake output 'topology'" warning
+        # inputs.nix-topology.flakeModule
       ];
     };
 }

@@ -74,20 +74,6 @@
         insteadOf = "https://github.com/";
       };
 
-      # GPG configuration
-      # Use a wrapper script that automatically enables loopback pinentry mode
-      # when no TTY is available (SSH sessions without -t flag)
-      gpg = {
-        program = pkgs.writeShellScriptBin "gpg-wrapper" ''
-          # Auto-detect if we need loopback mode (no TTY or SSH session)
-          if [ ! -t 0 ] || [ -n "$SSH_CONNECTION" ]; then
-            exec ${pkgs.gnupg}/bin/gpg --pinentry-mode=loopback "$@"
-          else
-            exec ${pkgs.gnupg}/bin/gpg "$@"
-          fi
-        '' + "/bin/gpg-wrapper";
-        format = "openpgp";
-      };
       commit.gpgsign = true;
       tag.gpgsign = true;
 
