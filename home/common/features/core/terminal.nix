@@ -38,9 +38,9 @@
       # Works with Niri's prefer-no-csd to draw borders around windows instead of behind them
       window-decoration = "server";
 
-      font-family = "Iosevka Nerd Font";
+      font-family = "Iosevka Nerd Font Mono";
       font-feature = "+calt,+liga,+dlig";
-      font-size = 12;
+      font-size = 14;
       font-synthetic-style = true;
       scrollback-limit = 100000;
 
@@ -57,6 +57,10 @@
       # Shift+Enter inserts a newline (multiline input)
       # Note: The literal backslash-n must be preserved in the output
       keybind = [ ''shift+enter=text:\n'' ];
+
+      window-padding-x = 20;
+      window-padding-y = 16;
+      window-padding-balance = true;
     };
   };
 }

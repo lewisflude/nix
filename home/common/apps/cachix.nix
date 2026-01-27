@@ -1,5 +1,0 @@
-{
-  programs.cachix = {
-    enable = true;
-  };
-}

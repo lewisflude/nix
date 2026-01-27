@@ -3,7 +3,6 @@
   imports = [
 
     ../apps/cursor
-    ../apps/lazydocker.nix
     ../features/development
 
     # Docker packages now handled by system-level virtualisation module

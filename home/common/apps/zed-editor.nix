@@ -21,13 +21,15 @@
       ruff
       rust-analyzer
     ];
-    mutableUserSettings = false;
+    # Allow Zed to manage its own settings in ~/.config/zed/
+    # Setting to false causes permission errors when Zed tries to update settings
+    mutableUserSettings = true;
 
     userSettings = {
       # Performance - Optimized for your hardware
-      "ui_font_size" = 16;
+      "ui_font_size" = 14;
       "ui_font_family" = "Iosevka Nerd Font Mono";
-      "buffer_font_size" = 14;
+      "buffer_font_size" = 12;
 
       "telemetry" = {
         "metrics" = false;

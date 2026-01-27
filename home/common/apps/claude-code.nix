@@ -256,84 +256,6 @@
       '';
     };
 
-    # Hooks for Claude Code
-    # These run automatically at specific lifecycle events
-    hooks = {
-      # Pre-tool-use hook: Block dangerous commands
-      pre-tool-use = ''
-        #!/usr/bin/env bash
-        # Block dangerous commands before execution
-        # This hook runs before Claude executes any tool
-
-        set -euo pipefail
-
-        # Read tool call from stdin (JSON format)
-        tool_call=$(cat)
-
-        # Extract command if it's a shell command
-        if echo "$tool_call" | grep -q '"name":"run_shell_command"'; then
-          command=$(echo "$tool_call" | ${pkgs.jq}/bin/jq -r '.parameters.command // empty')
-
-          # List of dangerous commands to block
-          dangerous_patterns=(
-            "rm -rf"
-            "sudo rm"
-            "dd if="
-            "mkfs"
-            "nh os switch"
-            "nh os boot"
-            "sudo nixos-rebuild"
-            "sudo darwin-rebuild"
-            "> /dev/sd"
-          )
-
-          # Check if command matches any dangerous pattern
-          for pattern in "''${dangerous_patterns[@]}"; do
-            if echo "$command" | grep -q "$pattern"; then
-              echo "BLOCKED: Dangerous command detected: $pattern" >&2
-              echo "Please run system commands manually for safety." >&2
-              exit 1
-            fi
-          done
-        fi
-
-        # Allow the command
-        exit 0
-      '';
-
-      # Post-tool-use hook: Auto-format Nix files
-      post-tool-use = ''
-        #!/usr/bin/env bash
-        # Auto-format Nix files after modification
-        # This hook runs after Claude modifies any files
-
-        set -euo pipefail
-
-        # Read tool result from stdin
-        tool_result=$(cat)
-
-        # Check if any .nix files were modified
-        if echo "$tool_result" | grep -q '\.nix'; then
-          echo "[post-hook] Formatting modified Nix files..." >&2
-
-          # Extract modified files and format them
-          modified_files=$(echo "$tool_result" | ${pkgs.jq}/bin/jq -r '.files[]? // empty' 2>/dev/null || echo "")
-
-          if [ -n "$modified_files" ]; then
-            for file in $modified_files; do
-              if [[ "$file" == *.nix ]]; then
-                if [ -f "$file" ]; then
-                  echo "[post-hook] Formatting $file" >&2
-                  ${pkgs.nixfmt}/bin/nixfmt "$file" 2>/dev/null || true
-                fi
-              fi
-            done
-          fi
-        fi
-
-        exit 0
-      '';
-    };
 
     # JSON settings for Claude Code
     # See: https://docs.anthropic.com/claude-code/reference/settings
@@ -361,33 +283,6 @@
         saveHistory = true; # Save conversation history
       };
 
-      # Tool restrictions for safety
-      # Note: This is NOT a security mechanism - use hooks for enforcement
-      dangerousCommands = {
-        block = [
-          "rm -rf"
-          "sudo rm"
-          "dd"
-          "mkfs"
-          "nh os switch"
-          "sudo nixos-rebuild"
-          "sudo darwin-rebuild"
-        ];
-      };
-
-      # UI preferences
-      ui = {
-        theme = "default"; # UI theme
-        showTips = true; # Show helpful tips
-        showBanner = false; # Hide startup banner for cleaner output
-      };
-
-      # Formatting
-      formatting = {
-        autoFormat = true; # Auto-format files after editing
-        formatCommand = "nix fmt"; # Use nix fmt for Nix files
-      };
-
       # Memory/Context configuration
       # Claude Code automatically loads CLAUDE.md from the repository
       # You can create .claude/ directory for additional context
@@ -396,6 +291,7 @@
         contextFiles = [
           "CLAUDE.md"
           "CONVENTIONS.md"
+          "README.md"
         ]; # Files to load as context
       };
 

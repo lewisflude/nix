@@ -61,6 +61,9 @@ in
       OBSIDIAN_API_KEY = mkSecret { allowUserRead = true; };
       OPENAI_API_KEY = mkSecret { allowUserRead = true; };
 
+      # Restic backup password
+      restic-password = mkSecret { allowUserRead = true; };
+
       # MCP Integration Secrets
       LINEAR_API_KEY = mkSecret { allowUserRead = true; };
       SLACK_BOT_TOKEN = mkSecret { allowUserRead = true; };

@@ -13,7 +13,6 @@
     ../apps/jq.nix
     ../apps/helix.nix
     ../apps/zed-editor.nix
-    ../apps/lazygit.nix
     ../apps/git-cliff.nix
     ../apps/atuin.nix
     ../apps/zellij.nix

@@ -1,5 +1,0 @@
-{
-  programs.yq = {
-    enable = true;
-  };
-}

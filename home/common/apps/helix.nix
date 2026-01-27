@@ -11,9 +11,10 @@ let
   getLanguageFilename =
     name: value:
     let
-      inherit (value) fileTypes;
-      # Use the first file type as the extension
-      extension = builtins.head fileTypes;
+      # Use the first file type as the extension, with a fallback to the name itself
+      extension = if (value ? fileTypes && builtins.length value.fileTypes > 0)
+                  then builtins.head value.fileTypes
+                  else name;
       # Fallback map for language names that don't match their file extensions
       extensionMap = {
         javascript = "js";
@@ -26,30 +27,24 @@ let
 
   # Helper to build formatter configuration
   # Biome requires special handling with --stdin-file-path argument
-  # Biome uses the filename extension to determine the file type
-  # Other formatters can specify custom args via formatterArgs in language standards
   buildFormatter =
     name: value:
-    if value.formatter == "biome" then
-      {
-        command = "biome";
-        args = [
-          "format"
-          "--stdin-file-path"
-          (getLanguageFilename name value)
-        ];
-      }
-    else
-      {
-        command = value.formatter;
-      }
-      // lib.optionalAttrs (value ? formatterArgs) {
-        args = value.formatterArgs;
-      };
+    let
+      isBiome = value.formatter == "biome";
+      baseArgs = lib.optionals isBiome [
+        "format"
+        "--stdin-file-path"
+        (getLanguageFilename name value)
+      ];
+      extraArgs = value.formatterArgs or [ ];
+    in
+    {
+      command = value.formatter;
+      args = baseArgs ++ extraArgs;
+    };
 
   # Helper to build language server list
   # For languages using Biome, add Biome LSP alongside the primary LSP
-  # Biome LSP provides linting and diagnostics
   buildLanguageServers =
     _name: value:
     if value.formatter == "biome" then
@@ -63,7 +58,6 @@ let
       [ value.lsp ];
 
   # Map command names to Nix packages
-  # Note: Some formatters are part of larger packages (e.g., goimports is in gotools)
   lspPackages = [
     pkgs.nixd
     pkgs.nodePackages.typescript-language-server
@@ -79,14 +73,15 @@ let
   ];
 
   formatterPackages = [
-    pkgs.nixfmt
+    pkgs.nixfmt # RFC 166 style formatter (was nixfmt-rfc-style)
     pkgs.biome
     pkgs.yamlfmt
     pkgs.gotools # Includes goimports
     pkgs.clang-tools # Includes clang-format
     pkgs.black # Python formatter
     pkgs.rustfmt # Rust formatter
-    # taplo is already in lspPackages
+    pkgs.ripgrep # Essential for Helix file picker speed
+    pkgs.fd # Essential for Helix global search
   ];
 in
 {
@@ -106,7 +101,6 @@ in
             indent = {
               tab-width = value.indent;
               # Generate unit from indent value if not explicitly provided
-              # unit is a string of spaces matching the indent width
               unit = value.unit or (lib.concatStrings (lib.replicate value.indent " "));
             };
             auto-format = value.formatter != null;
@@ -119,6 +113,7 @@ in
           }
         )
       ) standards.languages;
+
       # Configure Biome as a language server
       # Biome LSP provides linting and diagnostics for JS/TS/CSS/GraphQL
       language-server = {
@@ -128,6 +123,7 @@ in
         };
       };
     };
+
     settings = {
       editor = {
         line-number = "relative";
@@ -142,29 +138,34 @@ in
           120
         ];
         completion-trigger-len = 1;
-        idle-timeout = 0;
+        idle-timeout = 50; # Increased slightly to prevent UI stutter
         middle-click-paste = true;
         end-of-line-diagnostics = "hint";
         soft-wrap.enable = true;
       };
+
       editor.cursor-shape = {
         insert = "bar";
         normal = "block";
         select = "underline";
       };
+
       editor.indent-guides = {
         render = true;
         character = "╎";
       };
+
       editor.inline-diagnostics = {
         cursor-line = "error";
         other-lines = "disable";
       };
+
       editor.lsp = {
         display-messages = true;
         display-inlay-hints = true;
         auto-signature-help = false;
       };
+
       editor.statusline = {
         left = [
           "mode"
@@ -186,6 +187,7 @@ in
           select = "SELECT";
         };
       };
+
       editor.whitespace = {
         render = {
           space = "none";
@@ -197,12 +199,14 @@ in
           tabpad = " ";
         };
       };
+
       editor.file-picker = {
         hidden = false;
         parents = true;
         ignore = true;
         git-ignore = true;
       };
+
       keys.normal = {
         space = {
           space = "file_picker";
@@ -219,6 +223,7 @@ in
           "keep_primary_selection"
         ];
       };
+
       keys.insert = {
         j = {
           k = "normal_mode";
@@ -228,9 +233,6 @@ in
   };
 
   # Create runtime directory to fix health check warnings
-  # Helix looks for runtime files in ~/.config/helix/runtime
-  # This directory can be empty - Helix will use the Nix store runtime as fallback
-  # Using home.file creates the directory structure automatically
   home.file.".config/helix/runtime/.keep" = {
     text = "";
   };

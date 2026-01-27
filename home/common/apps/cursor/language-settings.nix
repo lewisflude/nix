@@ -2,8 +2,7 @@
 let
   standards = import ../../features/development/language-standards.nix;
   formatterMap = {
-    "nixfmt-rfc-style" = "jnordberg.nix-instantiate"; 
-        "biome" = "biomejs.biome";
+    "biome" = "biomejs.biome";
         "ruff" = "charliermarsh.ruff";
         "gofumpt" = "golang.go"; 
         "rustfmt" = "rust-lang.rust-analyzer";

@@ -3,7 +3,7 @@
     # Nix: Standardized on the new RFC 166 style
     nix = {
       lsp = "nixd";
-      formatter = "nixfmt-rfc-style";
+      formatter = "nixfmt";
       indent = 2;
     };
 
