@@ -16,7 +16,6 @@ let
   media = import ./media.nix { inherit lib; };
   security = import ./security.nix { inherit lib; };
   aiTools = import ./ai-tools.nix { inherit lib; };
-  hytaleServer = import ./hytale-server.nix { inherit lib; };
 in
 {
   options.host.features =
@@ -30,6 +29,5 @@ in
     // productivity
     // media
     // security
-    // aiTools
-    // hytaleServer;
+    // aiTools;
 }

@@ -10,8 +10,6 @@ let
     mkOption
     types
     ;
-  containersLib = import ../lib.nix { inherit lib; };
-  inherit (containersLib) mkResourceOptions mkResourceFlags;
   cfg = config.host.services.containersSupplemental;
   termixCfg = cfg.termix;
 in
@@ -31,10 +29,6 @@ in
       description = "Port to expose Termix on";
     };
 
-    resources = mkResourceOptions {
-      memory = "512m";
-      cpus = "0.5";
-    };
   };
 
   config = mkIf (cfg.enable && termixCfg.enable) {
@@ -52,10 +46,10 @@ in
         "/home/${config.host.username}/.ssh:/root/.ssh:ro"
       ];
       ports = [ "${toString termixCfg.port}:${toString termixCfg.port}" ];
-      extraOptions =
-        # Removed healthcheck - causes false positives during startup, service works without it
+      extraOptions = [
         # Use host network mode so Termix can access host SSH service
-        [ "--network=host" ] ++ mkResourceFlags termixCfg.resources;
+        "--network=host"
+      ];
     };
 
     systemd.tmpfiles.rules = [

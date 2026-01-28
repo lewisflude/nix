@@ -14,8 +14,6 @@ let
     optionalString
     mkMerge
     ;
-  containersLib = import ../lib.nix { inherit lib; };
-  inherit (containersLib) mkResourceOptions mkResourceFlags;
 
   cfg = config.host.services.containersSupplemental;
   calCfg = cfg.calcom;
@@ -49,17 +47,6 @@ in
 
     openFirewall = mkEnableOption "Open firewall ports for Cal.com" // {
       default = true;
-    };
-
-    resources = {
-      app = mkResourceOptions {
-        memory = "2g";
-        cpus = "2";
-      };
-      db = mkResourceOptions {
-        memory = "1g";
-        cpus = "2";
-      };
     };
 
     port = mkOption {
@@ -240,10 +227,7 @@ in
           volumes = [
             "${cfg.configPath}/calcom/postgres:/var/lib/postgresql/data"
           ];
-          extraOptions = [
-            "--shm-size=256m"
-          ]
-          ++ mkResourceFlags calCfg.resources.db;
+          extraOptions = [ "--shm-size=256m" ];
         };
 
         calcom = {
@@ -304,7 +288,6 @@ in
             "${cfg.configPath}/calcom/app_data:/app/data"
           ];
           ports = [ "${toString calCfg.port}:3000" ];
-          extraOptions = mkResourceFlags calCfg.resources.app;
           dependsOn = [ "calcom-db" ];
         };
       };

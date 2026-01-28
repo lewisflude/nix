@@ -4,7 +4,7 @@
 
   home.packages = [
     # Format converters and processing
-    pkgs.ffmpeg-full # Comprehensive audio/video conversion (includes most sox functionality)
+    pkgs.ffmpeg # Audio/video conversion (saves ~1GB vs ffmpeg-full by excluding whisper-cpp)
     pkgs.flac
     pkgs.lame
     pkgs.opusTools

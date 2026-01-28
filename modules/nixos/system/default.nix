@@ -9,6 +9,5 @@
     ./zfs.nix
     ./sops.nix
     ./service-monitoring.nix
-    ./boot-analysis.nix
   ];
 }

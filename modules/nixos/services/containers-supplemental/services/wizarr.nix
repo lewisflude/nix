@@ -6,8 +6,6 @@
 }:
 let
   inherit (lib) mkIf mkEnableOption;
-  containersLib = import ../lib.nix { inherit lib; };
-  inherit (containersLib) mkResourceOptions mkResourceFlags mkHealthFlags;
   cfg = config.host.services.containersSupplemental;
 in
 {
@@ -19,11 +17,6 @@ in
     openFirewall = mkEnableOption "Open firewall ports for Wizarr" // {
       default = true;
     };
-
-    resources = mkResourceOptions {
-      memory = "256m";
-      cpus = "0.25";
-    };
   };
 
   config = mkIf (cfg.enable && cfg.wizarr.enable) {
@@ -34,11 +27,13 @@ in
       };
       volumes = [ "${cfg.configPath}/wizarr:/data/database" ];
       ports = [ "5690:5690" ];
-      extraOptions =
-        mkHealthFlags {
-          cmd = "wget --no-verbose --tries=1 --spider http://localhost:5690/ || exit 1";
-        }
-        ++ mkResourceFlags cfg.wizarr.resources;
+      extraOptions = [
+        "--health-cmd=wget --no-verbose --tries=1 --spider http://localhost:5690/ || exit 1"
+        "--health-interval=30s"
+        "--health-timeout=10s"
+        "--health-retries=3"
+        "--health-start-period=30s"
+      ];
     };
 
     systemd.tmpfiles.rules = [

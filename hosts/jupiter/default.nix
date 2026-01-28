@@ -138,7 +138,6 @@
 
         # Storage optimization: NVMe (ZFS root pool) for incomplete downloads, HDD for final storage
         incompleteDownloadPath = "/var/lib/qbittorrent/incomplete";
-        diskCacheSize = 4096; # MiB - 4GB cache for high-performance with 64GB RAM system
 
         # OPTIMIZED SETTINGS (balanced for stability and performance)
         # Based on 8,216 KB/s upload via VPN, but tuned to prevent packet drops
@@ -159,28 +158,12 @@
         maxActiveDownloads = 5; # Concurrent downloads (5 for faster grabbing, 3 for HDD protection)
         maxActiveUploads = 50; # Reduced from 273 to prevent packet drops
 
-        # Automatic torrent management
-        autoTMMEnabled = true;
         defaultSavePath = "/mnt/storage/torrents";
 
         # Share limits (ratio and seeding time)
         maxRatio = 3.0;
         maxInactiveSeedingTime = 43200; # 30 days in minutes (43200 = 30 * 24 * 60)
         shareLimitAction = "Stop"; # Pause torrent when limits reached
-
-        # Slow torrent handling (private tracker settings - more aggressive)
-        # These torrents don't count against active limits if below thresholds
-        slowTorrentsDownloadRate = 10; # KiB/s - private tracker setting (default: 5)
-        slowTorrentsUploadRate = 10; # KiB/s - private tracker setting (default: 5)
-        slowTorrentsInactivityTimer = 30; # seconds - private tracker setting (default: 60)
-
-        # Torrent behavior settings
-        # Note: addToTopOfQueue, addExtensionToIncompleteFiles, and useCategoryPathsInManualMode
-        # are now enabled by default in the module, so explicit settings are optional
-        deleteTorrentFilesAfterwards = "Always";
-
-        # Preallocation disabled for ZFS (prevents fragmentation and double-writes)
-        preallocation = false;
 
         # VPN Configuration
         vpn = {
@@ -234,6 +217,17 @@
       };
     };
 
+    aiTools = {
+      enable = true;
+      ollama = {
+        acceleration = "cuda";
+        models = [ "llama2" ];
+      };
+      openWebui.enable = false;
+    };
+  };
+
+  services = {
     hytaleServer = {
       enable = true;
       port = 5520; # Default UDP port for QUIC
@@ -256,16 +250,6 @@
         symlinkFromFlatpak = false; # Copy files (uses 3.7GB but avoids permissions)
       };
     };
-
-    aiTools = {
-      enable = true;
-      ollama = {
-        acceleration = "cuda";
-        models = [ "llama2" ];
-      };
-      openWebui.enable = false;
-    };
-
     containersSupplemental = {
       enable = true;
       uid = 985;

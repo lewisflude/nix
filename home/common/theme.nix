@@ -26,8 +26,8 @@ in
     # Override signal-nix's GTK defaults with custom settings
     # Note: gtk-compat.nix handles signal-nix's invalid gtk.gtk4Theme option
     iconTheme = lib.mkForce {
-      name = "Papirus-Dark";
-      package = pkgs.papirus-icon-theme;
+      name = "Adwaita";
+      package = pkgs.adwaita-icon-theme;
     };
     cursorTheme = lib.mkForce {
       name = "DMZ-White";

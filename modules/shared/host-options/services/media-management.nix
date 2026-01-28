@@ -25,74 +25,22 @@ in
       example = "America/New_York";
     };
 
-    prowlarr = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable Prowlarr indexer manager";
-        example = true;
-      };
-    };
-
-    radarr = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable Radarr movie management";
-        example = true;
-      };
-    };
-
-    sonarr = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable Sonarr TV show management";
-        example = true;
-      };
-    };
-
-    lidarr = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable Lidarr music management";
-        example = true;
-      };
-    };
-
-    readarr = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable Readarr book management";
-        example = true;
-      };
-    };
+    prowlarr.enable = mkEnableOption "Prowlarr indexer manager" // { default = true; };
+    radarr.enable = mkEnableOption "Radarr movie management" // { default = true; };
+    sonarr.enable = mkEnableOption "Sonarr TV show management" // { default = true; };
+    lidarr.enable = mkEnableOption "Lidarr music management" // { default = true; };
+    readarr.enable = mkEnableOption "Readarr book management" // { default = true; };
 
     listenarr = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable Listenarr audiobook management";
-        example = true;
-      };
+      enable = mkEnableOption "Listenarr audiobook management";
       publicUrl = mkOption {
         type = types.nullOr types.str;
         default = null;
-        description = "Public URL for Listenarr (optional, used by Discord bot)";
-        example = "https://listenarr.example.com";
+        description = "Public URL for Listenarr (used by Discord bot)";
       };
     };
 
-    sabnzbd = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable SABnzbd usenet downloader";
-        example = true;
-      };
-    };
+    sabnzbd.enable = mkEnableOption "SABnzbd usenet downloader" // { default = true; };
 
     qbittorrent = mkOption {
       type = types.attrs;
@@ -106,49 +54,10 @@ in
       description = "Transmission configuration (options defined in service module)";
     };
 
-    jellyfin = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable Jellyfin media server";
-        example = true;
-      };
-    };
-
-    jellyseerr = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable Jellyseerr request management";
-        example = true;
-      };
-    };
-
-    flaresolverr = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable FlareSolverr cloudflare bypass";
-        example = true;
-      };
-    };
-
-    unpackerr = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable Unpackerr archive extractor";
-        example = true;
-      };
-    };
-
-    navidrome = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable Navidrome music server";
-        example = true;
-      };
-    };
+    jellyfin.enable = mkEnableOption "Jellyfin media server" // { default = true; };
+    jellyseerr.enable = mkEnableOption "Jellyseerr request management" // { default = true; };
+    flaresolverr.enable = mkEnableOption "FlareSolverr cloudflare bypass" // { default = true; };
+    unpackerr.enable = mkEnableOption "Unpackerr archive extractor" // { default = true; };
+    navidrome.enable = mkEnableOption "Navidrome music server" // { default = true; };
   };
 }

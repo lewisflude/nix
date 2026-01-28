@@ -10,9 +10,7 @@
     ./features/restic.nix
     ./features/media-management.nix
     ./features/ai-tools.nix
-    ./features/containers-supplemental.nix
     ./features/flatpak.nix
-    ./features/hytale-server.nix
 
     ./core
     ./hardware

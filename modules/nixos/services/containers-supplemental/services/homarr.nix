@@ -6,9 +6,6 @@
 }:
 let
   inherit (lib) mkIf mkEnableOption;
-  containersLib = import ../lib.nix { inherit lib; };
-  inherit (containersLib) mkResourceOptions mkResourceFlags mkHealthFlags;
-
   cfg = config.host.services.containersSupplemental;
 in
 {
@@ -19,11 +16,6 @@ in
 
     openFirewall = mkEnableOption "Open firewall ports for Homarr" // {
       default = true;
-    };
-
-    resources = mkResourceOptions {
-      memory = "512m";
-      cpus = "0.5";
     };
   };
 
@@ -39,11 +31,13 @@ in
         "${cfg.configPath}/homarr/data:/data"
       ];
       ports = [ "${toString constants.ports.services.homarr}:7575" ];
-      extraOptions =
-        mkHealthFlags {
-          cmd = "wget --no-verbose --tries=1 --spider http://localhost:7575/ || exit 1";
-        }
-        ++ mkResourceFlags cfg.homarr.resources;
+      extraOptions = [
+        "--health-cmd=wget --no-verbose --tries=1 --spider http://localhost:7575/ || exit 1"
+        "--health-interval=30s"
+        "--health-timeout=10s"
+        "--health-retries=3"
+        "--health-start-period=30s"
+      ];
     };
 
     systemd.tmpfiles.rules = [

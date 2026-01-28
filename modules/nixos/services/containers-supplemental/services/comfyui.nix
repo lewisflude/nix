@@ -12,8 +12,6 @@ let
     types
     mkMerge
     ;
-  containersLib = import ../lib.nix { inherit lib; };
-  inherit (containersLib) mkResourceOptions mkResourceFlags;
   cfg = config.host.services.containersSupplemental;
 in
 {
@@ -42,11 +40,6 @@ in
       description = "Path for ComfyUI data.";
     };
 
-    resources = mkResourceOptions {
-      memory = "16g";
-      cpus = "8";
-      memorySwap = "20g";
-    };
   };
 
   config = mkIf (cfg.enable && cfg.comfyui.enable) (mkMerge [
@@ -66,10 +59,7 @@ in
           "${cfg.comfyui.dataPath}/basedir:/basedir"
         ];
         ports = [ "8188:8188" ];
-        extraOptions = [
-          "--device=nvidia.com/gpu=all"
-        ]
-        ++ mkResourceFlags cfg.comfyui.resources;
+        extraOptions = [ "--device=nvidia.com/gpu=all" ];
       };
 
       systemd.tmpfiles.rules = [

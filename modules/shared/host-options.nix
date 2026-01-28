@@ -4,7 +4,6 @@
 # - ./host-options/features.nix - Feature options (development, gaming, etc.)
 # - ./host-options/hardware.nix - Hardware options (GPU IDs, etc.)
 # - ./host-options/services/media-management.nix - Media management options
-# - ./host-options/services/containers-supplemental.nix - Container service options
 #
 # This file re-exports all the split modules for backwards compatibility.
 {
@@ -13,6 +12,5 @@
     ./host-options/features
     ./host-options/hardware.nix
     ./host-options/services/media-management.nix
-    ./host-options/services/containers-supplemental.nix
   ];
 }

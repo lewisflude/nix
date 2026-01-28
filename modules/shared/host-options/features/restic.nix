@@ -8,18 +8,13 @@ let
 in
 {
   restic = {
-    enable = mkEnableOption "Restic backup integration" // {
-      default = false;
-      example = true;
-    };
+    enable = mkEnableOption "Restic backup integration";
 
     backups = mkOption {
       type = types.attrsOf (
         types.submodule (_: {
           options = {
-            enable = mkEnableOption "Enable this Restic backup job" // {
-              example = true;
-            };
+            enable = mkEnableOption "Enable this Restic backup job";
             path = mkOption {
               type = types.str;
               description = "Path to back up.";
@@ -73,10 +68,7 @@ in
     };
 
     restServer = {
-      enable = mkEnableOption "Restic REST server" // {
-        default = false;
-        example = true;
-      };
+      enable = mkEnableOption "Restic REST server";
       port = mkOption {
         type = types.int;
         default = 8000;

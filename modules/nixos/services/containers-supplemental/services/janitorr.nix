@@ -15,8 +15,6 @@ let
     nameValuePair
     recursiveUpdate
     ;
-  containersLib = import ../lib.nix { inherit lib; };
-  inherit (containersLib) mkResourceOptions mkResourceFlags mkHealthFlags;
 
   cfg = config.host.services.containersSupplemental;
 in
@@ -66,10 +64,6 @@ in
       description = "Recursive overrides applied to the generated Janitorr configuration.";
     };
 
-    resources = mkResourceOptions {
-      memory = "512m";
-      cpus = "1.0";
-    };
   };
 
   config = mkIf (cfg.enable && cfg.janitorr.enable) (
@@ -146,15 +140,12 @@ in
           # Host networking reduces isolation but simplifies communication with Jellyfin/Sonarr/Radarr
           # Acceptable for internal media cleanup services on trusted home network
           "--network=host"
-        ]
-        ++ mkHealthFlags {
-          cmd = "/workspace/health-check";
-          interval = "5s";
-          timeout = "10s";
-          retries = "3";
-          startPeriod = "45s";
-        }
-        ++ mkResourceFlags cfg.janitorr.resources;
+          "--health-cmd=/workspace/health-check"
+          "--health-interval=5s"
+          "--health-timeout=10s"
+          "--health-retries=3"
+          "--health-start-period=45s"
+        ];
       };
 
       systemd.tmpfiles.rules = [

@@ -11,8 +11,6 @@ let
     types
     optionalAttrs
     ;
-  containersLib = import ../lib.nix { inherit lib; };
-  inherit (containersLib) mkResourceOptions mkResourceFlags mkHealthFlags;
   cfg = config.host.services.containersSupplemental;
   jellystatCfg = cfg.jellystat;
 in
@@ -38,10 +36,6 @@ in
       description = "Use sops-nix for Jellystat secrets management";
     };
 
-    resources = mkResourceOptions {
-      memory = "256m";
-      cpus = "0.25";
-    };
   };
 
   config = mkIf (cfg.enable && jellystatCfg.enable) (
@@ -74,15 +68,13 @@ in
           "${cfg.configPath}/jellystat:/app/backend/userData"
         ];
         ports = [ "${toString jellystatCfg.port}:${toString jellystatCfg.port}" ];
-        extraOptions =
-          mkHealthFlags {
-            cmd = "wget --no-verbose --tries=1 --spider http://localhost:${toString jellystatCfg.port}/ || exit 1";
-            interval = "30s";
-            timeout = "10s";
-            retries = "3";
-            startPeriod = "60s";
-          }
-          ++ mkResourceFlags jellystatCfg.resources;
+        extraOptions = [
+          "--health-cmd=wget --no-verbose --tries=1 --spider http://localhost:${toString jellystatCfg.port}/ || exit 1"
+          "--health-interval=30s"
+          "--health-timeout=10s"
+          "--health-retries=3"
+          "--health-start-period=60s"
+        ];
       };
 
       systemd.tmpfiles.rules = [

@@ -9,7 +9,6 @@
     # Note: swaylock-effects is handled in apps/swayidle.nix via programs.swaylock
     pkgs.font-awesome
     pkgs.aseprite
-    pkgs.wl-screenrec
 
     # Thunar file manager with plugins (primary)
     pkgs.thunar

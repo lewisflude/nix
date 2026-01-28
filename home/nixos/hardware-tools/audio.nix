@@ -6,7 +6,6 @@
     # PipeWire control and utilities
     pkgs.pwvucontrol # Modern PipeWire volume control (GTK4)
     pkgs.helvum # PipeWire patchbay for audio routing
-    pkgs.qpwgraph # Qt-based PipeWire graph manager
 
     # PulseAudio compatibility tools
     pkgs.pavucontrol # PulseAudio volume control (works with PipeWire)

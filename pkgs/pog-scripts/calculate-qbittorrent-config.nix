@@ -162,25 +162,10 @@ pog.pog {
               # System resource settings based on detected RAM
               if [ "$RAM_GB" -ge 32 ]; then
                 PHYSICAL_MEMORY_LIMIT=8192
-                DISK_CACHE_SIZE=4096
               elif [ "$RAM_GB" -ge 16 ]; then
                 PHYSICAL_MEMORY_LIMIT=4096
-                DISK_CACHE_SIZE=2048
               else
                 PHYSICAL_MEMORY_LIMIT=2048
-                DISK_CACHE_SIZE=1024
-              fi
-
-              # CPU-based settings
-              if [ "$CPU_CORES" -ge 16 ]; then
-                ASYNC_IO_THREADS=32
-                HASHING_THREADS=8
-              elif [ "$CPU_CORES" -ge 8 ]; then
-                ASYNC_IO_THREADS=16
-                HASHING_THREADS=4
-              else
-                ASYNC_IO_THREADS=8
-                HASHING_THREADS=2
               fi
             }
 
@@ -204,9 +189,6 @@ pog.pog {
 
         # System Resource Settings
         physicalMemoryLimit = $PHYSICAL_MEMORY_LIMIT;
-        asyncIOThreadsCount = $ASYNC_IO_THREADS;
-        hashingThreadsCount = $HASHING_THREADS;
-        diskCacheSize = $DISK_CACHE_SIZE;
       };
       EOF
             }
@@ -233,10 +215,7 @@ pog.pog {
           "maxUploadsPerTorrent": $MAX_UPLOADS_PER_TORRENT,
           "maxActiveTorrents": $MAX_ACTIVE_TORRENTS,
           "maxActiveUploads": $MAX_ACTIVE_UPLOADS,
-          "physicalMemoryLimit": $PHYSICAL_MEMORY_LIMIT,
-          "asyncIOThreadsCount": $ASYNC_IO_THREADS,
-          "hashingThreadsCount": $HASHING_THREADS,
-          "diskCacheSize": $DISK_CACHE_SIZE
+          "physicalMemoryLimit": $PHYSICAL_MEMORY_LIMIT
         },
         "priority": "$priority"
       }
@@ -276,9 +255,6 @@ pog.pog {
       System Tuning:
       ─────────────────────────────────────────────────────────
       physicalMemoryLimit:        ''${PHYSICAL_MEMORY_LIMIT} MiB
-      asyncIOThreadsCount:        ''${ASYNC_IO_THREADS}
-      hashingThreadsCount:        ''${HASHING_THREADS}
-      diskCacheSize:              ''${DISK_CACHE_SIZE} MiB
 
       Next Steps:
       ─────────────────────────────────────────────────────────

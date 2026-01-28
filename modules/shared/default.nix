@@ -5,7 +5,6 @@
     ./host-options/hardware.nix
     ./host-options/system.nix
     ./host-options/services/media-management.nix
-    ./host-options/services/containers-supplemental.nix
     ./core.nix
     ./shell.nix
     ./dev.nix

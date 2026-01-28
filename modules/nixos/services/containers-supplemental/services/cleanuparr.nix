@@ -12,8 +12,6 @@ let
     mkOption
     types
     ;
-  containersLib = import ../lib.nix { inherit lib; };
-  inherit (containersLib) mkResourceOptions mkResourceFlags mkHealthFlags;
 
   cfg = config.host.services.containersSupplemental;
 in
@@ -39,10 +37,6 @@ in
       description = "Path to media storage directory.";
     };
 
-    resources = mkResourceOptions {
-      memory = "512m";
-      cpus = "1.0";
-    };
   };
 
   config = mkIf (cfg.enable && cfg.cleanuparr.enable) {
@@ -70,15 +64,12 @@ in
         # Host networking reduces isolation but simplifies communication with Sonarr/Radarr/etc
         # Acceptable for internal services on trusted home network
         "--network=host"
-      ]
-      ++ mkHealthFlags {
-        cmd = "curl -f http://localhost:${toString cfg.cleanuparr.port}/health || exit 1";
-        interval = "30s";
-        timeout = "10s";
-        retries = "3";
-        startPeriod = "60s";
-      }
-      ++ mkResourceFlags cfg.cleanuparr.resources;
+        "--health-cmd=curl -f http://localhost:${toString cfg.cleanuparr.port}/health || exit 1"
+        "--health-interval=30s"
+        "--health-timeout=10s"
+        "--health-retries=3"
+        "--health-start-period=60s"
+      ];
     };
 
     systemd.tmpfiles.rules = [

@@ -10,7 +10,7 @@ let
   # Note: Modern qBittorrent uses Session\ prefixed keys in [BitTorrent] section
   # This section includes WebUI config, AutoTMM, paths, ratio settings, and Advanced settings
   preferencesCfg = {
-    AutoTMMEnabled = qbittorrentCfg.autoTMMEnabled;
+    AutoTMMEnabled = true; # Always enabled for Arr apps
     WebUI = webUICfg;
     # Advanced settings for libtorrent - nested under Advanced key
     Advanced = {
@@ -85,12 +85,12 @@ let
 
     # Additional torrent behavior settings
     AddTorrentToTopOfQueue = qbittorrentCfg.addToTopOfQueue;
-    Preallocation = qbittorrentCfg.preallocation;
-    AddExtensionToIncompleteFiles = qbittorrentCfg.addExtensionToIncompleteFiles;
-    UseCategoryPathsInManualMode = qbittorrentCfg.useCategoryPathsInManualMode;
+    Preallocation = false; # Always false for ZFS/Btrfs
+    AddExtensionToIncompleteFiles = true;
+    UseCategoryPathsInManualMode = true;
 
     # Resume data save interval (minutes)
-    SaveResumeDataInterval = qbittorrentCfg.resumeDataSaveInterval;
+    SaveResumeDataInterval = 15;
 
     # Upload piece suggestions for better seeding
     SuggestMode = qbittorrentCfg.sendUploadPieceSuggestions;
@@ -99,21 +99,14 @@ let
     AnnounceToAllTrackers = qbittorrentCfg.reannounceWhenAddressChanged;
     ReannounceWhenAddressChanged = qbittorrentCfg.reannounceWhenAddressChanged;
 
-    # Advanced session settings for performance optimization
-    AsyncIOThreadsCount = qbittorrentCfg.asyncIOThreadsCount;
-    HashingThreadsCount = qbittorrentCfg.hashingThreadsCount;
-    FilePoolSize = qbittorrentCfg.filePoolSize;
-    DiskCacheSize = qbittorrentCfg.diskCacheSize;
-    DiskCacheTTL = qbittorrentCfg.diskCacheTTL;
-    CoalesceReadWrite = qbittorrentCfg.coalesceReadWrite;
-    PieceExtentAffinity = qbittorrentCfg.usePieceExtentAffinity;
-    SendBufferWatermark = qbittorrentCfg.sendBufferWatermark;
-    SendBufferLowWatermark = qbittorrentCfg.sendBufferLowWatermark;
-    SendBufferWatermarkFactor = qbittorrentCfg.sendBufferWatermarkFactor;
-    CheckingMemUsageSize = qbittorrentCfg.checkingMemUsageSize;
-
-    # OS cache usage for better performance with sufficient RAM
-    use_os_cache = qbittorrentCfg.useOSCache;
+    # Advanced session settings with good defaults
+    AsyncIOThreadsCount = 32; # Good for NVMe SSDs
+    HashingThreadsCount = 8; # Good for modern CPUs
+    FilePoolSize = 10000;
+    DiskCacheSize = 4096; # 4GB default
+    DiskCacheTTL = 60;
+    CheckingMemUsageSize = 128;
+    use_os_cache = true;
 
     # LAN rate limit bypass
     IgnoreLimitsOnLAN = qbittorrentCfg.ignoreLimitsOnLAN;
@@ -124,9 +117,9 @@ let
     # Slow torrent handling - don't count slow torrents in active limits
     IgnoreSlowTorrents = qbittorrentCfg.ignoreSlowTorrents;
     IgnoreSlowTorrentsForQueueing = qbittorrentCfg.ignoreSlowTorrents;
-    SlowTorrentsDownloadRate = qbittorrentCfg.slowTorrentsDownloadRate;
-    SlowTorrentsUploadRate = qbittorrentCfg.slowTorrentsUploadRate;
-    SlowTorrentsInactivityTimer = qbittorrentCfg.slowTorrentsInactivityTimer;
+    SlowTorrentsDownloadRate = 5; # KiB/s threshold
+    SlowTorrentsUploadRate = 5; # KiB/s threshold
+    SlowTorrentsInactivityTimer = 60; # seconds
 
     # Share limits (ratio and seeding time limits)
     # GlobalMaxRatio and GlobalMaxInactiveSeedingMinutes are in Session, not Preferences
@@ -134,9 +127,6 @@ let
   }
   // optionalAttrs (qbittorrentCfg.maxRatio != null) {
     GlobalMaxRatio = qbittorrentCfg.maxRatio;
-  }
-  // optionalAttrs (qbittorrentCfg.maxSeedingTime != null) {
-    GlobalMaxSeedingMinutes = qbittorrentCfg.maxSeedingTime;
   }
   // optionalAttrs (qbittorrentCfg.maxInactiveSeedingTime != null) {
     GlobalMaxInactiveSeedingMinutes = qbittorrentCfg.maxInactiveSeedingTime;

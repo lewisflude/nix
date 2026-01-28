@@ -128,12 +128,6 @@ in
         Session = bittorrentSession;
       };
     }
-    # Core configuration - at same level as BitTorrent and Preferences
-    // optionalAttrs (qbittorrentCfg.deleteTorrentFilesAfterwards != "Never") {
-      Core = {
-        AutoDeleteAddedTorrentFile = qbittorrentCfg.deleteTorrentFilesAfterwards;
-      };
-    }
     // optionalAttrs (qbittorrentCfg.categories != null) {
       Category = mapAttrs (_: path: {
         SavePath = path;

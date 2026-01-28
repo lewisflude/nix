@@ -10,8 +10,6 @@ let
     mkOption
     types
     ;
-  containersLib = import ../lib.nix { inherit lib; };
-  inherit (containersLib) mkResourceOptions mkResourceFlags;
 
   cfg = config.host.services.containersSupplemental;
 
@@ -27,10 +25,6 @@ in
       default = false;
     };
 
-    resources = mkResourceOptions {
-      memory = "128m";
-      cpus = "0.25";
-    };
 
     discordToken = mkOption {
       type = types.nullOr types.str;
@@ -77,8 +71,7 @@ in
         # Host networking reduces isolation but is necessary for Discord bot functionality
         # Acceptable for internal bot services on trusted home network
         "--network=host"
-      ]
-      ++ mkResourceFlags cfg.doplarr.resources;
+      ];
     };
 
     systemd.tmpfiles.rules = [
