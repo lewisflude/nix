@@ -16,6 +16,12 @@
       resume = true;
     };
 
+    media = {
+      audio = {
+        enable = true;
+      };
+    };
+
     gaming = {
       enable = true;
     };

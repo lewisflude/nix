@@ -19,7 +19,7 @@ in
       pkgs.ffmpeg-full # Comprehensive audio/video conversion
       pkgs.flac
       pkgs.lame
-      pkgs.opus
+      pkgs.opusTools
       pkgs.vorbis-tools
     ]
     ++ optionals cfg.production [

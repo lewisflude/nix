@@ -41,15 +41,20 @@ let
       # Log output for debugging
       echo "$line"
 
+      # Extract notification type from JSON
+      message="$(echo "$line" | ${pkgs.jq}/bin/jq -r '.type // empty')"
+
+      # Filter: Only process GPG events, ignore FIDO2 (browser WebAuthn polling)
+      if [ "$message" != "GPG" ]; then
+        continue
+      fi
+
       # Rate limit: 2-second delay between notifications
       NOW="$(${pkgs.coreutils}/bin/date +%s)"
       if [[ "$NOW" -le "$((LAST_NTFY + 2))" ]]; then
         continue
       fi
       LAST_NTFY="$NOW"
-
-      # Extract notification type from JSON
-      message="$(echo "$line" | ${pkgs.jq}/bin/jq -r '.type // empty')"
 
       if [ -n "$message" ]; then
         # Send notification with sound
@@ -260,20 +265,26 @@ in
   # Reference: https://github.com/ghostty-org/ghostty/discussions/5951
 
   # YubiKey touch notification LaunchAgent (macOS only)
-  # Automatically starts yknotify on login to watch for YubiKey touch events
-  # and sends macOS notifications when touch is required
-  launchd.agents = lib.mkIf isDarwin {
-    yknotify = {
-      enable = true;
-      config = {
-        ProgramArguments = [
-          "${yknotifyWrapper}/bin/yknotify-wrapper"
-        ];
-        KeepAlive = true;
-        RunAtLoad = true;
-        StandardOutPath = "/tmp/yknotify.log";
-        StandardErrorPath = "/tmp/yknotify.log";
-      };
-    };
-  };
+  # DISABLED: yknotify constantly triggers on browser FIDO2/WebAuthn polling
+  # Chrome and other browsers continuously check for security keys, causing
+  # yknotify to spam FIDO2 events even when no GPG/SSH operation is happening.
+  # The tool is designed for GPG touch detection but can't filter out browser activity.
+  #
+  # If you want notifications for GPG operations only, run manually when needed:
+  #   yknotify
+  #
+  # launchd.agents = lib.mkIf isDarwin {
+  #   yknotify = {
+  #     enable = true;
+  #     config = {
+  #       ProgramArguments = [
+  #         "${yknotifyWrapper}/bin/yknotify-wrapper"
+  #       ];
+  #       KeepAlive = true;
+  #       RunAtLoad = true;
+  #       StandardOutPath = "/tmp/yknotify.log";
+  #       StandardErrorPath = "/tmp/yknotify.log";
+  #     };
+  #   };
+  # };
 }

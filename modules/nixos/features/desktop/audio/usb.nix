@@ -15,6 +15,34 @@ in
     (mkIf cfg.enable {
       # USB audio optimizations for professional interfaces
       # Targeted approach: disable autosuspend only for audio class devices
+      # Apogee USB reconnection handler
+      # Restarts PipeWire when device reconnects (e.g., after KVM switch)
+      systemd.services.apogee-reconnect = {
+        description = "Restart PipeWire services on Apogee USB reconnection";
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = pkgs.writeShellScript "apogee-reconnect" ''
+            # Wait for USB device enumeration to complete
+            sleep 2
+
+            # Find all users with running PipeWire sessions
+            for user in $(${pkgs.systemd}/bin/loginctl list-users --no-legend | ${pkgs.coreutils}/bin/awk '{print $2}'); do
+              uid=$(${pkgs.coreutils}/bin/id -u "$user" 2>/dev/null) || continue
+
+              # Check if user has PipeWire running
+              if ${pkgs.systemd}/bin/systemctl --user --machine="$user@.host" is-active --quiet pipewire.service 2>/dev/null; then
+                echo "Restarting PipeWire services for user: $user"
+
+                # Restart PipeWire services for this user
+                ${pkgs.systemd}/bin/systemctl --user --machine="$user@.host" restart pipewire.service pipewire-pulse.service wireplumber.service || true
+              fi
+            done
+
+            echo "Apogee Symphony Desktop reconnected - audio services restarted"
+          '';
+        };
+      };
+
       services.udev.extraRules = ''
         # Disable autosuspend for USB audio (class 01) to prevent dropouts
         ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="01", TEST=="power/control", \
@@ -22,7 +50,8 @@ in
 
         # Apogee-specific optimization (USB Vendor ID: 0xa07)
         ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0a07", \
-          ATTR{power/control}="on", ATTR{power/wakeup}="disabled", ATTR{power/autosuspend}="-1"
+          ATTR{power/control}="on", ATTR{power/wakeup}="disabled", ATTR{power/autosuspend}="-1", \
+          TAG+="systemd", ENV{SYSTEMD_WANTS}="apogee-reconnect.service"
       '';
 
       # PCI latency timer optimization for audio devices

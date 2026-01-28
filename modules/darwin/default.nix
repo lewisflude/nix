@@ -12,6 +12,7 @@
 
     ./apps.nix
     ./audio.nix
+    ./audio-reconnect.nix
     ./gaming.nix
     ./vr.nix
 
