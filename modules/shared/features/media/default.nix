@@ -34,13 +34,6 @@ in
             pkgs.paulxstretch
           ])
         )
-        ++ optionals (cfg.video.enable && cfg.video.editing) [
-          pkgs.kdenlive
-          pkgs.ffmpeg
-          pkgs.handbrake
-          pkgs.imagemagick
-          pkgs.gimp
-        ]
         # Note: obs-studio is configured via home-manager programs.obs-studio
         ++ optionals (cfg.video.enable && cfg.video.streaming) [
           pkgs.v4l2loopback

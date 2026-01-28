@@ -99,8 +99,7 @@ in
     };
 
     video = {
-      enable = mkEnableOption "video production and editing tools";
-      editing = mkEnableOption "video editing tools (kdenlive, ffmpeg, handbrake, imagemagick, gimp)";
+      enable = mkEnableOption "video production tools";
       streaming = mkEnableOption "video streaming tools (v4l2loopback for virtual camera)";
     };
 
