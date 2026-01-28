@@ -228,33 +228,10 @@
   };
 
   services = {
-    hytaleServer = {
-      enable = true;
-      port = 5520; # Default UDP port for QUIC
-      authMode = "authenticated"; # Require OAuth (use "offline" for testing)
-
-      memory = {
-        max = "8G"; # Max heap - adjust based on player count
-        min = "4G"; # Initial heap
-      };
-
-      backup = {
-        enable = true;
-        frequency = 60; # Backup every hour
-        directory = "/mnt/storage/backups/hytale";
-      };
-
-      # Files auto-detected from Flatpak installation
-      # Copy instead of symlink to avoid permission issues with /home directory
-      serverFiles = {
-        symlinkFromFlatpak = false; # Copy files (uses 3.7GB but avoids permissions)
-      };
-    };
     containersSupplemental = {
       enable = true;
       uid = 985;
       gid = 976;
-      jellystat.enable = true;
       termix = {
         enable = true;
         port = 8083;
