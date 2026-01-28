@@ -43,40 +43,13 @@
       enable = true;
       nssmdns4 = true;
       openFirewall = true;
-      publish = {
-        enable = true;
-        addresses = true;
-        domain = true;
-        hinfo = true;
-        userServices = true;
-        workstation = true;
-      };
+      publish.enable = true;
     };
-    dbus = {
-      implementation = "broker";
-      packages = [ pkgs.avahi ];
-    };
+    dbus.packages = [ pkgs.avahi ];
   };
 
   boot.kernel.sysctl = {
     # IP forwarding for containers/VPN
     "net.ipv4.conf.all.forwarding" = 1;
-    "net.ipv6.conf.all.forwarding" = lib.mkDefault 1;
-
-    # BBR congestion control - proven throughput improvement
-    "net.core.default_qdisc" = "fq";
-    "net.ipv4.tcp_congestion_control" = "bbr";
-
-    # Optimized buffer sizes for symmetrical fiber connections
-    # Note: Lower values can reduce latency for some workloads
-    # If experiencing issues, disk-performance module may override with higher values
-    "net.core.rmem_max" = 2500000; # 2.5MB (as requested for testing)
-    "net.core.wmem_max" = 2500000; # 2.5MB (as requested for testing)
-    "net.ipv4.tcp_rmem" = "4096 87380 2500000";
-    "net.ipv4.tcp_wmem" = "4096 65536 2500000";
-
-    # TCP Fast Open - reduces latency for new connections
-    "net.ipv4.tcp_fastopen" = 3;
-    "net.ipv4.tcp_mtu_probing" = 1;
   };
 }

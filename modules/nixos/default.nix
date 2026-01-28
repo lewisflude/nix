@@ -11,9 +11,7 @@
     ./features/media-management.nix
     ./features/ai-tools.nix
     ./features/containers-supplemental.nix
-    ./features/boot-optimization.nix
     ./features/flatpak.nix
-    ./features/xfs.nix
     ./features/hytale-server.nix
 
     ./core

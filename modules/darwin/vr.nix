@@ -1,5 +1,3 @@
-# Immersed VR for macOS (darwin)
-# Downloads and manages Immersed VR desktop productivity app
 {
   lib,
   config,
@@ -10,30 +8,12 @@ let
   features = config.host.features or { };
   vrEnabled = (features.vr or { }).enable or false;
   immersedEnabled = ((features.vr or { }).immersed or { }).enable or false;
-
-  # Immersed DMG download URL
   immersedUrl = "https://static.immersed.com/dl/Immersed.dmg";
   appName = "Immersed";
   appPath = "/Applications/${appName}.app";
 in
 {
   config = lib.mkIf (vrEnabled && immersedEnabled) {
-    # Check Immersed installation during activation
-    # Auto-install is unreliable during nix-darwin rebuild, so we just notify
-    system.activationScripts.checkImmersed.text = ''
-      echo "🥽 Checking Immersed VR installation..."
-
-      if [ -d "${appPath}" ]; then
-        echo "✅ Immersed is already installed at ${appPath}"
-      else
-        echo ""
-        echo "⚠️  Immersed VR is not installed."
-        echo "   Run 'update-immersed-darwin' to install it."
-        echo ""
-      fi
-    '';
-
-    # Add helper script to update Immersed
     environment.systemPackages = [
       (pkgs.writeShellScriptBin "update-immersed-darwin" ''
         #!/bin/bash

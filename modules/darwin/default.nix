@@ -6,7 +6,6 @@
     ./system-preferences.nix
     ./dock-preferences.nix
     ./finder-preferences.nix
-    ./documentation.nix
     ./security-preferences.nix
     ./performance.nix
 

@@ -13,25 +13,7 @@
     pkgs.xfsprogs
   ];
   boot = {
-    initrd = {
-      supportedFilesystems = [ "zfs" ];
-      availableKernelModules = [
-        "xhci_pci"
-        "ahci"
-        "nvme"
-        "thunderbolt"
-        "usbhid"
-        "usb_storage"
-        "sd_mod"
-        "zfs"
-        "veth"
-        "bridge"
-        "br_netfilter"
-        "xt_nat"
-      ];
-      kernelModules = [ ];
-    };
-    kernelModules = [
+      kernelModules = [
       "kvm-intel"
       "zfs"
       "hid_sony"
@@ -72,13 +54,6 @@
       options = [
         "defaults"
         "nofail"
-        # XFS uses relatime by default (no overhead vs noatime, but maintains sane atime values)
-        # See: https://xfs.wiki.kernel.org/
-        "logbufs=8" # Number of in-memory log buffers
-        "logbsize=256k" # Size of each log buffer (reduces journal IOs)
-        "allocsize=64m" # Preallocation size for buffered I/O
-        "largeio" # Optimize for large sequential I/O (media files)
-        "swalloc" # Stripe-width allocation for large files
       ];
     };
     "/mnt/disk2" = {
@@ -87,13 +62,6 @@
       options = [
         "defaults"
         "nofail"
-        # XFS uses relatime by default (no overhead vs noatime, but maintains sane atime values)
-        # See: https://xfs.wiki.kernel.org/
-        "logbufs=8" # Number of in-memory log buffers
-        "logbsize=256k" # Size of each log buffer (reduces journal IOs)
-        "allocsize=64m" # Preallocation size for buffered I/O
-        "largeio" # Optimize for large sequential I/O (media files)
-        "swalloc" # Stripe-width allocation for large files
       ];
     };
     "/mnt/storage" = {
@@ -116,10 +84,8 @@
   swapDevices = [
     {
       device = "/dev/disk/by-uuid/65835c4c-3b5f-4ced-bf61-c73a6e76e562";
-      priority = 10;
-      discardPolicy = "once"; # TRIM swap at boot (Arch Wiki: SSD best practice)
     }
   ];
   networking.useDHCP = lib.mkDefault true;
-  networking.hostId = "259378f7";
+  networking.hostId = "8425e349";
 }

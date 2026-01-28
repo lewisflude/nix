@@ -36,13 +36,6 @@
   users.knownGroups = [ "wheel" ];
   users.groups.wheel.gid = 0; # wheel is traditionally GID 0
 
-  # Add user to wheel group via system activation script
-  system.activationScripts.addUserToWheel.text = ''
-    if ! dscl . -read /Groups/wheel GroupMembership 2>/dev/null | grep -q "${config.host.username}"; then
-      echo "Adding ${config.host.username} to wheel group..."
-      dseditgroup -o edit -a ${config.host.username} -t user wheel
-    fi
-  '';
   time.timeZone = constants.defaults.timezone;
 
   # YubiKey touch notifications - visual and audio feedback on macOS

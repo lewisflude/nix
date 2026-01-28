@@ -11,7 +11,6 @@
     ./dev.nix
     ./environment.nix
     ./overlays.nix
-    ./cachix.nix
     ./sops.nix
     ./telemetry.nix
 

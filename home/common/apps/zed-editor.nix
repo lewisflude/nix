@@ -9,17 +9,17 @@
     installRemoteServer = true;
 
     # Ensure LSPs and tools are available to Zed's environment
-    extraPackages = with pkgs; [
-      nixd
-      nixpkgs-fmt
+    extraPackages = [
+      pkgs.nixd
+      pkgs.nixpkgs-fmt
       # Tools to bypass the npm E401 authentication errors
-      vtsls
-      tailwindcss-language-server
-      vscode-langservers-extracted # Provides ESLint
-      nodePackages.typescript-language-server
-      basedpyright
-      ruff
-      rust-analyzer
+      pkgs.vtsls
+      pkgs.tailwindcss-language-server
+      pkgs.vscode-langservers-extracted # Provides ESLint
+      pkgs.nodePackages.typescript-language-server
+      pkgs.basedpyright
+      pkgs.ruff
+      pkgs.rust-analyzer
     ];
     # Allow Zed to manage its own settings in ~/.config/zed/
     # Setting to false causes permission errors when Zed tries to update settings

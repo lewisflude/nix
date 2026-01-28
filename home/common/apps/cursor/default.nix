@@ -4,10 +4,8 @@
   ...
 }:
 let
-  constants = import ./constants.nix { };
-  userSettings = import ./settings.nix { inherit pkgs lib constants; };
+  userSettings = import ./settings.nix { inherit pkgs lib; };
   languageSettings = import ./language-settings.nix { inherit lib; };
-  aiSettings = import ./ai-settings.nix { };
   extensions = import ./extensions.nix { inherit pkgs lib; };
   keybindings = import ./keybindings.nix { };
 in
@@ -23,7 +21,6 @@ in
       userSettings = lib.mkMerge [
         userSettings.userSettings
         languageSettings.userSettings
-        aiSettings.userSettings
       ];
       inherit (extensions) extensions;
       inherit (keybindings) keybindings;

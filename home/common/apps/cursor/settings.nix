@@ -1,11 +1,36 @@
 {
   pkgs,
   lib,
-  constants,
   ...
 }:
 let
-  inherit (constants) commonIgnores watcherIgnores;
+  # Minimal exclude patterns for Cursor/VS Code
+  # Philosophy: Trust Cursor's sensible defaults, only specify:
+  # 1. Nix-specific patterns (not in Cursor's defaults)
+  # 2. Performance-critical patterns for this repository
+  # 3. Patterns that significantly impact file watching/search
+
+  # Core excludes for file search and explorer
+  commonIgnores = {
+    "**/result" = true;
+    "**/result-*" = true;
+    "**/.direnv" = true;
+    "**/node_modules" = true;
+    "**/target" = true;
+    "**/.git" = true;
+  };
+
+  # Watcher-specific excludes (performance-critical)
+  watcherIgnores = {
+    "**/.direnv/**" = true;
+    "**/result/**" = true;
+    "**/result-*/**" = true;
+    "**/node_modules/**" = true;
+    "**/target/**" = true;
+    "**/.git/**" = true;
+    "**/.git/objects/**" = true;
+    "**/.git/subtree-cache/**" = true;
+  };
 in
 {
   userSettings = {
@@ -104,5 +129,8 @@ in
     };
     "telemetry.telemetryLevel" = "off";
     "security.workspace.trust.enabled" = false;
+    "nxConsole" = {
+      "generateAiAgentRules" = true;
+    };
   };
 }

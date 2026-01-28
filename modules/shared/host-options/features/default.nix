@@ -16,7 +16,6 @@ let
   media = import ./media.nix { inherit lib; };
   security = import ./security.nix { inherit lib; };
   aiTools = import ./ai-tools.nix { inherit lib; };
-  bootOptimization = import ./boot-optimization.nix { inherit lib; };
   hytaleServer = import ./hytale-server.nix { inherit lib; };
 in
 {
@@ -32,6 +31,5 @@ in
     // media
     // security
     // aiTools
-    // bootOptimization
     // hytaleServer;
 }

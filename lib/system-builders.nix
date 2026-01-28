@@ -31,83 +31,7 @@ let
     ../modules/shared
   ];
 
-  # Helper: Conditionally include a module if input exists
-  optionalModule = cond: module: lib.optionals cond [ module ];
 
-  # Helper: Build a list of optional Darwin integration modules
-  # Follows flake-parts pattern: group related modules together
-  mkDarwinIntegrationModules =
-    attrs:
-    let
-      inherit (attrs) determinate;
-      sops-nix = attrs."sops-nix" or null;
-      home-manager = attrs."home-manager" or null;
-      mac-app-util = attrs."mac-app-util" or null;
-      nix-homebrew = attrs."nix-homebrew" or null;
-    in
-    # Core integration modules (always checked)
-    optionalModule (determinate != null) determinate.darwinModules.default
-    ++ optionalModule (home-manager != null) home-manager.darwinModules.home-manager
-    ++ optionalModule (sops-nix != null) sops-nix.darwinModules.sops
-    # Darwin-specific integrations
-    # mac-app-util: Creates trampoline launchers for Nix-installed .app bundles,
-    # making them searchable in Spotlight and allowing Dock pinning across updates.
-    # See: modules/darwin/mac-app-util.nix
-    ++ optionalModule (mac-app-util != null) mac-app-util.darwinModules.default
-    ++ optionalModule (nix-homebrew != null) nix-homebrew.darwinModules.nix-homebrew;
-
-  # Helper: Build a list of optional NixOS integration modules
-  # Follows flake-parts pattern: group related modules together
-  mkNixosIntegrationModules =
-    attrs:
-    let
-      inherit (attrs) determinate;
-      sops-nix = attrs."sops-nix" or null;
-      inherit (attrs) niri;
-      inherit (attrs) musnix;
-      inherit (attrs) solaar;
-
-      nix-topology = attrs."nix-topology" or null;
-      vpn-confinement = attrs."vpn-confinement" or null;
-    in
-    # Core integration modules
-    optionalModule (determinate != null) determinate.nixosModules.default
-    ++ optionalModule (sops-nix != null) sops-nix.nixosModules.sops
-    # NixOS-specific integrations
-    ++ optionalModule (niri != null) niri.nixosModules.niri
-    ++ optionalModule (musnix != null) musnix.nixosModules.musnix
-    ++ optionalModule (solaar != null) solaar.nixosModules.default
-    ++ optionalModule (nix-topology != null) nix-topology.nixosModules.default
-    ++ optionalModule (vpn-confinement != null) vpn-confinement.nixosModules.default;
-
-  mkHomeManagerConfig =
-    {
-      hostConfig,
-      extraSharedModules ? [ ],
-    }:
-    {
-      # useGlobalPkgs=true shares system packages (more efficient, consistent overlays)
-      useGlobalPkgs = true;
-      useUserPackages = true;
-      verbose = true;
-      # Use .hm-backup to avoid conflicts with existing .backup files (e.g., ironbar)
-      backupFileExtension = "hm-backup";
-      extraSpecialArgs = functionsLib.mkHomeManagerExtraSpecialArgs {
-        inherit inputs hostConfig;
-        includeUserFields = true;
-      };
-      sharedModules =
-        optionalModule (sops-nix != null) sops-nix.homeManagerModules.sops
-        ++ optionalModule (mcp-home-manager != null) mcp-home-manager.homeManagerModules.default
-        ++ optionalModule (
-          ironbar != null && ironbar ? homeManagerModules
-        ) ironbar.homeManagerModules.default
-        ++ optionalModule (nix-flatpak != null) nix-flatpak.homeManagerModules.nix-flatpak
-        ++ optionalModule (signal != null) signal.homeManagerModules.default
-        ++ optionalModule (signal-ironbar != null) signal-ironbar.homeManagerModules.default
-        ++ extraSharedModules;
-      users.${hostConfig.username} = import ../home;
-    };
 in
 {
   mkDarwinSystem =
@@ -134,69 +58,68 @@ in
           # Note: signalPalette, signalLib, signalColors provided by Signal flake
         };
 
-        # Module list follows flake-parts best practices:
-        # 1. Host configuration first
-        # 2. Core system modules
-        # 3. Integration modules (conditionally)
-        # 4. System-specific configuration
-        # 5. Common modules last
-        modules = [
-          # Host-specific configuration
-          ../hosts/${hostName}/configuration.nix
-          {
-            config.host = hostConfig;
-          }
-          # Platform-specific modules
-          ../modules/darwin/default.nix
-        ]
-        # Integration modules (determinate, home-manager, sops-nix, etc.)
-        ++ mkDarwinIntegrationModules {
-          inherit
-            determinate
-            sops-nix
-            home-manager
-            mac-app-util
-            nix-homebrew
-            ;
-        }
-        # System configuration modules
-        ++ [
-          {
-            nixpkgs = {
-              overlays = functionsLib.mkOverlays {
-                inherit inputs;
-                inherit (hostConfig) system;
-              };
-              config = functionsLib.mkPkgsConfig;
-            };
-          }
-          {
-            nix-homebrew = {
-              enable = true;
-              enableRosetta = true;
-              user = hostConfig.username;
-              autoMigrate = true;
-              taps."j178/homebrew-tap" = homebrew-j178;
-              mutableTaps = false;
-            };
-          }
-          {
-            home-manager = mkHomeManagerConfig {
-              inherit hostConfig;
-              # mac-app-util home-manager module: Enables app launcher support
-              # for user-specific packages installed via home-manager
-              extraSharedModules = optionalModule (mac-app-util != null) mac-app-util.homeManagerModules.default;
-            };
-          }
-          (
-            { config, ... }:
+        modules =
+          [
+            ../hosts/${hostName}/configuration.nix
+            { config.host = hostConfig; }
+            ../modules/darwin/default.nix
+          ]
+          ++ lib.optionals (determinate != null) [ determinate.darwinModules.default ]
+          ++ lib.optionals (sops-nix != null) [ sops-nix.darwinModules.sops ]
+          ++ lib.optionals (mac-app-util != null) [ mac-app-util.darwinModules.default ]
+          ++ lib.optionals (nix-homebrew != null) [ nix-homebrew.darwinModules.nix-homebrew ]
+          ++ [
             {
-              home-manager.extraSpecialArgs.systemConfig = config;
+              nixpkgs = {
+                overlays = functionsLib.mkOverlays {
+                  inherit inputs;
+                  inherit (hostConfig) system;
+                };
+                config = functionsLib.mkPkgsConfig;
+              };
             }
-          )
-        ]
-        # Common modules (shared between platforms)
-        ++ commonModules;
+            {
+              nix-homebrew = {
+                enable = true;
+                enableRosetta = true;
+                user = hostConfig.username;
+                autoMigrate = true;
+                taps."j178/homebrew-tap" = homebrew-j178;
+                mutableTaps = false;
+              };
+            }
+          ]
+          ++ lib.optionals (home-manager != null) [
+            home-manager.darwinModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                verbose = true;
+                backupFileExtension = "hm-backup";
+                extraSpecialArgs = functionsLib.mkHomeManagerExtraSpecialArgs {
+                  inherit inputs hostConfig;
+                  includeUserFields = true;
+                };
+                sharedModules =
+                  lib.optionals (sops-nix != null) [ sops-nix.homeManagerModules.sops ]
+                  ++ lib.optionals (mcp-home-manager != null) [ mcp-home-manager.homeManagerModules.default ]
+                  ++ lib.optionals (ironbar != null && ironbar ? homeManagerModules) [ ironbar.homeManagerModules.default ]
+                  ++ lib.optionals (nix-flatpak != null) [ nix-flatpak.homeManagerModules.nix-flatpak ]
+                  ++ lib.optionals (signal != null) [ signal.homeManagerModules.default ]
+                  ++ lib.optionals (signal-ironbar != null) [ signal-ironbar.homeManagerModules.default ]
+                  ++ lib.optionals (mac-app-util != null) [ mac-app-util.homeManagerModules.default ];
+                users.${hostConfig.username} = import ../home;
+              };
+            }
+            (
+              { config, ... }:
+              {
+                home-manager.extraSpecialArgs.systemConfig = config;
+              }
+            )
+          ]
+          ++ commonModules;
       };
 
   mkNixosSystem =
@@ -219,65 +142,58 @@ in
         # Note: signalPalette, signalLib, signalColors provided by Signal flake
       };
 
-      # Module list follows flake-parts best practices:
-      # 1. Host configuration first
-      # 2. Core system modules
-      # 3. Integration modules (conditionally)
-      # 4. System-specific configuration
-      # 5. Common modules last
-      modules = [
-        # Host-specific configuration
-        ../hosts/${hostName}/configuration.nix
-        {
-          config.host = hostConfig;
-        }
-        # Nixpkgs configuration (overlays, config)
-        {
-          nixpkgs = {
-            overlays = functionsLib.mkOverlays {
-              inherit inputs;
-              inherit (hostConfig) system;
-            };
-            config = functionsLib.mkPkgsConfig;
-          };
-        }
-        # Platform-specific modules
-        ../modules/nixos/default.nix
-      ]
-      # Integration modules (determinate, sops-nix, niri, etc.)
-      ++ mkNixosIntegrationModules {
-        inherit
-          determinate
-          sops-nix
-          niri
-          musnix
-          solaar
-
-          ;
-        inherit (inputs) nix-topology;
-        inherit (inputs) vpn-confinement;
-        isLinux = hostConfig.system == "x86_64-linux" || hostConfig.system == "aarch64-linux";
-      }
-      ++ optionalModule (home-manager != null) home-manager.nixosModules.home-manager
-      # Home Manager configuration
-      ++ [
-        {
-          home-manager = mkHomeManagerConfig {
-            inherit hostConfig;
-            # Linux-specific home-manager modules (SwayNC/Mako notification daemons)
-            extraSharedModules = optionalModule (
-              signal-notifications != null
-            ) signal-notifications.homeManagerModules.default;
-          };
-        }
-        (
-          { config, ... }:
+      modules =
+        [
+          ../hosts/${hostName}/configuration.nix
+          { config.host = hostConfig; }
           {
-            home-manager.extraSpecialArgs.systemConfig = config;
+            nixpkgs = {
+              overlays = functionsLib.mkOverlays {
+                inherit inputs;
+                inherit (hostConfig) system;
+              };
+              config = functionsLib.mkPkgsConfig;
+            };
           }
-        )
-      ]
-      # Common modules (shared between platforms)
-      ++ commonModules;
+          ../modules/nixos/default.nix
+        ]
+        ++ lib.optionals (determinate != null) [ determinate.nixosModules.default ]
+        ++ lib.optionals (sops-nix != null) [ sops-nix.nixosModules.sops ]
+        ++ lib.optionals (niri != null) [ niri.nixosModules.niri ]
+        ++ lib.optionals (musnix != null) [ musnix.nixosModules.musnix ]
+        ++ lib.optionals (solaar != null) [ solaar.nixosModules.default ]
+        ++ lib.optionals (inputs ? nix-topology && inputs.nix-topology != null) [ inputs.nix-topology.nixosModules.default ]
+        ++ lib.optionals (inputs ? vpn-confinement && inputs.vpn-confinement != null) [ inputs.vpn-confinement.nixosModules.default ]
+        ++ lib.optionals (home-manager != null) [
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              verbose = true;
+              backupFileExtension = "hm-backup";
+              extraSpecialArgs = functionsLib.mkHomeManagerExtraSpecialArgs {
+                inherit inputs hostConfig;
+                includeUserFields = true;
+              };
+              sharedModules =
+                lib.optionals (sops-nix != null) [ sops-nix.homeManagerModules.sops ]
+                ++ lib.optionals (mcp-home-manager != null) [ mcp-home-manager.homeManagerModules.default ]
+                ++ lib.optionals (ironbar != null && ironbar ? homeManagerModules) [ ironbar.homeManagerModules.default ]
+                ++ lib.optionals (nix-flatpak != null) [ nix-flatpak.homeManagerModules.nix-flatpak ]
+                ++ lib.optionals (signal != null) [ signal.homeManagerModules.default ]
+                ++ lib.optionals (signal-ironbar != null) [ signal-ironbar.homeManagerModules.default ]
+                ++ lib.optionals (signal-notifications != null) [ signal-notifications.homeManagerModules.default ];
+              users.${hostConfig.username} = import ../home;
+            };
+          }
+          (
+            { config, ... }:
+            {
+              home-manager.extraSpecialArgs.systemConfig = config;
+            }
+          )
+        ]
+        ++ commonModules;
     };
 }
