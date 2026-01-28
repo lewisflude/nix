@@ -31,6 +31,36 @@ let
     };
   };
 
+  # Wrapper script that pipes yknotify output to terminal-notifier
+  # Based on: https://github.com/noperator/yknotify/blob/main/yknotify.sh
+  yknotifyWrapper = pkgs.writeShellScriptBin "yknotify-wrapper" ''
+    # 2-second delay between notifications to avoid spam
+    LAST_NTFY=0
+
+    while IFS= read -r line; do
+      # Log output for debugging
+      echo "$line"
+
+      # Rate limit: 2-second delay between notifications
+      NOW="$(${pkgs.coreutils}/bin/date +%s)"
+      if [[ "$NOW" -le "$((LAST_NTFY + 2))" ]]; then
+        continue
+      fi
+      LAST_NTFY="$NOW"
+
+      # Extract notification type from JSON
+      message="$(echo "$line" | ${pkgs.jq}/bin/jq -r '.type // empty')"
+
+      if [ -n "$message" ]; then
+        # Send notification with sound
+        ${pkgs.terminal-notifier}/bin/terminal-notifier \
+          -title "yknotify" \
+          -message "$message" \
+          -sound Submarine
+      fi
+    done < <(${yknotify}/bin/yknotify)
+  '';
+
   # PIN and Touch Cache Configuration
   #
   # IMPORTANT: YubiKey has TWO separate cache mechanisms:
@@ -71,6 +101,8 @@ in
         pkgs.pinentry_mac
         # YubiKey touch notification tool (shows dock icon + notifications)
         yknotify
+        # Required for yknotify to send macOS notifications
+        pkgs.terminal-notifier
       ]
     else
       [
@@ -226,4 +258,22 @@ in
   #    This is handled by programs.zsh.initContent above
   #
   # Reference: https://github.com/ghostty-org/ghostty/discussions/5951
+
+  # YubiKey touch notification LaunchAgent (macOS only)
+  # Automatically starts yknotify on login to watch for YubiKey touch events
+  # and sends macOS notifications when touch is required
+  launchd.agents = lib.mkIf isDarwin {
+    yknotify = {
+      enable = true;
+      config = {
+        ProgramArguments = [
+          "${yknotifyWrapper}/bin/yknotify-wrapper"
+        ];
+        KeepAlive = true;
+        RunAtLoad = true;
+        StandardOutPath = "/tmp/yknotify.log";
+        StandardErrorPath = "/tmp/yknotify.log";
+      };
+    };
+  };
 }
