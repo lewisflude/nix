@@ -8,52 +8,90 @@ let
   platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem system;
   isDarwin = lib.hasSuffix "-darwin" system;
 
-  # PIN cache configuration - adjust these for your security/UX preferences
-  # Security note: Cached PINs allow operations without YubiKey touch during cache period.
-  # If you need maximum security, reduce these values or disable caching entirely.
+  # PIN and Touch Cache Configuration
+  #
+  # IMPORTANT: YubiKey has TWO separate cache mechanisms:
+  #
+  # 1. TOUCH POLICY (configured on YubiKey via ykman):
+  #    - "Cached" (15s): Touch once, valid for 15 seconds
+  #    - "On": Touch required for every operation
+  #    - "Off": No touch required (less secure)
+  #    Current setting visible via: ykman openpgp info
+  #
+  # 2. PIN CACHE (configured here via gpg-agent):
+  #    - Controls how long PIN stays cached after first entry
+  #    - NOTE: With smart cards, PIN is often cached at card-level until unplugged
+  #    - These settings provide an upper bound, but may not behave exactly as specified
+  #
+  # Expected behavior with "Cached" touch policy + 1h PIN cache:
+  # - First operation: Enter PIN + touch YubiKey
+  # - Within 15 seconds: No PIN, no touch (both cached)
+  # - After 15s, within 1h: No PIN, touch required
+  # - After 1 hour: Enter PIN again + touch
+  #
+  # Standard practice: 1 hour for both GPG and SSH
   pinCacheTtl = {
     gpg = 3600;      # 1 hour for GPG operations (commit signing, etc.)
-    ssh = 14400;     # 4 hours for SSH operations (less frequent, higher-impact sessions)
+    ssh = 3600;      # 1 hour for SSH operations (standard security practice)
   };
 in
 {
   home.packages = [
     # Note: gnupg is automatically installed by programs.gpg.enable = true
     # pinentry packages are referenced by the wrapper script below, not needed in home.packages
+    pkgs.yubikey-manager  # ykman CLI tool for YubiKey configuration
   ]
   ++ (
     if isDarwin then
       [
         # macOS: pinentry_mac (native macOS GUI)
         pkgs.pinentry_mac
+
+        # macOS: YubiKey touch notifications (OPTIONAL)
+        # Uncomment to add visual feedback when YubiKey needs to be touched
+        # Alternative to yubikey-touch-detector (Linux only)
+        #
+        # (pkgs.buildGoModule rec {
+        #   pname = "yknotify";
+        #   version = "1.0.0";
+        #   src = pkgs.fetchFromGitHub {
+        #     owner = "noperator";
+        #     repo = "yknotify";
+        #     rev = "v${version}";
+        #     sha256 = lib.fakeSha256;  # Replace with actual hash after first build attempt
+        #   };
+        #   vendorHash = null;
+        # })
       ]
     else
       [
         # Linux: pinentry packages are used by the auto-detection wrapper
         # They are referenced directly in the wrapper script, not installed separately
+        # Linux: YubiKey touch detector configured at system level
+        # (see modules/nixos/hardware/yubikey.nix)
       ]
   );
 
   # Note: YubiKey touch detector configuration:
   # - Linux: Configured at system level via programs.yubikey-touch-detector.enable
   #          (see modules/nixos/hardware/yubikey.nix)
-  # - macOS: Use yknotify (not yet in nixpkgs) - install manually with:
+  # - macOS: yknotify can be installed (see commented code above) or manually:
   #          go install github.com/noperator/yknotify@latest
-  #          Run as LaunchAgent or manually: yknotify
+  #          Run: yknotify (provides visual notifications when touch needed)
   #          See: https://github.com/noperator/yknotify
 
   programs.gpg = {
     enable = true;
     scdaemonSettings = {
-      # Card detection timeout (not PIN cache - that's controlled by gpg-agent)
-      # How long to wait for card presence detection before timing out
-      card-timeout = "5";
-
       # Disable CCID to use pcscd (required for GnuPG 2.4+)
       # Per Arch Wiki: https://wiki.archlinux.org/title/GnuPG#GnuPG_with_pcscd_(PCSC_Lite)
       # Without this, scdaemon tries direct CCID access which conflicts with pcscd
       # Note: pcscd service is enabled at system level via modules/nixos/features/security.nix
       disable-ccid = true;
+
+      # REMOVED: card-timeout = "5"
+      # Reason: Aggressive timeout can kill card sessions and force PIN re-entry
+      # Let scdaemon manage card presence naturally for better PIN caching
     }
     // (
       if isDarwin then
@@ -61,6 +99,12 @@ in
           # macOS: Use pcsc-shared to allow PIN caching while sharing
           # the reader with macOS's built-in PC/SC daemon (com.apple.ctkpcscd)
           pcsc-shared = true;
+
+          # macOS: Disable PIV application to prevent conflicts with OpenPGP
+          # YubiKeys support both PIV and OpenPGP applications simultaneously
+          # Disabling PIV prevents card resets that break PIN caching
+          # Only disable PIV if you're not using it for other purposes
+          disable-application = "piv";
         }
       else
         { }
@@ -107,7 +151,7 @@ in
       # "ANOTHER_FINGERPRINT_HERE"                 # YubiKey 2 (backup) - uncomment and add if different
     ];
 
-    pinentryPackage =
+    pinentry.package =
       # Auto-detecting pinentry wrapper:
       # - Uses terminal pinentry (tty) for SSH sessions or headless environments
       # - Uses GUI pinentry (GNOME/macOS) for graphical desktop sessions
@@ -146,7 +190,13 @@ in
 
   # Critical: Export GPG_TTY and SSH_AUTH_SOCK for proper operation
   # Since enableZshIntegration is false, we must handle this manually
-  programs.zsh.initExtra = ''
+  #
+  # macOS Note: System runs its own ssh-agent by default
+  # Our SSH_AUTH_SOCK export overrides it to use gpg-agent instead
+  # Verify with: echo $SSH_AUTH_SOCK (should show gpg-agent socket path)
+  # If conflicts occur, disable system ssh-agent with:
+  #   launchctl disable user/$UID/com.openssh.ssh-agent
+  programs.zsh.initContent = ''
     export GPG_TTY=$(tty)
     export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
     gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
