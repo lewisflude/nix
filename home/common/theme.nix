@@ -16,7 +16,6 @@ in
 
       pkgs.iosevka-bin
       pkgs.nerd-fonts.iosevka
-      pkgs.gtk4
     ];
   };
 
