@@ -31,39 +31,41 @@
           value = "1048576";
         }
       ];
-      services = {
-        login.enableGnomeKeyring = true;
-        niri.enableGnomeKeyring = true;
-        greetd.text = ''
-          account required ${pkgs.linux-pam}/lib/security/pam_unix.so
-          auth sufficient ${pkgs.pam_u2f}/lib/security/pam_u2f.so authfile=/etc/u2f_mappings cue nouserok userpresence=1 origin=pam://yubi
-          auth required ${pkgs.linux-pam}/lib/security/pam_unix.so
-          auth optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so
-          password required ${pkgs.linux-pam}/lib/security/pam_unix.so yescrypt
-          password optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so use_authtok
-          session required ${pkgs.linux-pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
-          session required ${pkgs.linux-pam}/lib/security/pam_unix.so
-          session required ${pkgs.linux-pam}/lib/security/pam_limits.so conf=/etc/security/limits.conf
-          session required ${pkgs.systemd}/lib/security/pam_systemd.so class=greeter
-          session optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so auto_start
-        '';
-        swaylock.text = ''
-          account required ${pkgs.linux-pam}/lib/security/pam_unix.so
-          auth sufficient ${pkgs.pam_u2f}/lib/security/pam_u2f.so authfile=/etc/u2f_mappings cue nouserok userpresence=1 origin=pam://yubi
-          auth sufficient ${pkgs.linux-pam}/lib/security/pam_unix.so
-          auth optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so
-          auth required ${pkgs.linux-pam}/lib/security/pam_deny.so
-          password sufficient ${pkgs.linux-pam}/lib/security/pam_unix.so yescrypt
-          password optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so use_authtok
-          session required ${pkgs.linux-pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
-          session required ${pkgs.linux-pam}/lib/security/pam_unix.so
-          session required ${pkgs.linux-pam}/lib/security/pam_limits.so conf=/etc/security/limits.conf
-          session required ${pkgs.systemd}/lib/security/pam_systemd.so
-          session optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so auto_start
-        '';
-        sudo.u2fAuth = true;
-        login.u2fAuth = true;
-      };
+      services =
+        let
+          # Shared PAM configuration for graphical login services
+          # Enables U2F authentication with YubiKey and GNOME Keyring integration
+          basePamConfig = ''
+            account required ${pkgs.linux-pam}/lib/security/pam_unix.so
+            auth sufficient ${pkgs.pam_u2f}/lib/security/pam_u2f.so authfile=/etc/u2f_mappings cue nouserok userpresence=1 origin=pam://yubi
+            auth sufficient ${pkgs.linux-pam}/lib/security/pam_unix.so
+            auth optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so
+            password sufficient ${pkgs.linux-pam}/lib/security/pam_unix.so yescrypt
+            password optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so use_authtok
+            session required ${pkgs.linux-pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
+            session required ${pkgs.linux-pam}/lib/security/pam_unix.so
+            session required ${pkgs.linux-pam}/lib/security/pam_limits.so conf=/etc/security/limits.conf
+            session required ${pkgs.systemd}/lib/security/pam_systemd.so
+            session optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so auto_start
+          '';
+        in
+        {
+          login.enableGnomeKeyring = true;
+          niri.enableGnomeKeyring = true;
+
+          greetd.text = ''
+            ${basePamConfig}
+            session required ${pkgs.systemd}/lib/security/pam_systemd.so class=greeter
+          '';
+
+          swaylock.text = ''
+            ${basePamConfig}
+            auth required ${pkgs.linux-pam}/lib/security/pam_deny.so
+          '';
+
+          sudo.u2fAuth = true;
+          login.u2fAuth = true;
+        };
       u2f = {
         enable = true;
         control = "sufficient";
@@ -111,6 +113,8 @@
     };
   };
   environment.etc = {
+      # U2F/FIDO2 key mappings for YubiKey authentication
+      # Generated with: pamu2fcfg -o pam://yubi -i pam://yubi
       "u2f_mappings" = {
         text = "lewis:PaGbsjJa2IPXjK/nuSZEgqrqcP9JoxEO0IVVinIyfEXR0EbctKkhinM6f50ccHj7uSdy+YM2O+ToKVhqv5ynyQ==,cFyPyH4AUHDjTXelbVpfnc4DnESr8xJWyZC42DwEiofkoqQdt0lBdxPGLwjviysl7WlH+jlEw3Yhe5TBiBLNOg==,es256,+presence";
         mode = "0644";

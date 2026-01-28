@@ -23,12 +23,9 @@ lib.mkIf (cfg.enable && cfg.steamvr) {
   # Ensure 32-bit graphics drivers are available (already in graphics.nix)
   # hardware.graphics.enable32Bit = true;
 
-  # Enable required kernel capabilities for SteamVR async reprojection
-  # The patched bubblewrap from gaming.nix already grants ALL capabilities
-  # which includes CAP_SYS_NICE needed for SteamVR performance
-
   # Note: SteamVR must be installed through the Steam client
   # It cannot be packaged directly in NixOS due to its proprietary nature
+  # SteamVR async reprojection works without additional capabilities
 
   assertions = [
     {
