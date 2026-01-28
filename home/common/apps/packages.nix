@@ -21,6 +21,7 @@ in
     # Note: gemini-cli is handled via programs.gemini-cli in gemini-cli.nix
     pkgs.pgcli
     pkgs.cursor-cli # provides cursor-agent binary
+    pkgs.lefthook # Git hooks manager
 
     # AI coding agent tools from llm-agents.nix
   ]

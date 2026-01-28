@@ -45,6 +45,24 @@
   '';
   time.timeZone = constants.defaults.timezone;
 
+  # YubiKey touch notifications - visual and audio feedback on macOS
+  # Provides system sounds when YubiKey awaits physical touch for GPG/SSH operations
+  # See: https://github.com/reo101/yknotify-rs
+  #
+  # DISABLED: Upstream flake has build issues - missing macOS frameworks in buildInputs
+  # The package fails to build because mac-notification-sys can't find Cocoa/Foundation frameworks
+  # Issue: https://github.com/reo101/yknotify-rs/issues (needs to add darwin.apple_sdk.frameworks)
+  #
+  # Alternative: Manual install with Go version (works out of the box)
+  #   go install github.com/noperator/yknotify@latest
+  #   yknotify  # Run when you want visual feedback
+  #
+  # services.yknotify-rs = {
+  #   enable = true;
+  #   requestSound = "Tink";
+  #   dismissedSound = "Pop";
+  # };
+
   # Disabled: SOPS password file not available, causing service failures
   # host.features.restic = {
   #   enable = true;

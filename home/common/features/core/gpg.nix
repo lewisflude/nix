@@ -8,6 +8,29 @@ let
   platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem system;
   isDarwin = lib.hasSuffix "-darwin" system;
 
+  # YubiKey touch notification tool for macOS
+  # Provides visual dock icon + desktop notifications when YubiKey touch is required
+  yknotify = pkgs.buildGoModule rec {
+    pname = "yknotify";
+    version = "unstable-2025-01-20";
+
+    src = pkgs.fetchFromGitHub {
+      owner = "noperator";
+      repo = "yknotify";
+      rev = "999f01cc0d64e3f4c241b157d697d6ef22374e84";
+      hash = "sha256-SHedRv7WGaGmZOP5pt3/TFc5hF/Y8bJyib2ib+nfa4M=";
+    };
+
+    vendorHash = null;  # No external dependencies
+
+    meta = with lib; {
+      description = "Displays a notification when a YubiKey is waiting for touch";
+      homepage = "https://github.com/noperator/yknotify";
+      license = licenses.mit;
+      platforms = platforms.darwin;  # macOS only
+    };
+  };
+
   # PIN and Touch Cache Configuration
   #
   # IMPORTANT: YubiKey has TWO separate cache mechanisms:
@@ -46,39 +69,24 @@ in
       [
         # macOS: pinentry_mac (native macOS GUI)
         pkgs.pinentry_mac
-
-        # macOS: YubiKey touch notifications (OPTIONAL)
-        # Uncomment to add visual feedback when YubiKey needs to be touched
-        # Alternative to yubikey-touch-detector (Linux only)
-        #
-        # (pkgs.buildGoModule rec {
-        #   pname = "yknotify";
-        #   version = "1.0.0";
-        #   src = pkgs.fetchFromGitHub {
-        #     owner = "noperator";
-        #     repo = "yknotify";
-        #     rev = "v${version}";
-        #     sha256 = lib.fakeSha256;  # Replace with actual hash after first build attempt
-        #   };
-        #   vendorHash = null;
-        # })
+        # YubiKey touch notification tool (shows dock icon + notifications)
+        yknotify
       ]
     else
       [
         # Linux: pinentry packages are used by the auto-detection wrapper
         # They are referenced directly in the wrapper script, not installed separately
-        # Linux: YubiKey touch detector configured at system level
-        # (see modules/nixos/hardware/yubikey.nix)
       ]
   );
 
-  # Note: YubiKey touch detector configuration:
-  # - Linux: Configured at system level via programs.yubikey-touch-detector.enable
+  # YubiKey touch detector configuration:
+  # - macOS: yknotify is installed automatically (see package definition above)
+  #          Run: yknotify (provides visual dock icon + notifications)
+  #          Source: https://github.com/noperator/yknotify
+  #          Note: yknotify-rs (Rust version) has build issues, so using Go version
+  # - Linux: Configured at system level via programs.yubikey-touch-detector
   #          (see modules/nixos/hardware/yubikey.nix)
-  # - macOS: yknotify can be installed (see commented code above) or manually:
-  #          go install github.com/noperator/yknotify@latest
-  #          Run: yknotify (provides visual notifications when touch needed)
-  #          See: https://github.com/noperator/yknotify
+  #          Provides desktop notifications via libnotify
 
   programs.gpg = {
     enable = true;
@@ -215,7 +223,7 @@ in
   #    The agent will restart automatically on next use
   #
   # 3. For commit signing, ensure GPG_TTY is set:
-  #    This is handled by programs.zsh.initExtra above
+  #    This is handled by programs.zsh.initContent above
   #
   # Reference: https://github.com/ghostty-org/ghostty/discussions/5951
 }

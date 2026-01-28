@@ -127,6 +127,13 @@
       url = "github:polygon/audio.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # yknotify-rs: Disabled - upstream flake has build issues on macOS
+    # Missing darwin.apple_sdk.frameworks in buildInputs
+    # Use manual install instead: go install github.com/noperator/yknotify@latest
+    # yknotify-rs = {
+    #   url = "github:reo101/yknotify-rs";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
     rust-docs-mcp = {
       url = "github:snowmead/rust-docs-mcp";
       inputs.nixpkgs.follows = "nixpkgs";
