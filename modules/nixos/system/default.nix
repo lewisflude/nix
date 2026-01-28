@@ -2,7 +2,7 @@
 {
   imports = [
     ./nix
-    ./integration
+    ./integration/xdg.nix
     ./keyboard.nix
     ./keyd.nix
     ./monitor-brightness.nix

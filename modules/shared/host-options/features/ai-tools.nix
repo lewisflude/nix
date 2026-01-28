@@ -8,16 +8,10 @@ let
 in
 {
   aiTools = {
-    enable = mkEnableOption "AI tools stack (Ollama, Open WebUI) - NixOS only" // {
-      default = false;
-      example = true;
-    };
+    enable = mkEnableOption "AI tools stack (Ollama, Open WebUI) - NixOS only";
 
     ollama = {
-      enable = mkEnableOption "Ollama LLM backend" // {
-        default = true;
-        example = true;
-      };
+      enable = mkEnableOption "Ollama LLM backend" // { default = true; };
       acceleration = mkOption {
         type = types.nullOr (
           types.enum [
@@ -41,10 +35,7 @@ in
     };
 
     openWebui = {
-      enable = mkEnableOption "Open WebUI interface for LLMs" // {
-        default = true;
-        example = true;
-      };
+      enable = mkEnableOption "Open WebUI interface for LLMs" // { default = true; };
       port = mkOption {
         type = types.port;
         default = 7000;

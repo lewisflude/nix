@@ -8,33 +8,15 @@ let
 in
 {
   desktop = {
-    enable = mkEnableOption "desktop environment and customization" // {
-      default = true;
-      example = true;
-    };
-    niri = mkEnableOption "Niri Wayland compositor" // {
-      default = false;
-      example = true;
-    };
-    hyprland = mkEnableOption "Hyprland Wayland compositor" // {
-      default = false;
-      example = true;
-    };
-    theming = mkEnableOption "system-wide theming" // {
-      default = true;
-      example = true;
-    };
-    utilities = mkEnableOption "desktop utilities" // {
-      default = false;
-      example = true;
-    };
+    enable = mkEnableOption "desktop environment and customization" // { default = true; };
+    niri = mkEnableOption "Niri Wayland compositor";
+    hyprland = mkEnableOption "Hyprland Wayland compositor";
+    theming = mkEnableOption "system-wide theming" // { default = true; };
+    utilities = mkEnableOption "desktop utilities";
 
     # Signal theme options
     signalTheme = {
-      enable = mkEnableOption "Signal OKLCH color palette theme" // {
-        default = true;
-        example = true;
-      };
+      enable = mkEnableOption "Signal OKLCH color palette theme" // { default = true; };
       mode = mkOption {
         type = types.enum [
           "light"

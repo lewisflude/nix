@@ -1,11 +1,6 @@
 {
-  config,
-  lib,
-  ...
-}:
-{
   config = {
-    nix.optimise = lib.mkIf config.nix.enable {
+    nix.optimise = {
       automatic = true;
       dates = [ "03:45" ];
     };

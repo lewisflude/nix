@@ -10,7 +10,7 @@
       enable = true;
       extraRules = [
         {
-          users = [ "lewis" ];
+          users = [ config.host.username ];
           keepEnv = true;
           noPass = true; # Allow passwordless privilege escalation (matches sudo config)
         }
@@ -116,7 +116,7 @@
       # U2F/FIDO2 key mappings for YubiKey authentication
       # Generated with: pamu2fcfg -o pam://yubi -i pam://yubi
       "u2f_mappings" = {
-        text = "lewis:PaGbsjJa2IPXjK/nuSZEgqrqcP9JoxEO0IVVinIyfEXR0EbctKkhinM6f50ccHj7uSdy+YM2O+ToKVhqv5ynyQ==,cFyPyH4AUHDjTXelbVpfnc4DnESr8xJWyZC42DwEiofkoqQdt0lBdxPGLwjviysl7WlH+jlEw3Yhe5TBiBLNOg==,es256,+presence";
+        text = "${config.host.username}:PaGbsjJa2IPXjK/nuSZEgqrqcP9JoxEO0IVVinIyfEXR0EbctKkhinM6f50ccHj7uSdy+YM2O+ToKVhqv5ynyQ==,cFyPyH4AUHDjTXelbVpfnc4DnESr8xJWyZC42DwEiofkoqQdt0lBdxPGLwjviysl7WlH+jlEw3Yhe5TBiBLNOg==,es256,+presence";
         mode = "0644";
       };
       "security/limits.conf" = {

@@ -66,8 +66,7 @@ in
       users.groups.steam = { };
 
       # Add user to steam group for Steam Input access
-      # Note: This assumes username 'lewis' - adjust per-host if needed
-      users.users.lewis.extraGroups = [ "steam" ];
+      users.users.${config.host.username}.extraGroups = [ "steam" ];
 
       # Steam Link firewall (remotePlay.openFirewall may not cover Quest 3)
       networking.firewall = mkIf cfg.steam {

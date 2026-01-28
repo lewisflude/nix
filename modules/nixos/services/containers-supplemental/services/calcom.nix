@@ -20,21 +20,21 @@ let
   cfg = config.host.services.containersSupplemental;
   calCfg = cfg.calcom;
 
-  calcomHost =
+  # Extract hostname from URL (e.g., "https://cal.example.com" -> "cal.example.com")
+  extractHost = url:
     let
-      matches = builtins.match "https?://([^/:]+)" calCfg.webappUrl;
+      matches = builtins.match "https?://([^/:]+)" url;
     in
-    if matches == null || matches == [ ] then calCfg.webappUrl else lib.head matches;
+    if matches == null || matches == [ ] then url else lib.head matches;
+
+  calcomHost = extractHost calCfg.webappUrl;
 
   calcomCookieDomain =
     let
-      matches = builtins.match "https?://([^/:]+)" calCfg.webappUrl;
-      host = if matches == null || matches == [ ] then calCfg.webappUrl else lib.head matches;
-
-      parts = lib.splitString "." host;
+      parts = lib.splitString "." calcomHost;
       partsLen = lib.length parts;
     in
-    if partsLen >= 2 then ".${lib.concatStringsSep "." (lib.drop (partsLen - 2) parts)}" else host;
+    if partsLen >= 2 then ".${lib.concatStringsSep "." (lib.drop (partsLen - 2) parts)}" else calcomHost;
 
   calcomAllowedHostnames = builtins.toJSON [
     calcomHost
