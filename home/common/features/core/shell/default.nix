@@ -1,5 +1,5 @@
 # Shell Feature Module - Main Entry Point
-# Combines all shell sub-modules into a cohesive configuration
+# Consolidated ZSH configuration
 {
   pkgs,
   config,
@@ -21,13 +21,15 @@ let
 in
 {
   imports = [
-    (import ./zsh-config.nix {
-      inherit config lib;
+    (import ./zsh.nix {
+      inherit
+        config
+        lib
+        pkgs
+        hostSystem
+        ;
     })
-    (import ./completion.nix { inherit config pkgs; })
-    (import ./aliases.nix { inherit lib hostSystem; })
-    (import ./keybindings.nix { inherit config lib; })
-    (import ./init-content.nix {
+    (import ./zsh-init.nix {
       inherit
         config
         pkgs
@@ -37,19 +39,8 @@ in
         shellHelpers
         ;
     })
-    (import ./environment.nix {
-      inherit
-        config
-        pkgs
-        lib
-        ;
-    })
-    (import ./cached-init.nix {
-      inherit
-        config
-        pkgs
-        lib
-        ;
+    (import ./zsh-keybindings.nix {
+      inherit config lib;
     })
   ];
 }

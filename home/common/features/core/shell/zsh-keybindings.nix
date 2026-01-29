@@ -1,15 +1,18 @@
 # ZSH Keybindings Configuration
-# Terminfo-based key bindings with application mode support for maximum terminal compatibility
-{ config, lib, ... }:
+# Terminfo-based key bindings with application mode support
+{
+  config,
+  lib,
+  ...
+}:
 {
   programs.zsh.initContent = lib.mkMerge [
-    # Terminfo bindings can be loaded early (don't depend on plugins)
+    # ════════════════════════════════════════════════════════════════
+    # Terminfo-Based Keybindings (Early Loading)
+    # ════════════════════════════════════════════════════════════════
     ''
-      # ════════════════════════════════════════════════════════════════
-      # Terminfo-Based Keybindings (Cross-Terminal Compatibility)
-      # ════════════════════════════════════════════════════════════════
-      # Use terminfo capabilities instead of hardcoded escape sequences
-      # This ensures keybindings work across different terminal emulators
+      # Use terminfo capabilities for cross-terminal compatibility
+      # Avoids hardcoded escape sequences
 
       # Create zkbd-compatible hash for key definitions
       typeset -g -A key
@@ -61,7 +64,6 @@
       # Application Mode (Terminal State Management)
       # ════════════════════════════════════════════════════════════════
       # Ensure terminal is in application mode when ZLE is active
-      # This makes terminfo values valid and keybindings work correctly
 
       if (( ''${+terminfo[smkx]} && ''${+terminfo[rmkx]} )); then
         autoload -Uz add-zle-hook-widget
@@ -73,7 +75,10 @@
         add-zle-hook-widget -Uz zle-line-finish zle_application_mode_stop
       fi
 
-      # Ghostty multiline input support (terminal-specific, doesn't depend on plugins)
+      # ════════════════════════════════════════════════════════════════
+      # Ghostty Multiline Support
+      # ════════════════════════════════════════════════════════════════
+
       function _ghostty_insert_newline() { LBUFFER+=$'\n' }
       zle -N ghostty-insert-newline _ghostty_insert_newline
       bindkey -M emacs $'\e[99997u' ghostty-insert-newline
@@ -82,19 +87,16 @@
       bindkey -M viins $'\e\r'     ghostty-insert-newline
     ''
 
-    # Plugin-specific bindings must be loaded AFTER zsh-defer is sourced
-    # Use lib.mkAfter to ensure this comes after init-content.nix's lib.mkAfter section
+    # ════════════════════════════════════════════════════════════════
+    # Plugin-Specific Keybindings (lib.mkAfter)
+    # ════════════════════════════════════════════════════════════════
+    # Loaded after plugins are initialized
     (lib.mkAfter ''
-      # ════════════════════════════════════════════════════════════════
-      # Plugin-Specific Keybindings (Deferred Loading)
-      # ════════════════════════════════════════════════════════════════
-      # These are loaded after plugins are initialized and zsh-defer is available
-
       if [[ -o interactive ]]; then
-        # Atuin: Ctrl+R for history search (overwrites default)
+        # Atuin: Ctrl+R for history search
         zsh-defer -c 'bindkey "^r" _atuin_search_widget'
 
-        # History Substring Search: Ctrl+P/N (avoids Atuin conflict)
+        # History Substring Search: Ctrl+P/N
         zsh-defer -c 'bindkey "^P" history-substring-search-up'
         zsh-defer -c 'bindkey "^N" history-substring-search-down'
       fi
