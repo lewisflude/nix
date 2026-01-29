@@ -3,11 +3,9 @@
   lib,
   config,
   pkgs,
+  constants,
   ...
 }:
-let
-  constants = import ../../lib/constants.nix;
-in
 {
   determinateNix.customSettings = {
     flake-registry = "/etc/nix/flake-registry.json";

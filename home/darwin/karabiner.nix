@@ -1,5 +1,26 @@
 _:
 let
+  mnk88Condition = {
+    type = "device_if";
+    identifiers = [ { vendor_id = 19280; product_id = 34816; } ];
+  };
+
+  # Helper: Create basic key mapping
+  mapKey = from: to: {
+    type = "basic";
+    inherit from;
+    to = [ to ];
+    conditions = [ mnk88Condition ];
+  };
+
+  # Helper: Map key to another key
+  keyToKey = fromKey: toKey: mapKey { key_code = fromKey; } { key_code = toKey; };
+
+  # Helper: Map key to shell command
+  keyToShell = fromKey: cmd: mapKey { key_code = fromKey; } { shell_command = cmd; };
+
+  # Helper: Map key to modified key
+  keyToMod = fromKey: toKey: mods: mapKey { key_code = fromKey; } { key_code = toKey; modifiers = mods; };
 
   karabinerConfig = {
     global = {
@@ -7,25 +28,16 @@ let
       show_in_menu_bar = true;
       show_profile_name_in_menu_bar = false;
     };
-
     profiles = [
       {
         name = "Ergonomic Hybrid v2.0";
         selected = true;
-
         parameters = {
-
           "basic.to_if_alone_timeout_milliseconds" = 200;
-
           "basic.simultaneous_threshold_milliseconds" = 50;
         };
-
-        complex_modifications = {
-          rules = [ ];
-        };
-
+        complex_modifications.rules = [ ];
         simple_modifications = [ ];
-
         virtual_hid_keyboard = {
           country_code = 0;
           indicate_sticky_modifier_keys_state = true;
@@ -36,10 +48,8 @@ let
   };
 in
 {
-
   home.file.".config/karabiner/karabiner.json" = {
     text = builtins.toJSON karabinerConfig;
-
     force = true;
   };
 
@@ -48,257 +58,32 @@ in
       title = "MNK88 WKL swaps and launchers";
       rules = [
         {
-          description = "MNK88: Caps Lock → Control (firmware now sends KC_CAPS)";
-          manipulators = [
-            {
-              type = "basic";
-              from = {
-                key_code = "caps_lock";
-              };
-              to = [ { key_code = "left_control"; } ];
-              conditions = [
-                {
-                  type = "device_if";
-                  identifiers = [
-                    {
-                      vendor_id = 19280;
-                      product_id = 34816;
-                    }
-                  ];
-                }
-              ];
-            }
-          ];
+          description = "MNK88: Caps Lock → Control";
+          manipulators = [ (keyToKey "caps_lock" "left_control") ];
         }
         {
-          description = "MNK88: Swap Left Option→Command, Left Control→Option, and mirror on right";
+          description = "MNK88: Swap Option↔Command, Control↔Option";
           manipulators = [
-            {
-              type = "basic";
-              from = {
-                key_code = "left_option";
-              };
-              to = [ { key_code = "left_command"; } ];
-              conditions = [
-                {
-                  type = "device_if";
-                  identifiers = [
-                    {
-                      vendor_id = 19280;
-                      product_id = 34816;
-                    }
-                  ];
-                }
-              ];
-            }
-            {
-              type = "basic";
-              from = {
-                key_code = "left_control";
-              };
-              to = [ { key_code = "left_option"; } ];
-              conditions = [
-                {
-                  type = "device_if";
-                  identifiers = [
-                    {
-                      vendor_id = 19280;
-                      product_id = 34816;
-                    }
-                  ];
-                }
-              ];
-            }
-            {
-              type = "basic";
-              from = {
-                key_code = "right_option";
-              };
-              to = [ { key_code = "right_command"; } ];
-              conditions = [
-                {
-                  type = "device_if";
-                  identifiers = [
-                    {
-                      vendor_id = 19280;
-                      product_id = 34816;
-                    }
-                  ];
-                }
-              ];
-            }
-            {
-              type = "basic";
-              from = {
-                key_code = "right_control";
-              };
-              to = [ { key_code = "right_option"; } ];
-              conditions = [
-                {
-                  type = "device_if";
-                  identifiers = [
-                    {
-                      vendor_id = 19280;
-                      product_id = 34816;
-                    }
-                  ];
-                }
-              ];
-            }
+            (keyToKey "left_option" "left_command")
+            (keyToKey "left_control" "left_option")
+            (keyToKey "right_option" "right_command")
+            (keyToKey "right_control" "right_option")
           ];
         }
         {
           description = "MNK88: Launcher keys (F13 → Ghostty, Print Screen → Browser)";
           manipulators = [
-            {
-              type = "basic";
-              from = {
-                key_code = "f13";
-              };
-              to = [ { shell_command = "open -a Ghostty"; } ];
-              conditions = [
-                {
-                  type = "device_if";
-                  identifiers = [
-                    {
-                      vendor_id = 19280;
-                      product_id = 34816;
-                    }
-                  ];
-                }
-              ];
-            }
-            {
-              type = "basic";
-              from = {
-                key_code = "print_screen";
-              };
-              to = [ { shell_command = "open -a \"Safari\" || open -a \"Arc\" || open -a \"Google Chrome\""; } ];
-              conditions = [
-                {
-                  type = "device_if";
-                  identifiers = [
-                    {
-                      vendor_id = 19280;
-                      product_id = 34816;
-                    }
-                  ];
-                }
-              ];
-            }
+            (keyToShell "f13" "open -a Ghostty")
+            (keyToShell "print_screen" "open -a \"Safari\" || open -a \"Arc\" || open -a \"Google Chrome\"")
           ];
         }
         {
           description = "MNK88: Window management via F16–F19 (Rectangle chords)";
           manipulators = [
-
-            {
-              type = "basic";
-              from = {
-                key_code = "f16";
-              };
-              to = [
-                {
-                  key_code = "return_or_enter";
-                  modifiers = [
-                    "left_control"
-                    "left_option"
-                  ];
-                }
-              ];
-              conditions = [
-                {
-                  type = "device_if";
-                  identifiers = [
-                    {
-                      vendor_id = 19280;
-                      product_id = 34816;
-                    }
-                  ];
-                }
-              ];
-            }
-
-            {
-              type = "basic";
-              from = {
-                key_code = "f17";
-              };
-              to = [
-                {
-                  key_code = "left_arrow";
-                  modifiers = [
-                    "left_control"
-                    "left_option"
-                  ];
-                }
-              ];
-              conditions = [
-                {
-                  type = "device_if";
-                  identifiers = [
-                    {
-                      vendor_id = 19280;
-                      product_id = 34816;
-                    }
-                  ];
-                }
-              ];
-            }
-
-            {
-              type = "basic";
-              from = {
-                key_code = "f18";
-              };
-              to = [
-                {
-                  key_code = "c";
-                  modifiers = [
-                    "left_control"
-                    "left_option"
-                  ];
-                }
-              ];
-              conditions = [
-                {
-                  type = "device_if";
-                  identifiers = [
-                    {
-                      vendor_id = 19280;
-                      product_id = 34816;
-                    }
-                  ];
-                }
-              ];
-            }
-
-            {
-              type = "basic";
-              from = {
-                key_code = "f19";
-              };
-              to = [
-                {
-                  key_code = "right_arrow";
-                  modifiers = [
-                    "left_control"
-                    "left_option"
-                  ];
-                }
-              ];
-              conditions = [
-                {
-                  type = "device_if";
-                  identifiers = [
-                    {
-                      vendor_id = 19280;
-                      product_id = 34816;
-                    }
-                  ];
-                }
-              ];
-            }
+            (keyToMod "f16" "return_or_enter" [ "left_control" "left_option" ])
+            (keyToMod "f17" "left_arrow" [ "left_control" "left_option" ])
+            (keyToMod "f18" "c" [ "left_control" "left_option" ])
+            (keyToMod "f19" "right_arrow" [ "left_control" "left_option" ])
           ];
         }
       ];

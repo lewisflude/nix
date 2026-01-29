@@ -87,12 +87,8 @@
 
       # Immersed - VR desktop productivity
       immersed = {
-        tcp = {
-          start = 5230; # TCP port range start
-        };
-        udp = {
-          start = 5230; # UDP port range start
-        };
+        tcpStart = 5230;
+        udpStart = 5230;
       };
 
       # mDNS/Avahi for VR headset discovery
@@ -101,15 +97,9 @@
 
     # Gaming network ports
     gaming = {
-      # Steam Link (Quest 3 compatibility)
-      steamLink = {
-        discovery = 27031; # UDP discovery
-        streamingTcp = 27036; # TCP streaming
-        streamingUdp = [
-          27036
-          27037
-        ]; # UDP streaming
-      };
+      steamLinkDiscovery = 27031;
+      steamLinkTcp = 27036;
+      steamLinkUdp = [ 27036 27037 ];
     };
   };
 

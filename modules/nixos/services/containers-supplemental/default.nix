@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
@@ -19,7 +20,6 @@ in
     ./services/wizarr.nix
     ./services/doplarr.nix
     ./services/comfyui.nix
-    ./services/calcom.nix
     ./services/janitorr.nix
     ./services/jellystat.nix
     ./services/termix.nix
@@ -38,7 +38,7 @@ in
 
     timezone = mkOption {
       type = types.str;
-      default = "Europe/London";
+      default = constants.defaults.timezone;
       description = "Timezone for all containers.";
     };
 

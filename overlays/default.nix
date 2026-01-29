@@ -137,6 +137,38 @@ in
       java25 = jdk25;
     };
 
+  # xrizer-multilib - 32-bit and 64-bit OpenVR to OpenXR translation
+  # Required for 32-bit VR games like Half-Life 2: VR mod with WiVRn
+  # Based on: https://github.com/NixOS/nixpkgs/issues/448128#issuecomment-2480632726
+  xrizer-multilib = final: prev: {
+    xrizer-multilib =
+      let
+        # Helper to build xrizer with platform-specific library path
+        buildXrizerForPlatform =
+          pkgs: platformPath:
+          (pkgs.xrizer.overrideAttrs (oldAttrs: {
+            postInstall = ''
+              mkdir -p $out/lib/xrizer/${platformPath}
+              mv "$out/lib/libxrizer.so" "$out/lib/xrizer/${platformPath}/vrclient.so"
+            '';
+          }));
+
+        # Build for both 64-bit and 32-bit
+        xrizer-64bit = buildXrizerForPlatform prev "linux_x86_64";
+        xrizer-32bit = buildXrizerForPlatform prev.pkgsi686Linux "linux_i686";
+      in
+      prev.symlinkJoin {
+        name = "xrizer-multilib";
+        paths = [
+          xrizer-64bit
+          xrizer-32bit
+        ];
+        meta = xrizer-64bit.meta // {
+          description = "OpenVR to OpenXR translation layer (multilib: x86_64 + i686)";
+        };
+      };
+  };
+
   # Immersed VR - Use latest version from static URL
   # This pulls the latest release directly instead of using archived versions
   immersed-latest = _final: prev: {

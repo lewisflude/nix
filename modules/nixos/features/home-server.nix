@@ -1,12 +1,12 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
   inherit (lib) mkIf mkMerge;
   cfg = config.host.features.homeServer;
-  constants = import ../../../lib/constants.nix;
 in
 {
   config = mkMerge [

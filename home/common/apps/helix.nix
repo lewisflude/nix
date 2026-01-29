@@ -43,19 +43,6 @@ let
       args = baseArgs ++ extraArgs;
     };
 
-  # Helper to build language server list
-  # For languages using Biome, add Biome LSP alongside the primary LSP
-  buildLanguageServers =
-    _name: value:
-    if value.formatter == "biome" then
-      [
-        # Primary LSP for language features (type checking, completion, etc.)
-        value.lsp
-        # Biome LSP for linting and additional diagnostics
-        "biome"
-      ]
-    else
-      [ value.lsp ];
 
   # Map command names to Nix packages
   lspPackages = [
@@ -97,7 +84,7 @@ in
             scope = "source.${name}";
             injection-regex = name;
             file-types = value.fileTypes or [ name ];
-            language-servers = buildLanguageServers name value;
+            language-servers = if value.formatter == "biome" then [ value.lsp "biome" ] else [ value.lsp ];
             indent = {
               tab-width = value.indent;
               # Generate unit from indent value if not explicitly provided

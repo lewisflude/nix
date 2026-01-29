@@ -10,27 +10,28 @@ let
   # 2. Performance-critical patterns for this repository
   # 3. Patterns that significantly impact file watching/search
 
-  # Core excludes for file search and explorer
-  commonIgnores = {
-    "**/result" = true;
-    "**/result-*" = true;
-    "**/.direnv" = true;
-    "**/node_modules" = true;
-    "**/target" = true;
-    "**/.git" = true;
-  };
+  # Base patterns to exclude (Nix-specific and performance-critical)
+  ignorePatterns = [
+    "result"
+    "result-*"
+    ".direnv"
+    "node_modules"
+    "target"
+    ".git"
+  ];
 
-  # Watcher-specific excludes (performance-critical)
-  watcherIgnores = {
-    "**/.direnv/**" = true;
-    "**/result/**" = true;
-    "**/result-*/**" = true;
-    "**/node_modules/**" = true;
-    "**/target/**" = true;
-    "**/.git/**" = true;
-    "**/.git/objects/**" = true;
-    "**/.git/subtree-cache/**" = true;
-  };
+  # Generate ignore maps from base patterns
+  toCommonIgnore = pattern: { name = "**/${pattern}"; value = true; };
+  toWatcherIgnore = pattern: { name = "**/${pattern}/**"; value = true; };
+
+  commonIgnores = lib.listToAttrs (map toCommonIgnore ignorePatterns);
+
+  watcherIgnores =
+    lib.listToAttrs (map toWatcherIgnore ignorePatterns)
+    // {
+      "**/.git/objects/**" = true;
+      "**/.git/subtree-cache/**" = true;
+    };
 in
 {
   userSettings = {

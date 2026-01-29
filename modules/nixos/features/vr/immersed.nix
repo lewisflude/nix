@@ -4,11 +4,11 @@
   config,
   pkgs,
   lib,
+  constants,
   ...
 }:
 let
   cfg = config.host.features.vr;
-  constants = import ../../../../lib/constants.nix;
 in
 lib.mkIf (cfg.enable && cfg.immersed.enable) {
   programs.immersed = {
@@ -53,14 +53,14 @@ lib.mkIf (cfg.enable && cfg.immersed.enable) {
   # Firewall for PC-headset communication
   networking.firewall = lib.mkIf cfg.immersed.openFirewall {
     allowedTCPPorts = [
-      constants.ports.vr.immersed.tcp.start
-      (constants.ports.vr.immersed.tcp.start + 1)
-      (constants.ports.vr.immersed.tcp.start + 2)
+      constants.ports.vr.immersed.tcpStart
+      (constants.ports.vr.immersed.tcpStart + 1)
+      (constants.ports.vr.immersed.tcpStart + 2)
     ];
     allowedUDPPorts = [
-      constants.ports.vr.immersed.udp.start
-      (constants.ports.vr.immersed.udp.start + 1)
-      (constants.ports.vr.immersed.udp.start + 2)
+      constants.ports.vr.immersed.udpStart
+      (constants.ports.vr.immersed.udpStart + 1)
+      (constants.ports.vr.immersed.udpStart + 2)
     ];
   };
 }

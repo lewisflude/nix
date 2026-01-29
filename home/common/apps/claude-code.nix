@@ -19,240 +19,50 @@
     # This provides better maintenance and faster builds than claude-code-nix
     package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
 
-    # Custom commands for Claude Code
-    # Usage: Type /command-name in claude-code prompt
     commands = {
-      # Code review command
       review = ''
-        # Code Review
-
-        Perform a comprehensive code review of the selected code or files.
-
-        ## What to analyze:
-        1. **Bugs and Issues**: Identify potential bugs, logic errors, or edge cases
-        2. **Best Practices**: Check adherence to language and framework conventions
-        3. **Performance**: Look for performance bottlenecks or inefficiencies
-        4. **Security**: Identify security vulnerabilities or concerns
-        5. **Maintainability**: Assess code clarity, documentation, and structure
-        6. **Testing**: Suggest areas that need better test coverage
-
-        ## For Nix code specifically:
-        - Check for the pkgs scope antipattern (should use explicit pkgs.package references)
-        - Verify correct module placement (system vs home-manager)
-        - Ensure constants are used instead of hardcoded values
-        - Validate conventional commit message format
-
-        Provide actionable feedback with specific suggestions for improvement.
+        Review code for bugs, best practices, performance, security, and maintainability.
+        For Nix: check pkgs scope usage, module placement, constants usage, and commit format.
       '';
 
-      # Conventional commit message generator
       commit = ''
-        # Generate Conventional Commit Message
-
-        Generate a conventional commit message for the staged changes.
-
-        ## Format:
-        ```
-        <type>(<scope>): <description>
-
-        [optional body]
-
-        [optional footer(s)]
-        ```
-
-        ## Types:
-        - **feat**: New feature
-        - **fix**: Bug fix
-        - **refactor**: Code refactoring
-        - **docs**: Documentation changes
-        - **test**: Test additions or changes
-        - **chore**: Build/tooling changes
-        - **style**: Code style changes (formatting)
-        - **perf**: Performance improvements
-
-        ## Rules:
-        1. Keep description concise (50 chars or less)
-        2. Use imperative mood ("add" not "added" or "adds")
-        3. Focus on the "why" not the "what"
-        4. Reference issue numbers if applicable
-
-        Run `git diff --staged` to see the changes, then generate an appropriate commit message.
+        Generate conventional commit: <type>(<scope>): <description>
+        Types: feat, fix, refactor, docs, test, chore, style, perf
+        Use imperative mood, 50 chars max, focus on why not what.
       '';
 
-      # Nix expression helper
       nix = ''
-        # Nix Expression Helper
-
-        Help with Nix expressions and configuration following this repository's conventions.
-
-        ## Module Placement Guidelines:
-        ### System-Level (modules/nixos/ or modules/darwin/):
-        - System services (systemd, launchd)
-        - Hardware configuration
-        - Container runtimes
-        - Graphics drivers
-
-        ### Home-Manager (home/common/apps/):
-        - User applications
-        - Dotfiles
-        - Development tools
-        - Desktop applications
-
-        ## Code Style Requirements:
-        1. ❌ Never use pkgs scope operator - use explicit pkgs.package references
-        2. ✅ Use constants from lib/constants.nix
-        3. ✅ Follow conventional commits
-        4. ✅ Format with 'nix fmt' or 'treefmt'
-
-        ## Available Tools:
-        - `nix run .#new-module` - Create new modules
-        - `nix run .#update-all` - Update dependencies
-        - `nix fmt` - Format code
-
-        Provide clear explanations and suggest improvements following these patterns.
+        Help with Nix following repo conventions:
+        - Never use pkgs scope, use explicit pkgs.package
+        - System modules in modules/nixos/, home-manager in home/common/apps/
+        - Use constants from lib/constants.nix
+        - Format with nix fmt
       '';
 
-      # Debug helper
       debug = ''
-        # Debug Helper
-
-        Help debug the issue step-by-step.
-
-        ## Debugging Process:
-        1. **Understand the Problem**: Clarify what's broken and expected behavior
-        2. **Gather Information**: Review error messages, logs, and relevant code
-        3. **Identify Root Cause**: Analyze potential causes based on evidence
-        4. **Suggest Solutions**: Provide concrete fixes with explanations
-        5. **Prevent Recurrence**: Suggest how to prevent similar issues
-
-        ## For Nix Issues:
-        - Run `nix flake check` to validate configuration
-        - Check build logs: `nix log /nix/store/<path>`
-        - Trace evaluation: `nix eval --show-trace`
-        - Test builds: `nix build --dry-run`
-
-        ## For System Issues:
-        - Check systemd logs: `journalctl -xe`
-        - Review home-manager logs
-        - Use diagnostic scripts in `scripts/` directory
-
-        Work through the problem methodically.
+        Debug issues step-by-step: understand problem, gather info, identify cause, suggest fixes.
+        For Nix: use nix flake check, nix eval --show-trace, nix build --dry-run
+        For system: check journalctl -xe, home-manager logs, diagnostic scripts
       '';
 
-      # Refactor command
       refactor = ''
-        # Refactoring Assistant
-
-        Suggest refactoring improvements for the selected code.
-
-        ## Focus Areas:
-        1. **Code Clarity**: Improve readability and understandability
-        2. **Maintainability**: Make code easier to modify and extend
-        3. **Performance**: Optimize bottlenecks
-        4. **Best Practices**: Apply language/framework patterns
-        5. **Simplification**: Reduce complexity where possible
-
-        ## Refactoring Guidelines:
-        - Keep changes focused and atomic
-        - Maintain backward compatibility when possible
-        - Add tests for new behavior
-        - Document breaking changes clearly
-
-        ## For Nix Code:
-        - Extract common patterns into functions
-        - Use feature flags for optional functionality
-        - Consolidate duplicated configuration
-        - Improve module structure and organization
-
-        Provide before/after examples with clear explanations.
+        Suggest refactoring for clarity, maintainability, performance, and simplicity.
+        For Nix: extract patterns, use feature flags, consolidate config, improve structure.
       '';
 
-      # Documentation generator
       doc = ''
-        # Documentation Generator
-
-        Generate comprehensive documentation for the selected code.
-
-        ## Documentation Structure:
-        1. **Overview**: What the code does at a high level
-        2. **Purpose**: Why this code exists
-        3. **Usage**: How to use it with examples
-        4. **Parameters/Options**: Detailed parameter descriptions
-        5. **Return Values**: What the code returns
-        6. **Examples**: Real-world usage examples
-        7. **Notes**: Important caveats, warnings, or tips
-
-        ## For Nix Modules:
-        Example module option documentation:
-        - Use lib.mkOption with clear descriptions
-        - Include type, default, and example values
-        - Provide usage examples and important notes
-
-        ## Documentation Best Practices:
-        - Write for someone unfamiliar with the code
-        - Include practical examples
-        - Document edge cases and limitations
-        - Keep it up-to-date with code changes
-
-        Generate clear, comprehensive documentation.
+        Generate documentation: overview, purpose, usage, parameters, examples, notes.
+        For Nix modules: use mkOption with clear descriptions, types, defaults, examples.
       '';
 
-      # Test generation
       test = ''
-        # Test Case Generator
-
-        Generate comprehensive test cases for the selected code.
-
-        ## Test Categories:
-        1. **Happy Path**: Normal, expected usage
-        2. **Edge Cases**: Boundary conditions and limits
-        3. **Error Handling**: Invalid inputs and error conditions
-        4. **Integration**: Interactions with other components
-        5. **Performance**: Speed and resource usage
-        6. **Security**: Authentication, authorization, input validation
-
-        ## For Nix Code:
-        - Test module evaluation: `nix eval .#<output>`
-        - Test builds: `nix build .#<package>`
-        - Integration tests in `tests/` directory
-        - Use NixOS VM tests for system config
-
-        ## Test Structure:
-        Tests should include:
-        - Test name and clear description
-        - Test script or implementation
-        - Expected results for validation
-
-        Generate a complete test suite with clear descriptions.
+        Generate test cases: happy path, edge cases, error handling, integration.
+        For Nix: test with nix eval, nix build, integration tests, VM tests.
       '';
 
-      # Explain code
       explain = ''
-        # Code Explanation
-
-        Explain the selected code in clear, simple terms.
-
-        ## Explanation Structure:
-        1. **High-Level Purpose**: What does this code accomplish?
-        2. **How It Works**: Step-by-step breakdown of the logic
-        3. **Key Concepts**: Important patterns or techniques used
-        4. **Dependencies**: External libraries or modules used
-        5. **Gotchas**: Tricky parts or potential pitfalls
-        6. **Context**: Where this fits in the larger system
-
-        ## Explanation Guidelines:
-        - Use plain language (avoid unnecessary jargon)
-        - Provide analogies when helpful
-        - Break complex logic into digestible pieces
-        - Highlight the "why" behind design decisions
-
-        ## For Nix Code:
-        - Explain the Nix language features used
-        - Describe module system patterns
-        - Clarify attribute set manipulations
-        - Show evaluation order and lazy evaluation
-
-        Provide a clear, comprehensive explanation.
+        Explain code clearly: purpose, how it works, key concepts, dependencies, gotchas.
+        Use plain language, provide analogies, break down complex logic.
       '';
     };
 

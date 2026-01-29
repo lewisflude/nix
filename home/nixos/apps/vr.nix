@@ -10,6 +10,11 @@ let
   vrEnabled = osConfig.host.features.vr.enable or false;
   wivrnEnabled = (osConfig.host.features.vr.wivrn.enable or false) && vrEnabled;
 
+  # 32-bit WiVRn client library for 32-bit VR games (e.g., Half-Life 2: VR)
+  wivrn-client-32bit = pkgs.pkgsi686Linux.wivrn.override {
+    clientLibOnly = true;
+  };
+
   # Helper script to switch to WiVRn as default OpenXR runtime
   vr-use-wivrn = pkgs.writeShellApplication {
     name = "vr-use-wivrn";
@@ -177,7 +182,7 @@ mkIf vrEnabled {
     vr-use-wivrn
     pkgs.wayvr # Desktop overlay for VR
     pkgs.android-tools # ADB for wired VR fallback
-    pkgs.xrizer # OpenVR to OpenXR translation (required for SteamVR games)
+    pkgs.xrizer-multilib # OpenVR to OpenXR translation (32-bit + 64-bit)
   ];
 
   # CRITICAL: OpenXR runtime configuration for sandboxed apps (Steam)
@@ -189,6 +194,13 @@ mkIf vrEnabled {
         source = "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";
         force = true; # Overwrite existing file (may be from previous setup)
       };
+
+  # 32-bit OpenXR runtime for 32-bit VR games
+  # Automatically used by 32-bit applications (e.g., Half-Life 2: VR mod)
+  xdg.configFile."openxr/1/active_runtime.i686.json" = mkIf wivrnEnabled {
+    source = "${wivrn-client-32bit}/share/openxr/1/openxr_wivrn.i686.json";
+    force = true;
+  };
 
   # OpenVR paths for xrizer (OpenVR to OpenXR translation)
   # Required for SteamVR games to work via xrizer
@@ -204,7 +216,7 @@ mkIf vrEnabled {
         external_drivers = null;
         config = [ "${steam}/config" ];
         log = [ "${steam}/logs" ];
-        runtime = [ "${pkgs.xrizer}/lib/xrizer" ];
+        runtime = [ "${pkgs.xrizer-multilib}/lib/xrizer" ];
       };
   };
 }

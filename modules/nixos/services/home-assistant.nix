@@ -1,11 +1,11 @@
 {
   config,
   pkgs,
+  constants,
   ...
 }:
 let
   intent_script_yaml = ./home-assistant/intent-scripts/intent_script.yaml;
-  constants = import ../../../lib/constants.nix;
 in
 {
   sops.templates."hass-secrets.yaml" = {

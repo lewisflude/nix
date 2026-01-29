@@ -1,5 +1,8 @@
 { lib, pkgs, ... }:
 let
+  # Helper to create MIME associations for a list of types
+  mimeAssoc = app: mimes: lib.genAttrs mimes (_: app);
+
   # Core default applications for each MIME type
   mimeDefaults = {
     # Core Handlers
@@ -20,41 +23,43 @@ let
 
     # Documents & Media - PDFs
     "application/pdf" = "google-chrome.desktop";
-
-    # Documents & Media - Images
-    "image/jpeg" = "swayimg.desktop";
-    "image/jpg" = "swayimg.desktop";
-    "image/png" = "swayimg.desktop";
-    "image/gif" = "swayimg.desktop";
-    "image/webp" = "swayimg.desktop";
-    "image/bmp" = "swayimg.desktop";
-    "image/svg+xml" = "swayimg.desktop";
-
-    # Documents & Media - Video
-    "video/mp4" = "mpv.desktop";
-    "video/webm" = "mpv.desktop";
-    "video/x-matroska" = "mpv.desktop";
-    "video/mpeg" = "mpv.desktop";
-    "video/x-msvideo" = "mpv.desktop";
-
-    # Documents & Media - Audio
-    "audio/mpeg" = "mpv.desktop";
-    "audio/mp3" = "mpv.desktop";
-    "audio/flac" = "mpv.desktop";
-    "audio/ogg" = "mpv.desktop";
-    "audio/x-vorbis+ogg" = "mpv.desktop";
-    "audio/opus" = "mpv.desktop";
-
-    # Archives & Execution
-    "application/zip" = "org.gnome.FileRoller.desktop";
-    "application/x-7z-compressed" = "org.gnome.FileRoller.desktop";
-    "application/x-rar-compressed" = "org.gnome.FileRoller.desktop";
-    "application/x-rar" = "org.gnome.FileRoller.desktop";
-    "application/x-tar" = "org.gnome.FileRoller.desktop";
-    "application/x-compressed-tar" = "org.gnome.FileRoller.desktop";
-    "application/x-bzip-compressed-tar" = "org.gnome.FileRoller.desktop";
-    "application/x-shellscript" = "helix.desktop";
-    "application/x-executable" = "helix.desktop";
+  }
+  // mimeAssoc "swayimg.desktop" [
+    "image/jpeg"
+    "image/jpg"
+    "image/png"
+    "image/gif"
+    "image/webp"
+    "image/bmp"
+    "image/svg+xml"
+  ]
+  // mimeAssoc "mpv.desktop" [
+    "video/mp4"
+    "video/webm"
+    "video/x-matroska"
+    "video/mpeg"
+    "video/x-msvideo"
+    "audio/mpeg"
+    "audio/mp3"
+    "audio/flac"
+    "audio/ogg"
+    "audio/x-vorbis+ogg"
+    "audio/opus"
+  ]
+  // mimeAssoc "org.gnome.FileRoller.desktop" [
+    "application/zip"
+    "application/x-7z-compressed"
+    "application/x-rar-compressed"
+    "application/x-rar"
+    "application/x-tar"
+    "application/x-compressed-tar"
+    "application/x-bzip-compressed-tar"
+  ]
+  // mimeAssoc "helix.desktop" [
+    "application/x-shellscript"
+    "application/x-executable"
+  ]
+  // {
 
     # Additional platform-specific handlers
     "x-terminal-emulator" = "ghostty.desktop";
@@ -69,91 +74,56 @@ let
   };
 
   # Additional associations (alternatives that can also handle these types)
-  addedAssociations = {
-    # Text files - offer both Helix and Cursor as options
-    "text/plain" = [
-      "helix.desktop"
-      "cursor.desktop"
-    ];
-    "text/xml" = [
-      "helix.desktop"
-      "cursor.desktop"
-    ];
-    "text/markdown" = [
-      "helix.desktop"
-      "cursor.desktop"
-    ];
-    "text/css" = [
-      "helix.desktop"
-      "cursor.desktop"
-    ];
-    "text/javascript" = [
-      "helix.desktop"
-      "cursor.desktop"
-    ];
-    "text/x-python" = [
-      "helix.desktop"
-      "cursor.desktop"
-    ];
+  addedAssociations =
+    lib.genAttrs
+      [
+        "text/plain"
+        "text/xml"
+        "text/markdown"
+        "text/css"
+        "text/javascript"
+        "text/x-python"
+      ]
+      (_: [
+        "helix.desktop"
+        "cursor.desktop"
+      ])
+    // lib.genAttrs
+      [
+        "image/png"
+        "image/jpeg"
+        "image/gif"
+      ]
+      (_: [
+        "swayimg.desktop"
+        "gimp.desktop"
+      ])
+    // {
+      "application/pdf" = [
+        "google-chrome.desktop"
+        "org.gnome.FileRoller.desktop"
+      ];
+      "inode/directory" = [
+        "thunar.desktop"
+        "org.gnome.Nautilus.desktop"
+      ];
+    };
 
-    # PDFs - also offer file-roller for extraction
-    "application/pdf" = [
-      "google-chrome.desktop"
-      "org.gnome.FileRoller.desktop"
-    ];
-
-    # Images - offer GIMP as alternative editor
-    "image/png" = [
-      "swayimg.desktop"
-      "gimp.desktop"
-    ];
-    "image/jpeg" = [
-      "swayimg.desktop"
-      "gimp.desktop"
-    ];
-    "image/gif" = [
-      "swayimg.desktop"
-      "gimp.desktop"
-    ];
-
-    # File manager alternatives
-    "inode/directory" = [
-      "thunar.desktop"
-      "org.gnome.Nautilus.desktop"
-    ];
-  };
-
-  # Google Chrome command-line flags for performance and features
-  # Reference: https://wiki.archlinux.org/title/Chromium
+  # Google Chrome command-line flags
   chromeFlags = [
-    # Hardware acceleration (VA-API for video decode)
-    # Note: VaapiOnNvidiaGPUs is required for NVIDIA GPUs (Jupiter uses RTX 4090)
     "--enable-features=AcceleratedVideoDecodeLinuxGL,AcceleratedVideoEncoder,VaapiOnNvidiaGPUs"
-
-    # GPU acceleration (force past blocklist if needed)
     "--ignore-gpu-blocklist"
     "--enable-zero-copy"
-
-    # Wayland support (auto-detect X11 vs Wayland)
     "--ozone-platform-hint=auto"
     "--enable-wayland-ime"
-
-    # Performance optimizations
     "--enable-parallel-downloading"
     "--enable-gpu-rasterization"
-
-    # High refresh rate support (for gaming displays)
     "--use-gl=egl"
-
-    # Cache in tmpfs (reduces disk writes, improves performance)
     "--disk-cache-dir=/run/user/1000/chrome-cache"
-
-    # Password store (use GNOME Keyring consistently)
     "--password-store=gnome-libsecret"
   ];
 
-  # Format flags for chrome-flags.conf (one per line with comments)
-  chromeFlagsFormatted = lib.concatMapStringsSep "\n" (flag: flag) chromeFlags;
+  chromeFlagsFormatted = lib.concatStringsSep "\n" chromeFlags;
 
 in
 {
@@ -168,16 +138,5 @@ in
   # Install Google Chrome
   home.packages = [ pkgs.google-chrome ];
 
-  # Google Chrome persistent flags configuration
-  # Note: For Chromium use chromium-flags.conf instead
-  # These flags are read by the Chrome launcher script
-  home.file.".config/chrome-flags.conf".text = ''
-    # Chrome Performance & Feature Flags
-    # Generated by NixOS Home Manager
-    # See: https://wiki.archlinux.org/title/Chromium
-
-    # Hardware Video Acceleration (VA-API)
-    # Enables GPU-accelerated video decoding for better performance
-    ${chromeFlagsFormatted}
-  '';
+  home.file.".config/chrome-flags.conf".text = chromeFlagsFormatted;
 }

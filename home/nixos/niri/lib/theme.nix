@@ -20,13 +20,4 @@ in
   # Convenience helpers for geometric values only
   cornerRadius = niriSync.windowRadius * 1.0; # Convert to float for Niri config
   windowGap = niriSync.windowGap;
-
-  # Empty placeholders for features that were using colors
-  # These will be populated by signal-nix when support is added
-  colors = { };
-  shadowColor = null;
-  inactiveShadowColor = null;
-  floatingShadowColor = null;
-  screencastColors = null;
-  themeConstants = null;
 }

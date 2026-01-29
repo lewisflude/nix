@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
@@ -11,7 +12,6 @@ let
     types
     ;
   cfg = config.services.dante-proxy;
-  constants = import ../../../lib/constants.nix;
 in
 {
   options.services.dante-proxy = {

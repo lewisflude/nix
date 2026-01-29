@@ -3,10 +3,10 @@
   inputs,
   lib,
   hostSystem,
+  constants,
   ...
 }:
 let
-  constants = import ../../lib/constants.nix;
   platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
 
   revision =

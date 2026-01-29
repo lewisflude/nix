@@ -2,12 +2,12 @@
   config,
   lib,
   pkgs,
+  constants,
   ...
 }:
 let
   inherit (lib) mkIf mkMerge optionals;
   cfg = config.host.features.gaming;
-  constants = import ../../../lib/constants.nix;
 in
 {
   config = mkMerge [
@@ -70,11 +70,8 @@ in
 
       # Steam Link firewall (remotePlay.openFirewall may not cover Quest 3)
       networking.firewall = mkIf cfg.steam {
-        allowedUDPPorts = [
-          constants.ports.gaming.steamLink.discovery
-        ]
-        ++ constants.ports.gaming.steamLink.streamingUdp;
-        allowedTCPPorts = [ constants.ports.gaming.steamLink.streamingTcp ];
+        allowedUDPPorts = [ constants.ports.gaming.steamLinkDiscovery ] ++ constants.ports.gaming.steamLinkUdp;
+        allowedTCPPorts = [ constants.ports.gaming.steamLinkTcp ];
       };
 
       # Note: User gaming tools (protonup-qt, steamcmd, steam-run) are configured in home-manager

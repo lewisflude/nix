@@ -1,84 +1,69 @@
 # NixOS MCP Configuration
-#
-# Enables MCP servers for NixOS hosts.
-# The actual server definitions are in home/common/modules/mcp.nix
+{ config, pkgs, ... }:
 {
-  # Enable MCP with default servers (no secrets required)
-  services.mcp = {
+  programs.mcp = {
     enable = true;
-
-    # Default enabled servers (no secrets):
-    # - memory, git, time, sqlite, everything
-
-    # To enable servers that require secrets:
-    # 1. Add secrets to secrets/secrets.yaml using: sops secrets/secrets.yaml
-    # 2. Secrets are already configured in modules/shared/sops.nix
-    # 3. Rebuild system: nh os switch
-    # 4. Enable server below and rebuild again
     servers = {
-      # ═══════════════════════════════════════════════════════════
-      # CORE SERVERS (enabled by default, no secrets)
-      # ═══════════════════════════════════════════════════════════
-      # memory, git - kept enabled
-      time.enabled = false; # DISABLED: Rarely needed
-      sqlite.enabled = false; # DISABLED: Not needed for Nix development
-      everything.enabled = false; # DISABLED: Demo/testing server
+      # Core servers (no secrets required)
+      memory = {
+        command = "${pkgs.nodejs}/bin/npx";
+        args = [ "-y" "@modelcontextprotocol/server-memory" ];
+      };
 
-      # ═══════════════════════════════════════════════════════════
-      # DEVELOPMENT & DOCUMENTATION
-      # ═══════════════════════════════════════════════════════════
-      github.enabled = true; # GITHUB_TOKEN - KEPT for GitHub API integration
-      openai.enabled = false; # DISABLED: Redundant with Claude
-      docs.enabled = true; # OPENAI_API_KEY
-      # rustdocs.enabled = true; # TEMPORARILY DISABLED: upstream apple_sdk_11_0 deprecation
+      git = {
+        command = "${pkgs.nodejs}/bin/npx";
+        args = [ "-y" "@cyanheads/git-mcp-server" ];
+      };
 
-      # ═══════════════════════════════════════════════════════════
-      # SEARCH & RESEARCH
-      # ═══════════════════════════════════════════════════════════
-      kagi.enabled = true; # KAGI_API_KEY - KEPT as requested
-      brave.enabled = false; # BRAVE_API_KEY - NOT CONFIGURED
+      # Optional servers (no secrets required)
+      filesystem = {
+        command = "${pkgs.nodejs}/bin/npx";
+        args = [
+          "-y"
+          "@modelcontextprotocol/server-filesystem"
+          config.home.homeDirectory
+        ];
+      };
 
-      # ═══════════════════════════════════════════════════════════
-      # UTILITIES (no secrets required)
-      # ═══════════════════════════════════════════════════════════
-      filesystem.enabled = true;
-      sequentialthinking.enabled = true;
-      fetch.enabled = false; # DISABLED: Native capabilities usually sufficient
-      nixos.enabled = true;
-      puppeteer.enabled = false; # DISABLED: Browser automation not needed
-      wayland.enabled = true; # Wayland screenshot, analysis, and input control
+      sequentialthinking = {
+        command = "${pkgs.nodejs}/bin/npx";
+        args = [ "-y" "@modelcontextprotocol/server-sequential-thinking" ];
+      };
 
-      # ═══════════════════════════════════════════════════════════
-      # PROJECT MANAGEMENT
-      # ═══════════════════════════════════════════════════════════
-      linear.enabled = false; # DISABLED: Not needed for this project
+      nixos = {
+        command = "${pkgs.uv}/bin/uvx";
+        args = [ "mcp-nixos" ];
+      };
 
-      # ═══════════════════════════════════════════════════════════
-      # COMMUNICATION
-      # ═══════════════════════════════════════════════════════════
-      slack.enabled = false; # SLACK_BOT_TOKEN, SLACK_TEAM_ID - PLACEHOLDER VALUES
-      discord.enabled = false; # DISCORD_BOT_TOKEN - PLACEHOLDER VALUE
+      wayland = {
+        command = "${pkgs.nodejs}/bin/npx";
+        args = [ "-y" "mcp-server-wayland" ];
+      };
 
-      # ═══════════════════════════════════════════════════════════
-      # RESEARCH & CONTENT
-      # ═══════════════════════════════════════════════════════════
-      youtube.enabled = false; # DISABLED: Video management not needed
+      # Servers with secrets (secrets injected via env)
+      github = {
+        command = "${pkgs.nodejs}/bin/npx";
+        args = [ "-y" "@modelcontextprotocol/server-github" ];
+        env = {
+          GITHUB_TOKEN = "{env:GITHUB_TOKEN}";
+        };
+      };
 
-      # ═══════════════════════════════════════════════════════════
-      # DATABASE
-      # ═══════════════════════════════════════════════════════════
-      postgres.enabled = false; # POSTGRES_CONNECTION_STRING - PLACEHOLDER VALUE
+      docs = {
+        command = "${pkgs.nodejs}/bin/npx";
+        args = [ "-y" "@arabold/docs-mcp-server" ];
+        env = {
+          OPENAI_API_KEY = "{env:OPENAI_API_KEY}";
+        };
+      };
 
-      # ═══════════════════════════════════════════════════════════
-      # VECTOR DATABASES (for RAG workflows)
-      # ═══════════════════════════════════════════════════════════
-      qdrant.enabled = false; # DISABLED: Vector storage not needed
-      pinecone.enabled = false; # DISABLED: Vector database not needed
-
-      # ═══════════════════════════════════════════════════════════
-      # CODE EXECUTION
-      # ═══════════════════════════════════════════════════════════
-      e2b.enabled = false; # DISABLED: Remote sandbox not needed
+      kagi = {
+        command = "${pkgs.uv}/bin/uvx";
+        args = [ "mcp-server-kagi" ];
+        env = {
+          KAGI_API_KEY = "{env:KAGI_API_KEY}";
+        };
+      };
     };
   };
 }

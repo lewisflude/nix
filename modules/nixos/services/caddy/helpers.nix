@@ -1,72 +1,58 @@
 # Caddy Helper Functions
 # Reduces repetition in virtual host definitions
-_:
+{ lib }:
 let
-  # inherit (lib) concatStringsSep;
+  inherit (lib) optionalString;
 
-  # Standard reverse proxy headers
   standardHeaders = ''
     header_up X-Real-IP {remote_host}
     header_up X-Forwarded-For {remote_host}
     header_up X-Forwarded-Proto {scheme}
   '';
 
-  # Standard encoding
   standardEncoding = "encode zstd gzip";
 in
-{
-  # Create a standard reverse proxy virtual host config
-  # Usage: mkReverseProxy "localhost:8080"
-  mkReverseProxy = target: {
-    extraConfig = ''
-      reverse_proxy ${target} {
-        ${standardHeaders}
-      }
-      ${standardEncoding}
-    '';
-  };
-
-  # Create a reverse proxy with custom headers
-  # Usage: mkReverseProxyWithHeaders "localhost:8080" "header_up Host {host}"
-  mkReverseProxyWithHeaders = target: extraHeaders: {
-    extraConfig = ''
-      reverse_proxy ${target} {
-        ${standardHeaders}
-        ${extraHeaders}
-      }
-      ${standardEncoding}
-    '';
-  };
-
-  # Create a reverse proxy with special transport (e.g., HTTPS with insecure skip verify)
-  # Usage: mkReverseProxyWithTransport "https://localhost:8080" "tls_insecure_skip_verify"
-  mkReverseProxyWithTransport = target: transportConfig: {
-    extraConfig = ''
-      reverse_proxy ${target} {
-        transport http {
-          ${transportConfig}
+rec {
+  # Unified reverse proxy builder with optional features
+  # Usage:
+  #   mkProxy { target = "localhost:8080"; }
+  #   mkProxy { target = "localhost:8080"; extraHeaders = "header_up Host {host}"; }
+  #   mkProxy { target = "https://localhost:8080"; transport = "tls_insecure_skip_verify"; }
+  #   mkProxy { target = "localhost:8080"; basicAuth = true; }
+  mkProxy =
+    {
+      target,
+      extraHeaders ? "",
+      transport ? null,
+      basicAuth ? false,
+    }:
+    {
+      extraConfig = ''
+        ${optionalString basicAuth ''
+          basicauth {
+            import /etc/caddy/basicauth.conf
+          }
+        ''}
+        reverse_proxy ${target} {
+          ${optionalString (transport != null) ''
+            transport http {
+              ${transport}
+            }
+            header_up Host {host}
+          ''}
+          ${standardHeaders}
+          ${extraHeaders}
         }
-        header_up Host {host}
-        ${standardHeaders}
-      }
-      ${standardEncoding}
-    '';
-  };
+        ${standardEncoding}
+      '';
+    };
 
-  # Create a reverse proxy with HTTP Basic Auth protection
-  # Usage: mkAuthenticatedProxy "localhost:8080"
-  # Note: Requires setting up credentials via Caddy's hash-password command
-  mkAuthenticatedProxy = target: {
-    extraConfig = ''
-      basicauth {
-        # Generate hash with: caddy hash-password
-        # Add users here or import from secrets
-        import /etc/caddy/basicauth.conf
-      }
-      reverse_proxy ${target} {
-        ${standardHeaders}
-      }
-      ${standardEncoding}
-    '';
+  # Legacy helper functions (kept for backward compatibility, delegates to mkProxy)
+  mkReverseProxy = target: mkProxy { inherit target; };
+  mkReverseProxyWithHeaders = target: extraHeaders: mkProxy { inherit target extraHeaders; };
+  mkReverseProxyWithTransport = target: transport: mkProxy { inherit target transport; };
+  mkAuthenticatedProxy = target: mkProxy {
+    inherit target;
+    basicAuth = true;
   };
 }

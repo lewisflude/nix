@@ -1,10 +1,16 @@
-{ pkgs, config, lib, ... }: {
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
+{
   programs.gh = {
     enable = true;
-    extensions = with pkgs; [
-      gh-poi               # Safely clean up merged branches
-      gh-notify            # View notifications with fzf support
-      gh-markdown-preview  # Terminal markdown rendering
+    extensions = [
+      pkgs.gh-poi # Safely clean up merged branches
+      pkgs.gh-notify # View notifications with fzf support
+      pkgs.gh-markdown-preview # Terminal markdown rendering
     ];
 
     settings = {
@@ -26,8 +32,14 @@
     enable = true;
     settings = {
       prSections = [
-        { title = "My Pull Requests"; filters = "is:open author:@me"; }
-        { title = "Needs My Review"; filters = "is:open review-requested:@me"; }
+        {
+          title = "My Pull Requests";
+          filters = "is:open author:@me";
+        }
+        {
+          title = "Needs My Review";
+          filters = "is:open review-requested:@me";
+        }
       ];
     };
   };

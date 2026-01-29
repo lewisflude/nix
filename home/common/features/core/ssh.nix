@@ -1,7 +1,8 @@
-{ config, ... }:
-let
-  constants = import ../../../../lib/constants.nix;
-in
+{
+  config,
+  constants,
+  ...
+}:
 {
   programs.ssh = {
     enable = true;

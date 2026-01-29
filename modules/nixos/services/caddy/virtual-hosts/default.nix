@@ -2,14 +2,15 @@
 # Combines all virtual host categories
 {
   lib,
+  constants,
   ...
 }:
 lib.mergeAttrsList [
-  (import ./infrastructure.nix { inherit lib; })
-  (import ./media.nix { inherit lib; })
-  (import ./arr-stack.nix { inherit lib; })
-  (import ./downloads.nix { inherit lib; })
-  (import ./ai.nix { inherit lib; })
-  (import ./gaming.nix { inherit lib; })
-  (import ./misc.nix { inherit lib; })
+  (import ./infrastructure.nix { inherit lib constants; })
+  (import ./media.nix { inherit lib constants; })
+  (import ./arr-stack.nix { inherit lib constants; })
+  (import ./downloads.nix { inherit lib constants; })
+  (import ./ai.nix { inherit lib constants; })
+  (import ./gaming.nix { inherit lib constants; })
+  (import ./misc.nix { inherit lib constants; })
 ]

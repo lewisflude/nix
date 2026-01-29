@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  constants,
   ...
 }:
 # Hytale Server Module
@@ -28,7 +29,6 @@ let
     concatStringsSep
     ;
 
-  constants = import ../../../lib/constants.nix;
   cfg = config.services.hytaleServer;
 in
 {

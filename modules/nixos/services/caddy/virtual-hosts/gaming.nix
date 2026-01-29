@@ -1,9 +1,9 @@
 # Gaming Services Virtual Hosts
 # Sunshine streaming, etc.
-_:
-let
-  constants = import ../../../../../lib/constants.nix;
-in
+{
+  constants,
+  ...
+}:
 {
   # Sunshine (Gaming) - special transport config
   "sunshine.blmt.io" = {

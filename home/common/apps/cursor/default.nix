@@ -3,12 +3,6 @@
   lib,
   ...
 }:
-let
-  userSettings = import ./settings.nix { inherit pkgs lib; };
-  languageSettings = import ./language-settings.nix { inherit lib; };
-  extensions = import ./extensions.nix { inherit pkgs lib; };
-  keybindings = import ./keybindings.nix { };
-in
 {
   home.sessionVariables = {
     NODE_OPTIONS = "--max-old-space-size=4096";
@@ -19,11 +13,11 @@ in
     mutableExtensionsDir = false;
     profiles.default = {
       userSettings = lib.mkMerge [
-        userSettings.userSettings
-        languageSettings.userSettings
+        (import ./settings.nix { inherit pkgs lib; }).userSettings
+        (import ./language-settings.nix { inherit lib; }).userSettings
       ];
-      inherit (extensions) extensions;
-      inherit (keybindings) keybindings;
+      extensions = (import ./extensions.nix { inherit pkgs lib; }).extensions;
+      keybindings = (import ./keybindings.nix { }).keybindings;
     };
   };
 }

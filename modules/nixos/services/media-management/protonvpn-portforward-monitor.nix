@@ -89,20 +89,22 @@ in
                 exit 0
               fi
 
-              # Get file modification time
               LAST_UPDATE=$(${pkgs.coreutils}/bin/stat -c %Y "$STATE_FILE")
               NOW=$(${pkgs.coreutils}/bin/date +%s)
               AGE=$((NOW - LAST_UPDATE))
 
-              # Check if port forward is stale
+              read_port_info() {
+                CURRENT_PORT=$(${pkgs.gnugrep}/bin/grep "PUBLIC_PORT=" "$STATE_FILE" | ${pkgs.coreutils}/bin/cut -d= -f2 || echo "unknown")
+                PRIVATE_PORT=$(${pkgs.gnugrep}/bin/grep "PRIVATE_PORT=" "$STATE_FILE" | ${pkgs.coreutils}/bin/cut -d= -f2 || echo "unknown")
+              }
+
+              if [ -f "$STATE_FILE" ]; then
+                read_port_info
+              fi
+
               if [ $AGE -gt $MAX_AGE ]; then
                 echo "ERROR: Port forward state is stale (''${AGE}s old, max: ''${MAX_AGE}s)"
-                
-                # Read current port from state file
-                if [ -f "$STATE_FILE" ]; then
-                  CURRENT_PORT=$(${pkgs.gnugrep}/bin/grep "PUBLIC_PORT=" "$STATE_FILE" | ${pkgs.coreutils}/bin/cut -d= -f2 || echo "unknown")
-                  echo "Current port: $CURRENT_PORT"
-                fi
+                echo "Current port: $CURRENT_PORT"
 
                 ${
                   if monitorCfg.restartTimerOnStale then
@@ -116,14 +118,8 @@ in
                 }
               else
                 echo "✓ Port forward is fresh (''${AGE}s old)"
-                
-                # Read and display current port info
-                if [ -f "$STATE_FILE" ]; then
-                  CURRENT_PORT=$(${pkgs.gnugrep}/bin/grep "PUBLIC_PORT=" "$STATE_FILE" | ${pkgs.coreutils}/bin/cut -d= -f2 || echo "unknown")
-                  PRIVATE_PORT=$(${pkgs.gnugrep}/bin/grep "PRIVATE_PORT=" "$STATE_FILE" | ${pkgs.coreutils}/bin/cut -d= -f2 || echo "unknown")
-                  echo "  Public port: $CURRENT_PORT"
-                  echo "  Private port: $PRIVATE_PORT"
-                fi
+                echo "  Public port: $CURRENT_PORT"
+                echo "  Private port: $PRIVATE_PORT"
               fi
             ''}";
 

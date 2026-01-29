@@ -35,7 +35,6 @@ let
     text = builtins.readFile ../../../../scripts/media/protonvpn-natpmp-portforward.sh;
   };
 
-  # Firewall updater script - dynamically opens the forwarded port
   firewallScript = pkgs.writeShellScript "update-qbt-firewall" ''
     #!/usr/bin/env bash
     set -euo pipefail
@@ -50,41 +49,26 @@ let
 
     echo "Updating firewall for port $NEW_PORT in namespace $NAMESPACE..."
 
-    # IPv4: Remove old port rules (if any exist for ports that aren't the new port)
-    ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables-save | \
-      grep -E "qbt0.*dpt:[0-9]+" | grep -v "dpt:$NEW_PORT" | \
-      sed 's/^-A /-D /' | while read rule; do
-        ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables $rule 2>/dev/null || true
-      done || true  # Don't fail if no old rules exist
+    update_rules() {
+      local iptables_cmd="$1"
+      local ip_version="$2"
 
-    # IPv4: Add rules for new port if they don't exist
-    if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -C INPUT -p tcp --dport "$NEW_PORT" -i qbt0 -j ACCEPT 2>/dev/null; then
-      ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -I INPUT -p tcp --dport "$NEW_PORT" -i qbt0 -j ACCEPT
-      echo "Added IPv4 TCP rule for port $NEW_PORT"
-    fi
+      ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" "$iptables_cmd-save" | \
+        grep -E "qbt0.*dpt:[0-9]+" | grep -v "dpt:$NEW_PORT" | \
+        sed 's/^-A /-D /' | while read rule; do
+          ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" "$iptables_cmd" $rule 2>/dev/null || true
+        done || true
 
-    if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -C INPUT -p udp --dport "$NEW_PORT" -i qbt0 -j ACCEPT 2>/dev/null; then
-      ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -I INPUT -p udp --dport "$NEW_PORT" -i qbt0 -j ACCEPT
-      echo "Added IPv4 UDP rule for port $NEW_PORT"
-    fi
+      for protocol in tcp udp; do
+        if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" "$iptables_cmd" -C INPUT -p "$protocol" --dport "$NEW_PORT" -i qbt0 -j ACCEPT 2>/dev/null; then
+          ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" "$iptables_cmd" -I INPUT -p "$protocol" --dport "$NEW_PORT" -i qbt0 -j ACCEPT
+          echo "Added $ip_version $protocol rule for port $NEW_PORT"
+        fi
+      done
+    }
 
-    # IPv6: Remove old port rules (if any exist for ports that aren't the new port)
-    ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/ip6tables-save | \
-      grep -E "qbt0.*dpt:[0-9]+" | grep -v "dpt:$NEW_PORT" | \
-      sed 's/^-A /-D /' | while read rule; do
-        ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/ip6tables $rule 2>/dev/null || true
-      done || true  # Don't fail if no old rules exist
-
-    # IPv6: Add rules for new port if they don't exist
-    if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/ip6tables -C INPUT -p tcp --dport "$NEW_PORT" -i qbt0 -j ACCEPT 2>/dev/null; then
-      ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/ip6tables -I INPUT -p tcp --dport "$NEW_PORT" -i qbt0 -j ACCEPT
-      echo "Added IPv6 TCP rule for port $NEW_PORT"
-    fi
-
-    if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/ip6tables -C INPUT -p udp --dport "$NEW_PORT" -i qbt0 -j ACCEPT 2>/dev/null; then
-      ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/ip6tables -I INPUT -p udp --dport "$NEW_PORT" -i qbt0 -j ACCEPT
-      echo "Added IPv6 UDP rule for port $NEW_PORT"
-    fi
+    update_rules "${pkgs.iptables}/bin/iptables" "IPv4"
+    update_rules "${pkgs.iptables}/bin/ip6tables" "IPv6"
 
     echo "Firewall updated successfully for port $NEW_PORT (IPv4 + IPv6)"
   '';

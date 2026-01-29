@@ -248,7 +248,7 @@ in
 
 ## MCP (Model Context Protocol) Servers
 
-This configuration includes built-in MCP server support for AI coding tools (Claude Code, Cursor, etc.).
+This configuration includes built-in MCP server support for AI coding tools (Claude Code, Cursor, etc.) using the home-manager `programs.mcp` option.
 
 ### Available MCP Servers
 
@@ -275,17 +275,14 @@ This configuration includes built-in MCP server support for AI coding tools (Cla
 
 ### Configuration
 
-MCP servers are configured using the [mcp-home-manager](https://github.com/lewisflude/mcp-home-manager) flake module and automatically deployed to:
-
-- **Claude Code**: `~/.config/claude/claude_desktop_config.json` (Linux) or `~/Library/Application Support/Claude/` (macOS)
-- **Cursor**: `~/.cursor/mcp.json`
+MCP servers are configured using the built-in `programs.mcp` home-manager option and automatically deployed to `~/.config/mcp/mcp.json`. AI tools like Claude Code and Cursor can read this configuration.
 
 ### Enabling/Disabling Servers
 
 Override in `home/nixos/mcp.nix` or `home/darwin/mcp.nix`:
 
 ```nix
-services.mcp.servers = {
+programs.mcp.servers = {
   # Disable a default server
   sqlite.enabled = false;
 
@@ -318,12 +315,10 @@ To enable servers that require API keys:
 3. **Enable server**: In `home/{nixos,darwin}/mcp.nix`:
 
    ```nix
-   services.mcp.servers.my-server.enabled = true;
+   programs.mcp.servers.my-server.enabled = true;
    ```
 
 4. **Rebuild system**: The secret will be available at `/run/secrets-for-users/MY_SECRET`
-
-For detailed documentation, see the [mcp-home-manager repository](https://github.com/lewisflude/mcp-home-manager).
 
 ## Documentation
 

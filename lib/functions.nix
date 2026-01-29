@@ -53,7 +53,7 @@ let
     }:
     let
       # Shared resources (eliminates fragile relative imports)
-      constants = import ../lib/constants.nix;
+      constants = import ./constants.nix;
       # Note: signalPalette, signalLib, and signalColors are provided by Signal flake via _module.args
     in
     inputs

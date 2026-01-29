@@ -3,12 +3,13 @@
 {
   config,
   lib,
+  constants,
   ...
 }:
 let
   inherit (lib) mkIf; # recursiveUpdate;
   cfg = config.host.services.caddy;
-  virtualHosts = import ./virtual-hosts/default.nix { inherit lib; };
+  virtualHosts = import ./virtual-hosts/default.nix { inherit lib constants; };
 in
 {
   imports = [

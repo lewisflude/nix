@@ -3,15 +3,16 @@
   config,
   pkgs,
   lib,
+  constants,
   ...
 }:
 let
   cfg = config.host.features.vr;
 
-  wivrn = import ./wivrn.nix { inherit config pkgs lib; };
-  immersed = import ./immersed.nix { inherit config pkgs lib; };
-  steamvr = import ./steamvr.nix { inherit config pkgs lib; };
-  performance = import ./performance.nix { inherit config lib; };
+  wivrn = import ./wivrn.nix { inherit config pkgs lib constants; };
+  immersed = import ./immersed.nix { inherit config pkgs lib constants; };
+  steamvr = import ./steamvr.nix { inherit config pkgs lib constants; };
+  performance = import ./performance.nix { inherit config lib constants; };
 in
 {
   config = lib.mkMerge [
