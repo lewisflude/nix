@@ -46,6 +46,12 @@ in
         defaultRuntime = true; # WiVRn includes embedded Monado runtime
         openFirewall = true;
       };
+      alvr = {
+        enable = true;
+        autoStart = false; # Start manually when needed
+        defaultRuntime = false; # Keep WiVRn as default
+        openFirewall = true;
+      };
       immersed = {
         enable = true;
         openFirewall = true;
