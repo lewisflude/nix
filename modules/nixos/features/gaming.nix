@@ -27,6 +27,9 @@ in
           dedicatedServer.openFirewall = true;
           extraCompatPackages = [ pkgs.proton-ge-bin ];
 
+          # Add packages to Steam's FHS environment for VR
+          extraPackages = [ pkgs.xrizer-multilib ];
+
           # mkDefault allows VR module to override
           package = lib.mkDefault (
             pkgs.steam.override {
