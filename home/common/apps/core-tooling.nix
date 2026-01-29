@@ -10,7 +10,7 @@
     pkgs.nix-output-monitor
     pkgs.nix-tree
     pkgs.comma
-    
+
     # Modern Nix Dev Flow
     pkgs.nix-init
     pkgs.nurl
@@ -19,5 +19,7 @@
     # Workflow
     pkgs.cocogitto
     pkgs.yaml-language-server
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    pkgs.libnotify # provides notify-send
   ];
 }
