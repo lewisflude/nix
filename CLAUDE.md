@@ -327,16 +327,29 @@ For detailed documentation, see the [mcp-home-manager repository](https://github
 
 ## Documentation
 
-- **Architecture**: `docs/reference/architecture.md`
-- **Features**: `docs/FEATURES.md`
-- **DX Guide**: `docs/DX_GUIDE.md`
-- **TODO**: `docs/TODO.md` - Future refactoring tasks and improvements
-- **Contributing**: `CONTRIBUTING.md`
-- **VR Setup**: `docs/VR_SETUP_GUIDE.md` - WiVRn wireless VR configuration and Steam game launch options
-- **qBittorrent Setup**: `docs/QBITTORRENT_GUIDE.md` - Complete setup, optimization, and troubleshooting
-- **ProtonVPN Port Forwarding**: `docs/PROTONVPN_PORT_FORWARDING_SETUP.md` - Detailed VPN configuration
-- **SOPS Secret Management**: `docs/SOPS_GUIDE.md` - Comprehensive secrets management, key rotation, and best practices
-- **Refactoring Patterns**: `docs/reference/REFACTORING_EXAMPLES.md` - Examples of over-engineering to avoid
+### Core Documentation
+- **Architecture**: `docs/reference/architecture.md` - System architecture and design patterns
+- **Features**: `docs/FEATURES.md` - Feature system documentation
+- **DX Guide**: `docs/DX_GUIDE.md` - Developer experience and tooling
+- **Known Issues**: `docs/KNOWN_ISSUES.md` - Known issues and workarounds
+- **Refactoring Patterns**: `docs/reference/REFACTORING_EXAMPLES.md` - Antipatterns to avoid
+
+### Setup Guides
+- **VR**: `docs/VR_DUAL_RUNTIME.md` - WiVRn + ALVR dual runtime setup
+- **qBittorrent**: `docs/QBITTORRENT_GUIDE.md` - Complete torrent client setup
+- **ProtonVPN**: `docs/PROTONVPN_PORT_FORWARDING_SETUP.md` - VPN port forwarding configuration
+- **SOPS**: `docs/SOPS_GUIDE.md` - Secrets management with SOPS
+- **SSH/YubiKey**: `docs/SSH_YUBIKEY_CONFIGURATION.md` - SSH and hardware key setup
+- **Steam Gaming**: `docs/STEAM_GAMING_GUIDE.md` - Gaming optimizations and launch options
+- **Hytale Server**: `docs/HYTALE_SERVER.md` - Game server configuration
+
+### System Configuration
+- **Audio**: `docs/REALTIME_AUDIO_GUIDE.md` - Professional audio with musnix and PipeWire
+- **Boot**: `docs/BOOT_PERFORMANCE.md` - Boot time optimization
+- **Performance**: `docs/PERFORMANCE_OPTIMIZATIONS.md` - System performance tuning
+- **Systemd**: `docs/SYSTEMD_PATTERNS_NIXOS.md` - Systemd service patterns
+- **ZFS**: `docs/ZFS_OPTIMIZATION_GUIDE.md` - ZFS filesystem optimization
+- **Overlays**: `docs/COMMUNITY_OVERLAYS.md` - Community package overlays
 
 ## Important Notes
 

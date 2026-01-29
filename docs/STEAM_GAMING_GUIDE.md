@@ -333,10 +333,10 @@ Some EAC games require:
 
 ## VR Gaming
 
-This config includes comprehensive VR support for Quest 3 via WiVRn.
+This config includes comprehensive VR support for Quest 3 via WiVRn and ALVR.
 
 See:
-- `docs/VR_SETUP_GUIDE.md` - Complete VR setup
+- `docs/VR_DUAL_RUNTIME.md` - Complete VR setup with dual runtime support
 - `modules/nixos/features/vr/` - VR configuration modules
 
 ### Steam VR

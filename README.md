@@ -108,22 +108,15 @@ nix develop
 
 | Topic | Link | Description |
 |-------|------|-------------|
-| **🚀 Quick Start** | See [Quick Start](#-quick-start) above | Get up and running in 5 minutes |
-| **🗄️ Cachix & FlakeHub** | [`docs/archive/CACHIX_FLAKEHUB_SETUP.md`](docs/archive/CACHIX_FLAKEHUB_SETUP.md) | Set up binary cache and flake publishing (archived) |
-| **🎨 Developer Experience** | [`docs/DX_GUIDE.md`](docs/DX_GUIDE.md) | DX tooling, commits, and best practices |
-| **🔄 Continuous Integration** | [`docs/CI.md`](docs/CI.md) | GitHub Actions workflows and CI setup |
 | **🏗️ Architecture** | [`docs/reference/architecture.md`](docs/reference/architecture.md) | System design and patterns |
 | **⚙️ Features** | [`docs/FEATURES.md`](docs/FEATURES.md) | Feature-based configuration system |
+| **🎨 Developer Experience** | [`docs/DX_GUIDE.md`](docs/DX_GUIDE.md) | DX tooling, commits, and best practices |
 | **🎮 Steam Gaming** | [`docs/STEAM_GAMING_GUIDE.md`](docs/STEAM_GAMING_GUIDE.md) | Comprehensive Steam, Proton, and gaming guide |
-| **📈 Arch Wiki Performance** | [`docs/ARCH_WIKI_PERFORMANCE_RESOURCES.md`](docs/ARCH_WIKI_PERFORMANCE_RESOURCES.md) | Curated performance optimization resources and quick wins |
-| **📦 Community Overlays** | [`docs/COMMUNITY_OVERLAYS.md`](docs/COMMUNITY_OVERLAYS.md) | nixpkgs-xr, NUR, nixpkgs-wayland integration |
-| **⌨️ Keyboard Layout** | [`docs/reference/keyboard-keymap.md`](docs/reference/keyboard-keymap.md) | WKL F13 TKL ergonomic keymap for software engineers |
-| **🔄 Updating** | [`docs/UPDATING.md`](docs/UPDATING.md) | How to update dependencies and inputs |
-| **💬 Code Review** | [`docs/CONVENTIONAL_COMMENTS.md`](docs/CONVENTIONAL_COMMENTS.md) | Conventional comments for reviews |
-| **📊 Performance Tuning** | [`docs/PERFORMANCE_TUNING.md`](docs/PERFORMANCE_TUNING.md) | Performance optimizations and configurations |
-| **📈 Performance Monitoring** | [`docs/reference/performance-monitoring.md`](docs/reference/performance-monitoring.md) | Monitoring and tracking performance metrics |
 | **🎵 Real-Time Audio** | [`docs/REALTIME_AUDIO_GUIDE.md`](docs/REALTIME_AUDIO_GUIDE.md) | Professional audio with musnix, RT kernel, and USB audio interfaces |
-| **🤝 Contributing** | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to contribute to this repo |
+| **🔐 Secrets Management** | [`docs/SOPS_GUIDE.md`](docs/SOPS_GUIDE.md) | SOPS secrets management with age/GPG encryption |
+| **📦 Community Overlays** | [`docs/COMMUNITY_OVERLAYS.md`](docs/COMMUNITY_OVERLAYS.md) | nixpkgs-xr, NUR, nixpkgs-wayland integration |
+| **📊 Performance** | [`docs/PERFORMANCE_OPTIMIZATIONS.md`](docs/PERFORMANCE_OPTIMIZATIONS.md) | System performance optimizations |
+| **⚡ Boot Performance** | [`docs/BOOT_PERFORMANCE.md`](docs/BOOT_PERFORMANCE.md) | Boot time optimization |
 
 ## 🛠️ Tech Stack
 
@@ -211,7 +204,7 @@ This repository includes comprehensive DX tooling:
 
 **Get started:** `nix develop` (auto-configures everything!)
 
-**Learn more:** See [DX Guide](docs/DX_GUIDE.md) and [Contributing Guide](CONTRIBUTING.md)
+**Learn more:** See [DX Guide](docs/DX_GUIDE.md) for detailed development guidelines
 
 ## 🚀 Binary Cache & Publishing
 
@@ -255,11 +248,11 @@ This configuration can be published to FlakeHub for easy discovery and versioned
 
 ### 🤝 Contributing
 
-Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md) for:
+Contributions are welcome! See the [DX Guide](docs/DX_GUIDE.md) and [CLAUDE.md](CLAUDE.md) for:
 - Code style guidelines
 - Commit message conventions
-- Pull request process
-- Development setup
+- Development best practices
+- AI assistant guidelines
 
 ### 📝 License
 
