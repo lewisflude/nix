@@ -40,6 +40,9 @@ lib.mkIf (cfg.enable && cfg.wivrn.enable) {
         # Note: If WayVR fails to start, try removing ~/.config/wayvr
         application = [ pkgs.wayvr ];
 
+        # Use multilib xrizer for OpenVR compatibility (32-bit + 64-bit support)
+        openvr-compat-path = "${pkgs.xrizer-multilib}/lib/xrizer";
+
         # Optional: Use TCP only (disabled for lower latency)
         # tcp-only = false;
 
