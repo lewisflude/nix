@@ -25,7 +25,7 @@ in
     # Deploy p10k config from repository
     home.file.".p10k.zsh".source = ./p10k.zsh;
 
-    programs.zsh.initExtra = ''
+    programs.zsh.initContent = ''
       if [[ -r "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme" ]]; then
         source "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
       fi

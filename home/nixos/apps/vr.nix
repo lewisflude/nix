@@ -38,21 +38,44 @@ let
   vr-which-runtime = pkgs.writeShellApplication {
     name = "vr-which-runtime";
     text = ''
-      RUNTIME_FILE="$HOME/.config/openxr/1/active_runtime.json"
+      RUNTIME_64="$HOME/.config/openxr/1/active_runtime.json"
+      RUNTIME_32="$HOME/.config/openxr/1/active_runtime.i686.json"
 
-      if [ ! -f "$RUNTIME_FILE" ]; then
-        echo "No OpenXR runtime configured"
-        exit 1
+      echo "=== OpenXR Runtime Configuration ==="
+      echo ""
+
+      # Check 64-bit runtime
+      echo "64-bit runtime (for most VR games):"
+      if [ -f "$RUNTIME_64" ]; then
+        RUNTIME_PATH=$(readlink -f "$RUNTIME_64")
+        echo "  $RUNTIME_PATH"
+        if echo "$RUNTIME_PATH" | grep -q "wivrn"; then
+          echo "  → WiVRn (Monado-based)"
+        elif echo "$RUNTIME_PATH" | grep -q "steamvr"; then
+          echo "  → SteamVR"
+        else
+          echo "  → Unknown runtime"
+        fi
+      else
+        echo "  ⚠️  Not configured"
       fi
 
-      RUNTIME_PATH=$(readlink -f "$RUNTIME_FILE")
-      echo "Current OpenXR runtime:"
-      echo "  $RUNTIME_PATH"
+      echo ""
 
-      if echo "$RUNTIME_PATH" | grep -q "wivrn"; then
-        echo "  → WiVRn (Monado-based)"
+      # Check 32-bit runtime
+      echo "32-bit runtime (for Half-Life 2 VR, etc.):"
+      if [ -f "$RUNTIME_32" ]; then
+        RUNTIME_PATH=$(readlink -f "$RUNTIME_32")
+        echo "  $RUNTIME_PATH"
+        if echo "$RUNTIME_PATH" | grep -q "wivrn"; then
+          echo "  → WiVRn (Monado-based) [32-bit]"
+        elif echo "$RUNTIME_PATH" | grep -q "steamvr"; then
+          echo "  → SteamVR [32-bit]"
+        else
+          echo "  → Unknown runtime [32-bit]"
+        fi
       else
-        echo "  → Unknown runtime"
+        echo "  ⚠️  Not configured (32-bit VR games won't work)"
       fi
     '';
   };

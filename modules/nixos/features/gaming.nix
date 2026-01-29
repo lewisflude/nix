@@ -28,7 +28,10 @@ in
           extraCompatPackages = [ pkgs.proton-ge-bin ];
 
           # Add packages to Steam's FHS environment for VR
-          extraPackages = [ pkgs.xrizer-multilib ];
+          extraPackages = [
+            pkgs.xrizer-multilib
+            pkgs.SDL2 # Required by SteamVR
+          ];
 
           # mkDefault allows VR module to override
           package = lib.mkDefault (
