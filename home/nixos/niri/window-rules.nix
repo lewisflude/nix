@@ -1,68 +1,20 @@
-# Niri Window Rules Configuration
-# Organized by: Visual Hierarchy → Security → Performance → Usability → Workspace Assignment
-#
-# IMPORTANT: Corner radius is synchronized with Ironbar design tokens
-# to create visual harmony between windows and the bar.
-# Ironbar tokens are now provided by Signal flake
-#
-# Note: All color theming removed - should come from signal-nix when Niri support is added
-{
-  cornerRadius,
-  ...
-}:
-{
+# Niri Window Rules Configuration - Streamlined (10 essential rules)
+# Organized by: Global → Security → Performance → Usability
+_: {
   window-rules = [
     # ============================================================================
     # GLOBAL DEFAULTS
     # ============================================================================
 
-    # Global rounded corners for all windows
-    # Radius synchronized with Ironbar island radius (8pt grid: compact = 12px, relaxed = 16px)
-    # Applied first so specific rules can override if needed
+    # Global rounded corners for all windows (8px for tight 8pt grid)
     {
       geometry-corner-radius = {
-        top-left = cornerRadius;
-        top-right = cornerRadius;
-        bottom-right = cornerRadius;
-        bottom-left = cornerRadius;
+        top-left = 8.0;
+        top-right = 8.0;
+        bottom-right = 8.0;
+        bottom-left = 8.0;
       };
       clip-to-geometry = true;
-    }
-
-    # ============================================================================
-    # VISUAL HIERARCHY & FOCUS
-    # ============================================================================
-
-    # Inactive window dimming - helps identify focused window
-    {
-      matches = [
-        { is-active = false; }
-      ];
-      opacity = 0.95;
-    }
-
-    # Floating windows - corner radius only (shadow disabled until signal-nix provides colors)
-    {
-      matches = [
-        { is-floating = true; }
-      ];
-      geometry-corner-radius = {
-        top-left = cornerRadius;
-        top-right = cornerRadius;
-        bottom-right = cornerRadius;
-        bottom-left = cornerRadius;
-      };
-      clip-to-geometry = true;
-    }
-    # Note: Screencast indicator disabled until signal-nix provides colors
-
-    # Disable shadows for notifications (SwayNC)
-    # Fixes background "spilling out" beyond borders issue
-    {
-      matches = [
-        { app-id = "^org\\.erikreider\\.swaync.*"; }
-      ];
-      shadow.enable = false;
     }
 
     # ============================================================================
@@ -162,25 +114,6 @@
       };
     }
 
-    # Don't focus splash screens and startup dialogs
-    {
-      matches = [
-        {
-          app-id = "^gimp";
-          title = "^GIMP Startup$";
-        }
-      ];
-      open-focused = false;
-    }
-
-    # OBS minimum width fix - prevents layout issues with server-side decorations
-    {
-      matches = [
-        { app-id = "^com\\.obsproject\\.Studio$"; }
-      ];
-      min-width = 876;
-    }
-
     # Firefox/Thunderbird 1px border fix
     # These apps draw their own 1px dark border that obscures niri's border
     {
@@ -191,39 +124,12 @@
       clip-to-geometry = true;
     }
 
-    # Document viewers - tabbed display by default for better organization
+    # OBS minimum width fix - prevents layout issues with server-side decorations
     {
       matches = [
-        { app-id = "^evince$"; }
-        { app-id = "^org\\.pwmt\\.zathura$"; }
-        { app-id = "^org\\.gnome\\.Evince$"; }
+        { app-id = "^com\\.obsproject\\.Studio$"; }
       ];
-      default-column-display = "tabbed";
-    }
-
-    # DisplayCal - floating for color calibration workflows
-    {
-      matches = [
-        { app-id = "^displaycal$"; }
-      ];
-      default-column-width = { };
-      open-floating = true;
-    }
-
-    # ============================================================================
-    # GAMING
-    # ============================================================================
-
-    # Gamescope nested compositor - opens maximized for optimal gaming experience
-    # VRR is enabled above in the performance section
-    {
-      matches = [
-        { app-id = "^gamescope$"; }
-      ];
-      default-column-width = {
-        proportion = 1.0;
-      };
-      open-maximized = true;
+      min-width = 876;
     }
 
     # Steam games - open fullscreen for immersive gaming
@@ -233,6 +139,14 @@
         { app-id = "^steam_app_.*"; }
       ];
       open-fullscreen = true;
+    }
+
+    # Floating windows - focus on creation for better UX
+    {
+      matches = [
+        { is-floating = true; }
+      ];
+      open-focused = true;
     }
   ];
 }

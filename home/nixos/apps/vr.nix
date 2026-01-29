@@ -86,15 +86,26 @@ let
     text = ''
       echo "=== VR Runtime Launch Options for Steam ==="
       echo ""
-      echo "To use WiVRn for a specific game:"
-      echo "  XR_RUNTIME_JSON=${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json %command%"
+      echo "HALF-LIFE 2 VR (32-bit OpenVR game via xrizer):"
+      echo "  PRESSURE_VESSEL_FILESYSTEMS_RW=\$XDG_RUNTIME_DIR/wivrn %command%"
       echo ""
-      echo "For 64-bit OpenVR games with xrizer (WiVRn):"
-      echo "  xrizer PRESSURE_VESSEL_FILESYSTEMS_RW=\$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%"
+      echo "Alternative (if above doesn't work):"
+      echo "  %command%"
+      echo ""
+      echo "Other OpenVR games (64-bit):"
+      echo "  PRESSURE_VESSEL_FILESYSTEMS_RW=\$XDG_RUNTIME_DIR/wivrn %command%"
+      echo ""
+      echo "Direct OpenXR games:"
+      echo "  %command%"
       echo ""
       echo "---"
       echo ""
-      echo "Current default runtime:"
+      echo "Note: xrizer-multilib is already in Steam's FHS environment"
+      echo "OpenVR runtime path (from openvrpaths.vrpath):"
+      if [ -f ~/.config/openvr/openvrpaths.vrpath ]; then
+        grep -o '"/nix/store[^"]*xrizer[^"]*"' ~/.config/openvr/openvrpaths.vrpath || echo "  Not found"
+      fi
+      echo ""
       vr-which-runtime
     '';
     runtimeInputs = [ vr-which-runtime ];
@@ -205,7 +216,8 @@ mkIf vrEnabled {
     vr-use-wivrn
     pkgs.wayvr # Desktop overlay for VR
     pkgs.android-tools # ADB for wired VR fallback
-    pkgs.xrizer-multilib # OpenVR to OpenXR translation (32-bit + 64-bit)
+    # Note: xrizer-multilib is library-only, used via OPENVR_RUNTIME_PATH env var
+    # See vr-launch-options for Steam launch commands
   ];
 
   # CRITICAL: OpenXR runtime configuration for sandboxed apps (Steam)

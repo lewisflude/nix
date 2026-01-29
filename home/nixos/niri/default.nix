@@ -10,47 +10,49 @@
   ...
 }:
 let
-  # Unified theme helper with all theme imports and conveniences
-  theme = import ./lib/theme.nix { inherit lib; };
-
   # Use overlay packages to ensure mesa dependencies match system nixpkgs
   inherit (pkgs) niri-unstable;
 
-  packagesList = import ./packages.nix {
-    inherit pkgs inputs system;
-  };
-  input = import ./input.nix { };
+  # Import consolidated modules
   outputs = import ./outputs.nix { };
-  layout = import ./layout.nix {
-    inherit lib;
-    inherit (theme)
-      niriSync
-      ;
-  };
-  window-rules = import ./window-rules.nix {
-    inherit lib;
-    inherit (theme)
-      cornerRadius
-      ;
-  };
-  animations = import ./animations.nix { };
-  startup = import ./startup.nix {
-    inherit
-      config
-      pkgs
-      inputs
-      system
-      ;
-  };
-  binds = import ./keybinds/default.nix {
+  window-rules = import ./window-rules.nix { };
+  keybinds = import ./keybinds.nix {
     inherit config pkgs lib;
+  };
+  unified-config = import ./config.nix {
+    inherit pkgs config inputs system;
   };
 in
 {
-  home.packages = packagesList;
-
   imports = [
     inputs.hyprcursor-phinger.homeManagerModules.hyprcursor-phinger
+  ];
+
+  # Packages required for niri compositor functionality
+  home.packages = [
+    # Screenshot tools
+    pkgs.grim # Wayland screenshot utility (used in keybinds)
+    pkgs.slurp # Screen area selection (used with grim for area screenshots)
+
+    # Clipboard
+    pkgs.wl-clipboard # Wayland clipboard utilities (wl-copy, wl-paste)
+
+    # Display tools
+    pkgs.wlr-randr # Display configuration tool
+    pkgs.wayland-utils # Wayland debugging utilities
+    pkgs.libdrm # Provides modetest for checking DRM/HDR properties
+
+    # Color management
+    pkgs.argyllcms # Color calibration (provides dispwin for ICC profiles)
+    pkgs.wl-gammactl # Gamma/brightness correction tool
+
+    # X11 compatibility (see niri docs: XWayland.md)
+    pkgs.xwayland-satellite-unstable # XWayland satellite >= 0.7 (auto-managed by niri >= 25.08)
+
+    # Wallpaper
+    inputs.awww.packages.${system}.awww # "An Answer to your Wayland Wallpaper Woes"
+
+    # Note: xdg-utils is handled in core-tooling.nix
   ];
 
   # Configure cursor theme using phinger-cursors package
@@ -123,20 +125,16 @@ in
         # Note: DISPLAY is automatically managed by niri >= 25.08 for xwayland-satellite
         # Do NOT set DISPLAY here - let niri export it when X11 clients connect
       };
+
       # Force specific GPU as primary render device on multi-GPU systems
       # Configured per-host via host.hardware.renderDevice
       debug = lib.mkIf (osConfig.host.hardware.renderDevice or null != null) {
         render-drm-device = osConfig.host.hardware.renderDevice;
       };
     }
-    // input
     // outputs
-    // layout
     // window-rules
-    // animations
-    // startup
-    // {
-      inherit binds;
-    };
+    // keybinds
+    // unified-config;
   };
 }
