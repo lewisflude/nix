@@ -26,4 +26,6 @@ in
   "unifi.blmt.io" = mkReverseProxy "192.168.10.1:443";
 
   "blmt.io" = mkReverseProxy "127.0.0.1:7575"; # Homarr Dashboard
+
+  "home.blmt.io" = mkReverseProxy "127.0.0.1:8123"; # Home Assistant
 }
