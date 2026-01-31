@@ -330,7 +330,7 @@ To enable servers that require API keys:
 - **Refactoring Patterns**: `docs/reference/REFACTORING_EXAMPLES.md` - Antipatterns to avoid
 
 ### Setup Guides
-- **VR**: `docs/VR_DUAL_RUNTIME.md` - WiVRn + ALVR dual runtime setup
+- **VR**: `docs/WIVRN_VR_SETUP.md` - WiVRn VR setup and configuration
 - **qBittorrent**: `docs/QBITTORRENT_GUIDE.md` - Complete torrent client setup
 - **ProtonVPN**: `docs/PROTONVPN_PORT_FORWARDING_SETUP.md` - VPN port forwarding configuration
 - **SOPS**: `docs/SOPS_GUIDE.md` - Secrets management with SOPS

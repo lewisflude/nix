@@ -11,32 +11,15 @@ let
   wivrnEnabled = (osConfig.host.features.vr.wivrn.enable or false) && vrEnabled;
 
   # 32-bit WiVRn client library for 32-bit VR games (e.g., Half-Life 2: VR)
+  # clientLibOnly = true skips GUI deps (qtwebengine doesn't support i686)
   wivrn-client-32bit = pkgs.pkgsi686Linux.wivrn.override {
     clientLibOnly = true;
-  };
-
-  # Helper script to switch to WiVRn as default OpenXR runtime
-  vr-use-wivrn = pkgs.writeShellApplication {
-    name = "vr-use-wivrn";
-    text = ''
-      RUNTIME_FILE="$HOME/.config/openxr/1/active_runtime.json"
-      WIVRN_RUNTIME="${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json"
-
-      if [ ! -f "$WIVRN_RUNTIME" ]; then
-        echo "Error: WiVRn runtime not found at $WIVRN_RUNTIME"
-        exit 1
-      fi
-
-      mkdir -p "$(dirname "$RUNTIME_FILE")"
-      ln -sf "$WIVRN_RUNTIME" "$RUNTIME_FILE"
-      echo "✓ Switched default OpenXR runtime to WiVRn"
-      echo "  Runtime: $RUNTIME_FILE -> $WIVRN_RUNTIME"
-    '';
   };
 
   # Helper script to show current OpenXR runtime
   vr-which-runtime = pkgs.writeShellApplication {
     name = "vr-which-runtime";
+    runtimeInputs = [ pkgs.jq ];
     text = ''
       RUNTIME_64="$HOME/.config/openxr/1/active_runtime.json"
       RUNTIME_32="$HOME/.config/openxr/1/active_runtime.i686.json"
@@ -67,48 +50,37 @@ let
       if [ -f "$RUNTIME_32" ]; then
         RUNTIME_PATH=$(readlink -f "$RUNTIME_32")
         echo "  $RUNTIME_PATH"
-        if echo "$RUNTIME_PATH" | grep -q "wivrn"; then
-          echo "  → WiVRn (Monado-based) [32-bit]"
-        elif echo "$RUNTIME_PATH" | grep -q "steamvr"; then
-          echo "  → SteamVR [32-bit]"
-        else
-          echo "  → Unknown runtime [32-bit]"
+
+        # Check JSON content to identify runtime
+        RUNTIME_NAME=""
+        if [ -f "$RUNTIME_PATH" ]; then
+          CONTENT=$(cat "$RUNTIME_PATH")
+          if echo "$CONTENT" | jq -e '.runtime.library_path' > /dev/null 2>&1; then
+            LIBRARY_PATH=$(echo "$CONTENT" | jq -r '.runtime.library_path')
+            if echo "$LIBRARY_PATH" | grep -q "wivrn"; then
+              RUNTIME_NAME="WiVRn (Monado-based) [32-bit]"
+            elif echo "$LIBRARY_PATH" | grep -q "steamvr"; then
+              RUNTIME_NAME="SteamVR [32-bit]"
+            fi
+          fi
         fi
+
+        # Fallback to path check if JSON parsing fails
+        if [ -z "$RUNTIME_NAME" ]; then
+          if echo "$RUNTIME_PATH" | grep -q "wivrn"; then
+            RUNTIME_NAME="WiVRn (Monado-based) [32-bit]"
+          elif echo "$RUNTIME_PATH" | grep -q "steamvr"; then
+            RUNTIME_NAME="SteamVR [32-bit]"
+          else
+            RUNTIME_NAME="Unknown runtime [32-bit]"
+          fi
+        fi
+
+        echo "  → $RUNTIME_NAME"
       else
         echo "  ⚠️  Not configured (32-bit VR games won't work)"
       fi
     '';
-  };
-
-  # Helper to show Steam launch options for each runtime
-  vr-launch-options = pkgs.writeShellApplication {
-    name = "vr-launch-options";
-    text = ''
-      echo "=== VR Runtime Launch Options for Steam ==="
-      echo ""
-      echo "HALF-LIFE 2 VR (32-bit OpenVR game via xrizer):"
-      echo "  PRESSURE_VESSEL_FILESYSTEMS_RW=\$XDG_RUNTIME_DIR/wivrn %command%"
-      echo ""
-      echo "Alternative (if above doesn't work):"
-      echo "  %command%"
-      echo ""
-      echo "Other OpenVR games (64-bit):"
-      echo "  PRESSURE_VESSEL_FILESYSTEMS_RW=\$XDG_RUNTIME_DIR/wivrn %command%"
-      echo ""
-      echo "Direct OpenXR games:"
-      echo "  %command%"
-      echo ""
-      echo "---"
-      echo ""
-      echo "Note: xrizer-multilib is already in Steam's FHS environment"
-      echo "OpenVR runtime path (from openvrpaths.vrpath):"
-      if [ -f ~/.config/openvr/openvrpaths.vrpath ]; then
-        grep -o '"/nix/store[^"]*xrizer[^"]*"' ~/.config/openvr/openvrpaths.vrpath || echo "  Not found"
-      fi
-      echo ""
-      vr-which-runtime
-    '';
-    runtimeInputs = [ vr-which-runtime ];
   };
 
   # Helper to diagnose and fix SteamVR installation
@@ -209,38 +181,39 @@ mkIf vrEnabled {
   # User VR packages
   home.packages = [
     vr-which-runtime
-    vr-launch-options
     vr-fix-steamvr
   ]
   ++ lib.optionals wivrnEnabled [
-    vr-use-wivrn
     pkgs.wayvr # Desktop overlay for VR
     pkgs.android-tools # ADB for wired VR fallback
-    # Note: xrizer-multilib is library-only, used via OPENVR_RUNTIME_PATH env var
-    # See vr-launch-options for Steam launch commands
   ];
 
-  # CRITICAL: OpenXR runtime configuration for sandboxed apps (Steam)
-  # Required for Steam pressure-vessel containers to find the OpenXR runtime
-  # Set default runtime based on configuration
-  xdg.configFile."openxr/1/active_runtime.json" =
-    mkIf ((osConfig.host.features.vr.wivrn.defaultRuntime or false) && wivrnEnabled)
-      {
-        source = "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";
-        force = true; # Overwrite existing file (may be from previous setup)
-      };
-
-  # 32-bit OpenXR runtime for 32-bit VR games
-  # Automatically used by 32-bit applications (e.g., Half-Life 2: VR mod)
-  xdg.configFile."openxr/1/active_runtime.i686.json" = mkIf wivrnEnabled {
-    source = "${wivrn-client-32bit}/share/openxr/1/openxr_wivrn.i686.json";
+  # OpenXR 64-bit runtime - managed by services.wivrn.defaultRuntime
+  # This creates a symlink to WiVRn's OpenXR runtime for Steam and other apps
+  xdg.configFile."openxr/1/active_runtime.json" = mkIf wivrnEnabled {
+    source = "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";
     force = true;
   };
 
-  # OpenVR paths for xrizer (OpenVR to OpenXR translation)
-  # Required for SteamVR games to work via xrizer
+  # 32-bit OpenXR runtime for 32-bit VR games
+  # Automatically used by 32-bit applications (e.g., Half-Life 2: VR mod)
+  # Manual JSON since clientLibOnly doesn't generate it
+  xdg.configFile."openxr/1/active_runtime.i686.json" = mkIf wivrnEnabled {
+    force = true;
+    text = builtins.toJSON {
+      file_format_version = "1.0.0";
+      runtime = {
+        name = "Monado";
+        library_path = "${wivrn-client-32bit}/lib/wivrn/libopenxr_wivrn.so";
+        MND_libmonado_path = "${wivrn-client-32bit}/lib/wivrn/libmonado_wivrn.so";
+      };
+    };
+  };
+
+  # OpenVR paths for xrizer (OpenVR to OpenXR translation layer)
+  # Enables OpenVR games to work with WiVRn's OpenXR runtime
   xdg.configFile."openvr/openvrpaths.vrpath" = mkIf wivrnEnabled {
-    force = true; # Overwrite existing file (may be from previous setup)
+    force = true;
     text =
       let
         steam = "${config.xdg.dataHome}/Steam";

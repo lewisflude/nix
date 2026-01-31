@@ -8,7 +8,7 @@
     ./dante-proxy.nix
     ./eternal-terminal.nix
     ./fail2ban.nix
-    ./home-assistant.nix
+    ./home-assistant
     ./hytale-server
     ./mosh.nix
     ./music-assistant.nix

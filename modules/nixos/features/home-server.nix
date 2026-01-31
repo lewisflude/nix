@@ -13,26 +13,6 @@ in
     (mkIf cfg.enable {
 
       services = mkMerge [
-        (mkIf cfg.homeAssistant {
-          home-assistant = {
-            enable = true;
-            extraComponents = [
-              "esphome"
-              "met"
-              "radio_browser"
-            ];
-            config = {
-              default_config = { };
-              http = {
-                server_host = "0.0.0.0";
-                trusted_proxies = [
-                  constants.networks.localhost.ipv4
-                  constants.networks.localhost.ipv6
-                ];
-              };
-            };
-          };
-        })
         (mkIf cfg.fileSharing {
           samba = {
             enable = true;
@@ -70,9 +50,6 @@ in
       ];
 
       networking.firewall = mkMerge [
-        (mkIf cfg.homeAssistant {
-          allowedTCPPorts = [ constants.ports.services.homeAssistant ];
-        })
         (mkIf cfg.fileSharing {
           allowedTCPPorts = [
             139
@@ -88,10 +65,6 @@ in
 
     {
       assertions = [
-        {
-          assertion = cfg.homeAssistant -> cfg.enable;
-          message = "homeAssistant requires homeServer.enable to be true";
-        }
         {
           assertion = cfg.fileSharing -> cfg.enable;
           message = "fileSharing requires homeServer.enable to be true";

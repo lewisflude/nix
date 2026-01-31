@@ -42,14 +42,8 @@ in
       enable = true;
       wivrn = {
         enable = true;
-        autoStart = true; # Start automatically for convenience
-        defaultRuntime = true; # WiVRn includes embedded Monado runtime
-        openFirewall = true;
-      };
-      alvr = {
-        enable = true;
-        autoStart = false; # Start manually when needed
-        defaultRuntime = false; # Keep WiVRn as default
+        autoStart = true;
+        defaultRuntime = true;
         openFirewall = true;
       };
       immersed = {
@@ -57,7 +51,7 @@ in
         openFirewall = true;
       };
       steamvr = true; # Required for 32-bit games
-      performance = true;
+      performance = true; # NVIDIA optimizations
     };
 
     virtualisation = {
@@ -237,6 +231,13 @@ in
   };
 
   services = {
+    homeAssistant = {
+      enable = true;
+      lovelaceMode = "yaml";
+      llmIntegration = true;
+      intentScripts = true;
+    };
+
     containersSupplemental = {
       enable = true;
       uid = 985;

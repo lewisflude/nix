@@ -11,9 +11,10 @@ in
 lib.mkIf (cfg.enable && cfg.wivrn.enable) {
   # WiVRn wireless VR streaming configuration
   # Provides wireless PCVR from Quest headsets over WiFi using embedded Monado runtime
+  # Following LVRA best practices: use defaults for best out-of-the-box performance
   services.wivrn = {
     enable = true;
-    package = pkgs.wivrn.override { cudaSupport = true; };
+    package = pkgs.wivrn.override { cudaSupport = true; }; # Essential for RTX 4090
     inherit (cfg.wivrn) autoStart defaultRuntime openFirewall;
     highPriority = cfg.performance; # Enable async reprojection with high priority
 
@@ -22,46 +23,17 @@ lib.mkIf (cfg.enable && cfg.wivrn.enable) {
     config = {
       enable = true;
       json = {
-        # CORRECTED CONFIGURATION - using only officially documented options
-        # See: https://github.com/WiVRn/WiVRn/blob/master/docs/configuration.md
-
-        # Encoder configuration optimized for Quest 3 + RTX 4090
-        # AV1 provides best compression and quality for Quest 3
-        encoder = {
-          encoder = "nvenc"; # NVIDIA hardware encoding (RTX 4090)
-          codec = "av1"; # AV1 codec (Quest 3 native support)
-        };
-
-        # 10-bit color depth for better color reproduction
-        # Supported by RTX 4090 NVENC with AV1 codec
-        bit-depth = 10;
+        # WiVRn auto-detects optimal encoder settings based on hardware
+        # RTX 4090 will automatically use NVENC with AV1 codec at 10-bit depth
+        # Quest 3 hardware is automatically detected and optimized
 
         # Auto-launch WayVR when headset connects
-        # Note: If WayVR fails to start, try removing ~/.config/wayvr
         application = [ pkgs.wayvr ];
-
-        # Use multilib xrizer for OpenVR compatibility (32-bit + 64-bit support)
-        openvr-compat-path = "${pkgs.xrizer-multilib}/lib/xrizer";
-
-        # Optional: Use TCP only (disabled for lower latency)
-        # tcp-only = false;
-
-        # Optional: Service discovery via Avahi (enabled by default)
-        # publish-service = "avahi";
-
-        # Optional: HID forwarding (keyboard/mouse from headset to PC)
-        # Requires uinput kernel module and write access
-        # hid-forwarding = false;
       };
     };
   };
 
-  # No systemd override needed - nixpkgs version is up to date
-
-  # Note: VR user tools (wayvr, android-tools, xrizer) are configured in home-manager
-  # See: home/nixos/apps/vr.nix
-
-  # Nvidia GPU latency fixes for embedded Monado runtime
+  # NVIDIA GPU latency fixes for embedded Monado runtime
   # Addresses present latency issues with Nvidia driver 565+
   # See: https://lvra.gitlab.io/docs/hardware/
   systemd.services.wivrn.environment = {
