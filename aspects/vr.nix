@@ -76,12 +76,17 @@ in
       # See: https://github.com/NixOS/nixpkgs/issues/482152
       # Workaround from: https://github.com/NixOS/nixpkgs/pull/480752
       # Remove the --systemd flag by overriding ExecStart
-      systemd.user.services.wivrn.serviceConfig.ExecStart =
-        let
-          wivrnConfig = config.services.wivrn;
-          configFile = pkgs.writeText "wivrn-config.json" (builtins.toJSON wivrnConfig.config.json);
-        in
-        mkForce "${getExe' wivrnConfig.package "wivrn-server"} -f ${configFile}";
+      systemd.user.services.wivrn = {
+        serviceConfig.ExecStart =
+          let
+            wivrnConfig = config.services.wivrn;
+            configFile = pkgs.writeText "wivrn-config.json" (builtins.toJSON wivrnConfig.config.json);
+          in
+          mkForce "${getExe' wivrnConfig.package "wivrn-server"} -f ${configFile}";
+
+        # Add android-tools to PATH so wivrn-dashboard can find adb
+        path = [ pkgs.android-tools ];
+      };
     })
 
     # ================================================================
