@@ -58,14 +58,15 @@ let
       ironbar.homeManagerModules.default
     ]
     ++ lib.optionals (nix-flatpak != null) [ nix-flatpak.homeManagerModules.nix-flatpak ]
-    ++ lib.optionals (signal != null) [ signal.homeManagerModules.default ]
-    # Removed signal-ironbar - conflicts with DMS
-    # ++ lib.optionals (signal-ironbar != null) [ signal-ironbar.homeManagerModules.default ]
+    # signal-nix removed from Darwin - GTK theme is Linux-only
+    # ++ lib.optionals (signal != null) [ signal.homeManagerModules.default ]
     ++ lib.optionals (mac-app-util != null) [ mac-app-util.homeManagerModules.default ];
 
   # NixOS-specific home-manager modules (superset)
   nixosHomeModules =
     darwinHomeModules
+    # signal-nix for NixOS only (GTK theme is Linux-only)
+    ++ lib.optionals (signal != null) [ signal.homeManagerModules.default ]
     # Removed signal-notifications - only needed for signal-ironbar
     # ++ lib.optionals (signal-notifications != null) [ signal-notifications.homeManagerModules.default ]
     ++ lib.optionals (dms != null) [
