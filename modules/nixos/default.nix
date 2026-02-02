@@ -1,17 +1,10 @@
 {
   imports = [
+    # Aspects (dendritic feature modules)
+    # All feature implementations are now in aspects/
+    ../../aspects
 
-    ./features/desktop
-    # Note: ./features/theming removed - all theming now from signal-nix
-    ./features/security.nix
-    ./features/gaming.nix
-    ./features/vr
-    ./features/home-server.nix
-    ./features/restic.nix
-    ./features/media-management.nix
-    ./features/ai-tools.nix
-    ./features/flatpak.nix
-
+    # Core system modules (not features)
     ./core
     ./hardware
     ./services

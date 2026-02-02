@@ -12,6 +12,7 @@ let
     solaar
     determinate
     nix-homebrew
+    nixpkgs-xr
     ;
   mac-app-util = inputs.mac-app-util or null;
   nix-flatpak = inputs.nix-flatpak or null;
@@ -178,6 +179,9 @@ in
       ++ lib.optionals (signal != null) [ signal.nixosModules.default ]
       ++ lib.optionals (home-manager != null) (
         [ home-manager.nixosModules.home-manager ] ++ mkHomeManagerModule hostConfig nixosHomeModules
+      )
+      ++ lib.optionals (nixpkgs-xr != null) (
+        [ nixpkgs-xr.nixosModules.nixpkgs-xr ]
       )
       ++ commonModules;
     };

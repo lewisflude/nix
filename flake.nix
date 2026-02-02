@@ -7,6 +7,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    import-tree.url = "github:vic/import-tree";
     process-compose-flake.url = "github:Platonic-Systems/process-compose-flake";
     services-flake.url = "github:juspay/services-flake";
     darwin = {
@@ -152,8 +153,7 @@
     nix-flatpak = {
       url = "github:gmodena/nix-flatpak/?ref=latest";
     };
-    # nixpkgs-xr removed - using stable versions from nixpkgs instead
-    # wivrn, wayvr, and xrizer are all available in nixpkgs
+    nixpkgs-xr.url = "github:nix-community/nixpkgs-xr";
     nur = {
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";

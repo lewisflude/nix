@@ -185,7 +185,7 @@ mkIf vrEnabled {
   ]
   ++ lib.optionals wivrnEnabled [
     pkgs.wayvr # Desktop overlay for VR
-    pkgs.android-tools # ADB for wired VR fallback
+    # Note: android-tools is installed at system-level in aspects/vr.nix
   ];
 
   # OpenXR 64-bit runtime - managed by services.wivrn.defaultRuntime

@@ -9,12 +9,12 @@
     ./mcp.nix
     ./flatpak.nix
     ./dank-material-shell.nix
-    # Removed - conflicts with DMS:
-    # ./swaync.nix - DMS has notification system
-    # ./apps/signal-ironbar.nix - DMS is the bar
-    # ./apps/signal-notifications.nix - Only needed for swaync
-    # ./apps/wofi.nix - DMS has application launcher
-    # ./launcher.nix - DMS has application launcher (fuzzel)
+    # Files removed - DMS provides these features:
+    #   mako.nix, swaync.nix - DMS has notification system
+    #   launcher.nix - DMS has Spotlight launcher
+    #   apps/wofi.nix - DMS has application launcher
+    #   apps/signal-ironbar.nix - DMS is the bar
+    #   apps/signal-notifications.nix - Only needed for swaync
     ./apps/polkit-gnome.nix
     ./apps/wlsunset.nix
     ./apps/swayidle.nix

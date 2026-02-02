@@ -234,6 +234,12 @@ in
     sessionVariables = {
       DIRSTACKSIZE = "20";
       NH_SEARCH_CHANNEL = "nixpkgs-unstable";
+
+      # Systemd pager configuration
+      # less 685+ supports 24-bit RGB colors with --use-color flag
+      # This preserves systemd's full color palette (including severity-based coloring)
+      # FRSXMK = standard systemd flags + --use-color for RGB support
+      SYSTEMD_LESS = "FRSXMK --use-color";
     };
 
     # ════════════════════════════════════════════════════════════════

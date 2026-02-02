@@ -18,9 +18,11 @@
     pkgs.nautilus
   ];
 
-  services.cliphist = {
-    enable = true;
-  };
+  # Clipboard manager disabled - DMS has built-in clipboard with history
+  # To migrate from cliphist to DMS clipboard:
+  #   dms clipboard cliphist-migrate
+  # Configure clipboard via: dms settings clipboard
+  services.cliphist.enable = false;
 
   # Note: MIME associations have been moved to browser.nix to avoid conflicts
   # All xdg.mimeApps configuration is now centralized in browser.nix

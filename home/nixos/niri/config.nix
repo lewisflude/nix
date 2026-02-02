@@ -15,10 +15,11 @@
   # If conflicts occur, adjust DMS includes.override or these values
 
   layout = {
-    # Window spacing - 8px for tight 8pt grid system
-    gaps = 8;
+    # Visual appearance (gaps, border, focus-ring) managed by DMS via layout.kdl
+    # DMS sets: gaps = 4, border.width = 2, focus-ring.width = 2
+    # See: ~/.config/niri/dms/layout.kdl (auto-generated, do not edit)
 
-    # Layout behavior
+    # Layout behavior (not managed by DMS)
     always-center-single-column = true;
     empty-workspace-above-first = true;
     default-column-display = "tabbed";
@@ -33,11 +34,6 @@
       { proportion = 2.0 / 3.0; }
       { proportion = 1.0; }
     ];
-
-    # Border: disabled in favor of DMS-managed focus ring
-    border = {
-      enable = false;
-    };
 
     # Struts: reserve screen edges (not needed)
     struts = {

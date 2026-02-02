@@ -1,5 +1,10 @@
 {
   imports = [
+    # Aspects (dendritic feature modules)
+    # All feature implementations are now in aspects/
+    ../../aspects
+
+    # Core Darwin system modules (not features)
     ./nix.nix
     ./system.nix
 
@@ -10,17 +15,13 @@
     ./performance.nix
 
     ./apps.nix
-    ./audio.nix
-    ./audio-reconnect.nix
-    ./gaming.nix
-    ./vr.nix
 
     ./keyboard.nix
     ./karabiner.nix
     ./yubikey.nix
 
     ./backup.nix
-    ./restic.nix
+    ./restic.nix # Darwin-specific launchd config (aspects/restic.nix handles common config)
     ./sops.nix
     ./atuin.nix
     ./mac-app-util.nix
