@@ -9,9 +9,10 @@ let
   inherit (helpers) mkReverseProxy;
 in
 {
-  "home.blmt.io" = mkReverseProxy "127.0.0.1:8123"; # Home Assistant
+  # NOTE: home.blmt.io moved to infrastructure.nix
 
-  "dockge.blmt.io" = mkReverseProxy "127.0.0.1:5001";
+  # TODO: dockge service not configured - remove or enable service
+  # "dockge.blmt.io" = mkReverseProxy "127.0.0.1:5001";
 
   "termix.blmt.io" = mkReverseProxy "127.0.0.1:8083"; # SSH Management
 

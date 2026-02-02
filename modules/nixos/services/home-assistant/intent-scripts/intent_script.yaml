@@ -4,7 +4,7 @@ HassWeatherForecast:
     It does not require any parameters and returns the forecasts in a json structure.
 
   action:
-    - service: script.weather_forecast_duplicate
+    - service: script.weather_forecast
       response_variable: daily_summary
     - stop: ""
       response_variable: daily_summary

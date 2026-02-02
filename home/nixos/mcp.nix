@@ -64,6 +64,15 @@
           KAGI_API_KEY = "{env:KAGI_API_KEY}";
         };
       };
+
+      homeassistant = {
+        command = "${pkgs.nodejs}/bin/npx";
+        args = [ "-y" "homeassistant-mcp" ];
+        env = {
+          HASS_URL = "{env:HOME_ASSISTANT_BASE_URL}";
+          HASS_TOKEN = "{env:HOME_ASSISTANT_TOKEN}";
+        };
+      };
     };
   };
 }

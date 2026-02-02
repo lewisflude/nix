@@ -8,12 +8,13 @@ let
 in
 {
 
-  config = lib.mkIf cfg.enable (
-    lib.mkMerge [
-      # Note: System-level theming has been migrated to Signal flake
-      # Theming is now configured in home-manager (home/common/theming/signal.nix)
-      # NixOS-specific theming (mako, swaync) remains in modules/nixos/features/theming/
-      { }
-    ]
-  );
+  config = lib.mkIf cfg.enable {
+    # Enable Signal NixOS theming
+    # This provides system-wide GTK theme for login screens, pinentry, etc.
+    theming.signal.nixos = {
+      enable = true;
+      autoEnable = true;
+      mode = "dark";
+    };
+  };
 }

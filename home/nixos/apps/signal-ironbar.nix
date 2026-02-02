@@ -1,27 +1,18 @@
-# Signal Ironbar Theme Configuration
-# Complete ironbar setup with Signal colors
-{
-  config,
-  lib,
-  ...
-}:
+# Signal Ironbar - Status bar with Signal Design System colors
+{ config, lib, ... }:
 {
   programs.signal-ironbar = {
     enable = true;
-    profile = "relaxed"; # compact | relaxed | spacious
+    compositor = "niri";
 
-    # Enable all available widgets
-    widgets = {
-      niriLayout.enable = true;
-      battery.enable = true;
-      brightness.enable = true;
-      volume.enable = true;
-      clock.enable = true;
-      focused.enable = true;
-      notifications.enable = true;
-      power.enable = true;
-      tray.enable = true;
-      workspaces.enable = true;
-    };
+    # Display profile: "compact" (1080p), "relaxed" (1440p), "spacious" (4K)
+    profile = "relaxed";
+
+    # DDC-CI bus for external monitor brightness (run `ddcutil detect` to find)
+    widgets.brightness.ddc.bus = 17;
+
+    # Niri-specific widgets
+    widgets.focused.enable = true;
+    widgets.niriLayout.enable = true;
   };
 }

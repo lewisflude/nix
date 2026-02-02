@@ -27,5 +27,5 @@ in
 
   "blmt.io" = mkReverseProxy "127.0.0.1:7575"; # Homarr Dashboard
 
-  "home.blmt.io" = mkReverseProxy "127.0.0.1:8123"; # Home Assistant
+  "home.blmt.io" = mkReverseProxy "localhost:8123"; # Home Assistant
 }

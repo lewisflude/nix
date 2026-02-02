@@ -57,6 +57,7 @@ in
       LATITUDE = mkSecret { };
       LONGITUDE = mkSecret { };
       HOME_ASSISTANT_BASE_URL = mkSecret { };
+      HOME_ASSISTANT_TOKEN = mkSecret { allowUserRead = true; };
       KAGI_API_KEY = mkSecret { allowUserRead = true; };
       OBSIDIAN_API_KEY = mkSecret { allowUserRead = true; };
       OPENAI_API_KEY = mkSecret { allowUserRead = true; };

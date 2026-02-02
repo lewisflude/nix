@@ -1,12 +1,17 @@
 {
   pkgs,
   lib,
+  config,
   system,
   ...
 }:
 let
   platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem system;
   isDarwin = lib.hasSuffix "-darwin" system;
+
+  # Get Signal GTK theme name if available
+  signalCfg = config.theming.signal or null;
+  gtkThemeName = signalCfg.gtk.themeName or null;
 
   # YubiKey touch notification tool for macOS
   # Provides visual dock icon + desktop notifications when YubiKey touch is required
@@ -135,6 +140,8 @@ in
           if [ -n "$SSH_CONNECTION" ] || [ -z "$DISPLAY" ]; then
             exec ${pkgs.pinentry-tty}/bin/pinentry-tty "$@"
           else
+            # Set GTK theme for pinentry-gnome3 (gpg-agent doesn't inherit user session env)
+            ${lib.optionalString (gtkThemeName != null) "export GTK_THEME=\"${gtkThemeName}\""}
             exec ${pkgs.pinentry-gnome3}/bin/pinentry-gnome3 "$@"
           fi
         '';

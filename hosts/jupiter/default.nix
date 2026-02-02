@@ -84,31 +84,29 @@ in
       audio = {
         enable = true;
 
-        # Real-time audio with RT kernel and musnix optimizations
-        # Disabled due to RT kernel build issues with GPU drivers
-        # XanMod provides excellent low-latency for gaming and general audio
-        # Re-enable when needed for professional audio recording
+        # Real-time audio (CURRENTLY DISABLED for stability)
+        # RT kernel causes issues with NVIDIA RTX 4090 drivers
+        # XanMod provides excellent latency (~5.3ms) for gaming/desktop use
+        # Re-enable only if you need ultra-low latency for professional recording
         realtime = false;
 
-        # Professional audio configuration for Apogee Symphony Desktop
-        # Ultra-low latency: 64 frames @ 48kHz = ~1.3ms (requires realtime = true)
-        # Standard latency: 256 frames @ 48kHz = ~5.3ms (works well with XanMod)
-        # Set to true ONLY when doing actual recording AND enable realtime = true
-        # Current: false for stable daily use (gaming + VR streaming)
+        # Ultra-low latency mode (requires realtime = true)
+        # Current: false for stable gaming (256 frames = ~5.3ms latency)
+        # Professional: true for recording (64 frames = ~1.3ms, requires RT kernel)
         ultraLowLatency = false;
 
-        # USB audio interface optimizations
+        # USB audio interface optimization
+        # Auto-detects any USB audio class device (Apogee, Focusrite, etc.)
+        # Currently detects: Apogee Symphony Desktop
         usbAudioInterface = {
           enable = true;
-          # PCI ID of USB controller (not the Apogee device itself)
-          # Intel Raptor Lake USB 3.2 Gen 2x2 XHCI Host Controller
-          pciId = "00:14.0";
+          pciId = "00:14.0"; # Intel USB controller for IRQ optimization
         };
 
-        # musnix tools and features
-        rtirq = true; # IRQ priority management (prioritizes USB + sound)
-        dasWatchdog = true; # Safety: kills runaway RT processes
-        rtcqs = true; # Install rtcqs analysis tool (run: rtcqs)
+        # musnix tools (only active when realtime = true)
+        rtirq = true; # IRQ priority management
+        dasWatchdog = true; # Kills runaway RT processes
+        rtcqs = true; # RT analysis tool (run: rtcqs)
 
         # audio.nix flake packages (Bitwig Studio and plugins)
         # Temporarily disabling due to webkitgtk compatibility issue
@@ -236,6 +234,828 @@ in
       lovelaceMode = "yaml";
       llmIntegration = true;
       intentScripts = true;
+
+      # Weather service - Met.no is best for UK (free, accurate, community favorite)
+      weather.entity = "weather.met";
+
+      # Temperature sensors for averaging
+      # Tado thermostats provide room-specific temperature readings
+      # Combined with Hue motion sensor for comprehensive home temperature
+      temperatureSensors = [
+        "sensor.bedroom_temperature" # Tado bedroom thermostat
+        "sensor.guest_bedroom_temperature" # Tado guest bedroom thermostat
+        "sensor.hallway_temperature" # Tado hallway thermostat
+        "sensor.kitchen_temperature" # Tado kitchen thermostat
+        "sensor.hue_motion_sensor_1_temperature" # Hue motion sensor
+      ];
+
+      # Music playback integration
+      # Available speakers:
+      #   - media_player.living_room (WiiM Mini via LinkPlay)
+      #   - media_player.kitchen_speaker (WiiM Pro via Google Cast)
+      musicPlayer = {
+        enable = true;
+        # Fallback player (always specify media_player in script calls for best control)
+        defaultMediaPlayer = "media_player.kitchen_speaker"; # WiiM Pro
+        searchBackend = "music_assistant"; # Requires Music Assistant server
+      };
+
+      # Database history retention (default: 7 days)
+      recorderPurgeDays = 7;
+
+      # Declarative scenes - Enhanced with Adaptive Lighting integration
+      scenes = [
+        {
+          name = "Movie Time";
+          icon = "mdi:movie";
+          entities = {
+            # Dim living room lights for cinema ambiance
+            "light.living_room" = {
+              state = "on";
+              brightness = 26; # 10%
+              color_temp_kelvin = 2200;
+            };
+            "light.dining_room" = {
+              state = "off"; # Turn off dining room for movies
+            };
+            # Adaptive lighting will be manually disabled for this scene
+          };
+        }
+        {
+          name = "Focus Mode";
+          icon = "mdi:brain";
+          entities = {
+            # Bright, cool white for deep work in office
+            "light.office" = {
+              state = "on";
+              brightness = 255; # 100%
+              color_temp_kelvin = 5000;
+            };
+          };
+        }
+        {
+          name = "Bedtime";
+          icon = "mdi:bed";
+          entities = {
+            # Turn off all lights and enable sleep mode
+            "light.office".state = "off";
+            "light.living_room".state = "off";
+            "light.dining_room".state = "off";
+            # Sleep mode input boolean will trigger adaptive lighting sleep mode
+            "input_boolean.sleep_mode".state = "on";
+            # TODO: Add bedroom light with minimal warm setting when bedroom lights are added
+          };
+        }
+        {
+          name = "Welcome Home";
+          icon = "mdi:home";
+          entities = {
+            # Comfortable adaptive lighting when arriving
+            # Uses adaptive lighting - just turn on lights
+            "light.living_room".state = "on";
+            "light.dining_room".state = "on";
+            # Brightness and color handled by adaptive lighting
+            "input_select.house_mode".state = "Home";
+            # TODO: Add hallway and kitchen when lights are added
+          };
+        }
+        {
+          name = "Relaxing Evening";
+          icon = "mdi:weather-sunset";
+          entities = {
+            # Warm, dim lighting for unwinding
+            "light.living_room" = {
+              state = "on";
+              brightness = 128; # 50%
+              color_temp_kelvin = 2500;
+            };
+            "light.dining_room" = {
+              state = "on";
+              brightness = 102; # 40%
+              color_temp_kelvin = 2300;
+            };
+          };
+        }
+        {
+          name = "Morning Energize";
+          icon = "mdi:weather-sunny";
+          entities = {
+            # Bright, cool lighting to wake up and energize
+            "light.office" = {
+              state = "on";
+              brightness = 255; # 100%
+              color_temp_kelvin = 5000;
+            };
+            "light.living_room" = {
+              state = "on";
+              brightness = 204; # 80%
+              color_temp_kelvin = 4500;
+            };
+            "input_boolean.sleep_mode".state = "off";
+            "input_select.house_mode".state = "Home";
+            # TODO: Add bedroom and kitchen when lights are added
+          };
+        }
+        {
+          name = "All Off";
+          icon = "mdi:lightbulb-off";
+          entities = {
+            # Turn off all lights
+            "light.office".state = "off";
+            "light.living_room".state = "off";
+            "light.dining_room".state = "off";
+            "light.home".state = "off"; # Master light group
+          };
+        }
+      ];
+
+      # Declarative automations
+      automations = [
+        # ==================== LIGHTING AUTOMATIONS ====================
+        {
+          id = "lights_on_at_sunset";
+          alias = "Turn on lights at sunset";
+          description = "Gradually turn on living area lights 30 min before sunset (adaptive lighting handles color/brightness)";
+          mode = "single";
+          trigger = [
+            {
+              platform = "sun";
+              event = "sunset";
+              offset = "-00:30:00"; # 30 minutes before sunset
+            }
+          ];
+          condition = [
+            {
+              condition = "state";
+              entity_id = "person.lewis";
+              state = "home";
+            }
+            {
+              condition = "state";
+              entity_id = "input_boolean.sleep_mode";
+              state = "off";
+            }
+          ];
+          action = [
+            {
+              service = "input_select.select_option";
+              target.entity_id = "input_select.house_mode";
+              data.option = "Home";
+            }
+            {
+              # Turn on lights - adaptive lighting will set appropriate color/brightness
+              service = "light.turn_on";
+              target.entity_id = [
+                "light.living_room"
+                "light.dining_room"
+                # Note: kitchen and hallway don't have smart lights yet
+              ];
+              data = {
+                transition = 300; # 5 minute gentle transition
+              };
+            }
+          ];
+        }
+        {
+          id = "lights_off_at_night";
+          alias = "Turn off lights late at night";
+          description = "Automatically turn off lights if still on after midnight";
+          mode = "single";
+          trigger = [
+            {
+              platform = "time";
+              at = "00:30:00";
+            }
+          ];
+          condition = [
+            {
+              condition = "state";
+              entity_id = "input_boolean.sleep_mode";
+              state = "off";
+            }
+          ];
+          action = [
+            {
+              service = "input_boolean.turn_on";
+              target.entity_id = "input_boolean.sleep_mode";
+            }
+            # Uncomment once lights connected:
+            # {
+            #   service = "light.turn_off";
+            #   target.entity_id = "all";
+            # }
+          ];
+        }
+        {
+          id = "lights_on_when_arriving_dark";
+          alias = "Turn on lights when arriving home after dark";
+          description = "Welcome home with lights if arriving when it's dark";
+          mode = "single";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "person.lewis";
+              from = "not_home";
+              to = "home";
+            }
+          ];
+          condition = [
+            {
+              condition = "sun";
+              after = "sunset";
+              before = "sunrise";
+            }
+          ];
+          action = [
+            {
+              service = "input_select.select_option";
+              target.entity_id = "input_select.house_mode";
+              data.option = "Home";
+            }
+            # Uncomment once lights connected:
+            # {
+            #   service = "scene.turn_on";
+            #   target.entity_id = "scene.welcome_home";
+            # }
+          ];
+        }
+
+        # ==================== MOTION-BASED LIGHTING AUTOMATIONS ====================
+        # Office - Motion detection with long timeout for desk work
+        {
+          id = "office_lights_on_motion";
+          alias = "Office lights on with motion";
+          description = "Turn on office lights when motion detected, using adaptive lighting";
+          mode = "restart";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "binary_sensor.hue_motion_sensor_1_motion";
+              to = "on";
+            }
+          ];
+          condition = [
+            {
+              condition = "numeric_state";
+              entity_id = "sensor.hue_motion_sensor_1_light_level";
+              below = 40; # Only if ambient light is low
+            }
+            {
+              condition = "state";
+              entity_id = "input_boolean.sleep_mode";
+              state = "off";
+            }
+          ];
+          action = [
+            {
+              service = "light.turn_on";
+              target.entity_id = [
+                "light.office" # Controls all office lights
+              ];
+              # Adaptive lighting will handle color/brightness
+            }
+          ];
+        }
+        {
+          id = "office_lights_dim_no_motion";
+          alias = "Dim office lights after inactivity";
+          description = "Dim lights after 10 minutes of no motion (don't turn off, might be reading)";
+          mode = "restart";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "binary_sensor.hue_motion_sensor_1_motion";
+              to = "off";
+              for = "00:10:00";
+            }
+          ];
+          action = [
+            {
+              service = "light.turn_on";
+              target.entity_id = [
+                "light.office"
+              ];
+              data = {
+                brightness_pct = 30;
+                transition = 5;
+              };
+            }
+          ];
+        }
+        {
+          id = "office_lights_off_extended_no_motion";
+          alias = "Turn off office lights after extended inactivity";
+          description = "Turn off lights after 30 minutes of no motion";
+          mode = "restart";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "binary_sensor.hue_motion_sensor_1_motion";
+              to = "off";
+              for = "00:30:00";
+            }
+          ];
+          action = [
+            {
+              service = "light.turn_off";
+              target.entity_id = [
+                "light.office"
+              ];
+              data = {
+                transition = 10;
+              };
+            }
+          ];
+        }
+
+        # Kitchen - No smart lights in kitchen yet (only voice assistant LED ring)
+        # TODO: Uncomment these automations once kitchen lights are added to Home Assistant
+        # {
+        #   id = "kitchen_lights_on_motion";
+        #   alias = "Kitchen lights on with motion";
+        #   description = "Immediately turn on kitchen lights for safety during cooking";
+        #   mode = "restart";
+        #   trigger = [
+        #     {
+        #       platform = "state";
+        #       entity_id = "binary_sensor.kitchen_motion";
+        #       to = "on";
+        #     }
+        #   ];
+        #   condition = [
+        #     {
+        #       condition = "numeric_state";
+        #       entity_id = "sensor.kitchen_light_level";
+        #       below = 50;
+        #     }
+        #   ];
+        #   action = [
+        #     {
+        #       service = "light.turn_on";
+        #       target.entity_id = [ "light.kitchen" ];
+        #     }
+        #   ];
+        # }
+        # {
+        #   id = "kitchen_lights_off_no_motion";
+        #   alias = "Turn off kitchen lights when empty";
+        #   description = "Turn off lights after 5 minutes of no motion (task-based room)";
+        #   mode = "restart";
+        #   trigger = [
+        #     {
+        #       platform = "state";
+        #       entity_id = "binary_sensor.kitchen_motion";
+        #       to = "off";
+        #       for = "00:05:00";
+        #     }
+        #   ];
+        #   action = [
+        #     {
+        #       service = "light.turn_off";
+        #       target.entity_id = [ "light.kitchen" ];
+        #       data = {
+        #         transition = 5;
+        #       };
+        #     }
+        #   ];
+        # }
+
+        # Living Room - No motion sensor yet
+        # TODO: Add motion sensor and uncomment this automation for motion-based assistance
+        # {
+        #   id = "living_room_prevent_auto_off_if_occupied";
+        #   alias = "Prevent living room lights turning off if occupied";
+        #   description = "Cancel any scheduled turn-offs if motion detected";
+        #   mode = "restart";
+        #   trigger = [
+        #     {
+        #       platform = "state";
+        #       entity_id = "binary_sensor.living_room_motion";
+        #       to = "on";
+        #     }
+        #   ];
+        #   action = [
+        #     # This automation serves to restart and cancel timeout automations
+        #     {
+        #       delay = "00:00:01";
+        #     }
+        #   ];
+        # }
+
+        # Hallway - No smart lights in hallway yet
+        # TODO: Uncomment these automations once hallway lights are added to Home Assistant
+        # {
+        #   id = "hallway_night_light";
+        #   alias = "Hallway night light mode";
+        #   description = "Low warm light for safe nighttime navigation";
+        #   mode = "restart";
+        #   trigger = [
+        #     {
+        #       platform = "state";
+        #       entity_id = "binary_sensor.hallway_motion";
+        #       to = "on";
+        #     }
+        #   ];
+        #   condition = [
+        #     {
+        #       condition = "state";
+        #       entity_id = "input_boolean.sleep_mode";
+        #       state = "on";
+        #     }
+        #   ];
+        #   action = [
+        #     {
+        #       service = "light.turn_on";
+        #       target.entity_id = [ "light.hallway" ];
+        #       data = {
+        #         brightness_pct = 5;
+        #         color_temp_kelvin = 2000;
+        #         transition = 1;
+        #       };
+        #     }
+        #   ];
+        # }
+        # {
+        #   id = "hallway_night_light_off";
+        #   alias = "Turn off hallway night light";
+        #   description = "Turn off night light after 2 minutes of no motion";
+        #   mode = "restart";
+        #   trigger = [
+        #     {
+        #       platform = "state";
+        #       entity_id = "binary_sensor.hallway_motion";
+        #       to = "off";
+        #       for = "00:02:00";
+        #     }
+        #   ];
+        #   condition = [
+        #     {
+        #       condition = "state";
+        #       entity_id = "input_boolean.sleep_mode";
+        #       state = "on";
+        #     }
+        #   ];
+        #   action = [
+        #     {
+        #       service = "light.turn_off";
+        #       target.entity_id = [ "light.hallway" ];
+        #       data = {
+        #         transition = 2;
+        #       };
+        #     }
+        #   ];
+        # }
+
+        # ==================== SCENE INTEGRATION WITH ADAPTIVE LIGHTING ====================
+        # Disable adaptive lighting for scenes with specific colors
+        {
+          id = "disable_adaptive_lighting_for_movie_scene";
+          alias = "Disable adaptive lighting during movie time";
+          description = "Put living room adaptive lighting in manual mode for movie scene";
+          mode = "single";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "scene.movie_time";
+              to = "on";
+            }
+          ];
+          action = [
+            {
+              service = "adaptive_lighting.set_manual_control";
+              target.entity_id = "switch.adaptive_lighting_living_room";
+              data = {
+                manual_control = true;
+              };
+            }
+          ];
+        }
+        {
+          id = "disable_adaptive_lighting_for_focus_scene";
+          alias = "Disable adaptive lighting during focus mode";
+          description = "Put office adaptive lighting in manual mode for focus scene";
+          mode = "single";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "scene.focus_mode";
+              to = "on";
+            }
+          ];
+          action = [
+            {
+              service = "adaptive_lighting.set_manual_control";
+              target.entity_id = "switch.adaptive_lighting_office";
+              data = {
+                manual_control = true;
+              };
+            }
+          ];
+        }
+        # Re-enable adaptive lighting after 4 hours (assumes scene usage has ended)
+        {
+          id = "reenable_adaptive_lighting_after_scene";
+          alias = "Re-enable adaptive lighting after extended scene use";
+          description = "Resume adaptive lighting after 4 hours of manual control";
+          mode = "restart";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = [
+                "switch.adaptive_lighting_living_room"
+                "switch.adaptive_lighting_office"
+              ];
+              attribute = "manual_control";
+              to = true;
+              for = "04:00:00";
+            }
+          ];
+          action = [
+            {
+              service = "adaptive_lighting.set_manual_control";
+              target.entity_id = "{{ trigger.entity_id }}";
+              data = {
+                manual_control = false;
+              };
+            }
+          ];
+        }
+
+        # ==================== ADAPTIVE LIGHTING SLEEP MODE SYNC ====================
+        {
+          id = "enable_adaptive_lighting_sleep_mode";
+          alias = "Enable adaptive lighting sleep mode";
+          description = "Activate sleep mode on all adaptive lighting instances when sleep mode is on";
+          mode = "single";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "input_boolean.sleep_mode";
+              to = "on";
+            }
+          ];
+          action = [
+            {
+              service = "adaptive_lighting.set_manual_control";
+              target.entity_id = [
+                "switch.adaptive_lighting_office"
+                "switch.adaptive_lighting_living_room"
+                "switch.adaptive_lighting_dining_room"
+              ];
+              data = {
+                manual_control = false;
+              };
+            }
+            {
+              service = "switch.turn_on";
+              target.entity_id = [
+                "switch.adaptive_lighting_sleep_mode_office"
+                "switch.adaptive_lighting_sleep_mode_living_room"
+                "switch.adaptive_lighting_sleep_mode_dining_room"
+              ];
+            }
+          ];
+        }
+        {
+          id = "disable_adaptive_lighting_sleep_mode";
+          alias = "Disable adaptive lighting sleep mode";
+          description = "Deactivate sleep mode on all adaptive lighting instances";
+          mode = "single";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "input_boolean.sleep_mode";
+              to = "off";
+            }
+          ];
+          action = [
+            {
+              service = "switch.turn_off";
+              target.entity_id = [
+                "switch.adaptive_lighting_sleep_mode_office"
+                "switch.adaptive_lighting_sleep_mode_living_room"
+                "switch.adaptive_lighting_sleep_mode_dining_room"
+              ];
+            }
+          ];
+        }
+
+        # ==================== PRESENCE AUTOMATIONS ====================
+        {
+          id = "set_away_mode_when_leaving";
+          alias = "Set Away mode when leaving home";
+          description = "Automatically switch to Away mode when everyone leaves";
+          mode = "single";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "person.lewis";
+              from = "home";
+              to = "not_home";
+              for = "00:10:00"; # Wait 10 minutes to avoid false triggers
+            }
+          ];
+          action = [
+            {
+              service = "input_select.select_option";
+              target.entity_id = "input_select.house_mode";
+              data.option = "Away";
+            }
+            # Uncomment once lights connected:
+            # {
+            #   service = "light.turn_off";
+            #   target.entity_id = "all";
+            # }
+          ];
+        }
+        {
+          id = "set_home_mode_when_arriving";
+          alias = "Set Home mode when arriving";
+          description = "Switch to Home mode when arriving";
+          mode = "single";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "person.lewis";
+              from = "not_home";
+              to = "home";
+            }
+          ];
+          condition = [
+            {
+              condition = "not";
+              conditions = [
+                {
+                  condition = "state";
+                  entity_id = "input_select.house_mode";
+                  state = "Guest";
+                }
+              ];
+            }
+          ];
+          action = [
+            {
+              service = "input_select.select_option";
+              target.entity_id = "input_select.house_mode";
+              data.option = "Home";
+            }
+          ];
+        }
+
+        # ==================== CLIMATE AUTOMATIONS ====================
+        {
+          id = "climate_away_mode";
+          alias = "Set heating to eco when away";
+          description = "Lower heating temperature when house is in Away mode";
+          mode = "single";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "input_select.house_mode";
+              to = "Away";
+            }
+          ];
+          action = [
+            # Uncomment once Tado is connected:
+            # {
+            #   service = "climate.set_temperature";
+            #   target.entity_id = "climate.tado";
+            #   data.temperature = 16;
+            # }
+            {
+              service = "input_boolean.turn_off";
+              target.entity_id = "input_boolean.sleep_mode";
+            }
+          ];
+        }
+        {
+          id = "climate_home_mode";
+          alias = "Set comfortable temperature when home";
+          description = "Raise heating when returning home";
+          mode = "single";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "input_select.house_mode";
+              to = "Home";
+            }
+          ];
+          action = [
+            # Uncomment once Tado is connected:
+            # {
+            #   service = "climate.set_temperature";
+            #   target.entity_id = "climate.tado";
+            #   data.temperature = 20;
+            # }
+            {
+              service = "input_boolean.turn_off";
+              target.entity_id = "input_boolean.sleep_mode";
+            }
+          ];
+        }
+        {
+          id = "climate_sleep_mode";
+          alias = "Lower heating at bedtime";
+          description = "Reduce temperature for sleeping";
+          mode = "single";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "input_boolean.sleep_mode";
+              to = "on";
+            }
+          ];
+          action = [
+            {
+              service = "input_select.select_option";
+              target.entity_id = "input_select.house_mode";
+              data.option = "Sleep";
+            }
+            # Uncomment once Tado is connected:
+            # {
+            #   service = "climate.set_temperature";
+            #   target.entity_id = "climate.tado";
+            #   data.temperature = 18;
+            # }
+          ];
+        }
+
+        # ==================== MORNING ROUTINE ====================
+        {
+          id = "morning_wakeup";
+          alias = "Morning wake up routine";
+          description = "Disable sleep mode and set house to Home mode (weekdays only)";
+          mode = "single";
+          trigger = [
+            {
+              platform = "time";
+              at = "07:00:00";
+            }
+          ];
+          condition = [
+            {
+              condition = "state";
+              entity_id = "input_boolean.sleep_mode";
+              state = "on";
+            }
+            {
+              condition = "time";
+              weekday = [
+                "mon"
+                "tue"
+                "wed"
+                "thu"
+                "fri"
+              ];
+            }
+          ];
+          action = [
+            # Turn off sleep mode (this disables adaptive lighting sleep mode)
+            {
+              service = "input_boolean.turn_off";
+              target.entity_id = "input_boolean.sleep_mode";
+            }
+            {
+              service = "input_select.select_option";
+              target.entity_id = "input_select.house_mode";
+              data.option = "Home";
+            }
+            # TODO: Add sunrise simulation when bedroom lights are added
+            # TODO: Add kitchen light turn-on when kitchen lights are added
+          ];
+        }
+
+        # ==================== NOTIFICATIONS ====================
+        {
+          id = "notify_low_phone_battery";
+          alias = "Notify when phone battery is low at home";
+          description = "Remind to charge phone if battery low while at home";
+          mode = "single";
+          trigger = [
+            {
+              platform = "numeric_state";
+              entity_id = "sensor.lewiss_iphone_battery_level";
+              below = 20;
+            }
+          ];
+          condition = [
+            {
+              condition = "state";
+              entity_id = "person.lewis";
+              state = "home";
+            }
+          ];
+          action = [
+            {
+              service = "notify.mobile_app_lewiss_iphone";
+              data = {
+                title = "Battery Low";
+                message = "Your phone battery is below 20%. Time to charge!";
+              };
+            }
+          ];
+        }
+      ];
     };
 
     containersSupplemental = {

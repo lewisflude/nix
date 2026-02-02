@@ -13,6 +13,88 @@ This configuration uses [musnix](https://github.com/musnix/musnix) to optimize N
 - **Safety Features**: das_watchdog prevents RT process hangs
 - **ZFS Compatible**: Tested with ZFS root filesystem
 
+## ⚠️ Current Status: RT Kernel Disabled
+
+**IMPORTANT:** This configuration currently runs with the RT kernel **DISABLED** due to compatibility issues with NVIDIA GPU drivers (RTX 4090).
+
+### Active Configuration
+- **Kernel:** XanMod (low-latency, not RT-preempt)
+- **Latency:** ~5.3ms (256 frames @ 48kHz) - excellent for gaming/desktop
+- **Audio Interface:** USB audio auto-detected (currently Apogee Symphony Desktop)
+- **Primary Use:** Gaming + Desktop + VR streaming
+
+### Why RT Kernel is Disabled
+The RT-preempt kernel causes stability issues with NVIDIA proprietary drivers. XanMod provides excellent low-latency performance (~5ms) sufficient for:
+- Gaming with VR streaming
+- Desktop audio (music, videos)
+- Voice chat (Discord)
+- Casual audio work
+
+### When to Re-Enable RT Kernel
+Only re-enable for professional audio production requiring ultra-low latency (<2ms):
+- Professional recording sessions
+- Live monitoring during recording
+- DAW work (Bitwig, Reaper, Ardour)
+
+To re-enable: Set `host.features.media.audio.realtime = true` in your host config.
+
+---
+
+## USB Audio Interface Auto-Detection
+
+**New:** Audio configuration now automatically detects and prioritizes USB audio interfaces.
+
+### How It Works
+1. Any USB audio class device automatically gets highest priority (100)
+2. Gaming stereo bridge routes to the highest-priority device
+3. Apogee Symphony Desktop works without manual configuration
+4. Switch USB interfaces without config changes
+
+### Supported Devices
+- Apogee Symphony Desktop ✓ (tested)
+- Focusrite Scarlett series (should work)
+- Universal Audio Apollo (should work)
+- Any USB audio class-compliant interface
+
+### Verifying Auto-Detection
+
+```bash
+# Check detected audio devices
+wpctl status | grep -A20 "Audio"
+
+# Verify USB device priority
+pw-cli ls Node | grep -E "node.name|priority.session"
+
+# Check current default sink
+wpctl inspect @DEFAULT_AUDIO_SINK@
+```
+
+### Troubleshooting Auto-Detection
+
+**USB device not detected as default:**
+
+```bash
+# 1. Check if device is recognized
+wpctl status
+
+# 2. Verify priority settings
+pw-metadata -n settings
+
+# 3. Check WirePlumber rules
+journalctl -u wireplumber -f
+```
+
+**Multiple USB devices:**
+- All USB audio interfaces get priority 100 (equal)
+- WirePlumber chooses based on connection order
+- To force specific device, edit `lib/constants.nix` to add device-specific priority
+
+**Switching between USB devices:**
+- Disconnect/reconnect to change priority
+- Or use: `wpctl set-default <device-id>`
+
+---
+
 ## Quick Start
 
 ### 1. Enable Real-Time Audio
@@ -481,6 +563,57 @@ rtirq = {
   prioLow = 0;               # Lowest priority
 };
 ```
+
+## WirePlumber Rule Ordering
+
+WirePlumber processes `monitor.alsa.rules` sequentially, and when multiple rules match the same device, **later rules override earlier ones**. This has important implications for rule organization.
+
+### Critical Pattern: General to Specific
+
+Always order WirePlumber rules from **general to specific** to allow proper overriding:
+
+```nix
+"monitor.alsa.rules" = [
+  # GENERAL RULE FIRST - applies to all ALSA outputs
+  {
+    matches = [ { "node.name" = "~alsa_output.*"; } ];
+    actions.update-props."priority.session" = 50;  # Medium priority
+  }
+
+  # SPECIFIC RULE SECOND - overrides the general rule for USB devices
+  {
+    matches = [ { "node.name" = "~alsa_output.usb-.*"; } ];
+    actions.update-props."priority.session" = 100;  # High priority
+  }
+];
+```
+
+### Why This Matters
+
+If you reverse the order (specific before general), the general rule will override your specific settings:
+
+```nix
+# WRONG - Don't do this!
+"monitor.alsa.rules" = [
+  # Specific rule runs first...
+  { matches = [ { "node.name" = "~alsa_output.usb-.*"; } ];
+    actions.update-props."priority.session" = 100; }
+
+  # ...but general rule runs second and OVERWRITES the USB priority!
+  { matches = [ { "node.name" = "~alsa_output.*"; } ];
+    actions.update-props."priority.session" = 50; }
+];
+```
+
+### Rule Ordering in This Configuration
+
+See `modules/nixos/features/desktop/audio/default.nix` for examples:
+
+1. General ALSA output rules (`~alsa_output.*`)
+2. Specific USB audio rules (`~alsa_output.usb-.*`)
+3. Device-specific rules (e.g., HDMI audio by PCI ID)
+
+This pattern ensures USB audio interfaces always get the correct priority, regardless of how the general rules are configured.
 
 ## References
 

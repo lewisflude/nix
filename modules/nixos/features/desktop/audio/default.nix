@@ -7,6 +7,7 @@
 let
   inherit (lib) mkIf mkMerge;
   cfg = config.host.features.media.audio;
+  audioConstants = (import ../../../../../lib/constants.nix).audio;
 
   quantum = if cfg.ultraLowLatency then 64 else 256;
   latency = "${toString quantum}/48000";
@@ -102,8 +103,8 @@ in
               name = "libpipewire-module-loopback";
               flags = [ "ifexists" "nofail" ];
               args = {
-                "node.name" = "apogee_stereo_game_bridge";
-                "node.description" = "Apogee Stereo Game Bridge";
+                "node.name" = audioConstants.virtualSinks.gamingBridge;
+                "node.description" = "Gaming Stereo Bridge";
                 "capture.props" = {
                   "media.class" = "Audio/Sink";
                   "audio.position" = [ "FL" "FR" ];
@@ -113,7 +114,7 @@ in
                 };
                 "playback.props" = {
                   "audio.position" = [ "FL" "FR" ];
-                  "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0";
+                  # Remove hardcoded node.target - WirePlumber will auto-route to highest priority device (USB interface)
                   "node.passive" = true;
                   "stream.dont-remix" = true;
                   "node.latency" = gamingLatency;
@@ -140,8 +141,16 @@ in
 
             # Device priorities
             "10-device-priorities"."monitor.alsa.rules" = [
-              { matches = [ { "node.name" = "~alsa_output.usb-Apogee.*"; } ]; actions.update-props."priority.session" = 100; }
-              { matches = [ { "node.name" = "~alsa_output.*"; } ]; actions.update-props."priority.session" = 50; }
+              # Medium priority for ALSA outputs (onboard audio, etc.) - GENERAL RULE FIRST
+              {
+                matches = [ { "node.name" = "~alsa_output.*"; } ];
+                actions.update-props."priority.session" = audioConstants.priorities.onboard;
+              }
+              # High priority for USB audio interfaces - SPECIFIC RULE SECOND (OVERRIDES)
+              {
+                matches = [ { "node.name" = audioConstants.devices.usbAudioClass; } ];
+                actions.update-props."priority.session" = audioConstants.priorities.primaryInterface;
+              }
             ];
 
             "10-bridge-priority"."monitor.rules" = [
@@ -231,15 +240,34 @@ in
               ];
 
               "monitor.rules" = [
-                { matches = [ { "node.name" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0"; } ]; actions.update-props."priority.session" = 25; }
-                { matches = [ { "node.name" = "input.apogee_stereo_game_bridge"; } ]; actions.update-props = { "node.passive" = false; "priority.session" = 100; }; }
-                { matches = [ { "node.name" = "sink-sunshine-stereo"; } ]; actions.update-props."priority.session" = 150; }
-              ];
+                # Lower priority for USB audio when gaming bridge is active
+                {
+                  matches = [ { "node.name" = audioConstants.devices.usbAudioClass; } ];
+                  actions.update-props."priority.session" = audioConstants.priorities.fallback + 15; # 25
+                }
+                # Gaming bridge - high priority for game audio
+                {
+                  matches = [ { "node.name" = "input.${audioConstants.virtualSinks.gamingBridge}"; } ];
+                  actions.update-props = {
+                    "node.passive" = false;
+                    "priority.session" = audioConstants.priorities.gamingBridge;
+                  };
+                }
+              ] ++ lib.optional (config.services.sunshine.enable or false) {
+                # Sunshine virtual sink - only when Sunshine is enabled
+                matches = [ { "node.name" = audioConstants.virtualSinks.sunshineStereo; } ];
+                actions.update-props."priority.session" = audioConstants.priorities.sunshine;
+              };
 
               "monitor.stream.rules" =
                 let
+                  # Route games to Sunshine when streaming, gaming bridge otherwise
+                  gameRoutingTarget =
+                    if (config.services.sunshine.enable or false)
+                    then audioConstants.virtualSinks.sunshineStereo
+                    else audioConstants.virtualSinks.gamingBridge;
                   gameRouting = {
-                    "node.target" = "sink-sunshine-stereo";
+                    "node.target" = gameRoutingTarget;
                     "node.latency" = gamingLatency;
                     "resample.quality" = 4;
                     "session.suspend-timeout-seconds" = 0;
@@ -252,23 +280,12 @@ in
                 ];
             };
 
-            "91-sunshine-streaming"."monitor.rules" = [
-              {
-                matches = [ { "node.name" = "~sink-sunshine-stereo"; } ];
-                actions.update-props = {
-                  "audio.format" = "S16LE";
-                  "audio.rate" = 48000;
-                  "audio.channels" = 2;
-                  "node.latency" = "512/48000";
-                  "session.suspend-timeout-seconds" = 0;
-                };
-              }
-            ];
           };
         };
       };
 
-      environment.systemPackages = [ pkgs.pulseaudio ];
+      # Note: PulseAudio compatibility provided by PipeWire (services.pipewire.pulse.enable)
+      # User tools (pavucontrol, paprefs) installed via home-manager in home/nixos/hardware-tools/audio.nix
 
       # USB autosuspend prevention
       services.udev.extraRules = ''
@@ -317,6 +334,22 @@ in
       ];
 
       environment.systemPackages = [ pkgs.rnnoise-plugin ];
+    })
+
+    # Sunshine streaming configuration (only when enabled)
+    (mkIf (cfg.enable && (config.services.sunshine.enable or false)) {
+      services.pipewire.wireplumber.extraConfig."91-sunshine-streaming"."monitor.rules" = [
+        {
+          matches = [ { "node.name" = "~${audioConstants.virtualSinks.sunshineStereo}"; } ];
+          actions.update-props = {
+            "audio.format" = "S16LE";
+            "audio.rate" = 48000;
+            "audio.channels" = 2;
+            "node.latency" = "512/48000";
+            "session.suspend-timeout-seconds" = 0;
+          };
+        }
+      ];
     })
 
     # Echo cancellation

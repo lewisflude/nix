@@ -1,13 +1,12 @@
 # Niri Compositor Configuration - Main File
 # Combines all niri configuration modules
-{
-  pkgs,
-  config,
-  lib,
-  inputs,
-  system,
-  osConfig,
-  ...
+{ pkgs
+, config
+, lib
+, inputs
+, system
+, osConfig
+, ...
 }:
 let
   # Use overlay packages to ensure mesa dependencies match system nixpkgs
@@ -16,9 +15,9 @@ let
   # Import consolidated modules
   outputs = import ./outputs.nix { };
   window-rules = import ./window-rules.nix { };
-  keybinds = import ./keybinds.nix {
-    inherit config pkgs lib;
-  };
+  # keybinds = import ./keybinds.nix {
+  #   inherit config pkgs lib;
+  # };
   unified-config = import ./config.nix {
     inherit pkgs config inputs system;
   };
@@ -134,7 +133,6 @@ in
     }
     // outputs
     // window-rules
-    // keybinds
     // unified-config;
   };
 }

@@ -61,10 +61,6 @@
       window-padding-x = 20;
       window-padding-y = 16;
       window-padding-balance = true;
-
-      # Bell configuration
-      audible-bell = false;
-      visual-bell = true;
     };
   };
 }

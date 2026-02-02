@@ -157,6 +157,35 @@
     };
   };
 
+  # Audio configuration constants
+  audio = {
+    # Device detection patterns
+    devices = {
+      # Match any USB audio interface
+      usbAudioClass = "~alsa_output.usb-.*";
+
+      # Apogee-specific pattern (for future per-device optimizations)
+      apogee = "~alsa_output.usb-Apogee.*";
+    };
+
+    # Virtual sinks created by our config
+    virtualSinks = {
+      gamingBridge = "apogee_stereo_game_bridge";
+      sunshineStereo = "sink-sunshine-stereo";
+    };
+
+    # Priority levels for audio routing
+    priorities = {
+      primaryInterface = 100;  # USB audio interface
+      gamingBridge = 100;      # Gaming bridge (equal to primary)
+      sunshine = 150;          # Sunshine streaming (highest)
+      bluetooth = 80;          # Bluetooth devices
+      onboard = 50;            # Built-in audio
+      hdmi = 30;               # HDMI audio
+      fallback = 10;           # Lowest priority
+    };
+  };
+
   # Binary cache configuration
   # Shared between NixOS (nix.settings) and nix-darwin (determinateNix.customSettings)
   binaryCaches = {

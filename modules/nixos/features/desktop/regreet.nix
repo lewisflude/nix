@@ -6,26 +6,36 @@
 }:
 let
   cfg = config.host.features.desktop;
+  signalCfg = config.theming.signal.nixos or null;
 
-  # Custom CSS for ReGreet (Signal theme support disabled for now)
-  # TODO: Re-enable Signal theme integration once signal-nix provides proper module args
-  # Reference: https://docs.gtk.org/gtk4/css-properties.html
-  customCss = ""; # Disabled until Signal theme is properly integrated
+  # Use Signal GTK theme if available, otherwise fall back to Adwaita
+  gtkTheme = {
+    name = signalCfg.gtk.themeName or "Adwaita";
+    package = signalCfg.gtk.themePackage or pkgs.gnome-themes-extra;
+  };
 in
 {
-  options.host.features.desktop.autoLogin = {
-    enable = lib.mkEnableOption "automatic login on boot";
-    user = lib.mkOption {
-      type = lib.types.str;
-      default = config.host.username or "lewis";
-      description = "User to automatically login (defaults to host.username)";
+  options.host.features.desktop = {
+    greeter = lib.mkOption {
+      type = lib.types.enum [ "regreet" "dms" ];
+      default = "dms";
+      description = "Which greeter to use (regreet or dms)";
+    };
+
+    autoLogin = {
+      enable = lib.mkEnableOption "automatic login on boot";
+      user = lib.mkOption {
+        type = lib.types.str;
+        default = config.host.username or "lewis";
+        description = "User to automatically login (defaults to host.username)";
+      };
     };
   };
 
   config = lib.mkIf cfg.enable {
-    # Enable ReGreet greeter for greetd
+    # Enable ReGreet greeter for greetd (only if greeter is set to regreet)
     programs.regreet = {
-      enable = true;
+      enable = cfg.greeter == "regreet";
 
       # Cage arguments - enable VT switching and use last monitor
       cageArgs = [
@@ -34,11 +44,9 @@ in
         "last" # Use last-connected monitor only
       ];
 
-      # GTK theme configuration
-      theme = {
-        name = "Adwaita";
-        package = pkgs.gnome-themes-extra;
-      };
+      # GTK theme configuration (uses Signal theme if enabled)
+      # Use mkDefault to allow signal-nix to override
+      theme = lib.mkDefault gtkTheme;
 
       cursorTheme = {
         name = "Adwaita";
@@ -56,10 +64,8 @@ in
         package = pkgs.inter;
       };
 
-      # Custom CSS styling with Signal theme colors
-      # Applied on top of Adwaita base theme
-      # Reference: https://docs.gtk.org/gtk4/css-properties.html
-      extraCss = customCss;
+      # Custom CSS can be added via signal-nix's regreet module if enabled
+      # or manually here if needed
 
       # ReGreet TOML configuration
       settings = {
@@ -77,12 +83,12 @@ in
         };
 
         GTK = {
-          application_prefer_dark_theme = true;
+          application_prefer_dark_theme = lib.mkDefault true;
           cursor_theme_name = "Adwaita";
           cursor_blink = true;
           font_name = "Inter 12";
           icon_theme_name = "Adwaita";
-          theme_name = "Adwaita";
+          theme_name = lib.mkDefault gtkTheme.name;
         };
 
         commands = {

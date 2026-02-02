@@ -9,6 +9,7 @@ in
 {
   imports = [
     ./regreet.nix
+    ./dms-greeter.nix
     ./console-theme.nix
   ];
 
