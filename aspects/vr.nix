@@ -40,12 +40,24 @@ in
       # Provides wireless PCVR from Quest headsets over WiFi using embedded Monado runtime
       # Following LVRA best practices: use defaults for best out-of-the-box performance
 
-      # System-level packages for WiVRn (needed by wivrn-dashboard GUI)
-      environment.systemPackages = [ pkgs.android-tools ];
-
+      # Wrap wivrn package to ensure wivrn-dashboard can find adb
+      # Dashboard is launched via .desktop file which doesn't inherit full user PATH
       services.wivrn = {
         enable = true;
-        package = pkgs.wivrn.override { cudaSupport = true; }; # Essential for RTX 4090
+        package =
+          let
+            wivrnBase = pkgs.wivrn.override { cudaSupport = true; }; # Essential for RTX 4090
+          in
+          pkgs.symlinkJoin {
+            name = "wivrn-with-adb";
+            paths = [ wivrnBase ];
+            buildInputs = [ pkgs.makeWrapper ];
+            postBuild = ''
+              # Wrap wivrn-dashboard to include android-tools in PATH
+              wrapProgram $out/bin/wivrn-dashboard \
+                --prefix PATH : ${lib.makeBinPath [ pkgs.android-tools ]}
+            '';
+          };
         inherit (cfg.wivrn) autoStart defaultRuntime openFirewall;
         highPriority = cfg.performance; # Enable async reprojection with high priority
 
