@@ -1,14 +1,13 @@
 { ... }:
 {
+  # Disabled: DMS Night Light handles gamma control for blue light reduction
+  # DMS provides unified theming and coordinates-based scheduling
+  # See: home/nixos/dank-material-shell.nix settings.nightLight
   services.wlsunset = {
-    enable = true;
-    # London, UK coordinates (adjust if you're elsewhere)
-    latitude = "51.5";
-    longitude = "-0.1";
-    # Color temperature settings
-    temperature = {
-      day = 6500;
-      night = 3500;
-    };
+    enable = false;
+    # Previous settings preserved for reference:
+    # latitude = "51.5";
+    # longitude = "-0.1";
+    # temperature = { day = 6500; night = 3500; };
   };
 }

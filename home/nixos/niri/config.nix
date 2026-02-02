@@ -11,6 +11,8 @@
   # ============================================================================
   # LAYOUT CONFIGURATION
   # ============================================================================
+  # Note: DMS includes may override some of these settings via ~/.config/niri/dms/
+  # If conflicts occur, adjust DMS includes.override or these values
 
   layout = {
     # Window spacing - 8px for tight 8pt grid system
@@ -32,22 +34,10 @@
       { proportion = 1.0; }
     ];
 
-    # Focus ring: disabled until signal-nix provides colors
-    # focus-ring = { ... };
-
-    # Border: disabled in favor of focus ring for cleaner aesthetic
+    # Border: disabled in favor of DMS-managed focus ring
     border = {
       enable = false;
     };
-
-    # Drop shadows: disabled until signal-nix provides colors
-    # shadow = { ... };
-
-    # Tab indicator: disabled until signal-nix provides colors
-    # tab-indicator = { ... };
-
-    # Visual hint when inserting windows: disabled until signal-nix provides colors
-    # insert-hint = { ... };
 
     # Struts: reserve screen edges (not needed)
     struts = {

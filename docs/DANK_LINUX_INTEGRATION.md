@@ -14,13 +14,26 @@ The configuration now includes all available Dank Linux components from the dank
 
 **Location**: `home/nixos/dank-material-shell.nix`
 
-**Features Enabled**:
+**Core Features Enabled**:
 - System monitoring widgets (via dgop backend)
 - VPN management widget
-- Dynamic theming (wallpaper-based Material Design 3)
-- Audio visualization
-- Calendar events integration
-- Clipboard paste support
+- Dynamic theming (wallpaper-based Material Design 3 via matugen)
+- Audio visualization (via cava)
+- Calendar events integration (via khal)
+- Clipboard paste support (via wtype)
+
+**Desktop Features** (available via DMS runtime settings):
+- **Browser Picker**: Modal dialog for choosing browser when opening URLs
+- **Lock Screen**: Integrated screen locker with media controls
+- **Night Light**: Gamma control for blue light reduction
+- **Power Management**: Idle handling, suspend automation, fullscreen inhibit
+
+**Clipboard Manager** (built-in):
+- History tracking (text and images)
+- Pinning items
+- Persistent across sessions
+
+**Note**: Desktop features like Night Light and Power Management are configured via the DMS Settings UI or CLI (`dms settings`), not through Nix options.
 
 **Built-in Components** (no separate packages needed):
 - **Dank Dash**: Dashboard with media controls, weather, calendar, system info
@@ -28,6 +41,31 @@ The configuration now includes all available Dank Linux components from the dank
 - **Control Center**: System settings and quick toggle interface
 
 These are integral parts of DMS and activate automatically when DMS is running.
+
+### ✅ DMS Plugins
+
+**Status**: Configured
+
+The following plugins from the [DMS Plugin Registry](https://github.com/AvengeMedia/dms-plugin-registry) are enabled:
+
+| Plugin | Description |
+|--------|-------------|
+| Media Player | Media controls widget |
+| Docker Manager | Container management |
+| Weather Widget | Dashboard weather forecasts |
+| Command Runner | Quick shell command execution |
+| Web Search | 23+ search engines |
+| Emoji Launcher | 300+ emojis and unicode characters |
+| System Resources | Enhanced system stats |
+
+**Adding More Plugins**:
+```bash
+# Via CLI
+dms plugins list
+dms plugins install <plugin-name>
+
+# Or via DMS Settings UI → Plugins
+```
 
 ### ✅ Dank Greeter
 
@@ -153,22 +191,41 @@ All DMS features are in `home/nixos/dank-material-shell.nix`:
 programs.dank-material-shell = {
   enable = true;
 
-  # Niri integration - Use includes (recommended over enableKeybinds)
+  # Niri integration - All include modules enabled
   niri = {
     enableSpawn = true;
     includes = {
-      enable = true;      # Generate DMS config files (recommended)
-      override = true;    # DMS settings take precedence
+      enable = true;
+      override = true;
+      alttab = true;   # Window switching
+      binds = true;    # Keybindings
+      colors = true;   # Theme colors
+      layout = true;   # Gaps, borders
+      outputs = true;  # Monitor config
+      wpblur = true;   # Wallpaper blur
     };
   };
 
-  # Feature toggles
-  enableSystemMonitoring = true;   # dgop-powered widgets
-  enableVPN = true;                 # VPN management
-  enableDynamicTheming = true;      # Material Design 3 theming
-  enableAudioWavelength = true;     # Audio visualization
-  enableCalendarEvents = true;      # Calendar via khal
-  enableClipboardPaste = true;      # Clipboard support
+  # Core feature toggles
+  enableSystemMonitoring = true;
+  enableVPN = true;
+  enableDynamicTheming = true;
+  enableAudioWavelength = true;
+  enableCalendarEvents = true;
+  enableClipboardPaste = true;
+
+  # Desktop features configured via DMS Settings UI or CLI:
+  # - Browser Picker: dms settings browser-picker
+  # - Lock Screen: dms settings lock-screen
+  # - Night Light: dms settings night-light
+  # - Power Management: dms settings power
+
+  # Plugins - enable via Nix or CLI
+  plugins = {
+    mediaPlayer.enable = true;
+    dockerManager.enable = true;
+    # See full list with: dms plugins list
+  };
 };
 ```
 
@@ -244,23 +301,97 @@ dsearch index
 
 ## What's Already Working
 
-These DMS features are **already active** in your configuration:
+These DMS features are **active** in your configuration:
 
+**Core Features:**
 ✅ System monitoring (CPU, RAM, GPU, network, disk)
 ✅ VPN management widget
 ✅ Dynamic Material Design 3 theming from wallpaper
 ✅ Audio visualization
 ✅ Calendar events display
-✅ Clipboard paste functionality
+✅ Clipboard manager with history and persistence
 ✅ Application launcher (fuzzel-based)
 ✅ Dashboard with media/weather/system info
 ✅ Control center for quick settings
 
-## What's New
+**Desktop Features:**
+✅ Browser Picker - choose browser when opening URLs
+✅ Lock Screen - with media controls
+✅ Night Light - coordinates-based gamma control
+✅ Power Management - idle/suspend with fullscreen inhibit
+
+**Plugins:**
+✅ Media Player widget
+✅ Docker Manager
+✅ Weather Widget
+✅ Command Runner
+✅ Web Search (23+ engines)
+✅ Emoji Launcher
+✅ System Resources monitor
+
+**Niri Integration:**
+✅ All include modules (alttab, binds, colors, layout, outputs, wpblur)
+✅ Auto-start with Niri
+✅ DMS settings override Niri defaults
+
+## What's Been Replaced
+
+The following standalone tools have been disabled in favor of DMS:
+
+| Old | New (DMS) | Notes |
+|-----|-----------|-------|
+| wlsunset | Night Light | Configure via `dms settings night-light` |
+| swaylock-effects | Lock Screen | Built-in with Material Design theming |
+| swayidle | Power Management | Configure via `dms settings power` |
+| streaming-mode script | Fullscreen inhibit | Automatic via DMS power management |
+
+**Note**: DMS handles these features at runtime. If DMS is not running, these features won't be available.
+
+## Tools
 
 ✅ **DMS Greeter** - Material Design 3 login screen
 ✅ **dgop CLI** - Standalone system monitoring tool
 ✅ **dsearch** - Fast filesystem search utility
+
+## DMS CLI Suite
+
+The `dms` command provides terminal tools for scripting and control:
+
+```bash
+# Browser picker - open URL with browser selection dialog
+dms open <url>
+
+# System diagnostics - check for missing dependencies
+dms doctor
+
+# Screenshots - integrated with shell UI
+dms screenshot
+
+# Color picker - on-screen color selection
+dms color-picker
+
+# Process manager - view and manage processes
+dms process
+
+# Lock screen
+dms lock
+
+# Power management
+dms power inhibit on   # Disable auto-lock
+dms power inhibit off  # Re-enable auto-lock
+
+# Plugin management
+dms plugins list
+dms plugins install <name>
+dms plugins remove <name>
+
+# Keybinds
+dms keybinds show niri
+dms keybinds set niri <key> <action>
+
+# Logs
+dms logs
+```
 
 ## Resources
 

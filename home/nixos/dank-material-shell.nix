@@ -1,8 +1,9 @@
-{ lib
-, config
-, pkgs
-, inputs
-, ...
+{
+  lib,
+  config,
+  pkgs,
+  inputs,
+  ...
 }:
 let
   # Get Dank Linux ecosystem packages from flake inputs
@@ -22,62 +23,58 @@ in
   programs.dank-material-shell = {
     enable = true;
 
-    # Niri integration - Use includes method (recommended over enableKeybinds)
+    # ==========================================================================
+    # NIRI INTEGRATION
+    # ==========================================================================
+    # Use includes method (recommended over enableKeybinds)
     # See: https://danklinux.com/docs/dankmaterialshell/nixos-flake
     niri = {
       enableSpawn = true; # Auto-start DMS with niri
 
-      # Use includes for flexible keybind management (default, recommended)
-      # This generates config files in ~/.config/niri/dms/:
+      # Use includes for flexible keybind management
+      # Generates config files in ~/.config/niri/dms/:
       #   - binds.kdl (keybindings)
       #   - colors.kdl (DMS colors)
       #   - layout.kdl (gaps, window radius)
       #   - alttab.kdl (alt-tab configuration)
       includes = {
-        enable = true; # Recommended: more flexible than enableKeybinds
+        enable = true; # Generate DMS config files
         override = true; # DMS settings take precedence
       };
-
-      # Don't use enableKeybinds - it's less flexible and may conflict with includes
-      # enableKeybinds = false; # (default when omitted)
     };
 
-    # Core feature toggles (all enabled for full DMS experience)
-    enableSystemMonitoring = true; # System monitoring widgets (dgop)
-    enableVPN = true; # VPN management widget
-    enableDynamicTheming = true; # Wallpaper-based dynamic theming
-    enableAudioWavelength = true; # Audio visualization
-    enableCalendarEvents = true; # Calendar events via khal
-    enableClipboardPaste = true; # Clipboard paste support
+    # ==========================================================================
+    # CORE FEATURE TOGGLES
+    # ==========================================================================
+    enableSystemMonitoring = true; # System monitoring widgets (dgop backend)
+    enableVPN = true; # VPN management widget (requires NetworkManager)
+    enableDynamicTheming = true; # Wallpaper-based Material You theming (matugen)
+    enableAudioWavelength = true; # Audio visualization bars on dashboard (cava)
+    enableCalendarEvents = true; # Calendar events via khal backend
+    enableClipboardPaste = true; # Clipboard paste with wtype
 
-    # NOTE: DankMaterialShell includes these features built-in:
-    # - Dank Dash: Dashboard with media controls, weather, calendar, system info
-    # - Launcher: Application launcher with filesystem search (fuzzel-based)
-    # - Control Center: System settings and quick toggle interface
-    # These are integrated into DMS and don't require separate packages
+    # ==========================================================================
+    # NOTE: Additional DMS features configured via runtime settings
+    # ==========================================================================
+    # The following features are configured via DMS Settings UI or CLI:
+    # - Browser Picker: dms settings browser-picker
+    # - Lock Screen: dms settings lock-screen
+    # - Night Light: dms settings night-light
+    # - Power Management: dms settings power
+    # - Clipboard settings: dms settings clipboard
+    # - Plugins: dms plugins install <name>
+    #
+    # These features may not have declarative Nix options yet.
+    # Use `dms doctor` to check configuration status.
+    # ==========================================================================
 
-    # Optional: Custom settings (uncomment and configure as needed)
-    # settings = {
-    #   # DankMaterialShell settings go here
-    #   # Written to ~/.config/DankMaterialShell/settings.json
-    # };
+    # Optional: Custom settings (written to ~/.config/DankMaterialShell/settings.json)
+    # settings = { };
 
-    # Optional: Clipboard settings (uncomment and configure as needed)
-    # clipboardSettings = {
-    #   # Clipboard configuration goes here
-    #   # Written to ~/.config/DankMaterialShell/clsettings.json
-    # };
+    # Optional: Clipboard settings (written to ~/.config/DankMaterialShell/clsettings.json)
+    # clipboardSettings = { };
 
-    # Optional: Session settings (uncomment and configure as needed)
-    # session = {
-    #   # Session configuration goes here
-    #   # Written to ~/.local/state/DankMaterialShell/session.json
-    # };
-
-    # Plugin configuration
-    # Plugins can be added later via DMS settings UI or CLI: dms plugins install <plugin-name>
-    # plugins = {
-    #   dankBatteryAlerts.enable = true;
-    # };
+    # Optional: Plugin configuration
+    # plugins = { };
   };
 }
