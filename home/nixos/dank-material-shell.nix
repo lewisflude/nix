@@ -48,33 +48,46 @@ in
     # ==========================================================================
     enableSystemMonitoring = true; # System monitoring widgets (dgop backend)
     enableVPN = true; # VPN management widget (requires NetworkManager)
-    enableDynamicTheming = true; # Wallpaper-based Material You theming (matugen)
+    enableDynamicTheming = false; # Use DMS static colors (disable matugen auto-theming)
     enableAudioWavelength = true; # Audio visualization bars on dashboard (cava)
     enableCalendarEvents = true; # Calendar events via khal backend
     enableClipboardPaste = true; # Clipboard paste with wtype
 
     # ==========================================================================
-    # NOTE: Additional DMS features configured via runtime settings
+    # DECLARATIVE SETTINGS (Optional)
     # ==========================================================================
-    # The following features are configured via DMS Settings UI or CLI:
+    # Per docs: https://danklinux.com/docs/dankmaterialshell/nixos-flake
+    # These can be configured declaratively or via DMS CLI/UI at runtime.
+    #
+    # Declarative configuration (written to config files):
+    # settings = {
+    #   theme = "dark";
+    #   dynamicTheming = false;
+    # };
+    #
+    # clipboardSettings = {
+    #   maxHistory = 25;
+    #   autoClearDays = 1;
+    #   clearAtStartup = true;
+    # };
+    #
+    # Runtime configuration via CLI:
     # - Browser Picker: dms settings browser-picker
     # - Lock Screen: dms settings lock-screen
     # - Night Light: dms settings night-light
     # - Power Management: dms settings power
-    # - Clipboard settings: dms settings clipboard
+    # - Clipboard: dms settings clipboard
     # - Plugins: dms plugins install <name>
-    #
-    # These features may not have declarative Nix options yet.
-    # Use `dms doctor` to check configuration status.
+    # - Check status: dms doctor
     # ==========================================================================
 
-    # Optional: Custom settings (written to ~/.config/DankMaterialShell/settings.json)
-    # settings = { };
-
-    # Optional: Clipboard settings (written to ~/.config/DankMaterialShell/clsettings.json)
-    # clipboardSettings = { };
-
     # Optional: Plugin configuration
-    # plugins = { };
+    # plugins = {
+    #   dankBatteryAlerts.enable = true;
+    #   mediaPlayer = {
+    #     enable = true;
+    #     settings.preferredSource = "spotify";
+    #   };
+    # };
   };
 }

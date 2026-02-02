@@ -80,7 +80,9 @@ in
 
       # Overview settings
       overview = {
-        # Note: backdrop-color disabled until signal-nix provides colors
+        # Note: backdrop-color and all colors provided by signal-nix
+        # Signal-nix generates dms/signal-colors.kdl for DMS integration
+        # DMS provides functionality (keybinds, layout, widgets) - signal-nix owns colors
         zoom = 0.5; # Balanced zoom level for good visibility
       };
 
