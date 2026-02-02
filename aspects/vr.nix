@@ -39,25 +39,9 @@ in
       # WiVRn wireless VR streaming configuration
       # Provides wireless PCVR from Quest headsets over WiFi using embedded Monado runtime
       # Following LVRA best practices: use defaults for best out-of-the-box performance
-
-      # Wrap wivrn package to ensure wivrn-dashboard can find adb
-      # Dashboard is launched via .desktop file which doesn't inherit full user PATH
       services.wivrn = {
         enable = true;
-        package =
-          let
-            wivrnBase = pkgs.wivrn.override { cudaSupport = true; }; # Essential for RTX 4090
-          in
-          pkgs.symlinkJoin {
-            name = "wivrn-with-adb";
-            paths = [ wivrnBase ];
-            buildInputs = [ pkgs.makeWrapper ];
-            postBuild = ''
-              # Wrap wivrn-dashboard to include android-tools in PATH
-              wrapProgram $out/bin/wivrn-dashboard \
-                --prefix PATH : ${lib.makeBinPath [ pkgs.android-tools ]}
-            '';
-          };
+        package = pkgs.wivrn.override { cudaSupport = true; }; # Essential for RTX 4090
         inherit (cfg.wivrn) autoStart defaultRuntime openFirewall;
         highPriority = cfg.performance; # Enable async reprojection with high priority
 
@@ -82,23 +66,6 @@ in
       systemd.services.wivrn.environment = {
         XRT_COMPOSITOR_USE_PRESENT_WAIT = "1";
         U_PACING_COMP_TIME_FRACTION_PERCENT = "90";
-      };
-
-      # Fix for upstream removal of --systemd flag
-      # See: https://github.com/NixOS/nixpkgs/issues/482152
-      # Workaround from: https://github.com/NixOS/nixpkgs/pull/480752
-      # Remove the --systemd flag by overriding ExecStart
-      systemd.user.services.wivrn = {
-        # Add android-tools to PATH so wivrn-dashboard can find adb
-        # This extends the existing path (which includes steam)
-        path = lib.mkAfter [ pkgs.android-tools ];
-
-        serviceConfig.ExecStart =
-          let
-            wivrnConfig = config.services.wivrn;
-            configFile = pkgs.writeText "wivrn-config.json" (builtins.toJSON wivrnConfig.config.json);
-          in
-          mkForce "${getExe' wivrnConfig.package "wivrn-server"} -f ${configFile}";
       };
     })
 
