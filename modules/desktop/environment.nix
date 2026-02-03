@@ -27,21 +27,9 @@ in
     services.displayManager.sessionPackages = lib.mkForce [ ];
   };
 
-  # Desktop aggregation module - combines all desktop components
-  flake.modules.nixos.desktop = { pkgs, lib, config, ... }: {
-    imports = [
-      nixos.niri
-      nixos.graphics
-      nixos.fonts
-      nixos.greeter
-      nixos.theme
-      nixos.console
-      nixos.xwayland
-      nixos.hardwareSupport
-      nixos.desktopEnvironment
-    ];
-
-    # Desktop user groups
+  # Desktop user groups configuration
+  # Dendritic pattern: NO imports - hosts import features directly
+  flake.modules.nixos.desktopUserGroups = { pkgs, lib, config, ... }: {
     users.users.${config.host.username}.extraGroups = [
       "audio"
       "video"

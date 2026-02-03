@@ -51,9 +51,18 @@ in
       nixos.yubikey
 
       # ═══════════════════════════════════════════════════════════════════════
-      # Desktop Environment
+      # Desktop Environment (dendritic: explicit imports, not aggregation)
       # ═══════════════════════════════════════════════════════════════════════
-      nixos.desktop
+      nixos.niri
+      nixos.graphics
+      nixos.fonts
+      nixos.greeter
+      nixos.theme
+      nixos.console
+      nixos.xwayland
+      nixos.hardwareSupport
+      nixos.desktopEnvironment
+      nixos.desktopUserGroups
 
       # ═══════════════════════════════════════════════════════════════════════
       # Gaming & VR
@@ -167,7 +176,7 @@ in
       homeManager.fzf
       homeManager.zellij
       homeManager.gh
-      homeManager.gitCliff
+      homeManager.git-cliff
       homeManager.helix
       homeManager.neovim
       homeManager.powerlevel10k
@@ -177,7 +186,7 @@ in
       homeManager.yazi
       homeManager.mpv
       homeManager.obsidian
-      homeManager.cursor
+      # homeManager.cursor  # TODO: cursor package not in nixpkgs
       homeManager.zed
 
       # Desktop home-manager modules
