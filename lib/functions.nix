@@ -9,28 +9,33 @@ let
   # Cross-platform path helpers
   homeDir = system: username: if isDarwin system then "/Users/${username}" else "/home/${username}";
   configDir = system: username: "${homeDir system username}/.config";
-  dataDir = system: username:
+  dataDir =
+    system: username:
     if isDarwin system then
       "${homeDir system username}/Library/Application Support"
     else
       "${homeDir system username}/.local/share";
-  cacheDir = system: username:
+  cacheDir =
+    system: username:
     if isDarwin system then
       "${homeDir system username}/Library/Caches"
     else
       "${homeDir system username}/.cache";
 
   # Package selection helpers
-  platformPackage = system: linuxPkg: darwinPkg:
+  platformPackage =
+    system: linuxPkg: darwinPkg:
     if isDarwin system then darwinPkg else linuxPkg;
-  platformPackages = system: linuxPkgs: darwinPkgs:
+  platformPackages =
+    system: linuxPkgs: darwinPkgs:
     if isDarwin system then darwinPkgs else linuxPkgs;
 
   # Pkgs configuration for nixpkgs import
   mkPkgsConfig = {
     allowUnfree = true;
     allowUnfreePredicate = _: true;
-    allowBrokenPredicate = pkg:
+    allowBrokenPredicate =
+      pkg:
       let
         name = toString (pkg.name or "");
       in

@@ -110,7 +110,6 @@ in
 {
   flake.modules.homeManager.helix =
     {
-      config,
       lib,
       pkgs,
       ...

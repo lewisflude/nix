@@ -6,12 +6,7 @@ let
 in
 {
   flake.modules.homeManager.ssh =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
+    { config, ... }:
     {
       programs.ssh = {
         enable = true;

@@ -21,46 +21,54 @@ let
   };
 in
 {
-  flake.modules.nixos.caddy = nixosArgs:
-  let
-    pkgs = nixosArgs.pkgs;
-    lib = nixosArgs.lib;
-    nixosConfig = nixosArgs.config;
-    cfg = nixosConfig.host.services.caddy;
-  in
-  {
-    services.caddy = lib.mkIf cfg.enable {
-      enable = true;
-      email = cfg.email;
-      virtualHosts = {
-        # Infrastructure
-        "cockpit.blmt.io" = mkReverseProxy "127.0.0.1:9090";
-        "ha.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.homeAssistant}";
-        "assistant.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.musicAssistant}";
+  flake.modules.nixos.caddy =
+    {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
+    let
+      cfg = config.host.services.caddy;
+    in
+    {
+      services.caddy = lib.mkIf cfg.enable {
+        enable = true;
+        email = cfg.email;
+        virtualHosts = {
+          # Infrastructure
+          "cockpit.blmt.io" = mkReverseProxy "127.0.0.1:9090";
+          "ha.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.homeAssistant}";
+          "assistant.blmt.io" =
+            mkReverseProxy "127.0.0.1:${toString constants.ports.services.musicAssistant}";
 
-        # Media
-        "jellyfin.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.jellyfin}";
-        "music.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.navidrome}";
+          # Media
+          "jellyfin.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.jellyfin}";
+          "music.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.navidrome}";
 
-        # Arr Stack
-        "prowlarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.prowlarr}";
-        "sonarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.sonarr}";
-        "radarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.radarr}";
-        "lidarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.lidarr}";
-        "readarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.readarr}";
-        "sabnzbd.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.sabnzbd}";
+          # Arr Stack
+          "prowlarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.prowlarr}";
+          "sonarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.sonarr}";
+          "radarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.radarr}";
+          "lidarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.lidarr}";
+          "readarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.readarr}";
+          "sabnzbd.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.sabnzbd}";
 
-        # Downloads
-        "qbittorrent.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.qbittorrent}";
-        "transmission.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.transmission}";
+          # Downloads
+          "qbittorrent.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.qbittorrent}";
+          "transmission.blmt.io" =
+            mkReverseProxy "127.0.0.1:${toString constants.ports.services.transmission}";
 
-        # AI
-        "ollama.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.ollama}";
-        "openwebui.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.openWebui}";
-        "comfyui.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.comfyui}";
+          # AI
+          "ollama.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.ollama}";
+          "openwebui.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.openWebui}";
+          "comfyui.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.comfyui}";
+        };
       };
-    };
 
-    networking.firewall.allowedTCPPorts = lib.mkIf cfg.enable [ 80 443 ];
-  };
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.enable [
+        80
+        443
+      ];
+    };
 }

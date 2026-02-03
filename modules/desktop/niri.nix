@@ -3,21 +3,17 @@
 { config, inputs, ... }:
 {
   flake.modules.nixos.niri =
-    nixosArgs:
-    let
-      inherit (nixosArgs) pkgs lib;
-      nixosConfig = nixosArgs.config;
-    in
+    { lib, config, ... }:
     {
       programs.niri = {
         enable = true;
-        package = inputs.niri.packages.${nixosConfig.nixpkgs.hostPlatform.system}.niri-unstable;
+        package = inputs.niri.packages.${config.nixpkgs.hostPlatform.system}.niri-unstable;
       };
 
       # NVIDIA application profile to fix high VRAM usage with niri
       # See: https://yalter.github.io/niri/Nvidia.html#high-vram-usage-fix
       environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json" =
-        lib.mkIf (nixosConfig.hardware.nvidia.package != null) {
+        lib.mkIf (config.hardware.nvidia.package != null) {
           text = ''
             {
                 "rules": [

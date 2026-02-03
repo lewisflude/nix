@@ -1555,11 +1555,11 @@
         "nixpkgs": "nixpkgs_17"
       },
       "locked": {
-        "lastModified": 1770088923,
-        "narHash": "sha256-Q8cRwHEeyiEIRtNtONTefINpZFCW7hZ7MNyyFVffi48=",
+        "lastModified": 1770126339,
+        "narHash": "sha256-TVI+l6O1GXJ+SC7OFtTOtuVbsMu1aYCHgUOPbvgJxfw=",
         "owner": "nix-community",
         "repo": "nixpkgs-wayland",
-        "rev": "f980cc811b35f93e1ec09d4aae9ec048784abef8",
+        "rev": "09fd46bce334c18a4addd07d49108d09c49e54f5",
         "type": "github"
       },
       "original": {
@@ -1927,11 +1927,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770120029,
-        "narHash": "sha256-3UkghT5vQVBslKiZ+wIpgPze8eyMha8mT/T7IIRuRdc=",
+        "lastModified": 1770125189,
+        "narHash": "sha256-boDXS39FRXDhrQZoK9CvsogApXnLM8UR1qvevawKN/g=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "70877f9a9aa4f7034ca74a0c42b8c3268f943636",
+        "rev": "6a5c8df1342ff2ba9f9c1a9a3ebd99393faafb54",
         "type": "github"
       },
       "original": {
@@ -2049,6 +2049,26 @@
         "url": "https://git.outfoxxed.me/quickshell/quickshell"
       }
     },
+    "quickshell_2": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1769593411,
+        "narHash": "sha256-WW00FaBiUmQyxvSbefvgxIjwf/WmRrEGBbwMHvW/7uQ=",
+        "ref": "refs/heads/master",
+        "rev": "1e4d804e7f3fa7465811030e8da2bf10d544426a",
+        "revCount": 732,
+        "type": "git",
+        "url": "https://git.outfoxxed.me/quickshell/quickshell"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.outfoxxed.me/quickshell/quickshell"
+      }
+    },
     "root": {
       "inputs": {
         "atuin": "atuin",
@@ -2087,6 +2107,7 @@
         "pog": "pog",
         "pre-commit-hooks": "pre-commit-hooks",
         "process-compose-flake": "process-compose-flake",
+        "quickshell": "quickshell_2",
         "rust-docs-mcp": "rust-docs-mcp",
         "services-flake": "services-flake",
         "signal": "signal",

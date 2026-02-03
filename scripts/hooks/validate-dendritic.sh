@@ -24,13 +24,15 @@ if [[ "$FILE_PATH" != */modules/*.nix ]]; then
 fi
 
 # Get content being written/edited
-# - For Write tool: content field
-# - For Edit tool: new_string field
+# - For Write tool: content field (full file)
+# - For Edit tool: new_string field (fragment only)
 CONTENT=""
+IS_EDIT=false
 if echo "$INPUT" | jq -e '.tool_input.content' > /dev/null 2>&1; then
   CONTENT=$(echo "$INPUT" | jq -r '.tool_input.content')
 elif echo "$INPUT" | jq -e '.tool_input.new_string' > /dev/null 2>&1; then
   CONTENT=$(echo "$INPUT" | jq -r '.tool_input.new_string')
+  IS_EDIT=true
 fi
 
 # If no content to validate, allow
@@ -77,7 +79,9 @@ fi
 
 # Pattern validation: Feature modules should define flake.modules.*
 # (Skip infrastructure and host definition files)
-if [[ "$FILE_PATH" =~ ^.*/modules/[^/]+\.nix$ ]] &&
+# (Skip for Edit operations since we only see a fragment, not full file)
+if [[ "$IS_EDIT" == false ]] &&
+   [[ "$FILE_PATH" =~ ^.*/modules/[^/]+\.nix$ ]] &&
    [[ "$FILE_PATH" != */infrastructure/* ]] &&
    [[ "$FILE_PATH" != */hosts/* ]] &&
    [[ "$FILE_PATH" != */constants.nix ]] &&

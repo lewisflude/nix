@@ -5,8 +5,8 @@
   flake.modules.homeManager.powerlevel10k =
     {
       config,
-      lib,
       pkgs,
+      lib,
       ...
     }:
     let

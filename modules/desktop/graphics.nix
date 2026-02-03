@@ -3,11 +3,7 @@
 { config, ... }:
 {
   flake.modules.nixos.graphics =
-    nixosArgs:
-    let
-      inherit (nixosArgs) pkgs lib;
-      nixosConfig = nixosArgs.config;
-    in
+    { pkgs, config, ... }:
     {
       hardware = {
         graphics = {
@@ -22,7 +18,7 @@
         nvidia = {
           modesetting.enable = true; # Required for Wayland
           open = true; # Required for Turing+ (RTX 4090)
-          package = nixosConfig.boot.kernelPackages.nvidiaPackages.beta;
+          package = config.boot.kernelPackages.nvidiaPackages.beta;
         };
 
         # GPU access in containers (Ollama, etc.)

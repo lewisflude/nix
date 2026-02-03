@@ -66,55 +66,8 @@
             render-drm-device = osConfig.host.hardware.renderDevice;
           };
 
-          # Outputs
-          outputs = {
-            "DP-3" = {
-              scale = 1.25;
-              position = {
-                x = 0;
-                y = 0;
-              };
-              mode = {
-                width = 3440;
-                height = 1440;
-                refresh = 164.90;
-              };
-              variable-refresh-rate = "on-demand";
-              focus-at-startup = true;
-            };
-            "HDMI-A-4" = {
-              position = {
-                x = 2752;
-                y = 0;
-              };
-              mode = {
-                width = 1920;
-                height = 1080;
-                refresh = 60.0;
-              };
-              scale = 1.0;
-            };
-          };
-
-          # Layout
-          layout = {
-            always-center-single-column = true;
-            empty-workspace-above-first = true;
-            default-column-display = "tabbed";
-            center-focused-column = "on-overflow";
-            preset-column-widths = [
-              { proportion = 1.0 / 3.0; }
-              { proportion = 1.0 / 2.0; }
-              { proportion = 2.0 / 3.0; }
-              { proportion = 1.0; }
-            ];
-            struts = {
-              left = 0;
-              right = 0;
-              top = 0;
-              bottom = 0;
-            };
-          };
+          # Note: outputs and layout are managed by DankMaterialShell includes
+          # See modules/desktop/dms.nix: filesToInclude = ["outputs", "layout", ...]
 
           # Input
           input = {
@@ -196,9 +149,9 @@
             };
           };
 
-          # Startup
+          # Startup commands
+          # Note: DMS is launched via programs.dank-material-shell.niri.enableSpawn
           spawn-at-startup = [
-            { command = [ "awww-daemon" ]; }
             {
               command = [
                 "${pkgs.argyllcms}/bin/dispwin"

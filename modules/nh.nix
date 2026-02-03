@@ -5,8 +5,8 @@
   flake.modules.homeManager.nh =
     {
       config,
-      lib,
       pkgs,
+      lib,
       ...
     }:
     let

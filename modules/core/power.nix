@@ -1,9 +1,13 @@
 # Power management module
-# Disables power-profiles-daemon (conflicts with manual cpufreq governor)
+# Enables power-profiles-daemon for DMS and system power management
 { config, ... }:
 {
-  flake.modules.nixos.power = { lib, ... }: {
-    # For performance users, kernel governor (schedutil) handles P/E core scheduling better
-    services.power-profiles-daemon.enable = false;
-  };
+  flake.modules.nixos.power =
+    { lib, ... }:
+    {
+      # Power Profiles Daemon - system power/behavior state management
+      # Used by DMS and various desktop tools via DBus
+      # https://danklinux.com/docs/dankmaterialshell/cli-doctor#optional-features
+      services.power-profiles-daemon.enable = true;
+    };
 }

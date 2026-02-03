@@ -7,11 +7,7 @@ let
 in
 {
   flake.modules.nixos.desktopEnvironment =
-    nixosArgs:
-    let
-      inherit (nixosArgs) pkgs lib;
-      nixosConfig = nixosArgs.config;
-    in
+    { lib, config, ... }:
     {
       environment.pathsToLink = [ "/share/wayland-sessions" ];
 
@@ -25,7 +21,7 @@ in
           niri = {
             prettyName = "Niri";
             comment = "Niri compositor managed by UWSM";
-            binPath = lib.getExe nixosConfig.programs.niri.package;
+            binPath = lib.getExe config.programs.niri.package;
           };
         };
       };
@@ -36,13 +32,9 @@ in
   # Desktop user groups configuration
   # Dendritic pattern: NO imports - hosts import features directly
   flake.modules.nixos.desktopUserGroups =
-    nixosArgs:
-    let
-      inherit (nixosArgs) pkgs lib;
-      nixosConfig = nixosArgs.config;
-    in
+    { config, ... }:
     {
-      users.users.${nixosConfig.host.username}.extraGroups = [
+      users.users.${config.host.username}.extraGroups = [
         "audio"
         "video"
         "input"

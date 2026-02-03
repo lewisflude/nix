@@ -3,12 +3,7 @@
 { config, ... }:
 {
   flake.modules.homeManager.userPackages =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
+    { pkgs, lib, ... }:
     let
       llmAgentPkgs = pkgs.llmAgents or { };
     in

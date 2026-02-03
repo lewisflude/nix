@@ -4,9 +4,9 @@
 {
   flake.modules.homeManager.xdg =
     {
-      pkgs,
-      lib,
       config,
+      lib,
+      pkgs,
       ...
     }:
     {

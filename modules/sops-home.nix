@@ -3,12 +3,7 @@
 { config, ... }:
 {
   flake.modules.homeManager.sops =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
+    { config, pkgs, ... }:
     let
       isDarwin = pkgs.stdenv.isDarwin;
       homeDir = if isDarwin then "/Users/${config.home.username}" else "/home/${config.home.username}";

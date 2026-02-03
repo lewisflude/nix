@@ -3,12 +3,7 @@
 { config, ... }:
 {
   flake.modules.homeManager.claudeCode =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
+    { config, pkgs, ... }:
     {
       programs.claude-code = {
         enable = true;

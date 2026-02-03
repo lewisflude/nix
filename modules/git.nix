@@ -6,12 +6,7 @@
   # Home-manager Git configuration (works on NixOS AND Darwin)
   # ═══════════════════════════════════════════════════════════════════
   flake.modules.homeManager.git =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
+    { config, pkgs, ... }:
     {
       programs.git = {
         enable = true;

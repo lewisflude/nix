@@ -11,10 +11,13 @@ in
   # NixOS System Configuration
   # ==========================================================================
   flake.modules.nixos.vr =
-    nixosArgs:
+    {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
     let
-      inherit (nixosArgs) pkgs lib;
-      nixosConfig = nixosArgs.config;
       inherit (lib)
         mkIf
         mkMerge

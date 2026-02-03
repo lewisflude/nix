@@ -1,18 +1,21 @@
 # Greeter Configuration
-# greetd with auto-login support
+# greetd with DMS greeter and auto-login support
+# Follows: https://danklinux.com/docs/dankmaterialshell/nixos-flake
 { config, inputs, ... }:
 let
   inherit (config) username;
 in
 {
   flake.modules.nixos.greeter =
-    nixosArgs:
-    let
-      inherit (nixosArgs) pkgs lib;
-      nixosConfig = nixosArgs.config;
-    in
+    {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
     {
       # Enable DMS greeter for greetd
+      # https://danklinux.com/docs/dankmaterialshell/home-manager#greeter-options
       programs.dank-material-shell.greeter = {
         enable = true;
         compositor = {
@@ -22,15 +25,16 @@ in
           save = true;
           path = "/tmp/dms-greeter.log";
         };
-        configHome = "/home/${nixosConfig.host.username}/.config/dms";
+        # configHome is the user's home directory where DMS finds ~/.config/DankMaterialShell/
+        configHome = "/home/${config.host.username}";
       };
 
       # Greetd auto-login configuration (applied when host.features.desktop.autoLogin.enable = true)
-      services.greetd = lib.mkIf nixosConfig.host.features.desktop.autoLogin.enable {
+      services.greetd = lib.mkIf config.host.features.desktop.autoLogin.enable {
         settings = {
           initial_session = {
             command = "${pkgs.niri}/bin/niri-session";
-            user = nixosConfig.host.features.desktop.autoLogin.user;
+            user = config.host.features.desktop.autoLogin.user;
           };
         };
       };

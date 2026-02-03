@@ -3,16 +3,12 @@
 { config, ... }:
 {
   flake.modules.nixos.theme =
-    nixosArgs:
-    let
-      inherit (nixosArgs) pkgs lib;
-      nixosConfig = nixosArgs.config;
-    in
+    { lib, config, ... }:
     {
-      theming.signal.nixos = lib.mkIf nixosConfig.host.features.desktop.signalTheme.enable {
+      theming.signal.nixos = lib.mkIf config.host.features.desktop.signalTheme.enable {
         enable = true;
         autoEnable = true;
-        mode = nixosConfig.host.features.desktop.signalTheme.mode;
+        mode = config.host.features.desktop.signalTheme.mode;
       };
     };
 }

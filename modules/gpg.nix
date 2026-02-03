@@ -34,15 +34,18 @@
   flake.modules.homeManager.gpg =
     {
       config,
-      lib,
       pkgs,
+      lib,
       ...
     }:
     let
       isDarwin = pkgs.stdenv.isDarwin;
       gtkThemeName = config.theming.signal.gtk.themeName or null;
       pinCacheTtl = {
-        gpg = 3600;
+        gpg = {
+          default = 3600; # 1 hour - PIN stays cached after last use
+          max = 43200; # 12 hours - forces re-entry after absolute time
+        };
         ssh = 3600;
       };
     in
@@ -59,9 +62,9 @@
         enable = true;
         scdaemonSettings = {
           disable-ccid = true;
+          pcsc-shared = true; # Allow other apps to access YubiKey while GPG is running
         }
         // lib.optionalAttrs isDarwin {
-          pcsc-shared = true;
           disable-application = "piv";
         };
         settings = {
@@ -96,8 +99,8 @@
                 exec ${pkgs.pinentry-gnome3}/bin/pinentry-gnome3 "$@"
               fi
             '';
-        defaultCacheTtl = pinCacheTtl.gpg;
-        maxCacheTtl = pinCacheTtl.gpg;
+        defaultCacheTtl = pinCacheTtl.gpg.default;
+        maxCacheTtl = pinCacheTtl.gpg.max;
         defaultCacheTtlSsh = pinCacheTtl.ssh;
         maxCacheTtlSsh = pinCacheTtl.ssh;
         grabKeyboardAndMouse = true;

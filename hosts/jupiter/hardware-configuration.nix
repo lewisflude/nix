@@ -13,7 +13,7 @@
     pkgs.xfsprogs
   ];
   boot = {
-      kernelModules = [
+    kernelModules = [
       "kvm-intel"
       "zfs"
       "hid_sony"
