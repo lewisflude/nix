@@ -6,7 +6,8 @@
     {
       programs.fzf = {
         enable = true;
-        enableZshIntegration = true;
+        # Zsh integration disabled - using cached init script in modules/shell.nix for better performance
+        enableZshIntegration = false;
         defaultOptions = [
           "--height 40%"
           "--border"

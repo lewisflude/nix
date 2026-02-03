@@ -1,5 +1,6 @@
 # User packages and core tooling
 # Dendritic pattern: Full implementation as flake.modules.homeManager.userPackages
+# Note: General CLI tools are in cli-apps.nix, this module is for user-specific packages
 { config, ... }:
 {
   flake.modules.homeManager.userPackages =
@@ -9,31 +10,13 @@
     in
     {
       home.packages = [
-        # Essentials
-        pkgs.curl
-        pkgs.tree
-        pkgs.ouch
-
         # Nix Power Tools
         pkgs.nh
-        pkgs.nix-output-monitor
-        pkgs.nix-tree
-        pkgs.comma
 
-        # Modern Nix Dev Flow
-        pkgs.nix-init
-        pkgs.nurl
-        pkgs.nix-diff
-
-        # Shell tools
-        pkgs.atuin
-
-        # Workflow
-        pkgs.cocogitto
-        pkgs.yaml-language-server
-
-        # Additional packages
+        # Database clients
         pkgs.pgcli
+
+        # Development tools
         pkgs.cursor-cli
         pkgs.lefthook
       ]
@@ -43,8 +26,5 @@
         pkgs.libnotify
         pkgs.seahorse
       ];
-
-      programs.htop.enable = true;
-      programs.btop.enable = true;
     };
 }

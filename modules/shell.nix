@@ -458,9 +458,16 @@ in
         DIRENV_TIMEOUT = "5s";
       };
 
-      home.packages = [ pkgs.zoxide ];
+      # Zoxide configuration
+      # Note: enableZshIntegration disabled - using cached init script for performance
+      programs.zoxide = {
+        enable = true;
+        enableZshIntegration = false;
+        options = [ "--cmd cd" ];
+      };
 
-      # Pre-generated init scripts
+      # Pre-generated init scripts for performance
+      # These are cached at build time instead of running init commands on every shell startup
       home.file.".config/zsh/zoxide-init.zsh".source = pkgs.runCommand "zoxide-init" { } ''
         ${pkgs.zoxide}/bin/zoxide init zsh --cmd cd > $out
       '';
