@@ -33,6 +33,18 @@ in
         STATE_FILE="/var/lib/protonvpn-portforward.state"
         QBT_API="http://127.0.0.1:${toString constants.ports.services.qbittorrent}/api/v2"
 
+        # Check if VPN namespace exists
+        if ! ip netns list | grep -q "^$NAMESPACE"; then
+          echo "VPN namespace '$NAMESPACE' not found - VPN not connected, skipping"
+          exit 0
+        fi
+
+        # Check if VPN gateway is reachable within the namespace
+        if ! ip netns exec "$NAMESPACE" ip route | grep -q "$VPN_GATEWAY"; then
+          echo "VPN gateway $VPN_GATEWAY not reachable in namespace - VPN not connected, skipping"
+          exit 0
+        fi
+
         echo "Requesting port forward from ProtonVPN gateway $VPN_GATEWAY..."
 
         # Request port via NAT-PMP in VPN namespace
@@ -42,8 +54,8 @@ in
         PUBLIC_PORT=$(echo "$RESULT" | grep -oP 'Mapped public port \K[0-9]+' || echo "")
 
         if [ -z "$PUBLIC_PORT" ]; then
-          echo "Failed to get port from NAT-PMP"
-          exit 1
+          echo "Failed to get port from NAT-PMP - VPN may not support port forwarding"
+          exit 0
         fi
 
         echo "Got port: $PUBLIC_PORT"
@@ -103,7 +115,7 @@ in
       serviceConfig = {
         Type = "oneshot";
         ExecStart = "${portforwardScript}/bin/protonvpn-portforward";
-        ExecStartPost = "${pkgs.bash}/bin/bash -c '${firewallScript} ${namespace} $(cat /var/lib/protonvpn-portforward.state | grep PUBLIC_PORT | cut -d= -f2)'";
+        ExecStartPost = "${pkgs.bash}/bin/bash -c 'PORT=$(grep PUBLIC_PORT /var/lib/protonvpn-portforward.state 2>/dev/null | cut -d= -f2); [ -n \"$PORT\" ] && ${firewallScript} ${namespace} \"$PORT\" || echo \"No port to configure\"'";
         Environment = [
           "NAMESPACE=${namespace}"
           "VPN_GATEWAY=${gateway}"
