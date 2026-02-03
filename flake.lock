@@ -2261,8 +2261,8 @@
         "signal-palette": "signal-palette"
       },
       "locked": {
-        "lastModified": 1770139834,
-        "narHash": "sha256-Bpxl6U7LFbYZYul8sUBYGHftiHe1PFI9pclBEs+ayBI=",
+        "lastModified": 1770140008,
+        "narHash": "sha256-B1MTHIkVnx6gSYvbWCLY5X5QfDwYnBDpO7mLxC2ZiUc=",
         "path": "/Users/lewisflude/Code/signal-nix",
         "type": "path"
       },
