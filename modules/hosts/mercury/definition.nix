@@ -83,10 +83,6 @@ in
             homeManager.karabiner
             homeManager.audioDarwin
           ];
-
-          # Override for macOS system username (different from config username)
-          home.username = lib.mkForce "lewisflude";
-          home.homeDirectory = lib.mkForce "/Users/lewisflude";
         };
 
       # =========================================================================
@@ -152,6 +148,13 @@ in
       # =========================================================================
       # Homebrew (via nix-homebrew)
       # =========================================================================
+      nix-homebrew = {
+        enable = true;
+        enableRosetta = true;
+        user = "lewisflude";
+        autoMigrate = true;
+      };
+
       homebrew = {
         enable = true;
         onActivation = {
@@ -159,6 +162,9 @@ in
           autoUpdate = true;
           upgrade = true;
         };
+        casks = [
+          "ghostty"
+        ];
       };
     };
 }

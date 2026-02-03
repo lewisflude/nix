@@ -15,6 +15,7 @@
         pkgs.ouch
 
         # Nix Power Tools
+        pkgs.nh
         pkgs.nix-output-monitor
         pkgs.nix-tree
         pkgs.comma
@@ -23,6 +24,9 @@
         pkgs.nix-init
         pkgs.nurl
         pkgs.nix-diff
+
+        # Shell tools
+        pkgs.atuin
 
         # Workflow
         pkgs.cocogitto

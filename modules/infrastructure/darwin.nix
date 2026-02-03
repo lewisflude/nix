@@ -22,15 +22,14 @@
     );
 
     # Auto-generated checks for each Darwin configuration
-    checks =
-      config.flake.darwinConfigurations
-      |> lib.mapAttrsToList (
+    checks = lib.mkMerge (
+      lib.mapAttrsToList (
         name: darwin: {
           ${darwin.config.nixpkgs.hostPlatform.system} = {
             "configurations:darwin:${name}" = darwin.config.system.build.toplevel;
           };
         }
-      )
-      |> lib.mkMerge;
+      ) config.flake.darwinConfigurations
+    );
   };
 }

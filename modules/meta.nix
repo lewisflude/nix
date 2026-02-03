@@ -7,7 +7,7 @@
     username = lib.mkOption {
       type = lib.types.singleLineStr;
       readOnly = true;
-      default = "lewis";
+      default = "lewisflude";
       description = "Primary user's username";
     };
 
