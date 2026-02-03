@@ -2261,14 +2261,17 @@
         "signal-palette": "signal-palette"
       },
       "locked": {
-        "lastModified": 1770140008,
-        "narHash": "sha256-B1MTHIkVnx6gSYvbWCLY5X5QfDwYnBDpO7mLxC2ZiUc=",
-        "path": "/Users/lewisflude/Code/signal-nix",
-        "type": "path"
+        "lastModified": 1770139991,
+        "narHash": "sha256-wkwJ6RJY21tApySfT3oLwL6lA0wREJtv9hN/UvIm2V4=",
+        "owner": "lewisflude",
+        "repo": "signal-nix",
+        "rev": "7d8c9c8721c4accb34bb754a8b772a76e8b3dbc4",
+        "type": "github"
       },
       "original": {
-        "path": "/Users/lewisflude/Code/signal-nix",
-        "type": "path"
+        "owner": "lewisflude",
+        "repo": "signal-nix",
+        "type": "github"
       }
     },
     "signal-palette": {

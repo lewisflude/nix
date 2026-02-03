@@ -107,7 +107,7 @@
       url = "github:nutsalhan87/nix-colorizer";
     };
     signal-nix = {
-      url = "path:/Users/lewisflude/Code/signal-nix";
+      url = "github:lewisflude/signal-nix";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.nix-colorizer.follows = "nix-colorizer";
       inputs.home-manager.follows = "home-manager";

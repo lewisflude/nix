@@ -57,7 +57,7 @@ in
 
       # Termix - Terminal web UI
       virtualisation.oci-containers.containers.termix = {
-        image = "ghcr.io/termix-eu/termix:latest";
+        image = "ghcr.io/lukegus/termix:latest";
         environment = {
           TZ = timezone;
         };
@@ -78,7 +78,7 @@ in
 
       # Profilarr - Profile management
       virtualisation.oci-containers.containers.profilarr = {
-        image = "ghcr.io/santiagosayshey/profilarr:v0.8.3";
+        image = "docker.io/santiagosayshey/profilarr:latest";
         environment = {
           TZ = timezone;
           PUID = toString uid;
@@ -103,7 +103,7 @@ in
 
       # Listenarr - Music tracker
       virtualisation.oci-containers.containers.listenarr = {
-        image = "ghcr.io/listenarr/listenarr:latest";
+        image = "ghcr.io/therobbiedavis/listenarr:canary";
         environment = {
           TZ = timezone;
           PUID = toString uid;
