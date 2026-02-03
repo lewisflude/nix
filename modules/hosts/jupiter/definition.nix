@@ -157,6 +157,7 @@ in
         inputs.dms.homeModules.niri
         inputs.dms-plugin-registry.homeModules.default
         inputs.hyprcursor-phinger.homeManagerModules.hyprcursor-phinger
+        inputs.signal-nix.homeManagerModules.default
 
         # Core home-manager modules
         homeManager.shell

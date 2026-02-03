@@ -106,6 +106,12 @@
     nix-colorizer = {
       url = "github:nutsalhan87/nix-colorizer";
     };
+    signal-nix = {
+      url = "path:/Users/lewisflude/Code/signal-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nix-colorizer.follows = "nix-colorizer";
+      inputs.home-manager.follows = "home-manager";
+    };
     devour-flake = {
       url = "github:srid/devour-flake";
       flake = false;

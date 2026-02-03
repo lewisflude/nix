@@ -46,6 +46,7 @@ in
             # External home-manager modules
             inputs.nix-index-database.homeModules.nix-index
             inputs.sops-nix.homeManagerModules.sops
+            inputs.signal-nix.homeManagerModules.default
 
             # Core home-manager modules
             homeManager.shell
@@ -82,6 +83,9 @@ in
             homeManager.darwinHome
             homeManager.karabiner
             homeManager.audioDarwin
+
+            # Theming (cross-platform signal-nix)
+            homeManager.theming
           ];
         };
 
