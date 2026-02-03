@@ -36,11 +36,27 @@ in
           "jupiter" = {
             hostname = constants.hosts.jupiter.ipv4;
             user = config.home.username;
+            forwardAgent = true;
+            remoteForwards = [
+              {
+                bind.address = "/run/user/1000/gnupg/S.gpg-agent";
+                host.address = "/run/user/1000/gnupg/S.gpg-agent.extra";
+              }
+            ];
+            extraOptions.StreamLocalBindUnlink = "yes";
           };
 
           "mercury" = {
             hostname = constants.hosts.mercury.ipv4;
             user = config.home.username;
+            forwardAgent = true;
+            remoteForwards = [
+              {
+                bind.address = "/run/user/1000/gnupg/S.gpg-agent";
+                host.address = "/run/user/1000/gnupg/S.gpg-agent.extra";
+              }
+            ];
+            extraOptions.StreamLocalBindUnlink = "yes";
           };
         };
       };
