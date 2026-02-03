@@ -51,7 +51,10 @@
       "Bash(top:*)",
       "Bash(ps:*)",
       "Bash(pipewire:*)",
-      "Bash(xrizer --version:*)"
+      "Bash(xrizer --version:*)",
+      "Bash(sudo ls:*)",
+      "Bash(sudo du:*)",
+      "Bash(readlink:*)"
     ],
     "deny": [
       "Read(**/.env)",
