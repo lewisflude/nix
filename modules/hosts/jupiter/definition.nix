@@ -162,6 +162,12 @@ in
 
       # CLI apps and editors
       homeManager.cliApps
+      homeManager.atuin
+      homeManager.direnv
+      homeManager.fzf
+      homeManager.zellij
+      homeManager.gh
+      homeManager.gitCliff
       homeManager.helix
       homeManager.neovim
       homeManager.powerlevel10k
@@ -179,6 +185,8 @@ in
       homeManager.desktopApps
       homeManager.niriHome
       homeManager.flatpakHome
+      homeManager.theming
+      homeManager.developmentTools
 
       # Gaming & VR home-manager modules
       homeManager.gamingHome

@@ -54,6 +54,12 @@ in
 
       # CLI apps and editors
       homeManager.cliApps
+      homeManager.atuin
+      homeManager.direnv
+      homeManager.fzf
+      homeManager.zellij
+      homeManager.gh
+      homeManager.gitCliff
       homeManager.helix
       homeManager.neovim
       homeManager.powerlevel10k
@@ -65,6 +71,7 @@ in
       homeManager.obsidian
       homeManager.cursor
       homeManager.zed
+      homeManager.developmentTools
 
       # Darwin-specific home-manager modules
       homeManager.darwinHome
