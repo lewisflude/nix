@@ -64,9 +64,9 @@ in
         extraConfig = {
           client."92-high-quality-resample"."stream.properties"."resample.quality" = 10;
 
-          # Create stereo null sinks for Apogee routing
+          # Create stereo null sinks and loopback routing for Apogee
           # This solves quickshell crashes caused by Qt FFmpeg plugin not supporting 10-channel layouts
-          # Applications output to these stereo sinks, which can then be routed to the Apogee hardware
+          # Applications output to stereo sinks, which are automatically routed to Apogee hardware
           pipewire."91-null-sinks" = {
             "context.objects" = [
               {
@@ -176,7 +176,7 @@ in
               }
             ];
 
-            # Apogee Symphony Desktop - Force stereo mode
+            # Apogee Symphony Desktop - Use pro-audio profile for full channel access
             "10-apogee-stereo"."monitor.alsa.rules" = [
               {
                 matches = [
@@ -184,16 +184,14 @@ in
                 ];
                 actions.update-props = {
                   "api.alsa.use-acp" = true;
-                  "device.profile" = "output:analog-stereo+input:analog-stereo";
+                  "device.disabled" = false;
                 };
               }
               {
                 matches = [
-                  { "node.name" = "~alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.*"; }
+                  { "node.name" = "~alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output.*"; }
                 ];
                 actions.update-props = {
-                  "audio.channels" = 2;
-                  "audio.position" = "FL,FR";
                   "api.alsa.period-size" = 256;
                   "session.suspend-timeout-seconds" = 0;
                   "priority.session" = audioConstants.priorities.fallback;
@@ -230,6 +228,42 @@ in
                 actions.update-props = {
                   "priority.session" = 90;
                   "node.passive" = false;
+                };
+              }
+            ];
+
+            # Auto-link loopbacks to Apogee hardware
+            "10-apogee-loopback-links"."monitor.rules" = [
+              {
+                # Link game loopback output to Apogee hardware
+                matches = [ { "node.name" = "output.apogee_game_loopback"; } ];
+                actions.update-props = {
+                  "node.autoconnect" = true;
+                  "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0";
+                };
+              }
+              {
+                # Link game loopback input to game bridge monitor
+                matches = [ { "node.name" = "input.apogee_game_loopback"; } ];
+                actions.update-props = {
+                  "node.autoconnect" = true;
+                  "node.target" = "apogee_stereo_game_bridge";
+                };
+              }
+              {
+                # Link default loopback output to Apogee hardware
+                matches = [ { "node.name" = "output.apogee_default_loopback"; } ];
+                actions.update-props = {
+                  "node.autoconnect" = true;
+                  "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0";
+                };
+              }
+              {
+                # Link default loopback input to default bridge monitor
+                matches = [ { "node.name" = "input.apogee_default_loopback"; } ];
+                actions.update-props = {
+                  "node.autoconnect" = true;
+                  "node.target" = "apogee_stereo_default";
                 };
               }
             ];
@@ -424,6 +458,29 @@ in
         "snd_seq_midi"
         "snd_seq_midi_event"
       ];
+
+      # Script to link stereo bridges directly to Apogee hardware
+      systemd.user.services.apogee-audio-links = {
+        description = "Link Apogee Stereo Bridges to Hardware";
+        after = [ "wireplumber.service" ];
+        wantedBy = [ "pipewire.service" ];
+
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${pkgs.writeShellScript "apogee-link" ''
+            sleep 3  # Wait for WirePlumber
+
+            # Link game bridge directly to Apogee (channels 0-1)
+            ${pkgs.pipewire}/bin/pw-link apogee_stereo_game_bridge:monitor_FL alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX0 || true
+            ${pkgs.pipewire}/bin/pw-link apogee_stereo_game_bridge:monitor_FR alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX1 || true
+
+            # Link default bridge to Apogee (channels 2-3)
+            ${pkgs.pipewire}/bin/pw-link apogee_stereo_default:monitor_FL alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX2 || true
+            ${pkgs.pipewire}/bin/pw-link apogee_stereo_default:monitor_FR alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX3 || true
+          ''}";
+        };
+      };
     };
 
   # ==========================================================================

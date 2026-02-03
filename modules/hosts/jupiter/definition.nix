@@ -199,8 +199,8 @@ in
         homeManager.developmentTools
 
         # Gaming & VR home-manager modules
-        homeManager.gamingHome
-        homeManager.vrHome
+        homeManager.gaming
+        homeManager.vr
 
         # Audio home-manager module
         homeManager.audio

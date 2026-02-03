@@ -1,5 +1,5 @@
 {
-  username = "lewis";
+  username = "lewisflude";
   useremail = "lewis@lewisflude.com";
   system = "x86_64-linux";
   hostname = "jupiter";
@@ -170,7 +170,7 @@
         # WebUI Configuration
         webUI = {
           bindAddress = "*"; # Accessible from any interface (192.168.10.210:8080)
-          username = "lewis";
+          username = "lewisflude";
           password = "@ByteArray(J5lri+TddZR2AJqNVPndng==:no5T50n4CD9peISk6jZQ+Cb8qzv6DoV2MtOxE2oErywXVFngVDq/eySGpoNjUCFOHFdbifjwwHI4jlV2LH4ocQ==)";
           alternativeUIEnabled = true;
           # rootFolder will default to vuetorrent package path when alternativeUIEnabled is true

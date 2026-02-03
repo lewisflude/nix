@@ -24,12 +24,6 @@ in
           dedicatedServer.openFirewall = true;
           extraCompatPackages = [ pkgs.proton-ge-bin ];
 
-          # Add packages to Steam's FHS environment for VR
-          extraPackages = [
-            pkgs.xrizer-multilib
-            pkgs.SDL2 # Required by SteamVR
-          ];
-
           # mkDefault allows VR module to override
           package = lib.mkDefault (
             pkgs.steam.override {
@@ -38,6 +32,29 @@ in
                 # Required for OpenXR games to find WiVRn runtime
                 export PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1
               '';
+
+              # Add packages to Steam's FHS environment
+              # - VR support (xrizer-multilib, SDL2)
+              # - Gamescope dependencies (Xorg libraries)
+              # See: https://github.com/NixOS/nixpkgs/issues/214275
+              extraPkgs =
+                pkgs': with pkgs'; [
+                  # VR support
+                  xrizer-multilib
+                  SDL2
+
+                  # Gamescope within Steam (for launch options)
+                  xorg.libXcursor
+                  xorg.libXi
+                  xorg.libXinerama
+                  xorg.libXScrnSaver
+                  libpng
+                  libpulseaudio
+                  libvorbis
+                  stdenv.cc.cc.lib # Provides libstdc++.so.6
+                  libkrb5
+                  keyutils
+                ];
             }
           );
         };
@@ -88,8 +105,16 @@ in
   # Home-Manager User Configuration
   # ==========================================================================
   flake.modules.homeManager.gaming =
-    { pkgs, lib, ... }:
+    {
+      pkgs,
+      lib,
+      osConfig ? { },
+      ...
+    }:
     let
+      gamingEnabled = osConfig.host.features.gaming.enable or false;
+      steamEnabled = osConfig.host.features.gaming.steam or false;
+
       # Helper script to install Media Foundation codecs for Proton/Steam games
       install-mf-codecs = pkgs.writeShellApplication {
         name = "install-mf-codecs";
@@ -106,7 +131,7 @@ in
         runtimeInputs = [ pkgs.protontricks ];
       };
     in
-    {
+    lib.mkIf (gamingEnabled && pkgs.stdenv.isLinux) {
       programs.mangohud = {
         enable = true;
         enableSessionWide = false; # Enable per-game via MANGOHUD=1
@@ -118,6 +143,8 @@ in
         pkgs.winetricks
         install-mf-codecs
         pkgs.protonup-qt # Proton version manager GUI
+      ]
+      ++ lib.optionals steamEnabled [
         pkgs.steamcmd # Steam command-line client
         pkgs.steam-run # Steam runtime wrapper
       ];
@@ -135,6 +162,7 @@ in
       systemd.user.services.steam-bwrap-setup = {
         Unit = {
           Description = "Replace Steam's bubblewrap with patched version for VR";
+          Before = [ "steam-autostart.service" ];
         };
         Service = {
           Type = "oneshot";
@@ -163,6 +191,25 @@ in
             done
           '';
         };
+      };
+
+      # Auto-start Steam on login (when steam feature is enabled)
+      systemd.user.services.steam-autostart = lib.mkIf steamEnabled {
+        Unit = {
+          Description = "Auto-start Steam on login";
+          After = [
+            "graphical-session.target"
+            "steam-bwrap-setup.service"
+          ];
+          PartOf = [ "graphical-session.target" ];
+        };
+        Service = {
+          Type = "simple";
+          ExecStart = "${pkgs.steam}/bin/steam -silent";
+          Restart = "on-failure";
+          RestartSec = "5s";
+        };
+        Install.WantedBy = [ "graphical-session.target" ];
       };
     };
 }
