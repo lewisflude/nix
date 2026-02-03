@@ -40,7 +40,7 @@ let
           docker = packageSets.dockerTools;
           kubernetes = packageSets.kubernetesTools;
           vscode = packageSets.editors.vscode;
-          neovim = packageSets.editors.neovim;
+          # neovim managed via programs.neovim in home/common/features/development/default.nix
           helix = packageSets.editors.helix;
         };
       };
@@ -62,7 +62,7 @@ let
           nix = packageSets.nixTools ++ packageSets.languageFormatters.general;
           kubernetes = packageSets.kubernetesTools;
           vscode = packageSets.editors.vscode;
-          neovim = packageSets.editors.neovim;
+          # neovim managed via programs.neovim in home/common/features/development/default.nix
           helix = packageSets.editors.helix;
         };
       }

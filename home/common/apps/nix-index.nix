@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ ... }:
 {
   # Enable nix-index for package search and comma command
   # Usage:
@@ -10,9 +10,6 @@
     enableZshIntegration = true;
   };
 
-  # Use pre-built weekly database (much faster than building yourself)
-  # This provides a ~200MB index updated weekly, saving 30+ minutes of build time
-  imports = [
-    inputs.nix-index-database.homeModules.nix-index
-  ];
+  # Note: nix-index-database.homeModules.nix-index is imported at infrastructure level
+  # in modules/infrastructure/home-manager.nix for the pre-built weekly database
 }

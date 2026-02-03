@@ -1,14 +1,15 @@
 # ZSH Declarative Configuration
 # Single source of truth for all declarative ZSH settings
+# Dendritic pattern: Uses pkgs.stdenv for platform detection instead of hostSystem
 {
   config,
   lib,
   pkgs,
-  hostSystem ? null,
   ...
 }:
 let
-  isLinux = if hostSystem != null then lib.strings.hasSuffix "linux" hostSystem else false;
+  # Use pkgs.stdenv for platform detection instead of hostSystem parameter
+  isLinux = pkgs.stdenv.isLinux;
 in
 {
   programs.zsh = {

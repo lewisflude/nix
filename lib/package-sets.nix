@@ -96,7 +96,7 @@ let
 
     editors = {
       vscode = [ pkgs.vscode ];
-      neovim = [ pkgs.neovim ];
+      # neovim managed via programs.neovim in home/common/features/development/default.nix
       helix = [ pkgs.helix ];
     };
 

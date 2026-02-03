@@ -1,11 +1,13 @@
+# User packages
+# Dendritic pattern: Uses pkgs.llmAgents.* from overlay (provided by llm-agents.nix)
 {
   pkgs,
   lib,
-  inputs,
   ...
 }:
 let
-  llmAgentPkgs = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system} or { };
+  # LLM agent packages from overlay (see overlays/default.nix)
+  llmAgentPkgs = pkgs.llmAgents or { };
 in
 {
   home.packages = [
@@ -23,7 +25,7 @@ in
     pkgs.cursor-cli # provides cursor-agent binary
     pkgs.lefthook # Git hooks manager
 
-    # AI coding agent tools from llm-agents.nix
+    # AI coding agent tools from llm-agents.nix (via overlay)
   ]
   ++ lib.optionals (llmAgentPkgs ? ccusage) [
     # ccusage: Usage analysis tool for Claude Code sessions

@@ -1,10 +1,9 @@
 # Niri Unified Configuration
 # Consolidates: layout, input, animations, startup, and packages
+# Note: awww is provided via home.packages at infrastructure level
 {
   pkgs,
   config,
-  inputs,
-  system,
   ...
 }:
 {
@@ -182,10 +181,9 @@
     # awww wallpaper daemon
     # "An Answer to your Wayland Wallpaper Woes"
     # Set wallpapers with: awww img /path/to/image.png
+    # Note: awww is provided via home.packages at infrastructure level
     {
-      command = [
-        "${inputs.awww.packages.${system}.awww}/bin/awww-daemon"
-      ];
+      command = [ "awww-daemon" ];
     }
 
     # Apply ICC color profile for AW3423DWF monitor

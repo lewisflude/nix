@@ -167,7 +167,11 @@
     inputs@{ self, ... }:
     inputs.flake-parts.lib.mkFlake { inherit inputs self; } {
       imports = [
-        ./flake-parts/core.nix
+        # Dendritic pattern: auto-import all modules
+        # This replaces flake-parts/core.nix - all per-system and flake outputs are in modules/
+        (inputs.import-tree ./modules)
+        # Process-compose needs explicit import (external flake module)
+        inputs.process-compose-flake.flakeModule
         # Disabled: causes "unknown flake output 'topology'" warning
         # inputs.nix-topology.flakeModule
       ];

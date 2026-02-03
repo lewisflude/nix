@@ -1,8 +1,13 @@
+# SSH configuration
+# Dendritic pattern: Import constants directly instead of via extraSpecialArgs
 {
   config,
-  constants,
   ...
 }:
+let
+  # Pure data - can be imported directly
+  constants = import ../../../../modules/_lib/constants.nix;
+in
 {
   programs.ssh = {
     enable = true;

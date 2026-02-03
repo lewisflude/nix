@@ -1,14 +1,15 @@
+# Dank Material Shell configuration
+# Dendritic pattern: Uses pkgs.danksearch from overlay instead of inputs
 {
   lib,
   config,
   pkgs,
-  inputs,
   ...
 }:
 let
-  # Get Dank Linux ecosystem packages from flake inputs
+  # Get Dank Linux ecosystem packages from overlay
   # Note: dgop is already provided by DMS (enableSystemMonitoring = true)
-  danksearch = inputs.danksearch.packages.${pkgs.system}.default or null;
+  danksearch = pkgs.danksearch or null;
 in
 {
   # Install Dank Linux CLI tools

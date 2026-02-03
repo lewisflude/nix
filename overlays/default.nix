@@ -61,14 +61,22 @@ in
 
   # LLM agents - use pre-built binaries from llm-agents.nix
   # Daily builds with binary cache at https://cache.numtide.com
+  # Packages available as pkgs.llmAgents.{claude-code, gemini-cli, ccusage, etc.}
   llm-agents =
     _final: _prev:
-    if
-      inputs ? llm-agents && inputs.llm-agents ? packages && inputs.llm-agents.packages ? ${system}
-    then
-      inputs.llm-agents.packages.${system}
-    else
-      { };
+    let
+      llmAgentPkgs =
+        if inputs ? llm-agents && inputs.llm-agents ? packages && inputs.llm-agents.packages ? ${system}
+        then inputs.llm-agents.packages.${system}
+        else { };
+    in
+    {
+      # Namespaced under llmAgents to avoid polluting top-level pkgs
+      llmAgents = llmAgentPkgs;
+      # Also provide direct access for backwards compatibility
+      claude-code = llmAgentPkgs.claude-code or _prev.hello;
+      gemini-cli = llmAgentPkgs.gemini-cli or _prev.hello;
+    };
 
   # OneTBB - Disable tests on i686-linux (32-bit)
   # The onetbb test suite has known flakiness issues on 32-bit systems,
@@ -200,6 +208,20 @@ in
       };
     });
   };
+
+  # Danksearch - search utility from Dank Linux ecosystem
+  danksearch =
+    _final: _prev:
+    if inputs ? danksearch && inputs.danksearch ? packages && inputs.danksearch.packages ? ${system}
+    then { danksearch = inputs.danksearch.packages.${system}.default; }
+    else { };
+
+  # Awww - wallpaper setter for Wayland
+  awww =
+    _final: _prev:
+    if inputs ? awww && inputs.awww ? packages && inputs.awww.packages ? ${system}
+    then { awww = inputs.awww.packages.${system}.default; }
+    else { };
 
   # Community Overlays
   # These provide access to community-maintained packages and bleeding-edge versions

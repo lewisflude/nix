@@ -1,11 +1,13 @@
-{ inputs, system, ... }:
+# Gemini CLI - Google's AI coding assistant
+# Dendritic pattern: Package provided via overlay (pkgs.gemini-cli from llm-agents.nix)
+{ pkgs, ... }:
 
 {
   programs.gemini-cli = {
     enable = true;
 
-    # Use the daily-updated package from the Numtide flake
-    package = inputs.llm-agents.packages.${system}.gemini-cli;
+    # Package is provided via overlay in overlays/default.nix
+    package = pkgs.gemini-cli;
 
     # Set the default model (Pro is best for complex coding/Nix logic)
     defaultModel = "gemini-1.5-pro";

@@ -2,10 +2,11 @@
   config,
   lib,
   pkgs,
-  system,
   ...
 }:
 let
+  # Dendritic pattern: Use pkgs.stdenv.hostPlatform.system instead of system parameter
+  system = pkgs.stdenv.hostPlatform.system;
   platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem system;
   flakePath = "${platformLib.configDir config.home.username}/nix";
 in

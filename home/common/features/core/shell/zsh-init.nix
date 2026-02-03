@@ -19,34 +19,31 @@ in
   # All init scripts are pre-generated at Nix build time to avoid runtime eval
   # This saves 50-100ms on every shell startup
 
+  # Note: Using .source instead of .text = builtins.readFile to avoid
+  # requiring derivation build during cross-platform evaluation
+
   home.file.".config/zsh/zoxide-init.zsh".source = pkgs.runCommand "zoxide-init" { } ''
     ${pkgs.zoxide}/bin/zoxide init zsh --cmd cd > $out
   '';
 
-  home.file.".config/zsh/fzf-init.zsh".text = builtins.readFile (
-    pkgs.runCommand "fzf-init" { } ''
-      ${pkgs.fzf}/bin/fzf --zsh > $out 2>/dev/null || echo "# fzf init" > $out
-    ''
-  );
+  home.file.".config/zsh/fzf-init.zsh".source = pkgs.runCommand "fzf-init" { } ''
+    ${pkgs.fzf}/bin/fzf --zsh > $out 2>/dev/null || echo "# fzf init" > $out
+  '';
 
-  home.file.".config/zsh/direnv-init.zsh".text = builtins.readFile (
-    pkgs.runCommand "direnv-init" { } ''
-      ${pkgs.direnv}/bin/direnv hook zsh > $out
-    ''
-  );
+  home.file.".config/zsh/direnv-init.zsh".source = pkgs.runCommand "direnv-init" { } ''
+    ${pkgs.direnv}/bin/direnv hook zsh > $out
+  '';
 
-  home.file.".config/zsh/atuin-init.zsh".text = builtins.readFile (
-    pkgs.runCommand "atuin-init" { } ''
-      export HOME="$TMPDIR"
-      export ATUIN_CONFIG_DIR="$TMPDIR/.config/atuin"
-      mkdir -p "$ATUIN_CONFIG_DIR"
-      ${pkgs.atuin}/bin/atuin init zsh --disable-up-arrow > $out 2>&1 || {
-        # Fallback: if atuin fails, generate a minimal init script
-        echo "# Atuin init (generated fallback)" > $out
-        echo "export ATUIN_NOBIND=true" >> $out
-      }
-    ''
-  );
+  home.file.".config/zsh/atuin-init.zsh".source = pkgs.runCommand "atuin-init" { } ''
+    export HOME="$TMPDIR"
+    export ATUIN_CONFIG_DIR="$TMPDIR/.config/atuin"
+    mkdir -p "$ATUIN_CONFIG_DIR"
+    ${pkgs.atuin}/bin/atuin init zsh --disable-up-arrow > $out 2>&1 || {
+      # Fallback: if atuin fails, generate a minimal init script
+      echo "# Atuin init (generated fallback)" > $out
+      echo "export ATUIN_NOBIND=true" >> $out
+    }
+  '';
 
   # ════════════════════════════════════════════════════════════════
   # ZSH Initialization Content

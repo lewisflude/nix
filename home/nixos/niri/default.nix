@@ -1,11 +1,11 @@
 # Niri Compositor Configuration - Main File
 # Combines all niri configuration modules
+# Note: inputs-dependent modules (hyprcursor-phinger, awww) are imported at
+# infrastructure level in modules/infrastructure/home-manager.nix
 {
   pkgs,
   config,
   lib,
-  inputs,
-  system,
   osConfig,
   ...
 }:
@@ -23,15 +23,11 @@ let
     inherit
       pkgs
       config
-      inputs
-      system
       ;
   };
 in
 {
-  imports = [
-    inputs.hyprcursor-phinger.homeManagerModules.hyprcursor-phinger
-  ];
+  # Note: hyprcursor-phinger is imported at infrastructure level
 
   # Packages required for niri compositor functionality
   home.packages = [
@@ -54,9 +50,7 @@ in
     # X11 compatibility (see niri docs: XWayland.md)
     pkgs.xwayland-satellite-unstable # XWayland satellite >= 0.7 (auto-managed by niri >= 25.08)
 
-    # Wallpaper
-    inputs.awww.packages.${system}.awww # "An Answer to your Wayland Wallpaper Woes"
-
+    # Note: awww (wallpaper) is imported at infrastructure level
     # Note: xdg-utils is handled in core-tooling.nix
   ];
 

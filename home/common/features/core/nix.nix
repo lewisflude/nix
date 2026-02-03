@@ -1,6 +1,8 @@
+# Nix user configuration
+# Dendritic pattern: Uses osConfig instead of systemConfig
 {
   config,
-  systemConfig,
+  osConfig ? {},
   pkgs,
   lib,
   ...
@@ -18,7 +20,7 @@ let
     : > "$NIX_CONF_FILE"  # Clear file
 
     # Add GitHub token if available
-    SECRET_PATH="${systemConfig.sops.secrets.GITHUB_TOKEN.path or ""}"
+    SECRET_PATH="${osConfig.sops.secrets.GITHUB_TOKEN.path or ""}"
     if [ -n "$SECRET_PATH" ] && [ -r "$SECRET_PATH" ]; then
       GITHUB_TOKEN="$(${pkgs.coreutils}/bin/cat "$SECRET_PATH")"
       if [ -n "$GITHUB_TOKEN" ]; then

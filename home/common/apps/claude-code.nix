@@ -1,23 +1,18 @@
+# Claude Code CLI - agentic coding assistant
+# Dendritic pattern: Uses pkgs.claude-code from overlay (provided by llm-agents.nix)
+# MCP servers configured in home/{nixos,darwin}/mcp.nix
 {
   pkgs,
-  inputs,
   config,
   ...
 }:
 {
-  # Claude Code CLI - agentic coding assistant
-  # Uses llm-agents.nix for daily updates and pre-built binaries
-  # MCP servers configured in home/{nixos,darwin}/mcp.nix
-  #
-  # TEMPORARILY DISABLED: Waiting for upstream fix for apple_sdk_11_0 deprecation
-  # See: https://github.com/NixOS/nixpkgs/issues/
-
   programs.claude-code = {
     enable = true;
 
     # Use llm-agents.nix for daily updates and pre-built binaries from Numtide cache
-    # This provides better maintenance and faster builds than claude-code-nix
-    package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
+    # Package is provided via overlay in overlays/default.nix
+    package = pkgs.claude-code;
 
     commands = {
       review = ''

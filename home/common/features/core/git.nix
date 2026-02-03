@@ -1,6 +1,8 @@
+# Git configuration
+# Dendritic pattern: username from config.home.username, useremail from config.programs.git.settings.user.email
+# (set in infrastructure/home-manager.nix auto-config module)
 {
-  username,
-  useremail,
+  config,
   pkgs,
   ...
 }:
@@ -12,10 +14,11 @@
       key = "64CA14D5A2396CC0";
       signByDefault = true;
     };
+    # Use new settings format (git.userName deprecated)
     settings = {
       user = {
-        name = username;
-        email = useremail;
+        name = config.home.username;
+        # email is set via programs.git.settings.user.email in auto-config
         signingkey = "64CA14D5A2396CC0";
       };
 

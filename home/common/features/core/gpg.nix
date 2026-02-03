@@ -2,10 +2,11 @@
   pkgs,
   lib,
   config,
-  system,
   ...
 }:
 let
+  # Dendritic pattern: Use pkgs.stdenv.hostPlatform.system instead of system parameter
+  system = pkgs.stdenv.hostPlatform.system;
   platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem system;
   isDarwin = lib.hasSuffix "-darwin" system;
 

@@ -1,22 +1,24 @@
+# Security feature module
+# Dendritic pattern: Uses osConfig and pkgs.stdenv instead of systemConfig/hostSystem
 {
   lib,
-  systemConfig,
+  osConfig ? {},
   pkgs,
-  hostSystem,
   ...
 }:
 let
-  cfg = systemConfig.host.features.security;
-  platformLib = (import ../../../../lib/functions.nix { inherit lib; }).withSystem hostSystem;
-  inherit (platformLib) isDarwin isLinux;
+  cfg = osConfig.host.features.security or {};
+  # Use pkgs.stdenv for platform detection instead of hostSystem parameter
+  isDarwin = pkgs.stdenv.isDarwin;
+  isLinux = pkgs.stdenv.isLinux;
 in
 {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf (cfg.enable or false) {
     home.packages = [
       pkgs.age
       pkgs.sops
     ]
-    ++ lib.optionals cfg.yubikey (
+    ++ lib.optionals (cfg.yubikey or false) (
       [
         pkgs.yubikey-manager
         pkgs.yubikey-personalization

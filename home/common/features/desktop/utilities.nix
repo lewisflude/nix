@@ -1,15 +1,17 @@
+# Desktop utilities feature module
+# Dendritic pattern: Uses osConfig instead of systemConfig
 {
   lib,
-  systemConfig,
+  osConfig ? {},
   pkgs,
   ...
 }:
 let
-  cfg = systemConfig.host.features.desktop;
+  cfg = osConfig.host.features.desktop or {};
 in
 {
-  config = lib.mkIf cfg.enable {
-    home.packages = lib.optionals cfg.utilities [
+  config = lib.mkIf (cfg.enable or false) {
+    home.packages = lib.optionals (cfg.utilities or false) [
       pkgs.xdg-utils
     ];
   };

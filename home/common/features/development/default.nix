@@ -1,12 +1,14 @@
+# Development tools feature module
+# Dendritic pattern: Uses osConfig instead of systemConfig
 {
   lib,
   pkgs,
-  systemConfig,
+  osConfig ? {},
   ...
 }:
 let
   inherit (lib) mkIf;
-  cfg = systemConfig.host.features.development;
+  cfg = osConfig.host.features.development or {};
   packageSets = import ../../../../lib/package-sets.nix {
     inherit pkgs;
   };
@@ -20,7 +22,7 @@ in
     ./language-tools.nix
   ];
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable or false) {
     home.packages = featureBuilders.mkHomePackages {
       inherit cfg pkgs;
     };

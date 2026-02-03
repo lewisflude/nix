@@ -227,4 +227,30 @@ mkIf vrEnabled {
         runtime = [ "${pkgs.xrizer-multilib}/lib/xrizer" ];
       };
   };
+
+  # Desktop entries for SteamVR URI handlers
+  # Required for setting OpenXR runtime through SteamVR's GUI
+  # Fixes "No apps available" error when clicking vrmonitor://openxr/makedefault
+  # See: https://old.reddit.com/r/linuxmint/comments/1egvi8y/cant_set_openxr_no_apps_available/
+  xdg.desktopEntries = mkIf (vrEnabled && osConfig.host.features.gaming.steam or false) {
+    valve-URI-steamvr = {
+      name = "URI-steamvr";
+      comment = "URI handler for steamvr://";
+      exec = "${config.xdg.dataHome}/Steam/steamapps/common/SteamVR/bin/linux64/vrurlhandler %U";
+      terminal = false;
+      type = "Application";
+      categories = [ "Game" ];
+      mimeType = [ "x-scheme-handler/steamvr" ];
+    };
+
+    valve-URI-vrmonitor = {
+      name = "URI-vrmonitor";
+      comment = "URI handler for vrmonitor://";
+      exec = "${config.xdg.dataHome}/Steam/steamapps/common/SteamVR/bin/linux64/../vrmonitor.sh %U";
+      terminal = false;
+      type = "Application";
+      categories = [ "Game" ];
+      mimeType = [ "x-scheme-handler/vrmonitor" ];
+    };
+  };
 }

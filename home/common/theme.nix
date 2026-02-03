@@ -1,25 +1,22 @@
 {
   pkgs,
   lib,
-  system,
   ...
 }:
 let
-  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
-  # signal-theme now provided by signal flake
+  # Check if we're on Linux using pkgs.stdenv
+  isLinux = pkgs.stdenv.isLinux;
 in
 {
 
-  home = lib.optionalAttrs platformLib.isLinux {
-    packages = [
-      pkgs.nwg-look
+  home.packages = lib.mkIf isLinux [
+    pkgs.nwg-look
 
-      pkgs.iosevka-bin
-      pkgs.nerd-fonts.iosevka
-    ];
-  };
+    pkgs.iosevka-bin
+    pkgs.nerd-fonts.iosevka
+  ];
 
-  gtk = lib.mkIf platformLib.isLinux {
+  gtk = lib.mkIf isLinux {
     enable = true;
     # GTK theme now handled by signal-nix
     # Override signal-nix's GTK defaults with custom settings
@@ -41,7 +38,7 @@ in
 
   # Qt theming handled by signal-nix (via autoEnable)
   # Just enable Qt to activate the integration
-  qt.enable = lib.mkIf platformLib.isLinux true;
+  qt.enable = lib.mkIf isLinux true;
 
-  fonts.fontconfig.enable = lib.mkIf platformLib.isLinux true;
+  fonts.fontconfig.enable = lib.mkIf isLinux true;
 }
