@@ -120,22 +120,6 @@
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    signal = {
-      url = "github:lewisflude/signal-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    signal-ironbar = {
-      url = "github:lewisflude/signal-ironbar";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-      inputs.signal-nix.follows = "signal";
-    };
-    signal-notifications = {
-      url = "github:lewisflude/signal-notifications";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-      inputs.signal-nix.follows = "signal";
-    };
     audio-nix = {
       url = "github:polygon/audio.nix";
       inputs.nixpkgs.follows = "nixpkgs";

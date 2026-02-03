@@ -5,7 +5,7 @@
 let
   inherit (lib) mkOption mkEnableOption types;
   # Dendritic pattern: Access constants via top-level config
-  meta = config.constants or {};
+  meta = config.constants or { };
 in
 {
   # Define host options for both NixOS and Darwin
@@ -57,23 +57,37 @@ in
           enable = mkEnableOption "VR support";
           wivrn = {
             enable = mkEnableOption "WiVRn wireless VR";
-            autoStart = mkEnableOption "auto-start WiVRn" // { default = true; };
-            defaultRuntime = mkEnableOption "set WiVRn as default OpenXR runtime" // { default = true; };
-            openFirewall = mkEnableOption "open firewall for WiVRn" // { default = true; };
+            autoStart = mkEnableOption "auto-start WiVRn" // {
+              default = true;
+            };
+            defaultRuntime = mkEnableOption "set WiVRn as default OpenXR runtime" // {
+              default = true;
+            };
+            openFirewall = mkEnableOption "open firewall for WiVRn" // {
+              default = true;
+            };
           };
           steamvr = mkEnableOption "SteamVR";
           immersed = {
             enable = mkEnableOption "Immersed VR";
-            openFirewall = mkEnableOption "open firewall for Immersed" // { default = true; };
+            openFirewall = mkEnableOption "open firewall for Immersed" // {
+              default = true;
+            };
           };
-          performance = mkEnableOption "VR performance optimizations" // { default = true; };
+          performance = mkEnableOption "VR performance optimizations" // {
+            default = true;
+          };
         };
 
         # Desktop
         desktop = {
-          enable = mkEnableOption "desktop environment" // { default = true; };
+          enable = mkEnableOption "desktop environment" // {
+            default = true;
+          };
           niri = mkEnableOption "Niri Wayland compositor";
-          theming = mkEnableOption "system-wide theming" // { default = true; };
+          theming = mkEnableOption "system-wide theming" // {
+            default = true;
+          };
           utilities = mkEnableOption "desktop utilities";
           autoLogin = {
             enable = mkEnableOption "auto-login";
@@ -81,14 +95,6 @@ in
               type = types.str;
               default = "";
               description = "User to auto-login";
-            };
-          };
-          signalTheme = {
-            enable = mkEnableOption "Signal theme" // { default = true; };
-            mode = mkOption {
-              type = types.enum [ "light" "dark" "auto" ];
-              default = "dark";
-              description = "Color theme mode";
             };
           };
         };
@@ -115,8 +121,12 @@ in
         # Development
         development = {
           enable = mkEnableOption "development tools";
-          nix = mkEnableOption "Nix development" // { default = true; };
-          git = mkEnableOption "Git version control" // { default = true; };
+          nix = mkEnableOption "Nix development" // {
+            default = true;
+          };
+          git = mkEnableOption "Git version control" // {
+            default = true;
+          };
           neovim = mkEnableOption "Neovim editor";
           containers = mkEnableOption "container tools";
         };
@@ -132,7 +142,9 @@ in
         media = {
           enable = mkEnableOption "media features";
           audio = {
-            enable = mkEnableOption "audio support" // { default = true; };
+            enable = mkEnableOption "audio support" // {
+              default = true;
+            };
             realtime = mkEnableOption "realtime audio";
           };
         };
@@ -191,8 +203,12 @@ in
 
       features = {
         desktop = {
-          enable = mkEnableOption "desktop environment" // { default = true; };
-          theming = mkEnableOption "system-wide theming" // { default = true; };
+          enable = mkEnableOption "desktop environment" // {
+            default = true;
+          };
+          theming = mkEnableOption "system-wide theming" // {
+            default = true;
+          };
           utilities = mkEnableOption "desktop utilities";
           niri = mkEnableOption "Niri Wayland compositor"; # NixOS-only, but defined for option consistency
           autoLogin = {
@@ -204,9 +220,15 @@ in
             };
           };
           signalTheme = {
-            enable = mkEnableOption "Signal theme" // { default = true; };
+            enable = mkEnableOption "Signal theme" // {
+              default = true;
+            };
             mode = mkOption {
-              type = types.enum [ "light" "dark" "auto" ];
+              type = types.enum [
+                "light"
+                "dark"
+                "auto"
+              ];
               default = "dark";
               description = "Color theme mode";
             };
@@ -242,8 +264,12 @@ in
         # Development (same as NixOS for cross-platform consistency)
         development = {
           enable = mkEnableOption "development tools";
-          nix = mkEnableOption "Nix development" // { default = true; };
-          git = mkEnableOption "Git version control" // { default = true; };
+          nix = mkEnableOption "Nix development" // {
+            default = true;
+          };
+          git = mkEnableOption "Git version control" // {
+            default = true;
+          };
           neovim = mkEnableOption "Neovim editor";
           containers = mkEnableOption "container tools";
         };
@@ -259,7 +285,9 @@ in
         media = {
           enable = mkEnableOption "media features";
           audio = {
-            enable = mkEnableOption "audio support" // { default = true; };
+            enable = mkEnableOption "audio support" // {
+              default = true;
+            };
             realtime = mkEnableOption "realtime audio";
           };
         };

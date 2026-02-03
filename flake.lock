@@ -904,27 +904,6 @@
         "type": "github"
       }
     },
-    "home-manager_2": {
-      "inputs": {
-        "nixpkgs": [
-          "signal",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1768749864,
-        "narHash": "sha256-EKRMFBLBRCHrFZ5luX85RTnsN3b2q3FjZEi62vXwJBE=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "5148e08046dc8c74c66b8aee4d302a47d6931b56",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "type": "github"
-      }
-    },
     "homebrew-j178": {
       "flake": false,
       "locked": {
@@ -1262,21 +1241,6 @@
       }
     },
     "nix-colorizer": {
-      "locked": {
-        "lastModified": 1750078528,
-        "narHash": "sha256-NuGAJx61f/r0xrpyOTUEsO+MDNpso0qE99k2/apv3as=",
-        "owner": "nutsalhan87",
-        "repo": "nix-colorizer",
-        "rev": "c9ce6c710f4ed749f773104a8092a3e542dd1d7c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nutsalhan87",
-        "repo": "nix-colorizer",
-        "type": "github"
-      }
-    },
-    "nix-colorizer_2": {
       "locked": {
         "lastModified": 1750078528,
         "narHash": "sha256-NuGAJx61f/r0xrpyOTUEsO+MDNpso0qE99k2/apv3as=",
@@ -1903,22 +1867,6 @@
         "type": "github"
       }
     },
-    "nmt": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1705307515,
-        "narHash": "sha256-krVKx3/u1mDo8qe5qylYgmwAmlAPHa1BSPDzxq09FmI=",
-        "owner": "~rycee",
-        "repo": "nmt",
-        "rev": "1562940b7765a32f1987bd9a3ee6a4fa034c9429",
-        "type": "sourcehut"
-      },
-      "original": {
-        "owner": "~rycee",
-        "repo": "nmt",
-        "type": "sourcehut"
-      }
-    },
     "nur": {
       "inputs": {
         "flake-parts": "flake-parts_6",
@@ -2110,9 +2058,6 @@
         "quickshell": "quickshell_2",
         "rust-docs-mcp": "rust-docs-mcp",
         "services-flake": "services-flake",
-        "signal": "signal",
-        "signal-ironbar": "signal-ironbar",
-        "signal-notifications": "signal-notifications",
         "solaar": "solaar",
         "sops-nix": "sops-nix",
         "vpn-confinement": "vpn-confinement"
@@ -2281,97 +2226,6 @@
       "original": {
         "owner": "juspay",
         "repo": "services-flake",
-        "type": "github"
-      }
-    },
-    "signal": {
-      "inputs": {
-        "home-manager": "home-manager_2",
-        "nix-colorizer": "nix-colorizer_2",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "nmt": "nmt",
-        "signal-palette": "signal-palette"
-      },
-      "locked": {
-        "lastModified": 1770031620,
-        "narHash": "sha256-gASqTp/+FHY3N7uiYfw0H7mu9fQJ2h+FTSZWhgJrYSw=",
-        "owner": "lewisflude",
-        "repo": "signal-nix",
-        "rev": "7ef4b37ded5ad2c4df201b31b68b11a360a3502f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "lewisflude",
-        "repo": "signal-nix",
-        "type": "github"
-      }
-    },
-    "signal-ironbar": {
-      "inputs": {
-        "home-manager": [
-          "home-manager"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "signal-nix": [
-          "signal"
-        ]
-      },
-      "locked": {
-        "lastModified": 1769948430,
-        "narHash": "sha256-8CdFgRU3TBgFTzw4fz2+xgYnU5Q+arxOkgDlRkiObdg=",
-        "owner": "lewisflude",
-        "repo": "signal-ironbar",
-        "rev": "f354598d22aeb6e12d9274bec6321114196f315a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "lewisflude",
-        "repo": "signal-ironbar",
-        "type": "github"
-      }
-    },
-    "signal-notifications": {
-      "inputs": {
-        "home-manager": [
-          "home-manager"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "signal-nix": [
-          "signal"
-        ]
-      },
-      "locked": {
-        "lastModified": 1769946759,
-        "narHash": "sha256-2M0eoiEeH2IKE6KXm0ye7pG6dyn/a6VgQ6LHzkn+M44=",
-        "owner": "lewisflude",
-        "repo": "signal-notifications",
-        "rev": "a13c8d26df561398707e44d270e24c117c3c89e0",
-        "type": "github"
-      },
-      "original": {
-        "owner": "lewisflude",
-        "repo": "signal-notifications",
-        "type": "github"
-      }
-    },
-    "signal-palette": {
-      "locked": {
-        "lastModified": 1768685232,
-        "narHash": "sha256-0sn0ugGm3Ae8sEZhtpL+gz8fo81D+2x6HH5wBdYpji8=",
-        "owner": "lewisflude",
-        "repo": "signal-palette",
-        "rev": "398cafbf15772892350a3cc822e285842e292388",
-        "type": "github"
-      },
-      "original": {
-        "owner": "lewisflude",
-        "repo": "signal-palette",
         "type": "github"
       }
     },

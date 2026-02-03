@@ -33,11 +33,5 @@
       };
     };
 
-    desktop = {
-      signalTheme = {
-        enable = true;
-        mode = "dark";
-      };
-    };
   };
 }

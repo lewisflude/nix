@@ -25,7 +25,6 @@ in
         inputs.vpn-confinement.nixosModules.default
         inputs.dms.nixosModules.default
         inputs.dms.nixosModules.greeter
-        inputs.signal.nixosModules.default
         inputs.solaar.nixosModules.default
 
         # ═══════════════════════════════════════════════════════════════════════
@@ -159,7 +158,6 @@ in
         inputs.dms.homeModules.default
         inputs.dms.homeModules.niri
         inputs.dms-plugin-registry.homeModules.default
-        inputs.signal.homeManagerModules.default
         inputs.hyprcursor-phinger.homeManagerModules.hyprcursor-phinger
 
         # Core home-manager modules
@@ -229,10 +227,6 @@ in
             autoLogin = {
               enable = true;
               user = username;
-            };
-            signalTheme = {
-              enable = true;
-              mode = "dark";
             };
           };
 

@@ -64,10 +64,6 @@
     desktop = {
       niri = true;
       utilities = true;
-      signalTheme = {
-        enable = true;
-        mode = "dark";
-      };
     };
 
     restic = {
