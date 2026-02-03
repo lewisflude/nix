@@ -38,48 +38,56 @@ in
       # =========================================================================
       # Home-Manager Module Imports (Dendritic: at host level)
       # =========================================================================
-      home-manager.users.${username}.imports = [
-        # External home-manager modules
-        inputs.nix-index-database.homeModules.nix-index
-        inputs.sops-nix.homeManagerModules.sops
+      home-manager.users.${username} =
+        { lib, ... }:
+        {
+          imports = [
+            # External home-manager modules
+            inputs.nix-index-database.homeModules.nix-index
+            inputs.sops-nix.homeManagerModules.sops
 
-        # Core home-manager modules
-        homeManager.shell
-        homeManager.git
-        homeManager.ssh
-        homeManager.gpg
-        homeManager.terminal
-        homeManager.xdg
-        homeManager.nh
-        homeManager.sops
-        homeManager.nixUser
+            # Core home-manager modules
+            homeManager.shell
+            homeManager.git
+            homeManager.ssh
+            homeManager.gpg
+            homeManager.terminal
+            homeManager.xdg
+            homeManager.nh
+            homeManager.sops
+            homeManager.nixUser
 
-        # CLI apps and editors
-        homeManager.cliApps
-        homeManager.atuin
-        homeManager.direnv
-        homeManager.fzf
-        homeManager.zellij
-        homeManager.gh
-        homeManager.git-cliff
-        homeManager.helix
-        homeManager.neovim
-        homeManager.powerlevel10k
-        homeManager.userPackages
-        homeManager.claudeCode
-        homeManager.geminiCli
-        homeManager.yazi
-        homeManager.mpv
-        homeManager.obsidian
-        # homeManager.cursor  # TODO: cursor package not in nixpkgs
-        homeManager.zed
-        homeManager.developmentTools
+            # CLI apps and editors
+            homeManager.cliApps
+            homeManager.atuin
+            homeManager.direnv
+            homeManager.fzf
+            homeManager.zellij
+            homeManager.gh
+            homeManager.git-cliff
+            homeManager.helix
+            homeManager.neovim
+            homeManager.powerlevel10k
+            homeManager.userPackages
+            homeManager.claudeCode
+            homeManager.geminiCli
+            homeManager.yazi
+            homeManager.mpv
+            homeManager.obsidian
+            # homeManager.cursor  # TODO: cursor package not in nixpkgs
+            homeManager.zed
+            homeManager.developmentTools
 
-        # Darwin-specific home-manager modules
-        homeManager.darwinHome
-        homeManager.karabiner
-        homeManager.audioDarwin
-      ];
+            # Darwin-specific home-manager modules
+            homeManager.darwinHome
+            homeManager.karabiner
+            homeManager.audioDarwin
+          ];
+
+          # Override for macOS system username (different from config username)
+          home.username = lib.mkForce "lewisflude";
+          home.homeDirectory = lib.mkForce "/Users/lewisflude";
+        };
 
       # =========================================================================
       # Host Identity
@@ -117,7 +125,8 @@ in
       system.stateVersion = constants.defaults.darwinStateVersion;
 
       # Primary user for user-specific options (required by nix-darwin)
-      system.primaryUser = username;
+      # On macOS, the actual system user is "lewisflude"
+      system.primaryUser = "lewisflude";
 
       # =========================================================================
       # macOS System Preferences
