@@ -1,76 +1,87 @@
-# CLI applications configuration
-# Dendritic pattern: Full implementation as flake.modules.homeManager.cliApps
-# Combines: atuin, bat, direnv, eza, fzf, ripgrep, jq, tealdeer, zellij
+# Simple CLI applications - Tools with minimal configuration
+# Complex CLI apps with extensive configuration are in separate modules
 { config, ... }:
 {
-  flake.modules.homeManager.cliApps = { lib, pkgs, config, ... }: {
-    programs.atuin = {
-      enable = true;
-      enableZshIntegration = true;
-      flags = [ "--disable-up-arrow" ];
-      settings = { sync_frequency = "5m"; };
-    };
+  flake.modules.homeManager.cliApps =
+    { lib, pkgs, ... }:
+    {
+      # JSON processor
+      programs.jq.enable = true;
 
-    programs.bat.enable = true;
+      # Cat replacement with syntax highlighting
+      programs.bat.enable = true;
 
-    programs.direnv = {
-      enable = true;
-      enableZshIntegration = false; # Using cached init script for performance
-      nix-direnv.enable = true;
-    };
-
-    programs.eza = {
-      enable = true;
-      enableZshIntegration = true;
-      colors = "auto";
-      git = true;
-      icons = "auto";
-      extraOptions = [ "--header" "--group-directories-first" ];
-    };
-
-    programs.fzf = {
-      enable = true;
-      enableZshIntegration = true;
-      defaultOptions = [ "--height 40%" "--border" ];
-      defaultCommand = "${lib.getExe pkgs.fd} --hidden --strip-cwd-prefix --exclude .git";
-      fileWidgetCommand = "${lib.getExe pkgs.fd} --type f --hidden --strip-cwd-prefix --exclude .git";
-    };
-
-    programs.ripgrep = {
-      enable = true;
-      arguments = [ "--max-columns-preview" "--colors=line:style:bold" ];
-    };
-
-    programs.jq.enable = true;
-
-    programs.tealdeer = {
-      enable = true;
-      settings = {
-        display = { compact = true; };
-        updates = { auto_update = true; };
+      # Modern ls replacement
+      programs.eza = {
+        enable = true;
+        enableZshIntegration = true;
+        colors = "auto";
+        git = true;
+        icons = "auto";
+        extraOptions = [
+          "--header"
+          "--group-directories-first"
+        ];
       };
-    };
 
-    programs.zellij = {
-      enable = true;
-      enableZshIntegration = false;
-      settings = {
-        theme = "catppuccin-mocha";
-        default_shell = "zsh";
-        pane_frames = false;
-        default_layout = "compact";
-        ui.pane_frames.rounded_corners = true;
+      # Ripgrep configuration
+      programs.ripgrep = {
+        enable = true;
+        arguments = [
+          "--max-columns-preview"
+          "--colors=line:style:bold"
+        ];
       };
-    };
 
-    programs.gh = {
-      enable = true;
-      settings = {
-        git_protocol = "ssh";
-        prompt = "enabled";
+      # TLDR pages - simplified man pages
+      programs.tealdeer = {
+        enable = true;
+        enableAutoUpdates = true;
+        settings = {
+          display = {
+            compact = false;
+            use_pager = true;
+          };
+          updates = {
+            auto_update = true;
+          };
+        };
       };
-    };
 
-    programs.htop.enable = true;
-  };
+      # Nix package search and comma command
+      programs.nix-index = {
+        enable = true;
+        enableZshIntegration = true;
+      };
+
+      # AWS CLI
+      programs.awscli.enable = true;
+
+      # System monitoring
+      programs.htop.enable = true;
+      programs.btop.enable = true;
+
+      # Core utilities and tooling
+      home.packages = [
+        # Essentials
+        pkgs.curl
+        pkgs.tree
+        pkgs.ouch # Archive extraction
+
+        # Nix Power Tools
+        pkgs.nix-output-monitor
+        pkgs.nix-tree
+        pkgs.comma
+
+        # Modern Nix Dev Flow
+        pkgs.nix-init
+        pkgs.nurl
+        pkgs.nix-diff
+
+        # Workflow
+        pkgs.cocogitto
+        pkgs.yaml-language-server
+      ]
+      ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.libnotify ];
+    };
 }
