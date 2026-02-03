@@ -30,6 +30,7 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         darwin.shell
         darwin.audio
+        darwin.apps
       ];
 
       # Required for Darwin
@@ -153,18 +154,6 @@ in
         enableRosetta = true;
         user = "lewisflude";
         autoMigrate = true;
-      };
-
-      homebrew = {
-        enable = true;
-        onActivation = {
-          cleanup = "zap";
-          autoUpdate = true;
-          upgrade = true;
-        };
-        casks = [
-          "ghostty"
-        ];
       };
     };
 }
