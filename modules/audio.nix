@@ -10,8 +10,11 @@ in
   # ==========================================================================
   # NixOS System Configuration
   # ==========================================================================
-  flake.modules.nixos.audio = { pkgs, lib, config, ... }:
+  flake.modules.nixos.audio = nixosArgs:
   let
+    pkgs = nixosArgs.pkgs;
+    lib = nixosArgs.lib;
+    nixosConfig = nixosArgs.config;
     inherit (lib) mkDefault optional;
 
     # Default latency settings (can be overridden by hosts)
@@ -272,7 +275,7 @@ in
                   };
                 }
               ]
-              ++ optional (config.services.sunshine.enable or false) {
+              ++ optional (nixosConfig.services.sunshine.enable or false) {
                 # Sunshine virtual sink - only when Sunshine is enabled
                 matches = [ { "node.name" = audioConstants.virtualSinks.sunshineStereo; } ];
                 actions.update-props."priority.session" = audioConstants.priorities.sunshine;
@@ -282,7 +285,7 @@ in
               let
                 # Route games to Sunshine when streaming, gaming bridge otherwise
                 gameRoutingTarget =
-                  if (config.services.sunshine.enable or false) then
+                  if (nixosConfig.services.sunshine.enable or false) then
                     audioConstants.virtualSinks.sunshineStereo
                   else
                     audioConstants.virtualSinks.gamingBridge;

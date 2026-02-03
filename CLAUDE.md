@@ -18,7 +18,7 @@ Instead, suggest commands for the user to run manually.
 
 **Guidelines:**
 
-- **Never proactively create** `.md` files in `docs/` or `.sh` files in `scripts/`
+- **Never proactively create** `.md` files or `.sh` files in `scripts/`
 - **Ask permission first** if the user's request implies creating new docs or scripts
 - **Use existing documentation** - update existing files rather than creating new ones
 - **Prefer inline documentation** in code comments over separate doc files
@@ -29,16 +29,42 @@ Instead, suggest commands for the user to run manually.
 - User explicitly says "create a script to..." or "write documentation for..."
 - Task absolutely requires a new file and no existing file can be updated
 
-## Repository Structure
+## Dendritic Pattern Architecture
 
-This is a cross-platform Nix configuration supporting:
+This repository follows the **dendritic pattern** where every `.nix` file (except `flake.nix`) is a flake-parts module. See `DENDRITIC_SOURCE_OF_TRUTH.md` for the complete pattern documentation.
 
-- **NixOS** (Linux) - hosts defined in `hosts/`
-- **nix-darwin** (macOS) - hosts defined in `hosts/`
-- **Home Manager** - user configuration in `home/`
-- **Modules** - system-level modules in `modules/`
-- **POG Scripts** - CLI tools in `pkgs/pog-scripts/` (run with `nix run .#<name>`)
-- **Shell Scripts** - utility scripts in `scripts/`
+### Key Concepts
+
+1. **Every file is a top-level module** - All `.nix` files under `modules/` are flake-parts modules
+2. **Two levels of configuration**:
+   - **Top-level** (flake-parts): Where you define `flake.modules.*` and access `config.*`
+   - **Platform-level** (NixOS/Darwin/home-manager): The actual system configurations stored as values
+3. **Value sharing via top-level config** - No `specialArgs`, access values via `config.*`
+4. **Hosts compose features** - All imports happen at host level, not in infrastructure
+
+### Repository Structure
+
+```
+.
+├── flake.nix                    # Entry point: uses import-tree ./modules
+└── modules/
+    ├── infrastructure/          # Declares options + transforms to flake outputs
+    │   ├── flake-parts.nix      # Enables flake.modules.* option
+    │   ├── nixos.nix            # configurations.nixos -> nixosConfigurations
+    │   ├── darwin.nix           # configurations.darwin -> darwinConfigurations
+    │   └── home-manager.nix     # Home-manager base configuration
+    ├── hosts/                   # Host definitions (compose features)
+    │   ├── jupiter/
+    │   │   └── definition.nix   # NixOS desktop workstation
+    │   └── mercury/
+    │       └── definition.nix   # nix-darwin MacBook
+    ├── core/                    # Core system modules
+    ├── desktop/                 # Desktop environment modules
+    ├── hardware/                # Hardware support modules
+    ├── constants.nix            # Centralized constants (config.constants)
+    ├── meta.nix                 # username, useremail options
+    └── <feature>.nix            # Feature modules (flake.modules.*)
+```
 
 ## Available Tools
 
@@ -81,65 +107,109 @@ See `scripts/README.md` for detailed documentation of each script.
 
 1. **Always check existing patterns** before suggesting new code
 2. **Use templates** when creating modules: `nix run .#new-module`
-3. **Follow conventional commits** - see `docs/DX_GUIDE.md`
+3. **Follow conventional commits** for git messages
 4. **Format code** using `nix fmt` or `treefmt`
 5. **Check for existing modules** before creating new ones
-6. **Document changes** in relevant documentation files
+6. **Read `DENDRITIC_SOURCE_OF_TRUTH.md`** for architecture guidance
 
 ## Common Tasks
 
 ### Adding a Package
 
-- Check if it exists in `home/common/apps/` or `modules/nixos/features/`
-- Use feature-based configuration when appropriate
-- See `docs/FEATURES.md` for feature patterns
+1. Check if a relevant feature module exists in `modules/`
+2. Add to appropriate `flake.modules.nixos.*` or `flake.modules.homeManager.*`
+3. Import the module in the host definition (`modules/hosts/<hostname>/definition.nix`)
 
 ### Creating a Module
 
-- Use `nix run .#new-module` for scaffolding
-- Follow naming conventions in `docs/reference/architecture.md`
-- Add documentation to module options
+Follow the dendritic pattern:
+
+```nix
+# modules/my-feature.nix
+{ config, ... }:
+let
+  constants = config.constants;  # Access top-level constants
+in
+{
+  # NixOS system configuration
+  flake.modules.nixos.myFeature = { pkgs, lib, ... }: {
+    # Platform-level NixOS config here
+    services.myService.enable = true;
+  };
+
+  # Home-manager user configuration (optional)
+  flake.modules.homeManager.myFeature = { pkgs, ... }: {
+    # Platform-level home-manager config here
+    home.packages = [ pkgs.myApp ];
+  };
+}
+```
 
 ### Updating Dependencies
 
 - Use `nix run .#update-all` to update everything
 - Or manually: `nix flake update`
 
-## Module Placement Guidelines
+## Module Guidelines (Dendritic Pattern)
 
-When creating or modifying modules, follow these rules to maintain proper separation between home-manager and system configuration:
+### Understanding the Two Scopes
 
-### System-Level (NixOS/nix-darwin)
+The canonical pattern uses a named parameter (like `nixosArgs`) to avoid shadowing:
 
-Place in `modules/nixos/` or `modules/darwin/`:
+```nix
+# modules/shell.nix (canonical pattern)
+{ config, lib, ... }:         # ← Top-level (flake-parts) config
+{
+  flake.modules.nixos.shell = nixosArgs: {
+    #                         ^^^^^^^^^
+    #                         Named parameter for platform-level args
+    programs.fish.enable = true;
+    users.users.${config.username}.shell = nixosArgs.config.programs.fish.package;
+    #              ^^^^^^^^^^^^^^              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    #              Top-level config            Platform config (NixOS)
+    #              (from outer scope)          (via named parameter)
+  };
+}
+```
 
-**Required for System Level**:
+**Key insight**: Use `nixosArgs` (or similar) as the parameter name to access platform config while keeping `config` from outer scope available.
 
+**Alternative** - omit platform config if not needed:
+
+```nix
+{ config, ... }:              # ← Top-level config (outer scope)
+{
+  flake.modules.nixos.shell = { pkgs, ... }: {
+    users.users.${config.username}.shell = pkgs.fish;  # ✅ Uses outer config
+  };
+}
+```
+
+**Anti-pattern** - shadowing config:
+
+```nix
+{ config, ... }:
+{
+  flake.modules.nixos.shell = { config, pkgs, ... }: {
+    #                           ^^^^^^ SHADOWS outer config!
+    users.users.${config.username}.shell = pkgs.fish;  # ❌ config is NixOS here
+  };
+}
+```
+
+### System vs Home-Manager Configuration
+
+**System-level** (`flake.modules.nixos.*` or `flake.modules.darwin.*`):
 - System services (systemd, launchd)
 - Kernel modules and drivers
 - Hardware configuration
 - System daemons (running as root)
-- Container runtimes (Docker daemon, Podman system service)
+- Container runtimes
 - Graphics drivers
 - Network configuration (system-wide)
 - Boot configuration
 
-**Examples**:
-
-```nix
-# ✅ CORRECT: modules/nixos/features/virtualisation.nix
-virtualisation.podman.enable = true;
-
-# ✅ CORRECT: modules/nixos/features/desktop/graphics.nix
-hardware.graphics.extraPackages = [ pkgs.mesa ];
-```
-
-### Home-Manager Level
-
-Place in `home/common/apps/` or `home/{nixos,darwin}/`:
-
-**Required for Home-Manager**:
-
+**Home-manager** (`flake.modules.homeManager.*`):
 - User applications and CLI tools
 - User services (systemd --user)
 - Dotfiles and user configuration
@@ -149,102 +219,111 @@ Place in `home/common/apps/` or `home/{nixos,darwin}/`:
 - Shell configuration
 - Editor configurations
 
-**Examples**:
+### Example: Cross-Platform Feature Module
 
 ```nix
-# ✅ CORRECT: home/nixos/hardware-tools/audio.nix
-home.packages = [ pkgs.pwvucontrol pkgs.playerctl ];
+# modules/audio.nix - Single file with both NixOS and home-manager config
+{ config, ... }:
+let
+  constants = config.constants;
+in
+{
+  # NixOS system audio
+  flake.modules.nixos.audio = { pkgs, lib, ... }: {
+    services.pipewire.enable = true;
+    security.rtkit.enable = true;
+  };
 
-# ✅ CORRECT: home/common/apps/helix.nix
-programs.helix.enable = true;
+  # Home-manager audio tools
+  flake.modules.homeManager.audio = { pkgs, ... }: {
+    home.packages = [ pkgs.pwvucontrol pkgs.pavucontrol ];
+  };
+}
+```
+
+### Accessing Constants
+
+Constants are defined as a top-level option in `modules/constants.nix`:
+
+```nix
+# ✅ CORRECT - Access via top-level config
+{ config, ... }:
+let
+  constants = config.constants;
+in
+{
+  flake.modules.nixos.jellyfin = { ... }: {
+    services.jellyfin.port = constants.ports.services.jellyfin;
+  };
+}
+```
+
+```nix
+# ❌ WRONG - Don't import directly
+let
+  constants = import ../lib/constants.nix;  # Anti-pattern!
+in
 ```
 
 ### Common Antipatterns to Avoid
 
-#### ❌ WRONG: Container Tools in Home-Manager
+#### ❌ Using `with pkgs;`
 
 ```nix
-# ❌ WRONG - Don't do this
-home.packages = [ pkgs.podman pkgs.podman-compose ];
-```
-
-**Fix**: Container runtimes belong at system-level.
-
-#### ❌ WRONG: System Packages Duplicated in Home
-
-```nix
-# ❌ WRONG - Don't do this
-home.packages = [ pkgs.vulkan-tools pkgs.mesa-demos ];
-```
-
-**Fix**: Graphics libraries should only be in system config.
-
-#### ❌ WRONG: Hardcoded Values in Modules
-
-```nix
-# ❌ WRONG - Don't do this
-time.timeZone = "Europe/London";
-```
-
-**Fix**: Use per-host configuration or constants from `lib/constants.nix`.
-
-#### ❌ WRONG: Using 'with pkgs;'
-
-```nix
-# ❌ WRONG - Antipattern
+# ❌ WRONG
 home.packages = with pkgs; [ curl wget tree ];
+
+# ✅ CORRECT
+home.packages = [ pkgs.curl pkgs.wget pkgs.tree ];
 ```
 
-**Fix**: Use explicit package references:
+#### ❌ Using specialArgs
 
 ```nix
-# ✅ CORRECT - Modern pattern
-home.packages = [ pkgs.curl pkgs.wget pkgs.tree ];
+# ❌ WRONG - Anti-pattern in dendritic
+lib.nixosSystem {
+  specialArgs = { inherit inputs; };
+}
+
+# ✅ CORRECT - Access via top-level config
+{ config, inputs, ... }:
+{
+  flake.modules.nixos.myFeature = { ... }: {
+    # inputs available from outer scope
+  };
+}
+```
+
+#### ❌ Importing modules in infrastructure
+
+```nix
+# ❌ WRONG - Infrastructure should only transform
+config.flake.nixosConfigurations = lib.mapAttrs
+  (name: { module }: lib.nixosSystem {
+    modules = [
+      module
+      config.flake.modules.nixos.admin  # NO!
+    ];
+  })
+  config.configurations.nixos;
+
+# ✅ CORRECT - Hosts import features
+# modules/hosts/jupiter/definition.nix
+configurations.nixos.jupiter.module = {
+  imports = [ nixos.admin nixos.shell ];  # YES!
+};
 ```
 
 ### Decision Checklist
 
 When adding a package or service:
 
-1. **Does it require root/system privileges?** → System module
-2. **Does it run as a system service?** → System module
-3. **Is it hardware configuration?** → System module
-4. **Is it a user application?** → Home-Manager module
-5. **Does it configure dotfiles?** → Home-Manager module
-6. **Is it a tray applet?** → Home-Manager module
-
-### Module Organization
-
-- **System Services**: `modules/nixos/services/` or `modules/darwin/`
-- **User Applications**: `home/common/apps/` or `home/{nixos,darwin}/apps/`
-- **Features**: `modules/shared/features/` or `modules/nixos/features/`
-- **Hardware**: `modules/nixos/hardware/`
-
-### Using New Infrastructure
-
-**Constants**:
-
-```nix
-let
-  constants = import ../lib/constants.nix;
-in
-{
-  services.myService.port = constants.ports.services.myService;
-}
-```
-
-**Validators**:
-
-```nix
-let
-  validators = import ../lib/validators.nix { inherit lib; };
-in
-{
-  assertions = [
-    (validators.assertValidPort cfg.port "service-name")
-  ];
-}
-```
+1. **Does it require root/system privileges?** → `flake.modules.nixos.*`
+2. **Does it run as a system service?** → `flake.modules.nixos.*`
+3. **Is it hardware configuration?** → `flake.modules.nixos.*`
+4. **Is it a user application?** → `flake.modules.homeManager.*`
+5. **Does it configure dotfiles?** → `flake.modules.homeManager.*`
+6. **Is it a tray applet?** → `flake.modules.homeManager.*`
 
 ## MCP (Model Context Protocol) Servers
 
@@ -275,81 +354,34 @@ This configuration includes built-in MCP server support for AI coding tools (Cla
 
 ### Configuration
 
-MCP servers are configured using the built-in `programs.mcp` home-manager option and automatically deployed to `~/.config/mcp/mcp.json`. AI tools like Claude Code and Cursor can read this configuration.
-
-### Enabling/Disabling Servers
-
-Override in `home/nixos/mcp.nix` or `home/darwin/mcp.nix`:
-
-```nix
-programs.mcp.servers = {
-  # Disable a default server
-  sqlite.enabled = false;
-
-  # Enable a server that requires secrets
-  github.enabled = true;  # Requires GITHUB_TOKEN in SOPS
-
-  # Add a custom server
-  my-server = {
-    command = "${pkgs.nodejs}/bin/npx";
-    args = [ "-y" "my-mcp-server" ];
-    secret = "MY_API_KEY";  # Optional
-  };
-};
-```
+MCP servers are configured in feature modules and automatically deployed to `~/.config/mcp/mcp.json`. AI tools like Claude Code and Cursor can read this configuration.
 
 ### Enabling Servers with Secrets
 
 To enable servers that require API keys:
 
 1. **Add secret to SOPS**: Edit `secrets/secrets.yaml` with your secret
-2. **Configure secret for users**: In `modules/shared/sops.nix`, add:
-
-   ```nix
-   "MY_SECRET" = {
-     neededForUsers = true;
-     allowUserRead = true;
-   };
-   ```
-
-3. **Enable server**: In `home/{nixos,darwin}/mcp.nix`:
-
-   ```nix
-   programs.mcp.servers.my-server.enabled = true;
-   ```
-
-4. **Rebuild system**: The secret will be available at `/run/secrets-for-users/MY_SECRET`
+2. **Configure secret**: In the relevant module, add SOPS configuration
+3. **Rebuild system**: The secret will be available at `/run/secrets-for-users/MY_SECRET`
 
 ## Documentation
 
-### Core Documentation
-- **Architecture**: `docs/reference/architecture.md` - System architecture and design patterns
-- **Features**: `docs/FEATURES.md` - Feature system documentation
-- **DX Guide**: `docs/DX_GUIDE.md` - Developer experience and tooling
-- **Known Issues**: `docs/KNOWN_ISSUES.md` - Known issues and workarounds
-- **Refactoring Patterns**: `docs/reference/REFACTORING_EXAMPLES.md` - Antipatterns to avoid
+### Primary Documentation
 
-### Setup Guides
-- **VR**: `docs/WIVRN_VR_SETUP.md` - WiVRn VR setup and configuration
-- **qBittorrent**: `docs/QBITTORRENT_GUIDE.md` - Complete torrent client setup
-- **ProtonVPN**: `docs/PROTONVPN_PORT_FORWARDING_SETUP.md` - VPN port forwarding configuration
-- **SOPS**: `docs/SOPS_GUIDE.md` - Secrets management with SOPS
-- **SSH/YubiKey**: `docs/SSH_YUBIKEY_CONFIGURATION.md` - SSH and hardware key setup
-- **Steam Gaming**: `docs/STEAM_GAMING_GUIDE.md` - Gaming optimizations and launch options
-- **Hytale Server**: `docs/HYTALE_SERVER.md` - Game server configuration
+- **`DENDRITIC_SOURCE_OF_TRUTH.md`** - Complete dendritic pattern documentation (canonical source)
+- **`CLAUDE.md`** - This file (AI assistant guidelines)
+- **`scripts/README.md`** - Shell script documentation
 
-### System Configuration
-- **Audio**: `docs/REALTIME_AUDIO_GUIDE.md` - Professional audio with musnix and PipeWire
-- **Boot**: `docs/BOOT_PERFORMANCE.md` - Boot time optimization
-- **Performance**: `docs/PERFORMANCE_OPTIMIZATIONS.md` - System performance tuning
-- **Systemd**: `docs/SYSTEMD_PATTERNS_NIXOS.md` - Systemd service patterns
-- **ZFS**: `docs/ZFS_OPTIMIZATION_GUIDE.md` - ZFS filesystem optimization
-- **Overlays**: `docs/COMMUNITY_OVERLAYS.md` - Community package overlays
+### Reference
+
+- [Dendritic Pattern (canonical)](https://github.com/mightyiam/dendritic)
+- [Flake Parts Documentation](https://flake.parts)
 
 ## Important Notes
 
 - Never run system rebuild commands
 - Always suggest commands for the user to run
-- Check documentation before suggesting solutions
+- Read `DENDRITIC_SOURCE_OF_TRUTH.md` before making architectural decisions
 - Use existing patterns and conventions
 - Format code before suggesting changes
+- Every `.nix` file is a flake-parts module (dendritic pattern)

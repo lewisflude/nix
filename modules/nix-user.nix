@@ -2,7 +2,14 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.nixUser
 { config, ... }:
 {
-  flake.modules.homeManager.nixUser = { lib, pkgs, config, osConfig ? {}, ... }:
+  flake.modules.homeManager.nixUser =
+    {
+      config,
+      lib,
+      pkgs,
+      osConfig ? { },
+      ...
+    }:
     let
       updateNixConf = pkgs.writeShellScript "update-nix-conf" ''
         set -euo pipefail

@@ -2,7 +2,7 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.mpv
 { config, ... }:
 {
-  flake.modules.homeManager.mpv = { lib, pkgs, config, ... }: {
+  flake.modules.homeManager.mpv = { lib, pkgs, ... }: {
     programs.mpv = {
       enable = true;
       config = {

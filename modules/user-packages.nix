@@ -2,7 +2,13 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.userPackages
 { config, ... }:
 {
-  flake.modules.homeManager.userPackages = { lib, pkgs, config, ... }:
+  flake.modules.homeManager.userPackages =
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     let
       llmAgentPkgs = pkgs.llmAgents or { };
     in

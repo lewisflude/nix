@@ -2,7 +2,7 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.yazi
 { config, ... }:
 {
-  flake.modules.homeManager.yazi = { lib, pkgs, config, ... }: {
+  flake.modules.homeManager.yazi = { lib, pkgs, ... }: {
     programs.yazi = {
       enable = true;
       enableZshIntegration = true;

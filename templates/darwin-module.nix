@@ -1,37 +1,42 @@
+# Darwin-only Module Template - Dendritic Pattern
+# For features that only apply to macOS systems
+{ config, lib, ... }:
+let
+  inherit (config) username;
+  constants = config.constants;
+in
 {
-  pkgs,
-  username,
-  ...
-}:
-{
-  system.defaults = {
-    dock.autohide = true;
-    finder.FXPreferredViewStyle = "clmv";
-  };
-  environment.systemPackages = [
-    pkgs.terminal-notifier
-    pkgs.reattach-to-user-namespace
-  ];
-  homebrew = {
-    enable = true;
-    brews = [
-      "example-brew-package"
+  flake.modules.darwin.FEATURE_NAME = { pkgs, lib, ... }: {
+    # System packages (available to all users)
+    environment.systemPackages = [
+      pkgs.terminal-notifier
+      pkgs.reattach-to-user-namespace
     ];
-    casks = [
-      "example-cask-application"
-    ];
-  };
-  services.example-darwin = {
-    enable = true;
-  };
-  launchd.daemons.example = {
-    serviceConfig = {
-      ProgramArguments = [
-        "/path/to/program"
-        "--user"
-        username
+
+    # Homebrew configuration
+    homebrew = {
+      enable = true;
+      brews = [
+        "example-brew-package"
       ];
-      RunAtLoad = true;
+      casks = [
+        "example-cask-application"
+      ];
+    };
+
+    # System defaults (macOS preferences)
+    system.defaults = {
+      dock.autohide = true;
+      finder.FXPreferredViewStyle = "clmv";
+    };
+
+    # launchd services (macOS equivalent of systemd)
+    launchd.daemons.example = {
+      serviceConfig = {
+        ProgramArguments = [ "${pkgs.example}/bin/example" ];
+        RunAtLoad = true;
+        KeepAlive = true;
+      };
     };
   };
 }

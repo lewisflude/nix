@@ -2,7 +2,7 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.flatpakHome
 { config, ... }:
 {
-  flake.modules.homeManager.flatpakHome = { lib, pkgs, config, ... }:
+  flake.modules.homeManager.flatpakHome = { lib, pkgs, ... }:
     lib.mkIf pkgs.stdenv.isLinux {
       xdg.systemDirs.data = [
         "/var/lib/flatpak/exports/share"

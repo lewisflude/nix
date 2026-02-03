@@ -2,36 +2,77 @@
 description: "Validate Nix module structure and placement"
 ---
 
-# Module Validation
+# Module Validation (Dendritic Pattern)
 
-Validate that a Nix module follows project conventions and is placed in the correct location.
+Validate that a Nix module follows the dendritic pattern and project conventions.
 
 ## What to Check
 
-### 1. Module Placement
+### 1. Is it a Flake-Parts Module?
 
-**System-Level** (must be in `modules/nixos/` or `modules/darwin/`):
-- System services (systemd, launchd)
-- Kernel modules and drivers
-- Hardware configuration
-- Root-level daemons
-- Container runtimes (Podman, Docker daemons)
-- Graphics drivers and system libraries
-- Network configuration
-- Boot loaders
+Every `.nix` file under `modules/` must be a flake-parts module:
 
-**Home-Manager** (must be in `home/common/apps/` or `home/{nixos,darwin}/`):
-- User applications and CLI tools
-- User systemd services (systemd --user)
-- Dotfiles and shell configuration
-- Development tools (LSPs, formatters, linters)
-- Desktop applications
-- User tray applets
-- Editor configurations
+```nix
+# ✅ CORRECT - Flake-parts module
+{ config, lib, ... }:
+{
+  flake.modules.nixos.myFeature = { pkgs, ... }: {
+    # NixOS configuration here
+  };
+}
 
-### 2. Code Style
+# ❌ WRONG - Standalone NixOS module (not dendritic)
+{ config, lib, pkgs, ... }:
+{
+  services.myService.enable = true;
+}
+```
 
-Check for antipatterns:
+### 2. Scope Usage
+
+Check that `config` is accessed from the correct scope:
+
+```nix
+# ✅ CORRECT - Canonical pattern with nixosArgs
+{ config, ... }:
+{
+  flake.modules.nixos.shell = nixosArgs: {
+    users.users.${config.username}.shell = nixosArgs.config.programs.fish.package;
+    #              ^^^^^^^^^^^^^^              ^^^^^^^^^^^^
+    #              Top-level (outer)           Platform config
+  };
+}
+
+# ❌ WRONG - Shadows outer config
+{ config, ... }:
+{
+  flake.modules.nixos.shell = { config, pkgs, ... }: {
+    users.users.${config.username}.shell = pkgs.fish;  # config is NixOS here!
+  };
+}
+```
+
+### 3. Constants Access
+
+```nix
+# ✅ CORRECT - Via top-level config
+{ config, ... }:
+let
+  constants = config.constants;
+in
+{
+  flake.modules.nixos.service = { ... }: {
+    services.app.port = constants.ports.services.app;
+  };
+}
+
+# ❌ WRONG - Direct import (anti-pattern)
+let
+  constants = import ../lib/constants.nix;
+in
+```
+
+### 4. Code Style
 
 **❌ Using `with pkgs;`**:
 ```nix
@@ -42,56 +83,38 @@ home.packages = with pkgs; [ curl wget ];
 home.packages = [ pkgs.curl pkgs.wget ];
 ```
 
-**❌ Hardcoded values**:
+**❌ Using specialArgs**:
 ```nix
 # WRONG
-services.app.port = 8080;
+lib.nixosSystem { specialArgs = { inherit inputs; }; }
 
-# CORRECT
-let
-  constants = import ../lib/constants.nix;
-in
+# CORRECT - Access from outer scope
+{ config, inputs, ... }:
 {
-  services.app.port = constants.ports.services.app;
-}
-```
-
-### 3. Module Structure
-
-Verify proper module structure:
-
-```nix
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.features.myFeature;
-in
-{
-  options.features.myFeature = {
-    enable = lib.mkEnableOption "my feature";
-
-    # Additional options with proper types
-  };
-
-  config = lib.mkIf cfg.enable {
-    # Configuration
+  flake.modules.nixos.myFeature = { ... }: {
+    # inputs available via closure
   };
 }
 ```
 
-### 4. Documentation
+### 5. Module Placement
 
-Check that:
-- Options have `description` fields
-- Complex logic has comments
-- Module purpose is clear
+**System-level** (`flake.modules.nixos.*` or `flake.modules.darwin.*`):
+- System services (systemd, launchd)
+- Kernel modules and drivers
+- Hardware configuration
+- Container runtimes
+- Graphics drivers
+- Network configuration
+- Boot configuration
 
-### 5. Imports
-
-Verify:
-- All imports use correct relative paths
-- No circular dependencies
-- Constants and validators are imported if used
+**Home-manager** (`flake.modules.homeManager.*`):
+- User applications and CLI tools
+- User services (systemd --user)
+- Dotfiles and shell configuration
+- Development tools
+- Desktop applications
+- Editor configurations
 
 ## Usage
 
@@ -101,19 +124,19 @@ Verify:
 
 **Examples**:
 ```
-/validate-module modules/nixos/features/audio.nix
-/validate-module home/common/apps/git.nix
+/validate-module modules/audio.nix
+/validate-module modules/hosts/jupiter/definition.nix
 /validate-module
 ```
 
 ## Your Task
 
 1. **Read the module file** - Use Read tool to examine the module
-2. **Check placement** - Verify it's in the correct directory based on its purpose
-3. **Scan for antipatterns** - Look for `with pkgs;`, hardcoded values, etc.
-4. **Verify structure** - Ensure it follows the standard pattern
-5. **Check documentation** - Verify options have descriptions
-6. **Report findings** - Provide clear feedback on issues found
+2. **Check if dendritic** - Is it a flake-parts module with `flake.modules.*`?
+3. **Check scope usage** - Is `config` accessed correctly (outer vs inner)?
+4. **Scan for antipatterns** - `with pkgs;`, `specialArgs`, direct imports
+5. **Verify placement** - System vs home-manager distinction
+6. **Report findings** - Provide clear feedback
 
 ## Validation Output
 
@@ -137,7 +160,5 @@ Ask the user if they want you to fix identified issues automatically.
 
 ## Related Documentation
 
-- `CLAUDE.md` - Module placement guidelines (section: Module Placement Guidelines)
-- `CONVENTIONS.md` - Coding standards
-- `docs/reference/architecture.md` - Architecture patterns
-- `docs/FEATURES.md` - Feature module conventions
+- `DENDRITIC_SOURCE_OF_TRUTH.md` - Complete dendritic pattern documentation
+- `CLAUDE.md` - Module placement guidelines

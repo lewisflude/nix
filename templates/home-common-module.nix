@@ -1,55 +1,39 @@
-{
-  pkgs,
-  lib,
-  system,
-  config,
-  ...
-}:
+# Home-Manager Only Module Template - Dendritic Pattern
+# For user-level features that don't need system configuration
+{ config, lib, ... }:
 let
-  platformLib = (import ../../lib/functions.nix { inherit lib; }).withSystem system;
+  inherit (config) username;
+  constants = config.constants;
 in
 {
-  home = {
-    packages = [
-      pkgs.git
-      pkgs.curl
-      pkgs.jq
-    ]
-    ++
-      platformLib.platformPackages
-        [
-          pkgs.linux-specific-package
-        ]
-        [
-          pkgs.darwin-specific-package
-        ];
-    file = {
-      ".example-config" = {
-        text = ''
-          setting1=value1
-          setting2=value2
-        '';
-      };
-      "${platformLib.configDir config.home.username}/example/config.toml" = {
-        text = ''
-          config_dir = "${platformLib.configDir config.home.username}"
-          data_dir = "${platformLib.dataDir config.home.username}"
-          cache_dir = "${platformLib.cacheDir config.home.username}"
-        '';
+  flake.modules.homeManager.FEATURE_NAME = { pkgs, lib, config, ... }: {
+    home.packages = [
+      pkgs.example-tool
+      pkgs.example-app
+    ];
+
+    programs.example = {
+      enable = true;
+      settings = {
+        theme = "dark";
+        editor = "hx";
       };
     };
-  };
-  programs.example = {
-    enable = true;
-    settings = {
-      theme = "dark";
-      editor = "vim";
-    }
-    // lib.optionalAttrs platformLib.isDarwin {
-      integration = "macos";
-    }
-    // lib.optionalAttrs platformLib.isLinux {
-      integration = "systemd";
+
+    # XDG-compliant configuration
+    xdg.configFile."example/config.toml" = {
+      text = ''
+        [settings]
+        home = "${config.home.homeDirectory}"
+        config_dir = "${config.xdg.configHome}"
+        data_dir = "${config.xdg.dataHome}"
+        cache_dir = "${config.xdg.cacheHome}"
+      '';
+    };
+
+    # User services (systemd --user on Linux)
+    services.example = lib.mkIf pkgs.stdenv.isLinux {
+      enable = true;
     };
   };
 }

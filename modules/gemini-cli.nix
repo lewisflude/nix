@@ -2,13 +2,19 @@
 # AI coding assistant via Google Gemini
 { config, ... }:
 {
-  flake.modules.homeManager.geminiCli = { lib, pkgs, config, osConfig ? {}, ... }:
+  flake.modules.homeManager.geminiCli =
+    {
+      config,
+      lib,
+      pkgs,
+      osConfig ? { },
+      ...
+    }:
     let
       # Secret helper
-      secretAvailable = name:
-        osConfig ? sops && osConfig.sops ? secrets && osConfig.sops.secrets ? ${name};
-      secretPath = name:
-        if secretAvailable name then osConfig.sops.secrets.${name}.path else "";
+      secretAvailable =
+        name: osConfig ? sops && osConfig.sops ? secrets && osConfig.sops.secrets ? ${name};
+      secretPath = name: if secretAvailable name then osConfig.sops.secrets.${name}.path else "";
 
       # Command configurations
       commands = {
@@ -43,13 +49,13 @@
       };
 
       # Generate command config files
-      mkCommandConfig = name: config: {
+      mkCommandConfig = name: cmdConfig: {
         name = ".gemini/command-${name}.toml";
         value = {
           text = ''
-            model = "${config.model}"
+            model = "${cmdConfig.model}"
             prompt = """
-            ${config.prompt}
+            ${cmdConfig.prompt}
             """
           '';
         };
@@ -67,9 +73,7 @@
       };
 
       # Command configurations
-      home.file = lib.listToAttrs (
-        lib.mapAttrsToList mkCommandConfig commands
-      );
+      home.file = lib.listToAttrs (lib.mapAttrsToList mkCommandConfig commands);
 
       # Environment variable for API key (loaded from SOPS)
       home.sessionVariables = lib.mkIf (secretAvailable "GEMINI_API_KEY") {

@@ -2,7 +2,7 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.darwinHome
 { config, ... }:
 {
-  flake.modules.homeManager.darwinHome = { lib, pkgs, config, ... }:
+  flake.modules.homeManager.darwinHome = { lib, pkgs, ... }:
     lib.mkIf pkgs.stdenv.isDarwin {
       home.packages = [
         pkgs.dbeaver-bin

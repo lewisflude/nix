@@ -16,7 +16,7 @@ Updates:
 ## Usage
 
 ```
-/nix/update [input-name]
+/nix:update [input-name]
 ```
 
 **Arguments**:
@@ -25,9 +25,9 @@ Updates:
 
 **Examples**:
 ```
-/nix/update
-/nix/update nixpkgs
-/nix/update home-manager
+/nix:update
+/nix:update nixpkgs
+/nix:update home-manager
 ```
 
 ## Update Methods
@@ -99,11 +99,13 @@ nix flake update && git add flake.lock && git commit -m "chore(deps): update fla
 
 Common inputs in this project:
 
-- **nixpkgs** - Package repository (usually `nixos-unstable`)
+- **nixpkgs** - Package repository
 - **home-manager** - User environment manager
 - **darwin** - nix-darwin (macOS support)
-- **nur** - Nix User Repository
-- **Various plugins/tools** - Check `flake.nix` for full list
+- **flake-parts** - Flake organization framework
+- **import-tree** - Auto-import modules (dendritic pattern)
+
+Check `flake.nix` for the full list.
 
 ## Before Updating
 
@@ -125,13 +127,6 @@ Common inputs in this project:
 git checkout flake.lock
 ```
 
-## Update Frequency
-
-**Recommended schedule**:
-- **Weekly**: Check for security updates
-- **Monthly**: Full update of all inputs
-- **As needed**: For specific bug fixes or features
-
 ## Handling Breaking Changes
 
 If update introduces breaking changes:
@@ -151,18 +146,12 @@ If update introduces breaking changes:
    - Verify all features work
    - Check services start correctly
 
-4. **Document**:
-   - Add notes to commit message
-   - Update documentation if needed
-   - Add migration steps to docs
-
 ## Related Commands
 
-- `/nix/check-build` - Validate after updates
+- `/nix:check-build` - Validate after updates
 - `nix run .#update-all` - Interactive update tool
 
 ## Related Documentation
 
-- `docs/UPDATING.md` - Detailed update procedures
-- `docs/DX_GUIDE.md` - Development workflow
+- `CLAUDE.md` - AI assistant guidelines
 - `flake.nix` - Input definitions and versions

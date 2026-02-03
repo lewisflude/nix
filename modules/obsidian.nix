@@ -2,7 +2,7 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.obsidian
 { config, ... }:
 {
-  flake.modules.homeManager.obsidian = { lib, pkgs, config, ... }: {
+  flake.modules.homeManager.obsidian = { lib, pkgs, ... }: {
     home.file.".config/obsidian/.keep".text = "";
 
     programs.obsidian = {

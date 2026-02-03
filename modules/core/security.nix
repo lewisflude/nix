@@ -6,13 +6,13 @@ let
   constants = config.constants;
 in
 {
-  flake.modules.nixos.security = { pkgs, config, lib, ... }: {
+  flake.modules.nixos.security = { pkgs, lib, config ? null, ... }@nixosArgs: {
     security = {
       doas = {
         enable = true;
         extraRules = [
           {
-            users = [ config.host.username ];
+            users = [ username ];
             keepEnv = true;
             noPass = true;
           }
@@ -115,13 +115,13 @@ in
 
     environment.etc = {
       "u2f_mappings" = {
-        text = "${config.host.username}:PaGbsjJa2IPXjK/nuSZEgqrqcP9JoxEO0IVVinIyfEXR0EbctKkhinM6f50ccHj7uSdy+YM2O+ToKVhqv5ynyQ==,cFyPyH4AUHDjTXelbVpfnc4DnESr8xJWyZC42DwEiofkoqQdt0lBdxPGLwjviysl7WlH+jlEw3Yhe5TBiBLNOg==,es256,+presence";
+        text = "${username}:PaGbsjJa2IPXjK/nuSZEgqrqcP9JoxEO0IVVinIyfEXR0EbctKkhinM6f50ccHj7uSdy+YM2O+ToKVhqv5ynyQ==,cFyPyH4AUHDjTXelbVpfnc4DnESr8xJWyZC42DwEiofkoqQdt0lBdxPGLwjviysl7WlH+jlEw3Yhe5TBiBLNOg==,es256,+presence";
         mode = "0644";
       };
       "security/limits.conf" = {
         text = lib.concatMapStringsSep "\n" (
           limit: "${limit.domain} ${limit.type} ${limit.item} ${toString limit.value}"
-        ) config.security.pam.loginLimits;
+        ) nixosArgs.config.security.pam.loginLimits;
         mode = "0644";
       };
     };

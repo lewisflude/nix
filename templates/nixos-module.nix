@@ -1,48 +1,37 @@
+# NixOS-only Module Template - Dendritic Pattern
+# For features that only apply to NixOS systems
+{ config, lib, ... }:
+let
+  inherit (config) username;
+  constants = config.constants;
+in
 {
-  pkgs,
-  lib,
-  username,
-  ...
-}:
-{
-  environment.systemPackages = [
-    pkgs.systemd
-    pkgs.udev
-    pkgs.linux-firmware
-  ];
-  systemd.services.example = {
-    description = "Example service";
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      ExecStart = "${pkgs.example}/bin/example";
-      Restart = "on-failure";
-    };
-  };
-  systemd.timers.example = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "daily";
-      Persistent = true;
-    };
-  };
-  hardware = {
-    example.enable = true;
-  };
-  boot = {
-    loader.systemd-boot.enable = lib.mkDefault true;
-    kernelModules = [ "example-module" ];
-  };
-  networking = {
-    firewall.allowedTCPPorts = [
-      80
-      443
+  flake.modules.nixos.FEATURE_NAME = { pkgs, lib, ... }: {
+    # System packages
+    environment.systemPackages = [
+      pkgs.example-package
     ];
-  };
-  users.users.${username} = {
-    isNormalUser = true;
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-    ];
+
+    # Kernel modules
+    boot.kernelModules = [ "example-module" ];
+
+    # Hardware configuration
+    hardware.example.enable = true;
+
+    # System services
+    systemd.services.example = {
+      description = "Example service";
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        ExecStart = "${pkgs.example}/bin/example";
+        Restart = "on-failure";
+      };
+    };
+
+    # Firewall rules
+    networking.firewall.allowedTCPPorts = [ 8080 ];
+
+    # User configuration
+    users.users.${username}.extraGroups = [ "example-group" ];
   };
 }

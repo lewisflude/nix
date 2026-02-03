@@ -13,7 +13,7 @@ Runs `nix flake check` and optionally builds specific outputs to verify the conf
 ## Usage
 
 ```
-/nix/check-build [hostname]
+/nix:check-build [hostname]
 ```
 
 **Arguments**:
@@ -101,6 +101,11 @@ Validates home-manager configuration builds.
 - Conflicting values
 - Fix by resolving in higher-priority location
 
+**Dendritic pattern errors**:
+- Module not a flake-parts module
+- Wrong `config` scope
+- Fix by following patterns in `DENDRITIC_SOURCE_OF_TRUTH.md`
+
 ## After Successful Check
 
 Recommend:
@@ -129,9 +134,9 @@ home-manager switch --flake .#<user>@<hostname>
 
 - `/validate-module` - Check specific module structure
 - `/format-project` - Format code before checking
-- `/nix/trace-dep` - Debug dependency issues
+- `/nix:trace-dep` - Debug dependency issues
 
 ## Related Documentation
 
-- `docs/DX_GUIDE.md` - Build and validation workflow
-- `CONVENTIONS.md` - Common error patterns
+- `DENDRITIC_SOURCE_OF_TRUTH.md` - Dendritic pattern documentation
+- `CLAUDE.md` - AI assistant guidelines

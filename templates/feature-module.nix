@@ -1,63 +1,44 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+# Feature Module Template - Dendritic Pattern
+# One feature = one file spanning all configuration classes
+{ config, lib, ... }:
 let
-  inherit (lib) mkIf;
-  inherit (lib.lists) optional optionals;
-  cfg = config.host.features.FEATURE_NAME;
+  # Access top-level config values
+  inherit (config) username;
+  constants = config.constants;
 in
 {
-
-  config = mkIf cfg.enable {
-
-    assertions = [
-      {
-        assertion = cfg.enable -> (config.host.features.REQUIRED_FEATURE.enable or false);
-        message = "FEATURE_NAME requires REQUIRED_FEATURE to be enabled. Set host.features.REQUIRED_FEATURE.enable = true;";
-      }
-
+  # NixOS system-level configuration
+  flake.modules.nixos.FEATURE_NAME = { pkgs, lib, ... }: {
+    # System packages
+    environment.systemPackages = [
+      pkgs.example-package
     ];
 
-    environment.systemPackages =
-      optionals pkgs.stdenv.isLinux [
-
-      ]
-      ++ optionals pkgs.stdenv.isDarwin [
-
-      ]
-      ++ optionals cfg.OPTIONAL_FLAG [
-
-      ];
-
-    systemd.services = mkIf pkgs.stdenv.isLinux {
-      example-service = {
-        description = "Example service for FEATURE_NAME";
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-          Type = "simple";
-          ExecStart = "${pkgs.example}/bin/example-daemon";
-          Restart = "on-failure";
-
-        };
+    # System services
+    systemd.services.example = {
+      description = "Example service";
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        ExecStart = "${pkgs.example}/bin/example";
+        Restart = "on-failure";
       };
     };
 
-    users.users.${config.host.username}.extraGroups = optional cfg.enable "example-group";
+    # User configuration
+    users.users.${username}.extraGroups = [ "example-group" ];
+  };
 
-    home-manager.users.${config.host.username} = {
+  # Home-manager user configuration
+  flake.modules.homeManager.FEATURE_NAME = { pkgs, lib, ... }: {
+    home.packages = [
+      pkgs.example-tool
+    ];
 
-      programs.example = {
-        enable = true;
-
+    programs.example = {
+      enable = true;
+      settings = {
+        theme = "dark";
       };
-
-      home.packages = [
-
-      ];
     };
-
   };
 }

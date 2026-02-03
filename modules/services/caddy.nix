@@ -21,9 +21,12 @@ let
   };
 in
 {
-  flake.modules.nixos.caddy = { pkgs, lib, config, ... }:
+  flake.modules.nixos.caddy = nixosArgs:
   let
-    cfg = config.host.services.caddy;
+    pkgs = nixosArgs.pkgs;
+    lib = nixosArgs.lib;
+    nixosConfig = nixosArgs.config;
+    cfg = nixosConfig.host.services.caddy;
   in
   {
     services.caddy = lib.mkIf cfg.enable {

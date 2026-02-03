@@ -6,7 +6,7 @@ let
 in
 {
   flake.modules.nixos.ollama =
-    { lib, pkgs, config, ... }:
+    { lib, pkgs, ... }:
     let
       inherit (lib) mkMerge mkAfter;
       models = [ "llama3.2" "qwen2.5-coder" ];

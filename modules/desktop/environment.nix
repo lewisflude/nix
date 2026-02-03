@@ -6,36 +6,48 @@ let
   nixos = config.flake.modules.nixos;
 in
 {
-  flake.modules.nixos.desktopEnvironment = { pkgs, lib, config, ... }: {
-    environment.pathsToLink = [ "/share/wayland-sessions" ];
+  flake.modules.nixos.desktopEnvironment =
+    nixosArgs:
+    let
+      inherit (nixosArgs) pkgs lib;
+      nixosConfig = nixosArgs.config;
+    in
+    {
+      environment.pathsToLink = [ "/share/wayland-sessions" ];
 
-    services.seatd.enable = true;
-    users.users.greeter.extraGroups = [ "seat" ];
+      services.seatd.enable = true;
+      users.users.greeter.extraGroups = [ "seat" ];
 
-    programs.niri.enable = true;
-    programs.uwsm = {
-      enable = true;
-      waylandCompositors = {
-        niri = {
-          prettyName = "Niri";
-          comment = "Niri compositor managed by UWSM";
-          binPath = lib.getExe config.programs.niri.package;
+      programs.niri.enable = true;
+      programs.uwsm = {
+        enable = true;
+        waylandCompositors = {
+          niri = {
+            prettyName = "Niri";
+            comment = "Niri compositor managed by UWSM";
+            binPath = lib.getExe nixosConfig.programs.niri.package;
+          };
         };
       };
-    };
 
-    services.displayManager.sessionPackages = lib.mkForce [ ];
-  };
+      services.displayManager.sessionPackages = lib.mkForce [ ];
+    };
 
   # Desktop user groups configuration
   # Dendritic pattern: NO imports - hosts import features directly
-  flake.modules.nixos.desktopUserGroups = { pkgs, lib, config, ... }: {
-    users.users.${config.host.username}.extraGroups = [
-      "audio"
-      "video"
-      "input"
-      "networkmanager"
-      "seat"
-    ];
-  };
+  flake.modules.nixos.desktopUserGroups =
+    nixosArgs:
+    let
+      inherit (nixosArgs) pkgs lib;
+      nixosConfig = nixosArgs.config;
+    in
+    {
+      users.users.${nixosConfig.host.username}.extraGroups = [
+        "audio"
+        "video"
+        "input"
+        "networkmanager"
+        "seat"
+      ];
+    };
 }

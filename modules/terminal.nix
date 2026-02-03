@@ -2,7 +2,7 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.terminal
 { config, ... }:
 {
-  flake.modules.homeManager.terminal = { lib, pkgs, config, ... }: {
+  flake.modules.homeManager.terminal = { lib, pkgs, ... }: {
     home.packages = [
       pkgs.clipse
       pkgs.comma

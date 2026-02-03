@@ -7,8 +7,10 @@ let
 in
 {
   flake.modules.nixos.qbittorrent =
-    { lib, pkgs, config, ... }:
+    nixosArgs:
     let
+      inherit (nixosArgs) lib pkgs;
+      nixosConfig = nixosArgs.config;
       inherit (lib) mkDefault mkIf mkMerge;
       namespace = "qbt";
       torrentPort = 62000;
@@ -110,7 +112,7 @@ in
       # VPN namespace configuration
       vpnNamespaces.${namespace} = {
         enable = true;
-        wireguardConfigFile = config.sops.secrets."vpn-confinement-qbittorrent".path;
+        wireguardConfigFile = nixosConfig.config.sops.secrets."vpn-confinement-qbittorrent".path;
         accessibleFrom = [ "192.168.10.0/24" ];
         portMappings = [
           {
@@ -200,7 +202,10 @@ in
           Type = "oneshot";
           RemainAfterExit = "yes";
           ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${namespace} ${pkgs.iproute2}/bin/ip route add 10.2.0.0/16 dev ${namespace}0";
-          SuccessExitStatus = [ 0 2 ];
+          SuccessExitStatus = [
+            0
+            2
+          ];
         };
       };
 

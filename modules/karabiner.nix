@@ -2,7 +2,7 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.karabiner
 { config, ... }:
 {
-  flake.modules.homeManager.karabiner = { lib, pkgs, config, ... }:
+  flake.modules.homeManager.karabiner = { lib, pkgs, ... }:
     let
       mnk88Condition = {
         type = "device_if";

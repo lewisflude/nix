@@ -376,10 +376,11 @@ in
   # This option was declared in infrastructure/nixos.nix
   configurations.nixos.desktop.module = {
     imports = [
-      # Import feature modules
-      # These are NixOS modules (the platform-level modules)
-      nixos.admin   # From admin.nix: flake.modules.nixos.pc
-      nixos.shell   # From shell.nix: flake.modules.nixos.pc
+      # NOTE: The canonical example is incomplete - it references nixos.admin
+      # and nixos.shell, but admin.nix and shell.nix both define nixos.pc.
+      # In a complete implementation, module names would match.
+      nixos.admin
+      nixos.shell
       # ...other `nixos` modules
     ];
     nixpkgs.hostPlatform = "x86_64-linux";
@@ -425,7 +426,7 @@ in
         ▼                  ▼                  ▼
   config.username   flake.modules     configurations
       = "iam"        .nixos.pc          .nixos.desktop
-                     .nixos.shell           .module
+                     (merged)               .module
 ```
 
 **Step by Step**:
@@ -455,7 +456,7 @@ in
    let inherit (config.flake.modules) nixos; in
    {
      configurations.nixos.desktop.module = {
-       imports = [ nixos.pc nixos.shell ];  # ← Uses modules from step 2
+       imports = [ nixos.pc ];  # ← Uses module from step 2 (merged from admin.nix + shell.nix)
      };
    }
    ```

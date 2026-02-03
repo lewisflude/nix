@@ -2,7 +2,7 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.desktopApps
 { config, ... }:
 {
-  flake.modules.homeManager.desktopApps = { lib, pkgs, config, ... }:
+  flake.modules.homeManager.desktopApps = { lib, pkgs, ... }:
     lib.mkIf pkgs.stdenv.isLinux {
       home.packages = [
         pkgs.gimp

@@ -2,7 +2,13 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.nh
 { config, ... }:
 {
-  flake.modules.homeManager.nh = { lib, pkgs, config, ... }:
+  flake.modules.homeManager.nh =
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     let
       isDarwin = pkgs.stdenv.isDarwin;
       homeDir = if isDarwin then "/Users/${config.home.username}" else "/home/${config.home.username}";

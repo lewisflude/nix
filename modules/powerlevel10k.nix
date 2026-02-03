@@ -2,7 +2,13 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.powerlevel10k
 { config, ... }:
 {
-  flake.modules.homeManager.powerlevel10k = { lib, pkgs, config, ... }:
+  flake.modules.homeManager.powerlevel10k =
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     let
       cfg = config.programs.powerlevel10k;
     in

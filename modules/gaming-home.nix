@@ -2,7 +2,7 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.gamingHome
 { config, ... }:
 {
-  flake.modules.homeManager.gamingHome = { lib, pkgs, config, osConfig ? {}, ... }:
+  flake.modules.homeManager.gamingHome = { lib, pkgs, osConfig ? {}, ... }:
     let
       gamingEnabled = osConfig.host.features.gaming.enable or false;
 

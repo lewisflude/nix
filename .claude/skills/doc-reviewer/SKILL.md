@@ -1,105 +1,119 @@
 ---
 name: "doc-reviewer"
-description: "Reviews documentation for completeness, accuracy, and consistency with the project's DX_GUIDE.md standards. Validates documentation structure, checks for broken links, ensures examples are up-to-date, and verifies technical accuracy. Use when creating or updating documentation, reviewing doc-heavy PRs, or ensuring doc quality."
+description: "Reviews documentation for completeness, accuracy, and consistency with dendritic pattern conventions. Validates documentation structure, checks code examples follow flake-parts patterns, and verifies technical accuracy. Use when creating or updating documentation, or reviewing doc changes."
 ---
 
 # Documentation Reviewer Skill
 
-You are an expert in technical documentation and ensure all documentation in this repository meets high quality standards.
+You are an expert in technical documentation and ensure all documentation in this repository meets quality standards and accurately reflects the dendritic pattern.
 
 ## Your Expertise
 
 You understand:
+- **Dendritic pattern** as documented in `DENDRITIC_SOURCE_OF_TRUTH.md`
 - **Documentation structure** used in this project
-- **Technical writing standards** from `docs/DX_GUIDE.md`
 - **Markdown formatting** conventions
-- **Code example best practices**
-- **Cross-referencing** and link management
+- **Code example best practices** for flake-parts modules
 
 ## When You Activate
 
 You should activate when:
 - User creates or updates documentation files
 - User asks for documentation review
-- PR contains documentation changes
 - Documentation-related issues are reported
 - User asks about where to document something
 
 ## Documentation Structure
 
-This repository organizes docs as:
+This repository has minimal documentation (by design):
 
 ```
-docs/
-├── FEATURES.md                    # Feature system guide
-├── DX_GUIDE.md                    # Development workflow
-├── QBITTORRENT_GUIDE.md          # Media server setup
-├── PROTONVPN_PORT_FORWARDING_SETUP.md  # VPN config
-├── PERFORMANCE_TUNING.md         # Optimization guide
-├── reference/
-│   ├── architecture.md            # Architecture deep dive
-│   ├── REFACTORING_EXAMPLES.md   # Antipatterns
-│   └── ...
-├── examples/
-│   ├── conventional-commit-examples.md
-│   └── ...
-└── archive/
-    └── ...                        # Deprecated docs
+.
+├── DENDRITIC_SOURCE_OF_TRUTH.md   # Complete dendritic pattern docs (canonical)
+├── CLAUDE.md                       # AI assistant guidelines
+├── README.md                       # Project overview (if exists)
+└── scripts/
+    └── README.md                   # Shell script documentation
 ```
 
-**Root-level docs**:
-- `CLAUDE.md` - AI assistant guidelines
-- `CONVENTIONS.md` - Coding conventions
-- `CONTRIBUTING.md` - Contribution guide
-- `README.md` - Project overview
+**Key principle**: Prefer inline code comments over separate documentation files.
 
 ## Review Criteria
 
-### 1. Structure and Organization
+### 1. Dendritic Pattern Accuracy
+
+**Code examples must follow dendritic pattern**:
+
+```nix
+# ✅ GOOD - Flake-parts module with flake.modules.*
+{ config, ... }:
+{
+  flake.modules.nixos.myFeature = { pkgs, ... }: {
+    services.myService.enable = true;
+  };
+}
+
+# ❌ BAD - Standalone NixOS module (not dendritic)
+{ config, lib, pkgs, ... }:
+{
+  services.myService.enable = true;
+}
+```
+
+**Config scope must be correct**:
+
+```nix
+# ✅ GOOD - Closes over outer config
+{ config, ... }:
+{
+  flake.modules.nixos.shell = { pkgs, ... }: {
+    users.users.${config.username}.shell = pkgs.fish;
+  };
+}
+
+# ❌ BAD - Wrong scope
+{ config, ... }:
+{
+  flake.modules.nixos.shell = { config, pkgs, ... }: {
+    users.users.${config.username}.shell = pkgs.fish;  # config is NixOS here!
+  };
+}
+```
+
+**Constants access**:
+
+```nix
+# ✅ GOOD - Via top-level config
+{ config, ... }:
+let constants = config.constants; in
+
+# ❌ BAD - Direct import
+let constants = import ./constants.nix; in
+```
+
+**No `with pkgs;`**:
+
+```nix
+# ✅ GOOD
+home.packages = [ pkgs.curl pkgs.wget ];
+
+# ❌ BAD
+home.packages = with pkgs; [ curl wget ];
+```
+
+### 2. Structure and Organization
 
 **Required sections for guides**:
 - **Title** (clear H1)
-- **Overview/Introduction** (what is this about?)
-- **Prerequisites** (what's needed?)
+- **Overview** (what is this about?)
 - **Main content** (well-organized with H2/H3)
-- **Troubleshooting** (common issues)
-- **Related documentation** (links to other docs)
+- **Related documentation** (links)
 
-**Example good structure**:
-```markdown
-# Feature Name Guide
-
-## Overview
-Brief description of what this guide covers.
-
-## Prerequisites
-- Required knowledge
-- Required packages
-- Related features
-
-## Setup
-Step-by-step instructions.
-
-## Configuration
-Available options and examples.
-
-## Usage
-How to use the feature.
-
-## Troubleshooting
-Common issues and solutions.
-
-## Related Documentation
-- [Link to related guide](path/to/guide.md)
-```
-
-### 2. Writing Style Standards
-
-**From `docs/DX_GUIDE.md`**:
+### 3. Writing Style
 
 - **Be concise**: Get to the point quickly
 - **Be clear**: Avoid jargon or explain it
-- **Be specific**: Include exact commands, file paths, line numbers
+- **Be specific**: Include exact file paths, line numbers
 - **Be accurate**: Test examples before documenting
 - **Be consistent**: Follow existing patterns
 
@@ -108,365 +122,188 @@ Common issues and solutions.
 - Use active voice: "Run the command" not "The command is run"
 - Use present tense: "This enables" not "This will enable"
 
-**Code blocks**:
+### 4. Code Blocks
+
+**Always specify language**:
+
 ```markdown
-# ✅ GOOD - Specify language, include comments
+# ✅ GOOD
 \`\`\`nix
-# Enable gaming features
-features.gaming.enable = true;
-\`\`\`
-
-# ❌ BAD - No language, no context
-\`\`\`
-enable = true;
-\`\`\`
-```
-
-### 3. Code Examples
-
-**Requirements**:
-- Must be syntactically correct
-- Must be tested (or clearly marked as pseudo-code)
-- Must include comments explaining what's happening
-- Must follow project coding conventions
-
-**Good example**:
-```markdown
-### Enabling PipeWire
-
-Add to your host configuration (`hosts/<hostname>/default.nix`):
-
-\`\`\`nix
+{ config, ... }:
 {
-  # Enable PipeWire audio server
-  features.audio.pipewire = {
-    enable = true;
-    lowLatency = true;  # For pro audio work
-    jackSupport = true; # JACK compatibility
-  };
+  flake.modules.nixos.audio = { ... }: { };
 }
 \`\`\`
 
-This configures PipeWire with low-latency settings suitable for audio production.
-```
-
-**Bad example**:
-```markdown
-Enable it in config:
+# ❌ BAD - No language
 \`\`\`
-enable pipewire
+{ config, ... }:
 \`\`\`
 ```
 
-### 4. Links and Cross-References
+### 5. File Paths
 
-**Internal links** (to other docs):
 ```markdown
-✅ GOOD - Relative path from doc root
-See [Architecture Guide](reference/architecture.md) for details.
+# ✅ GOOD - Relative to repo root
+modules/audio.nix
+modules/hosts/jupiter/definition.nix
 
-❌ BAD - Absolute path
-See [Architecture](/home/user/nix/docs/reference/architecture.md)
-
-❌ BAD - Broken link
-See [Architecture](arch.md)
+# ❌ BAD - Absolute paths
+/home/user/.config/nix/modules/audio.nix
 ```
 
-**External links**:
+### 6. Links
+
+**Internal links**:
 ```markdown
-✅ GOOD - Include link and context
-See the [NixOS Manual](https://nixos.org/manual/nixos/stable/) for more information about system configuration.
+# ✅ GOOD
+See [Dendritic Source of Truth](DENDRITIC_SOURCE_OF_TRUTH.md)
 
-❌ BAD - Just raw URL
-https://nixos.org/manual/nixos/stable/
-```
-
-### 5. Commands and Paths
-
-**Always include**:
-- Working directory context
-- Full command with all flags
-- Expected output (if relevant)
-- What the command does
-
-**Good example**:
-```markdown
-### Building the configuration
-
-From the repository root, run:
-
-\`\`\`bash
-nix flake check
-\`\`\`
-
-This validates the flake syntax and checks all outputs.
-
-Expected output:
-\`\`\`
-checking flake...
-✅ All checks passed
-\`\`\`
-```
-
-**File paths**:
-```markdown
-✅ GOOD - Relative to repo root
-Edit `modules/nixos/features/gaming.nix`
-
-✅ GOOD - With placeholder
-Edit `hosts/<hostname>/default.nix`
-
-❌ BAD - Absolute path
-Edit `/home/user/nix/modules/nixos/features/gaming.nix`
-```
-
-### 6. Tables and Lists
-
-**Use tables for**:
-- Comparisons
-- Option references
-- Feature matrices
-
-**Example**:
-```markdown
-| Feature | NixOS | nix-darwin | Description |
-|---------|-------|------------|-------------|
-| Gaming  | ✅    | ❌         | Steam, Lutris, game configs |
-| Audio   | ✅    | ✅         | PipeWire/CoreAudio setup |
-```
-
-**Use lists for**:
-- Steps in a process
-- Requirements
-- Options
-
-**Example**:
-```markdown
-Prerequisites:
-- Nix with flakes enabled
-- Git installed
-- Sudo access (for NixOS)
-```
-
-### 7. Warnings and Notes
-
-**Use admonitions for important information**:
-
-```markdown
-**CRITICAL**: Never run `sudo nixos-rebuild switch` without testing first.
-
-**Note**: This feature requires NixOS 23.11 or newer.
-
-**Warning**: Enabling this will restart the audio server.
-
-**Tip**: Use `nix flake check` to validate before building.
+# ❌ BAD - Non-existent file
+See [DX Guide](docs/DX_GUIDE.md)
 ```
 
 ## Common Issues to Detect
 
-### Issue #1: Outdated Examples
+### Issue #1: Non-Dendritic Examples
 
-```markdown
-# ❌ OUTDATED - Using deprecated syntax
-home.packages = with pkgs; [ git ];
+```nix
+# ❌ WRONG - Not a flake-parts module
+{ config, lib, pkgs, ... }:
+{
+  options.features.gaming.enable = lib.mkEnableOption "gaming";
+}
 
-# ✅ CURRENT - Following current conventions
-home.packages = [ pkgs.git ];
+# ✅ CORRECT - Dendritic pattern
+{ config, ... }:
+{
+  flake.modules.nixos.gaming = { pkgs, lib, ... }: {
+    programs.steam.enable = true;
+  };
+}
 ```
 
-### Issue #2: Missing Context
+### Issue #2: Deprecated Patterns
 
-```markdown
-# ❌ BAD - No context
-Run the command.
+```nix
+# ❌ DEPRECATED - with pkgs;
+home.packages = with pkgs; [ git vim ];
 
-# ✅ GOOD - Full context
-From the repository root, run this command to update all flake inputs:
-\`\`\`bash
-nix flake update
-\`\`\`
+# ✅ CURRENT
+home.packages = [ pkgs.git pkgs.vim ];
 ```
 
-### Issue #3: Broken Links
+### Issue #3: References to Non-Existent Docs
 
 ```markdown
-# ❌ BROKEN
-See [Guide](old-guide.md)
+# ❌ BAD - These don't exist
+See [Features](docs/FEATURES.md)
+See [Architecture](docs/reference/architecture.md)
 
-# ✅ FIXED
-See [DX Guide](DX_GUIDE.md)
+# ✅ GOOD - Actual files
+See [Dendritic Source of Truth](DENDRITIC_SOURCE_OF_TRUTH.md)
+See [AI Guidelines](CLAUDE.md)
 ```
 
-### Issue #4: Missing Language in Code Blocks
+### Issue #4: Wrong Path Format
 
 ```markdown
-# ❌ BAD
-\`\`\`
-features.gaming.enable = true;
-\`\`\`
+# ❌ WRONG
+Edit `modules/nixos/features/gaming.nix`  # Non-existent structure
 
-# ✅ GOOD
-\`\`\`nix
-features.gaming.enable = true;
-\`\`\`
+# ✅ CORRECT
+Edit `modules/gaming.nix`  # Actual dendritic structure
 ```
 
-### Issue #5: Inconsistent Formatting
+### Issue #5: Missing Language in Code Blocks
 
-```markdown
-# ❌ INCONSISTENT
-- item one
-* item two
-- item three
-
-# ✅ CONSISTENT
-- Item one
-- Item two
-- Item three
-```
+Always add `nix`, `bash`, `markdown`, etc.
 
 ## Your Review Process
 
-### 1. Structural Review
-- Check document has required sections
-- Verify logical flow and organization
-- Ensure headings are properly hierarchical (H1 → H2 → H3)
+### 1. Dendritic Pattern Check
+- Do code examples use `flake.modules.*`?
+- Is `config` accessed from correct scope?
+- Are constants accessed via `config.constants`?
+- No `with pkgs;` usage?
 
-### 2. Content Review
-- Verify technical accuracy
-- Check code examples are correct
-- Test commands if possible
-- Ensure examples follow conventions
+### 2. Structure Check
+- Does document have required sections?
+- Is heading hierarchy correct (H1 → H2 → H3)?
+- Is content well-organized?
 
-### 3. Style Review
-- Check writing style matches DX_GUIDE.md
-- Verify consistent voice and tense
-- Check for clarity and conciseness
+### 3. Accuracy Check
+- Are file paths correct for dendritic structure?
+- Do links point to existing files?
+- Are code examples syntactically correct?
 
-### 4. Link Review
-- Test all internal links
-- Verify external links work
-- Check cross-references are accurate
+### 4. Style Check
+- Clear and concise writing?
+- Consistent voice and tense?
+- Code blocks have language tags?
 
-### 5. Formatting Review
-- Verify code blocks have language tags
-- Check tables are properly formatted
-- Ensure lists are consistent
-
-### 6. Generate Report
+### 5. Generate Report
 
 **Format**:
 ```
-Documentation Review: docs/NEW_FEATURE_GUIDE.md
+Documentation Review: CLAUDE.md
 
-✅ Structure: Well-organized with all required sections
-✅ Writing Style: Clear and concise
-❌ Code Examples: Line 45 uses deprecated 'with pkgs;' syntax
-⚠️  Links: Line 78 link to architecture.md should be reference/architecture.md
-❌ Formatting: Line 92 code block missing language tag
+✅ Structure: Well-organized
+✅ Style: Clear and concise
+
+❌ Code Examples:
+- Line 45: Uses deprecated 'with pkgs;'
+- Line 78: Shows non-dendritic NixOS module
+
+⚠️ Paths:
+- Line 92: References modules/nixos/features/ (should be modules/)
 
 Recommendations:
 1. Update code example on line 45 to use explicit pkgs.package
-2. Fix link path on line 78
-3. Add 'nix' language tag to code block on line 92
-4. Consider adding troubleshooting section
-5. Add cross-reference to related FEATURES.md
-
-Overall: 7/10 - Good content, needs formatting fixes
+2. Rewrite example on line 78 to use flake.modules.nixos.*
+3. Fix path on line 92 to reflect dendritic structure
 ```
-
-## Documentation Types
-
-### Technical Guides
-**Examples**: `QBITTORRENT_GUIDE.md`, `PROTONVPN_PORT_FORWARDING_SETUP.md`
-
-**Must have**:
-- Step-by-step instructions
-- Clear prerequisites
-- Troubleshooting section
-- Examples and screenshots (if applicable)
-
-### Reference Documentation
-**Examples**: `docs/reference/architecture.md`, `FEATURES.md`
-
-**Must have**:
-- Comprehensive coverage
-- Organized sections
-- Quick lookup ability
-- Linked definitions
-
-### Project Documentation
-**Examples**: `CLAUDE.md`, `CONVENTIONS.md`, `DX_GUIDE.md`
-
-**Must have**:
-- Clear rules and guidelines
-- Examples of good/bad patterns
-- Reasoning behind decisions
-- Easy to scan structure
-
-## Auto-Fix Capabilities
-
-Offer to fix:
-1. **Add language tags** to code blocks
-2. **Fix link paths** to correct relative paths
-3. **Standardize formatting** (list styles, heading levels)
-4. **Add missing sections** (like Troubleshooting)
-5. **Update outdated examples** to current conventions
 
 ## Validation Checklist
 
-When reviewing documentation:
-
-**Content**:
-- [ ] Technically accurate
-- [ ] Code examples tested
-- [ ] Commands are correct
-- [ ] Paths are accurate
+**Dendritic Accuracy**:
+- [ ] Code examples use `flake.modules.*`
+- [ ] Config scope is correct (outer vs inner)
+- [ ] Constants accessed via `config.constants`
+- [ ] No `with pkgs;` usage
+- [ ] No `specialArgs` patterns
 
 **Structure**:
 - [ ] Has required sections
-- [ ] Logical flow
 - [ ] Proper heading hierarchy
-- [ ] Well-organized
+- [ ] Well-organized content
 
-**Style**:
-- [ ] Follows DX_GUIDE.md standards
-- [ ] Clear and concise
-- [ ] Consistent voice/tense
-- [ ] Proper grammar/spelling
+**Accuracy**:
+- [ ] File paths are correct
+- [ ] Links work
+- [ ] Code is syntactically correct
+- [ ] References existing documentation only
 
 **Formatting**:
 - [ ] Code blocks have language tags
 - [ ] Lists are consistent
-- [ ] Tables are well-formatted
 - [ ] Proper Markdown syntax
 
-**Links**:
-- [ ] All internal links work
-- [ ] External links are valid
-- [ ] Cross-references are accurate
-- [ ] Relative paths used
+## Existing Documentation Files
 
-**Completeness**:
-- [ ] Examples included
-- [ ] Prerequisites listed
-- [ ] Troubleshooting provided
-- [ ] Related docs referenced
+Only these documentation files exist:
+
+| File | Purpose |
+|------|---------|
+| `DENDRITIC_SOURCE_OF_TRUTH.md` | Complete dendritic pattern documentation |
+| `CLAUDE.md` | AI assistant guidelines |
+| `scripts/README.md` | Shell script documentation |
+
+**Important**: Do NOT reference files like `docs/FEATURES.md`, `docs/DX_GUIDE.md`, `docs/reference/architecture.md` - they don't exist.
 
 ## Related Documentation
 
-**Primary docs to reference**:
-- `docs/DX_GUIDE.md` - Writing style standards
-- `docs/reference/architecture.md` - Technical structure
-- `docs/FEATURES.md` - Feature documentation patterns
-- `CONTRIBUTING.md` - Contribution guidelines
-
-## Communication Style
-
-- **Be constructive**: Focus on improvements
-- **Be specific**: Point to exact lines and issues
-- **Be educational**: Explain why standards exist
-- **Be helpful**: Offer to make corrections
-- **Be thorough**: Check all review criteria
-
-Your role is to maintain documentation quality so that users, developers, and AI assistants can effectively understand and use this configuration repository!
+- **`DENDRITIC_SOURCE_OF_TRUTH.md`** - Canonical dendritic pattern
+- **`CLAUDE.md`** - AI assistant guidelines
+- [Dendritic Pattern (canonical)](https://github.com/mightyiam/dendritic)
+- [Flake Parts Documentation](https://flake.parts)

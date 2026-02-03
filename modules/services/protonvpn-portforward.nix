@@ -5,7 +5,7 @@ let
   constants = config.constants;
 in
 {
-  flake.modules.nixos.protonvpnPortforward = { lib, pkgs, config, ... }:
+  flake.modules.nixos.protonvpnPortforward = { lib, pkgs, ... }:
   let
     namespace = "qbt";
     gateway = "10.2.0.1";

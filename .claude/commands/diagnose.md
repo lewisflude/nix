@@ -54,27 +54,13 @@ Run diagnostic scripts to troubleshoot system issues in this Nix configuration.
    ```
    Comprehensive SSH performance tests.
 
-### Network Diagnostics
+### Storage Diagnostics
 
-1. **VLAN2 Speed Test**
-   ```bash
-   ./scripts/test-vlan2-speed.sh
-   ```
-   Test network speed through VLAN 2.
-
-2. **HDD Storage Monitoring**
+1. **HDD Storage Monitoring**
    ```bash
    ./scripts/monitor-hdd-storage.sh
    ```
    Monitor HDD storage usage and health.
-
-### System Diagnostics
-
-1. **Steam Audio Diagnosis**
-   ```bash
-   ./scripts/diagnose-steam-audio.sh
-   ```
-   Diagnose Steam audio issues.
 
 ## Usage
 
@@ -87,7 +73,7 @@ You can specify which diagnostic to run:
 ```
 /diagnose qbittorrent
 /diagnose ssh
-/diagnose network
+/diagnose storage
 /diagnose all
 ```
 
@@ -110,6 +96,5 @@ Based on the argument provided (or if none, ask the user which diagnostic they w
 
 ## Related Documentation
 
-- `docs/QBITTORRENT_GUIDE.md` - qBittorrent setup and troubleshooting
-- `docs/PROTONVPN_PORT_FORWARDING_SETUP.md` - VPN configuration
 - `scripts/README.md` - Complete script documentation
+- `CLAUDE.md` - AI assistant guidelines

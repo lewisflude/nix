@@ -2,7 +2,7 @@
 # AI-powered code editor based on VSCode
 { config, ... }:
 {
-  flake.modules.homeManager.cursor = { lib, pkgs, config, ... }:
+  flake.modules.homeManager.cursor = { lib, pkgs, ... }:
     let
       # Extension definitions
       extensions = [

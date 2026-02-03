@@ -2,7 +2,7 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.browser
 { config, ... }:
 {
-  flake.modules.homeManager.browser = { lib, pkgs, config, ... }:
+  flake.modules.homeManager.browser = { lib, pkgs, ... }:
     let
       mimeAssoc = app: mimes: lib.genAttrs mimes (_: app);
 

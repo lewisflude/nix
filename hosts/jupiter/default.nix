@@ -1,6 +1,3 @@
-let
-  constants = import ../../lib/constants.nix;
-in
 {
   username = "lewis";
   useremail = "lewis@lewisflude.com";
@@ -176,7 +173,6 @@ in
 
         # WebUI Configuration
         webUI = {
-          port = constants.ports.services.qbittorrent;
           bindAddress = "*"; # Accessible from any interface (192.168.10.210:8080)
           username = "lewis";
           password = "@ByteArray(J5lri+TddZR2AJqNVPndng==:no5T50n4CD9peISk6jZQ+Cb8qzv6DoV2MtOxE2oErywXVFngVDq/eySGpoNjUCFOHFdbifjwwHI4jlV2LH4ocQ==)";
@@ -1064,7 +1060,6 @@ in
       gid = 976;
       termix = {
         enable = true;
-        port = constants.ports.services.termix;
       };
 
       janitorr = {

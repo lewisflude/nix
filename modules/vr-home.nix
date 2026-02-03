@@ -2,7 +2,14 @@
 # Dendritic pattern: Full implementation as flake.modules.homeManager.vrHome
 { config, ... }:
 {
-  flake.modules.homeManager.vrHome = { lib, pkgs, config, osConfig ? {}, ... }:
+  flake.modules.homeManager.vrHome =
+    {
+      config,
+      lib,
+      pkgs,
+      osConfig ? { },
+      ...
+    }:
     let
       vrEnabled = osConfig.host.features.vr.enable or false;
       wivrnEnabled = (osConfig.host.features.vr.wivrn.enable or false) && vrEnabled;
@@ -54,8 +61,14 @@
       };
     in
     lib.mkIf (vrEnabled && pkgs.stdenv.isLinux) {
-      home.packages = [ vr-which-runtime vr-fix-steamvr ]
-        ++ lib.optionals wivrnEnabled [ pkgs.wayvr pkgs.android-tools ];
+      home.packages = [
+        vr-which-runtime
+        vr-fix-steamvr
+      ]
+      ++ lib.optionals wivrnEnabled [
+        pkgs.wayvr
+        pkgs.android-tools
+      ];
 
       xdg.configFile."openxr/1/active_runtime.json" = lib.mkIf wivrnEnabled {
         source = "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";

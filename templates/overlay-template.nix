@@ -27,12 +27,12 @@ final: prev: {
       sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     };
 
-    nativeBuildInputs = with final; [
-      pkg-config
-      makeWrapper
+    nativeBuildInputs = [
+      final.pkg-config
+      final.makeWrapper
     ];
 
-    buildInputs = with final; [
+    buildInputs = [
 
     ];
 
@@ -45,12 +45,12 @@ final: prev: {
       runHook postInstall
     '';
 
-    meta = with final.lib; {
+    meta = {
       description = "Brief description of the package";
       homepage = "https://github.com/username/my-custom-package";
-      license = licenses.mit;
+      license = final.lib.licenses.mit;
       maintainers = [ ];
-      platforms = platforms.unix;
+      platforms = final.lib.platforms.unix;
     };
   };
 

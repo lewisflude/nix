@@ -10,7 +10,7 @@ in
   # ==========================================================================
   # NixOS System Configuration
   # ==========================================================================
-  flake.modules.nixos.gaming = { pkgs, lib, config, ... }: {
+  flake.modules.nixos.gaming = { pkgs, lib, ... }: {
     # Enable user namespaces for Steam/Flatpak sandboxing
     security.unprivilegedUsernsClone = true;
 
