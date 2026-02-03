@@ -64,6 +64,47 @@ in
         extraConfig = {
           client."92-high-quality-resample"."stream.properties"."resample.quality" = 10;
 
+          # Create stereo null sinks for Apogee routing
+          # This solves quickshell crashes caused by Qt FFmpeg plugin not supporting 10-channel layouts
+          # Applications output to these stereo sinks, which can then be routed to the Apogee hardware
+          pipewire."91-null-sinks" = {
+            "context.objects" = [
+              {
+                # Dummy driver for JACK clients
+                factory = "spa-node-factory";
+                args = {
+                  "factory.name" = "support.node.driver";
+                  "node.name" = "Dummy-Driver";
+                  "priority.driver" = 8000;
+                };
+              }
+              {
+                # Stereo output bridge for games/applications
+                factory = "adapter";
+                args = {
+                  "factory.name" = "support.null-audio-sink";
+                  "node.name" = "apogee_stereo_game_bridge";
+                  "node.description" = "Apogee Stereo Bridge";
+                  "media.class" = "Audio/Sink";
+                  "audio.position" = "FL,FR";
+                  "audio.channels" = 2;
+                };
+              }
+              {
+                # Default stereo output for system sounds
+                factory = "adapter";
+                args = {
+                  "factory.name" = "support.null-audio-sink";
+                  "node.name" = "apogee_stereo_default";
+                  "node.description" = "Apogee Stereo Default";
+                  "media.class" = "Audio/Sink";
+                  "audio.position" = "FL,FR";
+                  "audio.channels" = 2;
+                };
+              }
+            ];
+          };
+
           pipewire."92-low-latency" = {
             "context.properties" = {
               "default.clock.rate" = 48000;
@@ -135,6 +176,31 @@ in
               }
             ];
 
+            # Apogee Symphony Desktop - Force stereo mode
+            "10-apogee-stereo"."monitor.alsa.rules" = [
+              {
+                matches = [
+                  { "device.name" = "~alsa_card.usb-Apogee_Electronics_Corp_Symphony_Desktop-00"; }
+                ];
+                actions.update-props = {
+                  "api.alsa.use-acp" = true;
+                  "device.profile" = "output:analog-stereo+input:analog-stereo";
+                };
+              }
+              {
+                matches = [
+                  { "node.name" = "~alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.*"; }
+                ];
+                actions.update-props = {
+                  "audio.channels" = 2;
+                  "audio.position" = "FL,FR";
+                  "api.alsa.period-size" = 256;
+                  "session.suspend-timeout-seconds" = 0;
+                  "priority.session" = audioConstants.priorities.fallback;
+                };
+              }
+            ];
+
             # Device priorities
             "10-device-priorities"."monitor.alsa.rules" = [
               # Medium priority for ALSA outputs (onboard audio, etc.)
@@ -142,20 +208,29 @@ in
                 matches = [ { "node.name" = "~alsa_output.*"; } ];
                 actions.update-props."priority.session" = audioConstants.priorities.onboard;
               }
-              # High priority for USB audio interfaces
+              # USB audio interfaces get medium-low priority (we prefer virtual sinks)
               {
                 matches = [ { "node.name" = audioConstants.devices.usbAudioClass; } ];
-                actions.update-props."priority.session" = audioConstants.priorities.primaryInterface;
+                actions.update-props."priority.session" = audioConstants.priorities.fallback + 5;
               }
             ];
 
             "10-bridge-priority"."monitor.rules" = [
               {
-                matches = [
-                  { "node.name" = "~input.apogee_stereo_game_bridge"; }
-                  { "node.name" = "~output.apogee_stereo_game_bridge"; }
-                ];
-                actions.update-props."priority.session" = 50;
+                # Default stereo sink - highest priority for system sounds
+                matches = [ { "node.name" = "apogee_stereo_default"; } ];
+                actions.update-props = {
+                  "priority.session" = audioConstants.priorities.primaryInterface;
+                  "node.passive" = false;
+                };
+              }
+              {
+                # Gaming bridge - medium-high priority
+                matches = [ { "node.name" = "apogee_stereo_game_bridge"; } ];
+                actions.update-props = {
+                  "priority.session" = 90;
+                  "node.passive" = false;
+                };
               }
             ];
 
@@ -297,8 +372,16 @@ in
                     "resample.quality" = 4;
                     "session.suspend-timeout-seconds" = 0;
                   };
+                  # Default stereo routing for everything else
+                  defaultRouting = {
+                    "node.target" = "apogee_stereo_default";
+                    "node.latency" = latency;
+                    "resample.quality" = 10;
+                    "session.suspend-timeout-seconds" = 0;
+                  };
                 in
                 [
+                  # Route games to gaming bridge or Sunshine
                   {
                     matches = [
                       { "application.process.binary" = "steam"; }
@@ -316,6 +399,11 @@ in
                       { "application.process.binary" = "~.*\\.exe"; }
                     ];
                     actions.update-props = gameRouting;
+                  }
+                  # Route everything else to default stereo sink
+                  {
+                    matches = [ { "media.class" = "Stream/Output/Audio"; } ];
+                    actions.update-props = defaultRouting;
                   }
                 ];
             };
