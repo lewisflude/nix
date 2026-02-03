@@ -34,21 +34,18 @@
       };
 
       # TLDR pages - simplified man pages
-      # TEMPORARILY DISABLED due to phantom 'cli.tealdeer' evaluation error
-      # TODO: Re-enable once root cause is identified
-      # programs.tealdeer = {
-      #   enable = true;
-      #   enableAutoUpdates = true;
-      #   settings = {
-      #     display = {
-      #       compact = false;
-      #       use_pager = true;
-      #     };
-      #     updates = {
-      #       auto_update = true;
-      #     };
-      #   };
-      # };
+      programs.tealdeer = {
+        enable = true;
+        settings = {
+          display = {
+            compact = false;
+            use_pager = true;
+          };
+          updates = {
+            auto_update = true;
+          };
+        };
+      };
 
       # Nix package search and comma command
       programs.nix-index = {

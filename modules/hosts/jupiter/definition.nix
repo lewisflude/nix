@@ -98,9 +98,7 @@ in
         nixos.lidarr
         nixos.readarr
         nixos.jellyfin
-        nixos.navidrome
         nixos.sabnzbd
-        nixos.transmission
         nixos.flaresolverr
         nixos.jellyseerr
 
@@ -188,7 +186,6 @@ in
         homeManager.yazi
         homeManager.mpv
         homeManager.obsidian
-        # homeManager.cursor  # TODO: cursor package not in nixpkgs
         homeManager.zed
 
         # Desktop home-manager modules

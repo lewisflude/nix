@@ -75,7 +75,6 @@ in
             homeManager.yazi
             homeManager.mpv
             homeManager.obsidian
-            # homeManager.cursor  # TODO: cursor package not in nixpkgs
             homeManager.zed
             homeManager.developmentTools
 

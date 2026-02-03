@@ -2,99 +2,103 @@
 # Fast, collaborative code editor
 { config, ... }:
 {
-  flake.modules.homeManager.zed = { lib, pkgs, ... }: {
-    programs.zed-editor = {
-      enable = true;
-      installRemoteServer = true;
+  flake.modules.homeManager.zed =
+    { lib, pkgs, ... }:
+    {
+      programs.zed-editor = {
+        enable = true;
+        installRemoteServer = true;
 
-      extraPackages = [
-        pkgs.nixd
-        pkgs.nixpkgs-fmt
-        pkgs.vtsls
-        pkgs.tailwindcss-language-server
-        pkgs.vscode-langservers-extracted
-        pkgs.nodePackages.typescript-language-server
-        pkgs.basedpyright
-        pkgs.ruff
-        pkgs.rust-analyzer
-      ];
+        extraPackages = [
+          pkgs.nixd
+          pkgs.nixpkgs-fmt
+          pkgs.vtsls
+          pkgs.vscode-langservers-extracted
+          pkgs.basedpyright
+          pkgs.ruff
+          pkgs.rust-analyzer
+        ];
 
-      mutableUserSettings = true;
+        mutableUserSettings = true;
 
-      userSettings = {
-        ui_font_size = 14;
-        ui_font_family = "Iosevka Nerd Font Mono";
-        buffer_font_size = 12;
+        userSettings = {
+          ui_font_size = 14;
+          ui_font_family = "Iosevka Nerd Font Mono";
+          buffer_font_size = 12;
 
-        telemetry = {
-          metrics = false;
-          diagnostics = false;
-        };
+          telemetry = {
+            metrics = false;
+            diagnostics = false;
+          };
 
-        languages = {
-          Nix = {
-            language_servers = [ "nixd" ];
-            formatter = {
-              external = {
-                command = "nixpkgs-fmt";
+          languages = {
+            Nix = {
+              language_servers = [ "nixd" ];
+              formatter = {
+                external = {
+                  command = "nixpkgs-fmt";
+                };
               };
             };
-          };
-          TypeScript = {
-            language_servers = [ "vtsls" "..." ];
-            formatter = "language_server";
-          };
-          Python = {
-            language_servers = [ "basedpyright" "ruff" ];
-            format_on_save = "on";
-            formatter = {
-              external = {
-                command = "ruff";
-                arguments = [ "format" "--stdin-filename" "{buffer_path}" ];
+            TypeScript = {
+              language_servers = [
+                "vtsls"
+                "..."
+              ];
+              formatter = "language_server";
+            };
+            Python = {
+              language_servers = [
+                "basedpyright"
+                "ruff"
+              ];
+              format_on_save = "on";
+              formatter = {
+                external = {
+                  command = "ruff";
+                  arguments = [
+                    "format"
+                    "--stdin-filename"
+                    "{buffer_path}"
+                  ];
+                };
               };
             };
+            Rust = {
+              format_on_save = "on";
+              formatter = "language_server";
+            };
           };
-          Rust = {
-            format_on_save = "on";
-            formatter = "language_server";
-          };
-        };
 
-        lsp = {
-          nixd = {
-            initialization_options = {
-              formatting = {
-                command = [ "nixpkgs-fmt" ];
+          lsp = {
+            nixd = {
+              initialization_options = {
+                formatting = {
+                  command = [ "nixpkgs-fmt" ];
+                };
               };
             };
-          };
-          rust-analyzer = {
-            initialization_options = {
-              check = {
-                command = "clippy";
+            rust-analyzer = {
+              initialization_options = {
+                check = {
+                  command = "clippy";
+                };
               };
             };
-          };
-          vtsls = {
-            binary = {
-              path = lib.getExe pkgs.vtsls;
-              arguments = [ "--stdio" ];
+            vtsls = {
+              binary = {
+                path = lib.getExe pkgs.vtsls;
+                arguments = [ "--stdio" ];
+              };
             };
-          };
-          tailwindcss-language-server = {
-            binary = {
-              path = lib.getExe pkgs.tailwindcss-language-server;
-              arguments = [ "--stdio" ];
-            };
-          };
-          eslint = {
-            binary = {
-              path = "${pkgs.vscode-langservers-extracted}/bin/vscode-eslint-language-server";
-              arguments = [ "--stdio" ];
+            eslint = {
+              binary = {
+                path = "${pkgs.vscode-langservers-extracted}/bin/vscode-eslint-language-server";
+                arguments = [ "--stdio" ];
+              };
             };
           };
         };
       };
     };
-  };
 }
