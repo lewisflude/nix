@@ -20,11 +20,12 @@
         };
       };
 
-      # Theme utilities
+      # Theme utilities and desktop utilities
       home.packages = [
         pkgs.nwg-look
         pkgs.iosevka-bin
         pkgs.nerd-fonts.iosevka
+        pkgs.xdg-utils
       ];
 
       # GTK configuration
@@ -51,8 +52,5 @@
 
       # Font configuration
       fonts.fontconfig.enable = true;
-
-      # Desktop utilities
-      home.packages = [ pkgs.xdg-utils ];
     };
 }
