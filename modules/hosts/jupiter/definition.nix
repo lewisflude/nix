@@ -411,7 +411,7 @@ in
       # Power
       powerManagement.cpuFreqGovernor = "schedutil";
 
-      # Security
+      # Security: Passwordless sudo is appropriate for passwordless account with YubiKey at login
       security.sudo = {
         enable = true;
         wheelNeedsPassword = false;

@@ -469,15 +469,28 @@ in
           Type = "oneshot";
           RemainAfterExit = true;
           ExecStart = "${pkgs.writeShellScript "apogee-link" ''
-            sleep 3  # Wait for WirePlumber
+            # Wait for ports to exist (max 30 seconds)
+            echo "Waiting for PipeWire audio ports..."
+            for i in {1..30}; do
+              if ${pkgs.pipewire}/bin/pw-link -o | grep -q "apogee_stereo_game_bridge:monitor_FL" && \
+                 ${pkgs.pipewire}/bin/pw-link -i | grep -q "alsa_output.usb-Apogee.*playback_AUX0"; then
+                echo "Audio ports ready"
+                break
+              fi
+              sleep 1
+            done
 
-            # Link game bridge directly to Apogee (channels 0-1)
+            # Link game bridge to Apogee (channels 0-1)
+            echo "Linking game bridge to Apogee..."
             ${pkgs.pipewire}/bin/pw-link apogee_stereo_game_bridge:monitor_FL alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX0 || true
             ${pkgs.pipewire}/bin/pw-link apogee_stereo_game_bridge:monitor_FR alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX1 || true
 
             # Link default bridge to Apogee (channels 2-3)
+            echo "Linking default bridge to Apogee..."
             ${pkgs.pipewire}/bin/pw-link apogee_stereo_default:monitor_FL alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX2 || true
             ${pkgs.pipewire}/bin/pw-link apogee_stereo_default:monitor_FR alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.pro-output-0:playback_AUX3 || true
+
+            echo "Audio links established successfully"
           ''}";
         };
       };

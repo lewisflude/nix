@@ -15,16 +15,6 @@ in
     }:
     {
       security = {
-        doas = {
-          enable = true;
-          extraRules = [
-            {
-              users = [ username ];
-              keepEnv = true;
-              noPass = true;
-            }
-          ];
-        };
         pam = {
           loginLimits = [
             {
@@ -70,8 +60,8 @@ in
                 auth required ${pkgs.linux-pam}/lib/security/pam_deny.so
               '';
 
-              sudo.u2fAuth = true;
-              login.u2fAuth = true;
+              sudo.u2fAuth = false; # Use password for sudo (desktop workflow)
+              login.u2fAuth = true; # YubiKey required at login (proves physical presence)
             };
           u2f = {
             enable = true;

@@ -66,9 +66,12 @@ in
     _final: _prev:
     let
       llmAgentPkgs =
-        if inputs ? llm-agents && inputs.llm-agents ? packages && inputs.llm-agents.packages ? ${system}
-        then inputs.llm-agents.packages.${system}
-        else { };
+        if
+          inputs ? llm-agents && inputs.llm-agents ? packages && inputs.llm-agents.packages ? ${system}
+        then
+          inputs.llm-agents.packages.${system}
+        else
+          { };
     in
     {
       # Namespaced under llmAgents to avoid polluting top-level pkgs
@@ -212,16 +215,20 @@ in
   # Danksearch - search utility from Dank Linux ecosystem
   danksearch =
     _final: _prev:
-    if inputs ? danksearch && inputs.danksearch ? packages && inputs.danksearch.packages ? ${system}
-    then { danksearch = inputs.danksearch.packages.${system}.default; }
-    else { };
+    if
+      inputs ? danksearch && inputs.danksearch ? packages && inputs.danksearch.packages ? ${system}
+    then
+      { danksearch = inputs.danksearch.packages.${system}.default; }
+    else
+      { };
 
   # Awww - wallpaper setter for Wayland
   awww =
     _final: _prev:
-    if inputs ? awww && inputs.awww ? packages && inputs.awww.packages ? ${system}
-    then { awww = inputs.awww.packages.${system}.default; }
-    else { };
+    if inputs ? awww && inputs.awww ? packages && inputs.awww.packages ? ${system} then
+      { awww = inputs.awww.packages.${system}.default; }
+    else
+      { };
 
   # Community Overlays
   # These provide access to community-maintained packages and bleeding-edge versions
@@ -239,6 +246,15 @@ in
   nixpkgs-wayland =
     if isLinux && inputs ? nixpkgs-wayland && inputs.nixpkgs-wayland ? overlay then
       inputs.nixpkgs-wayland.overlay
+    else
+      (_final: _prev: { });
+
+  # VR/XR packages (Linux only)
+  # Git versions of WiVRn, Monado, xrizer and other VR packages
+  # Provides newer versions than nixpkgs
+  nixpkgs-xr =
+    if isLinux && inputs ? nixpkgs-xr && inputs.nixpkgs-xr ? overlays then
+      inputs.nixpkgs-xr.overlays.default
     else
       (_final: _prev: { });
 

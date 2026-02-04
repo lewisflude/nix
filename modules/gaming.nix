@@ -17,18 +17,27 @@ in
       security.unprivilegedUsernsClone = true;
 
       programs = {
+        # Steam with VR/VRChat support
+        # VRChat setup: Use Proton-GE-RTSP for video player support
+        # See: https://lvra.gitlab.io/docs/vrchat/
+        # Helper commands: vrchat-info, vrchat-link-pictures
         steam = {
           enable = true;
           protontricks.enable = true;
           remotePlay.openFirewall = true;
           dedicatedServer.openFirewall = true;
-          extraCompatPackages = [ pkgs.proton-ge-bin ];
+          extraCompatPackages = [
+            pkgs.proton-ge-rtsp-bin # VRChat video player support (RTSP/HLS streams)
+            pkgs.proton-ge-bin # Standard Proton GE for other games
+          ];
 
           # mkDefault allows VR module to override
           package = lib.mkDefault (
             pkgs.steam.override {
               extraArgs = "-pipewire -system-composer";
               extraProfile = ''
+                # Fix timezone issues in VR games (lvra.gitlab.io recommendation)
+                unset TZ
                 # Required for OpenXR games to find WiVRn runtime
                 export PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1
               '';
@@ -130,6 +139,228 @@ in
         '';
         runtimeInputs = [ pkgs.protontricks ];
       };
+
+      # VRChat: Link Pictures folder to system Pictures directory
+      vrchat-link-pictures = pkgs.writeShellApplication {
+        name = "vrchat-link-pictures";
+        text = ''
+          echo "=== VRChat Pictures Folder Setup ==="
+          echo ""
+          echo "This will link VRChat's Pictures folder to your system Pictures directory."
+          echo "Default VRChat location: ~/.steam/steam/steamapps/compatdata/438100/pfx/drive_c/users/steamuser/Pictures/VRChat"
+          echo ""
+          echo "Opening Wine configuration for VRChat (App ID: 438100)..."
+          echo ""
+          ${pkgs.protontricks}/bin/protontricks 438100 winecfg
+          echo ""
+          echo "In the Wine Configuration window:"
+          echo "  1. Go to 'Desktop Integration' tab"
+          echo "  2. Select 'Pictures' from the folders list"
+          echo "  3. Enable 'Link to' and browse to: $HOME/Pictures"
+          echo "  4. Click Apply and OK"
+          echo ""
+          echo "After this, VRChat screenshots will save directly to ~/Pictures/VRChat"
+        '';
+        runtimeInputs = [ pkgs.protontricks ];
+      };
+
+      # VRChat: Comprehensive setup information and recommendations
+      vrchat-info = pkgs.writeShellApplication {
+        name = "vrchat-info";
+        text = ''
+          echo "╔══════════════════════════════════════════════════════════════════════╗"
+          echo "║               VRChat on Linux - Setup Guide (NixOS)                 ║"
+          echo "╚══════════════════════════════════════════════════════════════════════╝"
+          echo ""
+          echo "🎮 PROTON CONFIGURATION"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✓ Proton-GE-RTSP installed (video player support)"
+          echo ""
+          echo "To enable in Steam:"
+          echo "  1. Right-click VRChat in Steam Library"
+          echo "  2. Properties → Compatibility"
+          echo "  3. Enable 'Force the use of a specific Steam Play compatibility tool'"
+          echo "  4. Select 'GE-Proton' with 'rtsp' in the name"
+          echo ""
+          echo "🚀 RECOMMENDED LAUNCH OPTIONS"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Right-click VRChat → Properties → Launch Options:"
+          echo ""
+          echo "  gamemoderun mangohud %command% --process-priority=1"
+          echo ""
+          echo "This enables:"
+          echo "  • gamemode: CPU/IO priority boost during gameplay"
+          echo "  • mangohud: FPS overlay and performance monitoring"
+          echo "  • --process-priority=1: Above-normal VRChat process priority"
+          echo ""
+          echo "📸 PICTURES SETUP"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Link VRChat screenshots to ~/Pictures:"
+          echo "  vrchat-link-pictures"
+          echo ""
+          echo "🎯 PERFORMANCE OPTIMIZATION"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Recommended in-game settings:"
+          echo "  • Anti-Aliasing: Off (or 2x if needed)"
+          echo "  • Pixel Light Count: Low"
+          echo "  • Shadow Quality: Low"
+          echo "  • LOD Quality: Low or Medium"
+          echo "  • Particle Limiter: On"
+          echo ""
+          echo "Avatar management:"
+          echo "  • Max shown avatars: 10-15"
+          echo "  • Create custom Safety profile blocking Animators/Shaders by default"
+          echo "  • Manually enable avatars for active conversations"
+          echo ""
+          echo "CPU bottleneck detection:"
+          echo "  • Run 'nvtop' or 'nvidia-smi' - if GPU < 100%, you're CPU-limited"
+          echo "  • Lower SteamVR render resolution to confirm"
+          echo ""
+          echo "🔊 AUDIO CONFIGURATION"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✓ PipeWire configured for VR (low-latency, large ring buffer)"
+          echo "✓ Audio dropout fix enabled (DisplayPort headsets)"
+          echo ""
+          echo "🛡️ EASY ANTI-CHEAT"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✓ EAC startup issues resolved (as of Oct-Nov 2024)"
+          echo ""
+          echo "⚠️  Do NOT set these environment variables:"
+          echo "  • SDL_VIDEODRIVER (breaks splash screen)"
+          echo "  • VR_OVERRIDE (causes compatibility issues)"
+          echo ""
+          echo "⚠️  Ensure firewall allows: modules-cdn.eac-prod.on.epicgames.com"
+          echo ""
+          echo "🥽 VR RUNTIME"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✓ WiVRn (OpenXR) configured"
+          echo "✓ xrizer-multilib (OpenVR→OpenXR translation) installed"
+          echo ""
+          echo "Check your runtime:"
+          echo "  vr-which-runtime"
+          echo ""
+          echo "🛠️ HELPER COMMANDS"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  vrchat-info            - Show this guide"
+          echo "  vrchat-link-pictures   - Link screenshots to ~/Pictures"
+          echo "  vrchat-performance     - Show detailed performance tips"
+          echo "  install-mf-codecs 438100 - Install Media Foundation codecs"
+          echo "  vr-which-runtime       - Check active OpenXR runtime"
+          echo "  vr-fix-steamvr         - Diagnose SteamVR issues"
+          echo ""
+          echo "📚 MORE INFO"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "VRChat App ID: 438100"
+          echo "Documentation: https://lvra.gitlab.io/docs/vrchat/"
+          echo "OpenComposite: Replaced by xrizer (already configured)"
+          echo ""
+        '';
+      };
+
+      # VRChat: Detailed performance optimization guide
+      vrchat-performance = pkgs.writeShellApplication {
+        name = "vrchat-performance";
+        text = ''
+          echo "╔══════════════════════════════════════════════════════════════════════╗"
+          echo "║            VRChat Performance Optimization Guide                     ║"
+          echo "╚══════════════════════════════════════════════════════════════════════╝"
+          echo ""
+          echo "🎯 IN-GAME GRAPHICS SETTINGS"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Recommended Settings (Performance First):"
+          echo "  Setting                Value          Impact"
+          echo "  ─────────────────────  ─────────────  ───────────────────────────"
+          echo "  Anti-Aliasing          Off/2x         Minimal visual impact"
+          echo "  Pixel Light Count      Low            HIGH CPU impact"
+          echo "  Shadow Quality         Low            High performance cost"
+          echo "  LOD Quality            Low/Medium     Depends on world complexity"
+          echo "  Particle Limiter       On             Prevents particle spam"
+          echo ""
+          echo "🧑 AVATAR OPTIMIZATION"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "1. Limit Visible Avatars:"
+          echo "   • Set max shown avatars: 10-15 people"
+          echo "   • This matches typical conversation group sizes"
+          echo ""
+          echo "2. Create Custom Safety Profile:"
+          echo "   • Block 'Animators' and 'Shaders' by default"
+          echo "   • Block 'Very Poor' performance avatars"
+          echo "   • Manually show avatars for people you're actively talking to"
+          echo "   • This isolates performance-draining avatars"
+          echo ""
+          echo "3. For Content Creators:"
+          echo "   Avatar optimization tools (requires Unity + vrc-get):"
+          echo "   • d4rkAvatarOptimizer"
+          echo "     vrc-get repo add https://d4rkc0d3r.github.io/vpm-repos/main.json"
+          echo "   • Avatar Optimizer by Anatawa12"
+          echo "     vrc-get repo add https://vpm.anatawa12.com/vpm.json"
+          echo ""
+          echo "🔍 DIAGNOSING BOTTLENECKS"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Identifying CPU vs GPU bottleneck:"
+          echo ""
+          echo "1. Monitor GPU usage:"
+          echo "   nvtop             # Interactive GPU monitor"
+          echo "   nvidia-smi -l 1   # 1-second polling"
+          echo ""
+          echo "2. Interpret results:"
+          echo "   • GPU < 100%: You're CPU-bottlenecked"
+          echo "   • GPU = 100%: You're GPU-bottlenecked"
+          echo ""
+          echo "3. Confirm CPU bottleneck:"
+          echo "   • Lower SteamVR render resolution"
+          echo "   • If FPS doesn't improve → CPU is the limitation"
+          echo ""
+          echo "💡 CPU BOTTLENECK SOLUTIONS"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "• Reduce avatar count (primary impact)"
+          echo "• Lower Pixel Light Count to Low"
+          echo "• Disable Animators/Shaders on non-essential avatars"
+          echo "• Use gamemode for CPU priority boost (already in launch options)"
+          echo "• Close background applications"
+          echo ""
+          echo "💡 GPU BOTTLENECK SOLUTIONS"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "• Lower SteamVR render resolution"
+          echo "• Disable Anti-Aliasing completely"
+          echo "• Set Shadow Quality to Low"
+          echo "• Reduce LOD Quality"
+          echo "• Consider world complexity when choosing instances"
+          echo ""
+          echo "🎮 SYSTEM-LEVEL OPTIMIZATIONS"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Already configured in your NixOS setup:"
+          echo "  ✓ GameMode enabled (CPU/IO priority boost)"
+          echo "  ✓ Low-latency PipeWire audio"
+          echo "  ✓ Steam with performance flags"
+          echo "  ✓ VR-optimized FHS environment"
+          echo ""
+          echo "Monitor performance:"
+          echo "  mangohud %command%    # FPS overlay (add to launch options)"
+          echo "  nvtop                 # GPU monitoring"
+          echo "  htop                  # CPU monitoring"
+          echo ""
+          echo "📊 PERFORMANCE METRICS"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Target framerates (VR):"
+          echo "  • Quest 2: 72 Hz, 90 Hz, 120 Hz"
+          echo "  • Quest 3: 72 Hz, 90 Hz, 120 Hz"
+          echo "  • Valve Index: 80 Hz, 90 Hz, 120 Hz, 144 Hz"
+          echo ""
+          echo "Aim for consistent frametime over high FPS."
+          echo "Reprojection (ASW/ATW) helps smooth dropped frames."
+          echo ""
+          echo "More info: https://lvra.gitlab.io/docs/vrchat/performance/"
+          echo ""
+        '';
+      };
     in
     lib.mkIf (gamingEnabled && pkgs.stdenv.isLinux) {
       programs.mangohud = {
@@ -143,6 +374,10 @@ in
         pkgs.winetricks
         install-mf-codecs
         pkgs.protonup-qt # Proton version manager GUI
+        # VRChat helpers
+        vrchat-link-pictures
+        vrchat-info
+        vrchat-performance
       ]
       ++ lib.optionals steamEnabled [
         pkgs.steamcmd # Steam command-line client
