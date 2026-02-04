@@ -259,7 +259,7 @@ pog.pog {
       Next Steps:
       ─────────────────────────────────────────────────────────
       1. Run: nix run .#calculate-qbittorrent-config -- -o nix
-      2. Copy output to hosts/jupiter/default.nix
+      2. Copy output to modules/hosts/jupiter/definition.nix
       3. Rebuild: nh os switch
       4. Monitor: ./scripts/monitor-hdd-storage.sh
 

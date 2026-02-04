@@ -61,7 +61,6 @@
           comfyui = 8188;
           janitorr = 8485;
           profilarr = 6868;
-          cleanuparr = 11011;
 
           syncthing = {
             sync = 22000;
@@ -151,28 +150,6 @@
         all = {
           ipv4 = "0.0.0.0";
           cidr = "0.0.0.0/0";
-        };
-      };
-
-      audio = {
-        devices = {
-          usbAudioClass = "~alsa_output.usb-.*";
-          apogee = "~alsa_output.usb-Apogee.*";
-        };
-
-        virtualSinks = {
-          gamingBridge = "apogee_stereo_game_bridge";
-          sunshineStereo = "sink-sunshine-stereo";
-        };
-
-        priorities = {
-          primaryInterface = 100;
-          gamingBridge = 100;
-          sunshine = 150;
-          bluetooth = 80;
-          onboard = 50;
-          hdmi = 30;
-          fallback = 10;
         };
       };
 

@@ -6,7 +6,7 @@ let
 in
 {
   # NixOS user account
-  flake.modules.nixos.base =
+  flake.modules.nixos.users =
     { pkgs, ... }:
     {
       users.users.${username} = {
@@ -23,7 +23,7 @@ in
     };
 
   # Darwin user configuration
-  flake.modules.darwin.base = {
+  flake.modules.darwin.users = {
     users.users.${username} = {
       home = "/Users/${username}";
       shell = "/run/current-system/sw/bin/zsh";

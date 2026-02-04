@@ -69,20 +69,20 @@ in
         );
 
       # Inline common functions
-      commonFunctions = builtins.readFile ../packages/sunshine/scripts/common.sh;
+      commonFunctions = builtins.readFile ../pkgs/sunshine/scripts/common.sh;
 
       # Build script packages
       sunshine-steam-launcher = pkgs.writeShellApplication {
         name = "sunshine-steam-launcher";
         runtimeInputs = commonRuntimeInputs ++ niriRuntimeInputs ++ [ pkgs.steam ];
         text =
-          commonFunctions + "\n" + builtins.readFile ../packages/sunshine/scripts/steam-launcher.sh;
+          commonFunctions + "\n" + builtins.readFile ../pkgs/sunshine/scripts/steam-launcher.sh;
       };
 
       sunshine-prep = pkgs.writeShellApplication {
         name = "sunshine-prep";
         runtimeInputs = commonRuntimeInputs ++ niriRuntimeInputs;
-        text = mkScriptEnv + "\n" + commonFunctions + "\n" + builtins.readFile ../packages/sunshine/scripts/prep.sh;
+        text = mkScriptEnv + "\n" + commonFunctions + "\n" + builtins.readFile ../pkgs/sunshine/scripts/prep.sh;
       };
 
       sunshine-cleanup = pkgs.writeShellApplication {
@@ -95,7 +95,7 @@ in
           + "\"\n"
           + commonFunctions
           + "\n"
-          + builtins.readFile ../packages/sunshine/scripts/cleanup.sh;
+          + builtins.readFile ../pkgs/sunshine/scripts/cleanup.sh;
       };
     in
     {

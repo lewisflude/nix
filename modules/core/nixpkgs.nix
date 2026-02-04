@@ -18,7 +18,7 @@ let
 in
 {
   # NixOS nixpkgs configuration
-  flake.modules.nixos.base =
+  flake.modules.nixos.nixpkgs =
     { lib, ... }:
     {
       nixpkgs.config = {
@@ -34,7 +34,7 @@ in
     };
 
   # Darwin nixpkgs configuration
-  flake.modules.darwin.base =
+  flake.modules.darwin.nixpkgs =
     { lib, ... }:
     {
       nixpkgs.config = {

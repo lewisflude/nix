@@ -20,9 +20,13 @@ in
         inputs.nix-homebrew.darwinModules.nix-homebrew
 
         # ═══════════════════════════════════════════════════════════════════════
-        # Base Modules (host options, home-manager structure)
+        # Core Modules (dendritic: each concern has its own module)
         # ═══════════════════════════════════════════════════════════════════════
-        darwin.base
+        darwin.hostOptions
+        darwin.nix
+        darwin.nixpkgs
+        darwin.sops
+        darwin.users
         darwin.determinate
         darwin.homeManagerBase
 
@@ -32,6 +36,7 @@ in
         darwin.shell
         darwin.audio
         darwin.apps
+        darwin.karabiner
       ];
 
       # Required for Darwin

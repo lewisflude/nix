@@ -1,7 +1,19 @@
 # Karabiner-Elements configuration (Darwin only)
-# Dendritic pattern: Full implementation as flake.modules.homeManager.karabiner
+# Dendritic pattern: nix-darwin service + home-manager config files
 { config, ... }:
 {
+  # ==========================================================================
+  # Darwin System Configuration
+  # ==========================================================================
+  # Uses native nix-darwin service management for Karabiner-Elements
+  flake.modules.darwin.karabiner = { ... }: {
+    services.karabiner-elements.enable = true;
+  };
+
+  # ==========================================================================
+  # Home-Manager Configuration
+  # ==========================================================================
+  # Provides the JSON configuration files for Karabiner-Elements
   flake.modules.homeManager.karabiner = { lib, pkgs, ... }:
     let
       mnk88Condition = {

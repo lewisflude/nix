@@ -12,7 +12,6 @@ ignore = [
   # System and palette files
   "**/systems.nix",
   "**/palette.nix",
-  "**/tests/palette.nix",
 
   # Service-specific files with minimal config
   "**/wlsunset.nix",

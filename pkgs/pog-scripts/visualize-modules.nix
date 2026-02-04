@@ -63,22 +63,19 @@ pog.pog {
           node [fillcolor="
           edge [color="
 
-          // Subgraphs for organization
-          subgraph cluster_shared {
-              label="Shared Modules";
+          // Subgraphs for organization (dendritic pattern)
+          subgraph cluster_infrastructure {
+              label="Infrastructure";
               style=filled;
               color="
               fillcolor="
       EOF
 
 
-          find "$REPO_ROOT/modules/shared" -name "default.nix" 2>/dev/null | while read -r file; do
+          find "$REPO_ROOT/modules/infrastructure" -name "*.nix" 2>/dev/null | while read -r file; do
               local module_name
-              module_name=$(basename "$(dirname "$file")")
-              if [[ "$module_name" == "shared" ]]; then
-                  module_name="shared_root"
-              fi
-              echo "          \"shared_$module_name\" [label=\"$module_name\"];" >> "$GRAPH_FILE"
+              module_name=$(basename "$file" .nix)
+              echo "          \"infra_$module_name\" [label=\"$module_name\"];" >> "$GRAPH_FILE"
           done
 
           echo "      }" >> "$GRAPH_FILE"
@@ -86,20 +83,17 @@ pog.pog {
 
           cat >> "$GRAPH_FILE" <<'EOF'
 
-          subgraph cluster_darwin {
-              label="Darwin Modules";
+          subgraph cluster_core {
+              label="Core Modules";
               style=filled;
               color="
               fillcolor="
       EOF
 
-          find "$REPO_ROOT/modules/darwin" -name "default.nix" 2>/dev/null | while read -r file; do
+          find "$REPO_ROOT/modules/core" -name "*.nix" 2>/dev/null | while read -r file; do
               local module_name
-              module_name=$(basename "$(dirname "$file")")
-              if [[ "$module_name" == "darwin" ]]; then
-                  module_name="darwin_root"
-              fi
-              echo "          \"darwin_$module_name\" [label=\"$module_name\"];" >> "$GRAPH_FILE"
+              module_name=$(basename "$file" .nix)
+              echo "          \"core_$module_name\" [label=\"$module_name\"];" >> "$GRAPH_FILE"
           done
 
           echo "      }" >> "$GRAPH_FILE"
@@ -107,20 +101,17 @@ pog.pog {
 
           cat >> "$GRAPH_FILE" <<'EOF'
 
-          subgraph cluster_nixos {
-              label="NixOS Modules";
+          subgraph cluster_hosts {
+              label="Host Definitions";
               style=filled;
               color="
               fillcolor="
       EOF
 
-          find "$REPO_ROOT/modules/nixos" -name "default.nix" 2>/dev/null | while read -r file; do
-              local module_name
-              module_name=$(basename "$(dirname "$file")")
-              if [[ "$module_name" == "nixos" ]]; then
-                  module_name="nixos_root"
-              fi
-              echo "          \"nixos_$module_name\" [label=\"$module_name\"];" >> "$GRAPH_FILE"
+          find "$REPO_ROOT/modules/hosts" -name "definition.nix" 2>/dev/null | while read -r file; do
+              local host_name
+              host_name=$(basename "$(dirname "$file")")
+              echo "          \"host_$host_name\" [label=\"$host_name\"];" >> "$GRAPH_FILE"
           done
 
           echo "      }" >> "$GRAPH_FILE"
@@ -166,24 +157,24 @@ pog.pog {
           local summary_file="$OUTPUT_DIR/module-summary.txt"
 
           cat > "$summary_file" <<EOF
-      Module Dependency Summary
+      Module Dependency Summary (Dendritic Pattern)
       Generated: $(date)
       ================================================================================
 
       EOF
 
           {
-            echo "Shared Modules:"
-            find "$REPO_ROOT/modules/shared" -name "*.nix" -not -name "default.nix" | wc -l | xargs echo "  Files:"
-            find "$REPO_ROOT/modules/shared" -type d -name "*" | wc -l | xargs echo "  Directories:"
+            echo "Infrastructure Modules:"
+            find "$REPO_ROOT/modules/infrastructure" -name "*.nix" 2>/dev/null | wc -l | xargs echo "  Files:"
             echo ""
-            echo "Darwin Modules:"
-            find "$REPO_ROOT/modules/darwin" -name "*.nix" -not -name "default.nix" | wc -l | xargs echo "  Files:"
-            find "$REPO_ROOT/modules/darwin" -type d -name "*" | wc -l | xargs echo "  Directories:"
+            echo "Core Modules:"
+            find "$REPO_ROOT/modules/core" -name "*.nix" 2>/dev/null | wc -l | xargs echo "  Files:"
             echo ""
-            echo "NixOS Modules:"
-            find "$REPO_ROOT/modules/nixos" -name "*.nix" -not -name "default.nix" | wc -l | xargs echo "  Files:"
-            find "$REPO_ROOT/modules/nixos" -type d -name "*" | wc -l | xargs echo "  Directories:"
+            echo "Host Definitions:"
+            find "$REPO_ROOT/modules/hosts" -name "definition.nix" 2>/dev/null | wc -l | xargs echo "  Hosts:"
+            echo ""
+            echo "Feature Modules (flake.modules.*):"
+            find "$REPO_ROOT/modules" -maxdepth 1 -name "*.nix" 2>/dev/null | wc -l | xargs echo "  Top-level files:"
             echo ""
           } >> "$summary_file"
 

@@ -1,10 +1,5 @@
 # Desktop Environment Configuration
 # Session management via UWSM, seatd, and display manager integration
-{ config, ... }:
-let
-  # Capture flake-parts config modules
-  nixos = config.flake.modules.nixos;
-in
 {
   flake.modules.nixos.desktopEnvironment =
     { lib, config, ... }:

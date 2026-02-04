@@ -90,17 +90,6 @@ in
         ports = [ "${toString constants.ports.services.profilarr}:6868" ];
       };
 
-      # Cleanuparr - Automated cleanup
-      virtualisation.oci-containers.containers.cleanuparr = {
-        image = "ghcr.io/recyclarr/recyclarr:latest";
-        environment = {
-          TZ = timezone;
-        };
-        volumes = [
-          "${configPath}/cleanuparr:/config"
-        ];
-      };
-
       # Listenarr - Music tracker
       virtualisation.oci-containers.containers.listenarr = {
         image = "ghcr.io/therobbiedavis/listenarr:canary";
@@ -125,7 +114,6 @@ in
         "d ${configPath}/wizarr 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/janitorr 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/profilarr 0755 ${toString uid} ${toString gid} -"
-        "d ${configPath}/cleanuparr 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/listenarr 0755 ${toString uid} ${toString gid} -"
       ];
 

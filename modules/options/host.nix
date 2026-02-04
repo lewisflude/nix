@@ -9,7 +9,7 @@ let
 in
 {
   # Define host options for both NixOS and Darwin
-  flake.modules.nixos.base = {
+  flake.modules.nixos.hostOptions = {
     options.host = {
       username = mkOption {
         type = types.str;
@@ -48,7 +48,6 @@ in
           enable = mkEnableOption "gaming platforms and optimizations";
           steam = mkEnableOption "Steam gaming platform";
           performance = mkEnableOption "gaming performance optimizations";
-          lutris = mkEnableOption "Lutris game manager";
           emulators = mkEnableOption "gaming emulators";
         };
 
@@ -177,7 +176,7 @@ in
   };
 
   # Darwin version (subset of options)
-  flake.modules.darwin.base = {
+  flake.modules.darwin.hostOptions = {
     options.host = {
       username = mkOption {
         type = types.str;

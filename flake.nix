@@ -1,7 +1,7 @@
 {
   description = "Lewiss NixOS and Nix-Darwin configuration";
 
-  # Note: Binary cache configuration is in modules/shared/core.nix
+  # Note: Binary cache configuration is in modules/core/nix.nix
   # not here in nixConfig, as nixConfig requires --accept-flake-config
 
   inputs = {

@@ -17,7 +17,7 @@ let
 in
 {
   # NixOS SOPS configuration
-  flake.modules.nixos.base =
+  flake.modules.nixos.sops =
     { lib, ... }:
     {
       sops = {
@@ -59,7 +59,7 @@ in
     };
 
   # Darwin SOPS configuration
-  flake.modules.darwin.base = {
+  flake.modules.darwin.sops = {
     sops = {
       age = {
         keyFile = "/Users/${username}/Library/Application Support/sops-nix/key.txt";

@@ -8,7 +8,7 @@ let
 in
 {
   # NixOS Nix configuration
-  flake.modules.nixos.base =
+  flake.modules.nixos.nix =
     { lib, ... }:
     {
       nix.settings = {
@@ -43,7 +43,7 @@ in
   # Darwin Nix configuration
   # Disable nix-darwin's Nix management since Determinate Nix handles it
   # See: https://github.com/nix-darwin/nix-darwin/pull/1313
-  flake.modules.darwin.base =
+  flake.modules.darwin.nix =
     { lib, ... }:
     {
       # Let Determinate Nix manage the Nix daemon

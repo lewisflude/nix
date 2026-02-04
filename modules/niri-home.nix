@@ -88,6 +88,11 @@
             # ═══════════════════════════════════════════════════════════════════
             # Launch Applications
             # ═══════════════════════════════════════════════════════════════════
+            # Note: Mod+Return (terminal) and Mod+D (launcher) provided by DMS binds.kdl
+            "Mod+T" = {
+              action.spawn = [ "alacritty" ];
+              hotkey-overlay.title = "Open Terminal";
+            };
             "Mod+B" = {
               action.spawn = [ "google-chrome-stable" ];
               hotkey-overlay.title = "Open Browser";
@@ -100,6 +105,18 @@
               action.close-window = { };
               hotkey-overlay.title = "Close Window";
             };
+
+            # ═══════════════════════════════════════════════════════════════════
+            # Focus Navigation
+            # ═══════════════════════════════════════════════════════════════════
+            "Mod+H".action.focus-column-left = { };
+            "Mod+J".action.focus-window-down = { };
+            "Mod+K".action.focus-window-up = { };
+            "Mod+L".action.focus-column-right = { };
+            "Mod+Left".action.focus-column-left = { };
+            "Mod+Down".action.focus-window-down = { };
+            "Mod+Up".action.focus-window-up = { };
+            "Mod+Right".action.focus-column-right = { };
 
             # ═══════════════════════════════════════════════════════════════════
             # DMS Features

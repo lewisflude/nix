@@ -137,12 +137,12 @@ pog.pog {
 
       case "$MODULE_TYPE" in
         feature)
-          echo "  1. Add feature options to modules/shared/host-options.nix"
-          echo "  2. Implement the feature in $OUTPUT_FILE"
-          echo "  3. Enable in a host: host.features.$NAME_SNAKE.enable = true"
+          echo "  1. Add feature options to modules/options/host.nix"
+          echo "  2. Implement the feature in $OUTPUT_FILE (dendritic pattern)"
+          echo "  3. Import module in host definition: modules/hosts/<hostname>/definition.nix"
           echo "  4. Test the configuration"
           echo ""
-          yellow "💡 Add this to modules/shared/host-options.nix:"
+          yellow "💡 Add this to modules/options/host.nix:"
           echo ""
           echo "    $NAME_SNAKE = {"
           echo "      enable = mkEnableOption \"$MODULE_NAME feature\";"

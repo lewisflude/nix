@@ -15,10 +15,10 @@ in
       inherit (lib) mkDefault mkIf optional;
 
       # Home-LLM custom component
-      home-llm = pkgs.callPackage ../packages/home-assistant/custom-components/home-llm.nix {
+      home-llm = pkgs.callPackage ../pkgs/home-assistant/custom-components/home-llm.nix {
         inherit (pkgs.home-assistant.python.pkgs) buildHomeAssistantComponent;
       };
-      intent_script_yaml = ../packages/home-assistant/intent-scripts/intent_script.yaml;
+      intent_script_yaml = ../pkgs/home-assistant/intent-scripts/intent_script.yaml;
 
       # Default configuration (can be overridden by hosts)
       # Basic settings

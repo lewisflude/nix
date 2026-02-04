@@ -28,9 +28,13 @@ in
         inputs.solaar.nixosModules.default
 
         # ═══════════════════════════════════════════════════════════════════════
-        # Base Modules (host options, home-manager structure)
+        # Core Modules (dendritic: each concern has its own module)
         # ═══════════════════════════════════════════════════════════════════════
-        nixos.base
+        nixos.hostOptions
+        nixos.nix
+        nixos.nixpkgs
+        nixos.sops
+        nixos.users
         nixos.homeManagerBase
 
         # ═══════════════════════════════════════════════════════════════════════
@@ -59,7 +63,6 @@ in
         nixos.graphics
         nixos.fonts
         nixos.greeter
-        nixos.theme
         nixos.console
         nixos.xwayland
         nixos.hardwareSupport
@@ -137,7 +140,6 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         nixos.colord
         nixos.xdgPortal
-        nixos.lutris
       ];
 
       # Required for NixOS
@@ -199,6 +201,7 @@ in
 
         # Gaming & VR home-manager modules
         homeManager.gaming
+        homeManager.lutris
         homeManager.vr
 
         # Audio home-manager module

@@ -1203,8 +1203,31 @@ config.flake.nixosConfigurations = lib.mapAttrs
 
 ## References
 
+### Canonical Sources
+
 - [Dendritic Pattern (mightyiam)](https://github.com/mightyiam/dendritic) - **Canonical source**
-- [Dendritic Design Guide (Doc-Steve)](https://github.com/Doc-Steve/dendritic-design-with-flake-parts)
 - [Flake Parts Documentation](https://flake.parts)
-- [Example: mightyiam/infra](https://github.com/mightyiam/infra)
-- [Flipping the Configuration Matrix](https://not-a-number.io/2025/refactoring-my-infrastructure-as-code-configurations/)
+
+### Guides and Documentation
+
+- [Dendritic Design Guide (Doc-Steve)](https://github.com/Doc-Steve/dendritic-design-with-flake-parts/wiki/Dendritic_Aspects) - Module design guide
+- [vic/dendrix/Dendritic](https://vic.github.io/dendrix/Dendritic.html) - Benefits of the pattern
+- [Flipping the Configuration Matrix](https://not-a-number.io/2025/refactoring-my-infrastructure-as-code-configurations/) - Pol Dellaiera's blog post
+
+### Frameworks and Tools
+
+- [vic/den](https://github.com/vic/den) - Aspect-oriented dendritic framework
+- [vic/dendritic-unflake](https://github.com/vic/dendritic-unflake) - Non-flake, non-flake-parts examples
+- [vic/import-tree](https://github.com/vic/import-tree) - Automatic module importing
+
+### Real Examples
+
+- [mightyiam/infra](https://github.com/mightyiam/infra) - Pattern author's config
+- [vic/vix](https://github.com/vic/vix)
+- [drupol/nixos-x260](https://github.com/drupol/nixos-x260)
+- [GaetanLepage/nix-config](https://github.com/GaetanLepage/nix-config)
+
+### Community
+
+- [GitHub Discussions](https://github.com/mightyiam/dendritic/discussions)
+- [Matrix room: #dendritic:matrix.org](https://matrix.to/#/#dendritic:matrix.org)

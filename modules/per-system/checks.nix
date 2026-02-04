@@ -6,10 +6,11 @@ let
   inherit (inputs) pre-commit-hooks;
   inherit (nixpkgs) lib;
 
-  hostsConfig = import ../../lib/hosts.nix { inherit lib; };
-  inherit (hostsConfig) hosts;
-
-  systems = builtins.attrValues (builtins.mapAttrs (_name: host: host.system) hosts);
+  # Systems for which we generate checks (matches our hosts: jupiter and mercury)
+  systems = [
+    "x86_64-linux"
+    "aarch64-darwin"
+  ];
 
   getPythonPackages = system: nixpkgs.legacyPackages.${system}.python312.pkgs;
 
