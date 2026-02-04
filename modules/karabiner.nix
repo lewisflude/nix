@@ -5,9 +5,13 @@
   # ==========================================================================
   # Darwin System Configuration
   # ==========================================================================
-  # Uses native nix-darwin service management for Karabiner-Elements
+  # NOTE: services.karabiner-elements.enable is disabled due to a bug in
+  # nix-darwin where the launchd plist files are missing from the derivation.
+  # Install Karabiner-Elements via Homebrew Cask instead:
+  #   brew install --cask karabiner-elements
+  # The home-manager config below still manages the JSON configuration.
   flake.modules.darwin.karabiner = { ... }: {
-    services.karabiner-elements.enable = true;
+    # services.karabiner-elements.enable = true;  # Disabled - use Homebrew
   };
 
   # ==========================================================================
