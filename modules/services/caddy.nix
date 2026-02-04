@@ -51,7 +51,6 @@ in
           "sonarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.sonarr}";
           "radarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.radarr}";
           "lidarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.lidarr}";
-          "readarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.readarr}";
           "usenet.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.sabnzbd}";
 
           # Downloads

@@ -19,7 +19,6 @@
         # Editors (cross-platform)
         editors = {
           helix.enable = true;
-          neovim.enable = true;
           zed.enable = true;
         };
 
@@ -47,7 +46,6 @@
         # Monitors (cross-platform except mangohud)
         monitors = {
           btop.enable = true;
-          htop.enable = true;
           bottom.enable = true;
           procs.enable = true;
           mangohud.enable = isLinux; # Gaming overlay (Linux-only)

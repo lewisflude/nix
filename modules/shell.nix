@@ -152,7 +152,7 @@ in
             ll = "eza -l --git --header";
             find = "fd";
             cat = "bat";
-            top = "htop";
+            top = "btop";
 
             # Directory navigation
             ".." = "cd ..";
@@ -271,7 +271,7 @@ in
         initContent = lib.mkMerge [
           ''
             ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-            AUTO_NOTIFY_IGNORE=("man" "less" "more" "vim" "nano" "htop" "top" "ssh" "scp" "rsync" "watch" "tail" "sleep" "ping" "curl" "wget" "git log" "git diff")
+            AUTO_NOTIFY_IGNORE=("man" "less" "more" "vim" "nano" "btop" "top" "ssh" "scp" "rsync" "watch" "tail" "sleep" "ping" "curl" "wget" "git log" "git diff")
           ''
           (lib.mkBefore ''
             # Skip ZSH config in Cursor Agent shells for clean command execution

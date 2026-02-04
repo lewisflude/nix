@@ -69,7 +69,7 @@ in
             homeManager.gh
             homeManager.git-cliff
             homeManager.helix
-            homeManager.neovim
+            homeManager.nixYourShell
             homeManager.powerlevel10k
             homeManager.userPackages
             homeManager.claudeCode
@@ -114,7 +114,6 @@ in
             enable = true;
             nix = true;
             git = true;
-            neovim = true;
           };
         };
       };

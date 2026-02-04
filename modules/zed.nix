@@ -11,7 +11,7 @@
 
         extraPackages = [
           pkgs.nixd
-          pkgs.nixpkgs-fmt
+          pkgs.nixfmt
           pkgs.vtsls
           pkgs.vscode-langservers-extracted
           pkgs.basedpyright
@@ -36,7 +36,7 @@
               language_servers = [ "nixd" ];
               formatter = {
                 external = {
-                  command = "nixpkgs-fmt";
+                  command = "nixfmt";
                 };
               };
             };
@@ -74,7 +74,7 @@
             nixd = {
               initialization_options = {
                 formatting = {
-                  command = [ "nixpkgs-fmt" ];
+                  command = [ "nixfmt" ];
                 };
               };
             };

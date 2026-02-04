@@ -19,6 +19,7 @@
           { on = "<C-z>"; run = ''shell -- ya emit cd "$(zoxide query -i)"''; desc = "Zoxide smart directory jump"; }
           { on = "<C-s>"; run = ''shell -- ya emit reveal "$(rg --files-with-matches --no-heading . | fzf --preview 'bat --color=always {}')"''; desc = "Search file contents with ripgrep + fzf"; }
           { on = "<C-p>"; run = ''shell -- bat --paging=always "$0"''; desc = "Preview file with bat"; }
+          { on = "<C-g>"; run = ''shell -- lazygit''; desc = "Open lazygit"; }
         ];
       };
     };

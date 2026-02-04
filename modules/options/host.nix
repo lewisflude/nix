@@ -127,7 +127,6 @@ in
           git = mkEnableOption "Git version control" // {
             default = true;
           };
-          neovim = mkEnableOption "Neovim editor";
           containers = mkEnableOption "container tools";
         };
 
@@ -270,7 +269,6 @@ in
           git = mkEnableOption "Git version control" // {
             default = true;
           };
-          neovim = mkEnableOption "Neovim editor";
           containers = mkEnableOption "container tools";
         };
 

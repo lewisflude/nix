@@ -344,7 +344,7 @@ in
           echo "Monitor performance:"
           echo "  mangohud %command%    # FPS overlay (add to launch options)"
           echo "  nvtop                 # GPU monitoring"
-          echo "  htop                  # CPU monitoring"
+          echo "  btop                  # CPU monitoring"
           echo ""
           echo "📊 PERFORMANCE METRICS"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

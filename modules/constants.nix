@@ -43,7 +43,6 @@
           sonarr = 8989;
           radarr = 7878;
           lidarr = 8686;
-          readarr = 8787;
           listenarr = 5000;
           prowlarr = 9696;
           qbittorrent = 8080;
@@ -98,7 +97,10 @@
         gaming = {
           steamLinkDiscovery = 27031;
           steamLinkTcp = 27036;
-          steamLinkUdp = [ 27036 27037 ];
+          steamLinkUdp = [
+            27036
+            27037
+          ];
         };
       };
 

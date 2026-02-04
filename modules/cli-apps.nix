@@ -57,8 +57,31 @@
       programs.awscli.enable = true;
 
       # System monitoring
-      programs.htop.enable = true;
       programs.btop.enable = true;
+
+      # Git TUI - lazygit
+      programs.lazygit = {
+        enable = true;
+        settings = {
+          gui.theme = {
+            lightTheme = false;
+            activeBorderColor = [ "green" "bold" ];
+            inactiveBorderColor = [ "white" ];
+          };
+          git.paging = {
+            colorArg = "always";
+            pager = "delta --dark --paging=never";
+          };
+        };
+      };
+
+      # Fast Python package manager
+      programs.uv = {
+        enable = true;
+        settings = {
+          pip.index-url = "https://pypi.org/simple";
+        };
+      };
 
       # Core utilities and tooling
       home.packages = [
@@ -66,6 +89,9 @@
         pkgs.curl
         pkgs.tree
         pkgs.ouch # Archive extraction
+        pkgs.sd # Modern sed alternative
+        pkgs.hyperfine # Benchmarking tool
+        pkgs.just # Modern make alternative
 
         # Nix Power Tools
         pkgs.nix-output-monitor
@@ -80,6 +106,10 @@
         # Workflow
         pkgs.cocogitto
         pkgs.yaml-language-server
+
+        # Development environments and caching
+        pkgs.devenv
+        pkgs.cachix
       ]
       ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.libnotify ];
     };
