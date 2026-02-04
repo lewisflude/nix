@@ -52,10 +52,10 @@ in
           "radarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.radarr}";
           "lidarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.lidarr}";
           "readarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.readarr}";
-          "sabnzbd.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.sabnzbd}";
+          "usenet.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.sabnzbd}";
 
           # Downloads
-          "qbittorrent.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.qbittorrent}";
+          "torrent.blmt.io" = mkReverseProxy "192.168.15.1:8080";
           "transmission.blmt.io" =
             mkReverseProxy "127.0.0.1:${toString constants.ports.services.transmission}";
 

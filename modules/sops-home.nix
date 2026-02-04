@@ -15,5 +15,8 @@
         keyFile = keyFilePath;
         sshKeyPaths = [ ];
       };
+
+      # Install sops CLI tool for editing secrets
+      home.packages = [ pkgs.sops ];
     };
 }

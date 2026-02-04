@@ -94,6 +94,14 @@
             };
 
             # ═══════════════════════════════════════════════════════════════════
+            # Window Actions
+            # ═══════════════════════════════════════════════════════════════════
+            "Mod+Q" = {
+              action.close-window = { };
+              hotkey-overlay.title = "Close Window";
+            };
+
+            # ═══════════════════════════════════════════════════════════════════
             # DMS Features
             # ═══════════════════════════════════════════════════════════════════
             "Mod+V" = {
@@ -163,6 +171,14 @@
             # ═══════════════════════════════════════════════════════════════════
             # Window Management (beyond DMS defaults)
             # ═══════════════════════════════════════════════════════════════════
+            "Mod+F" = {
+              action.maximize-column = { };
+              hotkey-overlay.title = "Maximize Column";
+            };
+            "Mod+Shift+F" = {
+              action.fullscreen-window = { };
+              hotkey-overlay.title = "Fullscreen Window";
+            };
             "Mod+M" = {
               action.maximize-window-to-edges = { };
               hotkey-overlay.title = "Maximize Window (no gaps)";
@@ -170,6 +186,12 @@
             "Mod+W" = {
               action.toggle-column-tabbed-display = { };
               hotkey-overlay.title = "Toggle Tabbed Display";
+            };
+            # Note: Default Mod+V is toggle-window-floating, but we use it for clipboard
+            # Use Mod+Space as alternative for toggling floating state
+            "Mod+Space" = {
+              action.toggle-window-floating = { };
+              hotkey-overlay.title = "Toggle Window Floating";
             };
             "Mod+Shift+V" = {
               action.switch-focus-between-floating-and-tiling = { };
@@ -247,6 +269,12 @@
               action.consume-or-expel-window-right = { };
               hotkey-overlay.title = "Consume/Expel Window Right";
             };
+            # Note: Default Mod+Comma is consume-window-into-column, but we use it for DMS settings
+            # Using Mod+Shift+Comma as alternative
+            "Mod+Shift+Comma" = {
+              action.consume-window-into-column = { };
+              hotkey-overlay.title = "Consume Window into Column";
+            };
             "Mod+Period" = {
               action.expel-window-from-column = { };
               hotkey-overlay.title = "Expel Window from Column";
@@ -277,14 +305,28 @@
             # ═══════════════════════════════════════════════════════════════════
             # Additional Workspace Navigation (beyond 1-5 that DMS provides)
             # ═══════════════════════════════════════════════════════════════════
+            # Focus workspaces 6-9
             "Mod+6".action.focus-workspace = 6;
             "Mod+7".action.focus-workspace = 7;
             "Mod+8".action.focus-workspace = 8;
             "Mod+9".action.focus-workspace = 9;
-            "Mod+Shift+6".action.move-column-to-workspace = 6;
-            "Mod+Shift+7".action.move-column-to-workspace = 7;
-            "Mod+Shift+8".action.move-column-to-workspace = 8;
-            "Mod+Shift+9".action.move-column-to-workspace = 9;
+
+            # Move window to workspace (consistent with DMS behavior for 1-5)
+            "Mod+Shift+6".action.move-window-to-workspace = 6;
+            "Mod+Shift+7".action.move-window-to-workspace = 7;
+            "Mod+Shift+8".action.move-window-to-workspace = 8;
+            "Mod+Shift+9".action.move-window-to-workspace = 9;
+
+            # Move entire column to workspace (upstream default pattern)
+            "Mod+Ctrl+1".action.move-column-to-workspace = 1;
+            "Mod+Ctrl+2".action.move-column-to-workspace = 2;
+            "Mod+Ctrl+3".action.move-column-to-workspace = 3;
+            "Mod+Ctrl+4".action.move-column-to-workspace = 4;
+            "Mod+Ctrl+5".action.move-column-to-workspace = 5;
+            "Mod+Ctrl+6".action.move-column-to-workspace = 6;
+            "Mod+Ctrl+7".action.move-column-to-workspace = 7;
+            "Mod+Ctrl+8".action.move-column-to-workspace = 8;
+            "Mod+Ctrl+9".action.move-column-to-workspace = 9;
 
             # Workspace up/down
             "Mod+U".action.focus-workspace-down = { };
@@ -320,9 +362,22 @@
               cooldown-ms = 150;
             };
 
+            # Column wheel scrolling
+            "Mod+WheelScrollRight".action.focus-column-right = { };
+            "Mod+WheelScrollLeft".action.focus-column-left = { };
+            "Mod+Ctrl+WheelScrollRight".action.move-column-right = { };
+            "Mod+Ctrl+WheelScrollLeft".action.move-column-left = { };
+
+            # Alternate column wheel scrolling (Shift variants)
+            "Mod+Shift+WheelScrollDown".action.focus-column-right = { };
+            "Mod+Shift+WheelScrollUp".action.focus-column-left = { };
+            "Mod+Ctrl+Shift+WheelScrollDown".action.move-column-right = { };
+            "Mod+Ctrl+Shift+WheelScrollUp".action.move-column-left = { };
+
             # ═══════════════════════════════════════════════════════════════════
             # Screenshots (DMS provides via niri 25.11+ IPC)
             # ═══════════════════════════════════════════════════════════════════
+            "Print".action.screenshot = { };
             "Ctrl+Print".action.screenshot-screen = { };
             "Alt+Print".action.screenshot-window = { };
 

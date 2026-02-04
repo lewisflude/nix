@@ -94,9 +94,21 @@ in
         pkgs.vuetorrent
       ];
 
-      # Configure SOPS secret for WireGuard configuration
+      # Configure SOPS secrets
       sops.secrets."vpn-confinement-qbittorrent" = {
         restartUnits = [ "${namespace}.service" ];
+      };
+
+      # SOPS secrets for WebUI credentials
+      sops.secrets."qbittorrent/webui/username" = {
+        owner = "qbittorrent";
+        group = "media";
+        restartUnits = [ "qbittorrent.service" ];
+      };
+      sops.secrets."qbittorrent/webui/password-pbkdf2" = {
+        owner = "qbittorrent";
+        group = "media";
+        restartUnits = [ "qbittorrent.service" ];
       };
 
       # nsswitch for namespace
@@ -142,16 +154,6 @@ in
         serverConfig = {
           Preferences = {
             AutoTMMEnabled = true;
-            WebUI = {
-              Address = "*";
-              Port = 8080;
-              HostHeaderValidation = false;
-              LocalHostAuth = false;
-              AlternativeUIEnabled = true;
-              RootFolder = "${pkgs.vuetorrent}/share/vuetorrent";
-              CSRFProtection = false;
-              ServerDomains = "*";
-            };
             Advanced = {
               PhysicalMemoryLimit = 8192;
               SendUploadPieceSuggestions = true;
@@ -194,6 +196,39 @@ in
           Restart = "on-failure";
           RestartSec = "10s";
         };
+        # Inject SOPS credentials into config if secrets exist
+        preStart = mkIf (config.sops.secrets ? "qbittorrent/webui/username") ''
+          CONFIG_FILE="/var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf"
+
+          if [ -f "${config.sops.secrets."qbittorrent/webui/username".path}" ] && \
+             [ -f "${config.sops.secrets."qbittorrent/webui/password-pbkdf2".path}" ]; then
+
+            USERNAME=$(cat "${config.sops.secrets."qbittorrent/webui/username".path}")
+            PASSWORD_HASH=$(cat "${config.sops.secrets."qbittorrent/webui/password-pbkdf2".path}")
+
+            # Use a temporary file for atomic updates
+            TEMP_FILE=$(mktemp)
+
+            # Update or add credentials in config
+            if [ -f "$CONFIG_FILE" ]; then
+              ${pkgs.gnused}/bin/sed \
+                -e "/^WebUI\\\\Username=/d" \
+                -e "/^WebUI\\\\Password_PBKDF2=/d" \
+                "$CONFIG_FILE" > "$TEMP_FILE"
+            else
+              echo "[Preferences]" > "$TEMP_FILE"
+            fi
+
+            # Append credentials
+            echo "WebUI\\Username=$USERNAME" >> "$TEMP_FILE"
+            echo "WebUI\\Password_PBKDF2=$PASSWORD_HASH" >> "$TEMP_FILE"
+
+            # Atomic move
+            mv "$TEMP_FILE" "$CONFIG_FILE"
+            chown qbittorrent:media "$CONFIG_FILE"
+            chmod 640 "$CONFIG_FILE"
+          fi
+        '';
       };
 
       # Configure routes for VPN namespace
