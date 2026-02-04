@@ -1,5 +1,5 @@
-# SOPS secrets management configuration
-# Uses top-level config.username from modules/meta.nix
+# SOPS secrets management - Dendritic Pattern
+# Single file containing NixOS, Darwin, and home-manager configurations
 { config, ... }:
 let
   inherit (config) username;
@@ -16,7 +16,9 @@ let
     };
 in
 {
-  # NixOS SOPS configuration
+  # ===========================================================================
+  # NixOS: SOPS configuration
+  # ===========================================================================
   flake.modules.nixos.sops =
     { lib, ... }:
     {
@@ -27,7 +29,7 @@ in
           sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
         };
         gnupg.sshKeyPaths = [ "/etc/ssh/ssh_host_rsa_key" ];
-        defaultSopsFile = ../../secrets/secrets.yaml;
+        defaultSopsFile = ../secrets/secrets.yaml;
         secrets = {
           CIRCLECI_TOKEN = mkSecret { allowUserRead = true; };
           GITHUB_TOKEN = mkSecret { allowUserRead = true; };
@@ -58,7 +60,9 @@ in
       users.users.${username}.extraGroups = [ "sops-secrets" ];
     };
 
-  # Darwin SOPS configuration
+  # ===========================================================================
+  # Darwin: SOPS configuration
+  # ===========================================================================
   flake.modules.darwin.sops = {
     sops = {
       age = {
@@ -67,7 +71,7 @@ in
         sshKeyPaths = [ ]; # Disable SSH key auto-detection on Darwin
       };
       gnupg.sshKeyPaths = [ ]; # Disable gnupg auto-detection on Darwin
-      defaultSopsFile = ../../secrets/secrets.yaml;
+      defaultSopsFile = ../secrets/secrets.yaml;
       secrets = {
         # Same secrets as NixOS but with Darwin-appropriate modes
         CIRCLECI_TOKEN = {
@@ -98,4 +102,25 @@ in
       };
     };
   };
+
+  # ===========================================================================
+  # Home-manager: SOPS configuration
+  # ===========================================================================
+  flake.modules.homeManager.sops =
+    { config, pkgs, ... }:
+    let
+      isDarwin = pkgs.stdenv.isDarwin;
+      homeDir = if isDarwin then "/Users/${config.home.username}" else "/home/${config.home.username}";
+      dataDir = if isDarwin then "${homeDir}/Library/Application Support" else "${homeDir}/.local/share";
+      keyFilePath = if isDarwin then "${dataDir}/sops-nix/key.txt" else "/var/lib/sops-nix/key.txt";
+    in
+    {
+      sops.age = {
+        keyFile = keyFilePath;
+        sshKeyPaths = [ ];
+      };
+
+      # Install sops CLI tool for editing secrets
+      home.packages = [ pkgs.sops ];
+    };
 }

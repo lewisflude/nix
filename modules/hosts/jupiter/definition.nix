@@ -195,7 +195,7 @@ in
         homeManager.desktopApps
         homeManager.niriHome
         homeManager.dms
-        homeManager.flatpakHome
+        homeManager.flatpak
         homeManager.theming
         homeManager.developmentTools
 

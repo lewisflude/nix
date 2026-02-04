@@ -1,10 +1,45 @@
-# SSH configuration
-# Dendritic pattern: Full implementation as flake.modules.homeManager.ssh
+# SSH configuration - Dendritic Pattern
+# Single file containing NixOS service config and home-manager client config
 { config, ... }:
 let
   constants = config.constants;
 in
 {
+  # ===========================================================================
+  # NixOS: OpenSSH server configuration
+  # ===========================================================================
+  flake.modules.nixos.ssh =
+    { lib, ... }:
+    {
+      services.openssh = {
+        enable = true;
+        ports = [ 22 ];
+        settings = {
+          PasswordAuthentication = false;
+          KbdInteractiveAuthentication = false;
+          PubkeyAuthentication = true;
+          PermitEmptyPasswords = false;
+          PermitRootLogin = "no";
+          Compression = false;
+          MaxAuthTries = 3;
+          MaxSessions = 10;
+          MaxStartups = "10:30:100";
+          LoginGraceTime = 30;
+          ClientAliveInterval = 30;
+          ClientAliveCountMax = 10;
+          TCPKeepAlive = false;
+          X11Forwarding = false;
+          AllowTcpForwarding = true;
+          AllowAgentForwarding = true;
+          PermitTunnel = false;
+          UseDns = false;
+        };
+      };
+    };
+
+  # ===========================================================================
+  # Home-manager: SSH client configuration
+  # ===========================================================================
   flake.modules.homeManager.ssh =
     { config, ... }:
     {
