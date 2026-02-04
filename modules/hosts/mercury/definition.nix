@@ -23,6 +23,7 @@ in
         # Base Modules (host options, home-manager structure)
         # ═══════════════════════════════════════════════════════════════════════
         darwin.base
+        darwin.determinate
         darwin.homeManagerBase
 
         # ═══════════════════════════════════════════════════════════════════════
