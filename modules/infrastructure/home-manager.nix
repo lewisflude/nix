@@ -25,6 +25,9 @@ in
             home.homeDirectory = "/home/${username}";
             programs.home-manager.enable = true;
             programs.git.settings.user.email = useremail;
+
+            # Disable options.json generation to avoid derivation context warning
+            manual.json.enable = false;
           };
       };
     };

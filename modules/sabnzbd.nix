@@ -39,6 +39,9 @@ in
       enable = true;
       inherit user group;
 
+      # Explicitly disable deprecated configFile to use settings
+      configFile = null;
+
       settings = {
         misc = {
           inherit port;
