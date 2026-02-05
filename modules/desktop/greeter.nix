@@ -1,7 +1,7 @@
 # Greeter Configuration
 # greetd with DMS greeter and auto-login support
 # Follows: https://danklinux.com/docs/dankmaterialshell/nixos-flake
-{ config, inputs, ... }:
+{ config, ... }:
 let
   inherit (config) username;
 in

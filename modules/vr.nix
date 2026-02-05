@@ -17,8 +17,8 @@
       };
 
       # ADB for Quest debugging and sideloading
-      programs.adb.enable = true;
-      users.users.${config.username}.extraGroups = [ "adbusers" ];
+      # Note: programs.adb removed in NixOS (systemd 258 handles uaccess rules)
+      environment.systemPackages = [ pkgs.android-tools ];
     };
 
   flake.modules.homeManager.vr =
