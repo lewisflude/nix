@@ -36,16 +36,12 @@ in
           VPN_GATEWAY="''${VPN_GATEWAY:-10.2.0.1}"
           LEASE_DURATION="${toString leaseDuration}"
           STATE_FILE="/var/lib/protonvpn-portforward.state"
-          COOKIE_FILE="/tmp/qbittorrent_portforward_cookie.txt"
           QBT_HOST="127.0.0.1:${toString qbtWebUIPort}"
           LOG_PREFIX="[ProtonVPN-PortForward]"
 
           log_info() { echo "$LOG_PREFIX INFO: $*" >&2; }
           log_error() { echo "$LOG_PREFIX ERROR: $*" >&2; }
           log_success() { echo "$LOG_PREFIX SUCCESS: $*" >&2; }
-
-          cleanup() { rm -f "$COOKIE_FILE"; }
-          trap cleanup EXIT
 
           # Check if VPN namespace exists
           if ! ip netns list | grep -q "^$NAMESPACE"; then
@@ -96,22 +92,9 @@ in
             exit 1
           fi
 
-          # Login to qBittorrent (from within namespace for localhost bypass)
+          # Get current qBittorrent port (localhost auth bypass enabled)
           log_info "Connecting to qBittorrent WebUI at http://$QBT_HOST..."
-          LOGIN_RESPONSE=$(ip netns exec "$NAMESPACE" curl -s -m 10 -c "$COOKIE_FILE" -X POST \
-            "http://$QBT_HOST/api/v2/auth/login" \
-            --data-urlencode "username=admin" \
-            --data-urlencode "password=admin" 2>&1 || echo "FAILED")
-
-          if [[ "$LOGIN_RESPONSE" == "Ok." ]] || [[ "$LOGIN_RESPONSE" == "Fails." ]]; then
-            log_success "Connected to qBittorrent API (localhost bypass)"
-          else
-            log_error "Failed to connect to qBittorrent: $LOGIN_RESPONSE"
-            exit 1
-          fi
-
-          # Get current qBittorrent port
-          PREFS=$(ip netns exec "$NAMESPACE" curl -s -m 10 -b "$COOKIE_FILE" \
+          PREFS=$(ip netns exec "$NAMESPACE" curl -s -m 10 \
             "http://$QBT_HOST/api/v2/app/preferences" 2>&1 || echo "{}")
           CURRENT_PORT=$(echo "$PREFS" | grep -oP '"listen_port":\K[0-9]+' || echo "0")
 
@@ -125,7 +108,7 @@ in
             log_info "Updating qBittorrent port from $CURRENT_PORT to $PUBLIC_PORT..."
 
             # Update port AND interface binding
-            UPDATE_RESPONSE=$(ip netns exec "$NAMESPACE" curl -s -m 10 -b "$COOKIE_FILE" -X POST \
+            UPDATE_RESPONSE=$(ip netns exec "$NAMESPACE" curl -s -m 10 -X POST \
               "http://$QBT_HOST/api/v2/app/setPreferences" \
               --data "json={\"listen_port\": $PUBLIC_PORT, \"current_interface_name\": \"${namespace}0\", \"current_interface_address\": \"10.2.0.2\"}" \
               2>&1 || echo "ERROR")

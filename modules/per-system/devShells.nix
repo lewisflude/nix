@@ -1,10 +1,9 @@
 # Per-system development shells
 # Dendritic pattern: Provides dev shells for each system
-{ inputs, config, ... }:
+{ inputs, config, lib, ... }:
 let
   inherit (inputs) nixpkgs;
-  inherit (nixpkgs) lib;
-  functionsLib = import ../../lib/functions.nix { inherit lib; };
+  shared = import ../_shared.nix { inherit lib inputs; };
 in
 {
   perSystem =
@@ -14,8 +13,8 @@ in
       pkgs =
         config._module.args.pkgs or (import nixpkgs {
           inherit system;
-          overlays = functionsLib.mkOverlays { inherit inputs system; };
-          config = functionsLib.mkPkgsConfig;
+          overlays = shared.overlaysList system;
+          config = shared.myLib.mkPkgsConfig;
         });
     in
     {

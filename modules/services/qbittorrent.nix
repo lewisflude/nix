@@ -153,6 +153,9 @@ in
         openFirewall = false; # Handled by VPN namespace
         serverConfig = {
           Preferences = {
+            WebUI = {
+              LocalHostAuth = false; # Allow localhost API access without auth (secure: only accessible within VPN namespace)
+            };
             AutoTMMEnabled = true;
             Advanced = {
               PhysicalMemoryLimit = 8192;
