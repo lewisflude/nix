@@ -70,8 +70,13 @@ let
         homeDir = homeDir;
         configDir = username: "${homeDir username}/.config";
         dataDir =
-          username: if isDarwin then "${homeDir username}/Library/Application Support" else "${homeDir username}/.local/share";
-        cacheDir = username: if isDarwin then "${homeDir username}/Library/Caches" else "${homeDir username}/.cache";
+          username:
+          if isDarwin then
+            "${homeDir username}/Library/Application Support"
+          else
+            "${homeDir username}/.local/share";
+        cacheDir =
+          username: if isDarwin then "${homeDir username}/Library/Caches" else "${homeDir username}/.cache";
         platformPackage = linuxPkg: darwinPkg: if isDarwin then darwinPkg else linuxPkg;
         platformPackages = linuxPkgs: darwinPkgs: if isDarwin then darwinPkgs else linuxPkgs;
       };

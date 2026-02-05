@@ -60,7 +60,7 @@
         enableSystemMonitoring = true;
         enableVPN = true;
         enableDynamicTheming = true;
-        enableAudioWavelength = true;
+        enableAudioWavelength = false; # Disabled: Qt6 ffmpeg resampler crash
         enableCalendarEvents = true;
         enableClipboardPaste = true;
       };

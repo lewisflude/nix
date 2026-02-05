@@ -1,6 +1,11 @@
 # Per-system development shells
 # Dendritic pattern: Provides dev shells for each system
-{ inputs, config, lib, ... }:
+{
+  inputs,
+  config,
+  lib,
+  ...
+}:
 let
   inherit (inputs) nixpkgs;
   shared = import ../_shared.nix { inherit lib inputs; };

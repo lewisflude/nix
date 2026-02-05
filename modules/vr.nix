@@ -4,7 +4,7 @@
 { config, ... }:
 {
   flake.modules.nixos.vr =
-    { pkgs, ... }:
+    { config, lib, pkgs, ... }:
     {
       services.wivrn = {
         enable = true;
@@ -15,6 +15,15 @@
         # Auto-launch WayVR when headset connects
         config.json.application = [ pkgs.wayvr ];
       };
+
+      # FIXME: Remove when https://github.com/NixOS/nixpkgs/issues/482152 is fixed
+      # The nixpkgs module passes --systemd but nixpkgs-xr's wivrn removed that flag
+      systemd.user.services.wivrn.serviceConfig.ExecStart = let
+        wivrn = pkgs.wivrn.override { cudaSupport = true; };
+        cfg = config.services.wivrn;
+        configFormat = pkgs.formats.json { };
+        configFile = configFormat.generate "config.json" cfg.config.json;
+      in lib.mkForce "${wivrn}/bin/wivrn-server -f ${configFile}";
 
       # ADB for Quest debugging and sideloading
       # Note: programs.adb removed in NixOS (systemd 258 handles uaccess rules)

@@ -1,6 +1,11 @@
 # Per-system formatters
 # Dendritic pattern: Provides nix fmt for each system
-{ inputs, config, lib, ... }:
+{
+  inputs,
+  config,
+  lib,
+  ...
+}:
 let
   inherit (inputs) nixpkgs;
   shared = import ../_shared.nix { inherit lib inputs; };

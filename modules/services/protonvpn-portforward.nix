@@ -49,9 +49,9 @@ in
             exit 0
           fi
 
-          # Check if VPN gateway is reachable within the namespace
-          if ! ip netns exec "$NAMESPACE" ip route | grep -q "$VPN_GATEWAY"; then
-            log_info "VPN gateway $VPN_GATEWAY not reachable in namespace - VPN not connected, skipping"
+          # Check if WireGuard interface is up in the namespace
+          if ! ip netns exec "$NAMESPACE" ip link show "${namespace}0" 2>/dev/null | grep -q "state UP\|state UNKNOWN"; then
+            log_info "WireGuard interface ${namespace}0 not up in namespace - VPN not connected, skipping"
             exit 0
           fi
 

@@ -1,6 +1,12 @@
 # Per-system CLI apps
 # Dendritic pattern: Provides CLI apps for each system
-{ inputs, config, self, lib, ... }:
+{
+  inputs,
+  config,
+  self,
+  lib,
+  ...
+}:
 let
   inherit (inputs) nixpkgs;
   shared = import ../_shared.nix { inherit lib inputs; };
