@@ -51,32 +51,6 @@ in
           emulators = mkEnableOption "gaming emulators";
         };
 
-        # VR
-        vr = {
-          enable = mkEnableOption "VR support";
-          wivrn = {
-            enable = mkEnableOption "WiVRn wireless VR";
-            autoStart = mkEnableOption "auto-start WiVRn" // {
-              default = true;
-            };
-            defaultRuntime = mkEnableOption "set WiVRn as default OpenXR runtime" // {
-              default = true;
-            };
-            openFirewall = mkEnableOption "open firewall for WiVRn" // {
-              default = true;
-            };
-          };
-          steamvr = mkEnableOption "SteamVR";
-          immersed = {
-            enable = mkEnableOption "Immersed VR";
-            openFirewall = mkEnableOption "open firewall for Immersed" // {
-              default = true;
-            };
-          };
-          performance = mkEnableOption "VR performance optimizations" // {
-            default = true;
-          };
-        };
 
         # Desktop
         desktop = {
@@ -252,12 +226,6 @@ in
           enable = mkEnableOption "gaming";
         };
 
-        vr = {
-          enable = mkEnableOption "VR";
-          immersed = {
-            enable = mkEnableOption "Immersed VR";
-          };
-        };
 
         # Development (same as NixOS for cross-platform consistency)
         development = {

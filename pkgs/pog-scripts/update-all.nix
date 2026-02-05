@@ -120,10 +120,6 @@ pog.pog {
           git diff --quiet overlays/_sources/ 2>/dev/null && echo "overlays/_sources/: No changes" || echo "overlays/_sources/: Updated"
         fi
 
-        if ! ${flag "skip_immersed"}; then
-          git diff --quiet overlays/default.nix 2>/dev/null && echo "Immersed VR: No changes" || echo "Immersed VR: Updated"
-        fi
-
         echo ""
         green "✅ Update completed!"
         cyan "Next steps:"

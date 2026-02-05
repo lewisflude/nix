@@ -84,12 +84,6 @@
             tcp = 9757;
             udp = 9757;
           };
-
-          immersed = {
-            tcpStart = 5230;
-            udpStart = 5230;
-          };
-
           mdns = 5353;
         };
 

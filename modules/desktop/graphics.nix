@@ -11,7 +11,7 @@
           enable32Bit = true; # Required for Steam/Wine/VR
           extraPackages = [
             pkgs.nvidia-vaapi-driver # Hardware video decode
-            pkgs.libva-vdpau-driver # Required for Immersed VR
+            pkgs.libva-vdpau-driver # VDPAU backend for VA-API
           ];
         };
 

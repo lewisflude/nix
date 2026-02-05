@@ -84,7 +84,6 @@ in
   # OneTBB - Disable tests on i686-linux (32-bit)
   # The onetbb test suite has known flakiness issues on 32-bit systems,
   # particularly in sandboxed build environments (SIGABRT crashes in threading tests).
-  # This is a common issue affecting immersed and other VR packages that need 32-bit libraries.
   # Disabling tests on i686-linux is the standard nixpkgs approach for this issue.
   onetbb-fix = _final: prev: {
     onetbb =
@@ -148,69 +147,7 @@ in
       java25 = jdk25;
     };
 
-  # xrizer-multilib - 32-bit and 64-bit OpenVR to OpenXR translation
-  # Required for 32-bit VR games like Half-Life 2: VR mod with WiVRn
-  # Based on: https://github.com/NixOS/nixpkgs/issues/448128#issuecomment-2480632726
-  xrizer-multilib = final: prev: {
-    xrizer-multilib =
-      let
-        # Helper to build xrizer with platform-specific library path
-        buildXrizerForPlatform =
-          pkgs: platformPath:
-          (pkgs.xrizer.overrideAttrs (oldAttrs: {
-            postInstall = ''
-              mkdir -p $out/lib/xrizer/${platformPath}
-              mv "$out/lib/libxrizer.so" "$out/lib/xrizer/${platformPath}/vrclient.so"
-            '';
-          }));
 
-        # Build for both 64-bit and 32-bit
-        xrizer-64bit = buildXrizerForPlatform prev "linux_x86_64";
-        xrizer-32bit = buildXrizerForPlatform prev.pkgsi686Linux "linux_i686";
-      in
-      prev.symlinkJoin {
-        name = "xrizer-multilib";
-        paths = [
-          xrizer-64bit
-          xrizer-32bit
-        ];
-        meta = xrizer-64bit.meta // {
-          description = "OpenVR to OpenXR translation layer (multilib: x86_64 + i686)";
-        };
-      };
-  };
-
-  # Immersed VR - Use latest version from static URL
-  # This pulls the latest release directly instead of using archived versions
-  immersed-latest = _final: prev: {
-    immersed = prev.immersed.overrideAttrs (oldAttrs: {
-      version = "11.0.0-latest";
-      src =
-        if prev.stdenv.isLinux && prev.stdenv.isx86_64 then
-          prev.fetchurl {
-            url = "https://static.immersed.com/dl/Immersed-x86_64.AppImage";
-            hash = "sha256-GbckZ/WK+7/PFQvTfUwwePtufPKVwIwSPh+Bo/cG7ko=";
-          }
-        else if prev.stdenv.isLinux && prev.stdenv.isAarch64 then
-          prev.fetchurl {
-            url = "https://static.immersed.com/dl/Immersed-aarch64.AppImage";
-            # Note: Hash needs to be verified for aarch64
-            hash = "sha256-3BokV30y6QRjE94K7JQ6iIuQw1t+h3BKZY+nEFGTVHI=";
-          }
-        else if prev.stdenv.isDarwin then
-          prev.fetchurl {
-            url = "https://static.immersed.com/dl/Immersed.dmg";
-            # Note: Hash needs to be verified for macOS
-            hash = "sha256-lmSkatB75Bztm19aCC50qrd/NV+HQX9nBMOTxIguaqI=";
-          }
-        else
-          throw "Unsupported system: ${prev.stdenv.system}";
-
-      meta = oldAttrs.meta // {
-        description = "VR coworking platform (latest from static URL)";
-      };
-    });
-  };
 
   # Danksearch - search utility from Dank Linux ecosystem
   danksearch =

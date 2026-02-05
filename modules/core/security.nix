@@ -123,11 +123,9 @@ in
         };
       };
 
+      # Note: GPG agent is configured via home-manager in modules/gpg.nix
+      # (provides more complete config with pinentry, cache TTLs, etc.)
       programs = {
-        gnupg.agent = {
-          enable = true;
-          enableSSHSupport = true;
-        };
         _1password.enable = true;
         _1password-gui = {
           enable = true;

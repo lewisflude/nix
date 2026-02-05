@@ -1,5 +1,10 @@
 # GPG and YubiKey configuration - ALL config classes in ONE file
 # Dendritic pattern: One feature = one file spanning all configurations
+#
+# This module provides:
+# - NixOS: PC/SC daemon, udev rules, GPG smartcard support, touch detector
+# - Darwin: GPG packages
+# - Home-Manager: GPG agent, signing config, YubiKey tools
 { config, ... }:
 {
   # ═══════════════════════════════════════════════════════════════════
@@ -8,8 +13,24 @@
   flake.modules.nixos.gpg =
     { pkgs, ... }:
     {
+      # PC/SC daemon for smartcard communication (required for YubiKey)
       services.pcscd.enable = true;
-      services.udev.packages = [ pkgs.yubikey-personalization ];
+
+      # udev rules for YubiKey device access
+      services.udev.packages = [
+        pkgs.yubikey-personalization # YubiKey 1-4 (EOL Feb 2026)
+        pkgs.libfido2 # Modern FIDO2/U2F support for YubiKey 5 series
+      ];
+
+      # Enable GPG smartcard support
+      hardware.gpgSmartcards.enable = true;
+
+      # YubiKey touch detector: Visual notifications when YubiKey needs touch
+      programs.yubikey-touch-detector = {
+        enable = true;
+        libnotify = true;
+      };
+
       environment.systemPackages = [
         pkgs.gnupg
         pkgs.yubikey-personalization
@@ -41,12 +62,15 @@
     let
       isDarwin = pkgs.stdenv.isDarwin;
       gtkThemeName = config.theming.signal.gtk.themeName or null;
+      # Cache TTLs following drduh/YubiKey-Guide recommendations
+      # Note: These primarily affect non-smartcard operations; YubiKey PIN
+      # is cached by hardware until removal (these don't override that)
       pinCacheTtl = {
         gpg = {
-          default = 3600; # 1 hour - PIN stays cached after last use
-          max = 43200; # 12 hours - forces re-entry after absolute time
+          default = 60; # 1 minute idle timeout (drduh recommendation)
+          max = 120; # 2 minutes max (drduh recommendation)
         };
-        ssh = 3600;
+        ssh = 60; # 1 minute for SSH keys
       };
     in
     {
@@ -102,7 +126,7 @@
         defaultCacheTtl = pinCacheTtl.gpg.default;
         maxCacheTtl = pinCacheTtl.gpg.max;
         defaultCacheTtlSsh = pinCacheTtl.ssh;
-        maxCacheTtlSsh = pinCacheTtl.ssh;
+        maxCacheTtlSsh = pinCacheTtl.gpg.max; # Use same max as GPG
         grabKeyboardAndMouse = true;
         noAllowExternalCache = true;
         extraConfig = "allow-preset-passphrase\nallow-loopback-pinentry";

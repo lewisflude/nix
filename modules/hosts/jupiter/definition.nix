@@ -26,6 +26,7 @@ in
         inputs.dms.nixosModules.default
         inputs.dms.nixosModules.greeter
         inputs.solaar.nixosModules.default
+        inputs.nixpkgs-xr.nixosModules.nixpkgs-xr
 
         # ═══════════════════════════════════════════════════════════════════════
         # Core Modules (dendritic: each concern has its own module)
@@ -53,7 +54,7 @@ in
         nixos.keyboard
         nixos.mouse
         nixos.usb
-        nixos.yubikey
+        nixos.gpg # GPG + YubiKey hardware support (merged module)
 
         # ═══════════════════════════════════════════════════════════════════════
         # Desktop Environment (dendritic: explicit imports, not aggregation)
@@ -74,7 +75,6 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         nixos.gaming
         nixos.vr
-        nixos.immersed
 
         # ═══════════════════════════════════════════════════════════════════════
         # Audio
@@ -236,21 +236,6 @@ in
             performance = true;
           };
 
-          vr = {
-            enable = true;
-            wivrn = {
-              enable = true;
-              autoStart = true;
-              defaultRuntime = true;
-              openFirewall = true;
-            };
-            steamvr = true;
-            immersed = {
-              enable = true;
-              openFirewall = true;
-            };
-            performance = true;
-          };
 
           productivity = {
             enable = true;

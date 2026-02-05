@@ -31,6 +31,7 @@ in
           X11Forwarding = false;
           AllowTcpForwarding = true;
           AllowAgentForwarding = true;
+          StreamLocalBindUnlink = true;
           PermitTunnel = false;
           UseDns = false;
         };
