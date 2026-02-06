@@ -17,8 +17,6 @@
   flake.modules.homeManager.dms =
     { pkgs, lib, ... }:
     lib.mkIf pkgs.stdenv.isLinux {
-      # Install optional DMS tools
-      # https://danklinux.com/docs/dankmaterialshell/cli-doctor#optional-features
       home.packages = [ pkgs.danksearch ];
 
       programs.dank-material-shell = {
@@ -27,6 +25,8 @@
         # Use quickshell-git for full feature support (Polkit, IdleMonitor, etc.)
         # https://danklinux.com/docs/dankmaterialshell/cli-doctor#quickshell
         quickshell.package = inputs.quickshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
+        settings.soundsEnabled = true;
 
         # Systemd service management
         # https://danklinux.com/docs/dankmaterialshell/home-manager#core-options
@@ -60,7 +60,7 @@
         enableSystemMonitoring = true;
         enableVPN = true;
         enableDynamicTheming = true;
-        enableAudioWavelength = false; # Disabled: Qt6 ffmpeg resampler crash
+        enableAudioWavelength = true;
         enableCalendarEvents = true;
         enableClipboardPaste = true;
       };

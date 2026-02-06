@@ -236,7 +236,10 @@ let
         if isLinux then
           final: _prev:
           let
-            wivrn64 = final.wivrn.override { cudaSupport = true; };
+            wivrn64 = final.wivrn.override {
+              cudaSupport = true;
+              ovrCompatSearchPaths = "${final.xrizer-multilib}/lib/xrizer:${final.opencomposite}/lib/opencomposite";
+            };
             # Build only the client library for 32-bit (avoids Qt/dashboard dependencies)
             wivrn32 = final.pkgsi686Linux.wivrn.override { clientLibOnly = true; };
           in
