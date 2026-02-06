@@ -228,6 +228,100 @@ let
           inputs.nixpkgs-xr.overlays.default
         else
           (_final: _prev: { });
+
+      # wivrn multilib (64-bit + 32-bit) for OpenXR compatibility
+      # Some older VR games and Proton titles need 32-bit OpenXR runtime
+      # Uses clientLibOnly=true for 32-bit to avoid Qt dependencies that don't support i686
+      wivrn-multilib =
+        if isLinux then
+          final: _prev:
+          let
+            wivrn64 = final.wivrn.override { cudaSupport = true; };
+            # Build only the client library for 32-bit (avoids Qt/dashboard dependencies)
+            wivrn32 = final.pkgsi686Linux.wivrn.override { clientLibOnly = true; };
+          in
+          {
+            wivrn-multilib = final.runCommand "wivrn-multilib" {
+              meta.mainProgram = "wivrn-server";
+            } ''
+              mkdir -p $out/bin
+              mkdir -p $out/lib/wivrn
+              mkdir -p $out/lib32/wivrn
+              mkdir -p $out/share/openxr/1
+
+              # Copy 64-bit server and binaries
+              cp -r ${wivrn64}/bin/* $out/bin/ 2>/dev/null || true
+
+              # Copy 64-bit libraries
+              cp -r ${wivrn64}/lib/wivrn/* $out/lib/wivrn/ 2>/dev/null || true
+
+              # Copy 32-bit OpenXR runtime libraries
+              if [ -d ${wivrn32}/lib/wivrn ]; then
+                cp -r ${wivrn32}/lib/wivrn/* $out/lib32/wivrn/
+              fi
+
+              # Generate 64-bit OpenXR manifest with correct paths
+              cat > $out/share/openxr/1/openxr_wivrn.json << EOF
+              {
+                "file_format_version": "1.0.0",
+                "runtime": {
+                  "name": "Monado",
+                  "library_path": "$out/lib/wivrn/libopenxr_wivrn.so",
+                  "MND_libmonado_path": "$out/lib/wivrn/libmonado_wivrn.so"
+                }
+              }
+              EOF
+
+              # Generate 32-bit OpenXR manifest with correct paths
+              cat > $out/share/openxr/1/openxr_wivrn.i686.json << EOF
+              {
+                "file_format_version": "1.0.0",
+                "runtime": {
+                  "name": "Monado",
+                  "library_path": "$out/lib32/wivrn/libopenxr_wivrn.so",
+                  "MND_libmonado_path": "$out/lib32/wivrn/libmonado_wivrn.so"
+                }
+              }
+              EOF
+            '';
+          }
+        else
+          (_final: _prev: { });
+
+      # xrizer multilib (64-bit + 32-bit) for OpenVR compatibility
+      # Some older VR games and Proton titles need 32-bit vrclient.so
+      xrizer-multilib =
+        if isLinux then
+          final: _prev: {
+            xrizer-multilib = final.runCommand "xrizer-multilib" { } ''
+              mkdir -p $out/lib/xrizer/bin/linux64
+              mkdir -p $out/lib/xrizer/bin/linux32
+
+              # 64-bit: find vrclient.so in the xrizer package
+              vrclient64=$(find ${final.xrizer} -name 'vrclient.so' -type f | head -n1)
+              if [ -n "$vrclient64" ]; then
+                cp "$vrclient64" $out/lib/xrizer/bin/linux64/
+              else
+                echo "ERROR: Could not find 64-bit vrclient.so in xrizer package"
+                echo "Package contents:"
+                find ${final.xrizer} -type f
+                exit 1
+              fi
+
+              # 32-bit: find vrclient.so in the i686 xrizer package
+              vrclient32=$(find ${final.pkgsi686Linux.xrizer} -name 'vrclient.so' -type f | head -n1)
+              if [ -n "$vrclient32" ]; then
+                cp "$vrclient32" $out/lib/xrizer/bin/linux32/
+              else
+                echo "ERROR: Could not find 32-bit vrclient.so in i686 xrizer package"
+                echo "Package contents:"
+                find ${final.pkgsi686Linux.xrizer} -type f
+                exit 1
+              fi
+            '';
+          }
+        else
+          (_final: _prev: { });
     };
 
   overlaySet = mkOverlaySet;

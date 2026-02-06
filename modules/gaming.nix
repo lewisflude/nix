@@ -4,7 +4,7 @@
 # - https://lvra.gitlab.io/docs/distros/nixos/
 {
   flake.modules.nixos.gaming =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       programs.steam = {
         enable = true;
@@ -19,23 +19,23 @@
             unset TZ
             export PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1
           '';
-          # Allow Steam sandbox to access WiVRn IPC socket
           extraEnv = {
             PRESSURE_VESSEL_FILESYSTEMS_RW = "$XDG_RUNTIME_DIR/wivrn/comp_ipc";
+            PRESSURE_VESSEL_FILESYSTEMS_RO = "/nix/store";
           };
-          extraPkgs =
-            pkgs': [
-              pkgs'.xorg.libXcursor
-              pkgs'.xorg.libXi
-              pkgs'.xorg.libXinerama
-              pkgs'.xorg.libXScrnSaver
-              pkgs'.libpng
-              pkgs'.libpulseaudio
-              pkgs'.libvorbis
-              pkgs'.stdenv.cc.cc.lib
-              pkgs'.libkrb5
-              pkgs'.keyutils
-            ];
+          extraPkgs = pkgs': [
+            pkgs'.xorg.libXcursor
+            pkgs'.xorg.libXi
+            pkgs'.xorg.libXinerama
+            pkgs'.xorg.libXScrnSaver
+            pkgs'.libpng
+            pkgs'.libpulseaudio
+            pkgs'.libvorbis
+            pkgs'.stdenv.cc.cc.lib
+            pkgs'.libkrb5
+            pkgs'.keyutils
+            pkgs.xrizer-multilib # Use outer pkgs (has our overlay)
+          ];
         };
       };
 

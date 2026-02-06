@@ -1,32 +1,37 @@
-# VR Module - WiVRn for Quest headsets
-# Reference: https://lvra.gitlab.io/docs/distros/nixos/
-# Packages from nixpkgs-xr overlay (wivrn, xrizer, wayvr, etc.)
+# VR Module - WiVRn + xrizer for Quest headsets
+# References:
+# - https://lvra.gitlab.io/docs/distros/nixos/
+# - https://wiki.nixos.org/wiki/VR
 { config, ... }:
 {
   flake.modules.nixos.vr =
-    { config, lib, pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    let
+      wivrnPkg = pkgs.wivrn-multilib;
+    in
     {
       services.wivrn = {
         enable = true;
-        package = pkgs.wivrn.override { cudaSupport = true; };
+        package = wivrnPkg;
         defaultRuntime = true;
         openFirewall = true;
-
-        # Auto-launch WayVR when headset connects
-        config.json.application = [ pkgs.wayvr ];
+        steam.importOXRRuntimes = true;
       };
 
       # FIXME: Remove when https://github.com/NixOS/nixpkgs/issues/482152 is fixed
-      # The nixpkgs module passes --systemd but nixpkgs-xr's wivrn removed that flag
-      systemd.user.services.wivrn.serviceConfig.ExecStart = let
-        wivrn = pkgs.wivrn.override { cudaSupport = true; };
-        cfg = config.services.wivrn;
-        configFormat = pkgs.formats.json { };
-        configFile = configFormat.generate "config.json" cfg.config.json;
-      in lib.mkForce "${wivrn}/bin/wivrn-server -f ${configFile}";
+      systemd.user.services.wivrn.serviceConfig.ExecStart =
+        let
+          cfg = config.services.wivrn;
+          configFormat = pkgs.formats.json { };
+          configFile = configFormat.generate "config.json" cfg.config.json;
+        in
+        lib.mkForce "${wivrnPkg}/bin/wivrn-server -f ${configFile}";
 
-      # ADB for Quest debugging and sideloading
-      # Note: programs.adb removed in NixOS (systemd 258 handles uaccess rules)
       environment.systemPackages = [ pkgs.android-tools ];
     };
 
@@ -39,22 +44,17 @@
       ...
     }:
     lib.mkIf (osConfig.services.wivrn.enable or false) {
-      # OpenXR runtime for sandboxed Steam apps
-      xdg.configFile."openxr/1/active_runtime.json".source =
-        "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";
-
-      # OpenVR paths for xrizer (from nixpkgs-xr)
-      xdg.configFile."openvr/openvrpaths.vrpath".text =
-        let
-          steam = "${config.xdg.dataHome}/Steam";
-        in
-        builtins.toJSON {
+      # xrizer OpenVR paths - points to nix store (accessible via PRESSURE_VESSEL_FILESYSTEMS_RO)
+      xdg.configFile."openvr/openvrpaths.vrpath" = {
+        force = true;
+        text = builtins.toJSON {
           version = 1;
           jsonid = "vrpathreg";
           external_drivers = null;
-          config = [ "${steam}/config" ];
-          log = [ "${steam}/logs" ];
-          runtime = [ "${pkgs.xrizer}/lib/xrizer" ];
+          config = [ "${config.xdg.dataHome}/Steam/config" ];
+          log = [ "${config.xdg.dataHome}/Steam/logs" ];
+          runtime = [ "${pkgs.xrizer-multilib}/lib/xrizer" ];
         };
+      };
     };
 }
