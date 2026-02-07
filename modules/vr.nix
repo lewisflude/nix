@@ -11,13 +11,9 @@
       pkgs,
       ...
     }:
-    let
-      wivrnPkg = pkgs.wivrn-multilib;
-    in
     {
       services.wivrn = {
         enable = true;
-        package = wivrnPkg;
         defaultRuntime = true;
         openFirewall = true;
         steam.importOXRRuntimes = true;
@@ -30,7 +26,7 @@
           configFormat = pkgs.formats.json { };
           configFile = configFormat.generate "config.json" cfg.config.json;
         in
-        lib.mkForce "${wivrnPkg}/bin/wivrn-server -f ${configFile}";
+        lib.mkForce "${cfg.package}/bin/wivrn-server -f ${configFile}";
 
       environment.systemPackages = [ pkgs.android-tools ];
     };
@@ -53,7 +49,21 @@
           external_drivers = null;
           config = [ "${config.xdg.dataHome}/Steam/config" ];
           log = [ "${config.xdg.dataHome}/Steam/logs" ];
-          runtime = [ "${pkgs.xrizer-multilib}/lib/xrizer" ];
+          runtime = [ "${pkgs.xrizer}/lib/xrizer" ];
+        };
+      };
+
+      # 32-bit OpenXR runtime manifest for 32-bit VR games (HL2VR, Portal VR)
+      # The 32-bit OpenXR loader looks for active_runtime.i686.json before active_runtime.json
+      xdg.configFile."openxr/1/active_runtime.i686.json" = {
+        force = true;
+        text = builtins.toJSON {
+          file_format_version = "1.0.0";
+          runtime = {
+            name = "Monado";
+            library_path = "${pkgs.wivrn}/lib32/wivrn/libopenxr_wivrn.so";
+            MND_libmonado_path = "${pkgs.wivrn}/lib32/wivrn/libmonado_wivrn.so";
+          };
         };
       };
     };

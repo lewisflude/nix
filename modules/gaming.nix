@@ -5,6 +5,11 @@
 {
   flake.modules.nixos.gaming =
     { pkgs, ... }:
+    let
+      patchedBwrap = pkgs.bubblewrap.overrideAttrs (o: {
+        patches = (o.patches or [ ]) ++ [ ./bwrap.patch ];
+      });
+    in
     {
       programs.steam = {
         enable = true;
@@ -15,6 +20,19 @@
           pkgs.proton-ge-rtsp-bin
         ];
         package = pkgs.steam.override {
+          buildFHSEnv =
+            args:
+            (
+              (pkgs.buildFHSEnv.override {
+                bubblewrap = patchedBwrap;
+              })
+              (
+                args
+                // {
+                  extraBwrapArgs = (args.extraBwrapArgs or [ ]) ++ [ "--cap-add ALL" ];
+                }
+              )
+            );
           extraProfile = ''
             unset TZ
             export PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1
@@ -34,19 +52,12 @@
             pkgs'.stdenv.cc.cc.lib
             pkgs'.libkrb5
             pkgs'.keyutils
-            pkgs.xrizer-multilib # Use outer pkgs (has our overlay)
+            pkgs.xrizer # Use outer pkgs (has our overlay)
           ];
         };
       };
 
-      programs.gamescope = {
-        enable = true;
-        capSysNice = true;
-      };
-
       programs.gamemode.enable = true;
-
-      environment.systemPackages = [ pkgs.gamescope-wsi ];
     };
 
   flake.modules.homeManager.gaming =

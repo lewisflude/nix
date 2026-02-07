@@ -21,8 +21,9 @@ in
         ];
       };
 
-      # Use pre-computed overlays (no inputs access needed here)
-      nixpkgs.overlays = nixosOverlays;
+      # Use pre-computed overlays, ordered after external NixOS module overlays
+      # (e.g. nixpkgs-xr) so our overrides (wivrn/xrizer multilib) see their packages
+      nixpkgs.overlays = lib.mkAfter nixosOverlays;
     };
 
   # Darwin nixpkgs configuration
@@ -34,7 +35,7 @@ in
         allowUnfreePredicate = _: true;
       };
 
-      # Use pre-computed overlays (no inputs access needed here)
-      nixpkgs.overlays = darwinOverlays;
+      # Use pre-computed overlays
+      nixpkgs.overlays = lib.mkAfter darwinOverlays;
     };
 }

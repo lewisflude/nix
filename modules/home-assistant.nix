@@ -49,7 +49,31 @@ in
       # Custom components and Lovelace modules
       extraComponents = [ ];
       customLovelaceModules = [ ];
-      automations = [ ];
+      automations = [
+        {
+          alias = "Turn off lights when Apple TV is playing";
+          id = "apple_tv_lights_off";
+          description = "Turn off living room and dining room lights when Apple TV starts playing";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "media_player.apple_tv"; # Check Developer Tools > States for correct entity ID
+              to = "playing";
+            }
+          ];
+          action = [
+            {
+              action = "light.turn_off";
+              target.entity_id = [
+                "light.living_room"
+                "light.living_room_pendant"
+                "light.dining_room"
+                "light.dining_room_pendant"
+              ];
+            }
+          ];
+        }
+      ];
       scenes = [ ];
     in
     {

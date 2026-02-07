@@ -115,6 +115,7 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         nixos.fail2ban
         nixos.mosh
+        nixos.eternalTerminal
 
         # ═══════════════════════════════════════════════════════════════════════
         # System Tools
@@ -420,6 +421,7 @@ in
           "staff"
           "_developer"
           "git"
+          "i2c"
           "media"
           "audio"
           "uinput"
