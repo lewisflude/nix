@@ -21,7 +21,7 @@ in
               domain = "*";
               type = "soft";
               item = "nofile";
-              value = "65536";
+              value = "524288";
             }
             {
               domain = "*";
@@ -87,10 +87,10 @@ in
       ];
 
       systemd = {
-        settings.Manager.DefaultLimitNOFILE = "65536";
+        settings.Manager.DefaultLimitNOFILE = "524288";
         user.extraConfig = ''
           [Manager]
-          DefaultLimitNOFILE=65536
+          DefaultLimitNOFILE=524288
         '';
         user.services.unlock-login-keyring = {
           description = "Unlock GNOME login keyring for auto-login";

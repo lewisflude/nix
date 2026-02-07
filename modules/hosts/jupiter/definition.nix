@@ -296,6 +296,7 @@ in
       # =========================================================================
       # Hardware Configuration
       # =========================================================================
+      boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
       boot.initrd.availableKernelModules = [
         "xhci_pci"
         "ahci"

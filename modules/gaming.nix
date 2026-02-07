@@ -57,7 +57,41 @@
         };
       };
 
-      programs.gamemode.enable = true;
+      programs.gamescope = {
+        enable = true;
+        capSysNice = true;
+      };
+      programs.steam.gamescopeSession.enable = true;
+
+      boot.kernel.sysctl = {
+        "vm.max_map_count" = 2147483642;
+        "vm.swappiness" = 10;
+        "vm.dirty_ratio" = 10;
+        "vm.dirty_background_ratio" = 5;
+      };
+
+      programs.gamemode = {
+        enable = true;
+        settings = {
+          general = {
+            renice = 10;
+          };
+          gpu = {
+            apply_gpu_optimisations = "accept-responsibility";
+            gpu_device = 0;
+          };
+          cpu = {
+            park_cores = "no";
+            pin_cores = "yes";
+          };
+        };
+      };
+
+      services.ananicy = {
+        enable = true;
+        package = pkgs.ananicy-cpp;
+        rulesProvider = pkgs.ananicy-cpp-rules;
+      };
     };
 
   flake.modules.homeManager.gaming =
@@ -78,6 +112,7 @@
 
       home.packages = [
         pkgs.steam-run
+        pkgs.protonup-qt
       ];
     };
 }
