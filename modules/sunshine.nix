@@ -58,15 +58,14 @@ in
         pkgs.jq
       ];
 
-      mkScriptEnv =
-        lib.concatStringsSep "\n" (
-          optional (displayStreaming != null) "export STREAMING_DISPLAY=\"${displayStreaming}\""
-          ++ optional (displayPrimary != null) "export PRIMARY_DISPLAY=\"${displayPrimary}\""
-          ++ [
-            # Export timing constants as JSON for scripts to parse
-            "export SUNSHINE_CONSTANTS='${builtins.toJSON scriptConstants.timing}'"
-          ]
-        );
+      mkScriptEnv = lib.concatStringsSep "\n" (
+        optional (displayStreaming != null) "export STREAMING_DISPLAY=\"${displayStreaming}\""
+        ++ optional (displayPrimary != null) "export PRIMARY_DISPLAY=\"${displayPrimary}\""
+        ++ [
+          # Export timing constants as JSON for scripts to parse
+          "export SUNSHINE_CONSTANTS='${builtins.toJSON scriptConstants.timing}'"
+        ]
+      );
 
       # Inline common functions
       commonFunctions = builtins.readFile ../pkgs/sunshine/scripts/common.sh;
@@ -75,14 +74,14 @@ in
       sunshine-steam-launcher = pkgs.writeShellApplication {
         name = "sunshine-steam-launcher";
         runtimeInputs = commonRuntimeInputs ++ niriRuntimeInputs ++ [ pkgs.steam ];
-        text =
-          commonFunctions + "\n" + builtins.readFile ../pkgs/sunshine/scripts/steam-launcher.sh;
+        text = commonFunctions + "\n" + builtins.readFile ../pkgs/sunshine/scripts/steam-launcher.sh;
       };
 
       sunshine-prep = pkgs.writeShellApplication {
         name = "sunshine-prep";
         runtimeInputs = commonRuntimeInputs ++ niriRuntimeInputs;
-        text = mkScriptEnv + "\n" + commonFunctions + "\n" + builtins.readFile ../pkgs/sunshine/scripts/prep.sh;
+        text =
+          mkScriptEnv + "\n" + commonFunctions + "\n" + builtins.readFile ../pkgs/sunshine/scripts/prep.sh;
       };
 
       sunshine-cleanup = pkgs.writeShellApplication {
@@ -101,6 +100,7 @@ in
     {
       # Sunshine service configuration
       services.sunshine = {
+        enable = true;
         autoStart = true;
         capSysAdmin = true; # Required for Wayland KMS capture
         openFirewall = true;
@@ -211,7 +211,7 @@ in
               options = [ "NOPASSWD" ];
             }
             {
-              command = "${pkgs.swaylock-effects}/bin/swaylock-effects -f";
+              command = "${pkgs.swaylock-effects}/bin/swaylock -f";
               options = [ "NOPASSWD" ];
             }
             {

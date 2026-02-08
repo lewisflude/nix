@@ -4,7 +4,7 @@
 # - https://lvra.gitlab.io/docs/distros/nixos/
 {
   flake.modules.nixos.gaming =
-    { pkgs, ... }:
+    { pkgs, lib, ... }:
     let
       patchedBwrap = pkgs.bubblewrap.overrideAttrs (o: {
         patches = (o.patches or [ ]) ++ [ ./bwrap.patch ];
@@ -35,9 +35,12 @@
             );
           extraProfile = ''
             unset TZ
-            export PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1
           '';
+          # VR integration: These must be part of the Steam package override (not vr.nix)
+          # because programs.steam.package is a single atomic override.
+          # See modules/vr.nix for the rest of VR configuration.
           extraEnv = {
+            PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = "1";
             PRESSURE_VESSEL_FILESYSTEMS_RW = "$XDG_RUNTIME_DIR/wivrn/comp_ipc";
             PRESSURE_VESSEL_FILESYSTEMS_RO = "/nix/store";
           };
@@ -52,7 +55,7 @@
             pkgs'.stdenv.cc.cc.lib
             pkgs'.libkrb5
             pkgs'.keyutils
-            pkgs.xrizer # Use outer pkgs (has our overlay)
+            pkgs.xrizer # VR: OpenVR compatibility layer (outer pkgs, has multilib overlay)
           ];
         };
       };
@@ -65,7 +68,7 @@
 
       boot.kernel.sysctl = {
         "vm.max_map_count" = 2147483642;
-        "vm.swappiness" = 10;
+        "vm.swappiness" = lib.mkDefault 10;
         "vm.dirty_ratio" = 10;
         "vm.dirty_background_ratio" = 5;
       };
@@ -90,7 +93,7 @@
       services.ananicy = {
         enable = true;
         package = pkgs.ananicy-cpp;
-        rulesProvider = pkgs.ananicy-cpp-rules;
+        rulesProvider = pkgs.ananicy-rules-cachyos;
       };
     };
 

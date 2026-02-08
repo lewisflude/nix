@@ -70,7 +70,12 @@
             "bluez5.enable-sbc-xq" = true;
             "bluez5.enable-msbc" = true;
             "bluez5.enable-hw-volume" = true;
-            "bluez5.roles" = [ "hsp_hs" "hsp_ag" "hfp_hf" "hfp_ag" ];
+            "bluez5.roles" = [
+              "hsp_hs"
+              "hsp_ag"
+              "hfp_hf"
+              "hfp_ag"
+            ];
           };
 
           # Set the virtual stereo sink as the default output
@@ -101,6 +106,7 @@
         pkgs.pwvucontrol
         pkgs.pavucontrol
         pkgs.playerctl
+        pkgs.helvum
       ];
       services.playerctld.enable = true;
     };
@@ -108,6 +114,9 @@
   flake.modules.homeManager.audioDarwin =
     { pkgs, ... }:
     {
-      home.packages = [ pkgs.lame pkgs.flac ];
+      home.packages = [
+        pkgs.lame
+        pkgs.flac
+      ];
     };
 }

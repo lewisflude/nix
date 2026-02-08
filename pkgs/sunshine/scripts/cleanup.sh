@@ -66,7 +66,7 @@ fi
 # Re-lock screen if configured
 if [ "${LOCK_ON_STREAM_END:-true}" = "true" ]; then
     log "Re-locking screen for security"
-    if run_as_user swaylock-effects -f; then
+    if run_as_user swaylock -f; then
         log "Screen locked successfully"
     else
         error "Failed to lock screen"

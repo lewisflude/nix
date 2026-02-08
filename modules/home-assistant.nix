@@ -10,7 +10,12 @@ in
   # NixOS System Configuration
   # ==========================================================================
   flake.modules.nixos.homeAssistant =
-    { lib, pkgs, config, ... }:
+    {
+      lib,
+      pkgs,
+      config,
+      ...
+    }:
     let
       inherit (lib) mkDefault mkIf optional;
 
@@ -94,56 +99,54 @@ in
         configDir = "/var/lib/hass";
         inherit openFirewall;
 
-        extraComponents =
-          [
-            # Core components
-            "analytics"
-            "default_config"
-            "esphome"
-            "google_translate"
-            "isal"
-            "lovelace"
-            "met"
-            "radio_browser"
-            "shopping_list"
+        extraComponents = [
+          # Core components
+          "analytics"
+          "default_config"
+          "esphome"
+          "google_translate"
+          "isal"
+          "lovelace"
+          "met"
+          "radio_browser"
+          "shopping_list"
 
-            # Device integrations
-            "apple_tv"
-            "brother"
-            "denonavr"
-            "homekit_controller"
-            "hue"
-            "linkplay"
-            "prusalink"
-            "tado"
-            "unifi"
-            "unifiprotect"
-            "unifi_direct"
-            "vacuum"
-            "wled"
+          # Device integrations
+          "apple_tv"
+          "brother"
+          "denonavr"
+          "homekit_controller"
+          "hue"
+          "linkplay"
+          "prusalink"
+          "tado"
+          "unifi"
+          "unifiprotect"
+          "unifi_direct"
+          "vacuum"
+          "wled"
 
-            # Media
-            "cast"
-            "media_player"
-            "mjpeg"
-            "spotify"
+          # Media
+          "cast"
+          "media_player"
+          "mjpeg"
+          "spotify"
 
-            # Utilities
-            "ipp"
-            "mqtt"
-            "ollama"
-            "upnp"
-            "weather"
-          ]
-          ++ optional (musicPlayerEnable && musicPlayerBackend == "music_assistant") "music_assistant"
-          ++ extraComponents;
+          # Utilities
+          "ipp"
+          "mqtt"
+          "ollama"
+          "upnp"
+          "weather"
+        ]
+        ++ optional (musicPlayerEnable && musicPlayerBackend == "music_assistant") "music_assistant"
+        ++ extraComponents;
 
-        customComponents =
-          [
-            pkgs.home-assistant-custom-components.localtuya
-            pkgs.home-assistant-custom-components.adaptive_lighting
-          ]
-          ++ optional llmIntegration home-llm;
+        customComponents = [
+          pkgs.home-assistant-custom-components.localtuya
+          pkgs.home-assistant-custom-components.adaptive_lighting
+        ]
+        ++ optional llmIntegration home-llm;
 
         inherit customLovelaceModules;
 
@@ -244,241 +247,240 @@ in
           intent_script = mkIf intentScripts "!include intent_script.yaml";
 
           # Scripts
-          script =
-            {
-              # Weather forecast script - fetches daily and hourly forecasts with day names
-              weather_forecast = {
-                alias = "Weather Forecast";
-                description = "Fetches and returns the forecast dictionary with day names.";
-                fields = {
-                  weather_entity = {
-                    description = "Weather entity to fetch forecast from (overrides default)";
-                    example = "weather.met";
-                    default = weatherEntity;
-                  };
+          script = {
+            # Weather forecast script - fetches daily and hourly forecasts with day names
+            weather_forecast = {
+              alias = "Weather Forecast";
+              description = "Fetches and returns the forecast dictionary with day names.";
+              fields = {
+                weather_entity = {
+                  description = "Weather entity to fetch forecast from (overrides default)";
+                  example = "weather.met";
+                  default = weatherEntity;
                 };
-                sequence = [
-                  {
-                    action = "weather.get_forecasts";
-                    data.type = "daily";
-                    response_variable = "forecast_daily";
-                    target.entity_id = "{{ weather_entity | default('${weatherEntity}') }}";
-                  }
-                  {
-                    action = "weather.get_forecasts";
-                    data.type = "hourly";
-                    response_variable = "forecast_hourly";
-                    target.entity_id = "{{ weather_entity | default('${weatherEntity}') }}";
-                  }
-                  {
-                    variables = {
-                      days_of_week = [
-                        "Sunday"
-                        "Monday"
-                        "Tuesday"
-                        "Wednesday"
-                        "Thursday"
-                        "Friday"
-                        "Saturday"
-                      ];
-                      today = "{{ now().strftime('%A') }}";
-                      start_index = "{{ days_of_week.index(today) }}";
-                      weather_entity_used = "{{ weather_entity | default('${weatherEntity}') }}";
-                      forecast_data_dict = {
-                        forecast_daily = ''
-                          {% set forecasts = forecast_daily[weather_entity_used]['forecast'] %}
-                          [{% for i in range(forecasts | length) %}
-                            {
-                              {% for key, value in forecasts[i].items() %}
-                              {% if key == 'datetime' %}
-                                {% set local_datetime = (forecasts[i]['datetime'] | as_datetime | as_local) %}
-                                "datetime": "{{ local_datetime.strftime('%Y-%m-%d') }}",
-                              {% else %}
-                                "day_of_the_week": "{{ days_of_week[(start_index + i) % days_of_week | length] }}",
-                                "{{ key }}": {{ value | tojson }},
-                              {% endif %}
-                              {% endfor %}
-                            }
-                            {% if not loop.last %},{% endif %}
-                          {% endfor %}]
-                        '';
-                        forecast_hourly = ''
-                          {% set forecasts = forecast_hourly[weather_entity_used]['forecast'] %}
-                          [{% for i in range(0, 24) %}
-                            {
-                              {% for key, value in forecasts[i].items() %}
-                              {% if key == 'datetime' %}
-                                {% set local_datetime = (forecasts[i]['datetime'] | as_datetime | as_local) %}
-                                "datetime": "{{ local_datetime.strftime('%Y-%m-%d %H:%M') }}",
-                              {% else %}
-                                "{{ key }}": {{ value | tojson }},
-                              {% endif %}
-                              {% endfor %}
-                            }
-                            {% if not loop.last %},{% endif %}
-                          {% endfor %}]
-                        '';
-                      };
-                    };
-                  }
-                  {
-                    stop = "Returning complete forecast dictionary with days";
-                    response_variable = "forecast_data_dict";
-                  }
-                ];
               };
-
-              # Get entity attributes script - fetches entity state and attributes
-              get_entity_attributes = {
-                alias = "Get Entity Attributes";
-                description = "Fetches and returns the state and attributes of an entity.";
-                fields = {
-                  entity_name = {
-                    description = "Name of the entity";
-                    example = "Kids Light";
-                  };
-                };
-                sequence = [
-                  {
-                    variables = {
-                      entity_id = ''
-                        {% set matched_entity = states | selectattr('name', 'equalto', entity_name) | map(attribute='entity_id') | first %}
-                        {{ matched_entity if matched_entity else entity }}
+              sequence = [
+                {
+                  action = "weather.get_forecasts";
+                  data.type = "daily";
+                  response_variable = "forecast_daily";
+                  target.entity_id = "{{ weather_entity | default('${weatherEntity}') }}";
+                }
+                {
+                  action = "weather.get_forecasts";
+                  data.type = "hourly";
+                  response_variable = "forecast_hourly";
+                  target.entity_id = "{{ weather_entity | default('${weatherEntity}') }}";
+                }
+                {
+                  variables = {
+                    days_of_week = [
+                      "Sunday"
+                      "Monday"
+                      "Tuesday"
+                      "Wednesday"
+                      "Thursday"
+                      "Friday"
+                      "Saturday"
+                    ];
+                    today = "{{ now().strftime('%A') }}";
+                    start_index = "{{ days_of_week.index(today) }}";
+                    weather_entity_used = "{{ weather_entity | default('${weatherEntity}') }}";
+                    forecast_data_dict = {
+                      forecast_daily = ''
+                        {% set forecasts = forecast_daily[weather_entity_used]['forecast'] %}
+                        [{% for i in range(forecasts | length) %}
+                          {
+                            {% for key, value in forecasts[i].items() %}
+                            {% if key == 'datetime' %}
+                              {% set local_datetime = (forecasts[i]['datetime'] | as_datetime | as_local) %}
+                              "datetime": "{{ local_datetime.strftime('%Y-%m-%d') }}",
+                            {% else %}
+                              "day_of_the_week": "{{ days_of_week[(start_index + i) % days_of_week | length] }}",
+                              "{{ key }}": {{ value | tojson }},
+                            {% endif %}
+                            {% endfor %}
+                          }
+                          {% if not loop.last %},{% endif %}
+                        {% endfor %}]
+                      '';
+                      forecast_hourly = ''
+                        {% set forecasts = forecast_hourly[weather_entity_used]['forecast'] %}
+                        [{% for i in range(0, 24) %}
+                          {
+                            {% for key, value in forecasts[i].items() %}
+                            {% if key == 'datetime' %}
+                              {% set local_datetime = (forecasts[i]['datetime'] | as_datetime | as_local) %}
+                              "datetime": "{{ local_datetime.strftime('%Y-%m-%d %H:%M') }}",
+                            {% else %}
+                              "{{ key }}": {{ value | tojson }},
+                            {% endif %}
+                            {% endfor %}
+                          }
+                          {% if not loop.last %},{% endif %}
+                        {% endfor %}]
                       '';
                     };
-                  }
-                  # Validate entity exists and is available
-                  {
-                    condition = "template";
-                    value_template = "{{ entity_id is defined and states(entity_id) not in ['unavailable', 'unknown'] }}";
-                    alias = "Check entity exists and is available";
-                  }
-                  {
-                    variables = {
-                      attr = {
-                        entity_id = "{{ entity_id }}";
-                        state = "{{ states(entity_id) }}";
-                        attributes = "{{ states[entity_id].attributes }}";
-                      };
-                    };
-                  }
-                  {
-                    stop = "Returning entity state and attributes";
-                    response_variable = "attr";
-                  }
-                ];
-              };
-            }
-            # Music playback script - conditionally enabled
-            // lib.optionalAttrs musicPlayerEnable {
-              play_music = {
-                alias = "Play Music";
-                description = "Search and play music using configured backend";
-                fields = {
-                  query = {
-                    description = "Search query for music (artist, song, album, genre)";
-                    example = "play some jazz";
-                    required = true;
                   };
-                  area = {
-                    description = "Area name for playback location (optional)";
-                    example = "living room";
-                    required = false;
-                  };
-                  media_player = {
-                    description = "Media player entity (defaults to configured player)";
-                    example = "media_player.spotify";
-                    default = musicPlayerDefault;
-                  };
-                };
-                sequence = [
-                  {
-                    variables = {
-                      player_entity = "{{ media_player | default('${musicPlayerDefault}') }}";
-                    };
-                  }
-                  # Validate media player exists and is available
-                  {
-                    condition = "template";
-                    value_template = "{{ states(player_entity) not in ['unavailable', 'unknown'] }}";
-                    alias = "Check media player is available";
-                  }
-                  # Route to appropriate backend based on configuration
-                  {
-                    choose = [
-                      # Music Assistant backend
-                      {
-                        conditions = [
-                          {
-                            condition = "template";
-                            value_template = "{{ '${musicPlayerBackend}' == 'music_assistant' }}";
-                          }
-                        ];
-                        sequence = [
-                          {
-                            action = "media_player.play_media";
-                            target.entity_id = "{{ player_entity }}";
-                            data = {
-                              media_content_type = "music";
-                              media_content_id = "{{ query }}";
-                            };
-                          }
-                        ];
-                      }
-                      # Spotify backend
-                      {
-                        conditions = [
-                          {
-                            condition = "template";
-                            value_template = "{{ '${musicPlayerBackend}' == 'spotify' }}";
-                          }
-                        ];
-                        sequence = [
-                          {
-                            action = "spotcast.start";
-                            data = {
-                              uri = "spotify:search:{{ query }}";
-                              device_name = "{{ player_entity.split('.')[1] }}";
-                            };
-                          }
-                        ];
-                      }
-                      # YouTube Music backend
-                      {
-                        conditions = [
-                          {
-                            condition = "template";
-                            value_template = "{{ '${musicPlayerBackend}' == 'ytmusic' }}";
-                          }
-                        ];
-                        sequence = [
-                          {
-                            action = "ytube_music_player.call_method";
-                            data = {
-                              entity_id = "{{ player_entity }}";
-                              command = "search";
-                              parameters = {
-                                query = "{{ query }}";
-                              };
-                            };
-                          }
-                        ];
-                      }
-                    ];
-                    # Fallback error handling
-                    default = [
-                      {
-                        action = "system_log.write";
-                        data = {
-                          level = "error";
-                          message = "Unsupported music backend: ${musicPlayerBackend}";
-                        };
-                      }
-                    ];
-                  }
-                ];
-              };
+                }
+                {
+                  stop = "Returning complete forecast dictionary with days";
+                  response_variable = "forecast_data_dict";
+                }
+              ];
             };
+
+            # Get entity attributes script - fetches entity state and attributes
+            get_entity_attributes = {
+              alias = "Get Entity Attributes";
+              description = "Fetches and returns the state and attributes of an entity.";
+              fields = {
+                entity_name = {
+                  description = "Name of the entity";
+                  example = "Kids Light";
+                };
+              };
+              sequence = [
+                {
+                  variables = {
+                    entity_id = ''
+                      {% set matched_entity = states | selectattr('name', 'equalto', entity_name) | map(attribute='entity_id') | first %}
+                      {{ matched_entity if matched_entity else entity }}
+                    '';
+                  };
+                }
+                # Validate entity exists and is available
+                {
+                  condition = "template";
+                  value_template = "{{ entity_id is defined and states(entity_id) not in ['unavailable', 'unknown'] }}";
+                  alias = "Check entity exists and is available";
+                }
+                {
+                  variables = {
+                    attr = {
+                      entity_id = "{{ entity_id }}";
+                      state = "{{ states(entity_id) }}";
+                      attributes = "{{ states[entity_id].attributes }}";
+                    };
+                  };
+                }
+                {
+                  stop = "Returning entity state and attributes";
+                  response_variable = "attr";
+                }
+              ];
+            };
+          }
+          # Music playback script - conditionally enabled
+          // lib.optionalAttrs musicPlayerEnable {
+            play_music = {
+              alias = "Play Music";
+              description = "Search and play music using configured backend";
+              fields = {
+                query = {
+                  description = "Search query for music (artist, song, album, genre)";
+                  example = "play some jazz";
+                  required = true;
+                };
+                area = {
+                  description = "Area name for playback location (optional)";
+                  example = "living room";
+                  required = false;
+                };
+                media_player = {
+                  description = "Media player entity (defaults to configured player)";
+                  example = "media_player.spotify";
+                  default = musicPlayerDefault;
+                };
+              };
+              sequence = [
+                {
+                  variables = {
+                    player_entity = "{{ media_player | default('${musicPlayerDefault}') }}";
+                  };
+                }
+                # Validate media player exists and is available
+                {
+                  condition = "template";
+                  value_template = "{{ states(player_entity) not in ['unavailable', 'unknown'] }}";
+                  alias = "Check media player is available";
+                }
+                # Route to appropriate backend based on configuration
+                {
+                  choose = [
+                    # Music Assistant backend
+                    {
+                      conditions = [
+                        {
+                          condition = "template";
+                          value_template = "{{ '${musicPlayerBackend}' == 'music_assistant' }}";
+                        }
+                      ];
+                      sequence = [
+                        {
+                          action = "media_player.play_media";
+                          target.entity_id = "{{ player_entity }}";
+                          data = {
+                            media_content_type = "music";
+                            media_content_id = "{{ query }}";
+                          };
+                        }
+                      ];
+                    }
+                    # Spotify backend
+                    {
+                      conditions = [
+                        {
+                          condition = "template";
+                          value_template = "{{ '${musicPlayerBackend}' == 'spotify' }}";
+                        }
+                      ];
+                      sequence = [
+                        {
+                          action = "spotcast.start";
+                          data = {
+                            uri = "spotify:search:{{ query }}";
+                            device_name = "{{ player_entity.split('.')[1] }}";
+                          };
+                        }
+                      ];
+                    }
+                    # YouTube Music backend
+                    {
+                      conditions = [
+                        {
+                          condition = "template";
+                          value_template = "{{ '${musicPlayerBackend}' == 'ytmusic' }}";
+                        }
+                      ];
+                      sequence = [
+                        {
+                          action = "ytube_music_player.call_method";
+                          data = {
+                            entity_id = "{{ player_entity }}";
+                            command = "search";
+                            parameters = {
+                              query = "{{ query }}";
+                            };
+                          };
+                        }
+                      ];
+                    }
+                  ];
+                  # Fallback error handling
+                  default = [
+                    {
+                      action = "system_log.write";
+                      data = {
+                        level = "error";
+                        message = "Unsupported music backend: ${musicPlayerBackend}";
+                      };
+                    }
+                  ];
+                }
+              ];
+            };
+          };
 
           # Adaptive Lighting - Circadian rhythm lighting automation
           adaptive_lighting = [
@@ -666,7 +668,9 @@ in
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
-          ExecStart = "/run/current-system/sw/bin/ln -sf ${config.sops.templates."hass-secrets.yaml".path} /var/lib/hass/secrets.yaml";
+          ExecStart = "/run/current-system/sw/bin/ln -sf ${
+            config.sops.templates."hass-secrets.yaml".path
+          } /var/lib/hass/secrets.yaml";
           User = "hass";
           Group = "hass";
         };

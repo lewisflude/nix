@@ -7,47 +7,58 @@ let
 in
 {
   # NixOS system configuration
-  flake.modules.nixos.FEATURE_NAME = { pkgs, lib, ... }: {
-    environment.systemPackages = [
-      pkgs.example-package
-    ];
+  flake.modules.nixos.FEATURE_NAME =
+    { pkgs, lib, ... }:
+    {
+      environment.systemPackages = [
+        pkgs.example-package
+      ];
 
-    systemd.services.example = {
-      description = "Example service";
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        ExecStart = "${pkgs.example}/bin/example";
-        Restart = "on-failure";
+      systemd.services.example = {
+        description = "Example service";
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          ExecStart = "${pkgs.example}/bin/example";
+          Restart = "on-failure";
+        };
       };
     };
-  };
 
   # Darwin system configuration
-  flake.modules.darwin.FEATURE_NAME = { pkgs, lib, ... }: {
-    environment.systemPackages = [
-      pkgs.example-package
-    ];
+  flake.modules.darwin.FEATURE_NAME =
+    { pkgs, lib, ... }:
+    {
+      environment.systemPackages = [
+        pkgs.example-package
+      ];
 
-    launchd.daemons.example = {
-      serviceConfig = {
-        ProgramArguments = [ "${pkgs.example}/bin/example" ];
-        RunAtLoad = true;
-        KeepAlive = true;
+      launchd.daemons.example = {
+        serviceConfig = {
+          ProgramArguments = [ "${pkgs.example}/bin/example" ];
+          RunAtLoad = true;
+          KeepAlive = true;
+        };
       };
     };
-  };
 
   # Home-manager configuration (shared across platforms)
-  flake.modules.homeManager.FEATURE_NAME = { pkgs, lib, config, ... }: {
-    home.packages = [
-      pkgs.example-tool
-    ];
+  flake.modules.homeManager.FEATURE_NAME =
+    {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
+    {
+      home.packages = [
+        pkgs.example-tool
+      ];
 
-    programs.example = {
-      enable = true;
-      settings = {
-        configDir = config.xdg.configHome;
+      programs.example = {
+        enable = true;
+        settings = {
+          configDir = config.xdg.configHome;
+        };
       };
     };
-  };
 }

@@ -2,7 +2,9 @@
 # Color management daemon
 { ... }:
 {
-  flake.modules.nixos.colord = { ... }: {
-    services.colord.enable = true;
-  };
+  flake.modules.nixos.colord =
+    { ... }:
+    {
+      services.colord.enable = true;
+    };
 }

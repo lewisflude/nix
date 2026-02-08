@@ -5,16 +5,18 @@ _: {
   name = "test-FEATURE_NAME";
 
   nodes = {
-    machine = { pkgs, ... }: {
-      # Import the module being tested
-      imports = [
-        # The test needs to import the actual NixOS module
-        # In dendritic, you'd typically test the full configuration
-      ];
+    machine =
+      { pkgs, ... }:
+      {
+        # Import the module being tested
+        imports = [
+          # The test needs to import the actual NixOS module
+          # In dendritic, you'd typically test the full configuration
+        ];
 
-      # Test configuration
-      environment.systemPackages = [ pkgs.curl ];
-    };
+        # Test configuration
+        environment.systemPackages = [ pkgs.curl ];
+      };
   };
 
   testScript = ''

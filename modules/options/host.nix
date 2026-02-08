@@ -51,7 +51,6 @@ in
           emulators = mkEnableOption "gaming emulators";
         };
 
-
         # Desktop
         desktop = {
           enable = mkEnableOption "desktop environment" // {
@@ -225,7 +224,6 @@ in
         gaming = {
           enable = mkEnableOption "gaming";
         };
-
 
         # Development (same as NixOS for cross-platform consistency)
         development = {

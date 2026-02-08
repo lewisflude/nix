@@ -3,7 +3,11 @@
 { ... }:
 {
   flake.modules.homeManager.lutris =
-    { pkgs, osConfig ? { }, ... }:
+    {
+      pkgs,
+      osConfig ? { },
+      ...
+    }:
     {
       programs.lutris = {
         enable = true;

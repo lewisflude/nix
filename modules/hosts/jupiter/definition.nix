@@ -9,7 +9,7 @@ let
 in
 {
   configurations.nixos.jupiter.module =
-    { pkgs, ... }:
+    { pkgs, lib, ... }:
     {
       imports = [
         # ═══════════════════════════════════════════════════════════════════════
@@ -77,9 +77,10 @@ in
         nixos.vr
 
         # ═══════════════════════════════════════════════════════════════════════
-        # Audio
+        # Audio & Music Production
         # ═══════════════════════════════════════════════════════════════════════
         nixos.audio
+        nixos.musicProduction
 
         # ═══════════════════════════════════════════════════════════════════════
         # Services
@@ -205,8 +206,9 @@ in
         homeManager.lutris
         homeManager.vr
 
-        # Audio home-manager module
+        # Audio & Music Production home-manager modules
         homeManager.audio
+        homeManager.musicProduction
       ];
 
       # =========================================================================
@@ -236,7 +238,6 @@ in
             steam = true;
             performance = true;
           };
-
 
           productivity = {
             enable = true;
@@ -296,7 +297,6 @@ in
       # =========================================================================
       # Hardware Configuration
       # =========================================================================
-      boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
       boot.initrd.availableKernelModules = [
         "xhci_pci"
         "ahci"
@@ -381,6 +381,7 @@ in
       boot.kernelParams = [
         "nvidia-drm.modeset=1"
         "nvidia-drm.fbdev=1"
+        "nvidia-modeset.conceal_vrr_caps=1"
         "cfg80211.ieee80211_regdom=GB"
       ];
 
@@ -397,7 +398,7 @@ in
       ];
 
       # Power
-      powerManagement.cpuFreqGovernor = "schedutil";
+      powerManagement.cpuFreqGovernor = lib.mkDefault "schedutil";
 
       # Security: Passwordless sudo is appropriate for passwordless account with YubiKey at login
       security.sudo = {

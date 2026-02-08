@@ -241,49 +241,52 @@ let
               wivrn32 = prev.pkgsi686Linux.wivrn.override { clientLibOnly = true; };
             in
             {
-              wivrn = final.runCommand "wivrn" {
-                meta.mainProgram = "wivrn-server";
-              } ''
-                mkdir -p $out/bin
-                mkdir -p $out/lib/wivrn
-                mkdir -p $out/lib32/wivrn
-                mkdir -p $out/share/openxr/1
-
-                # Copy 64-bit server and binaries
-                cp -r ${wivrn64}/bin/* $out/bin/ 2>/dev/null || true
-
-                # Copy 64-bit libraries
-                cp -r ${wivrn64}/lib/wivrn/* $out/lib/wivrn/ 2>/dev/null || true
-
-                # Copy 32-bit OpenXR runtime libraries
-                if [ -d ${wivrn32}/lib/wivrn ]; then
-                  cp -r ${wivrn32}/lib/wivrn/* $out/lib32/wivrn/
-                fi
-
-                # Generate 64-bit OpenXR manifest with correct paths
-                cat > $out/share/openxr/1/openxr_wivrn.json << EOF
-                {
-                  "file_format_version": "1.0.0",
-                  "runtime": {
-                    "name": "Monado",
-                    "library_path": "$out/lib/wivrn/libopenxr_wivrn.so",
-                    "MND_libmonado_path": "$out/lib/wivrn/libmonado_wivrn.so"
+              wivrn =
+                final.runCommand "wivrn"
+                  {
+                    meta.mainProgram = "wivrn-server";
                   }
-                }
-                EOF
+                  ''
+                    mkdir -p $out/bin
+                    mkdir -p $out/lib/wivrn
+                    mkdir -p $out/lib32/wivrn
+                    mkdir -p $out/share/openxr/1
 
-                # Generate 32-bit OpenXR manifest with correct paths
-                cat > $out/share/openxr/1/openxr_wivrn.i686.json << EOF
-                {
-                  "file_format_version": "1.0.0",
-                  "runtime": {
-                    "name": "Monado",
-                    "library_path": "$out/lib32/wivrn/libopenxr_wivrn.so",
-                    "MND_libmonado_path": "$out/lib32/wivrn/libmonado_wivrn.so"
-                  }
-                }
-                EOF
-              '';
+                    # Copy 64-bit server and binaries
+                    cp -r ${wivrn64}/bin/* $out/bin/ 2>/dev/null || true
+
+                    # Copy 64-bit libraries
+                    cp -r ${wivrn64}/lib/wivrn/* $out/lib/wivrn/ 2>/dev/null || true
+
+                    # Copy 32-bit OpenXR runtime libraries
+                    if [ -d ${wivrn32}/lib/wivrn ]; then
+                      cp -r ${wivrn32}/lib/wivrn/* $out/lib32/wivrn/
+                    fi
+
+                    # Generate 64-bit OpenXR manifest with correct paths
+                    cat > $out/share/openxr/1/openxr_wivrn.json << EOF
+                    {
+                      "file_format_version": "1.0.0",
+                      "runtime": {
+                        "name": "Monado",
+                        "library_path": "$out/lib/wivrn/libopenxr_wivrn.so",
+                        "MND_libmonado_path": "$out/lib/wivrn/libmonado_wivrn.so"
+                      }
+                    }
+                    EOF
+
+                    # Generate 32-bit OpenXR manifest with correct paths
+                    cat > $out/share/openxr/1/openxr_wivrn.i686.json << EOF
+                    {
+                      "file_format_version": "1.0.0",
+                      "runtime": {
+                        "name": "Monado",
+                        "library_path": "$out/lib32/wivrn/libopenxr_wivrn.so",
+                        "MND_libmonado_path": "$out/lib32/wivrn/libmonado_wivrn.so"
+                      }
+                    }
+                    EOF
+                  '';
             }
           else
             { } # Don't override on i686 — base packages must keep .override

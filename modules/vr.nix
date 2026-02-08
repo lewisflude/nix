@@ -2,7 +2,10 @@
 # References:
 # - https://lvra.gitlab.io/docs/distros/nixos/
 # - https://wiki.nixos.org/wiki/VR
-{ config, ... }:
+#
+# NOTE: VR also requires Steam integration configured in gaming.nix
+# (PRESSURE_VESSEL env vars, xrizer in extraPkgs)
+{ ... }:
 {
   flake.modules.nixos.vr =
     {
@@ -16,7 +19,48 @@
         enable = true;
         defaultRuntime = true;
         openFirewall = true;
+        autoStart = true;
+        highPriority = true;
         steam.importOXRRuntimes = true;
+
+        # NVIDIA VR environment from LVRA wiki
+        monadoEnvironment = {
+          XRT_COMPOSITOR_USE_PRESENT_WAIT = "1";
+          U_PACING_COMP_TIME_FRACTION_PERCENT = "90";
+          U_PACING_COMP_MIN_TIME_MS = "5";
+          XRT_COMPOSITOR_FORCE_WAYLAND_DIRECT = "1";
+          IPC_EXIT_ON_DISCONNECT = "1";
+        };
+
+        # Dual NVENC AV1 encoding: splits left/right eyes across RTX 4090's
+        # two NVENC engines for concurrent encoding. AV1 10-bit gives best
+        # quality per bit; Quest 3 has native AV1 HW decode.
+        config = {
+          enable = true;
+          json = {
+            bit-depth = 10;
+            encoder = [
+              {
+                encoder = "nvenc";
+                codec = "av1";
+                width = 0.5;
+                height = 1.0;
+                offset_x = 0.0;
+                offset_y = 0.0;
+                group = 0;
+              }
+              {
+                encoder = "nvenc";
+                codec = "av1";
+                width = 0.5;
+                height = 1.0;
+                offset_x = 0.5;
+                offset_y = 0.0;
+                group = 1;
+              }
+            ];
+          };
+        };
       };
 
       # FIXME: Remove when https://github.com/NixOS/nixpkgs/issues/482152 is fixed
@@ -66,5 +110,7 @@
           };
         };
       };
+
+      home.packages = [ pkgs.wayvr ];
     };
 }

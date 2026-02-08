@@ -1,7 +1,12 @@
 # Darwin configuration factory
 # Creates darwinConfigurations flake output from configurations.darwin option
 # Follows dendritic pattern: minimal infrastructure, modules imported by hosts
-{ lib, config, inputs, ... }:
+{
+  lib,
+  config,
+  inputs,
+  ...
+}:
 {
   options.configurations.darwin = lib.mkOption {
     type = lib.types.lazyAttrsOf (
@@ -23,13 +28,11 @@
 
     # Auto-generated checks for each Darwin configuration
     checks = lib.mkMerge (
-      lib.mapAttrsToList (
-        name: darwin: {
-          ${darwin.config.nixpkgs.hostPlatform.system} = {
-            "configurations:darwin:${name}" = darwin.config.system.build.toplevel;
-          };
-        }
-      ) config.flake.darwinConfigurations
+      lib.mapAttrsToList (name: darwin: {
+        ${darwin.config.nixpkgs.hostPlatform.system} = {
+          "configurations:darwin:${name}" = darwin.config.system.build.toplevel;
+        };
+      }) config.flake.darwinConfigurations
     );
   };
 }

@@ -9,23 +9,24 @@ in
   # ==========================================================================
   # NixOS System Configuration
   # ==========================================================================
-  flake.modules.nixos.musicAssistant = { lib, ... }:
-  let
-    inherit (lib) mkDefault;
-  in
-  {
-    services.music-assistant = {
-      enable = true;
-      # Additional configuration can be added by hosts:
-      # - providers (filesystem, streaming services)
-      # - dataDir
-      # - music library paths
-      # - port (default from constants)
-    };
+  flake.modules.nixos.musicAssistant =
+    { lib, ... }:
+    let
+      inherit (lib) mkDefault;
+    in
+    {
+      services.music-assistant = {
+        enable = true;
+        # Additional configuration can be added by hosts:
+        # - providers (filesystem, streaming services)
+        # - dataDir
+        # - music library paths
+        # - port (default from constants)
+      };
 
-    # Open firewall port for Music Assistant web interface
-    networking.firewall.allowedTCPPorts = mkDefault [
-      constants.ports.services.musicAssistant
-    ];
-  };
+      # Open firewall port for Music Assistant web interface
+      networking.firewall.allowedTCPPorts = mkDefault [
+        constants.ports.services.musicAssistant
+      ];
+    };
 }

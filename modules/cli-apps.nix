@@ -51,7 +51,10 @@
         settings = {
           gui.theme = {
             lightTheme = false;
-            activeBorderColor = [ "green" "bold" ];
+            activeBorderColor = [
+              "green"
+              "bold"
+            ];
             inactiveBorderColor = [ "white" ];
           };
           git.paging = {

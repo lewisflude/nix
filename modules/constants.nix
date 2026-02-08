@@ -79,14 +79,6 @@
           hytaleServer = 5520;
         };
 
-        vr = {
-          wivrn = {
-            tcp = 9757;
-            udp = 9757;
-          };
-          mdns = 5353;
-        };
-
         gaming = {
           steamLinkDiscovery = 27031;
           steamLinkTcp = 27036;
