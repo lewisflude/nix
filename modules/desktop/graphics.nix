@@ -27,9 +27,9 @@
 
       services.xserver.videoDrivers = [ "nvidia" ];
 
-      # NVIDIA GPU is card2 (Intel iGPU is card1, no monitors)
+      # NVIDIA GPU is card1
       environment.sessionVariables = {
-        WLR_DRM_DEVICES = "/dev/dri/card2";
+        WLR_DRM_DEVICES = "/dev/dri/card1";
         ELECTRON_OZONE_PLATFORM_HINT = "auto";
         NIXOS_OZONE_WL = "1";
       };

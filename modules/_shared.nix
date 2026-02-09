@@ -321,6 +321,10 @@ let
                   exit 1
                 fi
                 cp "$vrclient32" $out/lib/xrizer/bin/linux32/
+
+                # Proton's 32-bit vrclient.dll loads native lib from bin/vrclient.so
+                # (not bin/linux32/vrclient.so), matching the SteamVR directory convention
+                ln -s linux32/vrclient.so $out/lib/xrizer/bin/vrclient.so
               '';
             }
           else

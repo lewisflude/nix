@@ -119,8 +119,11 @@ in
           # Leverages RTX 4090's NVENC Gen 8 encoder for optimal streaming quality
           encoder = "nvenc"; # Force NVENC hardware encoding
 
-          # Video codec - H.264 for wide compatibility, HEVC for better compression
-          sw_preset = "llhp"; # Low Latency High Performance (optimal for RTX 40-series)
+          # NVENC preset - p1 (fastest/lowest latency) through p7 (slowest/best quality)
+          nvenc_preset = 1; # Lowest latency for game streaming
+
+          # Software fallback preset (if NVENC unavailable)
+          sw_preset = "ultrafast"; # Lowest latency x264 preset
 
           # Rate control mode - CBR prevents bandwidth spikes
           nvenc_rc = "cbr"; # Constant Bitrate for consistent network usage
@@ -183,6 +186,11 @@ in
             image-path = "steam.png";
           }
         ];
+      };
+
+      # Ensure Sunshine can find libnvidia-encode.so.1 for NVENC
+      systemd.user.services.sunshine.environment = {
+        LD_LIBRARY_PATH = "/run/opengl-driver/lib";
       };
 
       # Make scripts available system-wide for debugging

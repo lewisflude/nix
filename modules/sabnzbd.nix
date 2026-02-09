@@ -12,7 +12,7 @@ in
   flake.modules.nixos.sabnzbd =
     { lib, ... }:
     let
-      inherit (lib) mkDefault mkForce;
+      inherit (lib) mkDefault;
 
       # Default configuration (can be overridden by hosts)
       user = "media";
@@ -56,11 +56,9 @@ in
         };
       };
 
-      # Override the systemd service to remove the pre-start script that wipes config
-      # Add I/O and CPU nice priorities to prevent starving compositor
+      # I/O and CPU nice priorities to prevent starving compositor
       systemd.services.sabnzbd = {
         serviceConfig = {
-          ExecStartPre = mkForce "";
           # Nice priority: 19 = lowest CPU priority (background process)
           Nice = 19;
           # I/O priority: best-effort class 7 = lowest I/O priority

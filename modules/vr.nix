@@ -38,6 +38,7 @@
         config = {
           enable = true;
           json = {
+            application = [ pkgs.wayvr ];
             bit-depth = 10;
             encoder = [
               {

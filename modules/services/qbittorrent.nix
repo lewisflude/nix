@@ -21,6 +21,10 @@ in
 
       # BitTorrent session configuration optimized for seeding
       bittorrentSession = {
+        # Download paths: NVMe for incomplete (fast I/O), HDD for complete (capacity)
+        DefaultSavePath = "/mnt/storage/torrents";
+        TempPathEnabled = true;
+        TempPath = "/var/lib/qbittorrent/incomplete";
         Port = torrentPort;
         # Disable auto port discovery when using VPN
         UseUPnP = false;
@@ -179,6 +183,12 @@ in
       # Ensure media group exists
       users.groups.media = { };
 
+      # Ensure download directories exist with correct ownership
+      systemd.tmpfiles.rules = [
+        "d '/mnt/storage/torrents' 0770 qbittorrent media - -"
+        "d '/var/lib/qbittorrent/incomplete' 0770 qbittorrent media - -"
+      ];
+
       # qBittorrent service with VPN confinement
       systemd.services.qbittorrent = {
         vpnConfinement = {
@@ -199,7 +209,7 @@ in
           Restart = "on-failure";
           RestartSec = "10s";
         };
-        # Inject SOPS credentials into config if secrets exist
+        # Inject SOPS credentials into config under [Preferences] section
         preStart = mkIf (config.sops.secrets ? "qbittorrent/webui/username") ''
           CONFIG_FILE="/var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf"
 
@@ -209,22 +219,36 @@ in
             USERNAME=$(cat "${config.sops.secrets."qbittorrent/webui/username".path}")
             PASSWORD_HASH=$(cat "${config.sops.secrets."qbittorrent/webui/password-pbkdf2".path}")
 
-            # Use a temporary file for atomic updates
             TEMP_FILE=$(mktemp)
 
-            # Update or add credentials in config
             if [ -f "$CONFIG_FILE" ]; then
-              ${pkgs.gnused}/bin/sed \
-                -e "/^WebUI\\\\Username=/d" \
-                -e "/^WebUI\\\\Password_PBKDF2=/d" \
-                "$CONFIG_FILE" > "$TEMP_FILE"
+              # Strip existing credential lines, then insert them after [Preferences]
+              INSERTED=false
+              while IFS= read -r line; do
+                # Skip old credential lines
+                case "$line" in
+                  "WebUI\\Username="*|"WebUI\\Password_PBKDF2="*) continue ;;
+                esac
+                echo "$line" >> "$TEMP_FILE"
+                # Insert credentials right after [Preferences] header
+                if [ "$line" = "[Preferences]" ] && [ "$INSERTED" = false ]; then
+                  echo "WebUI\\Username=$USERNAME" >> "$TEMP_FILE"
+                  echo "WebUI\\Password_PBKDF2=$PASSWORD_HASH" >> "$TEMP_FILE"
+                  INSERTED=true
+                fi
+              done < "$CONFIG_FILE"
+
+              # If no [Preferences] section existed, add one with credentials
+              if [ "$INSERTED" = false ]; then
+                echo "[Preferences]" >> "$TEMP_FILE"
+                echo "WebUI\\Username=$USERNAME" >> "$TEMP_FILE"
+                echo "WebUI\\Password_PBKDF2=$PASSWORD_HASH" >> "$TEMP_FILE"
+              fi
             else
               echo "[Preferences]" > "$TEMP_FILE"
+              echo "WebUI\\Username=$USERNAME" >> "$TEMP_FILE"
+              echo "WebUI\\Password_PBKDF2=$PASSWORD_HASH" >> "$TEMP_FILE"
             fi
-
-            # Append credentials
-            echo "WebUI\\Username=$USERNAME" >> "$TEMP_FILE"
-            echo "WebUI\\Password_PBKDF2=$PASSWORD_HASH" >> "$TEMP_FILE"
 
             # Atomic move
             mv "$TEMP_FILE" "$CONFIG_FILE"
