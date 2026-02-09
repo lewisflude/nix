@@ -60,9 +60,6 @@ pog.pog {
         yellow "→ Adding nix-community cache..."
         cachix use nix-community || true
 
-        yellow "→ Adding nixpkgs-wayland cache..."
-        cachix use nixpkgs-wayland || true
-
         if [ -n "$CACHE_NAME" ]; then
           yellow "→ Adding custom cache: $CACHE_NAME..."
           if cachix use "$CACHE_NAME"; then

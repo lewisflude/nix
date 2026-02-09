@@ -90,7 +90,7 @@
             # ═══════════════════════════════════════════════════════════════════
             # Note: Mod+Return (terminal) and Mod+D (launcher) provided by DMS binds.kdl
             "Mod+T" = {
-              action.spawn = [ "alacritty" ];
+              action.spawn = [ "ghostty" ];
               hotkey-overlay.title = "Open Terminal";
             };
             "Mod+B" = {
@@ -595,6 +595,83 @@
               };
             };
           };
+
+          # Window rules (processed in order, last non-null value per property wins)
+          window-rules =
+            let
+              r = 12.0;
+            in
+            [
+              # Global: rounded corners (Material You aesthetic via DMS)
+              {
+                geometry-corner-radius = {
+                  top-left = r;
+                  top-right = r;
+                  bottom-left = r;
+                  bottom-right = r;
+                };
+                clip-to-geometry = true;
+              }
+
+              # Float dialog/utility windows
+              {
+                matches = [
+                  { app-id = "xdg-desktop-portal-gtk"; }
+                  { app-id = "xdg-desktop-portal-gnome"; }
+                  { app-id = "^pinentry-"; }
+                  { app-id = "gcr-prompter"; }
+                  { app-id = "nm-connection-editor"; }
+                  { app-id = "blueman-manager"; }
+                  { app-id = "^pavucontrol$"; }
+                  { app-id = "^pwvucontrol$"; }
+                  { app-id = "org.gnome.Calculator"; }
+                  { app-id = "zenity"; }
+                ];
+                open-floating = true;
+              }
+
+              # 1Password: float + hide from screencasts
+              {
+                matches = [{ app-id = "^1password$"; }];
+                open-floating = true;
+                block-out-from = "screencast";
+              }
+
+              # Firefox/Chromium picture-in-picture
+              {
+                matches = [
+                  { app-id = "^firefox"; title = "^Picture-in-Picture$"; }
+                  { title = "^Picture in picture$"; }
+                ];
+                open-floating = true;
+              }
+
+              # Steam games: fullscreen + VRR (AW3423DWF)
+              {
+                matches = [{ app-id = "^steam_app_"; }];
+                open-fullscreen = true;
+                variable-refresh-rate = true;
+              }
+
+              # Gamescope
+              {
+                matches = [{ app-id = "^gamescope$"; }];
+                open-fullscreen = true;
+                variable-refresh-rate = true;
+              }
+
+              # Steam client
+              {
+                matches = [{ app-id = "^steam$"; }];
+                default-column-width = { proportion = 0.65; };
+              }
+
+              # Inactive window transparency
+              {
+                matches = [{ is-active = false; }];
+                opacity = 0.95;
+              }
+            ];
 
           # Startup commands
           # Note: DMS is launched via programs.dank-material-shell.niri.enableSpawn

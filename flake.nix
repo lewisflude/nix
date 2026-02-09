@@ -26,9 +26,6 @@
     determinate = {
       url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
     };
-    flakehub = {
-      url = "https://flakehub.com/f/DeterminateSystems/fh/*.tar.gz";
-    };
     sops-nix = {
       url = "github:Mic92/sops-nix";
     };
@@ -38,10 +35,6 @@
     #   url = "github:hraban/mac-app-util";
     # };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
-    homebrew-j178 = {
-      url = "github:j178/homebrew-tap";
-      flake = false;
-    };
     niri = {
       url = "github:sodiboo/niri-flake";
     };
@@ -76,9 +69,6 @@
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
-    jsonresume-nix = {
-      url = "https://flakehub.com/f/TaserudConsulting/jsonresume-nix/*.tar.gz";
-    };
     # NH is available in nixpkgs - no need for flake input
     # Using nixpkgs version avoids test failures on Darwin
     # nh = {
@@ -92,25 +82,12 @@
     fenix = {
       url = "github:nix-community/fenix";
     };
-    lazygit = {
-      url = "github:jesseduffield/lazygit";
-    };
-    atuin = {
-      url = "github:atuinsh/atuin";
-    };
     pog = {
       url = "github:jpetrucciani/pog";
-    };
-    nix-topology = {
-      url = "github:oddlama/nix-topology";
-    };
-    nix-colorizer = {
-      url = "github:nutsalhan87/nix-colorizer";
     };
     signal-nix = {
       url = "github:lewisflude/signal-nix";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.nix-colorizer.follows = "nix-colorizer";
       inputs.home-manager.follows = "home-manager";
     };
     devour-flake = {
@@ -138,10 +115,6 @@
     #   url = "github:reo101/yknotify-rs";
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
-    rust-docs-mcp = {
-      url = "github:snowmead/rust-docs-mcp";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     hyprcursor-phinger = {
       url = "github:jappie3/hyprcursor-phinger";
     };
@@ -171,8 +144,6 @@
         (inputs.import-tree ./modules)
         # Process-compose needs explicit import (external flake module)
         inputs.process-compose-flake.flakeModule
-        # Disabled: causes "unknown flake output 'topology'" warning
-        # inputs.nix-topology.flakeModule
       ];
     };
 }

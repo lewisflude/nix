@@ -8,6 +8,11 @@ in
   flake.modules.nixos.unpackerr =
     { lib, pkgs, ... }:
     {
+      systemd.services.unpackerr = {
+        after = [ "mnt-storage.mount" ];
+        requires = [ "mnt-storage.mount" ];
+      };
+
       services.unpackerr = {
         enable = true;
         user = "media";
@@ -26,7 +31,7 @@ in
           radarr = [
             {
               url = "http://127.0.0.1:${toString constants.ports.services.radarr}";
-              paths = [ "/mnt/storage/movies" ];
+              paths = [ "/mnt/storage/torrents/movies" ];
               protocols = "torrent";
               timeout = "10s";
               delete_orig = false;
@@ -36,7 +41,7 @@ in
           sonarr = [
             {
               url = "http://127.0.0.1:${toString constants.ports.services.sonarr}";
-              paths = [ "/mnt/storage/tv" ];
+              paths = [ "/mnt/storage/torrents/tv" ];
               protocols = "torrent";
               timeout = "10s";
               delete_orig = false;
@@ -46,7 +51,7 @@ in
           lidarr = [
             {
               url = "http://127.0.0.1:${toString constants.ports.services.lidarr}";
-              paths = [ "/mnt/storage/music" ];
+              paths = [ "/mnt/storage/torrents/music" ];
               protocols = "torrent";
               timeout = "10s";
               delete_orig = false;

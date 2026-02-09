@@ -32,6 +32,11 @@ in
         inherit user group;
       };
 
+      systemd.services.jellyfin = {
+        after = [ "mnt-storage.mount" ];
+        requires = [ "mnt-storage.mount" ];
+      };
+
       networking.firewall = {
         allowedTCPPorts = mkDefault [
           constants.ports.services.jellyfin # 8096 - HTTP

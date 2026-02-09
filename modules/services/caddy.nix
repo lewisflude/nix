@@ -37,26 +37,29 @@ in
         email = cfg.email;
         virtualHosts = {
           # Infrastructure
-          "cockpit.blmt.io" = mkReverseProxy "127.0.0.1:9090";
+          "cockpit.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.cockpit}";
           "ha.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.homeAssistant}";
           "assistant.blmt.io" =
             mkReverseProxy "127.0.0.1:${toString constants.ports.services.musicAssistant}";
 
           # Media
           "jellyfin.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.jellyfin}";
-          "music.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.navidrome}";
+          "jellyseerr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.jellyseerr}";
+          "homarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.homarr}";
+          "wizarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.wizarr}";
 
           # Arr Stack
           "prowlarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.prowlarr}";
           "sonarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.sonarr}";
           "radarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.radarr}";
           "lidarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.lidarr}";
-          "usenet.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.sabnzbd}";
+          "readarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.readarr}";
+          "bazarr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.bazarr}";
+          "autobrr.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.autobrr}";
 
           # Downloads
           "torrent.blmt.io" = mkReverseProxy "192.168.15.1:8080";
-          "transmission.blmt.io" =
-            mkReverseProxy "127.0.0.1:${toString constants.ports.services.transmission}";
+          "usenet.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.sabnzbd}";
 
           # AI
           "ollama.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.ollama}";

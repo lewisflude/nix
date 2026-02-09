@@ -100,6 +100,9 @@ in
         nixos.radarr
         nixos.sonarr
         nixos.lidarr
+        nixos.bazarr
+        nixos.autobrr
+        nixos.readarr
         nixos.jellyfin
         nixos.sabnzbd
         nixos.flaresolverr

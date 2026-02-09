@@ -20,11 +20,15 @@ in
         ];
 
         # Performance settings
-        max-jobs = 16;
+        max-jobs = 2;
         max-substitution-jobs = 28;
         http-connections = 64;
+        connect-timeout = 5;
+        stalled-download-timeout = 10;
         cores = 0;
         sandbox = false;
+        always-allow-substitutes = true;
+        eval-cores = 4;
 
         # Binary caches from constants
         extra-substituters = constants.binaryCaches.substituters;

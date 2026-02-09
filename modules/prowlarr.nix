@@ -46,6 +46,7 @@ in
         serviceConfig = {
           User = user;
           Group = group;
+          UMask = "0002";
         };
       };
     };

@@ -16,9 +16,18 @@
         pulse.enable = true;
         jack.enable = true;
 
-        # Virtual stereo sink for apps that crash with multichannel/pro-audio devices
-        # (e.g. Apogee Symphony Desktop). The loopback module creates a stereo sink
-        # and automatically routes it to the Apogee's first two channels.
+        # Allow PipeWire to switch graph sample rate to match content,
+        # avoiding unnecessary resampling with the Apogee.
+        # https://wiki.archlinux.org/title/PipeWire#Changing_the_allowed_sample_rate(s)
+        extraConfig.pipewire."90-clock-rates" = {
+          "context.properties" = {
+            "default.clock.allowed-rates" = [ 44100 48000 88200 96000 ];
+          };
+        };
+
+        # Virtual stereo sink/source for apps that crash with multichannel/pro-audio
+        # devices (e.g. Apogee Symphony Desktop). Loopback modules present simple
+        # stereo endpoints while routing to/from the Apogee's multichannel ALSA nodes.
         # https://docs.pipewire.org/page_module_loopback.html
         extraConfig.pipewire."91-virtual-sink" = {
           "context.objects" = [
@@ -29,6 +38,20 @@
                 "factory.name" = "support.node.driver";
                 "node.name" = "Dummy-Driver";
                 "priority.driver" = 8000;
+              };
+            }
+            {
+              # Virtual stereo source visible to PulseAudio clients (browsers, etc).
+              # The loopback module's nodes have object.register=false which hides them,
+              # so we use a null-audio-sink with Audio/Source/Virtual instead.
+              factory = "adapter";
+              args = {
+                "factory.name" = "support.null-audio-sink";
+                "node.name" = "Main-Input";
+                "node.description" = "Main Input";
+                "media.class" = "Audio/Source/Virtual";
+                "audio.position" = "FL,FR";
+                "monitor.channel-volumes" = true;
               };
             }
           ];
@@ -46,7 +69,28 @@
                   "node.name" = "Main-Output-Playback";
                   "audio.position" = "AUX0,AUX1";
                   "stream.dont-remix" = true;
+                  "node.dont-reconnect" = true;
                   "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-output";
+                };
+              };
+            }
+            {
+              # Route Apogee input channels 1-2 into the Main-Input virtual source
+              name = "libpipewire-module-loopback";
+              args = {
+                "capture.props" = {
+                  "node.name" = "Main-Input-Capture";
+                  "audio.position" = "AUX0,AUX1";
+                  "stream.dont-remix" = true;
+                  "node.dont-reconnect" = true;
+                  "node.target" = "alsa_input.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-input";
+                };
+                "playback.props" = {
+                  "node.name" = "Main-Input-Loopback";
+                  "audio.position" = "FL,FR";
+                  "stream.dont-remix" = true;
+                  "node.dont-reconnect" = true;
+                  "node.target" = "Main-Input";
                 };
               };
             }
@@ -78,9 +122,12 @@
             ];
           };
 
-          # Set the virtual stereo sink as the default output
+          # Set the virtual stereo sink/source as defaults
           "10-default-sink"."wireplumber.settings"."default.configured.audio.sink" = {
             name = "Main-Output";
+          };
+          "10-default-source"."wireplumber.settings"."default.configured.audio.source" = {
+            name = "Main-Input";
           };
         };
 

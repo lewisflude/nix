@@ -1,15 +1,15 @@
-# Sonarr Service Module - Dendritic Pattern
-# TV show management for *arr stack
-# Usage: Import config.flake.modules.nixos.sonarr in host definition
+# Readarr Service Module - Dendritic Pattern
+# Ebook/audiobook management for *arr stack
+# Usage: Import config.flake.modules.nixos.readarr in host definition
 { config, ... }:
 let
   constants = config.constants;
 in
 {
-  flake.modules.nixos.sonarr =
+  flake.modules.nixos.readarr =
     { lib, ... }:
     let
-      inherit (lib) mkDefault mkAfter optional;
+      inherit (lib) mkDefault optional;
       user = "media";
       group = "media";
     in
@@ -21,24 +21,22 @@ in
       };
       users.groups.${group} = { };
 
-      # Ensure library directories exist (TRASHguides: /mnt/storage/media/<type>)
+      # Ensure library directory exists
       systemd.tmpfiles.rules = [
-        "d '/mnt/storage/media' 0770 ${user} ${group} - -"
-        "d '/mnt/storage/media/tv' 0770 ${user} ${group} - -"
+        "d '/mnt/storage/books' 0770 ${user} ${group} - -"
       ];
 
-      services.sonarr = {
+      services.readarr = {
         enable = true;
         openFirewall = false;
         inherit user group;
-        dataDir = "/var/lib/sonarr/.config/Sonarr";
       };
 
       networking.firewall.allowedTCPPorts = mkDefault [
-        constants.ports.services.sonarr
+        constants.ports.services.readarr
       ];
 
-      systemd.services.sonarr = {
+      systemd.services.readarr = {
         environment.TZ = mkDefault constants.defaults.timezone;
         after = [ "mnt-storage.mount" ] ++ (optional (config.services.prowlarr.enable or false) "prowlarr.service");
         requires = [ "mnt-storage.mount" ];

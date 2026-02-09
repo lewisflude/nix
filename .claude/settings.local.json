@@ -1,4 +1,15 @@
 {
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:wiki.nixos.org)",
+      "WebFetch(domain:discourse.nixos.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.lizardbyte.dev)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(journalctl:*)"
+    ]
+  },
   "enabledPlugins": {
     "ralph-loop@claude-plugins-official": true
   }

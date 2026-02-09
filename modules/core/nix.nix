@@ -17,13 +17,15 @@ in
           "root"
           username
         ];
-        max-jobs = lib.mkDefault 16;
+        # 13900K: 24 cores (8P+16E). 4 jobs * 6 cores = 24 threads (matches physical cores)
+        max-jobs = lib.mkDefault 4;
+        cores = lib.mkDefault 6;
         max-substitution-jobs = lib.mkDefault 28;
         http-connections = lib.mkDefault 64;
         always-allow-substitutes = lib.mkDefault true;
+        connect-timeout = 5;
+        stalled-download-timeout = 10;
         experimental-features = [
-          "nix-command"
-          "flakes"
           "ca-derivations"
           "fetch-closure"
           "parse-toml-timestamps"
@@ -36,6 +38,11 @@ in
         extra-substituters = constants.binaryCaches.substituters;
         extra-trusted-public-keys = constants.binaryCaches.trustedPublicKeys;
       };
+
+      # Determinate Nix-specific settings (not in nix.settings schema)
+      nix.extraOptions = ''
+        eval-cores = 4
+      '';
 
       # Note: configurationRevision removed - not needed in lower-level modules
     };

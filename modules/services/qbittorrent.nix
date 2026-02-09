@@ -33,10 +33,14 @@ in
         # Enable peer exchange and DHT
         UsePEX = true;
         UseDHT = true;
-        # Protocol settings
-        BTProtocol = "Both";
-        Encryption = 1; # Prefer encryption
+        # Protocol settings (TRASHguides: TCP has superior performance)
+        BTProtocol = "TCP";
+        Encryption = 0; # TRASHguides: Prefer (not Force) encryption for better compatibility
         uTPMixedMode = "TCP";
+        # TRASHguides: Disable anonymous mode for better speeds on private trackers
+        AnonymousMode = false;
+        # TRASHguides: Never auto-add external trackers (critical for private trackers)
+        AddTrackersEnabled = false;
         # Queue settings
         QueueingSystemEnabled = true;
         MaxActiveDownloads = 3;
@@ -186,6 +190,10 @@ in
       # Ensure download directories exist with correct ownership
       systemd.tmpfiles.rules = [
         "d '/mnt/storage/torrents' 0770 qbittorrent media - -"
+        # Category subdirectories (matching SABnzbd pattern)
+        "d '/mnt/storage/torrents/movies' 0770 qbittorrent media - -"
+        "d '/mnt/storage/torrents/tv' 0770 qbittorrent media - -"
+        "d '/mnt/storage/torrents/music' 0770 qbittorrent media - -"
         "d '/var/lib/qbittorrent/incomplete' 0770 qbittorrent media - -"
       ];
 
@@ -195,6 +203,8 @@ in
           enable = true;
           vpnNamespace = namespace;
         };
+        after = [ "mnt-storage.mount" ];
+        requires = [ "mnt-storage.mount" ];
         wants = [ "network-online.target" ];
         unitConfig = {
           StartLimitBurst = 5;

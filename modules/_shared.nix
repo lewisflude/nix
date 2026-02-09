@@ -89,13 +89,6 @@ let
       isLinux = system == "x86_64-linux" || system == "aarch64-linux";
     in
     {
-      # Network topology visualization
-      nix-topology =
-        if inputs ? nix-topology && inputs.nix-topology ? overlays then
-          inputs.nix-topology.overlays.default
-        else
-          (_final: _prev: { });
-
       # Rust toolchains from fenix (better than nixpkgs)
       fenix-overlay =
         if inputs ? fenix && inputs.fenix ? overlays then
