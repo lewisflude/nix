@@ -115,9 +115,13 @@
       hosts = {
         jupiter = {
           ipv4 = "192.168.10.210";
+          gpgAgent = "/run/user/1001/gnupg/S.gpg-agent";
+          gpgAgentExtra = "/run/user/1001/gnupg/S.gpg-agent.extra";
         };
         mercury = {
           ipv4 = "192.168.10.220";
+          gpgAgent = "/Users/lewisflude/.gnupg/S.gpg-agent";
+          gpgAgentExtra = "/Users/lewisflude/.gnupg/S.gpg-agent.extra";
         };
       };
 

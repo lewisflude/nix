@@ -45,19 +45,13 @@ in
     { config, pkgs, ... }:
     let
       isDarwin = pkgs.stdenv.isDarwin;
-      homeDir = config.home.homeDirectory;
 
-      # The local extra socket is the source of the forward (on the machine you're sitting at)
+      # The local extra socket (source of forward) — on the machine you're sitting at.
+      # isDarwin tells us which host we're building for.
       localExtraSocket =
         if isDarwin
-        then "${homeDir}/.gnupg/S.gpg-agent.extra"
-        else "/run/user/1000/gnupg/S.gpg-agent.extra";
-
-      # The remote agent socket is the target (on the machine you're SSHing into)
-      remoteAgentSocket = {
-        linux = "/run/user/1000/gnupg/S.gpg-agent";
-        darwin = "${homeDir}/.gnupg/S.gpg-agent";
-      };
+        then constants.hosts.mercury.gpgAgentExtra
+        else constants.hosts.jupiter.gpgAgentExtra;
     in
     {
       programs.ssh = {
@@ -91,7 +85,7 @@ in
             forwardAgent = true;
             remoteForwards = [
               {
-                bind.address = remoteAgentSocket.linux;
+                bind.address = constants.hosts.jupiter.gpgAgent;
                 host.address = localExtraSocket;
               }
             ];
@@ -104,7 +98,7 @@ in
             forwardAgent = true;
             remoteForwards = [
               {
-                bind.address = remoteAgentSocket.darwin;
+                bind.address = constants.hosts.mercury.gpgAgent;
                 host.address = localExtraSocket;
               }
             ];
