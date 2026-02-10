@@ -69,7 +69,7 @@
                   "node.name" = "Main-Output-Playback";
                   "audio.position" = "AUX0,AUX1";
                   "stream.dont-remix" = true;
-                  "node.dont-reconnect" = true;
+                  "node.dont-reconnect" = false;
                   "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-output";
                 };
               };
@@ -82,14 +82,14 @@
                   "node.name" = "Main-Input-Capture";
                   "audio.position" = "AUX0,AUX1";
                   "stream.dont-remix" = true;
-                  "node.dont-reconnect" = true;
+                  "node.dont-reconnect" = false;
                   "node.target" = "alsa_input.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-input";
                 };
                 "playback.props" = {
                   "node.name" = "Main-Input-Loopback";
                   "audio.position" = "FL,FR";
                   "stream.dont-remix" = true;
-                  "node.dont-reconnect" = true;
+                  "node.dont-reconnect" = false;
                   "node.target" = "Main-Input";
                 };
               };
@@ -97,7 +97,27 @@
           ];
         };
 
+        # Auto-switch to newly connected audio devices (e.g. after KVM switch)
+        extraConfig.pipewire-pulse."30-switch-on-connect" = {
+          "pulse.cmd" = [
+            { cmd = "load-module"; args = "module-switch-on-connect"; }
+          ];
+        };
+
         wireplumber.extraConfig = {
+          # Give the Apogee highest priority so WirePlumber prefers it on reconnect
+          "10-apogee-priority"."monitor.alsa.rules" = [
+            {
+              matches = [
+                { "node.name" = "~alsa_output.usb-Apogee_Electronics*"; }
+                { "node.name" = "~alsa_input.usb-Apogee_Electronics*"; }
+              ];
+              actions.update-props = {
+                "priority.driver" = 2000;
+                "priority.session" = 2000;
+              };
+            }
+          ];
           # Disable device suspension to prevent audio popping/delay
           "10-disable-suspend"."monitor.alsa.rules" = [
             {
