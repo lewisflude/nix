@@ -42,7 +42,23 @@ in
   # Home-manager: SSH client configuration
   # ===========================================================================
   flake.modules.homeManager.ssh =
-    { config, ... }:
+    { config, pkgs, ... }:
+    let
+      isDarwin = pkgs.stdenv.isDarwin;
+      homeDir = config.home.homeDirectory;
+
+      # The local extra socket is the source of the forward (on the machine you're sitting at)
+      localExtraSocket =
+        if isDarwin
+        then "${homeDir}/.gnupg/S.gpg-agent.extra"
+        else "/run/user/1000/gnupg/S.gpg-agent.extra";
+
+      # The remote agent socket is the target (on the machine you're SSHing into)
+      remoteAgentSocket = {
+        linux = "/run/user/1000/gnupg/S.gpg-agent";
+        darwin = "${homeDir}/.gnupg/S.gpg-agent";
+      };
+    in
     {
       programs.ssh = {
         enable = true;
@@ -75,8 +91,8 @@ in
             forwardAgent = true;
             remoteForwards = [
               {
-                bind.address = "/run/user/1000/gnupg/S.gpg-agent";
-                host.address = "/run/user/1000/gnupg/S.gpg-agent.extra";
+                bind.address = remoteAgentSocket.linux;
+                host.address = localExtraSocket;
               }
             ];
             extraOptions.StreamLocalBindUnlink = "yes";
@@ -88,13 +104,24 @@ in
             forwardAgent = true;
             remoteForwards = [
               {
-                bind.address = "/run/user/1000/gnupg/S.gpg-agent";
-                host.address = "/run/user/1000/gnupg/S.gpg-agent.extra";
+                bind.address = remoteAgentSocket.darwin;
+                host.address = localExtraSocket;
               }
             ];
             extraOptions.StreamLocalBindUnlink = "yes";
           };
         };
       };
+    };
+
+  # ===========================================================================
+  # Darwin: SSH server GPG forwarding support
+  # ===========================================================================
+  flake.modules.darwin.ssh =
+    { ... }:
+    {
+      environment.etc."ssh/sshd_config.d/200-gpg-forwarding.conf".text = ''
+        StreamLocalBindUnlink yes
+      '';
     };
 }

@@ -37,6 +37,7 @@ in
         darwin.audio
         darwin.apps
         darwin.karabiner
+        darwin.ssh
       ];
 
       # Required for Darwin

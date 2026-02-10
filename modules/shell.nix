@@ -299,10 +299,15 @@ in
             # Dynamic Variables & GPG Configuration
             # ════════════════════════════════════════════════════════════════
             export GPG_TTY=$TTY
-            zsh-defer ${pkgs.gnupg}/bin/gpg-connect-agent --quiet updatestartuptty /bye > /dev/null 2>&1 || true
+            # Only update the local GPG agent's TTY in local sessions;
+            # over SSH the forwarded agent socket should be left alone.
+            if [[ -z "$SSH_CONNECTION" ]]; then
+              zsh-defer ${pkgs.gnupg}/bin/gpg-connect-agent --quiet updatestartuptty /bye > /dev/null 2>&1 || true
+            fi
 
-            # SSH_AUTH_SOCK: Use systemd user service socket
-            if [[ -o interactive ]]; then
+            # SSH_AUTH_SOCK: Use GPG agent socket in local sessions only.
+            # In SSH sessions the forwarded socket is already correct.
+            if [[ -o interactive ]] && [[ -z "$SSH_CONNECTION" ]]; then
               if [[ -S "''${XDG_RUNTIME_DIR:-/run/user/$UID}/gnupg/S.gpg-agent.ssh" ]]; then
                 export SSH_AUTH_SOCK="''${XDG_RUNTIME_DIR:-/run/user/$UID}/gnupg/S.gpg-agent.ssh"
               else
