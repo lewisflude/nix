@@ -5,6 +5,9 @@
     { lib, pkgs, ... }:
     {
       home.packages = [
+        # Development environments
+        pkgs.devenv
+
         # Formatters
         pkgs.nixfmt
         pkgs.biome
