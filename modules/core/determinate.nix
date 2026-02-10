@@ -13,7 +13,7 @@ in
 
       # Declaratively configure /etc/nix/nix.custom.conf
       customSettings = {
-        # Allow user to manage binary caches (needed for devenv)
+        # Allow user to manage binary caches (needed for cachix and nix develop)
         trusted-users = [
           "root"
           username

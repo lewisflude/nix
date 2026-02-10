@@ -43,6 +43,7 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         nixos.boot
         nixos.networking
+        nixos.wakeOnLan
         nixos.security
         nixos.power
         nixos.memory

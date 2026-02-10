@@ -96,8 +96,7 @@
         pkgs.cocogitto
         pkgs.yaml-language-server
 
-        # Development environments and caching
-        pkgs.devenv
+        # Binary caching
         pkgs.cachix
       ]
       ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.libnotify ];

@@ -7,7 +7,6 @@
     {
       home.packages = [
         pkgs.clipse
-        pkgs.devenv
         pkgs.rsync
         pkgs.trash-cli
         pkgs.fd

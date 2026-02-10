@@ -18,7 +18,6 @@
 
         # Development tools
         pkgs.cursor-cli
-        pkgs.lefthook
       ]
       ++ lib.optionals (llmAgentPkgs ? ccusage) [ llmAgentPkgs.ccusage ]
       ++ lib.optionals (llmAgentPkgs ? coding-agent-search) [ llmAgentPkgs.coding-agent-search ]

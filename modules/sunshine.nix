@@ -1,17 +1,29 @@
 # Sunshine game streaming server
-# Streams HDMI-A-1 (dummy plug) via KMS capture with NVENC encoding
-{ config, ... }:
+# Streams dummy plug (1080p HDMI) via KMS capture with NVENC encoding.
+# On stream start, the ultrawide is disabled so games launch on the dummy plug.
+# On stream end, the ultrawide is re-enabled.
+{ ... }:
 {
   flake.modules.nixos.sunshine =
     { pkgs, ... }:
     let
+      # Display output names — verify with: niri msg outputs
+      # Dummy plug: HDMI-A-4 (1080p, always active, captured by Sunshine)
+      ultrawide = "DP-3"; # AW3423DWF — disabled during streaming
+
       sunshine-prep = pkgs.writeShellApplication {
         name = "sunshine-prep";
         runtimeInputs = [
           pkgs.systemd
           pkgs.coreutils
+          pkgs.niri
         ];
         text = ''
+          # Disable ultrawide so the dummy plug becomes the sole display
+          niri msg output "${ultrawide}" off
+          sleep 1
+
+          # Inhibit system sleep for the duration of the stream
           systemd-inhibit --what=idle:sleep \
             --who=sunshine --why="Game streaming" \
             sleep infinity &
@@ -21,8 +33,15 @@
 
       sunshine-cleanup = pkgs.writeShellApplication {
         name = "sunshine-cleanup";
-        runtimeInputs = [ pkgs.coreutils ];
+        runtimeInputs = [
+          pkgs.coreutils
+          pkgs.niri
+        ];
         text = ''
+          # Re-enable ultrawide
+          niri msg output "${ultrawide}" on
+
+          # Stop sleep inhibitor
           pid_file="$XDG_RUNTIME_DIR/sunshine-inhibit.pid"
           if [ -f "$pid_file" ]; then
             kill "$(cat "$pid_file")" 2>/dev/null || true
@@ -40,12 +59,12 @@
         package = pkgs.sunshine.override { cudaSupport = true; };
 
         settings = {
-          # Capture
+          # Capture — KMS grabs the dummy plug by output index.
+          # Find the correct index: journalctl --user -u sunshine | grep -i monitor
           capture = "kms";
           encoder = "nvenc";
           adapter_name = "/dev/dri/renderD128";
-          # output_name: set to HDMI-A-1's numeric index after checking logs
-          # Run: journalctl --user -u sunshine | grep "Detected monitor"
+          output_name = 0;
 
           # NVENC encoding (RTX 4090)
           nvenc_preset = 1;
@@ -76,9 +95,10 @@
         ];
       };
 
-      # NVIDIA encode libraries must be in Sunshine's library path
+      # Sunshine needs WAYLAND_DISPLAY to reach Niri, and NVIDIA libs for encoding
       systemd.user.services.sunshine.environment = {
         LD_LIBRARY_PATH = "/run/opengl-driver/lib";
+        WAYLAND_DISPLAY = "wayland-1";
       };
     };
 }

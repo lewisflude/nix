@@ -55,32 +55,6 @@ jobs:
             fi
           fi
 
-  formatting:
-    name: Format Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v21
-
-      - name: Setup Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v13
-
-      - name: Check formatting
-        run: |
-          # Format all Nix files using the flake formatter
-          # Find all .nix files and format them
-          find . -name "*.nix" -type f ! -path "./.direnv/*" ! -path "./result*" ! -path "./flake.lock" -exec nix fmt {} \;
-          # Check if any files were modified
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "❌ Files are not properly formatted. Please run 'nix fmt <file>' for each file and commit the changes."
-            git diff
-            exit 1
-          fi
-          echo "✅ All files are properly formatted."
-
   # Build key configurations to ensure they work
   build-configs:
     name: Build Configurations
@@ -111,29 +85,12 @@ jobs:
       - name: Test dev shell
         run: nix develop --command echo "Dev shell works"
 
-  # Pre-commit checks (linting, deadnix, statix, etc.)
-  pre-commit:
-    name: Pre-commit Checks
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v21
-
-      - name: Setup Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v13
-
-      - name: Run pre-commit checks
-        run: nix build .#checks.x86_64-linux.pre-commit-check --print-out-paths --no-link
-
   # Push NixOS builds to Cachix (only on main branch to save CI minutes)
   cachix-push-nixos:
     name: Push NixOS to Cachix
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [flake-check, formatting, build-configs]
+    needs: [flake-check, build-configs]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -160,7 +117,8 @@ jobs:
           # Build dev tools (useful for local development)
           echo "Building dev tools..."
           nix build .#formatter.x86_64-linux --no-link || true
-          nix build .#checks.x86_64-linux.pre-commit-check --no-link || true
+          nix build .#checks.x86_64-linux.pre-commit --no-link || true
+          nix build .#checks.x86_64-linux.treefmt --no-link || true
           nix build .#devShells.x86_64-linux.default --no-link || true
 
           echo "✅ NixOS builds pushed to Cachix cache"
@@ -171,7 +129,7 @@ jobs:
     name: Push Darwin to Cachix
     runs-on: macos-14
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [flake-check, formatting]
+    needs: [flake-check]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -198,7 +156,8 @@ jobs:
           # Build dev tools for Darwin
           echo "Building dev tools..."
           nix build .#formatter.aarch64-darwin --no-link || true
-          nix build .#checks.aarch64-darwin.pre-commit-check --no-link || true
+          nix build .#checks.aarch64-darwin.pre-commit --no-link || true
+          nix build .#checks.aarch64-darwin.treefmt --no-link || true
           nix build .#devShells.aarch64-darwin.default --no-link || true
 
           echo "✅ Darwin builds pushed to Cachix cache"
