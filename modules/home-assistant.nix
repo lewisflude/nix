@@ -114,8 +114,8 @@ in
       # SOPS secrets configuration
       sops.templates."hass-secrets.yaml" = {
         content = ''
-          latitude: ''${config.sops.placeholder.LATITUDE}
-          longitude: ''${config.sops.placeholder.LONGITUDE}
+          latitude: ${config.sops.placeholder.LATITUDE}
+          longitude: ${config.sops.placeholder.LONGITUDE}
         '';
         owner = "hass";
         group = "hass";
