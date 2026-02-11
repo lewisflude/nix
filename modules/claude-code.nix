@@ -41,6 +41,9 @@ _: {
               "-y"
               "@playwright/mcp@latest"
             ];
+            env = {
+              PATH = "${pkgs.nodejs}/bin";
+            };
           };
           sequential-thinking = {
             command = "${pkgs.nodejs}/bin/npx";
@@ -48,6 +51,9 @@ _: {
               "-y"
               "@modelcontextprotocol/server-sequential-thinking"
             ];
+            env = {
+              PATH = "${pkgs.nodejs}/bin";
+            };
           };
         };
       };
