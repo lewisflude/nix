@@ -53,6 +53,12 @@ _: {
           niri msg output "${ultrawide}" off
           sleep 1
 
+          # Match virtual display resolution to the Moonlight client
+          width="''${SUNSHINE_CLIENT_WIDTH:-1920}"
+          height="''${SUNSHINE_CLIENT_HEIGHT:-1080}"
+          fps="''${SUNSHINE_CLIENT_FPS:-60}"
+          niri msg output "${virtualDisplay}" mode "''${width}x''${height}@''${fps}" || true
+
           # Inhibit system sleep for the duration of the stream
           systemd-inhibit --what=idle:sleep \
             --who=sunshine --why="Game streaming" \
@@ -68,6 +74,8 @@ _: {
           pkgs.niri
         ];
         text = ''
+          # Restore default 1080p on the virtual display
+          niri msg output "${virtualDisplay}" mode 1920x1080@60 || true
           niri msg output "${ultrawide}" on
 
           pid_file="$XDG_RUNTIME_DIR/sunshine-inhibit.pid"
