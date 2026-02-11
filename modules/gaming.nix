@@ -57,6 +57,7 @@
             pkgs'.stdenv.cc.cc.lib
             pkgs'.libkrb5
             pkgs'.keyutils
+            pkgs'.gamescope # Gamescope inside Steam FHS environment
             pkgs.xrizer # VR: OpenVR compatibility layer (outer pkgs, has multilib overlay)
           ];
         };
