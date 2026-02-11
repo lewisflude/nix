@@ -29,15 +29,129 @@ in
         "sensor.office_temperature"
       ];
 
+      # Device groups
+      allRoomLights = [
+        "light.living_room"
+        "light.living_room_pendant"
+        "light.dining_room"
+        "light.dining_room_pendant"
+        "light.office"
+        "light.bedroom"
+        "light.kitchen"
+        "light.hallway"
+        "light.hue_play_1"
+        "light.hue_play_2"
+        "light.hue_iris_1"
+        "light.hue_gradient_lightstrip_1"
+        "light.hue_gradient_lightstrip_2"
+      ];
+
+      livingDiningLights = [
+        "light.living_room"
+        "light.living_room_pendant"
+        "light.dining_room"
+        "light.dining_room_pendant"
+      ];
+
+      allThermostats = [
+        "climate.bedroom"
+        "climate.guest_bedroom"
+        "climate.hallway"
+        "climate.kitchen"
+      ];
+
+      windowSensors = [
+        "binary_sensor.bedroom_window"
+        "binary_sensor.guest_bedroom_window"
+        "binary_sensor.hallway_window"
+        "binary_sensor.kitchen_window"
+      ];
+
+      presenceTrackers = [
+        "device_tracker.lewiss_phone"
+        "device_tracker.bexs_phone"
+      ];
+
+      sleepModeAdaptiveSwitches = [
+        "switch.adaptive_lighting_sleep_mode_office_adaptive_lighting"
+        "switch.adaptive_lighting_sleep_mode_living_dining_room_adaptive_lighting"
+        "switch.adaptive_lighting_sleep_mode_bedroom_adaptive_lighting"
+        "switch.adaptive_lighting_sleep_mode_kitchen_adaptive_lighting"
+        "switch.adaptive_lighting_sleep_mode_hallway_adaptive_lighting"
+      ];
+
       automations = [
+        # === LIGHTING ===
+
+        # 1. Turn on living area lights at sunset
         {
-          alias = "Turn off lights when Apple TV is playing";
-          id = "apple_tv_lights_off";
-          description = "Turn off living room and dining room lights when Apple TV starts playing after dark";
+          id = "lights_on_at_sunset";
+          alias = "Turn on lights at sunset";
+          description = "Turn on living area lights when the sun sets and someone is home";
+          trigger = [
+            {
+              platform = "sun";
+              event = "sunset";
+            }
+          ];
+          condition = [
+            {
+              condition = "state";
+              entity_id = "input_select.house_mode";
+              state = [
+                "Home"
+                "Guest"
+              ];
+            }
+          ];
+          action = [
+            {
+              action = "light.turn_on";
+              target.entity_id = livingDiningLights;
+            }
+          ];
+        }
+
+        # 2. Turn off all lights at 23:30
+        {
+          id = "lights_off_late_at_night";
+          alias = "Turn off lights late at night";
+          description = "Turn off all lights at 23:30 unless media is actively playing";
+          trigger = [
+            {
+              platform = "time";
+              at = "23:30:00";
+            }
+          ];
+          condition = [
+            {
+              condition = "not";
+              conditions = [
+                {
+                  condition = "state";
+                  entity_id = "media_player.living_room";
+                  state = "playing";
+                }
+              ];
+            }
+          ];
+          action = [
+            {
+              action = "light.turn_off";
+              target.entity_id = allRoomLights;
+            }
+          ];
+        }
+
+        # 3. Dim lights for movie watching
+        {
+          id = "movie_mode_dim";
+          alias = "Dim lights for movie mode";
+          description = "Dim living room lights and turn off pendants when media starts playing after dark";
           trigger = [
             {
               platform = "state";
-              entity_id = "media_player.apple_tv";
+              entity_id = "media_player.living_room";
               to = "playing";
             }
           ];
@@ -52,18 +166,277 @@ in
             {
               action = "light.turn_off";
               target.entity_id = [
-                "light.living_room"
                 "light.living_room_pendant"
                 "light.dining_room"
                 "light.dining_room_pendant"
               ];
             }
+            {
+              action = "light.turn_on";
+              target.entity_id = [
+                "light.living_room"
+                "light.hue_play_1"
+                "light.hue_play_2"
+                "light.hue_iris_1"
+                "light.hue_gradient_lightstrip_1"
+                "light.hue_gradient_lightstrip_2"
+              ];
+              data.brightness_pct = 15;
+            }
           ];
         }
+
+        # 4. Restore lights when media stops
         {
-          alias = "Activate Sleep Mode Lighting";
-          id = "sleep_mode_lighting";
-          description = "Switch all adaptive lighting to sleep mode";
+          id = "movie_mode_restore";
+          alias = "Restore lights after movie mode";
+          description = "Restore living room lights when media stops playing after dark";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "media_player.living_room";
+              from = "playing";
+            }
+          ];
+          condition = [
+            {
+              condition = "state";
+              entity_id = "sun.sun";
+              state = "below_horizon";
+            }
+          ];
+          action = [
+            {
+              action = "light.turn_on";
+              target.entity_id = livingDiningLights;
+            }
+            {
+              action = "adaptive_lighting.set_manual_control";
+              data = {
+                entity_id = "switch.adaptive_lighting_living_dining_room_adaptive_lighting";
+                manual_control = false;
+              };
+            }
+          ];
+        }
+
+        # === PRESENCE & MODE ===
+
+        # 5. Set Away when both residents leave
+        {
+          id = "set_away_mode";
+          alias = "Set Away mode when everyone leaves";
+          description = "Set house mode to Away when both residents have been away for 10 minutes";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = presenceTrackers;
+              to = "not_home";
+              "for" = "00:10:00";
+            }
+          ];
+          condition = [
+            {
+              condition = "state";
+              entity_id = "device_tracker.lewiss_phone";
+              state = "not_home";
+            }
+            {
+              condition = "state";
+              entity_id = "device_tracker.bexs_phone";
+              state = "not_home";
+            }
+          ];
+          action = [
+            {
+              action = "input_select.select_option";
+              target.entity_id = "input_select.house_mode";
+              data.option = "Away";
+            }
+          ];
+        }
+
+        # 6. Set Home when anyone arrives
+        {
+          id = "set_home_mode";
+          alias = "Set Home mode when anyone arrives";
+          description = "Set house mode to Home when either resident arrives";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = presenceTrackers;
+              to = "home";
+            }
+          ];
+          condition = [
+            {
+              condition = "state";
+              entity_id = "input_select.house_mode";
+              state = [
+                "Away"
+                "Sleep"
+              ];
+            }
+          ];
+          action = [
+            {
+              action = "input_select.select_option";
+              target.entity_id = "input_select.house_mode";
+              data.option = "Home";
+            }
+            {
+              action = "input_boolean.turn_off";
+              target.entity_id = "input_boolean.sleep_mode";
+            }
+          ];
+        }
+
+        # === HEATING ===
+
+        # 7. Eco heating when Away
+        {
+          id = "heating_eco_when_away";
+          alias = "Set heating to eco when away";
+          description = "Lower all thermostats to 15C when house mode is Away";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "input_select.house_mode";
+              to = "Away";
+            }
+          ];
+          action = [
+            {
+              action = "climate.set_temperature";
+              target.entity_id = allThermostats;
+              data.temperature = 15;
+            }
+          ];
+        }
+
+        # 8. Comfortable heating when Home
+        {
+          id = "heating_comfort_when_home";
+          alias = "Set comfortable heating when home";
+          description = "Restore normal heating temperatures when house mode is Home";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "input_select.house_mode";
+              to = "Home";
+            }
+          ];
+          action = [
+            {
+              action = "climate.set_temperature";
+              target.entity_id = "climate.bedroom";
+              data.temperature = 20;
+            }
+            {
+              action = "climate.set_temperature";
+              target.entity_id = "climate.kitchen";
+              data.temperature = 20;
+            }
+            {
+              action = "climate.set_temperature";
+              target.entity_id = "climate.hallway";
+              data.temperature = 18;
+            }
+            {
+              action = "climate.set_temperature";
+              target.entity_id = "climate.guest_bedroom";
+              data.temperature = 17;
+            }
+          ];
+        }
+
+        # 9. Lower heating at bedtime
+        {
+          id = "lower_heating_at_bedtime";
+          alias = "Lower heating at bedtime";
+          description = "Reduce non-bedroom heating when house mode is Sleep";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "input_select.house_mode";
+              to = "Sleep";
+            }
+          ];
+          action = [
+            {
+              action = "climate.set_temperature";
+              target.entity_id = "climate.bedroom";
+              data.temperature = 19;
+            }
+            {
+              action = "climate.set_temperature";
+              target.entity_id = [
+                "climate.kitchen"
+                "climate.hallway"
+                "climate.guest_bedroom"
+              ];
+              data.temperature = 15;
+            }
+          ];
+        }
+
+        # 10a. Turn off heating when window opens
+        {
+          id = "heating_off_window_open";
+          alias = "Turn off heating when window opens";
+          description = "Turn off radiator when Tado detects an open window";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = windowSensors;
+              to = "on";
+              "for" = "00:00:30";
+            }
+          ];
+          action = [
+            {
+              action = "climate.set_hvac_mode";
+              target.entity_id = "{{ trigger.entity_id | replace('binary_sensor.', 'climate.') | replace('_window', '') }}";
+              data.hvac_mode = "off";
+            }
+          ];
+        }
+
+        # 10b. Restore heating when window closes
+        {
+          id = "heating_restore_window_closed";
+          alias = "Restore heating when window closes";
+          description = "Set radiator back to auto when window closes";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = windowSensors;
+              to = "off";
+            }
+          ];
+          condition = [
+            {
+              condition = "state";
+              entity_id = "input_boolean.vacation_mode";
+              state = "off";
+            }
+          ];
+          action = [
+            {
+              action = "climate.set_hvac_mode";
+              target.entity_id = "{{ trigger.entity_id | replace('binary_sensor.', 'climate.') | replace('_window', '') }}";
+              data.hvac_mode = "auto";
+            }
+          ];
+        }
+
+        # === SLEEP MODE ===
+
+        # 11a. Sleep mode on: set house mode + adaptive lighting
+        {
+          id = "sleep_mode_activate";
+          alias = "Activate sleep mode";
+          description = "Set house mode to Sleep and enable adaptive lighting sleep mode";
           trigger = [
             {
               platform = "state";
@@ -73,21 +446,22 @@ in
           ];
           action = [
             {
+              action = "input_select.select_option";
+              target.entity_id = "input_select.house_mode";
+              data.option = "Sleep";
+            }
+            {
               action = "switch.turn_on";
-              target.entity_id = [
-                "switch.adaptive_lighting_sleep_mode_office_adaptive_lighting"
-                "switch.adaptive_lighting_sleep_mode_living_dining_room_adaptive_lighting"
-                "switch.adaptive_lighting_sleep_mode_bedroom_adaptive_lighting"
-                "switch.adaptive_lighting_sleep_mode_kitchen_adaptive_lighting"
-                "switch.adaptive_lighting_sleep_mode_hallway_adaptive_lighting"
-              ];
+              target.entity_id = sleepModeAdaptiveSwitches;
             }
           ];
         }
+
+        # 11b. Sleep mode off: restore house mode + adaptive lighting
         {
-          alias = "Deactivate Sleep Mode Lighting";
-          id = "sleep_mode_lighting_off";
-          description = "Switch all adaptive lighting back to normal";
+          id = "sleep_mode_deactivate";
+          alias = "Deactivate sleep mode";
+          description = "Restore house mode to Home and disable adaptive lighting sleep mode";
           trigger = [
             {
               platform = "state";
@@ -97,14 +471,62 @@ in
           ];
           action = [
             {
+              action = "input_select.select_option";
+              target.entity_id = "input_select.house_mode";
+              data.option = "Home";
+            }
+            {
               action = "switch.turn_off";
-              target.entity_id = [
-                "switch.adaptive_lighting_sleep_mode_office_adaptive_lighting"
-                "switch.adaptive_lighting_sleep_mode_living_dining_room_adaptive_lighting"
-                "switch.adaptive_lighting_sleep_mode_bedroom_adaptive_lighting"
-                "switch.adaptive_lighting_sleep_mode_kitchen_adaptive_lighting"
-                "switch.adaptive_lighting_sleep_mode_hallway_adaptive_lighting"
-              ];
+              target.entity_id = sleepModeAdaptiveSwitches;
+            }
+          ];
+        }
+
+        # === VACATION ===
+
+        # 12a. Vacation mode on: frost protection
+        {
+          id = "vacation_mode_on";
+          alias = "Set frost protection for vacation";
+          description = "Set all heating to frost protection and house mode to Away";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "input_boolean.vacation_mode";
+              to = "on";
+            }
+          ];
+          action = [
+            {
+              action = "input_select.select_option";
+              target.entity_id = "input_select.house_mode";
+              data.option = "Away";
+            }
+            {
+              action = "climate.set_temperature";
+              target.entity_id = allThermostats;
+              data.temperature = 7;
+            }
+          ];
+        }
+
+        # 12b. Vacation mode off: restore
+        {
+          id = "vacation_mode_off";
+          alias = "Restore heating after vacation";
+          description = "Restore house mode to Home when vacation ends";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "input_boolean.vacation_mode";
+              to = "off";
+            }
+          ];
+          action = [
+            {
+              action = "input_select.select_option";
+              target.entity_id = "input_select.house_mode";
+              data.option = "Home";
             }
           ];
         }
