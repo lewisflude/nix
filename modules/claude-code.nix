@@ -36,24 +36,16 @@ _: {
             ];
           };
           playwright = {
-            command = "${pkgs.nodejs}/bin/npx";
-            args = [
-              "-y"
-              "@playwright/mcp@latest"
-            ];
-            env = {
-              PATH = "${pkgs.nodejs}/bin";
-            };
+            command = "${pkgs.writeShellScript "mcp-playwright" ''
+              export PATH="${pkgs.nodejs}/bin:$PATH"
+              exec npx -y @playwright/mcp@latest "$@"
+            ''}";
           };
           sequential-thinking = {
-            command = "${pkgs.nodejs}/bin/npx";
-            args = [
-              "-y"
-              "@modelcontextprotocol/server-sequential-thinking"
-            ];
-            env = {
-              PATH = "${pkgs.nodejs}/bin";
-            };
+            command = "${pkgs.writeShellScript "mcp-sequential-thinking" ''
+              export PATH="${pkgs.nodejs}/bin:$PATH"
+              exec npx -y @modelcontextprotocol/server-sequential-thinking "$@"
+            ''}";
           };
         };
       };
