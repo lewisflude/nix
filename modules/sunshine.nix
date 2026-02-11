@@ -96,9 +96,9 @@ _: {
         package = pkgs.sunshine.override { cudaSupport = true; };
 
         settings = {
-          # KMS capture on the virtual display.
-          # Find the correct output index: journalctl --user -u sunshine | grep -i monitor
-          capture = "kms";
+          # Wayland capture via wlroots screencopy protocol (Niri supports zwlr_screencopy_manager_v1).
+          # KMS capture doesn't work with NVIDIA proprietary drivers (empty monitor list).
+          capture = "wlr";
           encoder = "nvenc";
           adapter_name = "/dev/dri/card1";
           output_name = 0;
