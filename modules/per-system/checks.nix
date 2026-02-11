@@ -4,22 +4,20 @@
 {
   imports = [ inputs.git-hooks-nix.flakeModule ];
 
-  perSystem =
-    _:
-    {
-      pre-commit.settings = {
-        excludes = [ "secrets/.*\\.yaml$" ];
+  perSystem = _: {
+    pre-commit.settings = {
+      excludes = [ "secrets/.*\\.yaml$" ];
 
-        hooks = {
-          # Formatting (auto-linked to treefmt-nix)
-          treefmt.enable = true;
+      hooks = {
+        # Formatting (auto-linked to treefmt-nix)
+        treefmt.enable = true;
 
-          # Commit message validation
-          commitizen.enable = true;
+        # Commit message validation
+        commitizen.enable = true;
 
-          # Markdown linting
-          markdownlint.enable = true;
-        };
+        # Markdown linting
+        markdownlint.enable = true;
       };
     };
+  };
 }

@@ -1,7 +1,6 @@
 # Browser and MIME configuration (NixOS only)
 # Dendritic pattern: Full implementation as flake.modules.homeManager.browser
-_:
-{
+_: {
   flake.modules.homeManager.browser =
     { lib, pkgs, ... }:
     let

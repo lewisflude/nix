@@ -13,7 +13,7 @@ _: {
           github = {
             url = "https://api.githubcopilot.com/mcp/";
             headers = {
-              Authorization = "Bearer \${GITHUB_PERSONAL_ACCESS_TOKEN}";
+              Authorization = "Bearer \${GITHUB_TOKEN}";
             };
           };
           figma-desktop = {
@@ -33,6 +33,20 @@ _: {
               "mcp-server-sqlite"
               "--db-path"
               "$HOME/.local/share/mcp/data.db"
+            ];
+          };
+          playwright = {
+            command = "npx";
+            args = [
+              "-y"
+              "@playwright/mcp@latest"
+            ];
+          };
+          sequential-thinking = {
+            command = "npx";
+            args = [
+              "-y"
+              "@modelcontextprotocol/server-sequential-thinking"
             ];
           };
         };

@@ -1,6 +1,5 @@
 # Mouse hardware support (Logitech, gaming mice)
-_:
-{
+_: {
   flake.modules.nixos.mouse =
     { pkgs, ... }:
     {

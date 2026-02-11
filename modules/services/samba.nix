@@ -1,7 +1,6 @@
 # Samba File Sharing Service
 # SMB shares with optimized performance settings
-_:
-{
+_: {
   flake.modules.nixos.samba =
     { pkgs, ... }:
     {

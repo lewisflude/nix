@@ -1,7 +1,6 @@
 # Lutris Gaming Module - Dendritic Pattern
 # Open source gaming platform with declarative Wine/Proton runner configuration
-_:
-{
+_: {
   flake.modules.homeManager.lutris =
     {
       pkgs,

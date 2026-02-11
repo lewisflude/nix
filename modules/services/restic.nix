@@ -1,7 +1,6 @@
 # Restic Backup Service Module - Dendritic Pattern
 # Backup solution with REST server
-_:
-{
+_: {
   flake.modules.nixos.restic =
     { pkgs, ... }:
     {

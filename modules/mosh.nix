@@ -1,8 +1,7 @@
 # Mosh Service Module - Dendritic Pattern
 # Mobile shell with UDP-based SSH alternative for better roaming
 # Usage: Import flake.modules.nixos.mosh in host definition
-{ config, ... }:
-{
+_: {
   # ==========================================================================
   # NixOS System Configuration
   # ==========================================================================

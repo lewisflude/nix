@@ -171,8 +171,10 @@ let
         let
           jdk25 =
             prev.temurin_25_jdk or (prev.jdk25 or (prev.openjdk25 or (builtins.trace ''
-                WARNING: Java 25 not found in nixpkgs, falling back to JDK ${prev.jdk.version}
-              '' prev.jdk)));
+              WARNING: Java 25 not found in nixpkgs, falling back to JDK ${prev.jdk.version}
+            '' prev.jdk)
+            )
+            );
         in
         {
           inherit jdk25;

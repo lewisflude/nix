@@ -1,7 +1,6 @@
 # Niri compositor home-manager configuration (NixOS only)
 # Dendritic pattern: Full implementation as flake.modules.homeManager.niriHome
-_:
-{
+_: {
   flake.modules.homeManager.niriHome =
     {
       config,

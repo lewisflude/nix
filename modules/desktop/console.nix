@@ -1,7 +1,6 @@
 # Console Configuration
 # Early boot console font and theming
-_:
-{
+_: {
   flake.modules.nixos.console =
     { pkgs, ... }:
     {

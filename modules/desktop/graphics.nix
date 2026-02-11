@@ -1,7 +1,6 @@
 # Graphics Configuration
 # NVIDIA GPU setup, hardware video acceleration, Wayland environment
-_:
-{
+_: {
   flake.modules.nixos.graphics =
     { pkgs, config, ... }:
     {

@@ -1,8 +1,7 @@
 # Greeter Configuration
 # greetd with DMS greeter and auto-login support
 # Follows: https://danklinux.com/docs/dankmaterialshell/nixos-flake
-{ config, ... }:
-{
+_: {
   flake.modules.nixos.greeter =
     {
       pkgs,

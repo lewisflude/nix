@@ -1,7 +1,6 @@
 # Yazi file manager configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.yazi
-_:
-{
+_: {
   flake.modules.homeManager.yazi =
     { pkgs, ... }:
     {

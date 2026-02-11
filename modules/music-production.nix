@@ -4,31 +4,28 @@
 # - https://wiki.nixos.org/wiki/Audio_production
 # - https://github.com/musnix/musnix
 # - https://wiki.nixos.org/wiki/JACK
-_:
-{
+_: {
   # NixOS: realtime audio optimizations via musnix
-  flake.modules.nixos.musicProduction =
-    _:
-    {
-      # musnix handles: PAM limits (memlock, rtprio), CPU governor,
-      # vm.swappiness, udev rules, and plugin path env vars
-      musnix = {
-        enable = true;
-        # Use the existing kernel rather than a realtime one --
-        # PipeWire + rtkit is sufficient for most DAW work
-        kernel.realtime = false;
-      };
-
-      # Ensure systemd user sessions also get unlimited memlock
-      # (PAM limits alone are insufficient with systemd-managed sessions)
-      systemd.user.extraConfig = "DefaultLimitMEMLOCK=infinity";
-
-      # Kernel modules for MIDI device support
-      boot.kernelModules = [
-        "snd-seq"
-        "snd-rawmidi"
-      ];
+  flake.modules.nixos.musicProduction = _: {
+    # musnix handles: PAM limits (memlock, rtprio), CPU governor,
+    # vm.swappiness, udev rules, and plugin path env vars
+    musnix = {
+      enable = true;
+      # Use the existing kernel rather than a realtime one --
+      # PipeWire + rtkit is sufficient for most DAW work
+      kernel.realtime = false;
     };
+
+    # Ensure systemd user sessions also get unlimited memlock
+    # (PAM limits alone are insufficient with systemd-managed sessions)
+    systemd.user.extraConfig = "DefaultLimitMEMLOCK=infinity";
+
+    # Kernel modules for MIDI device support
+    boot.kernelModules = [
+      "snd-seq"
+      "snd-rawmidi"
+    ];
+  };
 
   # Home-manager: Ardour + LV2 plugins
   # Note: LV2 plugins preferred over VST2 due to nixpkgs bug #310307

@@ -1,7 +1,6 @@
 # Service Module Template - Dendritic Pattern
 # For system services with options
-_:
-{
+_: {
   # NixOS service configuration
   flake.modules.nixos.SERVICE_NAME =
     {

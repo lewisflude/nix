@@ -9,16 +9,14 @@ in
   # ==========================================================================
   # NixOS System Configuration
   # ==========================================================================
-  flake.modules.nixos.eternalTerminal =
-    _:
-    {
-      services.eternal-terminal = {
-        enable = true;
-        port = constants.ports.services.eternalTerminal;
-      };
-
-      networking.firewall.allowedTCPPorts = [
-        constants.ports.services.eternalTerminal
-      ];
+  flake.modules.nixos.eternalTerminal = _: {
+    services.eternal-terminal = {
+      enable = true;
+      port = constants.ports.services.eternalTerminal;
     };
+
+    networking.firewall.allowedTCPPorts = [
+      constants.ports.services.eternalTerminal
+    ];
+  };
 }

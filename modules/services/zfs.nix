@@ -1,7 +1,6 @@
 # ZFS Service Module - Dendritic Pattern
 # ZFS filesystem management with auto-snapshot and scrub
-_:
-{
+_: {
   flake.modules.nixos.zfs =
     { pkgs, ... }:
     {

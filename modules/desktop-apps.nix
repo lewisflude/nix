@@ -1,7 +1,6 @@
 # Desktop applications (NixOS only)
 # Dendritic pattern: Full implementation as flake.modules.homeManager.desktopApps
-_:
-{
+_: {
   flake.modules.homeManager.desktopApps =
     { lib, pkgs, ... }:
     lib.mkIf pkgs.stdenv.isLinux {

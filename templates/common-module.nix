@@ -1,7 +1,6 @@
 # Cross-Platform Module Template - Dendritic Pattern
 # For features that work on both NixOS and Darwin
-{ config, ... }:
-{
+_: {
   # NixOS system configuration
   flake.modules.nixos.FEATURE_NAME =
     { pkgs, ... }:

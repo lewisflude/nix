@@ -1,7 +1,6 @@
 # Boot configuration module
 # Provides systemd-boot and ZFS support
-_:
-{
+_: {
   flake.modules.nixos.boot =
     { lib, ... }:
     {

@@ -1,7 +1,6 @@
 # Home-Manager Only Module Template - Dendritic Pattern
 # For user-level features that don't need system configuration
-{ config, ... }:
-{
+_: {
   flake.modules.homeManager.FEATURE_NAME =
     {
       pkgs,

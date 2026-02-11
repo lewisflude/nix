@@ -1,7 +1,6 @@
 # Per-system development shells
 # Dendritic pattern: Provides dev shells for each system
-_:
-{
+_: {
   perSystem =
     { pkgs, config, ... }:
     {

@@ -1,7 +1,6 @@
 # Darwin-only Module Template - Dendritic Pattern
 # For features that only apply to macOS systems
-{ config, ... }:
-{
+_: {
   flake.modules.darwin.FEATURE_NAME =
     { pkgs, ... }:
     {

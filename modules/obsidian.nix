@@ -1,7 +1,6 @@
 # Obsidian configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.obsidian
-_:
-{
+_: {
   flake.modules.homeManager.obsidian =
     { pkgs, ... }:
     {

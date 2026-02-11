@@ -1,8 +1,7 @@
 # User packages and core tooling
 # Dendritic pattern: Full implementation as flake.modules.homeManager.userPackages
 # Note: General CLI tools are in cli-apps.nix, this module is for user-specific packages
-_:
-{
+_: {
   flake.modules.homeManager.userPackages =
     { pkgs, lib, ... }:
     let

@@ -50,10 +50,8 @@ in
   # Darwin Nix configuration
   # Disable nix-darwin's Nix management since Determinate Nix handles it
   # See: https://github.com/nix-darwin/nix-darwin/pull/1313
-  flake.modules.darwin.nix =
-    _:
-    {
-      # Let Determinate Nix manage the Nix daemon
-      nix.enable = false;
-    };
+  flake.modules.darwin.nix = _: {
+    # Let Determinate Nix manage the Nix daemon
+    nix.enable = false;
+  };
 }

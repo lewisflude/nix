@@ -1,7 +1,6 @@
 # NH (Nix Helper) configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.nh
-_:
-{
+_: {
   flake.modules.homeManager.nh =
     {
       config,

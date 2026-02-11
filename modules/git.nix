@@ -1,7 +1,6 @@
 # Git configuration - ALL config classes in ONE file
 # Dendritic pattern: One feature = one file spanning all configurations
-_:
-{
+_: {
   # ═══════════════════════════════════════════════════════════════════
   # Home-manager Git configuration (works on NixOS AND Darwin)
   # ═══════════════════════════════════════════════════════════════════

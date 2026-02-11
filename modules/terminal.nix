@@ -1,7 +1,6 @@
 # Terminal configuration (Ghostty + CLI tools)
 # Dendritic pattern: Full implementation as flake.modules.homeManager.terminal
-_:
-{
+_: {
   flake.modules.homeManager.terminal =
     { lib, pkgs, ... }:
     {

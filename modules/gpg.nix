@@ -5,8 +5,7 @@
 # - NixOS: PC/SC daemon, udev rules, GPG smartcard support, touch detector
 # - Darwin: GPG packages
 # - Home-Manager: GPG agent, signing config, YubiKey tools
-_:
-{
+_: {
   # ═══════════════════════════════════════════════════════════════════
   # NixOS system-level GPG/YubiKey configuration
   # ═══════════════════════════════════════════════════════════════════

@@ -1,7 +1,6 @@
 # XDG Base Directory configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.xdg
-_:
-{
+_: {
   flake.modules.homeManager.xdg =
     {
       config,

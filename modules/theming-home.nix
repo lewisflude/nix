@@ -1,6 +1,5 @@
 # Desktop theming - GTK, Qt, fonts, and signal-nix integration
-_:
-{
+_: {
   flake.modules.homeManager.theming =
     { lib, pkgs, ... }:
     let

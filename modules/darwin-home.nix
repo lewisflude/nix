@@ -1,7 +1,6 @@
 # Darwin-specific home-manager configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.darwinHome
-_:
-{
+_: {
   flake.modules.homeManager.darwinHome =
     { lib, pkgs, ... }:
     lib.mkIf pkgs.stdenv.isDarwin {

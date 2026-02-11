@@ -12,7 +12,7 @@ mechanisms to ensure all code follows the dendritic pattern.
 
 All hooks follow patterns documented in:
 
-- **Claude Code Hooks Documentation**: https://code.claude.com/docs/hooks
+- **Claude Code Hooks Documentation**: <https://code.claude.com/docs/hooks>
 - **Dendritic Pattern**: `DENDRITIC_SOURCE_OF_TRUTH.md`
 - **Repository Guidelines**: `CLAUDE.md`
 
@@ -480,7 +480,7 @@ fi
 
 ## References
 
-- **Claude Code Hooks**: https://code.claude.com/docs/hooks
+- **Claude Code Hooks**: <https://code.claude.com/docs/hooks>
 - **Dendritic Pattern**: `DENDRITIC_SOURCE_OF_TRUTH.md`
 - **Repository Guidelines**: `CLAUDE.md`
 - **Skills Documentation**: `.claude/skills/*/SKILL.md`

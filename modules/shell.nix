@@ -252,6 +252,11 @@ in
           export SOPS_GPG_EXEC="${lib.getExe pkgs.gnupg}"
           export SOPS_GPG_ARGS="--pinentry-mode=loopback"
           export NIX_FLAKE="${config.home.homeDirectory}/.config/nix"
+          ${lib.optionalString (secretAvailable osConfig "GITHUB_TOKEN") ''
+            if [[ -z "$GITHUB_TOKEN" && -r "${lib.escapeShellArg (secretPath osConfig "GITHUB_TOKEN")}" ]]; then
+              export GITHUB_TOKEN="$(cat "${lib.escapeShellArg (secretPath osConfig "GITHUB_TOKEN")}")"
+            fi
+          ''}
         '';
 
         completionInit = ''

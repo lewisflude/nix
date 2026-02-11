@@ -1,7 +1,6 @@
 # Zed Editor - Dendritic Pattern
 # Fast, collaborative code editor
-_:
-{
+_: {
   flake.modules.homeManager.zed =
     { lib, pkgs, ... }:
     {

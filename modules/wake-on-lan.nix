@@ -1,8 +1,7 @@
 # Wake-on-LAN module
 # Uses ethtool service instead of networking.interfaces.wakeOnLan to avoid
 # DHCP regression with systemd-networkd (nixpkgs #339082)
-_:
-{
+_: {
   flake.modules.nixos.wakeOnLan =
     { pkgs, ... }:
     {
