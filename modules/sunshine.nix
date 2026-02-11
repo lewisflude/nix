@@ -100,7 +100,7 @@ _: {
           # Find the correct output index: journalctl --user -u sunshine | grep -i monitor
           capture = "kms";
           encoder = "nvenc";
-          adapter_name = "/dev/dri/renderD128";
+          adapter_name = "/dev/dri/card1";
           output_name = 0;
 
           # NVENC (RTX 4090)
