@@ -36,14 +36,14 @@ _: {
             ];
           };
           playwright = {
-            command = "npx";
+            command = "${pkgs.nodejs}/bin/npx";
             args = [
               "-y"
               "@playwright/mcp@latest"
             ];
           };
           sequential-thinking = {
-            command = "npx";
+            command = "${pkgs.nodejs}/bin/npx";
             args = [
               "-y"
               "@modelcontextprotocol/server-sequential-thinking"
