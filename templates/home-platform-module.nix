@@ -1,6 +1,6 @@
 # Home-Manager Module Template - Dendritic Pattern
 # For user-level configuration
-{ config, ... }:
+_:
 {
   # Home-manager configuration for all platforms
   flake.modules.homeManager.FEATURE_NAME =
