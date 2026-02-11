@@ -1,9 +1,9 @@
 # nix-your-shell - Wrapper to retain your shell in nix develop/nix-shell
 # Dendritic pattern: Full implementation as flake.modules.homeManager.nixYourShell
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.nixYourShell =
-    { lib, pkgs, ... }:
+    _:
     {
       programs.nix-your-shell = {
         enable = true;

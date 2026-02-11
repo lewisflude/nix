@@ -1,12 +1,12 @@
 # Flatpak - Dendritic Pattern
 # Single file containing NixOS service and home-manager XDG integration
-{ ... }:
+_:
 {
   # ===========================================================================
   # NixOS: Flatpak service
   # ===========================================================================
   flake.modules.nixos.flatpak =
-    { ... }:
+    _:
     {
       services.flatpak.enable = true;
     };

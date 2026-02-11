@@ -1,6 +1,6 @@
 # Helix editor configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.helix
-{ config, ... }:
+_:
 let
   # Language standards - inline for dendritic pattern
   languageStandards = {

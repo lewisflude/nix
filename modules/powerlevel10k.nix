@@ -1,6 +1,6 @@
 # Powerlevel10k ZSH theme configuration
 # Uses native home-manager programs.zsh.plugins for cleaner integration
-{ ... }:
+_:
 {
   flake.modules.homeManager.powerlevel10k =
     { pkgs, ... }:

@@ -2,11 +2,11 @@
 # TRaSH Guides sync for Sonarr/Radarr
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   flake.modules.nixos.recyclarr =
-    { lib, ... }:
+    _:
     {
       services.recyclarr = {
         enable = true;

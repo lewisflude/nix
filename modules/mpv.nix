@@ -1,9 +1,9 @@
 # MPV media player configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.mpv
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.mpv =
-    { lib, pkgs, ... }:
+    _:
     {
       programs.mpv = {
         enable = true;

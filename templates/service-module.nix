@@ -1,10 +1,6 @@
 # Service Module Template - Dendritic Pattern
 # For system services with options
-{ config, lib, ... }:
-let
-  inherit (config) username;
-  constants = config.constants;
-in
+{ config, ... }:
 {
   # NixOS service configuration
   flake.modules.nixos.SERVICE_NAME =

@@ -9,7 +9,7 @@ in
 {
   # NixOS home-manager base configuration (structure only)
   flake.modules.nixos.homeManagerBase =
-    { ... }:
+    _:
     {
       home-manager = {
         useGlobalPkgs = true;
@@ -42,7 +42,7 @@ in
         backupFileExtension = "hm-backup";
 
         users.${username} =
-          { ... }:
+          _:
           {
             # Auto-config: username, homeDirectory, stateVersion
             home.stateVersion = constants.defaults.stateVersion;

@@ -1,7 +1,7 @@
 # DankMaterialShell Configuration
 # Full desktop shell for niri with Material You theming
 # Follows: https://danklinux.com/docs/dankmaterialshell/home-manager
-{ config, inputs, ... }:
+{ inputs, ... }:
 {
   # NixOS system services required by DMS
   flake.modules.nixos.dms = {

@@ -1,5 +1,5 @@
 # GitHub CLI - Command-line interface for GitHub
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.gh =
     { pkgs, ... }:

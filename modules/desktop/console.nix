@@ -1,9 +1,9 @@
 # Console Configuration
 # Early boot console font and theming
-{ config, ... }:
+_:
 {
   flake.modules.nixos.console =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       console = {
         font = "ter-v22n";

@@ -3,7 +3,7 @@
 # Usage: Import config.flake.modules.nixos.readarr in host definition
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   flake.modules.nixos.readarr =
@@ -16,7 +16,7 @@ in
     {
       users.users.${user} = {
         isSystemUser = true;
-        group = group;
+        inherit group;
         description = "Media management user";
       };
       users.groups.${group} = { };
@@ -38,7 +38,10 @@ in
 
       systemd.services.readarr = {
         environment.TZ = mkDefault constants.defaults.timezone;
-        after = [ "mnt-storage.mount" ] ++ (optional (config.services.prowlarr.enable or false) "prowlarr.service");
+        after = [
+          "mnt-storage.mount"
+        ]
+        ++ (optional (config.services.prowlarr.enable or false) "prowlarr.service");
         requires = [ "mnt-storage.mount" ];
         serviceConfig.UMask = "0002";
       };

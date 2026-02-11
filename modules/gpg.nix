@@ -5,7 +5,7 @@
 # - NixOS: PC/SC daemon, udev rules, GPG smartcard support, touch detector
 # - Darwin: GPG packages
 # - Home-Manager: GPG agent, signing config, YubiKey tools
-{ config, ... }:
+_:
 {
   # ═══════════════════════════════════════════════════════════════════
   # NixOS system-level GPG/YubiKey configuration
@@ -60,7 +60,7 @@
       ...
     }:
     let
-      isDarwin = pkgs.stdenv.isDarwin;
+      inherit (pkgs.stdenv) isDarwin;
       gtkThemeName = config.theming.signal.gtk.themeName or null;
       # Cache TTLs following drduh/YubiKey-Guide recommendations
       # Note: These primarily affect non-smartcard operations; YubiKey PIN

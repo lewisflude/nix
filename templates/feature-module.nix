@@ -1,15 +1,14 @@
 # Feature Module Template - Dendritic Pattern
 # One feature = one file spanning all configuration classes
-{ config, lib, ... }:
+{ config, ... }:
 let
   # Access top-level config values
   inherit (config) username;
-  constants = config.constants;
 in
 {
   # NixOS system-level configuration
   flake.modules.nixos.FEATURE_NAME =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       # System packages
       environment.systemPackages = [
@@ -32,7 +31,7 @@ in
 
   # Home-manager user configuration
   flake.modules.homeManager.FEATURE_NAME =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       home.packages = [
         pkgs.example-tool

@@ -206,11 +206,11 @@ echo "Average latency:    ${AVG_LATENCY}s"
 echo ""
 
 # Performance assessment
-if (( $(echo "$AVG_LATENCY < 0.1" | bc -l) )); then
+if (($(echo "$AVG_LATENCY < 0.1" | bc -l))); then
   echo "? Excellent performance (< 100ms)"
-elif (( $(echo "$AVG_LATENCY < 0.3" | bc -l) )); then
+elif (($(echo "$AVG_LATENCY < 0.3" | bc -l))); then
   echo "? Good performance (< 300ms)"
-elif (( $(echo "$AVG_LATENCY < 0.5" | bc -l) )); then
+elif (($(echo "$AVG_LATENCY < 0.5" | bc -l))); then
   echo "? Acceptable performance (< 500ms)"
 else
   echo "? Slow performance (> 500ms) - consider optimization"

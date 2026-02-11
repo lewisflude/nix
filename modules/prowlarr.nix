@@ -3,7 +3,7 @@
 # Usage: Import config.flake.modules.nixos.prowlarr in host definition
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   # ==========================================================================
@@ -22,7 +22,7 @@ in
       # Ensure media user/group exist
       users.users.${user} = {
         isSystemUser = true;
-        group = group;
+        inherit group;
         description = "Media management user";
       };
       users.groups.${group} = { };

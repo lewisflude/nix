@@ -66,8 +66,8 @@ let
       {
         inherit system;
         isLinux = lib.hasSuffix "-linux" system;
-        isDarwin = isDarwin;
-        homeDir = homeDir;
+        inherit isDarwin;
+        inherit homeDir;
         configDir = username: "${homeDir username}/.config";
         dataDir =
           username:
@@ -170,19 +170,12 @@ let
         final: prev:
         let
           jdk25 =
-            if prev ? temurin_25_jdk then
-              prev.temurin_25_jdk
-            else if prev ? jdk25 then
-              prev.jdk25
-            else if prev ? openjdk25 then
-              prev.openjdk25
-            else
-              builtins.trace ''
+            prev.temurin_25_jdk or (prev.jdk25 or (prev.openjdk25 or (builtins.trace ''
                 WARNING: Java 25 not found in nixpkgs, falling back to JDK ${prev.jdk.version}
-              '' prev.jdk;
+              '' prev.jdk)));
         in
         {
-          jdk25 = jdk25;
+          inherit jdk25;
           java25 = jdk25;
         };
 

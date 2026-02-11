@@ -1,6 +1,6 @@
 # Nix user configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.nixUser
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.nixUser =
     {

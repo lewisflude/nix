@@ -3,12 +3,9 @@
 # Usage: Import flake.modules.nixos.homeAssistant in host definition
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
-  # ==========================================================================
-  # NixOS System Configuration
-  # ==========================================================================
   flake.modules.nixos.homeAssistant =
     {
       lib,
@@ -17,53 +14,38 @@ in
       ...
     }:
     let
-      inherit (lib) mkDefault mkIf optional;
 
-      # Home-LLM custom component
-      home-llm = pkgs.callPackage ../pkgs/home-assistant/custom-components/home-llm.nix {
-        inherit (pkgs.home-assistant.python.pkgs) buildHomeAssistantComponent;
-      };
+      # home-llm is disabled until the package is updated for current nixpkgs
+      # (buildHomeAssistantComponent moved). Use native Ollama integration instead.
       intent_script_yaml = ../pkgs/home-assistant/intent-scripts/intent_script.yaml;
 
-      # Default configuration (can be overridden by hosts)
-      # Basic settings
-      openFirewall = true;
-      lovelaceMode = "yaml";
-      llmIntegration = false;
-      intentScripts = true;
-      enableTemplates = true;
-      enableInputHelpers = true;
-      recorderPurgeDays = 7;
-
-      # Weather configuration
       weatherEntity = "weather.pirateweather";
 
-      # Temperature sensors for averaging
       temperatureSensors = [
         "sensor.bedroom_temperature"
+        "sensor.guest_bedroom_temperature"
         "sensor.living_room_temperature"
         "sensor.kitchen_temperature"
         "sensor.office_temperature"
       ];
 
-      # Music player configuration
-      musicPlayerEnable = false;
-      musicPlayerDefault = "media_player.music_assistant";
-      musicPlayerBackend = "music_assistant";
-
-      # Custom components and Lovelace modules
-      extraComponents = [ ];
-      customLovelaceModules = [ ];
       automations = [
         {
           alias = "Turn off lights when Apple TV is playing";
           id = "apple_tv_lights_off";
-          description = "Turn off living room and dining room lights when Apple TV starts playing";
+          description = "Turn off living room and dining room lights when Apple TV starts playing after dark";
           trigger = [
             {
               platform = "state";
-              entity_id = "media_player.apple_tv"; # Check Developer Tools > States for correct entity ID
+              entity_id = "media_player.apple_tv";
               to = "playing";
+            }
+          ];
+          condition = [
+            {
+              condition = "state";
+              entity_id = "sun.sun";
+              state = "below_horizon";
             }
           ];
           action = [
@@ -78,8 +60,55 @@ in
             }
           ];
         }
+        {
+          alias = "Activate Sleep Mode Lighting";
+          id = "sleep_mode_lighting";
+          description = "Switch all adaptive lighting to sleep mode";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "input_boolean.sleep_mode";
+              to = "on";
+            }
+          ];
+          action = [
+            {
+              action = "switch.turn_on";
+              target.entity_id = [
+                "switch.adaptive_lighting_sleep_mode_office_adaptive_lighting"
+                "switch.adaptive_lighting_sleep_mode_living_dining_room_adaptive_lighting"
+                "switch.adaptive_lighting_sleep_mode_bedroom_adaptive_lighting"
+                "switch.adaptive_lighting_sleep_mode_kitchen_adaptive_lighting"
+                "switch.adaptive_lighting_sleep_mode_hallway_adaptive_lighting"
+              ];
+            }
+          ];
+        }
+        {
+          alias = "Deactivate Sleep Mode Lighting";
+          id = "sleep_mode_lighting_off";
+          description = "Switch all adaptive lighting back to normal";
+          trigger = [
+            {
+              platform = "state";
+              entity_id = "input_boolean.sleep_mode";
+              to = "off";
+            }
+          ];
+          action = [
+            {
+              action = "switch.turn_off";
+              target.entity_id = [
+                "switch.adaptive_lighting_sleep_mode_office_adaptive_lighting"
+                "switch.adaptive_lighting_sleep_mode_living_dining_room_adaptive_lighting"
+                "switch.adaptive_lighting_sleep_mode_bedroom_adaptive_lighting"
+                "switch.adaptive_lighting_sleep_mode_kitchen_adaptive_lighting"
+                "switch.adaptive_lighting_sleep_mode_hallway_adaptive_lighting"
+              ];
+            }
+          ];
+        }
       ];
-      scenes = [ ];
     in
     {
       # SOPS secrets configuration
@@ -97,10 +126,10 @@ in
       services.home-assistant = {
         enable = true;
         configDir = "/var/lib/hass";
-        inherit openFirewall;
+        openFirewall = true;
 
         extraComponents = [
-          # Core components
+          # Core
           "analytics"
           "default_config"
           "esphome"
@@ -108,8 +137,10 @@ in
           "isal"
           "lovelace"
           "met"
+          "music_assistant"
           "radio_browser"
           "shopping_list"
+          "wyoming"
 
           # Device integrations
           "apple_tv"
@@ -121,8 +152,6 @@ in
           "prusalink"
           "tado"
           "unifi"
-          "unifiprotect"
-          "unifi_direct"
           "vacuum"
           "wled"
 
@@ -138,22 +167,19 @@ in
           "ollama"
           "upnp"
           "weather"
-        ]
-        ++ optional (musicPlayerEnable && musicPlayerBackend == "music_assistant") "music_assistant"
-        ++ extraComponents;
+        ];
 
         customComponents = [
           pkgs.home-assistant-custom-components.localtuya
           pkgs.home-assistant-custom-components.adaptive_lighting
-        ]
-        ++ optional llmIntegration home-llm;
+        ];
 
-        inherit customLovelaceModules;
+        customLovelaceModules = [ ];
 
         config = {
           # Lovelace dashboard configuration
           lovelace = {
-            mode = lovelaceMode;
+            mode = "yaml";
             resources = [ ];
           };
 
@@ -162,7 +188,7 @@ in
             name = "Home";
             latitude = "!secret latitude";
             longitude = "!secret longitude";
-            elevation = 0;
+            elevation = 50;
             unit_system = "metric";
             time_zone = constants.defaults.timezone;
             country = "GB";
@@ -171,7 +197,6 @@ in
             allowlist_external_dirs = [ "/var/lib/hass" ];
           };
 
-          # Default integrations
           default_config = { };
 
           # HTTP configuration for reverse proxy
@@ -188,12 +213,10 @@ in
             ];
           };
 
-          # Frontend configuration
           frontend = {
             themes = "!include_dir_merge_named themes";
           };
 
-          # Text-to-speech
           tts = [
             {
               platform = "google_translate";
@@ -205,8 +228,8 @@ in
           recorder = {
             db_url = "sqlite:////var/lib/hass/home-assistant_v2.db";
             auto_purge = true;
-            purge_keep_days = recorderPurgeDays;
-            commit_interval = 1;
+            purge_keep_days = 7;
+            commit_interval = 5;
             exclude = {
               domains = [
                 "automation"
@@ -217,7 +240,6 @@ in
             };
           };
 
-          # History
           history = {
             exclude = {
               domains = [
@@ -227,14 +249,12 @@ in
             };
           };
 
-          # Logbook
           logbook = {
             exclude = {
               domains = [ "automation" ];
             };
           };
 
-          # Logger configuration
           logger = {
             default = "info";
             logs = {
@@ -244,11 +264,11 @@ in
           };
 
           # Intent scripts for voice assistant
-          intent_script = mkIf intentScripts "!include intent_script.yaml";
+          intent_script = "!include intent_script.yaml";
 
           # Scripts
           script = {
-            # Weather forecast script - fetches daily and hourly forecasts with day names
+            # Weather forecast script
             weather_forecast = {
               alias = "Weather Forecast";
               description = "Fetches and returns the forecast dictionary with day names.";
@@ -330,7 +350,7 @@ in
               ];
             };
 
-            # Get entity attributes script - fetches entity state and attributes
+            # Get entity attributes script
             get_entity_attributes = {
               alias = "Get Entity Attributes";
               description = "Fetches and returns the state and attributes of an entity.";
@@ -345,11 +365,10 @@ in
                   variables = {
                     entity_id = ''
                       {% set matched_entity = states | selectattr('name', 'equalto', entity_name) | map(attribute='entity_id') | first %}
-                      {{ matched_entity if matched_entity else entity }}
+                      {{ matched_entity if matched_entity else entity_name }}
                     '';
                   };
                 }
-                # Validate entity exists and is available
                 {
                   condition = "template";
                   value_template = "{{ entity_id is defined and states(entity_id) not in ['unavailable', 'unknown'] }}";
@@ -370,12 +389,11 @@ in
                 }
               ];
             };
-          }
-          # Music playback script - conditionally enabled
-          // lib.optionalAttrs musicPlayerEnable {
+
+            # Play music via Music Assistant
             play_music = {
               alias = "Play Music";
-              description = "Search and play music using configured backend";
+              description = "Search and play music using Music Assistant";
               fields = {
                 query = {
                   description = "Search query for music (artist, song, album, genre)";
@@ -383,113 +401,43 @@ in
                   required = true;
                 };
                 area = {
-                  description = "Area name for playback location (optional)";
+                  description = "Area name for playback location";
                   example = "living room";
                   required = false;
                 };
                 media_player = {
-                  description = "Media player entity (defaults to configured player)";
-                  example = "media_player.spotify";
-                  default = musicPlayerDefault;
+                  description = "Media player entity for playback";
+                  example = "media_player.music_assistant";
+                  default = "media_player.music_assistant";
                 };
               };
               sequence = [
                 {
-                  variables = {
-                    player_entity = "{{ media_player | default('${musicPlayerDefault}') }}";
-                  };
-                }
-                # Validate media player exists and is available
-                {
                   condition = "template";
-                  value_template = "{{ states(player_entity) not in ['unavailable', 'unknown'] }}";
+                  value_template = "{{ states(media_player) not in ['unavailable', 'unknown'] }}";
                   alias = "Check media player is available";
                 }
-                # Route to appropriate backend based on configuration
                 {
-                  choose = [
-                    # Music Assistant backend
-                    {
-                      conditions = [
-                        {
-                          condition = "template";
-                          value_template = "{{ '${musicPlayerBackend}' == 'music_assistant' }}";
-                        }
-                      ];
-                      sequence = [
-                        {
-                          action = "media_player.play_media";
-                          target.entity_id = "{{ player_entity }}";
-                          data = {
-                            media_content_type = "music";
-                            media_content_id = "{{ query }}";
-                          };
-                        }
-                      ];
-                    }
-                    # Spotify backend
-                    {
-                      conditions = [
-                        {
-                          condition = "template";
-                          value_template = "{{ '${musicPlayerBackend}' == 'spotify' }}";
-                        }
-                      ];
-                      sequence = [
-                        {
-                          action = "spotcast.start";
-                          data = {
-                            uri = "spotify:search:{{ query }}";
-                            device_name = "{{ player_entity.split('.')[1] }}";
-                          };
-                        }
-                      ];
-                    }
-                    # YouTube Music backend
-                    {
-                      conditions = [
-                        {
-                          condition = "template";
-                          value_template = "{{ '${musicPlayerBackend}' == 'ytmusic' }}";
-                        }
-                      ];
-                      sequence = [
-                        {
-                          action = "ytube_music_player.call_method";
-                          data = {
-                            entity_id = "{{ player_entity }}";
-                            command = "search";
-                            parameters = {
-                              query = "{{ query }}";
-                            };
-                          };
-                        }
-                      ];
-                    }
-                  ];
-                  # Fallback error handling
-                  default = [
-                    {
-                      action = "system_log.write";
-                      data = {
-                        level = "error";
-                        message = "Unsupported music backend: ${musicPlayerBackend}";
-                      };
-                    }
-                  ];
+                  action = "media_player.play_media";
+                  target = {
+                    entity_id = "{{ media_player }}";
+                    area_id = "{{ area | default('') }}";
+                  };
+                  data = {
+                    media_content_type = "music";
+                    media_content_id = "{{ query }}";
+                  };
                 }
               ];
             };
           };
 
-          # Adaptive Lighting - Circadian rhythm lighting automation
+          # Adaptive Lighting - Circadian rhythm lighting
           adaptive_lighting = [
-            # Office - Optimized for productivity with cooler temps during work hours
+            # Office - Productivity-optimized
             {
               name = "Office Adaptive Lighting";
-              lights = [
-                "light.office" # Group controlling all office lights
-              ];
+              lights = [ "light.office" ];
               prefer_rgb_color = false;
               initial_transition = 1;
               transition = 45;
@@ -501,17 +449,19 @@ in
               sleep_brightness = 5;
               sleep_color_temp = 2000;
               sunrise_time = "07:00:00";
-              sunset_time = null; # Use automatic sunset
+              sunset_time = null;
               take_over_control = true;
               detect_non_ha_changes = true;
             }
 
-            # Living Room - Balanced comfort throughout the day
+            # Living & Dining Room (open plan) - Balanced comfort
             {
-              name = "Living Room Adaptive Lighting";
+              name = "Living Dining Room Adaptive Lighting";
               lights = [
-                "light.living_room" # Group controlling living room lights
+                "light.living_room"
                 "light.living_room_pendant"
+                "light.dining_room"
+                "light.dining_room_pendant"
               ];
               prefer_rgb_color = false;
               initial_transition = 1;
@@ -523,19 +473,36 @@ in
               max_color_temp = 5000;
               sleep_brightness = 3;
               sleep_color_temp = 2000;
-              sunrise_time = null; # Use automatic sunrise
-              sunset_time = null; # Use automatic sunset
+              sunrise_time = null;
+              sunset_time = null;
               take_over_control = true;
               detect_non_ha_changes = true;
             }
 
-            # Dining Room - Task lighting that adapts in evening
+            # Bedroom - Warm, relaxed
             {
-              name = "Dining Room Adaptive Lighting";
-              lights = [
-                "light.dining_room" # Group controlling dining room lights
-                "light.dining_room_pendant"
-              ];
+              name = "Bedroom Adaptive Lighting";
+              lights = [ "light.bedroom" ];
+              prefer_rgb_color = false;
+              initial_transition = 1;
+              transition = 60;
+              interval = 90;
+              min_brightness = 20;
+              max_brightness = 80;
+              min_color_temp = 2000;
+              max_color_temp = 4000;
+              sleep_brightness = 1;
+              sleep_color_temp = 2000;
+              sunrise_time = "07:30:00";
+              sunset_time = null;
+              take_over_control = true;
+              detect_non_ha_changes = true;
+            }
+
+            # Kitchen - Bright task lighting
+            {
+              name = "Kitchen Adaptive Lighting";
+              lights = [ "light.kitchen" ];
               prefer_rgb_color = false;
               initial_transition = 1;
               transition = 30;
@@ -544,20 +511,37 @@ in
               max_brightness = 100;
               min_color_temp = 2200;
               max_color_temp = 5500;
-              sleep_brightness = 10;
+              sleep_brightness = 5;
               sleep_color_temp = 2200;
               sunrise_time = "06:30:00";
               sunset_time = null;
               take_over_control = true;
               detect_non_ha_changes = true;
             }
+
+            # Hallway - Functional, short transitions
+            {
+              name = "Hallway Adaptive Lighting";
+              lights = [ "light.hallway" ];
+              prefer_rgb_color = false;
+              initial_transition = 1;
+              transition = 15;
+              interval = 90;
+              min_brightness = 30;
+              max_brightness = 90;
+              min_color_temp = 2200;
+              max_color_temp = 5000;
+              sleep_brightness = 3;
+              sleep_color_temp = 2200;
+              sunrise_time = null;
+              sunset_time = null;
+              take_over_control = true;
+              detect_non_ha_changes = true;
+            }
           ];
 
-          # Automations: use provided automations or include UI file
-          automation = if automations == [ ] then "!include automations.yaml" else automations;
-
-          # Declarative scenes
-          scene = scenes;
+          automation = automations;
+          scene = [ ];
 
           # Home zone
           zone = [
@@ -569,8 +553,7 @@ in
               icon = "mdi:home";
             }
           ];
-        }
-        // lib.optionalAttrs enableInputHelpers {
+
           # Input helpers for automations
           input_boolean = {
             guest_mode = {
@@ -610,13 +593,11 @@ in
               icon = "mdi:home-variant";
             };
           };
-        }
-        // lib.optionalAttrs enableTemplates {
-          # Template sensors for device aggregation and status
+
+          # Template sensors
           template = [
             {
               sensor = [
-                # Average house temperature - aggregates all configured temperature sensors
                 {
                   name = "Average House Temperature";
                   unit_of_measurement = "°C";
@@ -630,16 +611,14 @@ in
                     {% set valid_temps = temps | select('>', 0) | list %}
                     {{ (valid_temps | sum / (valid_temps | length)) | round(1) if valid_temps | length > 0 else 0 }}
                   '';
-                  # Only available when at least one sensor is available
                   availability = ''
                     {{ [
                       ${lib.concatMapStringsSep ",\n                      " (
                         sensor: "states('${sensor}')"
                       ) temperatureSensors}
-                    ] | select('in', ['unknown', 'unavailable']) | list | length == 0 }}
+                    ] | reject('in', ['unknown', 'unavailable']) | list | length > 0 }}
                   '';
                 }
-                # Home occupancy status - derived from house mode
                 {
                   name = "Home Occupied";
                   state = ''
@@ -651,7 +630,6 @@ in
             }
           ];
 
-          # Customize entities for better UI display
           homeassistant.customize = {
             "sensor.average_house_temperature" = {
               friendly_name = "Average Temperature";
@@ -668,7 +646,7 @@ in
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
-          ExecStart = "/run/current-system/sw/bin/ln -sf ${
+          ExecStart = "${pkgs.coreutils}/bin/ln -sf ${
             config.sops.templates."hass-secrets.yaml".path
           } /var/lib/hass/secrets.yaml";
           User = "hass";
@@ -676,14 +654,14 @@ in
         };
       };
 
-      systemd.services.hass-intent-script-link = mkIf intentScripts {
+      systemd.services.hass-intent-script-link = {
         description = "Link intent_script.yaml for Home Assistant";
         wantedBy = [ "home-assistant.service" ];
         before = [ "home-assistant.service" ];
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
-          ExecStart = "/run/current-system/sw/bin/ln -sf ${intent_script_yaml} /var/lib/hass/intent_script.yaml";
+          ExecStart = "${pkgs.coreutils}/bin/ln -sf ${intent_script_yaml} /var/lib/hass/intent_script.yaml";
           User = "hass";
           Group = "hass";
         };

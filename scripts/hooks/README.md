@@ -1,14 +1,17 @@
 # Claude Code Hooks for Dendritic Pattern Enforcement
 
-This directory contains hook scripts that enforce the dendritic pattern in real-time during Claude Code sessions.
+This directory contains hook scripts that enforce the dendritic pattern in
+real-time during Claude Code sessions.
 
 ## Overview
 
-The enforcement system uses a **layered approach** with 6 complementary mechanisms to ensure all code follows the dendritic pattern.
+The enforcement system uses a **layered approach** with 6 complementary
+mechanisms to ensure all code follows the dendritic pattern.
 
 ## Documentation References
 
 All hooks follow patterns documented in:
+
 - **Claude Code Hooks Documentation**: https://code.claude.com/docs/hooks
 - **Dendritic Pattern**: `DENDRITIC_SOURCE_OF_TRUTH.md`
 - **Repository Guidelines**: `CLAUDE.md`
@@ -16,25 +19,31 @@ All hooks follow patterns documented in:
 ## Enforcement Stack
 
 ### Layer 1: Education (Always Active)
+
 - **Source**: `CLAUDE.md` + `DENDRITIC_SOURCE_OF_TRUTH.md`
 - **When**: Loaded at session start via `SessionStart` hook
 - **Effect**: Claude understands the pattern rules
 - **Determinism**: Low (relies on Claude's understanding)
 
 ### Layer 2: Expert Skills (On-Demand)
-- **Source**: `.claude/skills/nix-module-expert/`, `.claude/skills/feature-validator/`, `.claude/skills/dendritic-validator/`
+
+- **Source**: `.claude/skills/nix-module-expert/`,
+  `.claude/skills/feature-validator/`, `.claude/skills/dendritic-validator/`
 - **When**: Auto-invoked when relevant, or manual `/skill-name`
 - **Effect**: Expert analysis and recommendations
 - **Determinism**: Medium (AI-powered analysis)
 
 ### Layer 3: Pre-Edit Validation (Real-Time Blocking) ⭐ HIGH IMPACT
+
 - **Source**: `validate-dendritic.sh`
 - **When**: Before EVERY `Edit` or `Write` operation on `.nix` files
 - **Effect**: **BLOCKS anti-patterns** before code is written
 - **Determinism**: High (deterministic regex checks)
-- **Documentation**: [PreToolUse Hooks](https://code.claude.com/docs/hooks#pretooluse)
+- **Documentation**:
+  [PreToolUse Hooks](https://code.claude.com/docs/hooks#pretooluse)
 
 **How it works** (per Claude Code docs):
+
 1. Hook receives tool call JSON via stdin
 2. Extracts `file_path` and `content`/`new_string`
 3. Runs validation checks
@@ -43,6 +52,7 @@ All hooks follow patterns documented in:
 6. Exit code `1` = warning (shows error but allows)
 
 **What it blocks**:
+
 - ❌ `with pkgs;` usage
 - ❌ `specialArgs` / `extraSpecialArgs`
 - ❌ Direct constant imports (`import ../lib/constants.nix`)
@@ -50,37 +60,46 @@ All hooks follow patterns documented in:
 - ⚠️ Missing `flake.modules.*` in feature modules
 
 ### Layer 4: Post-Edit Formatting (Automatic Cleanup)
+
 - **Source**: `auto-format-nix.sh`
 - **When**: After EVERY `Edit` or `Write` operation on `.nix` files
 - **Effect**: Auto-formats code with treefmt/nixfmt
 - **Determinism**: High (deterministic formatting)
-- **Documentation**: [PostToolUse Hooks](https://code.claude.com/docs/hooks#posttooluse)
+- **Documentation**:
+  [PostToolUse Hooks](https://code.claude.com/docs/hooks#posttooluse)
 
 **Formatters tried** (in order):
+
 1. `treefmt` (recommended)
 2. `nixfmt` (fallback)
 3. `nix fmt` (fallback)
 
 ### Layer 5: Post-Edit Linting (Issue Detection)
+
 - **Source**: `strict-lint-check.sh`
 - **When**: After EVERY `Edit` or `Write` operation on `.nix` files
 - **Effect**: Reports issues (doesn't block, Claude self-corrects)
 - **Determinism**: High (linters are deterministic)
-- **Documentation**: [PostToolUse Hooks](https://code.claude.com/docs/hooks#posttooluse)
+- **Documentation**:
+  [PostToolUse Hooks](https://code.claude.com/docs/hooks#posttooluse)
 
 **Linters run**:
+
 1. `statix check` - Nix anti-patterns and best practices
 2. `deadnix` - Dead code detection
 3. `nix flake check --no-build` - Flake validation (if flake.nix modified)
 
 ### Layer 6: Session-End Validation (Final Gate)
+
 - **Source**: `validate-session-dendritic.sh` + agent-based hook
 - **When**: When Claude session ends
 - **Effect**: Comprehensive validation of all changes
 - **Determinism**: High (command) + Medium (agent)
-- **Documentation**: [SessionEnd Hooks](https://code.claude.com/docs/hooks#sessionend)
+- **Documentation**:
+  [SessionEnd Hooks](https://code.claude.com/docs/hooks#sessionend)
 
 **Two-phase validation**:
+
 1. **Command hook**: Quick anti-pattern scan of modified files
 2. **Agent hook**: Deep architectural analysis with AI
 
@@ -93,11 +112,13 @@ All hooks follow patterns documented in:
 **Trigger**: `PreToolUse` hook on `Edit|Write` operations
 
 **Exit Codes** (per Claude Code documentation):
+
 - `0` = Allow the operation
 - `2` = **BLOCK** the operation (shows error to Claude)
 - `1` = Hook error (shows warning)
 
 **Checks Performed**:
+
 ```bash
 # Anti-pattern 1: with pkgs;
 grep -q "with pkgs;"
@@ -119,6 +140,7 @@ grep -P '{\s*config.*?flake\.modules\.\w+\.\w+\s*=\s*{\s*config'
 ```
 
 **Example Output** (when blocking):
+
 ```
 🚫 Dendritic Pattern Violation in: modules/audio.nix
 
@@ -131,6 +153,7 @@ grep -P '{\s*config.*?flake\.modules\.\w+\.\w+\s*=\s*{\s*config'
 ```
 
 **Documentation References in Code**:
+
 - Line 4-7: Exit code behavior from Claude Code docs
 - Line 88-91: `with pkgs;` anti-pattern (DENDRITIC_SOURCE_OF_TRUTH.md:1020-1026)
 - Line 94-98: specialArgs anti-pattern (DENDRITIC_SOURCE_OF_TRUTH.md:477-527)
@@ -146,15 +169,18 @@ grep -P '{\s*config.*?flake\.modules\.\w+\.\w+\s*=\s*{\s*config'
 **Trigger**: `PostToolUse` hook on `Edit|Write` operations
 
 **Exit Codes**:
+
 - `0` = Success (formatted successfully)
 - `1` = Warning (no formatter available)
 
 **Formatters** (tried in order):
+
 1. `treefmt` - Repository-wide formatter
 2. `nixfmt` - Nix-specific formatter
 3. `nix fmt` - Flake-based formatter
 
 **Example Output**:
+
 ```
 🎨 Auto-formatting: modules/audio.nix
 ✅ Formatted with treefmt
@@ -169,11 +195,13 @@ grep -P '{\s*config.*?flake\.modules\.\w+\.\w+\s*=\s*{\s*config'
 **Exit Codes**: Always `0` (never blocks, Claude sees output and self-corrects)
 
 **Linters Run**:
+
 1. `statix check` - Nix anti-patterns
 2. `deadnix` - Dead code detection
 3. `nix flake check` - Flake validation (if applicable)
 
 **Example Output**:
+
 ```
 🔍 Linting: modules/audio.nix
 ⚠️  Linting issues found:
@@ -193,11 +221,13 @@ warning: [empty_pattern]
 **Exit Codes**: Always `0` (reports but doesn't block)
 
 **Checks Performed**:
+
 1. Finds all modified `.nix` files in `modules/`
 2. Scans each for anti-patterns
 3. Reports violations with file references
 
 **Example Output**:
+
 ```
 🔍 Performing comprehensive dendritic pattern validation...
 📝 Modified modules:
@@ -272,11 +302,13 @@ Configuration is in `.claude/settings.json`:
 
 ## Claude Code Hook Types
 
-Per [Claude Code documentation](https://code.claude.com/docs/hooks), three types of hooks are supported:
+Per [Claude Code documentation](https://code.claude.com/docs/hooks), three types
+of hooks are supported:
 
 ### 1. Command Hooks (Used: Layers 3, 4, 5, 6)
 
 **How they work**:
+
 - Receive tool call JSON via stdin
 - Execute shell command
 - Return exit code:
@@ -287,6 +319,7 @@ Per [Claude Code documentation](https://code.claude.com/docs/hooks), three types
 **Best for**: Deterministic validation (regex, linters, formatters)
 
 **Our usage**:
+
 - `validate-dendritic.sh` - Blocks anti-patterns
 - `auto-format-nix.sh` - Auto-formats code
 - `strict-lint-check.sh` - Runs linters
@@ -295,6 +328,7 @@ Per [Claude Code documentation](https://code.claude.com/docs/hooks), three types
 ### 2. Prompt-Based Hooks (Not used)
 
 **How they work**:
+
 - Send prompt to Claude
 - Claude responds with JSON: `{"ok": true}` or `{"ok": false, "reason": "..."}`
 - Can block based on response
@@ -306,6 +340,7 @@ Per [Claude Code documentation](https://code.claude.com/docs/hooks), three types
 ### 3. Agent-Based Hooks (Used: Layer 6)
 
 **How they work**:
+
 - Launch a full Claude agent with tools
 - Agent performs complex multi-step tasks
 - Returns result to session
@@ -313,13 +348,16 @@ Per [Claude Code documentation](https://code.claude.com/docs/hooks), three types
 **Best for**: Complex validation requiring file inspection and analysis
 
 **Our usage**:
-- SessionEnd agent: Deep architectural validation with context from DENDRITIC_SOURCE_OF_TRUTH.md
+
+- SessionEnd agent: Deep architectural validation with context from
+  DENDRITIC_SOURCE_OF_TRUTH.md
 
 ## Testing the Hooks
 
 ### Test 1: Block `with pkgs;`
 
 Try having Claude write this:
+
 ```nix
 { config, ... }:
 {
@@ -329,18 +367,21 @@ Try having Claude write this:
 }
 ```
 
-**Expected**: Hook blocks with error message citing DENDRITIC_SOURCE_OF_TRUTH.md:1020-1026
+**Expected**: Hook blocks with error message citing
+DENDRITIC_SOURCE_OF_TRUTH.md:1020-1026
 
 ### Test 2: Block `specialArgs`
 
 Try having Claude write infrastructure with:
+
 ```nix
 lib.nixosSystem {
   specialArgs = { inherit inputs; };
 }
 ```
 
-**Expected**: Hook blocks with error message citing DENDRITIC_SOURCE_OF_TRUTH.md:477-527
+**Expected**: Hook blocks with error message citing
+DENDRITIC_SOURCE_OF_TRUTH.md:477-527
 
 ### Test 3: Auto-format
 
@@ -351,6 +392,7 @@ Have Claude write any valid Nix code without formatting.
 ### Test 4: Linting
 
 Have Claude write code with dead code:
+
 ```nix
 let
   unused = "value";
@@ -358,13 +400,15 @@ in
 { }
 ```
 
-**Expected**: `strict-lint-check.sh` reports dead code, Claude sees output and can fix
+**Expected**: `strict-lint-check.sh` reports dead code, Claude sees output and
+can fix
 
 ## Debugging Hooks
 
 ### View Hook Execution
 
 Hooks log to stderr. To see hook output:
+
 ```bash
 # Run Claude with debug output
 claude --log-level debug
@@ -389,6 +433,7 @@ echo $?  # Should be 2 (blocked)
 ### Disable Hooks Temporarily
 
 To disable hooks for a session:
+
 ```bash
 # Rename settings file
 mv .claude/settings.json .claude/settings.json.bak
@@ -425,13 +470,13 @@ fi
 
 ## Impact Summary
 
-| Hook | Impact | Purpose | Blocks | When |
-|------|--------|---------|--------|------|
-| **validate-dendritic.sh** | 🔴 HIGH | Real-time anti-pattern blocking | ✅ Yes | Every Edit/Write |
-| **auto-format-nix.sh** | 🟡 MEDIUM | Code formatting | ❌ No | After Edit/Write |
-| **strict-lint-check.sh** | 🟡 MEDIUM | Issue detection | ❌ No | After Edit/Write |
-| **validate-session-dendritic.sh** | 🟡 MEDIUM | Comprehensive scan | ❌ No | Session end |
-| **Agent validation** | 🟡 MEDIUM | Deep analysis | ❌ No | Session end |
+| Hook                              | Impact    | Purpose                         | Blocks | When             |
+| --------------------------------- | --------- | ------------------------------- | ------ | ---------------- |
+| **validate-dendritic.sh**         | 🔴 HIGH   | Real-time anti-pattern blocking | ✅ Yes | Every Edit/Write |
+| **auto-format-nix.sh**            | 🟡 MEDIUM | Code formatting                 | ❌ No  | After Edit/Write |
+| **strict-lint-check.sh**          | 🟡 MEDIUM | Issue detection                 | ❌ No  | After Edit/Write |
+| **validate-session-dendritic.sh** | 🟡 MEDIUM | Comprehensive scan              | ❌ No  | Session end      |
+| **Agent validation**              | 🟡 MEDIUM | Deep analysis                   | ❌ No  | Session end      |
 
 ## References
 

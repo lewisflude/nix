@@ -3,7 +3,7 @@
 # HDMI-A-4, eliminating the need for a physical dummy plug and surviving KVM
 # switches. Sunshine captures this output via KMS with NVENC encoding.
 # On stream start the ultrawide is disabled; on stream end it is re-enabled.
-{ ... }:
+_:
 {
   flake.modules.nixos.sunshine =
     { pkgs, ... }:

@@ -76,11 +76,11 @@ log_info() {
 }
 
 log_debug() {
-  [[ "$DEBUG" == "1" ]] && echo -e "${CYAN}🔍 DEBUG:${NC} $*" >&2
+  [[ $DEBUG == "1" ]] && echo -e "${CYAN}🔍 DEBUG:${NC} $*" >&2
 }
 
 log_verbose() {
-  [[ "$VERBOSE" == "1" ]] && echo -e "${CYAN}💬 VERBOSE:${NC} $*"
+  [[ $VERBOSE == "1" ]] && echo -e "${CYAN}💬 VERBOSE:${NC} $*"
 }
 
 # ============================================================================
@@ -149,7 +149,7 @@ check_dependencies() {
 # ============================================================================
 
 show_help() {
-  cat << EOF
+  cat <<EOF
 Usage: $SCRIPT_NAME [OPTIONS]
 
 {{DESCRIPTION}}
@@ -191,41 +191,41 @@ show_version() {
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case $1 in
-      -h|--help)
-        show_help
-        exit 0
-        ;;
-      -v|--verbose)
-        VERBOSE=1
-        shift
-        ;;
-      -d|--debug)
-        DEBUG=1
-        VERBOSE=1
-        shift
-        ;;
-      -n|--dry-run)
-        DRY_RUN=1
-        log_info "Dry-run mode enabled (no changes will be made)"
-        shift
-        ;;
-      --version)
-        show_version
-        exit 0
-        ;;
-      -*)
-        log_error "Unknown option: $1"
-        echo "" >&2
-        show_help >&2
-        exit 2
-        ;;
-      *)
-        # Positional argument
-        log_error "Unexpected argument: $1"
-        echo "" >&2
-        show_help >&2
-        exit 2
-        ;;
+    -h | --help)
+      show_help
+      exit 0
+      ;;
+    -v | --verbose)
+      VERBOSE=1
+      shift
+      ;;
+    -d | --debug)
+      DEBUG=1
+      VERBOSE=1
+      shift
+      ;;
+    -n | --dry-run)
+      DRY_RUN=1
+      log_info "Dry-run mode enabled (no changes will be made)"
+      shift
+      ;;
+    --version)
+      show_version
+      exit 0
+      ;;
+    -*)
+      log_error "Unknown option: $1"
+      echo "" >&2
+      show_help >&2
+      exit 2
+      ;;
+    *)
+      # Positional argument
+      log_error "Unexpected argument: $1"
+      echo "" >&2
+      show_help >&2
+      exit 2
+      ;;
     esac
   done
 }
@@ -252,7 +252,7 @@ main() {
   # Step 2: Processing
   log_verbose "Processing..."
 
-  if [[ "$DRY_RUN" == "1" ]]; then
+  if [[ $DRY_RUN == "1" ]]; then
     log_info "Would perform actions here (dry-run mode)"
   else
     log_verbose "Performing actions..."

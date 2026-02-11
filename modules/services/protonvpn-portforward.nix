@@ -1,12 +1,9 @@
 # ProtonVPN Port Forwarding Module
 # Automatic NAT-PMP port forwarding with qBittorrent API integration
 { config, ... }:
-let
-  constants = config.constants;
-in
 {
   flake.modules.nixos.protonvpnPortforward =
-    { lib, pkgs, ... }:
+    { pkgs, ... }:
     let
       namespace = "qbt";
       gateway = "10.2.0.1";

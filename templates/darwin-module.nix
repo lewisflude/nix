@@ -1,13 +1,9 @@
 # Darwin-only Module Template - Dendritic Pattern
 # For features that only apply to macOS systems
-{ config, lib, ... }:
-let
-  inherit (config) username;
-  constants = config.constants;
-in
+{ config, ... }:
 {
   flake.modules.darwin.FEATURE_NAME =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       # System packages (available to all users)
       environment.systemPackages = [

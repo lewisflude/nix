@@ -41,13 +41,13 @@ print_header "Gaming Setup Diagnostic"
 
 # Check if Steam is installed
 print_header "Steam Installation"
-if command -v steam &> /dev/null; then
+if command -v steam &>/dev/null; then
   check_pass "Steam is installed"
-  
+
   # Check Steam dev config
   if [ -f "$HOME/.steam/steam/steam_dev.cfg" ]; then
     check_pass "Steam dev config exists"
-    
+
     # Check shader compilation setting
     if grep -q "unShaderBackgroundProcessingThreads" "$HOME/.steam/steam/steam_dev.cfg"; then
       THREADS=$(grep "unShaderBackgroundProcessingThreads" "$HOME/.steam/steam/steam_dev.cfg" | awk '{print $2}')
@@ -55,7 +55,7 @@ if command -v steam &> /dev/null; then
     else
       check_warn "Multi-core shader compilation not configured"
     fi
-    
+
     # Check HTTP2 setting
     if grep -q "@nClientDownloadEnableHTTP2PlatformLinux 0" "$HOME/.steam/steam/steam_dev.cfg"; then
       check_pass "HTTP2 disabled for potentially faster downloads"
@@ -88,7 +88,7 @@ else
 fi
 
 # Check irqbalance status
-if systemctl is-enabled irqbalance &> /dev/null; then
+if systemctl is-enabled irqbalance &>/dev/null; then
   check_warn "irqbalance is enabled (known to cause stuttering in games)"
 else
   check_pass "irqbalance is disabled (correct for gaming)"
@@ -105,9 +105,9 @@ fi
 
 # Check gamemode
 print_header "Gaming Software"
-if command -v gamemoded &> /dev/null; then
+if command -v gamemoded &>/dev/null; then
   check_pass "GameMode is installed"
-  if systemctl --user is-active gamemode &> /dev/null; then
+  if systemctl --user is-active gamemode &>/dev/null; then
     check_pass "GameMode daemon is running"
   else
     check_warn "GameMode daemon is not running (starts automatically with games)"
@@ -117,14 +117,14 @@ else
 fi
 
 # Check ananicy-cpp
-if systemctl is-active ananicy-cpp &> /dev/null; then
+if systemctl is-active ananicy-cpp &>/dev/null; then
   check_pass "Ananicy-cpp is running (process prioritization active)"
 else
   check_warn "Ananicy-cpp is not running"
 fi
 
 # Check gamescope
-if command -v gamescope &> /dev/null; then
+if command -v gamescope &>/dev/null; then
   check_pass "Gamescope is installed"
 else
   check_warn "Gamescope is not installed (optional)"
@@ -134,14 +134,14 @@ fi
 print_header "Steam Input"
 if [ -e /dev/uinput ]; then
   check_pass "/dev/uinput exists"
-  
+
   # Check if user is in steam group
   if groups | grep -q steam; then
     check_pass "User is in 'steam' group (can access uinput)"
   else
     check_fail "User is not in 'steam' group (Steam Input may not work)"
   fi
-  
+
   # Check uinput permissions
   UINPUT_GROUP=$(stat -c '%G' /dev/uinput)
   if [ "$UINPUT_GROUP" = "steam" ]; then
@@ -155,11 +155,11 @@ fi
 
 # Check graphics drivers
 print_header "Graphics"
-if command -v vulkaninfo &> /dev/null; then
+if command -v vulkaninfo &>/dev/null; then
   check_pass "Vulkan tools are installed"
-  
+
   # Check for Vulkan ICD
-  if vulkaninfo --summary &> /dev/null; then
+  if vulkaninfo --summary &>/dev/null; then
     VULKAN_GPU=$(vulkaninfo --summary 2>/dev/null | grep "GPU id" | head -1 | cut -d: -f2 | xargs)
     check_pass "Vulkan is working (GPU: $VULKAN_GPU)"
   else
@@ -176,7 +176,7 @@ if [ -n "$REBAR_INFO" ]; then
   # Extract VRAM and BAR sizes
   VRAM_SIZE=$(echo "$REBAR_INFO" | grep -oP 'VRAM RAM=\K[0-9]+' || echo "unknown")
   BAR_SIZE=$(echo "$REBAR_INFO" | grep -oP 'BAR=\K[0-9]+' || echo "unknown")
-  
+
   if [ "$VRAM_SIZE" != "unknown" ] && [ "$BAR_SIZE" != "unknown" ]; then
     if [ "$BAR_SIZE" -ge "$((VRAM_SIZE - 256))" ]; then
       check_pass "Resizable BAR is enabled (BAR=${BAR_SIZE}M, VRAM=${VRAM_SIZE}M)"
@@ -217,7 +217,7 @@ else
 fi
 
 # Check MangoHud
-if command -v mangohud &> /dev/null; then
+if command -v mangohud &>/dev/null; then
   check_pass "MangoHud is installed"
 else
   check_warn "MangoHud not installed (useful for FPS monitoring)"

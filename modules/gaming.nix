@@ -4,7 +4,12 @@
 # - https://lvra.gitlab.io/docs/distros/nixos/
 {
   flake.modules.nixos.gaming =
-    { config, pkgs, lib, ... }:
+    {
+      config,
+      pkgs,
+      lib,
+      ...
+    }:
     let
       patchedBwrap = pkgs.bubblewrap.overrideAttrs (o: {
         patches = (o.patches or [ ]) ++ [ ./bwrap.patch ];

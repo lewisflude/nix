@@ -3,7 +3,7 @@
 # Follows dendritic pattern: ALL modules imported here, not in infrastructure
 { config, inputs, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
   inherit (config) username useremail;
   inherit (config.flake.modules) nixos homeManager;
 in
@@ -93,6 +93,7 @@ in
         nixos.sunshine
         nixos.homeAssistant
         nixos.musicAssistant
+        nixos.wyoming
 
         # ═══════════════════════════════════════════════════════════════════════
         # Media Management Services
@@ -219,8 +220,8 @@ in
       # Host Identity
       # =========================================================================
       host = {
-        username = username;
-        useremail = useremail;
+        inherit username;
+        inherit useremail;
         hostname = "jupiter";
         system = "x86_64-linux";
         hardware.renderDevice = "/dev/dri/renderD128";

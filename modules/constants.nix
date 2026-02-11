@@ -65,6 +65,11 @@
           };
 
           hytaleServer = 5520;
+
+          wyoming = {
+            whisper = 10300;
+            piper = 10200;
+          };
         };
 
         gaming = {

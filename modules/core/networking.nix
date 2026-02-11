@@ -1,6 +1,6 @@
 # Networking configuration module
 # Provides systemd-networkd, resolved, avahi, and firewall
-{ config, ... }:
+_:
 {
   flake.modules.nixos.networking =
     { pkgs, lib, ... }:

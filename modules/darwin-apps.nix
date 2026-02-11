@@ -1,6 +1,6 @@
 # Darwin Apps Feature Module - Dendritic Pattern
 # Homebrew casks, brews, and Mac App Store apps for macOS
-{ config, ... }:
+_:
 {
   # ==========================================================================
   # Darwin System Configuration

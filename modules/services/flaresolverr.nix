@@ -2,11 +2,11 @@
 # Cloudflare bypass for Prowlarr and *arr stack
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   flake.modules.nixos.flaresolverr =
-    { lib, pkgs, ... }:
+    _:
     {
       services.flaresolverr = {
         enable = true;

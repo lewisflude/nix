@@ -3,7 +3,6 @@
 { config, ... }:
 let
   inherit (config) username;
-  constants = config.constants;
 in
 {
   flake.modules.nixos.security =

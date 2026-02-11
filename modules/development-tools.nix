@@ -1,5 +1,5 @@
 # Development tools - Formatters, linters, and language standards
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.developmentTools =
     { lib, pkgs, ... }:

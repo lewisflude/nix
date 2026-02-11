@@ -1,9 +1,9 @@
 # Font Configuration
 # System-level font packages and fontconfig settings
-{ config, ... }:
+_:
 {
   flake.modules.nixos.fonts =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       fonts = {
         fontconfig = {

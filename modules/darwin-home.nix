@@ -1,6 +1,6 @@
 # Darwin-specific home-manager configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.darwinHome
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.darwinHome =
     { lib, pkgs, ... }:

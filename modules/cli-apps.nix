@@ -1,6 +1,6 @@
 # Simple CLI applications - Tools with minimal configuration
 # Complex CLI apps with extensive configuration are in separate modules
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.cliApps =
     { lib, pkgs, ... }:

@@ -1,14 +1,10 @@
 # Cross-Platform Module Template - Dendritic Pattern
 # For features that work on both NixOS and Darwin
-{ config, lib, ... }:
-let
-  inherit (config) username;
-  constants = config.constants;
-in
+{ config, ... }:
 {
   # NixOS system configuration
   flake.modules.nixos.FEATURE_NAME =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       environment.systemPackages = [
         pkgs.example-package
@@ -26,7 +22,7 @@ in
 
   # Darwin system configuration
   flake.modules.darwin.FEATURE_NAME =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       environment.systemPackages = [
         pkgs.example-package
@@ -45,7 +41,6 @@ in
   flake.modules.homeManager.FEATURE_NAME =
     {
       pkgs,
-      lib,
       config,
       ...
     }:

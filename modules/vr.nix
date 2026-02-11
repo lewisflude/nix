@@ -5,7 +5,7 @@
 #
 # NOTE: VR also requires Steam integration configured in gaming.nix
 # (PRESSURE_VESSEL env vars, xrizer in extraPkgs)
-{ ... }:
+_:
 {
   flake.modules.nixos.vr =
     {

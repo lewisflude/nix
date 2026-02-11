@@ -13,19 +13,19 @@ INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 # Only format .nix files
-if [[ "$FILE_PATH" != *.nix ]]; then
+if [[ $FILE_PATH != *.nix ]]; then
   exit 0
 fi
 
 # Check if file exists (may have been deleted)
-if [[ ! -f "$FILE_PATH" ]]; then
+if [[ ! -f $FILE_PATH ]]; then
   exit 0
 fi
 
 echo "🎨 Auto-formatting: $FILE_PATH"
 
 # Try treefmt first (recommended formatter)
-if command -v treefmt &> /dev/null; then
+if command -v treefmt &>/dev/null; then
   if treefmt "$FILE_PATH" 2>&1; then
     echo "✅ Formatted with treefmt"
     exit 0
@@ -33,7 +33,7 @@ if command -v treefmt &> /dev/null; then
 fi
 
 # Fallback to nixfmt if treefmt unavailable
-if command -v nixfmt &> /dev/null; then
+if command -v nixfmt &>/dev/null; then
   if nixfmt "$FILE_PATH" 2>&1; then
     echo "✅ Formatted with nixfmt"
     exit 0

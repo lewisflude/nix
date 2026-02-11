@@ -5,7 +5,7 @@
   imports = [ inputs.git-hooks-nix.flakeModule ];
 
   perSystem =
-    { pkgs, ... }:
+    _:
     {
       pre-commit.settings = {
         excludes = [ "secrets/.*\\.yaml$" ];

@@ -1,10 +1,10 @@
 # Audio - Simple PipeWire configuration
 # Following NixOS wiki best practices: https://wiki.nixos.org/wiki/PipeWire
-{ ... }:
+_:
 {
   # NixOS audio configuration
   flake.modules.nixos.audio =
-    { pkgs, ... }:
+    _:
     {
       # RTKit for realtime scheduling
       security.rtkit.enable = true;
@@ -21,7 +21,12 @@
         # https://wiki.archlinux.org/title/PipeWire#Changing_the_allowed_sample_rate(s)
         extraConfig.pipewire."90-clock-rates" = {
           "context.properties" = {
-            "default.clock.allowed-rates" = [ 44100 48000 88200 96000 ];
+            "default.clock.allowed-rates" = [
+              44100
+              48000
+              88200
+              96000
+            ];
           };
         };
 
@@ -100,7 +105,10 @@
         # Auto-switch to newly connected audio devices (e.g. after KVM switch)
         extraConfig.pipewire-pulse."30-switch-on-connect" = {
           "pulse.cmd" = [
-            { cmd = "load-module"; args = "module-switch-on-connect"; }
+            {
+              cmd = "load-module";
+              args = "module-switch-on-connect";
+            }
           ];
         };
 

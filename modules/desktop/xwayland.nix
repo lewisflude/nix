@@ -1,9 +1,9 @@
 # XWayland Configuration
 # Legacy X11 application support on Wayland
-{ config, ... }:
+_:
 {
   flake.modules.nixos.xwayland =
-    { lib, ... }:
+    _:
     {
       programs.xwayland.enable = true;
     };

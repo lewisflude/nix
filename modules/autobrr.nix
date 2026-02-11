@@ -3,7 +3,7 @@
 # Usage: Import config.flake.modules.nixos.autobrr in host definition
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   flake.modules.nixos.autobrr =

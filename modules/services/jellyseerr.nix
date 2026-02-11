@@ -2,11 +2,11 @@
 # Media request management for Jellyfin
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   flake.modules.nixos.jellyseerr =
-    { lib, pkgs, ... }:
+    { lib, ... }:
     {
       services.jellyseerr = {
         enable = true;

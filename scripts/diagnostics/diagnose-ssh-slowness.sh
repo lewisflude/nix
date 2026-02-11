@@ -78,7 +78,7 @@ OPT2_TIME=$(echo "$OPT2_END - $OPT2_START" | bc)
 echo "   Time: ${OPT2_TIME}s"
 echo ""
 
-if (( $(echo "$OPT2_TIME < $DEFAULT_TIME" | bc -l) )); then
+if (($(echo "$OPT2_TIME < $DEFAULT_TIME" | bc -l))); then
   IMPROVEMENT=$(echo "scale=1; (($DEFAULT_TIME - $OPT2_TIME) / $DEFAULT_TIME) * 100" | bc)
   echo "   ? Optimization improved speed by ${IMPROVEMENT}%"
 else

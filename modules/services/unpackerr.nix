@@ -2,11 +2,11 @@
 # Automatic unpacking for *arr stack downloads
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   flake.modules.nixos.unpackerr =
-    { lib, pkgs, ... }:
+    _:
     {
       systemd.services.unpackerr = {
         after = [ "mnt-storage.mount" ];

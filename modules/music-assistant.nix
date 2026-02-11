@@ -3,7 +3,7 @@
 # Usage: Import flake.modules.nixos.musicAssistant in host definition
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   # ==========================================================================

@@ -3,7 +3,7 @@
 # See: https://docs.determinate.systems/guides/nix-darwin/
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
   inherit (config) username;
 in
 {

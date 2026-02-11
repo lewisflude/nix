@@ -1,11 +1,10 @@
 # Desktop theming - GTK, Qt, fonts, and signal-nix integration
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.theming =
     { lib, pkgs, ... }:
     let
-      isLinux = pkgs.stdenv.isLinux;
-      isDarwin = pkgs.stdenv.isDarwin;
+      inherit (pkgs.stdenv) isLinux;
     in
     {
       # =========================================================================

@@ -18,20 +18,20 @@ OUTPUT_FILE=""
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --critical)
-      SHOW_CRITICAL_ONLY=true
-      shift
-      ;;
-    --output)
-      OUTPUT_FILE="$2"
-      shift 2
-      ;;
-    *)
-      echo "Usage: $0 [--critical] [--output file.txt]"
-      echo "  --critical    Show only critical vulnerabilities (CVSS >= 9.0)"
-      echo "  --output FILE Write results to file"
-      exit 1
-      ;;
+  --critical)
+    SHOW_CRITICAL_ONLY=true
+    shift
+    ;;
+  --output)
+    OUTPUT_FILE="$2"
+    shift 2
+    ;;
+  *)
+    echo "Usage: $0 [--critical] [--output file.txt]"
+    echo "  --critical    Show only critical vulnerabilities (CVSS >= 9.0)"
+    echo "  --output FILE Write results to file"
+    exit 1
+    ;;
   esac
 done
 
@@ -39,7 +39,7 @@ echo -e "${BLUE}=== NixOS Vulnerability Scanner ===${NC}"
 echo -e "${BLUE}Scanning system for known CVE vulnerabilities...${NC}\n"
 
 # Check if vulnix is available, if not use nix-shell
-if ! command -v vulnix &> /dev/null; then
+if ! command -v vulnix &>/dev/null; then
   echo -e "${YELLOW}Note: Running vulnix via nix-shell (this may take a moment)...${NC}\n"
   VULNIX_CMD="nix-shell -p vulnix --run 'vulnix --system 2>&1'"
 else
@@ -47,7 +47,7 @@ else
 fi
 
 # Run vulnix
-if [[ -n "$OUTPUT_FILE" ]]; then
+if [[ -n $OUTPUT_FILE ]]; then
   eval "$VULNIX_CMD" | tee "$OUTPUT_FILE"
   SCAN_OUTPUT=$(cat "$OUTPUT_FILE")
 else

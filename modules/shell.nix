@@ -66,7 +66,7 @@ in
     }:
     let
       sources = zshSources { inherit (pkgs) fetchgit; };
-      isLinux = pkgs.stdenv.isLinux;
+      inherit (pkgs.stdenv) isLinux;
     in
     {
       programs.zsh = {

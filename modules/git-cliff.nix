@@ -1,8 +1,8 @@
 # Git Cliff - Changelog generator
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.git-cliff =
-    { ... }:
+    _:
     {
       programs.git-cliff = {
         enable = true;

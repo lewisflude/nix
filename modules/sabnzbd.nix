@@ -3,7 +3,7 @@
 # Usage: Import flake.modules.nixos.sabnzbd in host definition
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   # ==========================================================================
@@ -25,7 +25,7 @@ in
       # Ensure media user/group exist
       users.users.${user} = mkDefault {
         isSystemUser = true;
-        group = group;
+        inherit group;
         description = "Media management user";
       };
       users.groups.${group} = mkDefault { };

@@ -5,11 +5,14 @@
 [![NixOS 25.05](https://img.shields.io/badge/NixOS-25.05-blue.svg)](https://nixos.org)
 [![nix-darwin](https://img.shields.io/badge/nix--darwin-supported-blue.svg)](https://github.com/LnL7/nix-darwin)
 
-A cross-platform Nix configuration for NixOS (Linux) and nix-darwin (macOS), using the **dendritic pattern** with flake-parts.
+A cross-platform Nix configuration for NixOS (Linux) and nix-darwin (macOS),
+using the **dendritic pattern** with flake-parts.
 
 ## Architecture
 
-This configuration uses the [dendritic pattern](https://github.com/snowfallorg/dendritic) - every `.nix` file (except `flake.nix`) is a flake-parts module.
+This configuration uses the
+[dendritic pattern](https://github.com/snowfallorg/dendritic) - every `.nix`
+file (except `flake.nix`) is a flake-parts module.
 
 ### Structure
 
@@ -36,8 +39,10 @@ This configuration uses the [dendritic pattern](https://github.com/snowfallorg/d
 
 ### How It Works
 
-1. **Feature modules** define `flake.modules.nixos.*` and `flake.modules.homeManager.*`
-2. **Host definitions** compose features by importing from `config.flake.modules`
+1. **Feature modules** define `flake.modules.nixos.*` and
+   `flake.modules.homeManager.*`
+2. **Host definitions** compose features by importing from
+   `config.flake.modules`
 3. **Infrastructure modules** transform host definitions into system outputs
 4. **Values flow through `config.*`**, not `specialArgs` or direct imports
 
@@ -118,10 +123,10 @@ nix develop  # Sets up pre-commit hooks and formatters
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [`DENDRITIC_SOURCE_OF_TRUTH.md`](DENDRITIC_SOURCE_OF_TRUTH.md) | Complete dendritic pattern documentation |
-| [`CLAUDE.md`](CLAUDE.md) | AI assistant guidelines and module patterns |
+| Document                                                       | Description                                 |
+| -------------------------------------------------------------- | ------------------------------------------- |
+| [`DENDRITIC_SOURCE_OF_TRUTH.md`](DENDRITIC_SOURCE_OF_TRUTH.md) | Complete dendritic pattern documentation    |
+| [`CLAUDE.md`](CLAUDE.md)                                       | AI assistant guidelines and module patterns |
 
 ## Available Tools
 
@@ -146,14 +151,14 @@ Located in `scripts/`:
 
 ## Common Tasks
 
-| Task | Command |
-|------|---------|
-| Enter dev environment | `nix develop` |
-| Format code | `nix fmt` |
-| Check configuration | `nix flake check` |
-| Update dependencies | `nix run .#update-all` |
-| Create module | `nix run .#new-module` |
-| Garbage collect | `nix-collect-garbage -d` |
+| Task                  | Command                  |
+| --------------------- | ------------------------ |
+| Enter dev environment | `nix develop`            |
+| Format code           | `nix fmt`                |
+| Check configuration   | `nix flake check`        |
+| Update dependencies   | `nix run .#update-all`   |
+| Create module         | `nix run .#new-module`   |
+| Garbage collect       | `nix-collect-garbage -d` |
 
 ## Binary Cache
 
@@ -205,4 +210,5 @@ cachix use lewisflude-nix
 
 ## License
 
-Personal configuration shared as reference material. Fork and adapt for your own use.
+Personal configuration shared as reference material. Fork and adapt for your own
+use.

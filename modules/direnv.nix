@@ -1,8 +1,8 @@
 # Direnv - Per-directory environment variables
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.direnv =
-    { ... }:
+    _:
     {
       programs.direnv = {
         enable = true;

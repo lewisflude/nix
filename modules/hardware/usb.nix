@@ -1,8 +1,8 @@
 # USB device support (gvfs, udisks2, tumbler)
-{ config, ... }:
+_:
 {
   flake.modules.nixos.usb =
-    { lib, ... }:
+    _:
     {
       services = {
         gvfs.enable = true;

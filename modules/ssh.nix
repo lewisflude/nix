@@ -2,14 +2,14 @@
 # Single file containing NixOS service config and home-manager client config
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   # ===========================================================================
   # NixOS: OpenSSH server configuration
   # ===========================================================================
   flake.modules.nixos.ssh =
-    { lib, ... }:
+    _:
     {
       services.openssh = {
         enable = true;
@@ -44,14 +44,12 @@ in
   flake.modules.homeManager.ssh =
     { config, pkgs, ... }:
     let
-      isDarwin = pkgs.stdenv.isDarwin;
+      inherit (pkgs.stdenv) isDarwin;
 
       # The local extra socket (source of forward) — on the machine you're sitting at.
       # isDarwin tells us which host we're building for.
       localExtraSocket =
-        if isDarwin
-        then constants.hosts.mercury.gpgAgentExtra
-        else constants.hosts.jupiter.gpgAgentExtra;
+        if isDarwin then constants.hosts.mercury.gpgAgentExtra else constants.hosts.jupiter.gpgAgentExtra;
     in
     {
       programs.ssh = {
@@ -112,7 +110,7 @@ in
   # Darwin: SSH server GPG forwarding support
   # ===========================================================================
   flake.modules.darwin.ssh =
-    { ... }:
+    _:
     {
       environment.etc."ssh/sshd_config.d/200-gpg-forwarding.conf".text = ''
         StreamLocalBindUnlink yes

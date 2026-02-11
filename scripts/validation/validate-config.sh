@@ -49,8 +49,8 @@ fi
 
 # Check 4: Validate flake structure
 echo "Checking flake structure..."
-if command -v nix &> /dev/null; then
-  if nix flake metadata --no-write-lock-file &> /dev/null; then
+if command -v nix &>/dev/null; then
+  if nix flake metadata --no-write-lock-file &>/dev/null; then
     echo -e "${GREEN}OK${NC} Flake structure is valid"
   else
     echo -e "${RED}ERROR: Invalid flake structure${NC}"

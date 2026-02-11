@@ -1,8 +1,12 @@
 # Scripts Directory
 
-**⚠️ IMPORTANT**: Do not add new scripts to this directory without explicit permission. This directory was intentionally cleaned from 63→21 scripts. For new CLI tools, use POG apps in `pkgs/pog-scripts/` instead of shell scripts.
+**⚠️ IMPORTANT**: Do not add new scripts to this directory without explicit
+permission. This directory was intentionally cleaned from 63→21 scripts. For new
+CLI tools, use POG apps in `pkgs/pog-scripts/` instead of shell scripts.
 
-Utility scripts for NixOS configuration management, diagnostics, automation, and AI tool integration. Scripts are organized by category for easy discovery and maintenance.
+Utility scripts for NixOS configuration management, diagnostics, automation, and
+AI tool integration. Scripts are organized by category for easy discovery and
+maintenance.
 
 ## 📂 Directory Structure
 
@@ -96,7 +100,8 @@ Interactive diagnostic tools for identifying system issues.
 **Key Scripts**:
 
 - `check-gaming-setup.sh` - Comprehensive gaming configuration validation ⭐
-- `check-audio-setup.sh` - PipeWire/WirePlumber audio configuration diagnostics ⭐ NEW
+- `check-audio-setup.sh` - PipeWire/WirePlumber audio configuration diagnostics
+  ⭐ NEW
 - `diagnose-ssh-slowness.sh` - SSH performance diagnostics
 - `test-ssh-performance.sh` - SSH benchmarking
 - `check-xfs-features.sh` - XFS feature verification and upgrade suggestions ⭐
@@ -126,18 +131,18 @@ Validate system configuration before deployment.
 
 ### By Use Case
 
-| I need to... | Script | Category |
-|--------------|--------|----------|
-| Check gaming setup and optimizations | `check-gaming-setup.sh` | diagnostics |
-| Check VPN port forwarding | `monitor-protonvpn-portforward.sh` | media |
-| Diagnose slow SSH | `diagnose-ssh-slowness.sh` | diagnostics |
-| Check XFS filesystem features | `check-xfs-features.sh` | diagnostics |
-| Test network speed | `test-sped.sh` | network |
-| Validate config before rebuild | `validate-config.sh` | validation |
-| Verify qBittorrent setup | `verify-qbittorrent-vpn.sh` | media |
-| Monitor HDD storage | `monitor-hdd-storage.sh` | media |
-| Benchmark SSH performance | `test-ssh-performance.sh` | diagnostics |
-| Diagnose qBittorrent seeding | `diagnose-qbittorrent-seeding.sh` | media |
+| I need to...                         | Script                             | Category    |
+| ------------------------------------ | ---------------------------------- | ----------- |
+| Check gaming setup and optimizations | `check-gaming-setup.sh`            | diagnostics |
+| Check VPN port forwarding            | `monitor-protonvpn-portforward.sh` | media       |
+| Diagnose slow SSH                    | `diagnose-ssh-slowness.sh`         | diagnostics |
+| Check XFS filesystem features        | `check-xfs-features.sh`            | diagnostics |
+| Test network speed                   | `test-sped.sh`                     | network     |
+| Validate config before rebuild       | `validate-config.sh`               | validation  |
+| Verify qBittorrent setup             | `verify-qbittorrent-vpn.sh`        | media       |
+| Monitor HDD storage                  | `monitor-hdd-storage.sh`           | media       |
+| Benchmark SSH performance            | `test-ssh-performance.sh`          | diagnostics |
+| Diagnose qBittorrent seeding         | `diagnose-qbittorrent-seeding.sh`  | media       |
 
 ### By Integration Status
 
@@ -216,7 +221,8 @@ done
 
 - **Guides**:
   - [qBittorrent Setup Guide](../docs/QBITTORRENT_GUIDE.md) - Complete setup
-  - [ProtonVPN Port Forwarding](../docs/PROTONVPN_PORT_FORWARDING_SETUP.md) - VPN config
+  - [ProtonVPN Port Forwarding](../docs/PROTONVPN_PORT_FORWARDING_SETUP.md) -
+    VPN config
   - [AI Assistant Guidelines](../CLAUDE.md) - AI assistant guidelines
 
 ## 🔧 Common Tasks
@@ -351,7 +357,8 @@ scripts/load-context.sh → scripts/hooks/load-context.sh
 scripts/optimize-mtu.sh → scripts/network/optimize-mtu.sh
 ```
 
-This maintains backward compatibility with existing references. Always prefer using the category paths for new code.
+This maintains backward compatibility with existing references. Always prefer
+using the category paths for new code.
 
 ### Never Run These Directly
 
@@ -391,13 +398,14 @@ Category-specific dependencies are listed in each category's README.
 
 ## 🔗 See Also
 
-- [POG Scripts](../pkgs/pog-scripts/) - Interactive CLI tools (`nix run .#<name>`)
+- [POG Scripts](../pkgs/pog-scripts/) - Interactive CLI tools
+  (`nix run .#<name>`)
 - [Templates](../templates/) - Module templates
 - [AI Guidelines](../CLAUDE.md) - AI assistant rules
 - [Contributing](../CONTRIBUTING.md) - Development workflow
 
 ---
 
-**Last Updated**: 2025-01-21
-**Scripts**: 27 total (7 hooks, 9 media, 3 network, 4 diagnostics, 2 validation, 1 template)
-**Organization**: Cleaned and optimized (removed 42 obsolete scripts)
+**Last Updated**: 2025-01-21 **Scripts**: 27 total (7 hooks, 9 media, 3 network,
+4 diagnostics, 2 validation, 1 template) **Organization**: Cleaned and optimized
+(removed 42 obsolete scripts)

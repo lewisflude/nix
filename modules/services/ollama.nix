@@ -2,7 +2,7 @@
 # Local LLM inference server
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   flake.modules.nixos.ollama =

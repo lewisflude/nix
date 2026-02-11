@@ -2,13 +2,13 @@
 # Follows dendritic pattern: ALL modules imported here, not in infrastructure
 { config, inputs, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
   inherit (config) username useremail;
   inherit (config.flake.modules) darwin homeManager;
 in
 {
   configurations.darwin.mercury.module =
-    { pkgs, ... }:
+    { ... }:
     {
       imports = [
         # ═══════════════════════════════════════════════════════════════════════
@@ -47,7 +47,7 @@ in
       # Home-Manager Module Imports (Dendritic: at host level)
       # =========================================================================
       home-manager.users.${username} =
-        { lib, ... }:
+        { ... }:
         {
           imports = [
             # External home-manager modules
@@ -100,8 +100,8 @@ in
       # Host Identity
       # =========================================================================
       host = {
-        username = username;
-        useremail = useremail;
+        inherit username;
+        inherit useremail;
         hostname = "mercury";
         system = "aarch64-darwin";
 

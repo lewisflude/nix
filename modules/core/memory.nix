@@ -1,9 +1,9 @@
 # Memory management module
 # Enables earlyoom for OOM prevention
-{ config, ... }:
+_:
 {
   flake.modules.nixos.memory =
-    { lib, ... }:
+    _:
     {
       services.earlyoom.enable = true;
     };

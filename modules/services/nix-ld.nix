@@ -1,6 +1,6 @@
 # Nix-ld Module - Dendritic Pattern
 # Run unpatched dynamic binaries on NixOS
-{ ... }:
+_:
 {
   flake.modules.nixos.nixLd =
     { pkgs, ... }:

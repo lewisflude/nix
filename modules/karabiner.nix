@@ -1,6 +1,6 @@
 # Karabiner-Elements configuration (Darwin only)
 # Dendritic pattern: nix-darwin service + home-manager config files
-{ config, ... }:
+_:
 {
   # ==========================================================================
   # Darwin System Configuration
@@ -11,7 +11,7 @@
   #   brew install --cask karabiner-elements
   # The home-manager config below still manages the JSON configuration.
   flake.modules.darwin.karabiner =
-    { ... }:
+    _:
     {
       # services.karabiner-elements.enable = true;  # Disabled - use Homebrew
     };

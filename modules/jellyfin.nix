@@ -3,7 +3,7 @@
 # Usage: Import config.flake.modules.nixos.jellyfin in host definition
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   flake.modules.nixos.jellyfin =
@@ -16,7 +16,7 @@ in
     {
       users.users.${user} = {
         isSystemUser = true;
-        group = group;
+        inherit group;
         description = "Media management user";
         # Add to render/video groups for hardware acceleration
         extraGroups = [

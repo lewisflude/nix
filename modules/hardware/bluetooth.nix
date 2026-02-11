@@ -1,8 +1,8 @@
 # Bluetooth hardware support
-{ config, ... }:
+_:
 {
   flake.modules.nixos.bluetooth =
-    { lib, ... }:
+    _:
     {
       hardware = {
         bluetooth = {

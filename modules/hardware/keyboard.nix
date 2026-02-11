@@ -1,8 +1,8 @@
 # Keyboard hardware support (QMK, HID)
-{ config, ... }:
+{ ... }:
 {
   flake.modules.nixos.keyboard =
-    { lib, ... }:
+    { ... }:
     {
       hardware.keyboard.qmk.enable = true;
 

@@ -1,8 +1,8 @@
 # Mouse hardware support (Logitech, gaming mice)
-{ config, ... }:
+_:
 {
   flake.modules.nixos.mouse =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       services.solaar = {
         enable = true;

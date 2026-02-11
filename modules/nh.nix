@@ -1,16 +1,15 @@
 # NH (Nix Helper) configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.nh
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.nh =
     {
       config,
       pkgs,
-      lib,
       ...
     }:
     let
-      isDarwin = pkgs.stdenv.isDarwin;
+      inherit (pkgs.stdenv) isDarwin;
       homeDir = if isDarwin then "/Users/${config.home.username}" else "/home/${config.home.username}";
       flakePath = "${homeDir}/.config/nix";
     in

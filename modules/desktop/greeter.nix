@@ -2,9 +2,6 @@
 # greetd with DMS greeter and auto-login support
 # Follows: https://danklinux.com/docs/dankmaterialshell/nixos-flake
 { config, ... }:
-let
-  inherit (config) username;
-in
 {
   flake.modules.nixos.greeter =
     {
@@ -34,7 +31,7 @@ in
         settings = {
           initial_session = {
             command = "${pkgs.niri}/bin/niri-session";
-            user = config.host.features.desktop.autoLogin.user;
+            inherit (config.host.features.desktop.autoLogin) user;
           };
         };
       };

@@ -1,10 +1,12 @@
 # AI Assistant Guidelines
 
-This document provides guidelines for AI assistants working with this Nix configuration repository.
+This document provides guidelines for AI assistants working with this Nix
+configuration repository.
 
 ## System Rebuilds
 
-**CRITICAL**: Never rebuild NixOS or nix-darwin systems directly. Always ask the user to build instead, as you do not have permissions to run commands like:
+**CRITICAL**: Never rebuild NixOS or nix-darwin systems directly. Always ask the
+user to build instead, as you do not have permissions to run commands like:
 
 - `nh os switch`
 - `sudo nixos-rebuild switch`
@@ -14,15 +16,20 @@ Instead, suggest commands for the user to run manually.
 
 ## Creating Documentation and Scripts
 
-**CRITICAL**: Do NOT create new documentation files or shell scripts without explicit user permission. The repository was intentionally cleaned of excessive documentation and scripts.
+**CRITICAL**: Do NOT create new documentation files or shell scripts without
+explicit user permission. The repository was intentionally cleaned of excessive
+documentation and scripts.
 
 **Guidelines:**
 
 - **Never proactively create** `.md` files or `.sh` files in `scripts/`
-- **Ask permission first** if the user's request implies creating new docs or scripts
-- **Use existing documentation** - update existing files rather than creating new ones
+- **Ask permission first** if the user's request implies creating new docs or
+  scripts
+- **Use existing documentation** - update existing files rather than creating
+  new ones
 - **Prefer inline documentation** in code comments over separate doc files
-- **Use POG scripts** (`pkgs/pog-scripts/`) for new CLI tools instead of shell scripts
+- **Use POG scripts** (`pkgs/pog-scripts/`) for new CLI tools instead of shell
+  scripts
 
 **Exceptions** (still require user confirmation):
 
@@ -31,16 +38,23 @@ Instead, suggest commands for the user to run manually.
 
 ## Dendritic Pattern Architecture
 
-This repository follows the **dendritic pattern** where every `.nix` file (except `flake.nix`) is a flake-parts module. See `DENDRITIC_SOURCE_OF_TRUTH.md` for the complete pattern documentation.
+This repository follows the **dendritic pattern** where every `.nix` file
+(except `flake.nix`) is a flake-parts module. See `DENDRITIC_SOURCE_OF_TRUTH.md`
+for the complete pattern documentation.
 
 ### Key Concepts
 
-1. **Every file is a top-level module** - All `.nix` files under `modules/` are flake-parts modules
+1. **Every file is a top-level module** - All `.nix` files under `modules/` are
+   flake-parts modules
 2. **Two levels of configuration**:
-   - **Top-level** (flake-parts): Where you define `flake.modules.*` and access `config.*`
-   - **Platform-level** (NixOS/Darwin/home-manager): The actual system configurations stored as values
-3. **Value sharing via top-level config** - No `specialArgs`, access values via `config.*`
-4. **Hosts compose features** - All imports happen at host level, not in infrastructure
+   - **Top-level** (flake-parts): Where you define `flake.modules.*` and access
+     `config.*`
+   - **Platform-level** (NixOS/Darwin/home-manager): The actual system
+     configurations stored as values
+3. **Value sharing via top-level config** - No `specialArgs`, access values via
+   `config.*`
+4. **Hosts compose features** - All imports happen at host level, not in
+   infrastructure
 
 ### Repository Structure
 
@@ -83,12 +97,16 @@ Located in `scripts/`:
 
 **qBittorrent & VPN:**
 
-- `scripts/diagnose-qbittorrent-seeding.sh` - Comprehensive qBittorrent seeding diagnostics
-- `scripts/test-qbittorrent-seeding-health.sh` - Full health check with API integration
+- `scripts/diagnose-qbittorrent-seeding.sh` - Comprehensive qBittorrent seeding
+  diagnostics
+- `scripts/test-qbittorrent-seeding-health.sh` - Full health check with API
+  integration
 - `scripts/test-qbittorrent-connectivity.sh` - Network connectivity verification
 - `scripts/protonvpn-natpmp-portforward.sh` - Automated NAT-PMP port forwarding
-- `scripts/monitor-protonvpn-portforward.sh` - Monitor VPN and port forwarding status
-- `scripts/verify-qbittorrent-vpn.sh` - Complete verification following setup guide
+- `scripts/monitor-protonvpn-portforward.sh` - Monitor VPN and port forwarding
+  status
+- `scripts/verify-qbittorrent-vpn.sh` - Complete verification following setup
+  guide
 - `scripts/test-vpn-port-forwarding.sh` - Quick port forwarding status check
 - `scripts/monitor-hdd-storage.sh` - Monitor HDD storage usage and health
 
@@ -118,7 +136,8 @@ See `scripts/README.md` for detailed documentation of each script.
 
 1. Check if a relevant feature module exists in `modules/`
 2. Add to appropriate `flake.modules.nixos.*` or `flake.modules.homeManager.*`
-3. Import the module in the host definition (`modules/hosts/<hostname>/definition.nix`)
+3. Import the module in the host definition
+   (`modules/hosts/<hostname>/definition.nix`)
 
 ### Creating a Module
 
@@ -154,7 +173,8 @@ in
 
 ### Understanding the Two Scopes
 
-The canonical pattern uses a named parameter (like `nixosArgs`) to avoid shadowing:
+The canonical pattern uses a named parameter (like `nixosArgs`) to avoid
+shadowing:
 
 ```nix
 # modules/shell.nix (canonical pattern)
@@ -172,7 +192,8 @@ The canonical pattern uses a named parameter (like `nixosArgs`) to avoid shadowi
 }
 ```
 
-**Key insight**: Use `nixosArgs` (or similar) as the parameter name to access platform config while keeping `config` from outer scope available.
+**Key insight**: Use `nixosArgs` (or similar) as the parameter name to access
+platform config while keeping `config` from outer scope available.
 
 **Alternative** - omit platform config if not needed:
 
@@ -200,6 +221,7 @@ The canonical pattern uses a named parameter (like `nixosArgs`) to avoid shadowi
 ### System vs Home-Manager Configuration
 
 **System-level** (`flake.modules.nixos.*` or `flake.modules.darwin.*`):
+
 - System services (systemd, launchd)
 - Kernel modules and drivers
 - Hardware configuration
@@ -210,6 +232,7 @@ The canonical pattern uses a named parameter (like `nixosArgs`) to avoid shadowi
 - Boot configuration
 
 **Home-manager** (`flake.modules.homeManager.*`):
+
 - User applications and CLI tools
 - User services (systemd --user)
 - Dotfiles and user configuration
@@ -327,7 +350,8 @@ When adding a package or service:
 
 ## MCP (Model Context Protocol) Servers
 
-This configuration includes built-in MCP server support for AI coding tools (Claude Code, Cursor, etc.) using the home-manager `programs.mcp` option.
+This configuration includes built-in MCP server support for AI coding tools
+(Claude Code, Cursor, etc.) using the home-manager `programs.mcp` option.
 
 ### Available MCP Servers
 
@@ -342,7 +366,8 @@ This configuration includes built-in MCP server support for AI coding tools (Cla
 **Disabled by default (require secrets or dependencies):**
 
 - **docs** - Documentation indexing and search (requires `OPENAI_API_KEY`)
-- **openai** - OpenAI integration with Rust docs support (requires `OPENAI_API_KEY`)
+- **openai** - OpenAI integration with Rust docs support (requires
+  `OPENAI_API_KEY`)
 - **rustdocs** - Bevy crate documentation (requires `OPENAI_API_KEY`)
 - **github** - GitHub API integration (requires `GITHUB_TOKEN`)
 - **kagi** - Kagi search and summarization (requires `KAGI_API_KEY` and `uv`)
@@ -354,7 +379,9 @@ This configuration includes built-in MCP server support for AI coding tools (Cla
 
 ### Configuration
 
-MCP servers are configured in feature modules and automatically deployed to `~/.config/mcp/mcp.json`. AI tools like Claude Code and Cursor can read this configuration.
+MCP servers are configured in feature modules and automatically deployed to
+`~/.config/mcp/mcp.json`. AI tools like Claude Code and Cursor can read this
+configuration.
 
 ### Enabling Servers with Secrets
 
@@ -362,13 +389,15 @@ To enable servers that require API keys:
 
 1. **Add secret to SOPS**: Edit `secrets/secrets.yaml` with your secret
 2. **Configure secret**: In the relevant module, add SOPS configuration
-3. **Rebuild system**: The secret will be available at `/run/secrets-for-users/MY_SECRET`
+3. **Rebuild system**: The secret will be available at
+   `/run/secrets-for-users/MY_SECRET`
 
 ## Documentation
 
 ### Primary Documentation
 
-- **`DENDRITIC_SOURCE_OF_TRUTH.md`** - Complete dendritic pattern documentation (canonical source)
+- **`DENDRITIC_SOURCE_OF_TRUTH.md`** - Complete dendritic pattern documentation
+  (canonical source)
 - **`CLAUDE.md`** - This file (AI assistant guidelines)
 - **`scripts/README.md`** - Shell script documentation
 

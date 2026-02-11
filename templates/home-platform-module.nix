@@ -1,16 +1,11 @@
 # Home-Manager Module Template - Dendritic Pattern
 # For user-level configuration
-{ config, lib, ... }:
-let
-  inherit (config) username;
-  constants = config.constants;
-in
+{ config, ... }:
 {
   # Home-manager configuration for all platforms
   flake.modules.homeManager.FEATURE_NAME =
     {
       pkgs,
-      lib,
       config,
       ...
     }:
@@ -44,7 +39,7 @@ in
 
   # Platform-specific home-manager (NixOS)
   flake.modules.homeManager.FEATURE_NAME-linux =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       home.packages = [
         pkgs.linux-specific-tool
@@ -53,7 +48,7 @@ in
 
   # Platform-specific home-manager (Darwin)
   flake.modules.homeManager.FEATURE_NAME-darwin =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       home.packages = [
         pkgs.darwin-specific-tool

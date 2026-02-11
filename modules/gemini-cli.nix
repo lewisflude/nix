@@ -1,10 +1,9 @@
 # Gemini CLI - Dendritic Pattern
 # AI coding assistant via Google Gemini
-{ config, ... }:
+{ ... }:
 {
   flake.modules.homeManager.geminiCli =
     {
-      config,
       lib,
       pkgs,
       osConfig ? { },

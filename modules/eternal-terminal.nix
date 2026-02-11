@@ -3,14 +3,14 @@
 # Usage: Import flake.modules.nixos.eternalTerminal in host definition
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   # ==========================================================================
   # NixOS System Configuration
   # ==========================================================================
   flake.modules.nixos.eternalTerminal =
-    { ... }:
+    _:
     {
       services.eternal-terminal = {
         enable = true;

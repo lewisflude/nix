@@ -1,9 +1,9 @@
 # Hardware Support Configuration
 # Thunderbolt, backlight control, geolocation services
-{ config, ... }:
+_:
 {
   flake.modules.nixos.hardwareSupport =
-    { pkgs, lib, ... }:
+    _:
     {
       services = {
         udev.extraRules = ''

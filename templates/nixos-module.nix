@@ -1,13 +1,12 @@
 # NixOS-only Module Template - Dendritic Pattern
 # For features that only apply to NixOS systems
-{ config, lib, ... }:
+{ config, ... }:
 let
   inherit (config) username;
-  constants = config.constants;
 in
 {
   flake.modules.nixos.FEATURE_NAME =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       # System packages
       environment.systemPackages = [

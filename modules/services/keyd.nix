@@ -1,9 +1,9 @@
 # Keyd Keyboard Remapping Module - Dendritic Pattern
 # Key remapping daemon for Linux
-{ ... }:
+_:
 {
   flake.modules.nixos.keyd =
-    { ... }:
+    _:
     {
       services.keyd = {
         enable = true;

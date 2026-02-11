@@ -2,7 +2,7 @@
 # Web server with automatic HTTPS and virtual hosts
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 
   # Helper functions for Caddy configuration
   standardHeaders = ''
@@ -23,7 +23,6 @@ in
 {
   flake.modules.nixos.caddy =
     {
-      pkgs,
       lib,
       config,
       ...
@@ -34,7 +33,7 @@ in
     {
       services.caddy = lib.mkIf cfg.enable {
         enable = true;
-        email = cfg.email;
+        inherit (cfg) email;
         virtualHosts = {
           # Infrastructure
           "cockpit.blmt.io" = mkReverseProxy "127.0.0.1:${toString constants.ports.services.cockpit}";

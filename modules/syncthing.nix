@@ -3,7 +3,7 @@
 # Usage: Import flake.modules.nixos.syncthing in host definition
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
   inherit (config) username;
 in
 {

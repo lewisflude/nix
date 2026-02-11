@@ -1,8 +1,8 @@
 # Atuin - Shell history sync and search
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.atuin =
-    { ... }:
+    _:
     {
       programs.atuin = {
         enable = true;

@@ -1,6 +1,6 @@
 # Niri compositor home-manager configuration (NixOS only)
 # Dendritic pattern: Full implementation as flake.modules.homeManager.niriHome
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.niriHome =
     {
@@ -632,7 +632,7 @@
 
               # 1Password: float + hide from screencasts
               {
-                matches = [{ app-id = "^1password$"; }];
+                matches = [ { app-id = "^1password$"; } ];
                 open-floating = true;
                 block-out-from = "screencast";
               }
@@ -640,7 +640,10 @@
               # Firefox/Chromium picture-in-picture
               {
                 matches = [
-                  { app-id = "^firefox"; title = "^Picture-in-Picture$"; }
+                  {
+                    app-id = "^firefox";
+                    title = "^Picture-in-Picture$";
+                  }
                   { title = "^Picture in picture$"; }
                 ];
                 open-floating = true;
@@ -648,27 +651,29 @@
 
               # Steam games: fullscreen + VRR (AW3423DWF)
               {
-                matches = [{ app-id = "^steam_app_"; }];
+                matches = [ { app-id = "^steam_app_"; } ];
                 open-fullscreen = true;
                 variable-refresh-rate = true;
               }
 
               # Gamescope
               {
-                matches = [{ app-id = "^gamescope$"; }];
+                matches = [ { app-id = "^gamescope$"; } ];
                 open-fullscreen = true;
                 variable-refresh-rate = true;
               }
 
               # Steam client
               {
-                matches = [{ app-id = "^steam$"; }];
-                default-column-width = { proportion = 0.65; };
+                matches = [ { app-id = "^steam$"; } ];
+                default-column-width = {
+                  proportion = 0.65;
+                };
               }
 
               # Inactive window transparency
               {
-                matches = [{ is-active = false; }];
+                matches = [ { is-active = false; } ];
                 opacity = 0.95;
               }
             ];

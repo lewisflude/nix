@@ -1,6 +1,6 @@
 # Niri Compositor Configuration
 # Niri Wayland compositor with NVIDIA optimizations
-{ config, inputs, ... }:
+{ inputs, ... }:
 {
   flake.modules.nixos.niri =
     { lib, config, ... }:

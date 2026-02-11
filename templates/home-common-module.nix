@@ -1,10 +1,6 @@
 # Home-Manager Only Module Template - Dendritic Pattern
 # For user-level features that don't need system configuration
-{ config, lib, ... }:
-let
-  inherit (config) username;
-  constants = config.constants;
-in
+{ config, ... }:
 {
   flake.modules.homeManager.FEATURE_NAME =
     {

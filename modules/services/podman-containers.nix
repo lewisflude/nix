@@ -2,14 +2,14 @@
 # OCI container services using Podman
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   flake.modules.nixos.podmanContainers =
-    { lib, pkgs, ... }:
+    _:
     let
       configPath = "/var/lib/containers/supplemental";
-      timezone = constants.defaults.timezone;
+      inherit (constants.defaults) timezone;
       uid = 1000;
       gid = 100;
     in

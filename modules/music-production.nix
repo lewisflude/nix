@@ -4,11 +4,11 @@
 # - https://wiki.nixos.org/wiki/Audio_production
 # - https://github.com/musnix/musnix
 # - https://wiki.nixos.org/wiki/JACK
-{ ... }:
+_:
 {
   # NixOS: realtime audio optimizations via musnix
   flake.modules.nixos.musicProduction =
-    { ... }:
+    _:
     {
       # musnix handles: PAM limits (memlock, rtprio), CPU governor,
       # vm.swappiness, udev rules, and plugin path env vars

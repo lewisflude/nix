@@ -5,7 +5,6 @@
 let
   inherit (lib) mkOption mkEnableOption types;
   # Dendritic pattern: Access constants via top-level config
-  meta = config.constants or { };
 in
 {
   # Define host options for both NixOS and Darwin

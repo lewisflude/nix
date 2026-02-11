@@ -2,9 +2,6 @@
 # Mobile shell with UDP-based SSH alternative for better roaming
 # Usage: Import flake.modules.nixos.mosh in host definition
 { config, ... }:
-let
-  constants = config.constants;
-in
 {
   # ==========================================================================
   # NixOS System Configuration

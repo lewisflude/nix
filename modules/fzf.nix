@@ -1,5 +1,5 @@
 # FZF - Fuzzy finder
-{ config, ... }:
+_:
 {
   flake.modules.homeManager.fzf =
     { pkgs, lib, ... }:

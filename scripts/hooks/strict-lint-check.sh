@@ -16,12 +16,12 @@ INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 # Only lint .nix files
-if [[ "$FILE_PATH" != *.nix ]]; then
+if [[ $FILE_PATH != *.nix ]]; then
   exit 0
 fi
 
 # Check if file exists
-if [[ ! -f "$FILE_PATH" ]]; then
+if [[ ! -f $FILE_PATH ]]; then
   exit 0
 fi
 
@@ -30,27 +30,27 @@ echo "🔍 Linting: $FILE_PATH"
 ISSUES=()
 
 # Check 1: statix (Nix linter)
-if command -v statix &> /dev/null; then
+if command -v statix &>/dev/null; then
   STATIX_OUTPUT=$(statix check "$FILE_PATH" 2>&1 || true)
-  if [[ -n "$STATIX_OUTPUT" ]]; then
+  if [[ -n $STATIX_OUTPUT ]]; then
     ISSUES+=("$STATIX_OUTPUT")
   fi
 fi
 
 # Check 2: deadnix (dead code detection)
-if command -v deadnix &> /dev/null; then
+if command -v deadnix &>/dev/null; then
   DEADNIX_OUTPUT=$(deadnix "$FILE_PATH" 2>&1 || true)
-  if [[ -n "$DEADNIX_OUTPUT" ]]; then
+  if [[ -n $DEADNIX_OUTPUT ]]; then
     ISSUES+=("Dead code detected:")
     ISSUES+=("$DEADNIX_OUTPUT")
   fi
 fi
 
 # Check 3: nix flake check (if modifying flake inputs)
-if [[ "$FILE_PATH" == */flake.nix ]] || [[ "$FILE_PATH" == */flake.lock ]]; then
+if [[ $FILE_PATH == */flake.nix ]] || [[ $FILE_PATH == */flake.lock ]]; then
   echo "🧪 Running nix flake check..."
   FLAKE_CHECK_OUTPUT=$(nix flake check --no-build 2>&1 || true)
-  if [[ -n "$FLAKE_CHECK_OUTPUT" ]]; then
+  if [[ -n $FLAKE_CHECK_OUTPUT ]]; then
     ISSUES+=("Flake check issues:")
     ISSUES+=("$FLAKE_CHECK_OUTPUT")
   fi

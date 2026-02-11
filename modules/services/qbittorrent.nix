@@ -3,7 +3,7 @@
 # Usage: Import flake.modules.nixos.qbittorrent in host definition
 { config, ... }:
 let
-  constants = config.constants;
+  inherit (config) constants;
 in
 {
   flake.modules.nixos.qbittorrent =
@@ -14,7 +14,7 @@ in
       ...
     }:
     let
-      inherit (lib) mkDefault mkIf mkMerge;
+      inherit (lib) mkIf;
       namespace = "qbt";
       torrentPort = 62000;
       webuiPort = constants.ports.services.qbittorrent;

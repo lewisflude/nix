@@ -1,9 +1,9 @@
 # XDG Desktop Portal Module - Dendritic Pattern
 # Portal services for sandboxed applications
-{ ... }:
+_:
 {
   flake.modules.nixos.xdgPortal =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       xdg.portal = {
         enable = true;

@@ -19,7 +19,7 @@ INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 # Only validate .nix files under modules/
-if [[ "$FILE_PATH" != */modules/*.nix ]]; then
+if [[ $FILE_PATH != */modules/*.nix ]]; then
   exit 0
 fi
 
@@ -28,15 +28,15 @@ fi
 # - For Edit tool: new_string field (fragment only)
 CONTENT=""
 IS_EDIT=false
-if echo "$INPUT" | jq -e '.tool_input.content' > /dev/null 2>&1; then
+if echo "$INPUT" | jq -e '.tool_input.content' >/dev/null 2>&1; then
   CONTENT=$(echo "$INPUT" | jq -r '.tool_input.content')
-elif echo "$INPUT" | jq -e '.tool_input.new_string' > /dev/null 2>&1; then
+elif echo "$INPUT" | jq -e '.tool_input.new_string' >/dev/null 2>&1; then
   CONTENT=$(echo "$INPUT" | jq -r '.tool_input.new_string')
   IS_EDIT=true
 fi
 
 # If no content to validate, allow
-if [[ -z "$CONTENT" ]]; then
+if [[ -z $CONTENT ]]; then
   exit 0
 fi
 
@@ -72,7 +72,7 @@ fi
 
 # Anti-pattern 4: Importing flake-parts.flakeModules.modules outside infrastructure
 # Infrastructure modules should import this, not feature modules
-if [[ "$FILE_PATH" != */infrastructure/* ]] && echo "$CONTENT" | grep -q "flake-parts.flakeModules.modules"; then
+if [[ $FILE_PATH != */infrastructure/* ]] && echo "$CONTENT" | grep -q "flake-parts.flakeModules.modules"; then
   ERRORS+=("⚠️  flakeModules.modules should only be imported in infrastructure/flake-parts.nix")
   ERRORS+=("   See: DENDRITIC_SOURCE_OF_TRUTH.md line 129-148")
 fi
@@ -80,13 +80,13 @@ fi
 # Pattern validation: Feature modules should define flake.modules.*
 # (Skip infrastructure and host definition files)
 # (Skip for Edit operations since we only see a fragment, not full file)
-if [[ "$IS_EDIT" == false ]] &&
-   [[ "$FILE_PATH" =~ ^.*/modules/[^/]+\.nix$ ]] &&
-   [[ "$FILE_PATH" != */infrastructure/* ]] &&
-   [[ "$FILE_PATH" != */hosts/* ]] &&
-   [[ "$FILE_PATH" != */constants.nix ]] &&
-   [[ "$FILE_PATH" != */meta.nix ]] &&
-   [[ "$FILE_PATH" != */systems.nix ]]; then
+if [[ $IS_EDIT == false ]] &&
+  [[ $FILE_PATH =~ ^.*/modules/[^/]+\.nix$ ]] &&
+  [[ $FILE_PATH != */infrastructure/* ]] &&
+  [[ $FILE_PATH != */hosts/* ]] &&
+  [[ $FILE_PATH != */constants.nix ]] &&
+  [[ $FILE_PATH != */meta.nix ]] &&
+  [[ $FILE_PATH != */systems.nix ]]; then
 
   # Check if it defines flake.modules.*
   if ! echo "$CONTENT" | grep -q "flake\.modules\."; then
@@ -116,7 +116,7 @@ if [ ${#ERRORS[@]} -gt 0 ]; then
   echo "" >&2
   echo "   📖 Read DENDRITIC_SOURCE_OF_TRUTH.md for complete pattern guide" >&2
   echo "   💡 Ask: 'Can you fix this following dendritic pattern?'" >&2
-  exit 2  # Exit code 2 blocks the action
+  exit 2 # Exit code 2 blocks the action
 fi
 
 # All checks passed
