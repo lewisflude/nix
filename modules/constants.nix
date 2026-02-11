@@ -7,24 +7,9 @@
     readOnly = true;
     default = {
       # Service ports - centralized to avoid conflicts
-      # Port range: 6200-6299 reserved for MCP servers
       ports = {
         mcp = {
-          github = 6230;
-          git = 6233;
-          kagi = 6240;
-          openai = 6250;
           docs = 6280;
-          rustdocs = 6270;
-          fetch = 6260;
-          nixos = 6265;
-          time-nixos = 6262;
-          time-darwin = 6263;
-          sequential-thinking-nixos = 6281;
-          sequential-thinking-darwin = 6282;
-          filesystem = 6220;
-          memory = 6221;
-          everything = 6222;
         };
 
         services = {
@@ -93,11 +78,6 @@
       };
 
       timeouts = {
-        mcp = {
-          registration = "60000";
-          warmup = "900";
-          default = "60000";
-        };
         service = {
           start = "300";
           stop = "90";
