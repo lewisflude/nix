@@ -8,7 +8,7 @@ _: {
     { pkgs, ... }:
     let
       # Display output names — verify with: niri msg outputs
-      virtualDisplay = "HDMI-A-4"; # 1080p virtual output (EDID-emulated, captured by Sunshine)
+      virtualDisplay = "HDMI-A-1"; # 1080p virtual output (EDID-emulated, captured by Sunshine)
       ultrawide = "DP-3"; # AW3423DWF — disabled during streaming
 
       # 1920x1080@60Hz EDID (v1.3, manufacturer "LNX", sRGB, monitor name "Virtual 1080").
