@@ -702,7 +702,7 @@ _: {
                 "${pkgs.niri}/bin/niri"
                 "msg"
                 "output"
-                "HDMI-A-4"
+                "HDMI-A-1"
                 "on"
               ];
             }

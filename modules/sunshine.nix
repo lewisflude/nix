@@ -1,6 +1,6 @@
 # Sunshine game streaming server
 # A custom EDID is loaded at boot to create a persistent virtual display on
-# HDMI-A-4, eliminating the need for a physical dummy plug and surviving KVM
+# HDMI-A-1, eliminating the need for a physical dummy plug and surviving KVM
 # switches. Sunshine captures this output via KMS with NVENC encoding.
 # On stream start the ultrawide is disabled; on stream end it is re-enabled.
 _: {
@@ -96,9 +96,9 @@ _: {
         package = pkgs.sunshine.override { cudaSupport = true; };
 
         settings = {
-          # Wayland capture via wlroots screencopy protocol (Niri supports zwlr_screencopy_manager_v1).
-          # KMS capture doesn't work with NVIDIA proprietary drivers (empty monitor list).
-          capture = "wlr";
+          # KMS capture on the virtual display.
+          # Find the correct output index: journalctl --user -u sunshine | grep -i monitor
+          capture = "kms";
           encoder = "nvenc";
           adapter_name = "/dev/dri/card1";
           output_name = 0;
@@ -126,6 +126,20 @@ _: {
               {
                 do = "${sunshine-prep}/bin/sunshine-prep";
                 undo = "${sunshine-cleanup}/bin/sunshine-cleanup";
+              }
+            ];
+          }
+          {
+            name = "Steam Big Picture";
+            detached = [ "setsid steam steam://open/bigpicture" ];
+            prep-cmd = [
+              {
+                do = "${sunshine-prep}/bin/sunshine-prep";
+                undo = "${sunshine-cleanup}/bin/sunshine-cleanup";
+              }
+              {
+                do = "";
+                undo = "setsid steam steam://close/bigpicture";
               }
             ];
           }
