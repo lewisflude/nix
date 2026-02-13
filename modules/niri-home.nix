@@ -703,7 +703,7 @@ _: {
                 "msg"
                 "output"
                 "HDMI-A-1"
-                "on"
+                "off"
               ];
             }
           ];

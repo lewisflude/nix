@@ -49,7 +49,8 @@ _: {
           pkgs.niri
         ];
         text = ''
-          # Disable ultrawide so the virtual display becomes the sole output
+          # Enable virtual display and disable ultrawide so it becomes the sole output
+          niri msg output "${virtualDisplay}" on
           niri msg output "${ultrawide}" off
           sleep 1
 
@@ -74,8 +75,9 @@ _: {
           pkgs.niri
         ];
         text = ''
-          # Restore default 1080p on the virtual display
+          # Disable virtual display and restore ultrawide
           niri msg output "${virtualDisplay}" mode 1920x1080@60 || true
+          niri msg output "${virtualDisplay}" off
           niri msg output "${ultrawide}" on
 
           pid_file="$XDG_RUNTIME_DIR/sunshine-inhibit.pid"

@@ -24,7 +24,7 @@ in
         MaxStartups = "10:30:100";
         LoginGraceTime = 30;
         ClientAliveInterval = 30;
-        ClientAliveCountMax = 10;
+        ClientAliveCountMax = 3;
         TCPKeepAlive = false;
         X11Forwarding = false;
         AllowTcpForwarding = true;
@@ -50,16 +50,24 @@ in
         if isDarwin then constants.hosts.mercury.gpgAgentExtra else constants.hosts.jupiter.gpgAgentExtra;
     in
     {
+      home.file.".ssh/sockets/.keep".text = "";
+
       programs.ssh = {
         enable = true;
         enableDefaultConfig = false;
         matchBlocks = {
           "*" = {
             addKeysToAgent = "yes";
+            identitiesOnly = true;
+            hashKnownHosts = true;
+            forwardAgent = false;
+            controlMaster = "auto";
+            controlPath = "~/.ssh/sockets/%r@%h-%p";
+            controlPersist = "600";
+            serverAliveInterval = 15;
+            serverAliveCountMax = 4;
             sendEnv = [ "TERM" ];
             extraOptions = {
-              ServerAliveInterval = "15";
-              ServerAliveCountMax = "4";
               TCPKeepAlive = "no";
             };
           };

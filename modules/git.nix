@@ -17,7 +17,6 @@ _: {
         settings = {
           user = {
             name = config.home.username;
-            signingkey = "64CA14D5A2396CC0";
           };
           init.defaultBranch = "main";
           core.editor = "hx";
@@ -40,8 +39,6 @@ _: {
           rerere.enabled = true;
           column.ui = "auto";
           url."git@github.com:".insteadOf = "https://github.com/";
-          commit.gpgsign = true;
-          tag.gpgsign = true;
           alias = {
             br = "branch";
             co = "checkout";

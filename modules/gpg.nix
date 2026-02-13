@@ -17,9 +17,13 @@ _: {
 
       # udev rules for YubiKey device access
       services.udev.packages = [
-        pkgs.yubikey-personalization # YubiKey 1-4 (EOL Feb 2026)
         pkgs.libfido2 # Modern FIDO2/U2F support for YubiKey 5 series
       ];
+
+      # Lock screen when YubiKey is physically removed (vendor 1050 = Yubico)
+      services.udev.extraRules = ''
+        ACTION=="remove", ENV{ID_VENDOR_ID}=="1050", RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
+      '';
 
       # Enable GPG smartcard support
       hardware.gpgSmartcards.enable = true;
@@ -32,7 +36,6 @@ _: {
 
       environment.systemPackages = [
         pkgs.gnupg
-        pkgs.yubikey-personalization
       ];
     };
 
@@ -44,7 +47,6 @@ _: {
     {
       environment.systemPackages = [
         pkgs.gnupg
-        pkgs.yubikey-personalization
       ];
     };
 
@@ -100,6 +102,11 @@ _: {
           fixed-list-mode = true;
           no-comments = true;
           keyserver = "hkps://keys.openpgp.org";
+          no-emit-version = true;
+          s2k-digest-algo = "SHA512";
+          s2k-cipher-algo = "AES256";
+          personal-compress-preferences = "ZLIB BZIP2 ZIP Uncompressed";
+          throw-keyids = true;
         };
       };
 

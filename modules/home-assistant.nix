@@ -112,6 +112,35 @@ in
           ];
         }
 
+        # 1b. Turn on office/shed light at sunset
+        {
+          id = "office_light_on_at_sunset";
+          alias = "Turn on office light at sunset";
+          description = "Turn on office/shed light when sun sets and someone is home. No brightness specified so adaptive lighting takes over.";
+          trigger = [
+            {
+              platform = "sun";
+              event = "sunset";
+            }
+          ];
+          condition = [
+            {
+              condition = "state";
+              entity_id = "input_select.house_mode";
+              state = [
+                "Home"
+                "Guest"
+              ];
+            }
+          ];
+          action = [
+            {
+              action = "light.turn_on";
+              target.entity_id = "light.office";
+            }
+          ];
+        }
+
         # 2. Turn off all lights at 23:30
         {
           id = "lights_off_late_at_night";
