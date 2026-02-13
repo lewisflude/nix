@@ -19,6 +19,10 @@
     lib.mkIf pkgs.stdenv.isLinux {
       home.packages = [ pkgs.danksearch ];
 
+      # Use GStreamer instead of FFmpeg for Qt Multimedia to avoid crash
+      # in the FFmpeg resampler with multichannel audio interfaces
+      systemd.user.services.dms.Service.Environment = "QT_MEDIA_BACKEND=gstreamer";
+
       programs.dank-material-shell = {
         enable = true;
 

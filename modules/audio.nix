@@ -42,15 +42,6 @@ _: {
       extraConfig.pipewire."91-virtual-sink" = {
         "context.objects" = [
           {
-            # Dummy driver for JACK clients / always-on nodes
-            factory = "spa-node-factory";
-            args = {
-              "factory.name" = "support.node.driver";
-              "node.name" = "Dummy-Driver";
-              "priority.driver" = 8000;
-            };
-          }
-          {
             # Virtual stereo source visible to PulseAudio clients (browsers, etc).
             # The loopback module's nodes have object.register=false which hides them,
             # so we use a null-audio-sink with Audio/Source/Virtual instead.
@@ -107,16 +98,6 @@ _: {
         ];
       };
 
-      # Auto-switch to newly connected audio devices (e.g. after KVM switch)
-      extraConfig.pipewire-pulse."30-switch-on-connect" = {
-        "pulse.cmd" = [
-          {
-            cmd = "load-module";
-            args = "module-switch-on-connect";
-          }
-        ];
-      };
-
       wireplumber.extraConfig = {
         # Give the Apogee highest priority so WirePlumber prefers it on reconnect
         "10-apogee-priority"."monitor.alsa.rules" = [
@@ -134,25 +115,16 @@ _: {
         # Disable device suspension to prevent audio popping/delay
         "10-disable-suspend"."monitor.alsa.rules" = [
           {
-            matches = [
-              { "node.name" = "~alsa_input.*"; }
-              { "node.name" = "~alsa_output.*"; }
-            ];
+            matches = [ { "node.name" = "~alsa_*"; } ];
             actions.update-props."session.suspend-timeout-seconds" = 0;
           }
         ];
 
-        # Bluetooth codecs
+        # Bluetooth codecs (roles left at WirePlumber defaults to include A2DP)
         "10-bluez"."monitor.bluez.properties" = {
           "bluez5.enable-sbc-xq" = true;
           "bluez5.enable-msbc" = true;
           "bluez5.enable-hw-volume" = true;
-          "bluez5.roles" = [
-            "hsp_hs"
-            "hsp_ag"
-            "hfp_hf"
-            "hfp_ag"
-          ];
         };
 
         # Set the virtual stereo sink/source as defaults
