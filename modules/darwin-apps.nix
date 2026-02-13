@@ -84,6 +84,7 @@ _: {
         brews = [
           "circleci"
           "mas"
+          "switchaudio-osx"
         ];
         casks =
           lib.optionals desktopEnabled [

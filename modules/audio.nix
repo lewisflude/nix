@@ -185,10 +185,49 @@ _: {
 
   flake.modules.homeManager.audioDarwin =
     { pkgs, ... }:
+    let
+      audioKvmRecovery = pkgs.writeShellScript "audio-kvm-recovery" ''
+        # Auto-switch to Apogee Symphony Desktop after KVM switch
+        PREFERRED="Symphony Desktop"
+        SWITCH="/opt/homebrew/bin/SwitchAudioSource"
+
+        # Exit silently if SwitchAudioSource isn't installed yet
+        [ -x "$SWITCH" ] || exit 0
+
+        # Check if preferred device is available and switch if needed
+        if "$SWITCH" -a -t output | /usr/bin/grep -q "$PREFERRED"; then
+          CURRENT=$("$SWITCH" -c -t output)
+          if [ "$CURRENT" != "$PREFERRED" ]; then
+            "$SWITCH" -s "$PREFERRED" -t output
+            /usr/bin/logger -t audio-kvm "Switched output to $PREFERRED"
+          fi
+        fi
+
+        if "$SWITCH" -a -t input | /usr/bin/grep -q "$PREFERRED"; then
+          CURRENT=$("$SWITCH" -c -t input)
+          if [ "$CURRENT" != "$PREFERRED" ]; then
+            "$SWITCH" -s "$PREFERRED" -t input
+            /usr/bin/logger -t audio-kvm "Switched input to $PREFERRED"
+          fi
+        fi
+      '';
+    in
     {
       home.packages = [
         pkgs.lame
         pkgs.flac
       ];
+
+      # Poll for Apogee reconnection after KVM switch
+      launchd.agents.audio-kvm-recovery = {
+        enable = true;
+        config = {
+          ProgramArguments = [ "${audioKvmRecovery}" ];
+          StartInterval = 5;
+          RunAtLoad = true;
+          StandardOutPath = "/tmp/audio-kvm-recovery.log";
+          StandardErrorPath = "/tmp/audio-kvm-recovery.err";
+        };
+      };
     };
 }

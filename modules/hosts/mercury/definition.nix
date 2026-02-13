@@ -128,6 +128,14 @@ in
       # Core System Configuration
       # =========================================================================
       networking.hostName = "mercury";
+
+      # =========================================================================
+      # Power Management (pro audio / KVM reliability)
+      # =========================================================================
+      power.sleep.computer = "never";
+      power.sleep.display = "never";
+      power.sleep.harddisk = "never";
+
       system.stateVersion = constants.defaults.darwinStateVersion;
 
       # Primary user for user-specific options (required by nix-darwin)
@@ -149,6 +157,22 @@ in
         NSGlobalDomain = {
           AppleInterfaceStyle = "Dark";
           "com.apple.swipescrolldirection" = false;
+        };
+        # Pro audio optimizations
+        CustomUserPreferences = {
+          NSGlobalDomain = {
+            # Disable App Nap (prevents macOS throttling background audio apps)
+            NSAppSleepDisabled = true;
+            # Silence alert sounds (prevents unexpected audio through interface)
+            "com.apple.sound.beep.volume" = 0.0;
+            # Disable UI sounds (empty trash, screenshots, etc.)
+            "com.apple.sound.uiaudioenabled" = 0;
+          };
+          "com.apple.SoftwareUpdate" = {
+            # Disable background update checks during audio sessions
+            AutomaticCheckEnabled = false;
+            AutomaticDownload = false;
+          };
         };
       };
 
