@@ -20,11 +20,6 @@ _: {
         pkgs.libfido2 # Modern FIDO2/U2F support for YubiKey 5 series
       ];
 
-      # Lock screen when YubiKey is physically removed (vendor 1050 = Yubico)
-      services.udev.extraRules = ''
-        ACTION=="remove", ENV{ID_VENDOR_ID}=="1050", RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
-      '';
-
       # Enable GPG smartcard support
       hardware.gpgSmartcards.enable = true;
 
