@@ -408,6 +408,12 @@ in
       # Power
       powerManagement.cpuFreqGovernor = lib.mkDefault "schedutil";
 
+      # Prevent suspend when KVM-switched away (no display = idle)
+      services.logind.settings.Login = {
+        IdleAction = "ignore";
+        HandleLidSwitch = "ignore";
+      };
+
       # Security: Passwordless sudo is appropriate for passwordless account with YubiKey at login
       security.sudo = {
         enable = true;

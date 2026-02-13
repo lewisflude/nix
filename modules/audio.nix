@@ -6,6 +6,14 @@ _: {
     # RTKit for realtime scheduling
     security.rtkit.enable = true;
 
+    # Threaded IRQs for lower worst-case audio latency
+    boot.kernelParams = [ "threadirqs" ];
+
+    # Disable USB autosuspend for Apogee Symphony Desktop (vendor 0c60, product 002a)
+    services.udev.extraRules = ''
+      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0c60", ATTR{idProduct}=="002a", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
+    '';
+
     services.pipewire = {
       enable = true;
       alsa.enable = true;
