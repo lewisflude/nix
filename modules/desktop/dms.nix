@@ -2,6 +2,19 @@
 # Full desktop shell for niri with Material You theming
 # Follows: https://danklinux.com/docs/dankmaterialshell/home-manager
 { inputs, ... }:
+let
+  # Patch DMS shell.qml to use GStreamer instead of FFmpeg for Qt Multimedia.
+  # The FFmpeg resampler crashes with multichannel audio interfaces (Apogee Symphony Desktop).
+  # DMS hardcodes `//@ pragma Env QT_MEDIA_BACKEND=ffmpeg` in shell.qml, so we must patch it.
+  patchDmsShell =
+    pkg:
+    pkg.overrideAttrs (old: {
+      postInstall = (old.postInstall or "") + ''
+        substituteInPlace $out/share/quickshell/dms/shell.qml \
+          --replace-fail 'QT_MEDIA_BACKEND=ffmpeg' 'QT_MEDIA_BACKEND=gstreamer'
+      '';
+    });
+in
 {
   # NixOS system services required by DMS
   flake.modules.nixos.dms = {
@@ -16,12 +29,16 @@
   };
   flake.modules.homeManager.dms =
     { pkgs, lib, ... }:
+    let
+      inherit (pkgs.stdenv.hostPlatform) system;
+      dmsPatchedShell = patchDmsShell inputs.dms.packages.${system}.default;
+    in
     lib.mkIf pkgs.stdenv.isLinux {
       home.packages = [ pkgs.danksearch ];
 
-      # Use GStreamer instead of FFmpeg for Qt Multimedia to avoid crash
-      # in the FFmpeg resampler with multichannel audio interfaces
-      systemd.user.services.dms.Service.Environment = "QT_MEDIA_BACKEND=gstreamer";
+      systemd.user.services.dms.Service.ExecStart = lib.mkForce (
+        lib.getExe dmsPatchedShell + " run --session"
+      );
 
       programs.dank-material-shell = {
         enable = true;
