@@ -5,6 +5,10 @@ let
   inherit (config) constants;
 in
 {
+  flake.modules.nixos.claudeCode = _: {
+    networking.firewall.allowedTCPPorts = [ constants.ports.mcp.docs ];
+  };
+
   flake.modules.homeManager.claudeCode =
     { pkgs, ... }:
     {

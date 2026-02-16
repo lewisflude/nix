@@ -136,6 +136,7 @@ in
         # AI Tools
         # ═══════════════════════════════════════════════════════════════════════
         nixos.ollama
+        nixos.claudeCode
 
         # ═══════════════════════════════════════════════════════════════════════
         # Container Services
@@ -397,14 +398,6 @@ in
 
       # Networking
       networking.networkmanager.enable = true;
-      networking.firewall.allowedTCPPorts = [
-        22
-        constants.ports.mcp.docs
-        constants.ports.gaming.steamLinkTcp # 27036
-        27037 # Steam Link streaming
-      ];
-      networking.firewall.allowedUDPPorts = constants.ports.gaming.steamLinkUdp; # 27036, 27037
-
       # Power
       powerManagement.cpuFreqGovernor = lib.mkDefault "schedutil";
 

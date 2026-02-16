@@ -76,6 +76,7 @@
         gaming = {
           steamLinkDiscovery = 27031;
           steamLinkTcp = 27036;
+          steamLinkStreaming = 27037;
           steamLinkUdp = [
             27036
             27037

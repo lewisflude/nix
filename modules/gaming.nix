@@ -2,6 +2,10 @@
 # References:
 # - https://wiki.nixos.org/wiki/Steam
 # - https://lvra.gitlab.io/docs/distros/nixos/
+{ config, ... }:
+let
+  inherit (config) constants;
+in
 {
   flake.modules.nixos.gaming =
     {
@@ -102,6 +106,15 @@
         enable = true;
         package = pkgs.ananicy-cpp;
         rulesProvider = pkgs.ananicy-rules-cachyos;
+      };
+
+      # Steam Link streaming ports
+      networking.firewall = {
+        allowedTCPPorts = [
+          constants.ports.gaming.steamLinkTcp
+          constants.ports.gaming.steamLinkStreaming
+        ];
+        allowedUDPPorts = constants.ports.gaming.steamLinkUdp;
       };
     };
 

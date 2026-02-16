@@ -4,44 +4,34 @@
 { lib, inputs }:
 let
   # Library functions
-  myLib = {
+  myLib = rec {
     # Platform detection
     isLinux = system: lib.hasSuffix "-linux" system;
     isDarwin = system: lib.hasSuffix "-darwin" system;
 
-    # Cross-platform path helpers
-    homeDir =
-      system: username:
-      if lib.hasSuffix "-darwin" system then "/Users/${username}" else "/home/${username}";
-    configDir =
-      system: username:
-      let
-        homeDir = if lib.hasSuffix "-darwin" system then "/Users/${username}" else "/home/${username}";
-      in
-      "${homeDir}/.config";
+    # Cross-platform path helpers (composed from homeDir)
+    homeDir = system: username: if isDarwin system then "/Users/${username}" else "/home/${username}";
+    configDir = system: username: "${homeDir system username}/.config";
     dataDir =
       system: username:
-      let
-        homeDir = if lib.hasSuffix "-darwin" system then "/Users/${username}" else "/home/${username}";
-      in
-      if lib.hasSuffix "-darwin" system then
-        "${homeDir}/Library/Application Support"
+      if isDarwin system then
+        "${homeDir system username}/Library/Application Support"
       else
-        "${homeDir}/.local/share";
+        "${homeDir system username}/.local/share";
     cacheDir =
       system: username:
-      let
-        homeDir = if lib.hasSuffix "-darwin" system then "/Users/${username}" else "/home/${username}";
-      in
-      if lib.hasSuffix "-darwin" system then "${homeDir}/Library/Caches" else "${homeDir}/.cache";
+      if isDarwin system then
+        "${homeDir system username}/Library/Caches"
+      else
+        "${homeDir system username}/.cache";
 
     # Package selection helpers
     platformPackage =
       system: linuxPkg: darwinPkg:
-      if lib.hasSuffix "-darwin" system then darwinPkg else linuxPkg;
+      if isDarwin system then darwinPkg else linuxPkg;
     platformPackages =
       system: linuxPkgs: darwinPkgs:
-      if lib.hasSuffix "-darwin" system then darwinPkgs else linuxPkgs;
+      if isDarwin system then darwinPkgs else linuxPkgs;
 
     # Pkgs configuration for nixpkgs import
     mkPkgsConfig = {
@@ -60,25 +50,18 @@ let
     withSystem =
       system:
       let
-        isDarwin = lib.hasSuffix "-darwin" system;
-        homeDir = username: if isDarwin then "/Users/${username}" else "/home/${username}";
+        sd = isDarwin system;
       in
       {
         inherit system;
-        isLinux = lib.hasSuffix "-linux" system;
-        inherit isDarwin;
-        inherit homeDir;
-        configDir = username: "${homeDir username}/.config";
-        dataDir =
-          username:
-          if isDarwin then
-            "${homeDir username}/Library/Application Support"
-          else
-            "${homeDir username}/.local/share";
-        cacheDir =
-          username: if isDarwin then "${homeDir username}/Library/Caches" else "${homeDir username}/.cache";
-        platformPackage = linuxPkg: darwinPkg: if isDarwin then darwinPkg else linuxPkg;
-        platformPackages = linuxPkgs: darwinPkgs: if isDarwin then darwinPkgs else linuxPkgs;
+        isLinux = isLinux system;
+        isDarwin = sd;
+        homeDir = homeDir system;
+        configDir = configDir system;
+        dataDir = dataDir system;
+        cacheDir = cacheDir system;
+        platformPackage = linuxPkg: darwinPkg: if sd then darwinPkg else linuxPkg;
+        platformPackages = linuxPkgs: darwinPkgs: if sd then darwinPkgs else linuxPkgs;
       };
   };
 
@@ -86,22 +69,20 @@ let
   mkOverlaySet =
     system:
     let
-      isLinux = system == "x86_64-linux" || system == "aarch64-linux";
+      isLinux = lib.hasSuffix "-linux" system;
+      noopOverlay = _final: _prev: { };
     in
     {
       # Rust toolchains from fenix (better than nixpkgs)
       fenix-overlay =
-        if inputs ? fenix && inputs.fenix ? overlays then
-          inputs.fenix.overlays.default
-        else
-          (_final: _prev: { });
+        if inputs ? fenix && inputs.fenix ? overlays then inputs.fenix.overlays.default else noopOverlay;
 
       # Niri compositor (Linux only)
       niri =
         if isLinux && inputs ? niri && inputs.niri ? overlays then
           inputs.niri.overlays.niri
         else
-          (_final: _prev: { });
+          noopOverlay;
 
       # ComfyUI overlay (native Nix package, replaces Docker container)
       comfyui =
@@ -110,7 +91,7 @@ let
         else if inputs ? comfyui && inputs.comfyui ? packages && inputs.comfyui.packages ? ${system} then
           (_final: _prev: { comfyui = inputs.comfyui.packages.${system}.default or _prev.hello; })
         else
-          (_final: _prev: { });
+          noopOverlay;
 
       # Audio.nix overlay (Bitwig Studio and audio plugins)
       audio-nix =
@@ -125,7 +106,7 @@ let
           in
           audioNixOverlay final superWithWebkit
         else
-          (_final: _prev: { });
+          noopOverlay;
 
       # LLM agents
       llm-agents =
@@ -145,41 +126,23 @@ let
           gemini-cli = llmAgentPkgs.gemini-cli or _prev.hello;
         };
 
-      # OneTBB fix for i686-linux
-      onetbb-fix = _final: prev: {
-        onetbb =
-          if prev.stdenv.hostPlatform.system == "i686-linux" then
-            prev.onetbb.overrideAttrs (oldAttrs: {
-              doCheck = false;
-              meta = (oldAttrs.meta or { }) // {
-                description =
-                  (oldAttrs.meta.description or "") + " (tests disabled on i686-linux due to flakiness)";
-              };
-            })
-          else
-            prev.onetbb;
-      };
-
-      # Git fix for i686-linux (t0050-filesystem.sh tests unexpectedly pass on i686)
-      git-fix = _final: prev: {
-        git =
-          if prev.stdenv.hostPlatform.system == "i686-linux" then
-            prev.git.overrideAttrs (oldAttrs: {
-              doCheck = false;
-              doInstallCheck = false;
-            })
-          else
-            prev.git;
-      };
-
-      # Python filelock fix for i686-linux (thread tests exhaust 3GB address space)
-      python-filelock-fix =
+      # i686-linux test fixes: targeted overlays for packages with broken tests
+      # These preserve binary cache hits (unlike stdenv overrides which invalidate everything)
+      i686-test-fixes =
         _final: prev:
         if prev.stdenv.hostPlatform.system == "i686-linux" then
           {
+            onetbb = prev.onetbb.overrideAttrs { doCheck = false; };
+            git = prev.git.overrideAttrs {
+              doCheck = false;
+              doInstallCheck = false;
+            };
+            flac = prev.flac.overrideAttrs { doCheck = false; };
             pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
               (_python-final: python-prev: {
+                pycairo = python-prev.pycairo.overridePythonAttrs { doCheck = false; };
                 filelock = python-prev.filelock.overridePythonAttrs { doCheck = false; };
+                distutils = python-prev.distutils.overridePythonAttrs { doInstallCheck = false; };
               })
             ];
           }
@@ -226,15 +189,14 @@ let
           { };
 
       # NUR
-      nur =
-        if inputs ? nur && inputs.nur ? overlays then inputs.nur.overlays.default else (_final: _prev: { });
+      nur = if inputs ? nur && inputs.nur ? overlays then inputs.nur.overlays.default else noopOverlay;
 
       # Wayland packages (Linux only)
       nixpkgs-wayland =
         if isLinux && inputs ? nixpkgs-wayland && inputs.nixpkgs-wayland ? overlay then
           inputs.nixpkgs-wayland.overlay
         else
-          (_final: _prev: { });
+          noopOverlay;
 
       # wivrn multilib (64-bit + 32-bit) for OpenXR compatibility
       # Some older VR games and Proton titles need 32-bit OpenXR runtime
@@ -305,7 +267,7 @@ let
           else
             { } # Don't override on i686 — base packages must keep .override
         else
-          (_final: _prev: { });
+          noopOverlay;
 
       # xrizer multilib (64-bit + 32-bit) for OpenVR compatibility
       # Some older VR games and Proton titles need 32-bit vrclient.so
@@ -344,7 +306,7 @@ let
           else
             { } # Don't override on i686 — base packages must keep .override
         else
-          (_final: _prev: { });
+          noopOverlay;
     };
 
   overlaySet = mkOverlaySet;

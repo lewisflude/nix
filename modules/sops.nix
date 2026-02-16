@@ -1,8 +1,14 @@
 # SOPS secrets management - Dendritic Pattern
 # Single file containing NixOS, Darwin, and home-manager configurations
-{ config, ... }:
+{
+  config,
+  lib,
+  inputs,
+  ...
+}:
 let
   inherit (config) username;
+  inherit ((import ./_shared.nix { inherit lib inputs; })) myLib;
 
   mkSecret =
     {
@@ -12,7 +18,7 @@ let
     {
       mode = if allowUserRead then "0440" else mode;
       owner = if allowUserRead then "root" else username;
-      group = if allowUserRead then "sops-secrets" else "sops-secrets";
+      group = "sops-secrets";
     };
 in
 {
@@ -66,7 +72,7 @@ in
   flake.modules.darwin.sops = {
     sops = {
       age = {
-        keyFile = "/Users/${username}/Library/Application Support/sops-nix/key.txt";
+        keyFile = "${myLib.dataDir "aarch64-darwin" username}/sops-nix/key.txt";
         generateKey = true;
         sshKeyPaths = [ ]; # Disable SSH key auto-detection on Darwin
       };
@@ -109,10 +115,10 @@ in
   flake.modules.homeManager.sops =
     { config, pkgs, ... }:
     let
-      inherit (pkgs.stdenv) isDarwin;
-      homeDir = if isDarwin then "/Users/${config.home.username}" else "/home/${config.home.username}";
-      dataDir = if isDarwin then "${homeDir}/Library/Application Support" else "${homeDir}/.local/share";
-      keyFilePath = if isDarwin then "${dataDir}/sops-nix/key.txt" else "/var/lib/sops-nix/key.txt";
+      inherit (pkgs.stdenv.hostPlatform) system;
+      dataDir = myLib.dataDir system config.home.username;
+      keyFilePath =
+        if pkgs.stdenv.isDarwin then "${dataDir}/sops-nix/key.txt" else "/var/lib/sops-nix/key.txt";
     in
     {
       sops.age = {

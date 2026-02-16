@@ -1,6 +1,10 @@
 # NH (Nix Helper) configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.nh
-_: {
+{ lib, inputs, ... }:
+let
+  inherit ((import ./_shared.nix { inherit lib inputs; })) myLib;
+in
+{
   flake.modules.homeManager.nh =
     {
       config,
@@ -8,9 +12,8 @@ _: {
       ...
     }:
     let
-      inherit (pkgs.stdenv) isDarwin;
-      homeDir = if isDarwin then "/Users/${config.home.username}" else "/home/${config.home.username}";
-      flakePath = "${homeDir}/.config/nix";
+      configDir = myLib.configDir pkgs.stdenv.hostPlatform.system config.home.username;
+      flakePath = "${configDir}/nix";
     in
     {
       programs.nh = {
