@@ -9,7 +9,7 @@
 }:
 let
   inherit (inputs) nixpkgs;
-  shared = import ../_shared.nix { inherit lib inputs; };
+  inherit (config) myLib overlaysForSystem;
 in
 {
   perSystem =
@@ -19,8 +19,8 @@ in
       pkgs =
         config._module.args.pkgs or (import nixpkgs {
           inherit system;
-          overlays = shared.overlaysList system;
-          config = shared.myLib.mkPkgsConfig;
+          overlays = overlaysForSystem system;
+          config = myLib.mkPkgsConfig;
         });
       # Get pog overlay if available
       getPogOverlay =

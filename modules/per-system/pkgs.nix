@@ -1,9 +1,9 @@
 # Per-system pkgs setup
 # Dendritic pattern: Sets up pkgs for each system with overlays applied
-{ inputs, lib, ... }:
+{ config, inputs, ... }:
 let
   inherit (inputs) nixpkgs;
-  shared = import ../_shared.nix { inherit lib inputs; };
+  inherit (config) myLib overlaysForSystem;
 in
 {
   # Sets up pkgs for each system with overlays applied
@@ -13,8 +13,8 @@ in
     let
       pkgsWithOverlays = import nixpkgs {
         inherit system;
-        overlays = shared.overlaysList system;
-        config = shared.myLib.mkPkgsConfig;
+        overlays = overlaysForSystem system;
+        config = myLib.mkPkgsConfig;
       };
     in
     {

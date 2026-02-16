@@ -1,12 +1,12 @@
 # Nixpkgs configuration and overlays
 # Dendritic pattern: Top-level module prepares overlays, lower-level modules consume them
-{ lib, inputs, ... }:
+{ config, ... }:
 let
-  shared = import ../_shared.nix { inherit lib inputs; };
+  inherit (config) overlaysForSystem;
 
   # Pre-compute overlays for each system at top-level
-  nixosOverlays = shared.overlaysList "x86_64-linux";
-  darwinOverlays = shared.overlaysList "aarch64-darwin";
+  nixosOverlays = overlaysForSystem "x86_64-linux";
+  darwinOverlays = overlaysForSystem "aarch64-darwin";
 in
 {
   # NixOS nixpkgs configuration

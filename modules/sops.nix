@@ -1,14 +1,8 @@
 # SOPS secrets management - Dendritic Pattern
 # Single file containing NixOS, Darwin, and home-manager configurations
-{
-  config,
-  lib,
-  inputs,
-  ...
-}:
+{ config, ... }:
 let
-  inherit (config) username;
-  inherit ((import ./_shared.nix { inherit lib inputs; })) myLib;
+  inherit (config) username myLib;
 
   mkSecret =
     {

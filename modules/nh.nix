@@ -1,8 +1,8 @@
 # NH (Nix Helper) configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.nh
-{ lib, inputs, ... }:
+{ config, ... }:
 let
-  inherit ((import ./_shared.nix { inherit lib inputs; })) myLib;
+  inherit (config) myLib;
 in
 {
   flake.modules.homeManager.nh =

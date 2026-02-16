@@ -16,7 +16,7 @@ in
     }:
     let
       patchedBwrap = pkgs.bubblewrap.overrideAttrs (o: {
-        patches = (o.patches or [ ]) ++ [ ./bwrap.patch ];
+        patches = (o.patches or [ ]) ++ [ ../patches/bwrap.patch ];
       });
     in
     {
