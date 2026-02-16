@@ -11,7 +11,7 @@ _: {
       programs.lutris = {
         enable = true;
         # Wine packages for game compatibility
-        winePackages = [ pkgs.wineWowPackages.stagingFull ];
+        winePackages = [ pkgs.wineWow64Packages.stagingFull ];
         # Proton packages for umu-launcher
         protonPackages = [ pkgs.proton-ge-bin ];
         # Steam integration (if Steam is enabled at system level)

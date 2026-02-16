@@ -25,9 +25,11 @@
 
     determinate = {
       url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     # TEMPORARY: Disabled due to upstream SBCL/GitLab Common Lisp API issue
     # Re-enable once https://gitlab.common-lisp.net/iterate/iterate is fixed
@@ -37,15 +39,19 @@
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     niri = {
       url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     awww = {
       url = "git+https://codeberg.org/LGFae/awww";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     ironbar = {
       url = "github:JakeStanger/ironbar";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     musnix = {
       url = "github:musnix/musnix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     dms = {
       url = "github:AvengeMedia/DankMaterialShell";
@@ -66,6 +72,7 @@
     };
     solaar = {
       url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
@@ -85,9 +92,11 @@
     };
     fenix = {
       url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     pog = {
       url = "github:jpetrucciani/pog";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     signal-nix = {
       url = "github:lewisflude/signal-nix";
@@ -103,6 +112,7 @@
     };
     comfyui = {
       url = "github:utensils/nix-comfyui";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
@@ -121,6 +131,7 @@
     # };
     hyprcursor-phinger = {
       url = "github:jappie3/hyprcursor-phinger";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-flatpak = {
       url = "github:gmodena/nix-flatpak/?ref=latest";

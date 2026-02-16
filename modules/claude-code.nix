@@ -1,6 +1,10 @@
 # Claude Code CLI configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.claudeCode
-_: {
+{ config, ... }:
+let
+  inherit (config) constants;
+in
+{
   flake.modules.homeManager.claudeCode =
     { pkgs, ... }:
     {
@@ -17,7 +21,7 @@ _: {
             };
           };
           figma-desktop = {
-            url = "http://127.0.0.1:3845/mcp";
+            url = "http://127.0.0.1:${toString constants.ports.mcp.figma}/mcp";
           };
           git = {
             command = "uvx";
@@ -28,23 +32,20 @@ _: {
             args = [ "mcp-server-time" ];
           };
           sqlite = {
-            command = "uvx";
-            args = [
-              "mcp-server-sqlite"
-              "--db-path"
-              "$HOME/.local/share/mcp/data.db"
-            ];
+            command = "${pkgs.writeShellScript "mcp-sqlite" ''
+              exec uvx mcp-server-sqlite --db-path "$HOME/.local/share/mcp/data.db" "$@"
+            ''}";
           };
           playwright = {
             command = "${pkgs.writeShellScript "mcp-playwright" ''
               export PATH="${pkgs.nodejs}/bin:$PATH"
-              exec npx -y @playwright/mcp@latest "$@"
+              exec npx -y @playwright/mcp@0.0.68 "$@"
             ''}";
           };
           sequential-thinking = {
             command = "${pkgs.writeShellScript "mcp-sequential-thinking" ''
               export PATH="${pkgs.nodejs}/bin:$PATH"
-              exec npx -y @modelcontextprotocol/server-sequential-thinking "$@"
+              exec npx -y @modelcontextprotocol/server-sequential-thinking@2025.12.18 "$@"
             ''}";
           };
         };
@@ -146,8 +147,14 @@ _: {
               "Bash(wget:*)"
               "Bash(make:*)"
               "Bash(cmake:*)"
-              "Bash(docker:*)"
-              "Bash(podman:*)"
+              "Bash(docker ps:*)"
+              "Bash(docker logs:*)"
+              "Bash(docker inspect:*)"
+              "Bash(docker images:*)"
+              "Bash(podman ps:*)"
+              "Bash(podman logs:*)"
+              "Bash(podman inspect:*)"
+              "Bash(podman images:*)"
               "Bash(hx:*)"
               "Bash(which:*)"
               "Bash(echo:*)"
@@ -164,8 +171,9 @@ _: {
             ];
             deny = [
               "Bash(sudo:*)"
-              "Bash(rm -rf /:*)"
-              "Bash(chmod -R 777:*)"
+              "Bash(rm:*)"
+              "Bash(chmod:*)"
+              "Bash(chown:*)"
               "Bash(nixos-rebuild:*)"
               "Bash(darwin-rebuild:*)"
             ];
@@ -204,8 +212,10 @@ _: {
                         if ! RESULT=$(nix flake check 2>&1); then
                           jq -n --arg reason "nix flake check failed: $RESULT" \
                             '{"decision": "block", "reason": $reason}'
+                          exit 0
                         fi
                       fi
+                      echo '{"decision": "allow"}'
                     '';
                     timeout = 120;
                   }

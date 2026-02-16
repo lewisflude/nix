@@ -9,11 +9,8 @@ _: {
       # REST server for backup storage
       services.restic.server = {
         enable = true;
-        listenAddress = "0.0.0.0:8000";
-        extraFlags = [ "--no-auth" ];
+        listenAddress = "127.0.0.1:8000";
       };
-
-      networking.firewall.allowedTCPPorts = [ 8000 ];
 
       users.users.restic = {
         isSystemUser = true;

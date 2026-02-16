@@ -44,7 +44,6 @@ in
       services.sabnzbd = {
         enable = true;
         inherit user group;
-
         settings = {
           misc = {
             inherit port;

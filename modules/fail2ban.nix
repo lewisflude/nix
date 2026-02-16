@@ -89,7 +89,7 @@ in
       environment.etc."fail2ban/filter.d/caddy-exploit.conf".text = ''
         [Definition]
         # Ban on exploit patterns: CVE boundaries, malicious headers, path traversal
-        failregex = ^.*"remote_ip":"<HOST>".*("bissa_cve_boundary"|"Next-Action"|"WebKitFormBoundary.*NiggersTongue"|"\.\.\/"|"\.env"|"eval\(").*$
+        failregex = ^.*"remote_ip":"<HOST>".*("bissa_cve_boundary"|"Next-Action"|"\.\.\/"|"\.env"|"eval\(").*$
         ignoreregex =
       '';
     };

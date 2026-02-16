@@ -160,6 +160,32 @@ let
             prev.onetbb;
       };
 
+      # Git fix for i686-linux (t0050-filesystem.sh TODO tests unexpectedly pass)
+      git-fix = _final: prev: {
+        git =
+          if prev.stdenv.hostPlatform.system == "i686-linux" then
+            prev.git.overrideAttrs (oldAttrs: {
+              doCheck = false;
+              doInstallCheck = false;
+            })
+          else
+            prev.git;
+      };
+
+      # Python filelock fix for i686-linux (thread tests exhaust 3GB address space)
+      python-filelock-fix =
+        _final: prev:
+        if prev.stdenv.hostPlatform.system == "i686-linux" then
+          {
+            pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+              (_python-final: python-prev: {
+                filelock = python-prev.filelock.overridePythonAttrs { doCheck = false; };
+              })
+            ];
+          }
+        else
+          { };
+
       # yutu - YouTube MCP server
       yutu = _final: prev: {
         yutu = prev.callPackage ../pkgs/yutu.nix { };

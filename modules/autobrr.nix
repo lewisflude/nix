@@ -18,15 +18,11 @@ in
         openFirewall = false;
         secretFile = secretPath;
         settings = {
-          host = "0.0.0.0";
+          host = "127.0.0.1";
           port = constants.ports.services.autobrr;
           checkForUpdates = false;
         };
       };
-
-      networking.firewall.allowedTCPPorts = mkDefault [
-        constants.ports.services.autobrr
-      ];
 
       systemd.services.autobrr-secret = {
         description = "Generate autobrr session secret";
