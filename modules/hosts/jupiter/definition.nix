@@ -451,10 +451,5 @@ in
         pkgs.xfsprogs
       ];
 
-      # Open WebUI
-      services.open-webui = {
-        port = constants.ports.services.openWebui;
-        openFirewall = true;
-      };
     };
 }

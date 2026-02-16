@@ -1,5 +1,4 @@
-# Ollama AI Service Module - Dendritic Pattern
-# Local LLM inference server
+# Ollama + Open WebUI - Local LLM inference
 { config, ... }:
 let
   inherit (config) constants;
@@ -22,7 +21,18 @@ in
         };
       };
 
-      # Enable NVIDIA container toolkit for other CUDA needs
+      services.open-webui = {
+        enable = true;
+        port = constants.ports.services.openWebui;
+        openFirewall = true;
+        environment = {
+          ANONYMIZED_TELEMETRY = "False";
+          DO_NOT_TRACK = "True";
+          SCARF_NO_ANALYTICS = "True";
+          OLLAMA_API_BASE_URL = "http://127.0.0.1:${toString constants.ports.services.ollama}";
+        };
+      };
+
       hardware.nvidia-container-toolkit.enable = true;
     };
 }

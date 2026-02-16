@@ -160,7 +160,7 @@ let
             prev.onetbb;
       };
 
-      # Git fix for i686-linux (t0050-filesystem.sh TODO tests unexpectedly pass)
+      # Git fix for i686-linux (t0050-filesystem.sh tests unexpectedly pass on i686)
       git-fix = _final: prev: {
         git =
           if prev.stdenv.hostPlatform.system == "i686-linux" then

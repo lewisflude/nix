@@ -23,19 +23,6 @@ in
         configDir = "/home/${username}/.config/syncthing";
 
         # Devices and folders should be configured by hosts
-        # Example:
-        # devices = {
-        #   jupiter = {
-        #     id = "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX";
-        #     addresses = [ "tcp://192.168.10.210:22000" ];
-        #   };
-        # };
-        # folders = {
-        #   "Documents" = {
-        #     path = "/home/${username}/Documents";
-        #     devices = [ "jupiter" "mercury" ];
-        #   };
-        # };
 
         settings = {
           options = {

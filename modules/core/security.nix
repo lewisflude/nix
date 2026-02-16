@@ -110,6 +110,8 @@ in
       };
 
       environment.etc = {
+        # Public key material only (like an SSH public key) — safe in plaintext.
+        # Stored in read-only NixOS-managed /etc/, preventing key injection.
         "u2f_mappings" = {
           text = "${username}:PaGbsjJa2IPXjK/nuSZEgqrqcP9JoxEO0IVVinIyfEXR0EbctKkhinM6f50ccHj7uSdy+YM2O+ToKVhqv5ynyQ==,cFyPyH4AUHDjTXelbVpfnc4DnESr8xJWyZC42DwEiofkoqQdt0lBdxPGLwjviysl7WlH+jlEw3Yhe5TBiBLNOg==,es256,+presence";
           mode = "0644";

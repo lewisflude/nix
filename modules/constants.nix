@@ -91,6 +91,8 @@
         };
       };
 
+      baseDomain = "blmt.io";
+
       defaults = {
         timezone = "Europe/London";
         locale = "en_GB.UTF-8";
