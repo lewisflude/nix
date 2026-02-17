@@ -120,8 +120,6 @@ _: {
           nvenc_spatial_aq = 1;
           nvenc_temporal_aq = 1;
           bitrate = 20000;
-          qp = 28;
-          sw_preset = "ultrafast";
 
           # Audio
           audio_codec = "opus";

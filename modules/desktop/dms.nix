@@ -20,9 +20,11 @@ _: {
         pkgs.kdePackages.kimageformats
       ];
 
-      # Use native PipeWire audio backend instead of FFmpeg's libswresample
-      # to avoid SIGSEGV on unsupported channel layouts (DMS#1054)
-      systemd.user.services.dms.Service.Environment = [ "QT_AUDIO_BACKEND=pipewire" ];
+      # Use GStreamer media backend instead of FFmpeg to avoid SIGSEGV when
+      # swresample encounters the Symphony Desktop's 10-channel layout
+      # (FL+FR+FC+LFE+BL+BR+FLC+FRC+BC+SL) which it doesn't support.
+      # GStreamer handles channel mapping correctly via PipeWire.
+      systemd.user.services.dms.Service.Environment = [ "QT_MEDIA_BACKEND=gstreamer" ];
 
       programs.dank-material-shell = {
         enable = true;
