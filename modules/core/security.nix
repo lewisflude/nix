@@ -9,9 +9,8 @@ in
     {
       pkgs,
       lib,
-      config,
       ...
-    }:
+    }@nixosArgs:
     {
       security = {
         pam = {
@@ -119,7 +118,7 @@ in
         "security/limits.conf" = {
           text = lib.concatMapStringsSep "\n" (
             limit: "${limit.domain} ${limit.type} ${limit.item} ${toString limit.value}"
-          ) config.security.pam.loginLimits;
+          ) nixosArgs.config.security.pam.loginLimits;
           mode = "0644";
         };
       };

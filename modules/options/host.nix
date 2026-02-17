@@ -29,7 +29,6 @@ let
     };
 
     features = {
-      gaming.enable = mkEnableOption "gaming platforms and optimizations";
       desktop.autoLogin = {
         enable = mkEnableOption "auto-login";
         user = mkOption {

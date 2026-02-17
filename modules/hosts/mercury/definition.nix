@@ -36,6 +36,7 @@ in
         darwin.shell
         darwin.audio
         darwin.apps
+        darwin.gaming
         darwin.karabiner
         darwin.ssh
       ];
@@ -87,9 +88,9 @@ in
             homeManager.developmentTools
 
             # Darwin-specific home-manager modules
-            homeManager.darwinHome
+            homeManager.darwin
             homeManager.karabiner
-            homeManager.audioDarwin
+            homeManager.audio
 
             # Theming (cross-platform signal-nix)
             homeManager.theming

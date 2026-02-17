@@ -152,20 +152,9 @@ _: {
 
   # Home-manager audio tools
   flake.modules.homeManager.audio =
-    { pkgs, ... }:
-    {
-      home.packages = [
-        pkgs.pwvucontrol
-        pkgs.pavucontrol
-        pkgs.playerctl
-        pkgs.helvum
-      ];
-      services.playerctld.enable = true;
-    };
-
-  flake.modules.homeManager.audioDarwin =
-    { pkgs, ... }:
+    { pkgs, lib, ... }:
     let
+      inherit (pkgs.stdenv) isLinux isDarwin;
       audioKvmRecovery = pkgs.writeShellScript "audio-kvm-recovery" ''
         # Auto-switch to Apogee Symphony Desktop after KVM switch
         PREFERRED="Symphony Desktop"
@@ -193,13 +182,22 @@ _: {
       '';
     in
     {
-      home.packages = [
-        pkgs.lame
-        pkgs.flac
-      ];
+      home.packages =
+        lib.optionals isLinux [
+          pkgs.pwvucontrol
+          pkgs.pavucontrol
+          pkgs.playerctl
+          pkgs.helvum
+        ]
+        ++ lib.optionals isDarwin [
+          pkgs.lame
+          pkgs.flac
+        ];
 
-      # Poll for Apogee reconnection after KVM switch
-      launchd.agents.audio-kvm-recovery = {
+      services.playerctld.enable = isLinux;
+
+      # Poll for Apogee reconnection after KVM switch (macOS only)
+      launchd.agents.audio-kvm-recovery = lib.mkIf isDarwin {
         enable = true;
         config = {
           ProgramArguments = [ "${audioKvmRecovery}" ];

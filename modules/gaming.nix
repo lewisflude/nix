@@ -9,11 +9,10 @@ in
 {
   flake.modules.nixos.gaming =
     {
-      config,
       pkgs,
       lib,
       ...
-    }:
+    }@nixosArgs:
     let
       patchedBwrap = pkgs.bubblewrap.overrideAttrs (o: {
         patches = (o.patches or [ ]) ++ [ ../patches/bwrap.patch ];
@@ -53,7 +52,7 @@ in
             PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = "1";
             PRESSURE_VESSEL_FILESYSTEMS_RW = "$XDG_RUNTIME_DIR/wivrn/comp_ipc";
             PRESSURE_VESSEL_FILESYSTEMS_RO = "/nix/store";
-            XRIZER_CUSTOM_BINDINGS_DIR = "/home/${config.host.username}/.local/share/xrizer/bindings";
+            XRIZER_CUSTOM_BINDINGS_DIR = "/home/${nixosArgs.config.host.username}/.local/share/xrizer/bindings";
           };
           extraPkgs = pkgs': [
             pkgs'.libxcursor
@@ -118,17 +117,22 @@ in
       };
     };
 
+  flake.modules.darwin.gaming = _: {
+    homebrew.casks = [
+      "epic-games"
+      "moonlight"
+      "obs@beta"
+      "steam"
+    ];
+  };
+
   flake.modules.homeManager.gaming =
     {
       pkgs,
       lib,
-      osConfig ? { },
       ...
     }:
-    let
-      gamingEnabled = osConfig.host.features.gaming.enable or false;
-    in
-    lib.mkIf (gamingEnabled && pkgs.stdenv.isLinux) {
+    lib.mkIf pkgs.stdenv.isLinux {
       programs.mangohud = {
         enable = true;
         enableSessionWide = false;
@@ -137,6 +141,7 @@ in
       home.packages = [
         pkgs.steam-run
         pkgs.protonup-qt
+        pkgs.moonlight-qt
       ];
     };
 }

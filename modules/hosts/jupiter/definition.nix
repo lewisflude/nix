@@ -201,7 +201,7 @@ in
         # Desktop home-manager modules
         homeManager.browser
         homeManager.desktopApps
-        homeManager.niriHome
+        homeManager.niri
         homeManager.dms
         homeManager.flatpak
         homeManager.theming
@@ -228,7 +228,6 @@ in
         hardware.renderDevice = "/dev/dri/renderD128";
 
         features = {
-          gaming.enable = true;
           desktop.autoLogin = {
             enable = true;
             user = username;
