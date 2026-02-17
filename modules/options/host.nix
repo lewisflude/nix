@@ -4,265 +4,69 @@
 { config, lib, ... }:
 let
   inherit (lib) mkOption mkEnableOption types;
-  # Dendritic pattern: Access constants via top-level config
-in
-{
-  # Define host options for both NixOS and Darwin
-  flake.modules.nixos.hostOptions = {
-    options.host = {
-      username = mkOption {
-        type = types.str;
-        description = "Primary user's username";
-      };
 
-      useremail = mkOption {
-        type = types.str;
-        default = "";
-        description = "Primary user's email address";
-      };
+  # Shared options between NixOS and Darwin
+  mkCommonOptions = {
+    username = mkOption {
+      type = types.str;
+      description = "Primary user's username";
+    };
 
-      hostname = mkOption {
-        type = types.str;
-        description = "System hostname";
-      };
+    useremail = mkOption {
+      type = types.str;
+      default = "";
+      description = "Primary user's email address";
+    };
 
-      system = mkOption {
-        type = types.str;
-        description = "System architecture";
-      };
+    hostname = mkOption {
+      type = types.str;
+      description = "System hostname";
+    };
 
-      # Hardware options
-      hardware = {
-        renderDevice = mkOption {
-          type = types.nullOr types.str;
-          default = null;
-          description = "DRM render device path for GPU selection";
-        };
-      };
+    system = mkOption {
+      type = types.str;
+      description = "System architecture";
+    };
 
-      # Feature flags - set by importing feature modules
-      features = {
-        # Gaming
-        gaming = {
-          enable = mkEnableOption "gaming platforms and optimizations";
-          steam = mkEnableOption "Steam gaming platform";
-          performance = mkEnableOption "gaming performance optimizations";
-          emulators = mkEnableOption "gaming emulators";
-        };
-
-        # Desktop
-        desktop = {
-          enable = mkEnableOption "desktop environment" // {
-            default = true;
-          };
-          niri = mkEnableOption "Niri Wayland compositor";
-          theming = mkEnableOption "system-wide theming" // {
-            default = true;
-          };
-          utilities = mkEnableOption "desktop utilities";
-          autoLogin = {
-            enable = mkEnableOption "auto-login";
-            user = mkOption {
-              type = types.str;
-              default = "";
-              description = "User to auto-login";
-            };
-          };
-        };
-
-        # Productivity
-        productivity = {
-          enable = mkEnableOption "productivity tools";
-          office = mkEnableOption "office suite";
-          notes = mkEnableOption "note-taking";
-          email = mkEnableOption "email clients";
-          calendar = mkEnableOption "calendar applications";
-          resume = mkEnableOption "resume tools";
-        };
-
-        # Security
-        security = {
-          enable = mkEnableOption "security tools";
-          yubikey = mkEnableOption "YubiKey support";
-          gpg = mkEnableOption "GPG encryption";
-          firewall = mkEnableOption "advanced firewall";
-          fail2ban = mkEnableOption "fail2ban";
-        };
-
-        # Development
-        development = {
-          enable = mkEnableOption "development tools";
-          nix = mkEnableOption "Nix development" // {
-            default = true;
-          };
-          git = mkEnableOption "Git version control" // {
-            default = true;
-          };
-          containers = mkEnableOption "container tools";
-        };
-
-        # AI Tools
-        aiTools = {
-          enable = mkEnableOption "AI tools";
-          ollama = mkEnableOption "Ollama local LLM";
-          openWebui = mkEnableOption "Open WebUI";
-        };
-
-        # Media
-        media = {
-          enable = mkEnableOption "media features";
-          audio = {
-            enable = mkEnableOption "audio support" // {
-              default = true;
-            };
-            realtime = mkEnableOption "realtime audio";
-          };
-        };
-
-        # Virtualisation
-        virtualisation = {
-          enable = mkEnableOption "virtualisation";
-          docker = mkEnableOption "Docker";
-          podman = mkEnableOption "Podman";
-          libvirt = mkEnableOption "libvirt/QEMU";
-        };
-      };
-
-      # Services options
-      services = {
-        caddy = {
-          enable = mkEnableOption "Caddy reverse proxy";
-          email = mkOption {
-            type = types.str;
-            default = "";
-            description = "Email for ACME certificates";
-          };
+    features = {
+      gaming.enable = mkEnableOption "gaming platforms and optimizations";
+      desktop.autoLogin = {
+        enable = mkEnableOption "auto-login";
+        user = mkOption {
+          type = types.str;
+          default = "";
+          description = "User to auto-login";
         };
       };
     };
 
-    # Set defaults from meta
+    services.caddy = {
+      enable = mkEnableOption "Caddy reverse proxy";
+      email = mkOption {
+        type = types.str;
+        default = "";
+        description = "Email for ACME certificates";
+      };
+    };
+  };
+in
+{
+  flake.modules.nixos.hostOptions = {
+    options.host = mkCommonOptions // {
+      hardware.renderDevice = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "DRM render device path for GPU selection";
+      };
+    };
+
     config.host = lib.mkIf (config.options.host.username.isDefined or false) {
       system = lib.mkDefault "x86_64-linux";
     };
   };
 
-  # Darwin version (subset of options)
   flake.modules.darwin.hostOptions = {
-    options.host = {
-      username = mkOption {
-        type = types.str;
-        description = "Primary user's username";
-      };
-
-      useremail = mkOption {
-        type = types.str;
-        default = "";
-        description = "Primary user's email address";
-      };
-
-      hostname = mkOption {
-        type = types.str;
-        description = "System hostname";
-      };
-
-      system = mkOption {
-        type = types.str;
-        description = "System architecture";
-      };
-
-      features = {
-        desktop = {
-          enable = mkEnableOption "desktop environment" // {
-            default = true;
-          };
-          theming = mkEnableOption "system-wide theming" // {
-            default = true;
-          };
-          utilities = mkEnableOption "desktop utilities";
-          niri = mkEnableOption "Niri Wayland compositor"; # NixOS-only, but defined for option consistency
-          autoLogin = {
-            enable = mkEnableOption "auto-login";
-            user = mkOption {
-              type = types.str;
-              default = "";
-              description = "User to auto-login";
-            };
-          };
-          signalTheme = {
-            enable = mkEnableOption "Signal theme" // {
-              default = true;
-            };
-            mode = mkOption {
-              type = types.enum [
-                "light"
-                "dark"
-                "auto"
-              ];
-              default = "dark";
-              description = "Color theme mode";
-            };
-          };
-        };
-
-        productivity = {
-          enable = mkEnableOption "productivity tools";
-          office = mkEnableOption "office suite";
-          notes = mkEnableOption "note-taking";
-          email = mkEnableOption "email clients";
-          calendar = mkEnableOption "calendar applications";
-          resume = mkEnableOption "resume tools";
-        };
-
-        security = {
-          enable = mkEnableOption "security tools";
-          yubikey = mkEnableOption "YubiKey support";
-          gpg = mkEnableOption "GPG encryption";
-        };
-
-        gaming = {
-          enable = mkEnableOption "gaming";
-        };
-
-        # Development (same as NixOS for cross-platform consistency)
-        development = {
-          enable = mkEnableOption "development tools";
-          nix = mkEnableOption "Nix development" // {
-            default = true;
-          };
-          git = mkEnableOption "Git version control" // {
-            default = true;
-          };
-          containers = mkEnableOption "container tools";
-        };
-
-        # AI Tools
-        aiTools = {
-          enable = mkEnableOption "AI tools";
-          ollama = mkEnableOption "Ollama local LLM";
-          openWebui = mkEnableOption "Open WebUI";
-        };
-
-        # Media
-        media = {
-          enable = mkEnableOption "media features";
-          audio = {
-            enable = mkEnableOption "audio support" // {
-              default = true;
-            };
-            realtime = mkEnableOption "realtime audio";
-          };
-        };
-
-        # Virtualisation
-        virtualisation = {
-          enable = mkEnableOption "virtualisation";
-          docker = mkEnableOption "Docker";
-          podman = mkEnableOption "Podman";
-          libvirt = mkEnableOption "libvirt/QEMU";
-        };
-      };
-    };
+    options.host = mkCommonOptions;
 
     config.host = {
       system = lib.mkDefault "aarch64-darwin";

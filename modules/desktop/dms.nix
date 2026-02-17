@@ -1,8 +1,7 @@
 # DankMaterialShell Configuration
 # Full desktop shell for niri with Material You theming
 # Follows: https://danklinux.com/docs/dankmaterialshell/nixos-flake
-_:
-{
+_: {
   # NixOS system services required by DMS
   flake.modules.nixos.dms =
     { pkgs, ... }:
@@ -16,7 +15,14 @@ _:
   flake.modules.homeManager.dms =
     { pkgs, lib, ... }:
     lib.mkIf pkgs.stdenv.isLinux {
-      home.packages = [ pkgs.danksearch ];
+      home.packages = [
+        pkgs.danksearch
+        pkgs.kdePackages.kimageformats
+      ];
+
+      # Use native PipeWire audio backend instead of FFmpeg's libswresample
+      # to avoid SIGSEGV on unsupported channel layouts (DMS#1054)
+      systemd.user.services.dms.Service.Environment = [ "QT_AUDIO_BACKEND=pipewire" ];
 
       programs.dank-material-shell = {
         enable = true;

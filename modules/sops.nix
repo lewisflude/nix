@@ -63,45 +63,32 @@ in
   # ===========================================================================
   # Darwin: SOPS configuration
   # ===========================================================================
-  flake.modules.darwin.sops = {
-    sops = {
-      age = {
-        keyFile = "${myLib.dataDir "aarch64-darwin" username}/sops-nix/key.txt";
-        generateKey = true;
-        sshKeyPaths = [ ]; # Disable SSH key auto-detection on Darwin
+  flake.modules.darwin.sops =
+    let
+      mkDarwinSecret = {
+        mode = "0640";
+        owner = username;
+        group = "admin";
       };
-      gnupg.sshKeyPaths = [ ]; # Disable gnupg auto-detection on Darwin
-      defaultSopsFile = ../secrets/secrets.yaml;
-      secrets = {
-        # Same secrets as NixOS but with Darwin-appropriate modes
-        CIRCLECI_TOKEN = {
-          mode = "0640";
-          owner = username;
-          group = "admin";
+    in
+    {
+      sops = {
+        age = {
+          keyFile = "${myLib.dataDir "aarch64-darwin" username}/sops-nix/key.txt";
+          generateKey = true;
+          sshKeyPaths = [ ]; # Disable SSH key auto-detection on Darwin
         };
-        GITHUB_TOKEN = {
-          mode = "0640";
-          owner = username;
-          group = "admin";
-        };
-        KAGI_API_KEY = {
-          mode = "0640";
-          owner = username;
-          group = "admin";
-        };
-        OPENAI_API_KEY = {
-          mode = "0640";
-          owner = username;
-          group = "admin";
-        };
-        HOME_ASSISTANT_TOKEN = {
-          mode = "0640";
-          owner = username;
-          group = "admin";
+        gnupg.sshKeyPaths = [ ]; # Disable gnupg auto-detection on Darwin
+        defaultSopsFile = ../secrets/secrets.yaml;
+        secrets = {
+          CIRCLECI_TOKEN = mkDarwinSecret;
+          GITHUB_TOKEN = mkDarwinSecret;
+          KAGI_API_KEY = mkDarwinSecret;
+          OPENAI_API_KEY = mkDarwinSecret;
+          HOME_ASSISTANT_TOKEN = mkDarwinSecret;
         };
       };
     };
-  };
 
   # ===========================================================================
   # Home-manager: SOPS configuration

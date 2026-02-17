@@ -123,10 +123,10 @@ nix develop  # Sets up pre-commit hooks and formatters
 
 ## Documentation
 
-| Document                                                       | Description                                 |
-| -------------------------------------------------------------- | ------------------------------------------- |
-| [`DENDRITIC_SOURCE_OF_TRUTH.md`](DENDRITIC_SOURCE_OF_TRUTH.md) | Complete dendritic pattern documentation    |
-| [`CLAUDE.md`](CLAUDE.md)                                       | AI assistant guidelines and module patterns |
+| Document                                       | Description                                 |
+| ---------------------------------------------- | ------------------------------------------- |
+| [`DENDRITIC_PATTERN.md`](DENDRITIC_PATTERN.md) | Complete dendritic pattern documentation    |
+| [`CLAUDE.md`](CLAUDE.md)                       | AI assistant guidelines and module patterns |
 
 ## Available Tools
 

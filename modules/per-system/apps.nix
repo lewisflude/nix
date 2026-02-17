@@ -40,19 +40,6 @@ in
       mkPogApp =
         script-name:
         let
-          needsConfigRoot = lib.elem script-name [
-            "new-module"
-            "update-all"
-            "visualize-modules"
-            "calculate-qbittorrent-config"
-          ];
-          scriptArgs =
-            if needsConfigRoot then
-              {
-                config-root = self;
-              }
-            else
-              { };
           descriptions = {
             "new-module" = "Scaffold new NixOS/home-manager modules";
             "setup-cachix" = "Configure Cachix binary cache";
@@ -60,7 +47,9 @@ in
             "visualize-modules" = "Generate module dependency graphs";
             "calculate-qbittorrent-config" = "Calculate optimal qBittorrent settings from speed tests";
           };
-          pogScript = pkgsWithPog.callPackage ../../pkgs/pog-scripts/${script-name}.nix scriptArgs;
+          pogScript = pkgsWithPog.callPackage ../../pkgs/pog-scripts/${script-name}.nix {
+            config-root = self;
+          };
         in
         {
           type = "app";

@@ -91,7 +91,13 @@ _: {
             # DMS 1.4 binds.kdl generates incorrect spotlight command (missing "call"),
             # so we override Mod+D here with the correct IPC syntax.
             "Mod+D" = {
-              action.spawn = [ "dms" "ipc" "call" "spotlight" "toggle" ];
+              action.spawn = [
+                "dms"
+                "ipc"
+                "call"
+                "spotlight"
+                "toggle"
+              ];
               hotkey-overlay.title = "Launch DMS Spotlight";
             };
             "Mod+T" = {

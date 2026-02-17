@@ -66,7 +66,7 @@ required_files=(
   "modules/constants.nix"
   "modules/meta.nix"
   "lib/functions.nix"
-  "DENDRITIC_SOURCE_OF_TRUTH.md"
+  "DENDRITIC_PATTERN.md"
 )
 
 for file in "${required_files[@]}"; do

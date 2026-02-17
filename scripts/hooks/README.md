@@ -13,14 +13,14 @@ mechanisms to ensure all code follows the dendritic pattern.
 All hooks follow patterns documented in:
 
 - **Claude Code Hooks Documentation**: <https://code.claude.com/docs/hooks>
-- **Dendritic Pattern**: `DENDRITIC_SOURCE_OF_TRUTH.md`
+- **Dendritic Pattern**: `DENDRITIC_PATTERN.md`
 - **Repository Guidelines**: `CLAUDE.md`
 
 ## Enforcement Stack
 
 ### Layer 1: Education (Always Active)
 
-- **Source**: `CLAUDE.md` + `DENDRITIC_SOURCE_OF_TRUTH.md`
+- **Source**: `CLAUDE.md` + `DENDRITIC_PATTERN.md`
 - **When**: Loaded at session start via `SessionStart` hook
 - **Effect**: Claude understands the pattern rules
 - **Determinism**: Low (relies on Claude's understanding)
@@ -146,21 +146,21 @@ grep -P '{\s*config.*?flake\.modules\.\w+\.\w+\s*=\s*{\s*config'
 
    ❌ Anti-pattern 'with pkgs;' detected
    Use explicit package references: pkgs.curl pkgs.wget
-   See: DENDRITIC_SOURCE_OF_TRUTH.md line 1020-1026
+   See: DENDRITIC_PATTERN.md line 1020-1026
 
-   📖 Read DENDRITIC_SOURCE_OF_TRUTH.md for complete pattern guide
+   📖 Read DENDRITIC_PATTERN.md for complete pattern guide
    💡 Ask: 'Can you fix this following dendritic pattern?'
 ```
 
 **Documentation References in Code**:
 
 - Line 4-7: Exit code behavior from Claude Code docs
-- Line 88-91: `with pkgs;` anti-pattern (DENDRITIC_SOURCE_OF_TRUTH.md:1020-1026)
-- Line 94-98: specialArgs anti-pattern (DENDRITIC_SOURCE_OF_TRUTH.md:477-527)
-- Line 101-105: Constants access pattern (DENDRITIC_SOURCE_OF_TRUTH.md:723-766)
-- Line 108-112: flakeModules placement (DENDRITIC_SOURCE_OF_TRUTH.md:129-148)
-- Line 126-132: Feature module structure (DENDRITIC_SOURCE_OF_TRUTH.md:280-348)
-- Line 136-141: Scope confusion (DENDRITIC_SOURCE_OF_TRUTH.md:306-341)
+- Line 88-91: `with pkgs;` anti-pattern (DENDRITIC_PATTERN.md:1020-1026)
+- Line 94-98: specialArgs anti-pattern (DENDRITIC_PATTERN.md:477-527)
+- Line 101-105: Constants access pattern (DENDRITIC_PATTERN.md:723-766)
+- Line 108-112: flakeModules placement (DENDRITIC_PATTERN.md:129-148)
+- Line 126-132: Feature module structure (DENDRITIC_PATTERN.md:280-348)
+- Line 136-141: Scope confusion (DENDRITIC_PATTERN.md:306-341)
 
 ### 2. auto-format-nix.sh
 
@@ -350,7 +350,7 @@ of hooks are supported:
 **Our usage**:
 
 - SessionEnd agent: Deep architectural validation with context from
-  DENDRITIC_SOURCE_OF_TRUTH.md
+  DENDRITIC_PATTERN.md
 
 ## Testing the Hooks
 
@@ -368,7 +368,7 @@ Try having Claude write this:
 ```
 
 **Expected**: Hook blocks with error message citing
-DENDRITIC_SOURCE_OF_TRUTH.md:1020-1026
+DENDRITIC_PATTERN.md:1020-1026
 
 ### Test 2: Block `specialArgs`
 
@@ -380,8 +380,7 @@ lib.nixosSystem {
 }
 ```
 
-**Expected**: Hook blocks with error message citing
-DENDRITIC_SOURCE_OF_TRUTH.md:477-527
+**Expected**: Hook blocks with error message citing DENDRITIC_PATTERN.md:477-527
 
 ### Test 3: Auto-format
 
@@ -456,7 +455,7 @@ Edit `validate-dendritic.sh` and add checks in the validation section:
 if echo "$CONTENT" | grep -q "pattern"; then
   ERRORS+=("❌ Anti-pattern 'pattern' detected")
   ERRORS+=("   Explanation and fix")
-  ERRORS+=("   See: DENDRITIC_SOURCE_OF_TRUTH.md line XXX-YYY")
+  ERRORS+=("   See: DENDRITIC_PATTERN.md line XXX-YYY")
 fi
 ```
 
@@ -465,7 +464,7 @@ fi
 1. Update `validate-dendritic.sh` for blocking validation
 2. Update `validate-session-dendritic.sh` for session-end checks
 3. Update `.claude/skills/dendritic-validator/SKILL.md` for skill validation
-4. Update `DENDRITIC_SOURCE_OF_TRUTH.md` with new pattern documentation
+4. Update `DENDRITIC_PATTERN.md` with new pattern documentation
 5. Test with sample violations
 
 ## Impact Summary
@@ -481,6 +480,6 @@ fi
 ## References
 
 - **Claude Code Hooks**: <https://code.claude.com/docs/hooks>
-- **Dendritic Pattern**: `DENDRITIC_SOURCE_OF_TRUTH.md`
+- **Dendritic Pattern**: `DENDRITIC_PATTERN.md`
 - **Repository Guidelines**: `CLAUDE.md`
 - **Skills Documentation**: `.claude/skills/*/SKILL.md`

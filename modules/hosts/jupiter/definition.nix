@@ -228,61 +228,10 @@ in
         hardware.renderDevice = "/dev/dri/renderD128";
 
         features = {
-          desktop = {
+          gaming.enable = true;
+          desktop.autoLogin = {
             enable = true;
-            niri = true;
-            theming = true;
-            utilities = true;
-            autoLogin = {
-              enable = true;
-              user = username;
-            };
-          };
-
-          gaming = {
-            enable = true;
-            steam = true;
-            performance = true;
-          };
-
-          productivity = {
-            enable = true;
-            notes = true;
-            email = true;
-            resume = true;
-          };
-
-          security = {
-            enable = true;
-            yubikey = true;
-            gpg = true;
-          };
-
-          development = {
-            enable = true;
-            nix = true;
-            git = true;
-            containers = true;
-          };
-
-          aiTools = {
-            enable = true;
-            ollama = true;
-            openWebui = true;
-          };
-
-          media = {
-            enable = true;
-            audio = {
-              enable = true;
-              realtime = true;
-            };
-          };
-
-          virtualisation = {
-            enable = true;
-            docker = true;
-            podman = true;
+            user = username;
           };
         };
 

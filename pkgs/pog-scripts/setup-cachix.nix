@@ -1,6 +1,7 @@
 {
   pkgs,
   pog,
+  ...
 }:
 pog.pog {
   name = "setup-cachix";

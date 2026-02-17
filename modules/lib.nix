@@ -16,20 +16,6 @@ let
         "${homeDir system username}/Library/Application Support"
       else
         "${homeDir system username}/.local/share";
-    cacheDir =
-      system: username:
-      if isDarwin system then
-        "${homeDir system username}/Library/Caches"
-      else
-        "${homeDir system username}/.cache";
-
-    # Package selection helpers
-    platformPackage =
-      system: linuxPkg: darwinPkg:
-      if isDarwin system then darwinPkg else linuxPkg;
-    platformPackages =
-      system: linuxPkgs: darwinPkgs:
-      if isDarwin system then darwinPkgs else linuxPkgs;
 
     # Pkgs configuration for nixpkgs import
     mkPkgsConfig = {
@@ -43,24 +29,6 @@ let
         lib.hasPrefix "zfs-kernel" name || name == "postgresql-test-hook";
       allowUnsupportedSystem = false;
     };
-
-    # Curry system-dependent functions
-    withSystem =
-      system:
-      let
-        sd = isDarwin system;
-      in
-      {
-        inherit system;
-        isLinux = isLinux system;
-        isDarwin = sd;
-        homeDir = homeDir system;
-        configDir = configDir system;
-        dataDir = dataDir system;
-        cacheDir = cacheDir system;
-        platformPackage = linuxPkg: darwinPkg: if sd then darwinPkg else linuxPkg;
-        platformPackages = linuxPkgs: darwinPkgs: if sd then darwinPkgs else linuxPkgs;
-      };
   };
 in
 {

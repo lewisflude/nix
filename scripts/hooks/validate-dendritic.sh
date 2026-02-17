@@ -47,34 +47,34 @@ ERRORS=()
 # ======================================================================
 
 # Anti-pattern 1: with pkgs;
-# See DENDRITIC_SOURCE_OF_TRUTH.md#anti-patterns
+# See DENDRITIC_PATTERN.md#anti-patterns
 if echo "$CONTENT" | grep -q "with pkgs;"; then
   ERRORS+=("❌ Anti-pattern 'with pkgs;' detected")
   ERRORS+=("   Use explicit package references: pkgs.curl pkgs.wget")
-  ERRORS+=("   See: DENDRITIC_SOURCE_OF_TRUTH.md line 1020-1026")
+  ERRORS+=("   See: DENDRITIC_PATTERN.md line 1020-1026")
 fi
 
 # Anti-pattern 2: specialArgs / extraSpecialArgs
-# See DENDRITIC_SOURCE_OF_TRUTH.md#value-sharing-no-specialargs
+# See DENDRITIC_PATTERN.md#value-sharing-no-specialargs
 if echo "$CONTENT" | grep -qE "(specialArgs|extraSpecialArgs)"; then
   ERRORS+=("❌ Anti-pattern 'specialArgs/extraSpecialArgs' detected")
   ERRORS+=("   Access values via top-level config instead")
-  ERRORS+=("   See: DENDRITIC_SOURCE_OF_TRUTH.md line 477-527")
+  ERRORS+=("   See: DENDRITIC_PATTERN.md line 477-527")
 fi
 
 # Anti-pattern 3: Direct constant imports
-# See DENDRITIC_SOURCE_OF_TRUTH.md#accessing-constants
+# See DENDRITIC_PATTERN.md#accessing-constants
 if echo "$CONTENT" | grep -qE "import.*(lib/constants|constants\.nix)"; then
   ERRORS+=("❌ Anti-pattern: importing constants directly")
   ERRORS+=("   Access via config.constants")
-  ERRORS+=("   See: DENDRITIC_SOURCE_OF_TRUTH.md line 723-766")
+  ERRORS+=("   See: DENDRITIC_PATTERN.md line 723-766")
 fi
 
 # Anti-pattern 4: Importing flake-parts.flakeModules.modules outside infrastructure
 # Infrastructure modules should import this, not feature modules
 if [[ $FILE_PATH != */infrastructure/* ]] && echo "$CONTENT" | grep -q "flake-parts.flakeModules.modules"; then
   ERRORS+=("⚠️  flakeModules.modules should only be imported in infrastructure/flake-parts.nix")
-  ERRORS+=("   See: DENDRITIC_SOURCE_OF_TRUTH.md line 129-148")
+  ERRORS+=("   See: DENDRITIC_PATTERN.md line 129-148")
 fi
 
 # Pattern validation: Feature modules should define flake.modules.*
@@ -92,7 +92,7 @@ if [[ $IS_EDIT == false ]] &&
   if ! echo "$CONTENT" | grep -q "flake\.modules\."; then
     ERRORS+=("⚠️  Feature module should define flake.modules.* options")
     ERRORS+=("   Example: flake.modules.nixos.myFeature = { ... };")
-    ERRORS+=("   See: DENDRITIC_SOURCE_OF_TRUTH.md line 280-348")
+    ERRORS+=("   See: DENDRITIC_PATTERN.md line 280-348")
   fi
 fi
 
@@ -102,7 +102,7 @@ fi
 if echo "$CONTENT" | grep -qP '{\s*config.*?flake\.modules\.\w+\.\w+\s*=\s*{\s*config'; then
   ERRORS+=("⚠️  Possible config scope confusion detected")
   ERRORS+=("   Use named parameter (nixosArgs) to avoid shadowing outer config")
-  ERRORS+=("   See: DENDRITIC_SOURCE_OF_TRUTH.md line 306-341")
+  ERRORS+=("   See: DENDRITIC_PATTERN.md line 306-341")
 fi
 
 # ======================================================================
@@ -114,7 +114,7 @@ if [ ${#ERRORS[@]} -gt 0 ]; then
   echo "" >&2
   printf "   %s\n" "${ERRORS[@]}" >&2
   echo "" >&2
-  echo "   📖 Read DENDRITIC_SOURCE_OF_TRUTH.md for complete pattern guide" >&2
+  echo "   📖 Read DENDRITIC_PATTERN.md for complete pattern guide" >&2
   echo "   💡 Ask: 'Can you fix this following dendritic pattern?'" >&2
   exit 2 # Exit code 2 blocks the action
 fi

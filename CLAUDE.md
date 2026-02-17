@@ -39,8 +39,8 @@ documentation and scripts.
 ## Dendritic Pattern Architecture
 
 This repository follows the **dendritic pattern** where every `.nix` file
-(except `flake.nix`) is a flake-parts module. See `DENDRITIC_SOURCE_OF_TRUTH.md`
-for the complete pattern documentation.
+(except `flake.nix`) is a flake-parts module. See `DENDRITIC_PATTERN.md` for the
+complete pattern documentation.
 
 ### Key Concepts
 
@@ -128,7 +128,7 @@ See `scripts/README.md` for detailed documentation of each script.
 3. **Follow conventional commits** for git messages
 4. **Format code** using `nix fmt` or `treefmt`
 5. **Check for existing modules** before creating new ones
-6. **Read `DENDRITIC_SOURCE_OF_TRUTH.md`** for architecture guidance
+6. **Read `DENDRITIC_PATTERN.md`** for architecture guidance
 
 ## Common Tasks
 
@@ -396,7 +396,7 @@ To enable servers that require API keys:
 
 ### Primary Documentation
 
-- **`DENDRITIC_SOURCE_OF_TRUTH.md`** - Complete dendritic pattern documentation
+- **`DENDRITIC_PATTERN.md`** - Complete dendritic pattern documentation
   (canonical source)
 - **`CLAUDE.md`** - This file (AI assistant guidelines)
 - **`scripts/README.md`** - Shell script documentation
@@ -410,7 +410,7 @@ To enable servers that require API keys:
 
 - Never run system rebuild commands
 - Always suggest commands for the user to run
-- Read `DENDRITIC_SOURCE_OF_TRUTH.md` before making architectural decisions
+- Read `DENDRITIC_PATTERN.md` before making architectural decisions
 - Use existing patterns and conventions
 - Format code before suggesting changes
 - Every `.nix` file is a flake-parts module (dendritic pattern)

@@ -105,23 +105,7 @@ in
         hostname = "mercury";
         system = "aarch64-darwin";
 
-        features = {
-          desktop.enable = true;
-
-          productivity.enable = true;
-
-          security = {
-            enable = true;
-            yubikey = true;
-            gpg = true;
-          };
-
-          development = {
-            enable = true;
-            nix = true;
-            git = true;
-          };
-        };
+        features = { };
       };
 
       # =========================================================================
