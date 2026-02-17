@@ -44,6 +44,7 @@ in
       services.sabnzbd = {
         enable = true;
         inherit user group;
+        configFile = null; # use settings instead (default is non-null for stateVersion < 26.05)
         settings = {
           misc = {
             inherit port;
