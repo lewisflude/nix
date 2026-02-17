@@ -9,7 +9,7 @@ _: {
     let
       # Display output names — verify with: niri msg outputs
       virtualDisplay = "HDMI-A-1"; # 1080p virtual output (EDID-emulated, captured by Sunshine)
-      ultrawide = "DP-3"; # AW3423DWF — disabled during streaming
+      ultrawide = "DP-1"; # AW3423DWF — disabled during streaming
 
       # 1920x1080@60Hz EDID (v1.3, manufacturer "LNX", sRGB, monitor name "Virtual 1080").
       # Loaded via drm.edid_firmware so the GPU always sees a connected display on
@@ -51,7 +51,7 @@ _: {
         text = ''
           # Enable virtual display and disable ultrawide so it becomes the sole output
           niri msg output "${virtualDisplay}" on
-          niri msg output "${ultrawide}" off
+          niri msg output "${ultrawide}" off || true
           sleep 1
 
           # Match virtual display resolution to the Moonlight client
@@ -78,7 +78,7 @@ _: {
           # Disable virtual display and restore ultrawide
           niri msg output "${virtualDisplay}" mode 1920x1080@60 || true
           niri msg output "${virtualDisplay}" off
-          niri msg output "${ultrawide}" on
+          niri msg output "${ultrawide}" on || true
 
           pid_file="$XDG_RUNTIME_DIR/sunshine-inhibit.pid"
           if [ -f "$pid_file" ]; then
