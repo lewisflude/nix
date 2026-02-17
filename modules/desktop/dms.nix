@@ -23,7 +23,7 @@ _: {
       programs.dank-material-shell = {
         enable = true;
 
-        settings.soundsEnabled = true;
+        settings.soundsEnabled = false;
 
         systemd = {
           enable = true;

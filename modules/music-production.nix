@@ -42,6 +42,10 @@ _: {
         pkgs.schismtracker # Impulse Tracker clone (.it)
         pkgs.sunvox # Modular tracker/synth
 
+        # MIDI routing
+        pkgs.alsa-utils # aconnect, amidi, aplaymidi
+        pkgs.qpwgraph # PipeWire/JACK/ALSA patchbay GUI
+
         # Synths
         pkgs.vital # Wavetable synth
         pkgs.surge-xt # Open-source hybrid synth
