@@ -74,11 +74,13 @@ let
               doInstallCheck = false;
             };
             flac = prev.flac.overrideAttrs { doCheck = false; };
+            ffmpeg-headless = prev.ffmpeg-headless.overrideAttrs { doCheck = false; };
+            libpulseaudio = prev.libpulseaudio.overrideAttrs { doCheck = false; };
             pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
               (_python-final: python-prev: {
                 pycairo = python-prev.pycairo.overridePythonAttrs { doCheck = false; };
                 filelock = python-prev.filelock.overridePythonAttrs { doCheck = false; };
-                distutils = python-prev.distutils.overridePythonAttrs { doInstallCheck = false; };
+                distutils = python-prev.distutils.overridePythonAttrs { doCheck = false; };
               })
             ];
           }

@@ -40,7 +40,7 @@ in
   # Home-manager: SSH client configuration
   # ===========================================================================
   flake.modules.homeManager.ssh =
-    { config, pkgs, ... }:
+    { pkgs, ... }@hmArgs:
     let
       inherit (pkgs.stdenv) isDarwin;
 
@@ -85,7 +85,7 @@ in
 
           "jupiter" = {
             hostname = constants.hosts.jupiter.ipv4;
-            user = config.home.username;
+            user = hmArgs.config.home.username;
             forwardAgent = true;
             remoteForwards = [
               {
@@ -98,7 +98,7 @@ in
 
           "mercury" = {
             hostname = constants.hosts.mercury.ipv4;
-            user = config.home.username;
+            user = hmArgs.config.home.username;
             forwardAgent = true;
             remoteForwards = [
               {

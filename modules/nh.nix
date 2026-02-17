@@ -6,13 +6,9 @@ let
 in
 {
   flake.modules.homeManager.nh =
-    {
-      config,
-      pkgs,
-      ...
-    }:
+    { pkgs, ... }@hmArgs:
     let
-      configDir = myLib.configDir pkgs.stdenv.hostPlatform.system config.home.username;
+      configDir = myLib.configDir pkgs.stdenv.hostPlatform.system hmArgs.config.home.username;
       flakePath = "${configDir}/nix";
     in
     {

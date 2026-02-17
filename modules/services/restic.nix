@@ -10,6 +10,7 @@ _: {
       services.restic.server = {
         enable = true;
         listenAddress = "127.0.0.1:8000";
+        extraFlags = [ "--no-auth" ];
       };
 
       users.users.restic = {

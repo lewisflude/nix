@@ -10,9 +10,8 @@ in
     {
       pkgs,
       lib,
-      config,
       ...
-    }:
+    }@nixosArgs:
     let
       inherit (lib) mkIf;
       namespace = "qbt";
@@ -135,7 +134,7 @@ in
       # VPN namespace configuration
       vpnNamespaces.${namespace} = {
         enable = true;
-        wireguardConfigFile = config.sops.secrets."vpn-confinement-qbittorrent".path;
+        wireguardConfigFile = nixosArgs.config.sops.secrets."vpn-confinement-qbittorrent".path;
         accessibleFrom = [ "192.168.10.0/24" ];
         portMappings = [
           {
@@ -220,14 +219,14 @@ in
           RestartSec = "10s";
         };
         # Inject SOPS credentials into config under [Preferences] section
-        preStart = mkIf (config.sops.secrets ? "qbittorrent/webui/username") ''
+        preStart = mkIf (nixosArgs.config.sops.secrets ? "qbittorrent/webui/username") ''
           CONFIG_FILE="/var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf"
 
-          if [ -f "${config.sops.secrets."qbittorrent/webui/username".path}" ] && \
-             [ -f "${config.sops.secrets."qbittorrent/webui/password-pbkdf2".path}" ]; then
+          if [ -f "${nixosArgs.config.sops.secrets."qbittorrent/webui/username".path}" ] && \
+             [ -f "${nixosArgs.config.sops.secrets."qbittorrent/webui/password-pbkdf2".path}" ]; then
 
-            USERNAME=$(cat "${config.sops.secrets."qbittorrent/webui/username".path}")
-            PASSWORD_HASH=$(cat "${config.sops.secrets."qbittorrent/webui/password-pbkdf2".path}")
+            USERNAME=$(cat "${nixosArgs.config.sops.secrets."qbittorrent/webui/username".path}")
+            PASSWORD_HASH=$(cat "${nixosArgs.config.sops.secrets."qbittorrent/webui/password-pbkdf2".path}")
 
             TEMP_FILE=$(mktemp)
 

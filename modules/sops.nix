@@ -107,10 +107,10 @@ in
   # Home-manager: SOPS configuration
   # ===========================================================================
   flake.modules.homeManager.sops =
-    { config, pkgs, ... }:
+    { pkgs, ... }@hmArgs:
     let
       inherit (pkgs.stdenv.hostPlatform) system;
-      dataDir = myLib.dataDir system config.home.username;
+      dataDir = myLib.dataDir system hmArgs.config.home.username;
       keyFilePath =
         if pkgs.stdenv.isDarwin then "${dataDir}/sops-nix/key.txt" else "/var/lib/sops-nix/key.txt";
     in

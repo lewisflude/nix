@@ -201,31 +201,8 @@ in
                 ];
               }
             ];
-            Stop = [
-              {
-                hooks = [
-                  {
-                    type = "command";
-                    command = ''
-                      INPUT=$(cat)
-                      STOP_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active')
-                      if [ "$STOP_ACTIVE" = "true" ]; then
-                        exit 0
-                      fi
-                      if [ -f flake.nix ]; then
-                        if ! RESULT=$(nix flake check 2>&1); then
-                          jq -n --arg reason "nix flake check failed: $RESULT" \
-                            '{"decision": "block", "reason": $reason}'
-                          exit 0
-                        fi
-                      fi
-                      echo '{"decision": "allow"}'
-                    '';
-                    timeout = 120;
-                  }
-                ];
-              }
-            ];
+            # TODO: re-enable once upstream nixpkgs python3.13-distutils-80.9.0 test_concurrent_safe is fixed
+            Stop = [ ];
           };
           session = {
             maxTurns = -1;

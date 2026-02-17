@@ -87,7 +87,13 @@ _: {
             # ═══════════════════════════════════════════════════════════════════
             # Launch Applications
             # ═══════════════════════════════════════════════════════════════════
-            # Note: Mod+Return (terminal) and Mod+D (launcher) provided by DMS binds.kdl
+            # Note: Mod+Return (terminal) provided by DMS binds.kdl
+            # DMS 1.4 binds.kdl generates incorrect spotlight command (missing "call"),
+            # so we override Mod+D here with the correct IPC syntax.
+            "Mod+D" = {
+              action.spawn = [ "dms" "ipc" "call" "spotlight" "toggle" ];
+              hotkey-overlay.title = "Launch DMS Spotlight";
+            };
             "Mod+T" = {
               action.spawn = [ "ghostty" ];
               hotkey-overlay.title = "Open Terminal";
