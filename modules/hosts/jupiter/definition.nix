@@ -215,6 +215,7 @@ in
         # Audio & Music Production home-manager modules
         homeManager.audio
         homeManager.musicProduction
+        homeManager.liveCoding
       ];
 
       # =========================================================================

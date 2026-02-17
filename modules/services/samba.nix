@@ -1,6 +1,7 @@
 # Samba File Sharing Service
 # SMB shares with optimized performance settings
-_: {
+{ config, ... }:
+{
   flake.modules.nixos.samba =
     { pkgs, ... }:
     {
@@ -40,6 +41,14 @@ _: {
               "directory mask" = "0775";
               "force create mode" = "0660";
               "force directory mode" = "0770";
+              "case sensitive" = "auto";
+            };
+            music = {
+              path = "/home/${config.username}/Music";
+              writable = "true";
+              "valid users" = config.username;
+              "create mask" = "0644";
+              "directory mask" = "0755";
               "case sensitive" = "auto";
             };
           };

@@ -1,5 +1,5 @@
-# Music Production - Ardour DAW with pro audio optimizations
-# Relies on audio.nix for PipeWire/JACK base; adds DAW, plugins, and musnix tuning
+# Music Production - DAWs, trackers, and pro audio optimizations
+# Relies on audio.nix for PipeWire/JACK base; adds DAWs, trackers, plugins, and musnix tuning
 # References:
 # - https://wiki.nixos.org/wiki/Audio_production
 # - https://github.com/musnix/musnix
@@ -33,8 +33,18 @@ _: {
     { pkgs, ... }:
     {
       home.packages = [
-        # DAW
+        # DAWs
         pkgs.ardour
+        pkgs.reaper
+
+        # Trackers -- breakcore/jungle workflow
+        pkgs.milkytracker # FastTracker 2 clone (.xm/.mod)
+        pkgs.schismtracker # Impulse Tracker clone (.it)
+        pkgs.sunvox # Modular tracker/synth
+
+        # Synths
+        pkgs.vital # Wavetable synth
+        pkgs.surge-xt # Open-source hybrid synth
 
         # LV2 plugins -- essentials for mixing/mastering/sound design
         pkgs.lsp-plugins # EQ, compressor, gate, limiter, analyser
