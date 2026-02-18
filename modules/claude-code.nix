@@ -1,5 +1,4 @@
 # Claude Code CLI configuration
-# Dendritic pattern: Full implementation as flake.modules.homeManager.claudeCode
 { config, ... }:
 let
   inherit (config) constants;
@@ -101,11 +100,6 @@ in
         };
 
         settings = {
-          editor.preferredEditor = "hx";
-          fileFiltering = {
-            respectGitIgnore = true;
-            enableRecursiveFileSearch = true;
-          };
           permissions = {
             allow = [
               "Read"
@@ -113,73 +107,77 @@ in
               "Write"
               "WebFetch"
               "WebSearch"
-              "Bash(git:*)"
-              "Bash(gh:*)"
-              "Bash(nix:*)"
-              "Bash(nh:*)"
-              "Bash(nix-env:*)"
-              "Bash(npm:*)"
-              "Bash(npx:*)"
-              "Bash(node:*)"
-              "Bash(cargo:*)"
-              "Bash(rustc:*)"
-              "Bash(rustup:*)"
-              "Bash(go:*)"
-              "Bash(python:*)"
-              "Bash(python3:*)"
-              "Bash(uv:*)"
-              "Bash(pip:*)"
-              "Bash(treefmt:*)"
-              "Bash(nixfmt:*)"
-              "Bash(biome:*)"
-              "Bash(prettier:*)"
-              "Bash(rg:*)"
-              "Bash(fd:*)"
-              "Bash(jq:*)"
-              "Bash(bat:*)"
-              "Bash(eza:*)"
-              "Bash(ls:*)"
-              "Bash(cat:*)"
-              "Bash(head:*)"
-              "Bash(tail:*)"
-              "Bash(wc:*)"
-              "Bash(mkdir:*)"
-              "Bash(cp:*)"
-              "Bash(mv:*)"
-              "Bash(touch:*)"
-              "Bash(curl:*)"
-              "Bash(wget:*)"
-              "Bash(make:*)"
-              "Bash(cmake:*)"
-              "Bash(docker ps:*)"
-              "Bash(docker logs:*)"
-              "Bash(docker inspect:*)"
-              "Bash(docker images:*)"
-              "Bash(podman ps:*)"
-              "Bash(podman logs:*)"
-              "Bash(podman inspect:*)"
-              "Bash(podman images:*)"
-              "Bash(hx:*)"
-              "Bash(which:*)"
-              "Bash(echo:*)"
-              "Bash(printf:*)"
-              "Bash(test:*)"
-              "Bash([:*)"
-              "Bash(direnv:*)"
-              "Bash(devenv:*)"
-              "Bash(stat:*)"
-              "Bash(file:*)"
-              "Bash(du:*)"
-              "Bash(df:*)"
-              "Bash(mdfind:*)"
+              # dev tools
+              "Bash(git *)"
+              "Bash(gh *)"
+              "Bash(nix *)"
+              "Bash(nh *)"
+              "Bash(npm *)"
+              "Bash(npx *)"
+              "Bash(node *)"
+              "Bash(cargo *)"
+              "Bash(rustc *)"
+              "Bash(rustup *)"
+              "Bash(go *)"
+              "Bash(python *)"
+              "Bash(python3 *)"
+              "Bash(uv *)"
+              "Bash(pip *)"
+              "Bash(make *)"
+              "Bash(cmake *)"
+              # formatters
+              "Bash(treefmt *)"
+              "Bash(nixfmt *)"
+              "Bash(biome *)"
+              "Bash(prettier *)"
+              # search & filesystem
+              "Bash(rg *)"
+              "Bash(fd *)"
+              "Bash(jq *)"
+              "Bash(bat *)"
+              "Bash(eza *)"
+              "Bash(ls *)"
+              "Bash(cat *)"
+              "Bash(head *)"
+              "Bash(tail *)"
+              "Bash(wc *)"
+              "Bash(mkdir *)"
+              "Bash(cp *)"
+              "Bash(mv *)"
+              "Bash(touch *)"
+              "Bash(which *)"
+              "Bash(stat *)"
+              "Bash(file *)"
+              "Bash(du *)"
+              "Bash(df *)"
+              # network
+              "Bash(curl *)"
+              "Bash(wget *)"
+              # containers (read-only)
+              "Bash(docker ps *)"
+              "Bash(docker logs *)"
+              "Bash(docker inspect *)"
+              "Bash(docker images *)"
+              "Bash(podman ps *)"
+              "Bash(podman logs *)"
+              "Bash(podman inspect *)"
+              "Bash(podman images *)"
+              # env tools
+              "Bash(direnv *)"
+              "Bash(devenv *)"
+              # misc
+              "Bash(echo *)"
+              "Bash(printf *)"
+              "Bash(test *)"
+              "Bash([ *)"
             ];
             deny = [
-              "Bash(sudo:*)"
-              "Bash(rm:*)"
-              "Bash(chmod:*)"
-              "Bash(chown:*)"
-              "Bash(nixos-rebuild:*)"
-              "Bash(darwin-rebuild:*)"
+              "Bash(sudo *)"
+              "Bash(rm -rf *)"
+              "Bash(chmod *)"
+              "Bash(chown *)"
+              "Bash(nixos-rebuild *)"
+              "Bash(darwin-rebuild *)"
             ];
           };
           hooks = {
@@ -201,22 +199,7 @@ in
                 ];
               }
             ];
-            # TODO: re-enable once upstream nixpkgs python3.13-distutils-80.9.0 test_concurrent_safe is fixed
-            Stop = [ ];
           };
-          session = {
-            maxTurns = -1;
-            saveHistory = true;
-          };
-          context = {
-            loadProjectContext = true;
-            contextFiles = [
-              "CLAUDE.md"
-              "CONVENTIONS.md"
-              "README.md"
-            ];
-          };
-          telemetry.enabled = false;
         };
 
         rules = {
@@ -298,6 +281,26 @@ in
             2. Read each modified file
             3. Report issues by priority: Critical > Warning > Suggestion
             4. Be specific: include file path and line number for each issue
+          '';
+
+          code-simplifier = ''
+            ---
+            name: code-simplifier
+            description: Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise.
+            tools: Read, Write, Edit, Glob, Grep, Bash
+            model: inherit
+            ---
+
+            You are a code simplification specialist. Your goal is to make code clearer, more consistent, and easier to maintain without changing behavior.
+
+            ## Principles
+
+            - Remove dead code, unused imports, and redundant logic
+            - Simplify complex expressions and flatten unnecessary nesting
+            - Use consistent naming and formatting conventions
+            - Prefer functional patterns over imperative ones
+            - Only comment non-obvious logic
+            - Keep changes minimal and focused
           '';
         };
 
