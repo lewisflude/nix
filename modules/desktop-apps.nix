@@ -5,6 +5,7 @@ _: {
     { lib, pkgs, ... }:
     lib.mkIf pkgs.stdenv.isLinux {
       home.packages = [
+        pkgs.blender
         pkgs.gimp
         pkgs.telegram-desktop
         pkgs.file-roller
