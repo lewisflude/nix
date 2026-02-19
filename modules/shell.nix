@@ -60,11 +60,11 @@ in
     {
       lib,
       pkgs,
-      config,
       osConfig ? { },
       ...
-    }:
+    }@hmArgs:
     let
+      hmConfig = hmArgs.config;
       sources = zshSources { inherit (pkgs) fetchgit; };
       inherit (pkgs.stdenv) isLinux;
     in
@@ -72,7 +72,7 @@ in
       programs.zsh = {
         enable = true;
         enableCompletion = true;
-        dotDir = "${config.xdg.configHome}/zsh";
+        dotDir = "${hmConfig.xdg.configHome}/zsh";
         autosuggestion.enable = false;
         syntaxHighlighting.enable = false;
         historySubstringSearch.enable = false;
@@ -110,7 +110,7 @@ in
           save = 50000;
           size = 50000;
           ignoreAllDups = true;
-          path = "${config.home.homeDirectory}/.zsh_history";
+          path = "${hmConfig.home.homeDirectory}/.zsh_history";
           ignorePatterns = [
             "rm *"
             "pkill *"
@@ -251,7 +251,7 @@ in
           export WORDCHARS='*?_-.[]~=&;!'
           export SOPS_GPG_EXEC="${lib.getExe pkgs.gnupg}"
           export SOPS_GPG_ARGS="--pinentry-mode=loopback"
-          export NIX_FLAKE="${config.home.homeDirectory}/.config/nix"
+          export NIX_FLAKE="${hmConfig.home.homeDirectory}/.config/nix"
           ${lib.optionalString (secretAvailable osConfig "GITHUB_TOKEN") ''
             if [[ -z "$GITHUB_TOKEN" && -r "${lib.escapeShellArg (secretPath osConfig "GITHUB_TOKEN")}" ]]; then
               export GITHUB_TOKEN="$(cat "${lib.escapeShellArg (secretPath osConfig "GITHUB_TOKEN")}")"
@@ -261,16 +261,16 @@ in
 
         completionInit = ''
           autoload -Uz compinit
-          mkdir -p ${config.xdg.cacheHome}/zsh
+          mkdir -p ${hmConfig.xdg.cacheHome}/zsh
           fpath=(${pkgs.zsh-completions}/share/zsh/site-functions $fpath)
-          local zcompdump="${config.xdg.cacheHome}/zsh/.zcompdump"
+          local zcompdump="${hmConfig.xdg.cacheHome}/zsh/.zcompdump"
           if [[ ! -f "$zcompdump" ]] || [[ -n "$(find "$zcompdump" -mtime +1 2>/dev/null)" ]]; then
             compinit -d "$zcompdump"
           else
             compinit -C -d "$zcompdump"
           fi
           zstyle ':completion:*' use-cache yes
-          zstyle ':completion:*' cache-path ${config.xdg.cacheHome}/zsh
+          zstyle ':completion:*' cache-path ${hmConfig.xdg.cacheHome}/zsh
         '';
 
         initContent = lib.mkMerge [
@@ -382,8 +382,8 @@ in
             # ════════════════════════════════════════════════════════════════
             # Custom Functions (Load Immediately)
             # ════════════════════════════════════════════════════════════════
-            [[ -f "${config.home.homeDirectory}/.config/nix/lib/zsh/functions.zsh" ]] && source "${config.home.homeDirectory}/.config/nix/lib/zsh/functions.zsh"
-            [[ -f "${config.home.homeDirectory}/.config/nix/lib/zsh/p10k-diagnostics.zsh" ]] && source "${config.home.homeDirectory}/.config/nix/lib/zsh/p10k-diagnostics.zsh"
+            [[ -f "${hmConfig.home.homeDirectory}/.config/nix/lib/zsh/functions.zsh" ]] && source "${hmConfig.home.homeDirectory}/.config/nix/lib/zsh/functions.zsh"
+            [[ -f "${hmConfig.home.homeDirectory}/.config/nix/lib/zsh/p10k-diagnostics.zsh" ]] && source "${hmConfig.home.homeDirectory}/.config/nix/lib/zsh/p10k-diagnostics.zsh"
 
             # ════════════════════════════════════════════════════════════════
             # Terminfo-Based Keybindings

@@ -10,9 +10,8 @@ in
     {
       lib,
       pkgs,
-      config,
       ...
-    }:
+    }@nixosArgs:
     let
 
       # home-llm is disabled until the package is updated for current nixpkgs
@@ -560,13 +559,15 @@ in
           ];
         }
       ];
+    
+      nixosConfig = nixosArgs.config;
     in
     {
       # SOPS secrets configuration
       sops.templates."hass-secrets.yaml" = {
         content = ''
-          latitude: ${config.sops.placeholder.LATITUDE}
-          longitude: ${config.sops.placeholder.LONGITUDE}
+          latitude: ${nixosConfig.sops.placeholder.LATITUDE}
+          longitude: ${nixosConfig.sops.placeholder.LONGITUDE}
         '';
         owner = "hass";
         group = "hass";
@@ -1098,7 +1099,7 @@ in
           Type = "oneshot";
           RemainAfterExit = true;
           ExecStart = "${pkgs.coreutils}/bin/ln -sf ${
-            config.sops.templates."hass-secrets.yaml".path
+            nixosConfig.sops.templates."hass-secrets.yaml".path
           } /var/lib/hass/secrets.yaml";
           User = "hass";
           Group = "hass";

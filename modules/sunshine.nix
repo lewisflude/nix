@@ -12,8 +12,8 @@ _: {
       ultrawide = "DP-1"; # AW3423DWF — disabled during streaming
 
       # 1920x1080@60Hz EDID (v1.3, manufacturer "LNX", sRGB, monitor name "Virtual 1080").
-      # Loaded via drm.edid_firmware so the GPU always sees a connected display on
-      # the virtual output, even when no physical monitor or dummy plug is attached.
+      # Loaded via hardware.display.edid so the GPU always sees a connected display
+      # on the virtual output, even when no physical monitor or dummy plug is attached.
       edidHex = builtins.concatStringsSep "" [
         "00FFFFFFFFFFFF00" # Header
         "31D8000000000000" # Manufacturer "LNX", product 0, serial 0
@@ -33,7 +33,7 @@ _: {
         "0000000000000064" # Extension count 0, checksum 0x64
       ];
 
-      edidFirmware = pkgs.runCommandLocal "edid-virtual-1080p" { } ''
+      edidPackage = pkgs.runCommandLocal "edid-virtual-1080p" { } ''
         mkdir -p $out/lib/firmware/edid
         hex="${edidHex}"
         for ((i = 0; i < ''${#hex}; i += 2)); do
@@ -41,14 +41,43 @@ _: {
         done > $out/lib/firmware/edid/virtual-1080p.bin
       '';
 
+      # Auto-discover the niri IPC socket (path contains the PID, so it's dynamic)
+      findNiriSocket = ''
+        if [ -z "''${NIRI_SOCKET:-}" ]; then
+          NIRI_SOCKET="$(find "/run/user/$(id -u)" -maxdepth 1 -name 'niri.*.sock' -print -quit 2>/dev/null || true)"
+          export NIRI_SOCKET
+        fi
+      '';
+
+      sunshine-enable-display = pkgs.writeShellApplication {
+        name = "sunshine-enable-display";
+        runtimeInputs = [
+          pkgs.coreutils
+          pkgs.findutils
+          pkgs.niri
+        ];
+        text = ''
+          ${findNiriSocket}
+          if [ -z "''${NIRI_SOCKET:-}" ]; then
+            echo "Warning: niri socket not found, cannot enable virtual display" >&2
+            exit 0
+          fi
+          niri msg output "${virtualDisplay}" on || true
+          sleep 1
+        '';
+      };
+
       sunshine-prep = pkgs.writeShellApplication {
         name = "sunshine-prep";
         runtimeInputs = [
           pkgs.systemd
           pkgs.coreutils
+          pkgs.findutils
           pkgs.niri
         ];
         text = ''
+          ${findNiriSocket}
+
           # Enable virtual display and disable ultrawide so it becomes the sole output
           niri msg output "${virtualDisplay}" on
           niri msg output "${ultrawide}" off || true
@@ -72,12 +101,16 @@ _: {
         name = "sunshine-cleanup";
         runtimeInputs = [
           pkgs.coreutils
+          pkgs.findutils
           pkgs.niri
         ];
         text = ''
-          # Disable virtual display and restore ultrawide
+          ${findNiriSocket}
+
+          # Reset virtual display resolution and restore ultrawide
+          # Keep the virtual display ON so Sunshine's KMS capture remains valid
+          # for future connections (turning it off invalidates the CRTC handle)
           niri msg output "${virtualDisplay}" mode 1920x1080@60 || true
-          niri msg output "${virtualDisplay}" off
           niri msg output "${ultrawide}" on || true
 
           pid_file="$XDG_RUNTIME_DIR/sunshine-inhibit.pid"
@@ -89,14 +122,13 @@ _: {
       };
     in
     {
-      # Custom EDID firmware so the GPU always sees a display on the virtual output
-      hardware.firmware = [ edidFirmware ];
-
-      # Force the virtual display enabled at boot with our EDID
-      boot.kernelParams = [
-        "drm.edid_firmware=${virtualDisplay}:edid/virtual-1080p.bin"
-        "video=${virtualDisplay}:e"
-      ];
+      # Custom EDID firmware so the GPU always sees a display on the virtual output,
+      # force-enabled at boot via hardware.display.outputs
+      hardware.display.edid.packages = [ edidPackage ];
+      hardware.display.outputs.${virtualDisplay} = {
+        edid = "virtual-1080p.bin";
+        mode = "e";
+      };
 
       services.sunshine = {
         enable = true;
@@ -154,10 +186,16 @@ _: {
         ];
       };
 
-      # Sunshine needs WAYLAND_DISPLAY to reach Niri, and NVIDIA libs for encoding
-      systemd.user.services.sunshine.environment = {
-        LD_LIBRARY_PATH = "/run/opengl-driver/lib";
-        WAYLAND_DISPLAY = "wayland-1";
+      # Sunshine needs WAYLAND_DISPLAY to reach Niri, and NVIDIA libs for encoding.
+      # ExecStartPre enables the virtual display so Sunshine's encoder probe finds
+      # an active CRTC even when the KVM is switched away (DP-1 disconnected).
+      systemd.user.services.sunshine = {
+        after = [ "graphical-session.target" ];
+        environment = {
+          LD_LIBRARY_PATH = "/run/opengl-driver/lib";
+          WAYLAND_DISPLAY = "wayland-1";
+        };
+        serviceConfig.ExecStartPre = "${sunshine-enable-display}/bin/sunshine-enable-display";
       };
     };
 }

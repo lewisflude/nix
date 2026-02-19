@@ -55,11 +55,10 @@ in
   flake.modules.nixos.caddy =
     {
       lib,
-      config,
       ...
-    }:
+    }@nixosArgs:
     let
-      cfg = config.host.services.caddy;
+      cfg = nixosArgs.config.host.services.caddy;
     in
     {
       services.caddy = lib.mkIf cfg.enable {

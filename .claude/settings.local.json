@@ -8,11 +8,12 @@
       "WebFetch(domain:docs.lizardbyte.dev)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(journalctl:*)",
-      "Bash(niri msg:*)"
+      "Bash(niri msg:*)",
+      "mcp__git__git_status"
     ]
   },
+  "disableAllHooks": true,
   "enabledPlugins": {
     "ralph-loop@claude-plugins-official": true
-  },
-  "disableAllHooks": true
+  }
 }
