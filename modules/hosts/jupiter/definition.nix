@@ -89,6 +89,7 @@ in
         nixos.ssh
         nixos.samba
         nixos.caddy
+        nixos.filestash
         nixos.syncthing
         nixos.sunshine
         nixos.homeAssistant

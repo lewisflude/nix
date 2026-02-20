@@ -9,7 +9,8 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(journalctl:*)",
       "Bash(niri msg:*)",
-      "mcp__git__git_status"
+      "mcp__git__git_status",
+      "mcp__github__search_repositories"
     ]
   },
   "disableAllHooks": true,

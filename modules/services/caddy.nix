@@ -49,6 +49,9 @@ let
     inherit (constants.ports.services) ollama;
     openwebui = constants.ports.services.openWebui;
     inherit (constants.ports.services) comfyui;
+
+    # File sharing
+    files = constants.ports.services.filestash;
   };
 in
 {

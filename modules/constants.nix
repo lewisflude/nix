@@ -50,6 +50,7 @@
           comfyui = 8188;
           janitorr = 8485;
           profilarr = 6868;
+          filestash = 8334;
 
           syncthing = {
             sync = 22000;
