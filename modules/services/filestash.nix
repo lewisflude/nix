@@ -25,9 +25,9 @@ in
       };
 
       systemd.tmpfiles.rules = [
-        "d ${configPath}/filestash 0755 root root -"
-        "d ${configPath}/filestash/log 0755 root root -"
-        "f ${configPath}/filestash/log/access.log 0644 root root -"
+        "d ${configPath}/filestash 0777 root root -"
+        "d ${configPath}/filestash/log 0777 root root -"
+        "d ${configPath}/filestash/config 0777 root root -"
       ];
     };
 }
