@@ -559,7 +559,7 @@ in
           ];
         }
       ];
-    
+
       nixosConfig = nixosArgs.config;
     in
     {

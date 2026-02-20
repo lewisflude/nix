@@ -13,23 +13,20 @@ in
     in
     {
       virtualisation.oci-containers.containers.filestash = {
-        image = "machines/filestash:latest";
+        image = "docker.io/machines/filestash:latest";
         environment = {
           TZ = timezone;
-          APPLICATION_URL = "files.${constants.baseDomain}";
+          APPLICATION_URL = "https://files.${constants.baseDomain}";
         };
         volumes = [
           "${configPath}/filestash:/app/data/state"
         ];
-        ports = [ "${toString constants.ports.services.filestash}:8334" ];
+        ports = [ "127.0.0.1:${toString constants.ports.services.filestash}:8334" ];
       };
 
       systemd.tmpfiles.rules = [
         "d ${configPath}/filestash 0755 root root -"
-      ];
-
-      networking.firewall.allowedTCPPorts = [
-        constants.ports.services.filestash
+        "d ${configPath}/filestash/log 0755 root root -"
       ];
     };
 }
