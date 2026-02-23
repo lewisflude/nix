@@ -89,7 +89,7 @@ in
         nixos.ssh
         nixos.samba
         nixos.caddy
-        nixos.filestash
+        nixos.filebrowser
         nixos.syncthing
         nixos.sunshine
         nixos.homeAssistant
@@ -110,6 +110,10 @@ in
         nixos.sabnzbd
         nixos.flaresolverr
         nixos.jellyseerr
+        nixos.notifiarr
+        nixos.decluttarr
+        nixos.autopulse
+        nixos.huntarr
 
         # ═══════════════════════════════════════════════════════════════════════
         # VPN & Downloads
@@ -195,6 +199,7 @@ in
         homeManager.claudeCode
         homeManager.geminiCli
         homeManager.yazi
+        homeManager.iaGet
         homeManager.mpv
         homeManager.obsidian
         homeManager.zed

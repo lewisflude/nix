@@ -41,6 +41,9 @@ let
     inherit (constants.ports.services) readarr;
     inherit (constants.ports.services) bazarr;
     inherit (constants.ports.services) autobrr;
+    inherit (constants.ports.services) notifiarr;
+    inherit (constants.ports.services) huntarr;
+    inherit (constants.ports.services) autopulse;
 
     # Downloads
     usenet = constants.ports.services.sabnzbd;
@@ -51,7 +54,7 @@ let
     inherit (constants.ports.services) comfyui;
 
     # File sharing
-    files = constants.ports.services.filestash;
+    files = constants.ports.services.filebrowser;
   };
 in
 {
@@ -77,6 +80,7 @@ in
           // {
             # VPN namespace — different IP, not localhost
             "torrent.${constants.baseDomain}" = mkReverseProxy "192.168.15.1:8080";
+
           };
       };
 

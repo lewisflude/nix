@@ -36,11 +36,20 @@ _: {
         # DAWs
         pkgs.ardour
         pkgs.reaper
+        pkgs.zrythm # GTK4 DAW with built-in plugins
 
         # Trackers -- breakcore/jungle workflow
         pkgs.milkytracker # FastTracker 2 clone (.xm/.mod)
         pkgs.schismtracker # Impulse Tracker clone (.it)
         pkgs.sunvox # Modular tracker/synth
+
+        # Modular synthesis
+        pkgs.vcv-rack # Virtual Eurorack
+        pkgs.cardinal # Self-contained VCV Rack as plugin (LV2/VST/CLAP)
+
+        # Audio programming languages
+        pkgs.csound # Orchestra/score language
+        pkgs.faust # Functional DSP language (compiles to C++, LLVM, WASM, etc.)
 
         # MIDI routing
         pkgs.alsa-utils # aconnect, amidi, aplaymidi

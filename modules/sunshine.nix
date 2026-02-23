@@ -11,36 +11,6 @@ _: {
       virtualDisplay = "HDMI-A-1"; # 1080p virtual output (EDID-emulated, captured by Sunshine)
       ultrawide = "DP-1"; # AW3423DWF — disabled during streaming
 
-      # 1920x1080@60Hz EDID (v1.3, manufacturer "LNX", sRGB, monitor name "Virtual 1080").
-      # Loaded via hardware.display.edid so the GPU always sees a connected display
-      # on the virtual output, even when no physical monitor or dummy plug is attached.
-      edidHex = builtins.concatStringsSep "" [
-        "00FFFFFFFFFFFF00" # Header
-        "31D8000000000000" # Manufacturer "LNX", product 0, serial 0
-        "0122010380351E78" # Week 1, 2024, EDID 1.3, digital, 53x30 cm, gamma 2.2
-        "0AEE91A3544C9926" # sRGB chromaticity
-        "0F50540000000101" # Established/standard timings (unused)
-        "0101010101010101"
-        "010101010101023A" # DTD: pixel clock 148.5 MHz (1920x1080@60Hz)
-        "801871382D40582C" # H-active 1920, H-blank 280, V-active 1080, V-blank 45
-        "4500122C2100001E" # Sync 88/44 + 4/5, 530x300 mm, +H/+V
-        "000000FD00324B1E" # Range limits: 50-75 Hz V, 30-81 kHz H
-        "5110000A20202020" # Max pixel clock 160 MHz
-        "2020000000FC0056" # Monitor name: "Virtual 1080"
-        "69727475616C2031"
-        "3038300A00000010" # Dummy descriptor
-        "0000000000000000"
-        "0000000000000064" # Extension count 0, checksum 0x64
-      ];
-
-      edidPackage = pkgs.runCommandLocal "edid-virtual-1080p" { } ''
-        mkdir -p $out/lib/firmware/edid
-        hex="${edidHex}"
-        for ((i = 0; i < ''${#hex}; i += 2)); do
-          printf "\x''${hex:$i:2}"
-        done > $out/lib/firmware/edid/virtual-1080p.bin
-      '';
-
       # Auto-discover the niri IPC socket (path contains the PID, so it's dynamic)
       findNiriSocket = ''
         if [ -z "''${NIRI_SOCKET:-}" ]; then
@@ -122,11 +92,12 @@ _: {
       };
     in
     {
-      # Custom EDID firmware so the GPU always sees a display on the virtual output,
-      # force-enabled at boot via hardware.display.outputs
-      hardware.display.edid.packages = [ edidPackage ];
+      # 1920x1080@60Hz EDID generated from modeline so the GPU always sees a
+      # display on the virtual output, force-enabled at boot
+      hardware.display.edid.modelines."virt-1080p" =
+        "148.50  1920 2008 2052 2200  1080 1084 1089 1125  +hsync +vsync";
       hardware.display.outputs.${virtualDisplay} = {
-        edid = "virtual-1080p.bin";
+        edid = "virt-1080p.bin";
         mode = "e";
       };
 
@@ -157,6 +128,11 @@ _: {
           audio_codec = "opus";
           channels = 2;
           audio_bitrate = 128;
+
+          # Force Xbox 360 controller emulation for reliable Steam detection.
+          # Default "auto" can select DS4/DS5/Switch types that Steam Input
+          # doesn't reliably recognise as virtual uinput devices on Linux.
+          gamepad = "x360";
         };
 
         applications.apps = [

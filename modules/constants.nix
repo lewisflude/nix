@@ -50,7 +50,10 @@
           comfyui = 8188;
           janitorr = 8485;
           profilarr = 6868;
-          filestash = 8334;
+          filebrowser = 8400;
+          notifiarr = 5454;
+          autopulse = 2875;
+          huntarr = 9705;
 
           syncthing = {
             sync = 22000;

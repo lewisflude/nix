@@ -1,168 +1,125 @@
 # ProtonVPN Port Forwarding Module
-# Automatic NAT-PMP port forwarding with qBittorrent API integration
+# Long-running NAT-PMP port forwarding with qBittorrent API integration
+# Runs inside VPN namespace via vpnConfinement with 30s renewal loop
 _: {
   flake.modules.nixos.protonvpnPortforward =
     { pkgs, ... }:
     let
       namespace = "qbt";
       gateway = "10.2.0.1";
-      renewInterval = "45s";
       leaseDuration = 60;
-      qbtWebUIPort = 8080; # Internal port within namespace
+      renewInterval = 30;
+      qbtWebUIPort = 8080;
 
-      # Port forwarding script with correct NAT-PMP commands
       portforwardScript = pkgs.writeShellApplication {
         name = "protonvpn-portforward";
         runtimeInputs = [
           pkgs.libnatpmp
           pkgs.iproute2
-          pkgs.systemd
           pkgs.gnugrep
-          pkgs.gnused
           pkgs.coreutils
           pkgs.curl
           pkgs.iptables
-          pkgs.inetutils
         ];
         text = ''
-          #!/usr/bin/env bash
-          set -euo pipefail
-
-          NAMESPACE="''${NAMESPACE:-qbt}"
-          VPN_GATEWAY="''${VPN_GATEWAY:-10.2.0.1}"
+          VPN_GATEWAY="''${VPN_GATEWAY:-${gateway}}"
           LEASE_DURATION="${toString leaseDuration}"
-          STATE_FILE="/var/lib/protonvpn-portforward.state"
           QBT_HOST="127.0.0.1:${toString qbtWebUIPort}"
+          IFACE="${namespace}0"
           LOG_PREFIX="[ProtonVPN-PortForward]"
+          PREV_PORT=""
 
-          log_info() { echo "$LOG_PREFIX INFO: $*" >&2; }
-          log_error() { echo "$LOG_PREFIX ERROR: $*" >&2; }
+          log_info()    { echo "$LOG_PREFIX INFO: $*" >&2; }
+          log_error()   { echo "$LOG_PREFIX ERROR: $*" >&2; }
           log_success() { echo "$LOG_PREFIX SUCCESS: $*" >&2; }
 
-          # Check if VPN namespace exists
-          if ! ip netns list | grep -q "^$NAMESPACE"; then
-            log_info "VPN namespace '$NAMESPACE' not found - VPN not connected, skipping"
-            exit 0
-          fi
+          cleanup() {
+            log_info "Shutting down, cleaning up firewall rules..."
+            if [[ -n "$PREV_PORT" ]]; then
+              iptables -D INPUT -p tcp --dport "$PREV_PORT" -i "$IFACE" -j ACCEPT 2>/dev/null || true
+              iptables -D INPUT -p udp --dport "$PREV_PORT" -i "$IFACE" -j ACCEPT 2>/dev/null || true
+              log_info "Removed firewall rules for port $PREV_PORT"
+            fi
+          }
+          trap cleanup EXIT
 
-          # Check if WireGuard interface is up in the namespace
-          if ! ip netns exec "$NAMESPACE" ip link show "${namespace}0" 2>/dev/null | grep -q "state UP\|state UNKNOWN"; then
-            log_info "WireGuard interface ${namespace}0 not up in namespace - VPN not connected, skipping"
-            exit 0
-          fi
-
-          log_info "=== ProtonVPN NAT-PMP Port Forwarding ==="
-
-          # Request BOTH UDP and TCP port mappings (required per ProtonVPN docs)
-          log_info "Requesting UDP port mapping..."
-          UDP_OUTPUT=$(ip netns exec "$NAMESPACE" natpmpc -a 1 0 udp "$LEASE_DURATION" -g "$VPN_GATEWAY" 2>&1) || true
-
-          log_info "Requesting TCP port mapping..."
-          TCP_OUTPUT=$(ip netns exec "$NAMESPACE" natpmpc -a 1 0 tcp "$LEASE_DURATION" -g "$VPN_GATEWAY" 2>&1) || true
-
-          # Extract ports - ProtonVPN should assign the same port for both
-          UDP_PORT=0
-          TCP_PORT=0
-
-          if echo "$UDP_OUTPUT" | grep -q "Mapped public port"; then
-            UDP_PORT=$(echo "$UDP_OUTPUT" | grep -oP 'Mapped public port \K[0-9]+' || echo "0")
-          fi
-
-          if echo "$TCP_OUTPUT" | grep -q "Mapped public port"; then
-            TCP_PORT=$(echo "$TCP_OUTPUT" | grep -oP 'Mapped public port \K[0-9]+' || echo "0")
-          fi
-
-          # Verify both protocols got the same port
-          if [[ "$UDP_PORT" -gt 0 ]] && [[ "$TCP_PORT" -gt 0 ]]; then
-            if [[ "$UDP_PORT" == "$TCP_PORT" ]]; then
-              PUBLIC_PORT="$TCP_PORT"
-              log_success "ProtonVPN assigned port: $PUBLIC_PORT (UDP+TCP)"
-            else
-              log_error "Port mismatch: UDP=$UDP_PORT, TCP=$TCP_PORT"
+          # Wait for WireGuard interface
+          log_info "Waiting for WireGuard interface $IFACE..."
+          for i in $(seq 1 30); do
+            if ip link show "$IFACE" 2>/dev/null | grep -qE "state (UP|UNKNOWN)"; then
+              log_info "Interface $IFACE is up"
+              break
+            fi
+            if [[ "$i" -eq 30 ]]; then
+              log_error "Timed out waiting for $IFACE"
               exit 1
             fi
-          else
-            log_error "Failed to get port from NAT-PMP"
-            log_error "UDP output: $UDP_OUTPUT"
-            log_error "TCP output: $TCP_OUTPUT"
-            exit 1
-          fi
-
-          # Get current qBittorrent port (localhost auth bypass enabled)
-          log_info "Connecting to qBittorrent WebUI at http://$QBT_HOST..."
-          PREFS=$(ip netns exec "$NAMESPACE" curl -s -m 10 \
-            "http://$QBT_HOST/api/v2/app/preferences" 2>&1 || echo "{}")
-          CURRENT_PORT=$(echo "$PREFS" | grep -oP '"listen_port":\K[0-9]+' || echo "0")
-
-          log_info "Current qBittorrent port: $CURRENT_PORT"
-          log_info "ProtonVPN assigned port: $PUBLIC_PORT"
-
-          # Update qBittorrent port if needed
-          if [[ "$CURRENT_PORT" == "$PUBLIC_PORT" ]]; then
-            log_info "qBittorrent port already correct ($PUBLIC_PORT) - no update needed"
-          else
-            log_info "Updating qBittorrent port from $CURRENT_PORT to $PUBLIC_PORT..."
-
-            # Update port AND interface binding
-            UPDATE_RESPONSE=$(ip netns exec "$NAMESPACE" curl -s -m 10 -X POST \
-              "http://$QBT_HOST/api/v2/app/setPreferences" \
-              --data "json={\"listen_port\": $PUBLIC_PORT, \"current_interface_name\": \"${namespace}0\", \"current_interface_address\": \"10.2.0.2\"}" \
-              2>&1 || echo "ERROR")
-
-            if [[ -z "$UPDATE_RESPONSE" ]] || [[ "$UPDATE_RESPONSE" == "Ok." ]]; then
-              log_success "qBittorrent port updated to $PUBLIC_PORT"
-            else
-              log_error "Failed to update port: $UPDATE_RESPONSE"
-            fi
-
-            # Verify qBittorrent is listening on new port
             sleep 2
-            if ip netns exec "$NAMESPACE" ss -tuln 2>/dev/null | grep -q ":$PUBLIC_PORT "; then
-              log_success "Verified: qBittorrent listening on port $PUBLIC_PORT"
-            else
-              log_info "qBittorrent may still be binding to port $PUBLIC_PORT"
+          done
+
+          log_info "Starting NAT-PMP renewal loop (every ${toString renewInterval}s, lease ${toString leaseDuration}s)"
+
+          while true; do
+            # Request both UDP and TCP mappings (required by ProtonVPN)
+            UDP_OUTPUT=$(natpmpc -a 1 0 udp "$LEASE_DURATION" -g "$VPN_GATEWAY" 2>&1) || true
+            TCP_OUTPUT=$(natpmpc -a 1 0 tcp "$LEASE_DURATION" -g "$VPN_GATEWAY" 2>&1) || true
+
+            UDP_PORT=0
+            TCP_PORT=0
+
+            if echo "$UDP_OUTPUT" | grep -q "Mapped public port"; then
+              UDP_PORT=$(echo "$UDP_OUTPUT" | grep -oP 'Mapped public port \K[0-9]+' || echo "0")
             fi
-          fi
+            if echo "$TCP_OUTPUT" | grep -q "Mapped public port"; then
+              TCP_PORT=$(echo "$TCP_OUTPUT" | grep -oP 'Mapped public port \K[0-9]+' || echo "0")
+            fi
 
-          # Save state
-          cat > "$STATE_FILE" << EOF
-          # ProtonVPN Port Forwarding State
-          # Last updated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-          PUBLIC_PORT=$PUBLIC_PORT
-          NAMESPACE=$NAMESPACE
-          VPN_GATEWAY=$VPN_GATEWAY
-          EOF
-          chmod 644 "$STATE_FILE"
+            if [[ "$UDP_PORT" -gt 0 ]] && [[ "$TCP_PORT" -gt 0 ]] && [[ "$UDP_PORT" == "$TCP_PORT" ]]; then
+              PUBLIC_PORT="$TCP_PORT"
+              log_success "NAT-PMP assigned port: $PUBLIC_PORT (UDP+TCP)"
+            else
+              log_error "NAT-PMP failed or port mismatch (UDP=$UDP_PORT TCP=$TCP_PORT)"
+              log_error "UDP: $UDP_OUTPUT"
+              log_error "TCP: $TCP_OUTPUT"
+              sleep "${toString renewInterval}"
+              continue
+            fi
 
-          log_success "=== Port Forwarding Complete: $PUBLIC_PORT ==="
-          echo "$PUBLIC_PORT"
+            # Update firewall: add new rules first, then remove old (zero-downtime)
+            if [[ "$PUBLIC_PORT" != "$PREV_PORT" ]]; then
+              for proto in tcp udp; do
+                if ! iptables -C INPUT -p "$proto" --dport "$PUBLIC_PORT" -i "$IFACE" -j ACCEPT 2>/dev/null; then
+                  iptables -I INPUT -p "$proto" --dport "$PUBLIC_PORT" -i "$IFACE" -j ACCEPT
+                  log_info "Added $proto firewall rule for port $PUBLIC_PORT"
+                fi
+              done
+
+              if [[ -n "$PREV_PORT" ]] && [[ "$PREV_PORT" != "$PUBLIC_PORT" ]]; then
+                for proto in tcp udp; do
+                  iptables -D INPUT -p "$proto" --dport "$PREV_PORT" -i "$IFACE" -j ACCEPT 2>/dev/null || true
+                done
+                log_info "Removed old firewall rules for port $PREV_PORT"
+              fi
+
+              PREV_PORT="$PUBLIC_PORT"
+            fi
+
+            # Update qBittorrent port if needed
+            PREFS=$(curl -s -m 10 "http://$QBT_HOST/api/v2/app/preferences" 2>/dev/null || echo "{}")
+            CURRENT_PORT=$(echo "$PREFS" | grep -oP '"listen_port":\K[0-9]+' || echo "0")
+
+            if [[ "$CURRENT_PORT" != "$PUBLIC_PORT" ]]; then
+              log_info "Updating qBittorrent port from $CURRENT_PORT to $PUBLIC_PORT..."
+              curl -s -m 10 -X POST \
+                "http://$QBT_HOST/api/v2/app/setPreferences" \
+                --data "json={\"listen_port\": $PUBLIC_PORT, \"current_interface_name\": \"$IFACE\", \"current_interface_address\": \"10.2.0.2\"}" \
+                2>/dev/null || log_error "Failed to update qBittorrent port"
+            fi
+
+            sleep "${toString renewInterval}"
+          done
         '';
       };
-
-      # Firewall update script
-      firewallScript = pkgs.writeShellScript "update-qbt-firewall" ''
-        #!/usr/bin/env bash
-        set -euo pipefail
-
-        NAMESPACE="''${1:-qbt}"
-        NEW_PORT="''${2:-0}"
-
-        if [[ "$NEW_PORT" -eq 0 ]]; then
-          echo "Error: Port not provided"
-          exit 1
-        fi
-
-        echo "Updating firewall for port $NEW_PORT in namespace $NAMESPACE..."
-
-        for protocol in tcp udp; do
-          if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -C INPUT -p "$protocol" --dport "$NEW_PORT" -i "$NAMESPACE"0 -j ACCEPT 2>/dev/null; then
-            ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iptables}/bin/iptables -I INPUT -p "$protocol" --dport "$NEW_PORT" -i "$NAMESPACE"0 -j ACCEPT
-            echo "Added IPv4 $protocol rule for port $NEW_PORT"
-          fi
-        done
-
-        echo "Firewall updated successfully for port $NEW_PORT"
-      '';
     in
     {
       environment.systemPackages = [
@@ -171,49 +128,32 @@ _: {
       ];
 
       systemd.services.protonvpn-portforward = {
-        description = "ProtonVPN NAT-PMP Port Forwarding with qBittorrent Integration";
+        description = "ProtonVPN NAT-PMP Port Forwarding (loop-based)";
         after = [
           "network-online.target"
           "${namespace}.service"
           "qbittorrent.service"
-          "configure-qbt-routes.service"
         ];
         wants = [
           "network-online.target"
           "${namespace}.service"
         ];
+        wantedBy = [ "multi-user.target" ];
+
+        vpnConfinement = {
+          enable = true;
+          vpnNamespace = namespace;
+        };
 
         serviceConfig = {
-          Type = "oneshot";
+          Type = "simple";
           ExecStart = "${portforwardScript}/bin/protonvpn-portforward";
-          ExecStartPost = "${pkgs.bash}/bin/bash -c 'PORT=$(grep PUBLIC_PORT /var/lib/protonvpn-portforward.state 2>/dev/null | cut -d= -f2); [ -n \"$PORT\" ] && ${firewallScript} ${namespace} \"$PORT\" || echo \"No port to configure\"'";
-          Environment = [
-            "NAMESPACE=${namespace}"
-            "VPN_GATEWAY=${gateway}"
-          ];
-          TimeoutStartSec = "60s";
+          Restart = "on-failure";
+          RestartSec = "10s";
+          Environment = [ "VPN_GATEWAY=${gateway}" ];
           PrivateTmp = true;
           NoNewPrivileges = false;
-          ProtectSystem = "strict";
           ProtectHome = true;
-          ReadWritePaths = [
-            "/var/lib"
-            "/tmp"
-          ];
-          PrivateNetwork = false;
-        };
-      };
-
-      systemd.timers.protonvpn-portforward = {
-        description = "Timer for ProtonVPN NAT-PMP Port Forwarding Renewal";
-        wantedBy = [ "timers.target" ];
-        after = [ "${namespace}.service" ];
-        timerConfig = {
-          OnBootSec = "1min";
-          OnUnitActiveSec = renewInterval;
-          Unit = "protonvpn-portforward.service";
-          Persistent = true;
-          AccuracySec = "1min";
         };
       };
     };

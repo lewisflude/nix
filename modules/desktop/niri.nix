@@ -104,6 +104,7 @@
           environment.QT_QPA_PLATFORM = "wayland";
           debug = lib.mkIf (osConfig.host.hardware.renderDevice or null != null) {
             render-drm-device = osConfig.host.hardware.renderDevice;
+            disable-cursor-plane = true;
           };
 
           binds = {

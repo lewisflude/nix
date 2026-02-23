@@ -130,46 +130,25 @@ in
               "Bash(nixfmt *)"
               "Bash(biome *)"
               "Bash(prettier *)"
-              # search & filesystem
-              "Bash(rg *)"
-              "Bash(fd *)"
+              # filesystem
               "Bash(jq *)"
-              "Bash(bat *)"
-              "Bash(eza *)"
               "Bash(ls *)"
-              "Bash(cat *)"
-              "Bash(head *)"
-              "Bash(tail *)"
               "Bash(wc *)"
               "Bash(mkdir *)"
               "Bash(cp *)"
               "Bash(mv *)"
               "Bash(touch *)"
               "Bash(which *)"
-              "Bash(stat *)"
-              "Bash(file *)"
-              "Bash(du *)"
-              "Bash(df *)"
               # network
               "Bash(curl *)"
-              "Bash(wget *)"
               # containers (read-only)
               "Bash(docker ps *)"
               "Bash(docker logs *)"
               "Bash(docker inspect *)"
               "Bash(docker images *)"
-              "Bash(podman ps *)"
-              "Bash(podman logs *)"
-              "Bash(podman inspect *)"
-              "Bash(podman images *)"
               # env tools
               "Bash(direnv *)"
               "Bash(devenv *)"
-              # misc
-              "Bash(echo *)"
-              "Bash(printf *)"
-              "Bash(test *)"
-              "Bash([ *)"
             ];
             deny = [
               "Bash(sudo *)"
@@ -211,6 +190,75 @@ in
             - Use strong, explicit types. Avoid any/unknown. Prefer type annotations.
             - Only comment non-obvious logic. Code should be self-documenting.
             - Delete dead code rather than commenting it out.
+          '';
+        };
+
+        skills = {
+          dendritic-pattern = ''
+            ---
+            description: Dendritic pattern guide for writing and modifying .nix flake-parts modules in this repository.
+            ---
+
+            # Dendritic Pattern
+
+            Every .nix file (except flake.nix) is a flake-parts module.
+
+            ## Module Template
+
+            ```nix
+            { config, ... }:
+            let
+              constants = config.constants;
+            in
+            {
+              flake.modules.nixos.featureName = { pkgs, lib, ... }: {
+                # NixOS system config (services, kernel, hardware, daemons)
+              };
+
+              flake.modules.homeManager.featureName = { pkgs, ... }: {
+                # Home-manager config (user apps, dotfiles, dev tools, shell)
+              };
+            }
+            ```
+
+            ## Two Scopes — Avoiding Config Shadowing
+
+            Use a named parameter to access platform config without shadowing outer (flake-parts) config:
+
+            ```nix
+            { config, ... }:
+            {
+              flake.modules.nixos.shell = nixosArgs: {
+                # config = flake-parts top-level (outer scope)
+                # nixosArgs.config = NixOS platform config
+                users.users.''${config.username}.shell = nixosArgs.config.programs.fish.package;
+              };
+            }
+            ```
+
+            If you don't need platform config, destructure normally:
+
+            ```nix
+            { config, ... }:
+            {
+              flake.modules.nixos.shell = { pkgs, ... }: {
+                users.users.''${config.username}.shell = pkgs.fish;
+              };
+            }
+            ```
+
+            ## Anti-Patterns
+
+            - `{ config, pkgs, ... }:` inside module body — **shadows outer config**
+            - `with pkgs;` — use explicit `pkgs.package`
+            - `specialArgs = { inherit inputs; }` — access `inputs` from outer scope
+            - `import ../lib/constants.nix` — use `config.constants`
+            - Importing modules in infrastructure — hosts compose features, infrastructure only transforms
+
+            ## Placement Rules
+
+            - System services, kernel, hardware, daemons, boot, networking → `flake.modules.nixos.*`
+            - User apps, dotfiles, dev tools, tray applets, shell, editor → `flake.modules.homeManager.*`
           '';
         };
 
@@ -282,60 +330,27 @@ in
             3. Report issues by priority: Critical > Warning > Suggestion
             4. Be specific: include file path and line number for each issue
           '';
-
-          code-simplifier = ''
-            ---
-            name: code-simplifier
-            description: Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise.
-            tools: Read, Write, Edit, Glob, Grep, Bash
-            model: inherit
-            ---
-
-            You are a code simplification specialist. Your goal is to make code clearer, more consistent, and easier to maintain without changing behavior.
-
-            ## Principles
-
-            - Remove dead code, unused imports, and redundant logic
-            - Simplify complex expressions and flatten unnecessary nesting
-            - Use consistent naming and formatting conventions
-            - Prefer functional patterns over imperative ones
-            - Only comment non-obvious logic
-            - Keep changes minimal and focused
-          '';
         };
 
         memory.text = ''
           # Lewis Flude - Development Environment
 
           ## Machines
-          - **Jupiter**: NixOS desktop workstation (x86_64-linux). NVIDIA RTX 4090, ZFS storage. Used for development, gaming, VR, audio production.
-          - **Mercury**: macOS laptop (aarch64-darwin). Used for mobile development.
+          - Jupiter: NixOS desktop (x86_64-linux), RTX 4090, ZFS
+          - Mercury: macOS laptop (aarch64-darwin)
 
           ## Primary Tools
-          - **Editor**: Helix (hx)
-          - **Shell**: ZSH with Atuin history, Powerlevel10k prompt
-          - **Terminal multiplexer**: Zellij
-          - **Git**: GPG-signed commits, lazygit TUI, gh CLI
-          - **Environments**: Nix flakes, devenv, direnv
+          - Editor: Helix (hx)
+          - Shell: ZSH (Atuin, Powerlevel10k)
+          - Terminal: Zellij
+          - Git: GPG-signed, lazygit, gh CLI
+          - Envs: Nix flakes, devenv, direnv
 
-          ## Languages (by frequency)
-          - Nix (primary - this config repo)
-          - TypeScript / JavaScript (biome formatter)
-          - Python (ruff formatter, uv package manager)
-          - Go (gofumpt formatter)
-          - Rust (rustfmt formatter)
+          ## Languages
+          Nix, TypeScript, Python, Go, Rust
 
-          ## Coding Style
-          - Concise and minimal. No unnecessary abstraction.
-          - Functional patterns over imperative loops.
-          - Strong, explicit types. No any/unknown.
-          - Self-documenting code. Only comment non-obvious logic.
+          ## Conventions
           - Conventional commits: <type>(<scope>): <description>
-
-          ## Nix Repository
-          - Dendritic pattern: every .nix file is a flake-parts module
-          - Never run system rebuild commands (no sudo, no nixos-rebuild, no darwin-rebuild)
-          - Format with `nix fmt` (treefmt-nix with nixfmt, statix, deadnix, shfmt, prettier)
         '';
       };
     };

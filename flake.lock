@@ -533,6 +533,20 @@
         "type": "github"
       }
     },
+    "flake-schemas": {
+      "locked": {
+        "lastModified": 1761577921,
+        "narHash": "sha256-eK3/xbUOrxp9fFlei09XNjqcdiHXxndzrTXp7jFpOk8=",
+        "rev": "47849c7625e223d36766968cc6dc23ba0e135922",
+        "revCount": 107,
+        "type": "tarball",
+        "url": "https://api.flakehub.com/f/pinned/DeterminateSystems/flake-schemas/0.2.0/019a4a84-544d-7c59-b26d-e334e320c932/source.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://flakehub.com/f/DeterminateSystems/flake-schemas/%2A.tar.gz"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems_2"
@@ -714,6 +728,28 @@
       "original": {
         "owner": "jappie3",
         "repo": "hyprcursor-phinger",
+        "type": "github"
+      }
+    },
+    "ia-get": {
+      "inputs": {
+        "flake-schemas": "flake-schemas",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay_3"
+      },
+      "locked": {
+        "lastModified": 1771318888,
+        "narHash": "sha256-rroUp8xRQUvLOMiq0gX6ltJb4NEPtAsWdwLifeFSu4w=",
+        "owner": "wimpysworld",
+        "repo": "ia-get",
+        "rev": "1b4741baef59927103dcf0ce98d8320d9b2f9778",
+        "type": "github"
+      },
+      "original": {
+        "owner": "wimpysworld",
+        "repo": "ia-get",
         "type": "github"
       }
     },
@@ -1426,6 +1462,7 @@
         "git-hooks-nix": "git-hooks-nix_2",
         "home-manager": "home-manager",
         "hyprcursor-phinger": "hyprcursor-phinger",
+        "ia-get": "ia-get",
         "import-tree": "import-tree",
         "ironbar": "ironbar",
         "llm-agents": "llm-agents",
@@ -1535,6 +1572,27 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "rev": "ab3536fe850211a96673c6ffb2cb88aab8071cc9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_3": {
+      "inputs": {
+        "nixpkgs": [
+          "ia-get",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1768963622,
+        "narHash": "sha256-n6VHiUgrYD9yjagzG6ncVVqFbVTsKCI54tR9PNAFCo0=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "2ef5b3362af585a83bafd34e7fc9b1f388c2e5e2",
         "type": "github"
       },
       "original": {

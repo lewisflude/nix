@@ -18,7 +18,7 @@ in
       torrentPort = 62000;
       webuiPort = constants.ports.services.qbittorrent;
 
-      # BitTorrent session configuration optimized for seeding
+      # BitTorrent session configuration
       bittorrentSession = {
         # Download paths: NVMe for incomplete (fast I/O), HDD for complete (capacity)
         DefaultSavePath = "/mnt/storage/torrents";
@@ -29,50 +29,53 @@ in
         UseUPnP = false;
         UseNATPMP = false;
         UseLSD = false;
-        # Enable peer exchange and DHT
+        # Enable peer exchange and DHT (auto-disabled for private torrents)
         UsePEX = true;
         UseDHT = true;
-        # Protocol settings (TRASHguides: TCP has superior performance)
-        BTProtocol = "TCP";
-        Encryption = 0; # TRASHguides: Prefer (not Force) encryption for better compatibility
-        uTPMixedMode = "TCP";
-        # TRASHguides: Disable anonymous mode for better speeds on private trackers
+        # TCP+uTP: avoids TCP-only stalling bugs over VPN, reaches uTP-only peers.
+        # WireGuard is UDP-based so no TCP-over-TCP meltdown risk.
+        BTProtocol = "TCP and uTP";
+        uTPMixedMode = 0; # prefer_tcp: don't throttle TCP when uTP detects congestion
+        Encryption = 0; # Prefer (not Force) — VPN provides real encryption
         AnonymousMode = false;
-        # TRASHguides: Never auto-add external trackers (critical for private trackers)
         AddTrackersEnabled = false;
-        # Queue settings
+        # Queue settings: unlimited active uploads/torrents so all can seed.
+        # IgnoreSlowTorrents handles idle ones naturally.
         QueueingSystemEnabled = true;
-        MaxActiveDownloads = 3;
-        MaxActiveUploads = 75;
-        MaxActiveTorrents = 150;
-        # Connection limits
-        MaxConnections = 600;
-        MaxConnectionsPerTorrent = 80;
-        MaxUploads = 300;
+        MaxActiveDownloads = 5;
+        MaxActiveUploads = -1;
+        MaxActiveTorrents = -1;
+        # Connection limits tuned for 100 Mbps upload
+        MaxConnections = 500;
+        MaxConnectionsPerTorrent = 100;
+        MaxUploads = 200; # ~60 KB/s per slot at full upload
         MaxUploadsPerTorrent = 10;
         # Performance
         AddTorrentToTopOfQueue = true;
-        Preallocation = false;
+        Preallocation = false; # Required: ZFS CoW makes preallocation wasteful
         AddExtensionToIncompleteFiles = true;
         UseCategoryPathsInManualMode = true;
         SaveResumeDataInterval = 15;
-        SuggestMode = true;
+        SuggestMode = false; # Ineffective in libtorrent v2 (no managed disk cache)
         AnnounceToAllTrackers = true;
         ReannounceWhenAddressChanged = true;
-        # I/O optimization
-        AsyncIOThreadsCount = 32;
-        HashingThreadsCount = 8;
-        FilePoolSize = 10000;
-        DiskCacheSize = 4096;
-        DiskCacheTTL = 60;
-        CheckingMemUsageSize = 128;
-        use_os_cache = true;
+        ConnectionSpeed = 30; # Outgoing connections/sec (libtorrent default, qbt defaults to 20)
+        # I/O: POSIX mode avoids ZFS ARC memory leak with mmap
+        DiskIOType = 2; # 0=default, 1=mmap, 2=POSIX
+        AsyncIOThreadsCount = 10; # 32 causes HDD thrashing; NVMe handles parallelism in hardware
+        HashingThreadsCount = 4; # v2 ties hashing to disk reads; 8 thrashes HDDs on recheck
+        FilePoolSize = 5000; # Leave headroom for socket FDs
+        CheckingMemUsageSize = 512; # MiB — faster rechecks, plenty of RAM available
+        # Send buffer tuning for 100 Mbps upload throughput
+        SendBufferWatermark = 2048; # KiB
+        SendBufferLowWatermark = 32; # KiB
+        SendBufferWatermarkFactor = 150; # Percent
         # Seeding behavior
         IgnoreLimitsOnLAN = true;
         AddTorrentStopped = false;
         IgnoreSlowTorrents = true;
         IgnoreSlowTorrentsForQueueing = true;
-        SlowTorrentsDownloadRate = 5;
+        SlowTorrentsDownloadRate = 10;
         SlowTorrentsUploadRate = 5;
         SlowTorrentsInactivityTimer = 60;
         ShareLimitAction = "Stop";
@@ -84,6 +87,8 @@ in
       };
     in
     {
+      boot.kernelModules = [ "tcp_bbr" ];
+
       # Kernel tuning for high-throughput networking
       boot.kernel.sysctl = {
         "net.core.rmem_default" = 262144;
@@ -92,6 +97,14 @@ in
         "net.core.wmem_max" = 33554432;
         "net.ipv4.udp_rmem_min" = 16384;
         "net.ipv4.udp_wmem_min" = 16384;
+        # TCP tuning for BitTorrent over WireGuard
+        "net.ipv4.tcp_rmem" = "4096 131072 33554432";
+        "net.ipv4.tcp_wmem" = "4096 16384 33554432";
+        "net.ipv4.tcp_congestion_control" = "bbr";
+        "net.core.default_qdisc" = "fq";
+        "net.ipv4.tcp_mtu_probing" = 1;
+        "net.ipv4.tcp_slow_start_after_idle" = 0;
+        "net.ipv4.tcp_fin_timeout" = 15;
       };
 
       environment.systemPackages = [
@@ -166,7 +179,6 @@ in
             AutoTMMEnabled = true;
             Advanced = {
               PhysicalMemoryLimit = 8192;
-              SendUploadPieceSuggestions = true;
             };
           };
           Application.MemoryWorkingSetLimit = 8192;
@@ -267,22 +279,6 @@ in
         '';
       };
 
-      # Configure routes for VPN namespace
-      systemd.services."configure-qbt-routes" = {
-        description = "Configure routes for qBittorrent VPN namespace";
-        after = [ "qbittorrent.service" ];
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = "yes";
-          ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${namespace} ${pkgs.iproute2}/bin/ip route add 10.2.0.0/16 dev ${namespace}0";
-          SuccessExitStatus = [
-            0
-            2
-          ];
-        };
-      };
-
       # Traffic control for fair queuing
       systemd.services."configure-qbt-qdisc" = {
         description = "Configure traffic control qdisc for qBittorrent WireGuard interface";
@@ -292,7 +288,7 @@ in
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = "yes";
-          ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${namespace} ${pkgs.iproute2}/bin/tc qdisc replace dev ${namespace}0 root cake bandwidth 100mbit overhead 60 mpu 64";
+          ExecStart = "${pkgs.iproute2}/bin/ip netns exec ${namespace} ${pkgs.iproute2}/bin/tc qdisc replace dev ${namespace}0 root cake bandwidth 100mbit overhead 78 mpu 64 flows besteffort";
           ExecStop = "${pkgs.iproute2}/bin/ip netns exec ${namespace} ${pkgs.iproute2}/bin/tc qdisc del dev ${namespace}0 root || true";
         };
       };
@@ -318,7 +314,6 @@ in
         serviceConfig = {
           Type = "oneshot";
           ExecStart = pkgs.writeShellScript "check-qbt-vpn" ''
-            #!/bin/sh
             set -euo pipefail
 
             NAMESPACE="${namespace}"
@@ -326,48 +321,44 @@ in
 
             echo "Checking qBittorrent VPN binding..."
 
-            # Check if qBittorrent is running
             if ! ${pkgs.systemd}/bin/systemctl is-active --quiet qbittorrent.service; then
               echo "INFO: qBittorrent is not running, skipping check"
               exit 0
             fi
 
-            # Check if VPN namespace exists
+            # Check namespace exists
             if ! ${pkgs.iproute2}/bin/ip netns list | grep -q "^$NAMESPACE"; then
               echo "ERROR: VPN namespace '$NAMESPACE' does not exist"
-              echo "Restarting qBittorrent service..."
-              ${pkgs.systemd}/bin/systemctl restart qbittorrent.service
+              echo "Restarting VPN namespace service..."
+              ${pkgs.systemd}/bin/systemctl restart ${namespace}.service
               exit 0
             fi
 
-            # Check if VPN interface is up in the namespace
-            if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ip link show "$VPN_INTERFACE" 2>/dev/null | grep -q "state UP"; then
+            # Check WireGuard interface exists (WireGuard reports "state UNKNOWN" not "state UP")
+            if ! ${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.iproute2}/bin/ip link show "$VPN_INTERFACE" 2>/dev/null | grep -qE "state (UP|UNKNOWN)"; then
               echo "ERROR: VPN interface '$VPN_INTERFACE' is not up in namespace '$NAMESPACE'"
-              echo "Restarting qBittorrent service..."
-              ${pkgs.systemd}/bin/systemctl restart qbittorrent.service
+              echo "Restarting VPN namespace service..."
+              ${pkgs.systemd}/bin/systemctl restart ${namespace}.service
               exit 0
             fi
 
-            # Check if we can get external IP through VPN
+            # Check internet reachability through VPN
             VPN_IP=$(${pkgs.iproute2}/bin/ip netns exec "$NAMESPACE" ${pkgs.curl}/bin/curl -s --max-time 10 https://api.ipify.org || echo "")
             if [ -z "$VPN_IP" ]; then
-              echo "ERROR: Cannot determine external IP through VPN namespace"
-              echo "Restarting qBittorrent service..."
-              ${pkgs.systemd}/bin/systemctl restart qbittorrent.service
+              echo "ERROR: Cannot reach internet through VPN namespace"
+              echo "Restarting VPN namespace service..."
+              ${pkgs.systemd}/bin/systemctl restart ${namespace}.service
               exit 0
             fi
 
-            echo "✓ VPN health check passed"
-            echo "  Namespace: $NAMESPACE"
-            echo "  Interface: $VPN_INTERFACE"
-            echo "  External IP: $VPN_IP"
+            echo "VPN health check passed (IP: $VPN_IP)"
           '';
           StandardOutput = "journal";
           StandardError = "journal";
           SyslogIdentifier = "qbittorrent-vpn-health";
           TimeoutStartSec = "30s";
-          PrivateTmp = true;
-          NoNewPrivileges = false;
+          PrivateTmp = false;
+          NoNewPrivileges = true;
           ProtectSystem = "strict";
           ProtectHome = true;
           PrivateNetwork = false;

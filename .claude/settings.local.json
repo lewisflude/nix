@@ -1,16 +1,16 @@
 {
   "permissions": {
     "allow": [
+      "Bash",
       "WebSearch",
-      "WebFetch(domain:wiki.nixos.org)",
-      "WebFetch(domain:discourse.nixos.org)",
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:docs.lizardbyte.dev)",
-      "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(journalctl:*)",
-      "Bash(niri msg:*)",
-      "mcp__git__git_status",
-      "mcp__github__search_repositories"
+      "WebFetch",
+      "mcp__git__*",
+      "mcp__github__*",
+      "mcp__sequential-thinking__*",
+      "mcp__context7__*",
+      "mcp__playwright__*",
+      "mcp__sqlite__*",
+      "mcp__time__*"
     ]
   },
   "disableAllHooks": true,
