@@ -34,7 +34,7 @@ in
     # Set default ACLs so newly added files inherit media group access.
     # Uses setfacl instead of tmpfiles A+ with d: prefix to work around
     # systemd bug #9545 (d: entries fail on files during recursion).
-    systemd.services.filebrowser.serviceConfig.ExecStartPre = "${pkgs.acl}/bin/setfacl -R -d -m g:media:rX ${musicDir}";
+    systemd.services.filebrowser.serviceConfig.ExecStartPre = "+${pkgs.acl}/bin/setfacl -R -d -m g:media:rX ${musicDir}";
 
     systemd.services.filebrowser.after = [ "mnt-storage.mount" ];
   };

@@ -26,6 +26,15 @@
               "disable spoolss" = "yes";
               "aio read size" = "16384";
               "aio write size" = "16384";
+              # macOS compatibility (fruit VFS)
+              "vfs objects" = "catia fruit streams_xattr";
+              "fruit:aapl" = "yes";
+              "fruit:metadata" = "stream";
+              "fruit:model" = "MacSamba";
+              "fruit:posix_rename" = "yes";
+              "fruit:veto_appledouble" = "no";
+              "fruit:wipe_intentionally_left_blank_rfork" = "yes";
+              "fruit:delete_empty_adfiles" = "yes";
             };
             homes = {
               browseable = "no";
