@@ -91,6 +91,7 @@ in
             homeManager.darwin
             homeManager.karabiner
             homeManager.audio
+            homeManager.samba
 
             # Theming (cross-platform signal-nix)
             homeManager.theming
