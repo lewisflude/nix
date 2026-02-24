@@ -10,16 +10,15 @@ in
   flake.modules.nixos.filebrowser = {
     services.filebrowser = {
       enable = true;
+      user = username;
       group = "media";
       settings = {
-        address = "127.0.0.1";
         inherit port;
         root = musicDir;
       };
     };
 
     users.groups.media = { };
-
-    systemd.services.filebrowser.serviceConfig.ReadWritePaths = [ musicDir ];
+    users.users.${username}.extraGroups = [ "media" ];
   };
 }
