@@ -1,6 +1,3 @@
-# Autobrr Service Module - Dendritic Pattern
-# IRC/announce-based release grabbing for *arr stack
-# Usage: Import config.flake.modules.nixos.autobrr in host definition
 { config, ... }:
 let
   inherit (config) constants;
@@ -9,13 +6,12 @@ in
   flake.modules.nixos.autobrr =
     { lib, pkgs, ... }:
     let
-      inherit (lib) mkDefault;
+      inherit (lib) mkDefault mkForce;
       secretPath = "/var/lib/autobrr/session-secret";
     in
     {
       services.autobrr = {
         enable = true;
-        openFirewall = false;
         secretFile = secretPath;
         settings = {
           host = "127.0.0.1";
@@ -45,7 +41,7 @@ in
         after = [ "autobrr-secret.service" ];
         requires = [ "autobrr-secret.service" ];
         environment.TZ = mkDefault constants.defaults.timezone;
-        serviceConfig.UMask = "0002";
+        serviceConfig.UMask = mkForce "0002";
       };
     };
 }

@@ -1,15 +1,12 @@
-# Sonarr Service Module - Dendritic Pattern
-# TV show management for *arr stack
-# Usage: Import config.flake.modules.nixos.sonarr in host definition
 { config, ... }:
 let
   inherit (config) constants;
 in
 {
   flake.modules.nixos.sonarr =
-    { lib, ... }:
+    { config, lib, ... }:
     let
-      inherit (lib) mkDefault optional;
+      inherit (lib) mkDefault mkForce optional;
       user = "media";
       group = "media";
     in
@@ -21,7 +18,6 @@ in
       };
       users.groups.${group} = { };
 
-      # Ensure library directories exist (TRASHguides: /mnt/storage/media/<type>)
       systemd.tmpfiles.rules = [
         "d '/mnt/storage/media' 0770 ${user} ${group} - -"
         "d '/mnt/storage/media/tv' 0770 ${user} ${group} - -"
@@ -29,7 +25,6 @@ in
 
       services.sonarr = {
         enable = true;
-        openFirewall = false;
         inherit user group;
         dataDir = "/var/lib/sonarr/.config/Sonarr";
       };
@@ -40,12 +35,9 @@ in
 
       systemd.services.sonarr = {
         environment.TZ = mkDefault constants.defaults.timezone;
-        after = [
-          "mnt-storage.mount"
-        ]
-        ++ (optional (config.services.prowlarr.enable or false) "prowlarr.service");
+        after = [ "mnt-storage.mount" ] ++ optional config.services.prowlarr.enable "prowlarr.service";
         requires = [ "mnt-storage.mount" ];
-        serviceConfig.UMask = "0002";
+        serviceConfig.UMask = mkForce "0002";
       };
     };
 }

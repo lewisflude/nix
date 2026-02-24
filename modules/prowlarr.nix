@@ -1,25 +1,16 @@
-# Prowlarr Service Module - Dendritic Pattern
-# Indexer manager for *arr services
-# Usage: Import config.flake.modules.nixos.prowlarr in host definition
 { config, ... }:
 let
   inherit (config) constants;
 in
 {
-  # ==========================================================================
-  # NixOS System Configuration
-  # ==========================================================================
   flake.modules.nixos.prowlarr =
     { lib, ... }:
     let
-      inherit (lib) mkDefault;
-
-      # Default configuration (can be overridden by hosts)
+      inherit (lib) mkDefault mkForce;
       user = "media";
       group = "media";
     in
     {
-      # Ensure media user/group exist
       users.users.${user} = {
         isSystemUser = true;
         inherit group;
@@ -27,26 +18,18 @@ in
       };
       users.groups.${group} = { };
 
-      # Prowlarr service configuration
-      services.prowlarr = {
-        enable = true;
-        openFirewall = false;
-      };
+      services.prowlarr.enable = true;
 
-      # Firewall configuration
       networking.firewall.allowedTCPPorts = mkDefault [
         constants.ports.services.prowlarr
       ];
 
-      # Service overrides
       systemd.services.prowlarr = {
-        environment = {
-          TZ = mkDefault constants.defaults.timezone;
-        };
+        environment.TZ = mkDefault constants.defaults.timezone;
         serviceConfig = {
           User = user;
           Group = group;
-          UMask = "0002";
+          UMask = mkForce "0002";
         };
       };
     };

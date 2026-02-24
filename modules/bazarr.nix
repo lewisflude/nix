@@ -1,15 +1,12 @@
-# Bazarr Service Module - Dendritic Pattern
-# Subtitle management for Sonarr/Radarr
-# Usage: Import config.flake.modules.nixos.bazarr in host definition
 { config, ... }:
 let
   inherit (config) constants;
 in
 {
   flake.modules.nixos.bazarr =
-    { lib, ... }:
+    { config, lib, ... }:
     let
-      inherit (lib) mkDefault optional;
+      inherit (lib) mkDefault mkForce optional;
       user = "media";
       group = "media";
     in
@@ -23,7 +20,6 @@ in
 
       services.bazarr = {
         enable = true;
-        openFirewall = false;
         listenPort = constants.ports.services.bazarr;
         inherit user group;
       };
@@ -35,9 +31,9 @@ in
       systemd.services.bazarr = {
         environment.TZ = mkDefault constants.defaults.timezone;
         after =
-          (optional (config.services.sonarr.enable or false) "sonarr.service")
-          ++ (optional (config.services.radarr.enable or false) "radarr.service");
-        serviceConfig.UMask = "0002";
+          optional config.services.sonarr.enable "sonarr.service"
+          ++ optional config.services.radarr.enable "radarr.service";
+        serviceConfig.UMask = mkForce "0002";
       };
     };
 }
