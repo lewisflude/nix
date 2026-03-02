@@ -12,12 +12,11 @@ _: {
         # TidalCycles: Haskell live coding pattern language
         pkgs.haskellPackages.tidal
 
-        # Sonic Pi: beginner-friendly live coding synth
-        pkgs.sonic-pi
+        # pkgs.sonic-pi # broken: boost 1.89 in nixpkgs
 
         # ChucK: strongly-timed audio programming language
         pkgs.chuck
-        pkgs.miniaudicle
+        # pkgs.miniaudicle # broken: Qt 6.10 qmake regression in nixpkgs
 
         # Pure Data: visual dataflow programming for audio/video
         pkgs.puredata

@@ -65,7 +65,6 @@ in
             pkgs'.stdenv.cc.cc.lib
             pkgs'.libkrb5
             pkgs'.keyutils
-            pkgs'.gamescope # Gamescope inside Steam FHS environment
             pkgs.xrizer # VR: OpenVR compatibility layer (outer pkgs, has multilib overlay)
           ];
         };
@@ -145,22 +144,4 @@ in
       ];
     };
 
-  flake.modules.homeManager.lutris =
-    {
-      pkgs,
-      osConfig ? { },
-      ...
-    }:
-    {
-      programs.lutris = {
-        enable = true;
-        winePackages = [ pkgs.wineWow64Packages.stagingFull ];
-        protonPackages = [ pkgs.proton-ge-bin ];
-        steamPackage = osConfig.programs.steam.package or null;
-        extraPackages = [
-          pkgs.winetricks
-          pkgs.gamemode
-        ];
-      };
-    };
 }

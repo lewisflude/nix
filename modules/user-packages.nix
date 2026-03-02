@@ -19,7 +19,6 @@ _: {
         pkgs.cursor-cli
       ]
       ++ lib.optionals (llmAgentPkgs ? ccusage) [ llmAgentPkgs.ccusage ]
-      ++ lib.optionals (llmAgentPkgs ? coding-agent-search) [ llmAgentPkgs.coding-agent-search ]
       ++ lib.optionals pkgs.stdenv.isLinux [
         pkgs.libnotify
         pkgs.seahorse

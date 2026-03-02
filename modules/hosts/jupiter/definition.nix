@@ -215,7 +215,6 @@ in
 
         # Gaming & VR home-manager modules
         homeManager.gaming
-        homeManager.lutris
         homeManager.vr
 
         # Audio & Music Production home-manager modules

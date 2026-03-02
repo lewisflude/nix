@@ -106,7 +106,10 @@ _: {
         autoStart = true;
         capSysAdmin = true;
         openFirewall = true;
-        package = pkgs.sunshine.override { cudaSupport = true; };
+        package = pkgs.sunshine.override {
+          cudaSupport = true;
+          boost = pkgs.boost187; # boost 1.89 breaks sunshine build
+        };
 
         settings = {
           # KMS capture on the virtual display.
