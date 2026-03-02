@@ -77,6 +77,7 @@ _: {
         "1password@beta"
         "ableton-live-suite"
         "betterdisplay"
+        "blender"
         "claude"
         "discord"
         "figma"

@@ -167,6 +167,13 @@ let
         else
           noopOverlay;
 
+      # Blender upstream binary (avoids LLVM version conflict between CUDA and Mesa)
+      blender-bin =
+        if isLinux && inputs ? nix-warez && inputs.nix-warez ? overlays then
+          inputs.nix-warez.overlays.default
+        else
+          noopOverlay;
+
       # WiVRn with CUDA and OpenVR compatibility (64-bit only)
       # 32-bit multilib disabled: GCC 15 ICE on i686 (sqlite3.c GIMPLE pass segfault)
       wivrn-cuda =

@@ -5,7 +5,7 @@ _: {
     { lib, pkgs, ... }:
     lib.mkIf pkgs.stdenv.isLinux {
       home.packages = [
-        (pkgs.blender.override { cudaSupport = true; })
+        pkgs.blender_5_0
         pkgs.gimp
         pkgs.telegram-desktop
         pkgs.file-roller
