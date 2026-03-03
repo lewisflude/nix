@@ -1,6 +1,5 @@
 # Ollama + Open WebUI - Local LLM inference
 # Disabled: re-enable when needed
-_:
-{
+_: {
   flake.modules.nixos.ollama = { };
 }

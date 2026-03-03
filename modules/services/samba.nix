@@ -1,34 +1,8 @@
 # Samba File Sharing Service
-# Server: SMB shares with optimized performance settings
-# Client: Auto-mount music share on macOS via launchd
-{ config, ... }:
+# Server: SMB shares with optimized performance settings (storage share)
+# Music share moved to NFS — see nfs.nix
+_:
 {
-  # macOS client: keep music share mounted
-  flake.modules.homeManager.samba =
-    { pkgs, lib, ... }:
-    let
-      inherit (pkgs.stdenv) isDarwin;
-      jupiterIp = config.constants.hosts.jupiter.ipv4;
-      mountMusic = pkgs.writeShellScript "mount-music" ''
-        MOUNT_POINT="/Volumes/music"
-        if ! /sbin/mount | /usr/bin/grep -q "$MOUNT_POINT"; then
-          /usr/bin/osascript -e "mount volume \"smb://${jupiterIp}/music\""
-        fi
-      '';
-    in
-    {
-      launchd.agents.mount-music = lib.mkIf isDarwin {
-        enable = true;
-        config = {
-          ProgramArguments = [ "${mountMusic}" ];
-          StartInterval = 60;
-          RunAtLoad = true;
-          StandardOutPath = "/tmp/mount-music.log";
-          StandardErrorPath = "/tmp/mount-music.err";
-        };
-      };
-    };
-
   # NixOS server: SMB shares
   flake.modules.nixos.samba =
     { pkgs, ... }:
@@ -78,14 +52,6 @@
               "directory mask" = "0775";
               "force create mode" = "0660";
               "force directory mode" = "0770";
-              "case sensitive" = "auto";
-            };
-            music = {
-              path = "/home/${config.username}/Music";
-              writable = "true";
-              "valid users" = config.username;
-              "create mask" = "0644";
-              "directory mask" = "0755";
               "case sensitive" = "auto";
             };
           };

@@ -88,6 +88,7 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         nixos.ssh
         nixos.samba
+        nixos.nfs
         nixos.caddy
         nixos.filebrowser
         nixos.syncthing
