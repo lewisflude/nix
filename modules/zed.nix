@@ -4,19 +4,19 @@ _: {
   flake.modules.homeManager.zed =
     { lib, pkgs, ... }:
     {
+      home.packages = [
+        pkgs.nixd
+        pkgs.nixfmt
+        pkgs.vtsls
+        pkgs.vscode-langservers-extracted
+        pkgs.basedpyright
+        pkgs.ruff
+        pkgs.rust-analyzer
+      ];
+
       programs.zed-editor = {
         enable = true;
-        installRemoteServer = true;
-
-        extraPackages = [
-          pkgs.nixd
-          pkgs.nixfmt
-          pkgs.vtsls
-          pkgs.vscode-langservers-extracted
-          pkgs.basedpyright
-          pkgs.ruff
-          pkgs.rust-analyzer
-        ];
+        package = null;
 
         mutableUserSettings = true;
 
@@ -100,4 +100,8 @@ _: {
         };
       };
     };
+
+  flake.modules.darwin.zed = _: {
+    homebrew.casks = [ "zed" ];
+  };
 }

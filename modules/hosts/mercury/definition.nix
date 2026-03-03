@@ -39,6 +39,7 @@ in
         darwin.gaming
         darwin.karabiner
         darwin.ssh
+        darwin.zed
       ];
 
       # Required for Darwin
@@ -80,9 +81,7 @@ in
             homeManager.powerlevel10k
             homeManager.userPackages
             homeManager.claudeCode
-            homeManager.geminiCli
             homeManager.yazi
-            homeManager.mpv
             homeManager.obsidian
             homeManager.zed
             homeManager.developmentTools
