@@ -112,7 +112,7 @@
           gpgAgentExtra = "/run/user/1001/gnupg/S.gpg-agent.extra";
         };
         mercury = {
-          ipv4 = "192.168.10.220";
+          ipv4 = "192.168.10.211";
           gpgAgent = "/Users/lewisflude/.gnupg/S.gpg-agent";
           gpgAgentExtra = "/Users/lewisflude/.gnupg/S.gpg-agent.extra";
         };
