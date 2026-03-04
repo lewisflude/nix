@@ -18,8 +18,11 @@ in
         '';
       };
 
-      networking.firewall.allowedTCPPorts = [ 2049 ];
-      networking.firewall.allowedUDPPorts = [ 2049 ];
+      services.nfs.server.lockdPort = 4001;
+      services.nfs.server.statdPort = 4002;
+
+      networking.firewall.allowedTCPPorts = [ 111 2049 4001 4002 20048 ];
+      networking.firewall.allowedUDPPorts = [ 111 2049 4001 4002 20048 ];
     };
 
   # macOS client: keep music NFS mount active
