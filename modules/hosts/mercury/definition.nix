@@ -82,6 +82,7 @@ in
             homeManager.userPackages
             homeManager.claudeCode
             homeManager.yazi
+            homeManager.nicotinePlus
             homeManager.obsidian
             homeManager.zed
             homeManager.developmentTools
