@@ -19,13 +19,15 @@ _: {
         fi
       '';
 
+      niriDeps = [
+        pkgs.coreutils
+        pkgs.findutils
+        pkgs.niri
+      ];
+
       sunshine-enable-display = pkgs.writeShellApplication {
         name = "sunshine-enable-display";
-        runtimeInputs = [
-          pkgs.coreutils
-          pkgs.findutils
-          pkgs.niri
-        ];
+        runtimeInputs = niriDeps;
         text = ''
           ${findNiriSocket}
           if [ -z "''${NIRI_SOCKET:-}" ]; then
@@ -39,12 +41,7 @@ _: {
 
       sunshine-prep = pkgs.writeShellApplication {
         name = "sunshine-prep";
-        runtimeInputs = [
-          pkgs.systemd
-          pkgs.coreutils
-          pkgs.findutils
-          pkgs.niri
-        ];
+        runtimeInputs = niriDeps ++ [ pkgs.systemd ];
         text = ''
           ${findNiriSocket}
 
@@ -69,11 +66,7 @@ _: {
 
       sunshine-cleanup = pkgs.writeShellApplication {
         name = "sunshine-cleanup";
-        runtimeInputs = [
-          pkgs.coreutils
-          pkgs.findutils
-          pkgs.niri
-        ];
+        runtimeInputs = niriDeps;
         text = ''
           ${findNiriSocket}
 
@@ -108,7 +101,7 @@ _: {
         openFirewall = true;
         package = pkgs.sunshine.override {
           cudaSupport = true;
-          boost = pkgs.boost187; # boost 1.89 breaks sunshine build
+          boost = pkgs.boost186; # boost 1.87+ breaks sunshine build (nixpkgs#375077)
         };
 
         settings = {
@@ -120,7 +113,7 @@ _: {
           output_name = 0;
 
           # NVENC (RTX 4090)
-          nvenc_preset = 1;
+          nvenc_preset = 3;
           nvenc_rc = "cbr";
           nvenc_twopass = "quarter_res";
           nvenc_spatial_aq = 1;
@@ -129,8 +122,8 @@ _: {
 
           # Audio
           audio_codec = "opus";
-          channels = 2;
-          audio_bitrate = 128;
+          channels = 6;
+          audio_bitrate = 192;
 
           # Force Xbox 360 controller emulation for reliable Steam detection.
           # Default "auto" can select DS4/DS5/Switch types that Steam Input
@@ -138,31 +131,30 @@ _: {
           gamepad = "x360";
         };
 
-        applications.apps = [
-          {
-            name = "Desktop";
-            prep-cmd = [
-              {
-                do = "${sunshine-prep}/bin/sunshine-prep";
-                undo = "${sunshine-cleanup}/bin/sunshine-cleanup";
-              }
-            ];
-          }
-          {
-            name = "Steam Big Picture";
-            detached = [ "setsid steam steam://open/bigpicture" ];
-            prep-cmd = [
-              {
-                do = "${sunshine-prep}/bin/sunshine-prep";
-                undo = "${sunshine-cleanup}/bin/sunshine-cleanup";
-              }
-              {
-                do = "";
-                undo = "setsid steam steam://close/bigpicture";
-              }
-            ];
-          }
-        ];
+        applications.apps =
+          let
+            streamPrep = {
+              do = "${sunshine-prep}/bin/sunshine-prep";
+              undo = "${sunshine-cleanup}/bin/sunshine-cleanup";
+            };
+          in
+          [
+            {
+              name = "Desktop";
+              prep-cmd = [ streamPrep ];
+            }
+            {
+              name = "Steam Big Picture";
+              detached = [ "setsid steam steam://open/bigpicture" ];
+              prep-cmd = [
+                streamPrep
+                {
+                  do = "";
+                  undo = "setsid steam steam://close/bigpicture";
+                }
+              ];
+            }
+          ];
       };
 
       # Sunshine needs WAYLAND_DISPLAY to reach Niri, and NVIDIA libs for encoding.

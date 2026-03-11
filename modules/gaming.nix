@@ -26,7 +26,6 @@ in
         localNetworkGameTransfers.openFirewall = true;
         extraCompatPackages = [
           pkgs.proton-ge-bin
-          pkgs.proton-ge-rtsp-bin
         ];
         package = pkgs.steam.override {
           buildFHSEnv =
@@ -77,7 +76,6 @@ in
       programs.steam.gamescopeSession.enable = true;
 
       boot.kernel.sysctl = {
-        "vm.max_map_count" = 2147483642;
         "vm.swappiness" = lib.mkDefault 10;
         "vm.dirty_ratio" = 10;
         "vm.dirty_background_ratio" = 5;
@@ -87,7 +85,7 @@ in
         enable = true;
         settings = {
           general = {
-            renice = 10;
+            renice = -10;
           };
           gpu = {
             apply_gpu_optimisations = "accept-responsibility";
