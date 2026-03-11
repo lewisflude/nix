@@ -51,7 +51,6 @@ in
             PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = "1";
             PRESSURE_VESSEL_FILESYSTEMS_RW = "$XDG_RUNTIME_DIR/wivrn/comp_ipc";
             PRESSURE_VESSEL_FILESYSTEMS_RO = "/nix/store";
-            XRIZER_CUSTOM_BINDINGS_DIR = "/home/${nixosArgs.config.host.username}/.local/share/xrizer/bindings";
           };
           extraPkgs = pkgs': [
             pkgs'.libxcursor
