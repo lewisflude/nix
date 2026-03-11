@@ -8,21 +8,31 @@ let
 in
 {
   # NixOS server: NFS export
-  flake.modules.nixos.nfs =
-    _:
-    {
-      services.nfs.server = {
-        enable = true;
-        lockdPort = 4001;
-        statdPort = 4002;
-        exports = ''
-          /home/${config.username}/Music ${mercuryIp}(rw,no_subtree_check,all_squash,anonuid=1001,anongid=100)
-        '';
-      };
-
-      networking.firewall.allowedTCPPorts = [ 111 2049 4001 4002 20048 ];
-      networking.firewall.allowedUDPPorts = [ 111 2049 4001 4002 20048 ];
+  flake.modules.nixos.nfs = _: {
+    services.nfs.server = {
+      enable = true;
+      lockdPort = 4001;
+      statdPort = 4002;
+      exports = ''
+        /home/${config.username}/Music ${mercuryIp}(rw,no_subtree_check,all_squash,anonuid=1001,anongid=100)
+      '';
     };
+
+    networking.firewall.allowedTCPPorts = [
+      111
+      2049
+      4001
+      4002
+      20048
+    ];
+    networking.firewall.allowedUDPPorts = [
+      111
+      2049
+      4001
+      4002
+      20048
+    ];
+  };
 
   # macOS client: keep music NFS mount active (runs as root via daemon)
   flake.modules.homeManager.nfs =

@@ -1,8 +1,7 @@
 # Samba File Sharing Service
 # Server: SMB shares with optimized performance settings (storage share)
 # Music share moved to NFS — see nfs.nix
-_:
-{
+_: {
   # NixOS server: SMB shares
   flake.modules.nixos.samba =
     { pkgs, ... }:
