@@ -12,7 +12,7 @@ _: {
         pkgs.dust
         pkgs.procs
         pkgs.gping
-        pkgs.p7zip
+        pkgs._7zz-rar
         pkgs.pigz
         pkgs.git-extras
       ]
