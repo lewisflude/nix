@@ -187,6 +187,7 @@ let
             {
               wivrn = stableWivrn.override {
                 cudaSupport = true;
+                inherit (final) cudaPackages;
                 ovrCompatSearchPaths = "${final.xrizer}/lib/xrizer:${final.opencomposite}/lib/opencomposite";
               };
             }
@@ -206,10 +207,12 @@ in
 
   config.flake.overlays.default =
     final: prev:
-    let
-      inherit (prev.stdenv.hostPlatform) system;
-      overlayList = builtins.attrValues (mkOverlaySet system);
-      inherit (prev.lib) composeExtensions foldl';
-    in
-    (foldl' composeExtensions (_: _: { }) overlayList) final prev;
+    if !(prev ? stdenv) then
+      { } # nix flake check calls overlay {} {} — noop without real nixpkgs
+    else
+      let
+        inherit (prev.stdenv.hostPlatform) system;
+        overlayList = builtins.attrValues (mkOverlaySet system);
+      in
+      (lib.foldl' lib.composeExtensions (_: _: { }) overlayList) final prev;
 }
