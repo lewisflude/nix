@@ -40,6 +40,7 @@ in
         darwin.karabiner
         darwin.ssh
         darwin.zed
+        darwin.nfs
       ];
 
       # Required for Darwin
@@ -91,7 +92,6 @@ in
             homeManager.darwin
             homeManager.karabiner
             homeManager.audio
-            homeManager.nfs
 
             # Theming (cross-platform signal-nix)
             homeManager.theming
