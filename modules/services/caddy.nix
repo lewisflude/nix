@@ -40,7 +40,6 @@ let
     inherit (constants.ports.services) lidarr;
     inherit (constants.ports.services) readarr;
     inherit (constants.ports.services) bazarr;
-    inherit (constants.ports.services) autobrr;
     inherit (constants.ports.services) notifiarr;
     inherit (constants.ports.services) huntarr;
     inherit (constants.ports.services) autopulse;

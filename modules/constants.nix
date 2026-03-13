@@ -36,7 +36,6 @@
           sabnzbd = 8084;
           navidrome = 4533;
           bazarr = 6767;
-          autobrr = 7474;
           readarr = 8787;
           flaresolverr = 8191;
           musicAssistant = 8095;
