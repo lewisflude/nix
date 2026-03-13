@@ -187,7 +187,7 @@ _: {
           pkgs.pwvucontrol
           pkgs.pavucontrol
           pkgs.playerctl
-          pkgs.helvum
+          pkgs.crosspipe
         ]
         ++ lib.optionals isDarwin [
           pkgs.lame
