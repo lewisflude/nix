@@ -2,7 +2,8 @@
 # A custom EDID is loaded at boot to create a persistent virtual display on
 # HDMI-A-1, eliminating the need for a physical dummy plug and surviving KVM
 # switches. Sunshine captures this output via KMS with NVENC encoding.
-# On stream start the ultrawide is disabled; on stream end it is re-enabled.
+# HDMI-A-1 is kept off by default (see niri.nix) and only enabled during
+# active streams to prevent the mouse cursor escaping to it during gaming.
 _: {
   flake.modules.nixos.sunshine =
     { pkgs, ... }:
@@ -24,20 +25,6 @@ _: {
         pkgs.findutils
         pkgs.niri
       ];
-
-      sunshine-enable-display = pkgs.writeShellApplication {
-        name = "sunshine-enable-display";
-        runtimeInputs = niriDeps;
-        text = ''
-          ${findNiriSocket}
-          if [ -z "''${NIRI_SOCKET:-}" ]; then
-            echo "Warning: niri socket not found, cannot enable virtual display" >&2
-            exit 0
-          fi
-          niri msg output "${virtualDisplay}" on || true
-          sleep 1
-        '';
-      };
 
       sunshine-prep = pkgs.writeShellApplication {
         name = "sunshine-prep";

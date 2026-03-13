@@ -50,9 +50,6 @@
       osConfig ? { },
       ...
     }:
-    let
-      inherit (pkgs) niri-unstable;
-    in
     lib.mkIf pkgs.stdenv.isLinux {
       home.packages = [
         pkgs.grim
@@ -63,7 +60,6 @@
         pkgs.libdrm
         pkgs.argyllcms
         pkgs.wl-gammactl
-        pkgs.xwayland-satellite-unstable
       ];
 
       home.pointerCursor = {
@@ -77,7 +73,7 @@
       programs.hyprcursor-phinger.enable = true;
 
       programs.niri = {
-        package = niri-unstable;
+        package = pkgs.niri-unstable;
         settings = {
           prefer-no-csd = true;
           hotkey-overlay.skip-at-startup = true;
@@ -104,7 +100,6 @@
           environment.QT_QPA_PLATFORM = "wayland";
           debug = lib.mkIf (osConfig.host.hardware.renderDevice or null != null) {
             render-drm-device = osConfig.host.hardware.renderDevice;
-            disable-cursor-plane = true;
           };
 
           binds = {
@@ -514,73 +509,34 @@
               enable = true;
               max-scroll-amount = "0%";
             };
-            warp-mouse-to-focus.enable = false;
             workspace-auto-back-and-forth = true;
             mouse = {
               natural-scroll = true;
               accel-profile = "flat";
-              scroll-factor = 1.0;
             };
           };
 
-          animations = {
-            enable = true;
-            slowdown = 1.0;
-            workspace-switch = {
-              enable = true;
-              kind.spring = {
+          animations =
+            let
+              snappy.kind.spring = {
                 damping-ratio = 1.0;
                 stiffness = 1000;
                 epsilon = 0.0001;
               };
-            };
-            window-movement = {
-              enable = true;
-              kind.spring = {
-                damping-ratio = 1.0;
-                stiffness = 1000;
-                epsilon = 0.0001;
-              };
-            };
-            window-open = {
-              enable = true;
-              kind.spring = {
-                damping-ratio = 1.0;
-                stiffness = 1000;
-                epsilon = 0.0001;
-              };
-            };
-            window-resize = {
-              enable = true;
-              kind.spring = {
-                damping-ratio = 1.0;
-                stiffness = 1000;
-                epsilon = 0.0001;
-              };
-            };
-            horizontal-view-movement = {
-              enable = true;
-              kind.spring = {
-                damping-ratio = 1.0;
-                stiffness = 1000;
-                epsilon = 0.0001;
-              };
-            };
-            window-close = {
-              enable = true;
-              kind.easing = {
+              quick.kind.easing = {
                 duration-ms = 150;
                 curve = "ease-out-quad";
               };
+            in
+            {
+              workspace-switch = snappy;
+              window-movement = snappy;
+              window-open = snappy;
+              window-resize = snappy;
+              horizontal-view-movement = snappy;
+              window-close = quick;
+              screenshot-ui-open = quick;
             };
-            screenshot-ui-open = {
-              enable = true;
-              kind.easing = {
-                duration-ms = 150;
-                curve = "ease-out-quad";
-              };
-            };
-          };
 
           window-rules =
             let
@@ -675,7 +631,7 @@
             }
             {
               command = [
-                "${pkgs.niri}/bin/niri"
+                "niri"
                 "msg"
                 "output"
                 "HDMI-A-1"
