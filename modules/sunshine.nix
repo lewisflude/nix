@@ -70,11 +70,10 @@ _: {
         text = ''
           ${findNiriSocket}
 
-          # Reset virtual display resolution and restore ultrawide
-          # Keep the virtual display ON so Sunshine's KMS capture remains valid
-          # for future connections (turning it off invalidates the CRTC handle)
-          niri msg output "${virtualDisplay}" mode 1920x1080@60 || true
+          # Restore ultrawide and disable virtual display
+          # sunshine-prep will re-enable it on the next stream connection
           niri msg output "${ultrawide}" on || true
+          niri msg output "${virtualDisplay}" off || true
 
           pid_file="$XDG_RUNTIME_DIR/sunshine-inhibit.pid"
           if [ -f "$pid_file" ]; then
@@ -158,15 +157,15 @@ _: {
       };
 
       # Sunshine needs WAYLAND_DISPLAY to reach Niri, and NVIDIA libs for encoding.
-      # ExecStartPre enables the virtual display so Sunshine's encoder probe finds
-      # an active CRTC even when the KVM is switched away (DP-1 disconnected).
+      # Virtual display is enabled per-connection by sunshine-prep and disabled
+      # after streaming by sunshine-cleanup, keeping HDMI-A-1 off when not
+      # streaming so the mouse cursor can't escape to it during gaming.
       systemd.user.services.sunshine = {
         after = [ "graphical-session.target" ];
         environment = {
           LD_LIBRARY_PATH = "/run/opengl-driver/lib";
           WAYLAND_DISPLAY = "wayland-1";
         };
-        serviceConfig.ExecStartPre = "${sunshine-enable-display}/bin/sunshine-enable-display";
       };
     };
 }
