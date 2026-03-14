@@ -174,21 +174,16 @@ let
         else
           noopOverlay;
 
-      # WiVRn stable with CUDA and OpenVR compatibility (64-bit only)
-      # Uses stable nixpkgs wivrn instead of bleeding-edge nixpkgs-xr version
-      # 32-bit multilib disabled: GCC 15 ICE on i686 (sqlite3.c GIMPLE pass segfault)
+      # WiVRn with CUDA encoding support (64-bit only)
+      # OpenVR compatibility paths managed by WiVRn itself since v0.23
       wivrn-cuda =
         if isLinux then
           final: prev:
           if prev.stdenv.hostPlatform.system == "x86_64-linux" then
-            let
-              stableWivrn = inputs.nixpkgs.legacyPackages.x86_64-linux.wivrn;
-            in
             {
-              wivrn = stableWivrn.override {
+              wivrn = prev.wivrn.override {
                 cudaSupport = true;
                 inherit (final) cudaPackages;
-                ovrCompatSearchPaths = "${final.xrizer}/lib/xrizer:${final.opencomposite}/lib/opencomposite";
               };
             }
           else
