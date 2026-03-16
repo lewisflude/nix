@@ -29,7 +29,7 @@ _: {
       services.greetd = lib.mkIf config.host.features.desktop.autoLogin.enable {
         settings = {
           initial_session = {
-            command = "${pkgs.niri}/bin/niri-session";
+            command = "${pkgs.uwsm}/bin/uwsm start niri.desktop";
             inherit (config.host.features.desktop.autoLogin) user;
           };
         };

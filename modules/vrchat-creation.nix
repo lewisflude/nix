@@ -9,6 +9,7 @@ _: {
       xdg.portal.xdgOpenUsePortal = true;
 
       environment.systemPackages = [
+        pkgs.vrc-get
         (pkgs.unityhub.override {
           extraPkgs = fhsPkgs: [
             fhsPkgs.harfbuzz

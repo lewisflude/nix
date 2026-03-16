@@ -1,13 +1,10 @@
 # Desktop Environment Configuration
-# Session management via UWSM, seatd, and display manager integration
+# Session management via UWSM and display manager integration
 {
   flake.modules.nixos.desktopEnvironment =
     { lib, config, ... }:
     {
       environment.pathsToLink = [ "/share/wayland-sessions" ];
-
-      services.seatd.enable = true;
-      users.users.greeter.extraGroups = [ "seat" ];
 
       programs.niri.enable = true;
       programs.uwsm = {
@@ -21,7 +18,6 @@
         };
       };
 
-      services.displayManager.sessionPackages = lib.mkForce [ ];
     };
 
   # Desktop user groups configuration
@@ -34,7 +30,6 @@
         "video"
         "input"
         "networkmanager"
-        "seat"
       ];
     };
 }

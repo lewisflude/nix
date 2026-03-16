@@ -40,7 +40,6 @@ in
                 session required ${pkgs.linux-pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
                 session required ${pkgs.linux-pam}/lib/security/pam_unix.so
                 session required ${pkgs.linux-pam}/lib/security/pam_limits.so conf=/etc/security/limits.conf
-                session required ${pkgs.systemd}/lib/security/pam_systemd.so
                 session optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so auto_start
               '';
             in
@@ -55,6 +54,7 @@ in
 
               swaylock.text = ''
                 ${basePamConfig}
+                session required ${pkgs.systemd}/lib/security/pam_systemd.so
                 auth required ${pkgs.linux-pam}/lib/security/pam_deny.so
               '';
 
@@ -90,22 +90,6 @@ in
           [Manager]
           DefaultLimitNOFILE=524288
         '';
-        user.services.unlock-login-keyring = {
-          description = "Unlock GNOME login keyring for auto-login";
-          after = [ "gnome-keyring-daemon.service" ];
-          wants = [ "gnome-keyring-daemon.service" ];
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = "${pkgs.writeShellScript "unlock-keyring" ''
-              sleep 2
-              if ! ${pkgs.libsecret}/bin/secret-tool lookup dummy dummy 2>/dev/null; then
-                printf '\n' | ${pkgs.gnome-keyring}/bin/gnome-keyring --unlock 2>/dev/null || true
-              fi
-            ''}";
-          };
-          wantedBy = [ "default.target" ];
-        };
       };
 
       environment.etc = {

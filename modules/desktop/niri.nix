@@ -13,7 +13,7 @@
       # NVIDIA application profile to fix high VRAM usage with niri
       # See: https://yalter.github.io/niri/Nvidia.html#high-vram-usage-fix
       environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json" =
-        lib.mkIf (config.hardware.nvidia.package != null) {
+        lib.mkIf config.hardware.nvidia.enabled {
           text = ''
             {
                 "rules": [
