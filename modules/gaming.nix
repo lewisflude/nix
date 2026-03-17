@@ -135,7 +135,6 @@ in
       };
 
       home.packages = [
-        pkgs.steam-run
         pkgs.protonup-qt
         pkgs.moonlight-qt
       ];
