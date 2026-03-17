@@ -8,14 +8,29 @@ _: {
       # xdgOpenUsePortal fixes Unity Hub login callback in FHS sandbox
       xdg.portal.xdgOpenUsePortal = true;
 
-      environment.systemPackages = [
-        pkgs.vrc-get
-        (pkgs.unityhub.override {
-          extraPkgs = fhsPkgs: [
-            fhsPkgs.harfbuzz
-            fhsPkgs.libogg
-          ];
-        })
-      ];
+      environment.systemPackages =
+        let
+          unityhub-x11 = pkgs.symlinkJoin {
+            name = "unityhub-x11";
+            paths = [
+              (pkgs.unityhub.override {
+                extraPkgs = fhsPkgs: [
+                  fhsPkgs.harfbuzz
+                  fhsPkgs.libogg
+                ];
+              })
+            ];
+            buildInputs = [ pkgs.makeWrapper ];
+            postBuild = ''
+              wrapProgram $out/bin/unityhub \
+                --set GDK_BACKEND x11 \
+                --set SDL_VIDEODRIVER x11
+            '';
+          };
+        in
+        [
+          pkgs.vrc-get
+          unityhub-x11
+        ];
     };
 }
