@@ -33,4 +33,14 @@ _: {
           unityhub-x11
         ];
     };
+
+  flake.modules.homeManager.vrchatCreation =
+    { pkgs, ... }:
+    {
+      home.packages = [ pkgs.vrc-get ];
+    };
+
+  flake.modules.darwin.vrchatCreation = _: {
+    homebrew.casks = [ "unity-hub" ];
+  };
 }
