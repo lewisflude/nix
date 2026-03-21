@@ -2,16 +2,11 @@
 # Fast, collaborative code editor
 _: {
   flake.modules.homeManager.zed =
-    { lib, pkgs, ... }:
+    { pkgs, ... }:
     {
       home.packages = [
         pkgs.nixd
         pkgs.nixfmt
-        pkgs.vtsls
-        pkgs.vscode-langservers-extracted
-        pkgs.basedpyright
-        pkgs.ruff
-        pkgs.rust-analyzer
       ];
 
       programs.zed-editor = {
@@ -39,34 +34,6 @@ _: {
                 };
               };
             };
-            TypeScript = {
-              language_servers = [
-                "vtsls"
-                "..."
-              ];
-              formatter = "language_server";
-            };
-            Python = {
-              language_servers = [
-                "basedpyright"
-                "ruff"
-              ];
-              format_on_save = "on";
-              formatter = {
-                external = {
-                  command = "ruff";
-                  arguments = [
-                    "format"
-                    "--stdin-filename"
-                    "{buffer_path}"
-                  ];
-                };
-              };
-            };
-            Rust = {
-              format_on_save = "on";
-              formatter = "language_server";
-            };
           };
 
           lsp = {
@@ -75,25 +42,6 @@ _: {
                 formatting = {
                   command = [ "nixfmt" ];
                 };
-              };
-            };
-            rust-analyzer = {
-              initialization_options = {
-                check = {
-                  command = "clippy";
-                };
-              };
-            };
-            vtsls = {
-              binary = {
-                path = lib.getExe pkgs.vtsls;
-                arguments = [ "--stdio" ];
-              };
-            };
-            eslint = {
-              binary = {
-                path = "${pkgs.vscode-langservers-extracted}/bin/vscode-eslint-language-server";
-                arguments = [ "--stdio" ];
               };
             };
           };

@@ -9,86 +9,6 @@ let
       formatter = "nixfmt";
       indent = 2;
     };
-    typescript = {
-      lsp = "vtsls";
-      formatter = "biome";
-      indent = 2;
-      fileTypes = [
-        "ts"
-        "tsx"
-      ];
-    };
-    javascript = {
-      lsp = "vtsls";
-      formatter = "biome";
-      indent = 2;
-      fileTypes = [
-        "js"
-        "jsx"
-      ];
-    };
-    json = {
-      lsp = "vscode-langservers-extracted";
-      formatter = "biome";
-      indent = 2;
-      fileTypes = [
-        "json"
-        "jsonc"
-      ];
-    };
-    css = {
-      lsp = "vscode-langservers-extracted";
-      formatter = "biome";
-      indent = 2;
-      fileTypes = [
-        "css"
-        "scss"
-      ];
-    };
-    graphql = {
-      lsp = "graphql-language-server";
-      formatter = "biome";
-      indent = 2;
-      fileTypes = [
-        "graphql"
-        "gql"
-      ];
-    };
-    python = {
-      lsp = "pyright";
-      formatter = "ruff";
-      indent = 4;
-      unit = "    ";
-      fileTypes = [ "py" ];
-    };
-    go = {
-      lsp = "gopls";
-      formatter = "gofumpt";
-      indent = 4;
-      unit = "    ";
-      fileTypes = [ "go" ];
-    };
-    rust = {
-      lsp = "rust-analyzer";
-      formatter = "rustfmt";
-      indent = 4;
-      unit = "    ";
-      fileTypes = [ "rs" ];
-    };
-    cpp = {
-      lsp = "clangd";
-      formatter = "clang-format";
-      indent = 4;
-      unit = "    ";
-      fileTypes = [
-        "cpp"
-        "cxx"
-        "cc"
-        "hpp"
-        "hxx"
-        "h"
-      ];
-    };
     yaml = {
       lsp = "yaml-language-server";
       formatter = "yamlfmt";
@@ -115,59 +35,25 @@ in
       ...
     }:
     let
-      getLanguageFilename =
-        name: value:
-        let
-          extension =
-            if (value ? fileTypes && builtins.length value.fileTypes > 0) then
-              builtins.head value.fileTypes
-            else
-              name;
-          extensionMap = {
-            javascript = "js";
-            typescript = "ts";
-            jsx = "jsx";
-            tsx = "tsx";
-          };
-        in
-        "file.${extensionMap.${name} or extension}";
-
       buildFormatter =
         name: value:
         let
-          isBiome = value.formatter == "biome";
-          baseArgs = lib.optionals isBiome [
-            "format"
-            "--stdin-file-path"
-            (getLanguageFilename name value)
-          ];
           extraArgs = value.formatterArgs or [ ];
         in
         {
           command = value.formatter;
-          args = baseArgs ++ extraArgs;
+          args = extraArgs;
         };
 
       lspPackages = [
         pkgs.nixd
-        pkgs.nodePackages.typescript-language-server
-        pkgs.vscode-langservers-extracted
         pkgs.yaml-language-server
         pkgs.taplo
-        pkgs.gopls
-        pkgs.rust-analyzer
-        pkgs.pyright
-        pkgs.llvmPackages.clang-unwrapped
       ];
 
       formatterPackages = [
         pkgs.nixfmt
-        pkgs.biome
         pkgs.yamlfmt
-        pkgs.gotools
-        pkgs.clang-tools
-        pkgs.black
-        pkgs.rustfmt
         pkgs.ripgrep
         pkgs.fd
       ];
@@ -184,14 +70,7 @@ in
               scope = "source.${name}";
               injection-regex = name;
               file-types = value.fileTypes or [ name ];
-              language-servers =
-                if value.formatter == "biome" then
-                  [
-                    value.lsp
-                    "biome"
-                  ]
-                else
-                  [ value.lsp ];
+              language-servers = [ value.lsp ];
               indent = {
                 tab-width = value.indent;
                 unit = value.unit or (lib.concatStrings (lib.replicate value.indent " "));
@@ -202,12 +81,7 @@ in
             // lib.optionalAttrs (value.formatter != null) { formatter = buildFormatter name value; }
           ) languageStandards;
 
-          language-server = {
-            biome = {
-              command = "biome";
-              args = [ "lsp-proxy" ];
-            };
-          };
+          language-server = { };
         };
 
         settings = {

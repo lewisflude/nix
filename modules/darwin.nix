@@ -114,7 +114,6 @@ _: {
       home.packages = [
         pkgs.ninja
         pkgs.portaudio
-        pkgs.imagemagick
         pkgs.xcodebuild
         pkgs.lame
         pkgs.flac

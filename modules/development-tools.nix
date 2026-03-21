@@ -12,8 +12,6 @@ _: {
         pkgs.biome
         pkgs.taplo
         pkgs.yamlfmt
-        pkgs.gotools # Includes goimports
-        pkgs.clang-tools # Includes clang-format
 
         # Linters
         pkgs.luaPackages.luacheck

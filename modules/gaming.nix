@@ -115,7 +115,6 @@ in
 
   flake.modules.darwin.gaming = _: {
     homebrew.casks = [
-      "epic-games"
       "moonlight"
       "obs@beta"
       "steam"

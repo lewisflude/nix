@@ -67,7 +67,11 @@ in
     launchd.daemons.reload-autofs = {
       serviceConfig = {
         Label = "org.nix.reload-autofs";
-        ProgramArguments = [ "/bin/sh" "-c" "automount -cv" ];
+        ProgramArguments = [
+          "/bin/sh"
+          "-c"
+          "automount -cv"
+        ];
         RunAtLoad = true;
       };
     };
