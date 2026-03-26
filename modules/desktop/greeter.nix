@@ -1,7 +1,8 @@
 # Greeter Configuration
 # greetd with DMS greeter and auto-login support
 # Follows: https://danklinux.com/docs/dankmaterialshell/nixos-flake
-_: {
+{ inputs, ... }:
+{
   flake.modules.nixos.greeter =
     {
       pkgs,
@@ -9,6 +10,9 @@ _: {
       config,
       ...
     }:
+    let
+      niri = inputs.niri.packages.${config.nixpkgs.hostPlatform.system}.niri-unstable;
+    in
     {
       # Enable DMS greeter for greetd
       # https://danklinux.com/docs/dankmaterialshell/home-manager#greeter-options
@@ -27,12 +31,17 @@ _: {
 
       # Greetd auto-login configuration (applied when host.features.desktop.autoLogin.enable = true)
       services.greetd = lib.mkIf config.host.features.desktop.autoLogin.enable {
-        settings = {
-          initial_session = {
-            command = "${pkgs.uwsm}/bin/uwsm start niri.desktop";
-            inherit (config.host.features.desktop.autoLogin) user;
+        settings =
+          let
+            session = {
+              command = "${pkgs.uwsm}/bin/uwsm start -- ${niri}/bin/niri-session";
+              inherit (config.host.features.desktop.autoLogin) user;
+            };
+          in
+          {
+            initial_session = session;
+            default_session = session;
           };
-        };
       };
     };
 }

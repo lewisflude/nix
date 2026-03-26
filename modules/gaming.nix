@@ -44,14 +44,6 @@ in
           extraProfile = ''
             unset TZ
           '';
-          # VR integration: These must be part of the Steam package override (not vr.nix)
-          # because programs.steam.package is a single atomic override.
-          # See modules/vr.nix for the rest of VR configuration.
-          extraEnv = {
-            PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = "1";
-            PRESSURE_VESSEL_FILESYSTEMS_RW = "$XDG_RUNTIME_DIR/wivrn/comp_ipc";
-            PRESSURE_VESSEL_FILESYSTEMS_RO = "/nix/store";
-          };
           extraPkgs = pkgs': [
             pkgs'.libxcursor
             pkgs'.libxi
@@ -63,7 +55,6 @@ in
             pkgs'.stdenv.cc.cc.lib
             pkgs'.libkrb5
             pkgs'.keyutils
-            pkgs.xrizer # VR: OpenVR compatibility layer (outer pkgs, has multilib overlay)
           ];
         };
       };
@@ -75,6 +66,7 @@ in
       programs.steam.gamescopeSession.enable = true;
 
       boot.kernel.sysctl = {
+        "vm.max_map_count" = 2147483642;
         "vm.swappiness" = lib.mkDefault 10;
         "vm.dirty_ratio" = 10;
         "vm.dirty_background_ratio" = 5;

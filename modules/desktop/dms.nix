@@ -41,7 +41,6 @@ _: {
               "binds"
               "colors"
               "layout"
-              "outputs"
               "wpblur"
             ];
           };

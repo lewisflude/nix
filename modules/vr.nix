@@ -1,13 +1,19 @@
 # VR Module - WiVRn + xrizer for Quest headsets
 # References:
 # - https://lvra.gitlab.io/docs/distros/nixos/
-#
-# NOTE: VR also requires Steam integration configured in gaming.nix
-# (PRESSURE_VESSEL env vars, xrizer in extraPkgs)
 _: {
   flake.modules.nixos.vr =
     { pkgs, ... }:
     {
+      # Steam VR integration (per LVRA NixOS guide)
+      # Sets OpenXR runtime import for pressure-vessel/Proton.
+      # Non-VR games that break with VR detection need per-game launch options:
+      #   PROTON_VR_RUNTIME="" %command%
+      programs.steam.extraPackages = [ pkgs.xrizer ];
+      environment.sessionVariables = {
+        PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = "1";
+      };
+
       services.wivrn = {
         enable = true;
         defaultRuntime = true;

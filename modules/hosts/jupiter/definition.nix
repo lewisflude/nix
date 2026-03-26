@@ -26,7 +26,6 @@ in
         inputs.dms.nixosModules.default
         inputs.dms.nixosModules.greeter
         inputs.solaar.nixosModules.default
-        inputs.nixpkgs-xr.nixosModules.nixpkgs-xr
 
         # ═══════════════════════════════════════════════════════════════════════
         # Core Modules (dendritic: each concern has its own module)
@@ -56,6 +55,11 @@ in
         nixos.mouse
         nixos.usb
         nixos.gpg # GPG + YubiKey hardware support (merged module)
+
+        # ═══════════════════════════════════════════════════════════════════════
+        # Virtualization
+        # ═══════════════════════════════════════════════════════════════════════
+        nixos.gpuPassthrough
 
         # ═══════════════════════════════════════════════════════════════════════
         # Desktop Environment (dendritic: explicit imports, not aggregation)
@@ -213,6 +217,9 @@ in
         homeManager.flatpak
         homeManager.theming
         homeManager.developmentTools
+
+        # Virtualization home-manager modules
+        homeManager.gpuPassthrough
 
         # Gaming & VR home-manager modules
         homeManager.gaming
@@ -390,6 +397,7 @@ in
           "audio"
           "uinput"
           "video"
+          "libvirtd"
         ];
       };
 

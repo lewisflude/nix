@@ -161,6 +161,33 @@
             };
             screenshot-path = "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
             environment.QT_QPA_PLATFORM = "wayland";
+            outputs."DP-1" = {
+              mode = {
+                width = 3440;
+                height = 1440;
+                refresh = 164.900;
+              };
+              position = {
+                x = 0;
+                y = 0;
+              };
+              focus-at-startup = true;
+            };
+
+            # Sunshine streaming output — off by default, toggled via sunshine prep-cmd
+            outputs."HDMI-A-1" = {
+              off = true;
+              mode = {
+                width = 1920;
+                height = 1080;
+                refresh = 60.0;
+              };
+              position = {
+                x = 3440;
+                y = 0;
+              };
+            };
+
             debug = lib.mkIf (osConfig.host.hardware.renderDevice or null != null) {
               render-drm-device = osConfig.host.hardware.renderDevice;
             };
@@ -534,15 +561,6 @@
                   "1.0"
                   "--brightness"
                   "1.0"
-                ];
-              }
-              {
-                command = [
-                  "niri"
-                  "msg"
-                  "output"
-                  "HDMI-A-1"
-                  "off"
                 ];
               }
             ];
