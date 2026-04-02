@@ -16,7 +16,6 @@ _: {
 
       services.wivrn = {
         enable = true;
-        defaultRuntime = true;
         openFirewall = true;
         autoStart = true;
 
@@ -57,5 +56,46 @@ _: {
         };
       };
 
+      # Auto-switch default audio sink/source when WiVRn headset connects.
+      # Watches PipeWire for wivrn.sink appearing/disappearing and calls
+      # pactl to switch between WiVRn and Main-Output/Main-Input.
+      # Node names from WiVRn source: wivrn.sink / wivrn.source
+      systemd.user.services.wivrn-audio-switch = {
+        Unit = {
+          Description = "Auto-switch audio to WiVRn headset";
+          After = [ "pipewire-pulse.service" ];
+          Requires = [ "pipewire-pulse.service" ];
+        };
+        Service = {
+          ExecStart = toString (
+            pkgs.writeShellScript "wivrn-audio-switch" ''
+              pactl=${pkgs.pulseaudio}/bin/pactl
+              grep=${pkgs.gnugrep}/bin/grep
+              state_file=$(mktemp)
+              echo "" > "$state_file"
+              trap 'rm -f "$state_file"' EXIT
+              $pactl subscribe | $grep --line-buffered "'new'\|'remove'" | while read -r _; do
+                state=$(cat "$state_file")
+                if $pactl list sinks short 2>/dev/null | $grep -q "wivrn.sink"; then
+                  if [ "$state" != "wivrn" ]; then
+                    $pactl set-default-sink wivrn.sink
+                    $pactl set-default-source wivrn.source 2>/dev/null
+                    echo "wivrn" > "$state_file"
+                  fi
+                else
+                  if [ "$state" != "main" ]; then
+                    $pactl set-default-sink Main-Output
+                    $pactl set-default-source Main-Input
+                    echo "main" > "$state_file"
+                  fi
+                fi
+              done
+            ''
+          );
+          Restart = "on-failure";
+          RestartSec = 5;
+        };
+        Install.WantedBy = [ "pipewire-pulse.service" ];
+      };
     };
 }

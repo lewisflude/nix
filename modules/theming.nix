@@ -35,10 +35,7 @@ _: {
           name = "Adwaita";
           package = pkgs.adwaita-icon-theme;
         };
-        cursorTheme = lib.mkForce {
-          name = "DMZ-White";
-          package = pkgs.vanilla-dmz;
-        };
+        # Cursor theme managed by home.pointerCursor in niri.nix
         font = lib.mkForce {
           name = "Iosevka";
           package = pkgs.iosevka-bin;

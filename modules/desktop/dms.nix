@@ -7,7 +7,6 @@ _: {
     { pkgs, ... }:
     {
       services.accounts-daemon.enable = true;
-      services.fprintd.enable = true;
       services.printing.enable = true;
       environment.systemPackages = [ pkgs.cups-pk-helper ];
     };
@@ -38,7 +37,6 @@ _: {
             override = true;
             filesToInclude = [
               "alttab"
-              "binds"
               "colors"
               "layout"
               "wpblur"

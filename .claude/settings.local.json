@@ -10,7 +10,8 @@
       "mcp__context7__*",
       "mcp__playwright__*",
       "mcp__sqlite__*",
-      "mcp__time__*"
+      "mcp__time__*",
+      "mcp__nixos__*"
     ]
   },
   "disableAllHooks": true,

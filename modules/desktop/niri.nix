@@ -174,9 +174,9 @@
               focus-at-startup = true;
             };
 
-            # Sunshine streaming output — off by default, toggled via sunshine prep-cmd
+            # Sunshine streaming output — disabled by default, toggled via sunshine prep-cmd
             outputs."HDMI-A-1" = {
-              off = true;
+              enable = false;
               mode = {
                 width = 1920;
                 height = 1080;

@@ -51,6 +51,10 @@ in
               exec npx -y @modelcontextprotocol/server-sequential-thinking@2025.12.18 "$@"
             ''}";
           };
+          nixos = {
+            command = "uvx";
+            args = [ "mcp-nixos" ];
+          };
         };
       };
 
@@ -191,6 +195,33 @@ in
             - Only comment non-obvious logic. Code should be self-documenting.
             - Delete dead code rather than commenting it out.
           '';
+          research-first = ''
+            # Research-First Protocol
+
+            ## Before Answering Technical Questions
+
+            - **Verify before stating.** Never fabricate package names, option names, API signatures, CLI flags, menu paths, or version numbers. If unsure, look it up or say so.
+            - **Use available tools.** Prefer Context7, WebSearch, WebFetch, and mcp-nixos over training data for anything version-specific, recently changed, or niche.
+            - **Admit uncertainty explicitly.** Say "I'm not sure" or "Let me check" rather than guessing. Confidence without verification is harmful.
+            - **Cite sources.** When referencing documentation, include where you found it.
+            - **Specify versions.** Always mention which version of software, library, or API your advice applies to.
+
+            ## Tool Priority for Verification
+
+            1. **Context7** — library/framework docs (React, Django, Prisma, etc.)
+            2. **mcp-nixos** — NixOS packages, options, Home Manager options, nix-darwin settings
+            3. **WebSearch** — recent changes, changelogs, niche tools, community solutions
+            4. **WebFetch** — read specific documentation pages, wikis, READMEs
+            5. **Grep/Glob** — verify claims against the actual codebase
+
+            ## Especially Important For
+
+            - NixOS/Home Manager option names and types
+            - Blender plugin UIs, menus, and settings (these change between versions)
+            - CLI tool flags and subcommands
+            - Hardware-specific configuration
+            - Any domain where your training data may be sparse or outdated
+          '';
         };
 
         skills = {
@@ -259,6 +290,83 @@ in
 
             - System services, kernel, hardware, daemons, boot, networking → `flake.modules.nixos.*`
             - User apps, dotfiles, dev tools, tray applets, shell, editor → `flake.modules.homeManager.*`
+          '';
+          blender-help = ''
+            ---
+            description: Help with Blender plugins, addons, and 3D workflows. Use when discussing Hair Tool, CharMorph, bpy API, or any Blender-related topic.
+            ---
+
+            # Blender Plugin & Workflow Assistant
+
+            You are helping a user learn and use Blender plugins. The user may be working with Hair Tool, CharMorph, or other addons.
+
+            ## Research Protocol
+
+            **Always verify before answering.** Blender plugin UIs, settings, and workflows change between versions. Never guess at menu locations, panel names, parameter names, or keyboard shortcuts.
+
+            1. **Ask which Blender version** the user is running (4.x vs 3.x matters significantly)
+            2. **Ask which plugin version** they have installed
+            3. **WebSearch** for the plugin's current documentation, changelog, or wiki
+            4. **WebFetch** the plugin's official docs page if available
+            5. **Search for video tutorial transcripts** or forum posts for step-by-step workflows
+
+            ## Hair Tool Specifics
+
+            - Hair Tool is a paid Blender addon for hair/fur creation and grooming
+            - UI and workflow changed significantly between Blender 3.x and 4.x
+            - Key concepts: hair curves, guide curves, interpolation, clumping, braiding
+            - Always verify panel locations — they move between versions
+
+            ## CharMorph Specifics
+
+            - CharMorph is an open-source character creation addon for Blender
+            - Uses morphing/shape keys for character customization
+            - Key concepts: morphs, materials, presets, fitting, asset library
+            - Documentation may be sparse — search GitHub issues and wiki
+
+            ## General Approach
+
+            - Walk through steps one at a time, confirming the user can see each UI element
+            - Include screenshots references when possible (suggest the user share screenshots)
+            - If a step doesn't match what the user sees, troubleshoot version differences
+            - Suggest the user check Preferences > Add-ons to confirm the addon is enabled and its version
+          '';
+          deep-research = ''
+            ---
+            description: Research a topic thoroughly before answering. Use when investigating unfamiliar libraries, APIs, tools, or workflows where accuracy matters more than speed.
+            ---
+
+            # Deep Research Mode
+
+            Research the given topic thoroughly before providing any answer.
+
+            ## Process
+
+            1. **Identify what needs verification.** Break the question into specific factual claims that need checking.
+            2. **Search broadly first.** Use WebSearch to find current, authoritative sources. Look for:
+               - Official documentation
+               - Recent changelog entries or release notes
+               - GitHub issues or discussions
+               - Community forums (Reddit, Discourse, Stack Overflow)
+            3. **Read primary sources.** Use WebFetch to read the actual documentation pages, not just search snippets.
+            4. **Use specialized tools.** Context7 for library docs, mcp-nixos for Nix options.
+            5. **Cross-reference.** Verify claims against multiple sources when possible.
+            6. **Synthesize with citations.** Present findings with source links.
+
+            ## Output Format
+
+            Structure your response as:
+            - **Answer** — the verified information
+            - **Sources** — links to documentation or references used
+            - **Caveats** — what you couldn't verify, version-specific notes, or known gaps
+            - **Version info** — which versions this applies to
+
+            ## Rules
+
+            - Never state something as fact without a source
+            - If you find conflicting information, present both sides
+            - If documentation is sparse, say so explicitly
+            - Prefer official docs over blog posts over forum answers
           '';
         };
 
@@ -351,6 +459,19 @@ in
 
           ## Conventions
           - Conventional commits: <type>(<scope>): <description>
+
+          ## Interests
+          - 3D art: Blender (Hair Tool, CharMorph plugins), character creation
+          - NixOS configuration and system administration
+
+          ## How I Want Claude to Work
+
+          - **Research first, answer second.** Use WebSearch/WebFetch/Context7/mcp-nixos before giving technical advice. Training data goes stale.
+          - **Be specific about versions.** Don't say "in Blender" — say "in Blender 4.2". Don't say "add this option" — say "this NixOS 25.05 option".
+          - **Admit gaps.** "I'm not sure, let me check" is always better than a confident wrong answer.
+          - **Walk me through things step by step** when I'm learning new tools or plugins.
+          - **Use /deep-research** for unfamiliar topics before answering.
+          - **Use /blender-help** when discussing Blender plugins or workflows.
         '';
       };
     };

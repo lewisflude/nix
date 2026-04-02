@@ -70,7 +70,6 @@ _: {
                 "node.name" = "Main-Output-Playback";
                 "audio.position" = "AUX0,AUX1";
                 "stream.dont-remix" = true;
-                "node.dont-reconnect" = false;
                 "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-output";
               };
             };
@@ -83,14 +82,12 @@ _: {
                 "node.name" = "Main-Input-Capture";
                 "audio.position" = "AUX0,AUX1";
                 "stream.dont-remix" = true;
-                "node.dont-reconnect" = false;
                 "node.target" = "alsa_input.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-input";
               };
               "playback.props" = {
                 "node.name" = "Main-Input-Loopback";
                 "audio.position" = "FL,FR";
                 "stream.dont-remix" = true;
-                "node.dont-reconnect" = false;
                 "node.target" = "Main-Input";
               };
             };
@@ -117,6 +114,13 @@ _: {
           {
             matches = [ { "node.name" = "~alsa_*"; } ];
             actions.update-props."session.suspend-timeout-seconds" = 0;
+          }
+        ];
+        # Disable GPU HDMI audio — not used (Apogee handles all audio)
+        "10-disable-hdmi"."monitor.alsa.rules" = [
+          {
+            matches = [ { "device.name" = "~alsa_card.*HDA_NVidia*"; } ];
+            actions.update-props."device.disabled" = true;
           }
         ];
 
@@ -185,7 +189,6 @@ _: {
       home.packages =
         lib.optionals isLinux [
           pkgs.pwvucontrol
-          pkgs.pavucontrol
           pkgs.playerctl
           pkgs.crosspipe
         ]

@@ -6,12 +6,12 @@ _: {
     lib.mkIf pkgs.stdenv.isLinux {
       home.packages = [
         pkgs.blender_5_0
-        pkgs.gimp
         pkgs.telegram-desktop
         pkgs.file-roller
         pkgs.font-awesome
         pkgs.aseprite
         pkgs.nautilus
+        pkgs.swayimg
       ];
 
       # Discord with Vencord (better Wayland, screen sharing, plugins)

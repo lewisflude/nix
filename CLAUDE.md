@@ -42,3 +42,15 @@ Key rules:
 - Conventional commits: `<type>(<scope>): <description>`
 - Never use `with pkgs;` — use explicit `pkgs.package`
 - Format all Nix with `nix fmt` (treefmt-nix)
+
+## Verification Protocol (NixOS-Specific)
+
+- **Use mcp-nixos** to verify NixOS options, Home Manager options, and package
+  names exist before suggesting them. Never invent option paths.
+- **Check flake.lock** for actual nixpkgs version in use before giving
+  version-specific advice.
+- **Use Context7** for library/framework docs when writing modules that
+  configure third-party tools.
+- **WebSearch** for niche packages or options you're uncertain about.
+- If an option or package can't be verified, say so and suggest the user check
+  with `nix search` or `man configuration.nix`.

@@ -7,11 +7,11 @@ _: {
     { pkgs, ... }:
     {
       # Force HDMI-A-1 connected via EDID override (no dummy plug needed)
-      hardware.display.edid.modelines."sunshine-1080p" =
+      hardware.display.edid.modelines."sun-1080p" =
         "173.00 1920 2048 2248 2576 1080 1083 1088 1120 -hsync +vsync";
 
       boot.kernelParams = [
-        "drm.edid_firmware=HDMI-A-1:edid/sunshine-1080p.bin"
+        "drm.edid_firmware=HDMI-A-1:edid/sun-1080p.bin"
         "video=HDMI-A-1:e"
       ];
 
@@ -44,7 +44,7 @@ _: {
 
           # Audio
           audio_codec = "opus";
-          channels = 6;
+          channels = 2;
           audio_bitrate = 192;
 
           gamepad = "x360";

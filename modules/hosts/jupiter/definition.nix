@@ -170,7 +170,6 @@ in
         # External home-manager modules
         inputs.nix-index-database.homeModules.nix-index
         inputs.sops-nix.homeManagerModules.sops
-        inputs.ironbar.homeManagerModules.default
         inputs.nix-flatpak.homeManagerModules.nix-flatpak
         inputs.dms.homeModules.default
         inputs.dms.homeModules.niri
@@ -212,6 +211,7 @@ in
         # Desktop home-manager modules
         homeManager.browser
         homeManager.desktopApps
+        homeManager.gimp
         homeManager.niri
         homeManager.dms
         homeManager.flatpak
