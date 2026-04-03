@@ -52,12 +52,6 @@ in
                 session required ${pkgs.systemd}/lib/security/pam_systemd.so class=greeter
               '';
 
-              swaylock.text = ''
-                ${basePamConfig}
-                session required ${pkgs.systemd}/lib/security/pam_systemd.so
-                auth required ${pkgs.linux-pam}/lib/security/pam_deny.so
-              '';
-
               sudo.u2fAuth = false; # Use password for sudo (desktop workflow)
               login.u2fAuth = true; # YubiKey required at login (proves physical presence)
             };

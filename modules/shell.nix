@@ -219,7 +219,6 @@ in
             # Editor
             zed = "zeditor";
           }
-          (lib.mkIf isLinux { lock = "swaylock -f"; })
         ];
 
         shellGlobalAliases = {

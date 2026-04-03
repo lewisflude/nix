@@ -2,15 +2,6 @@
 # Full desktop shell for niri with Material You theming
 # Follows: https://danklinux.com/docs/dankmaterialshell/nixos-flake
 _: {
-  # NixOS system services required by DMS
-  flake.modules.nixos.dms =
-    { pkgs, ... }:
-    {
-      services.accounts-daemon.enable = true;
-      services.printing.enable = true;
-      environment.systemPackages = [ pkgs.cups-pk-helper ];
-    };
-
   flake.modules.homeManager.dms =
     { pkgs, lib, ... }:
     lib.mkIf pkgs.stdenv.isLinux {

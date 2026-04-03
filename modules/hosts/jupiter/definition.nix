@@ -65,12 +65,10 @@ in
         # Desktop Environment (dendritic: explicit imports, not aggregation)
         # ═══════════════════════════════════════════════════════════════════════
         nixos.niri
-        nixos.dms
         nixos.graphics
         nixos.fonts
         nixos.greeter
         nixos.console
-        nixos.xwayland
         nixos.hardwareSupport
         nixos.desktopEnvironment
         nixos.desktopUserGroups
@@ -157,6 +155,7 @@ in
         # Desktop Extras
         # ═══════════════════════════════════════════════════════════════════════
         nixos.colord
+        nixos.printing
         nixos.xdgPortal
       ];
 
@@ -213,6 +212,7 @@ in
         homeManager.desktopApps
         homeManager.gimp
         homeManager.niri
+        homeManager.niriOutputsJupiter
         homeManager.dms
         homeManager.flatpak
         homeManager.theming
@@ -394,9 +394,8 @@ in
           "git"
           "i2c"
           "media"
-          "audio"
-          "uinput"
           "video"
+          "uinput"
           "libvirtd"
         ];
       };

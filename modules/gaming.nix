@@ -44,6 +44,9 @@ in
           extraProfile = ''
             unset TZ
           '';
+          extraEnv = {
+            PRESSURE_VESSEL_FILESYSTEMS_RO = "/nix/store";
+          };
           extraPkgs = pkgs': [
             pkgs'.libxcursor
             pkgs'.libxi

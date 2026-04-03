@@ -7,6 +7,12 @@
       environment.pathsToLink = [ "/share/wayland-sessions" ];
 
       programs.niri.enable = true;
+
+      # niri-flake targets WantedBy=niri.service, but UWSM uses
+      # wayland-wm@niri-session.service — fix to target graphical-session.target
+      systemd.user.services.niri-flake-polkit.wantedBy = lib.mkForce [
+        "graphical-session.target"
+      ];
       programs.uwsm = {
         enable = true;
         waylandCompositors = {

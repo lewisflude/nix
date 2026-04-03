@@ -14,17 +14,9 @@ _: {
       # =========================================================================
       # Packages
       # =========================================================================
-      home.packages =
-        # Fonts (cross-platform)
-        [
-          pkgs.iosevka-bin
-          pkgs.nerd-fonts.iosevka
-        ]
-        # Linux-specific packages
-        ++ lib.optionals isLinux [
-          pkgs.nwg-look
-          pkgs.xdg-utils
-        ];
+      home.packages = lib.optionals isLinux [
+        pkgs.xdg-utils
+      ];
 
       # =========================================================================
       # GTK Overrides (on top of signal-nix) - Linux only
