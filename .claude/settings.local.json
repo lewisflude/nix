@@ -12,7 +12,9 @@
       "mcp__sqlite__*",
       "mcp__time__*",
       "mcp__nixos__*",
-      "mcp__plugin_claude-code-home-manager_nixos__nix"
+      "mcp__plugin_claude-code-home-manager_nixos__nix",
+      "mcp__plugin_claude-code-home-manager_github__search_code",
+      "mcp__plugin_claude-code-home-manager_github__get_file_contents"
     ]
   },
   "disableAllHooks": true,

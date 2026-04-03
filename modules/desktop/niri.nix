@@ -174,20 +174,6 @@
               focus-at-startup = true;
             };
 
-            # Sunshine streaming output — disabled by default, toggled via sunshine prep-cmd
-            outputs."HDMI-A-1" = {
-              enable = false;
-              mode = {
-                width = 1920;
-                height = 1080;
-                refresh = 60.0;
-              };
-              position = {
-                x = 3440;
-                y = 0;
-              };
-            };
-
             debug = lib.mkIf (osConfig.host.hardware.renderDevice or null != null) {
               render-drm-device = osConfig.host.hardware.renderDevice;
             };

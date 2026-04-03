@@ -1,5 +1,5 @@
 # Jupiter-specific niri output and display configuration
-# Monitor layout, ICC profile, and gamma for the AW3423DWF + Sunshine HDMI
+# Monitor layout, ICC profile, and gamma for the AW3423DWF + virtual streaming display
 _: {
   flake.modules.homeManager.niriOutputsJupiter =
     { config, pkgs, ... }:
@@ -18,8 +18,8 @@ _: {
           focus-at-startup = true;
         };
 
-        # Sunshine streaming output — disabled by default, toggled via sunshine prep-cmd
-        outputs."HDMI-A-1" = {
+        # Virtual 16:9 streaming display — disabled by default, Sunshine toggles via IPC
+        outputs."DP-3" = {
           enable = false;
           mode = {
             width = 1920;

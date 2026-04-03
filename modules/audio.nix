@@ -116,8 +116,8 @@ _: {
             actions.update-props."session.suspend-timeout-seconds" = 0;
           }
         ];
-        # Disable GPU HDMI audio — not used (Apogee handles all audio)
-        "10-disable-hdmi"."monitor.alsa.rules" = [
+        # Disable GPU audio — not used (Apogee handles all audio)
+        "10-disable-gpu-audio"."monitor.alsa.rules" = [
           {
             matches = [ { "device.name" = "~alsa_card.*HDA_NVidia*"; } ];
             actions.update-props."device.disabled" = true;

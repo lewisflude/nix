@@ -1,19 +1,19 @@
 # Sunshine game streaming server with NVENC encoding (RTX 4090)
-# KMS capture streams HDMI-A-1 output — enabled on connect, disabled on disconnect.
-# Kernel EDID override forces HDMI-A-1 as "connected" without a physical display.
-# Niri keeps the output off by default; Sunshine prep-cmd toggles it via IPC.
+# KMS capture streams a virtual 16:9 display on DP-3 (EDID override, no dummy plug).
+# Niri keeps DP-3 off by default; Sunshine prep-cmd toggles it via IPC and sets
+# the resolution to match the connecting Moonlight client.
 _: {
   flake.modules.nixos.sunshine =
     { pkgs, ... }:
     {
-      # Force HDMI-A-1 connected via EDID override (no dummy plug needed)
-      hardware.display.edid.modelines."sun-1080p" =
+      # Virtual display on DP-3 via EDID override (no physical monitor needed)
+      hardware.display.edid.modelines."sun-virt" =
         "173.00 1920 2048 2248 2576 1080 1083 1088 1120 -hsync +vsync";
 
-      boot.kernelParams = [
-        "drm.edid_firmware=HDMI-A-1:edid/sun-1080p.bin"
-        "video=HDMI-A-1:e"
-      ];
+      hardware.display.outputs."DP-3" = {
+        edid = "sun-virt.bin";
+        mode = "e"; # force enabled even with nothing plugged in
+      };
 
       services.sunshine = {
         enable = true;
@@ -29,10 +29,10 @@ _: {
           capture = "kms";
           encoder = "nvenc";
           adapter_name = "/dev/dri/card1";
-          output_name = "HDMI-A-1";
+          output_name = "DP-3";
 
-          # Toggle HDMI-A-1 on stream connect/disconnect (niri IPC)
-          global_prep_cmd = ''[{"do":"niri msg output HDMI-A-1 on","undo":"niri msg output HDMI-A-1 off"}]'';
+          # Match Moonlight client resolution/fps on connect, restore on disconnect
+          global_prep_cmd = ''[{"do":"niri msg output DP-3 on && niri msg output DP-3 mode \"''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}.000\"","undo":"niri msg output DP-3 off"}]'';
 
           # NVENC (RTX 4090)
           nvenc_preset = 3;

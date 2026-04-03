@@ -22,7 +22,7 @@ in
       };
 
       # Use pre-computed overlays, ordered after external NixOS module overlays
-      # (e.g. nixpkgs-xr) so our overrides (wivrn/xrizer multilib) see their packages
+      # so our overrides (e.g. wivrn CUDA) take precedence
       nixpkgs.overlays = lib.mkAfter nixosOverlays;
     };
 

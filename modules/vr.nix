@@ -1,6 +1,6 @@
 # VR Module - WiVRn + xrizer for Quest headsets
 # References:
-# - https://lvra.gitlab.io/docs/distros/nixos/
+# - https://wiki.vronlinux.org/docs/distros/nixos/
 _: {
   flake.modules.nixos.vr =
     { pkgs, ... }:
@@ -14,20 +14,28 @@ _: {
         enable = true;
         openFirewall = true;
         autoStart = true;
-        highPriority = true; # CAP_SYS_NICE for async reprojection
+        highPriority = true; # CAP_SYS_NICE for real-time compositor scheduling
 
         steam.importOXRRuntimes = true; # PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1
 
         monadoEnvironment = {
           U_PACING_COMP_MIN_TIME_MS = "5";
-          IPC_EXIT_ON_DISCONNECT = "1";
-          XRT_COMPOSITOR_USE_PRESENT_WAIT = "1"; # NVIDIA head tracking latency reduction
-          U_PACING_COMP_TIME_FRACTION_PERCENT = "90"; # NVIDIA head tracking latency reduction
+          IPC_EXIT_WHEN_IDLE = "1";
+          IPC_EXIT_WHEN_IDLE_DELAY_MS = "5000";
+          XRT_COMPOSITOR_USE_PRESENT_WAIT = "1"; # NVIDIA latency reduction
+          U_PACING_COMP_TIME_FRACTION_PERCENT = "90"; # NVIDIA latency reduction
+          XRT_COMPOSITOR_FORCE_WAYLAND_DIRECT = "1"; # NVIDIA Wayland direct compositing
         };
 
         config = {
           enable = true;
           json = {
+            bit-depth = 10;
+            encoder = {
+              encoder = "nvenc";
+              codec = "av1"; # RTX 4090 has hardware AV1 encode
+            };
+            openvr-compat-path = "${pkgs.xrizer}/lib/xrizer";
             application = [ pkgs.wayvr ];
           };
         };
@@ -77,6 +85,7 @@ _: {
               echo "" > "$state_file"
               trap 'rm -f "$state_file"' EXIT
               $pactl subscribe | $grep --line-buffered "'new'\|'remove'" | while read -r _; do
+                ${pkgs.coreutils}/bin/sleep 0.1
                 state=$(cat "$state_file")
                 if $pactl list sinks short 2>/dev/null | $grep -q "wivrn.sink"; then
                   if [ "$state" != "wivrn" ]; then
