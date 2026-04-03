@@ -4,7 +4,7 @@
 # the resolution to match the connecting Moonlight client.
 _: {
   flake.modules.nixos.sunshine =
-    { config, pkgs, ... }:
+    { pkgs, ... }:
     {
       # Virtual display on DP-3 via EDID override (no physical monitor needed)
       hardware.display.edid.modelines."sun-virt" =
@@ -29,10 +29,10 @@ _: {
           capture = "kms";
           encoder = "nvenc";
           adapter_name = "/dev/dri/card1";
-          output_name = 1; # KMS monitor index (0=DP-1, 1=DP-3)
+          output_name = "DP-3";
 
           # Match Moonlight client resolution/fps on connect, restore on disconnect
-          global_prep_cmd = ''[{"do":"niri msg output DP-3 on","undo":"niri msg output DP-3 off"}]'';
+          global_prep_cmd = ''[{"do":"niri msg output DP-3 on && niri msg output DP-3 mode \"''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}.000\"","undo":"niri msg output DP-3 off"}]'';
 
           # NVENC (RTX 4090)
           nvenc_preset = 3;
@@ -57,7 +57,6 @@ _: {
           LD_LIBRARY_PATH = "/run/opengl-driver/lib";
           WAYLAND_DISPLAY = "wayland-1";
         };
-        serviceConfig.ExecStartPre = "${config.programs.niri.package}/bin/niri msg output DP-3 on";
       };
     };
 }

@@ -5,6 +5,9 @@ _: {
   flake.modules.nixos.vrchatCreation =
     { pkgs, ... }:
     {
+      # xdgOpenUsePortal fixes Unity Hub login callback in FHS sandbox
+      xdg.portal.xdgOpenUsePortal = true;
+
       environment.systemPackages =
         let
           unityhub-x11 = pkgs.symlinkJoin {
