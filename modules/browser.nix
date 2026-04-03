@@ -89,6 +89,7 @@ _: {
         "--enable-zero-copy"
         "--ozone-platform-hint=auto"
         "--enable-wayland-ime"
+        "--wayland-text-input-version=3"
         "--enable-parallel-downloading"
         "--enable-gpu-rasterization"
         "--use-gl=egl"

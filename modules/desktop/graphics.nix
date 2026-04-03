@@ -31,6 +31,9 @@ _: {
         WLR_DRM_DEVICES = "/dev/dri/card1";
         ELECTRON_OZONE_PLATFORM_HINT = "auto";
         NIXOS_OZONE_WL = "1";
+        QT_QPA_PLATFORMTHEME = "gtk2";
+        XCURSOR_SIZE = "32";
+        XCURSOR_THEME = "phinger-cursors-light";
       };
     };
 }

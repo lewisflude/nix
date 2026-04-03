@@ -30,7 +30,7 @@ _: {
         };
       };
 
-      services.cliphist.enable = false;
+      services.cliphist.enable = true;
 
       xdg.desktopEntries.ghostty = {
         name = "Ghostty";

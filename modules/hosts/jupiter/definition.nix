@@ -272,6 +272,13 @@ in
         "usb_storage"
         "sd_mod"
       ];
+      # Early KMS for flicker-free boot with NVIDIA
+      boot.initrd.kernelModules = [
+        "nvidia"
+        "nvidia_modeset"
+        "nvidia_uvm"
+        "nvidia_drm"
+      ];
       boot.kernelModules = [
         "kvm-intel"
         "zfs"
