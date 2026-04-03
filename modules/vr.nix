@@ -5,23 +5,24 @@ _: {
   flake.modules.nixos.vr =
     { pkgs, ... }:
     {
-      # Steam VR integration (per LVRA NixOS guide)
-      # Sets OpenXR runtime import for pressure-vessel/Proton.
+      # xrizer OpenVR-on-OpenXR layer for Steam/Proton VR games
       # Non-VR games that break with VR detection need per-game launch options:
       #   PROTON_VR_RUNTIME="" %command%
       programs.steam.extraPackages = [ pkgs.xrizer ];
-      environment.sessionVariables = {
-        PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = "1";
-      };
 
       services.wivrn = {
         enable = true;
         openFirewall = true;
         autoStart = true;
+        highPriority = true; # CAP_SYS_NICE for async reprojection
+
+        steam.importOXRRuntimes = true; # PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1
 
         monadoEnvironment = {
           U_PACING_COMP_MIN_TIME_MS = "5";
           IPC_EXIT_ON_DISCONNECT = "1";
+          XRT_COMPOSITOR_USE_PRESENT_WAIT = "1"; # NVIDIA head tracking latency reduction
+          U_PACING_COMP_TIME_FRACTION_PERCENT = "90"; # NVIDIA head tracking latency reduction
         };
 
         config = {
@@ -32,6 +33,7 @@ _: {
         };
       };
 
+      # ADB for Quest headset setup/sideloading
       environment.systemPackages = [ pkgs.android-tools ];
     };
 

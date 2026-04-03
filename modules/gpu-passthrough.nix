@@ -63,6 +63,15 @@ _: {
             # Bind GPU to vfio-pci for passthrough
             # Run: lspci -nn | grep NVIDIA to find your PCI IDs
             # Then set these in the script or pass as args
+
+            # Refuse if GPU-dependent services are running
+            for svc in wivrn sunshine; do
+              if systemctl --user is-active "$svc.service" 2>/dev/null; then
+                echo "ERROR: $svc is running. Stop it first: systemctl --user stop $svc" >&2
+                exit 1
+              fi
+            done
+
             GPU_PCI=''${1:-"01:00.0"}
             GPU_AUDIO=''${2:-"01:00.1"}
 
