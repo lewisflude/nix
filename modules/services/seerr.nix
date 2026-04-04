@@ -1,20 +1,20 @@
-# Jellyseerr Service Module
+# Seerr Service Module
 # Media request management for Jellyfin
 { config, ... }:
 let
   inherit (config) constants;
 in
 {
-  flake.modules.nixos.jellyseerr =
+  flake.modules.nixos.seerr =
     { lib, ... }:
     {
-      services.jellyseerr = {
+      services.seerr = {
         enable = true;
         openFirewall = true;
-        port = constants.ports.services.jellyseerr;
+        port = constants.ports.services.seerr;
       };
 
-      systemd.services.jellyseerr = {
+      systemd.services.seerr = {
         after = lib.mkAfter [ "jellyfin.service" ];
         environment = {
           TZ = constants.defaults.timezone;

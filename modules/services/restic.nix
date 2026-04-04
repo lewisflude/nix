@@ -1,6 +1,10 @@
 # Restic Backup Service Module - Dendritic Pattern
 # Backup solution with REST server
-_: {
+{ config, ... }:
+let
+  inherit (config) constants;
+in
+{
   flake.modules.nixos.restic =
     { pkgs, ... }:
     {
@@ -9,7 +13,7 @@ _: {
       # REST server for backup storage
       services.restic.server = {
         enable = true;
-        listenAddress = "127.0.0.1:8000";
+        listenAddress = "127.0.0.1:${toString constants.ports.services.restic}";
         extraFlags = [ "--no-auth" ];
       };
 

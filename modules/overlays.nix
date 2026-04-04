@@ -167,13 +167,6 @@ let
         else
           noopOverlay;
 
-      # Blender upstream binary (avoids LLVM version conflict between CUDA and Mesa)
-      blender-bin =
-        if isLinux && inputs ? nix-warez && inputs.nix-warez ? overlays then
-          inputs.nix-warez.overlays.default
-        else
-          noopOverlay;
-
       # WiVRn with CUDA encoding support (64-bit only)
       # OpenVR compatibility paths managed by WiVRn itself since v0.23
       wivrn-cuda =

@@ -148,7 +148,7 @@ in
       vpnNamespaces.${namespace} = {
         enable = true;
         wireguardConfigFile = nixosArgs.config.sops.secrets."vpn-confinement-qbittorrent".path;
-        accessibleFrom = [ "192.168.10.0/24" ];
+        accessibleFrom = [ constants.networks.lan.primary ];
         portMappings = [
           {
             from = webuiPort;

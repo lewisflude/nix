@@ -29,7 +29,7 @@ let
 
     # Media
     inherit (constants.ports.services) jellyfin;
-    inherit (constants.ports.services) jellyseerr;
+    inherit (constants.ports.services) seerr;
     inherit (constants.ports.services) homarr;
     inherit (constants.ports.services) wizarr;
 
@@ -77,8 +77,9 @@ in
             )
           ) localServices)
           // {
-            # VPN namespace — different IP, not localhost
-            "torrent.${constants.baseDomain}" = mkReverseProxy "192.168.15.1:8080";
+            # VPN namespace — qBittorrent runs inside a network namespace, accessed via its gateway
+            "torrent.${constants.baseDomain}" =
+              mkReverseProxy "${constants.networks.vpnNamespace.gateway}:${toString constants.ports.services.qbittorrent}";
 
           };
       };

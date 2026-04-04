@@ -14,6 +14,7 @@ _: {
         userDirs = lib.mkIf pkgs.stdenv.isLinux {
           enable = true;
           createDirectories = true;
+          setSessionVariables = true;
           desktop = "${config.home.homeDirectory}/Desktop";
           documents = "${config.home.homeDirectory}/Documents";
           download = "${config.home.homeDirectory}/Downloads";

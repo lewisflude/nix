@@ -17,7 +17,7 @@ _: {
         nvidia = {
           modesetting.enable = true; # Required for Wayland
           open = true; # Required for Turing+ (RTX 4090)
-          package = config.boot.kernelPackages.nvidiaPackages.production;
+          package = config.boot.kernelPackages.nvidiaPackages.latest;
         };
 
         # GPU access in containers (Ollama, etc.)
@@ -25,6 +25,12 @@ _: {
       };
 
       services.xserver.videoDrivers = [ "nvidia" ];
+
+      # NVIDIA modprobe: PAT for better memory mapping, ReBAR for faster CPU-GPU transfers
+      boot.extraModprobeConfig = ''
+        options nvidia NVreg_UsePageAttributeTable=1
+        options nvidia NVreg_EnableResizableBar=1
+      '';
 
       # NVIDIA GPU is card1
       environment.sessionVariables = {

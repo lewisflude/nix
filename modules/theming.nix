@@ -23,6 +23,7 @@ _: {
       # =========================================================================
       gtk = lib.mkIf isLinux {
         enable = true;
+        gtk4.theme = null;
         iconTheme = lib.mkForce {
           name = "Adwaita";
           package = pkgs.adwaita-icon-theme;

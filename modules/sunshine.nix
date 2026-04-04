@@ -29,10 +29,12 @@ _: {
           capture = "kms";
           encoder = "nvenc";
           adapter_name = "/dev/dri/card1";
-          output_name = "DP-3";
+          output_name = 1; # KMS index for DP-3 (sun-virt)
 
-          # Match Moonlight client resolution/fps on connect, restore on disconnect
-          global_prep_cmd = ''[{"do":"niri msg output DP-3 on && niri msg output DP-3 mode \"''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}.000\"","undo":"niri msg output DP-3 off"}]'';
+          # Match Moonlight client resolution/fps on connect, restore default on disconnect
+          # Guard: skip mode switch during Sunshine's startup encoder test (no client connected)
+          # TODO: re-enable dynamic resolution switching once streaming works
+          # global_prep_cmd = ...;
 
           # NVENC (RTX 4090)
           nvenc_preset = 3;

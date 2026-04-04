@@ -112,7 +112,7 @@ in
         nixos.jellyfin
         nixos.sabnzbd
         nixos.flaresolverr
-        nixos.jellyseerr
+        nixos.seerr
         nixos.notifiarr
         nixos.decluttarr
         nixos.autopulse
@@ -209,6 +209,7 @@ in
 
         # Desktop home-manager modules
         homeManager.browser
+        homeManager.davinciResolve
         homeManager.desktopApps
         homeManager.gimp
         homeManager.niri

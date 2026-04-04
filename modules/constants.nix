@@ -25,7 +25,7 @@
 
           # Media management services
           jellyfin = 8096;
-          jellyseerr = 5055;
+          seerr = 5055;
           sonarr = 8989;
           radarr = 7878;
           lidarr = 8686;
@@ -126,6 +126,9 @@
         };
         vpn = {
           cidr = "10.2.0.0/24";
+        };
+        vpnNamespace = {
+          gateway = "192.168.15.1";
         };
         localhost = {
           ipv4 = "127.0.0.1";

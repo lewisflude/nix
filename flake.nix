@@ -135,10 +135,6 @@
       url = "github:nix-community/nixpkgs-wayland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-warez = {
-      url = "github:edolstra/nix-warez?dir=blender";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     ia-get = {
       url = "github:wimpysworld/ia-get";
       inputs.nixpkgs.follows = "nixpkgs";

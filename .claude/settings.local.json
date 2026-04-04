@@ -14,7 +14,8 @@
       "mcp__nixos__*",
       "mcp__plugin_claude-code-home-manager_nixos__nix",
       "mcp__plugin_claude-code-home-manager_github__search_code",
-      "mcp__plugin_claude-code-home-manager_github__get_file_contents"
+      "mcp__plugin_claude-code-home-manager_github__get_file_contents",
+      "mcp__plugin_claude-code-home-manager_github__search_issues"
     ]
   },
   "disableAllHooks": true,
