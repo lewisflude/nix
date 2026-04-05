@@ -83,8 +83,7 @@ in
         volumes = [
           "${configPath}/janitorr/application.yml:/config/application.yml"
         ];
-        ports = [ "${toString constants.ports.services.janitorr}:8978" ];
-        extraOptions = [ "--add-host=host.containers.internal:host-gateway" ];
+        extraOptions = [ "--network=host" ];
       };
 
       # Janitorr SOPS secrets
@@ -147,16 +146,16 @@ in
             clients:
               sonarr:
                 enabled: true
-                url: "http://host.containers.internal:${toString constants.ports.services.sonarr}"
+                url: "http://localhost:${toString constants.ports.services.sonarr}"
                 api-key: "@SONARR_KEY@"
                 delete-empty-shows: true
               radarr:
                 enabled: true
-                url: "http://host.containers.internal:${toString constants.ports.services.radarr}"
+                url: "http://localhost:${toString constants.ports.services.radarr}"
                 api-key: "@RADARR_KEY@"
               jellyfin:
                 enabled: true
-                url: "http://host.containers.internal:${toString constants.ports.services.jellyfin}"
+                url: "http://localhost:${toString constants.ports.services.jellyfin}"
                 api-key: "@JELLYFIN_KEY@"
                 username: Janitorr
                 password: "@JELLYFIN_PASS@"
@@ -170,12 +169,12 @@ in
                 delete: false
               jellyseerr:
                 enabled: true
-                url: "http://host.containers.internal:${toString constants.ports.services.seerr}"
+                url: "http://localhost:${toString constants.ports.services.seerr}"
                 api-key: "@JELLYSEERR_KEY@"
                 match-server: false
               jellystat:
                 enabled: true
-                url: "http://host.containers.internal:${toString constants.ports.services.jellystat}"
+                url: "http://localhost:${toString constants.ports.services.jellystat}"
                 api-key: "@JELLYSTAT_KEY@"
           '';
         in
