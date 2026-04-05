@@ -106,6 +106,20 @@ in
         restartUnits = [ "podman-janitorr.service" ];
       };
 
+      # Janitorr depends on Sonarr/Radarr/Jellyfin being ready
+      systemd.services.podman-janitorr = {
+        after = [
+          "sonarr.service"
+          "radarr.service"
+          "jellyfin.service"
+        ];
+        wants = [
+          "sonarr.service"
+          "radarr.service"
+          "jellyfin.service"
+        ];
+      };
+
       # Generate janitorr application.yml from template with injected secrets
       systemd.services.podman-janitorr.preStart =
         let
