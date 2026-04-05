@@ -43,6 +43,7 @@ let
     inherit (constants.ports.services) notifiarr;
     inherit (constants.ports.services) huntarr;
     inherit (constants.ports.services) autopulse;
+    inherit (constants.ports.services) jellystat;
 
     # Downloads
     usenet = constants.ports.services.sabnzbd;
