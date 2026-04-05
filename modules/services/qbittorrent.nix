@@ -78,7 +78,9 @@ in
         SlowTorrentsDownloadRate = 10;
         SlowTorrentsUploadRate = 5;
         SlowTorrentsInactivityTimer = 60;
-        ShareLimitAction = "Stop";
+        MaxRatio = 2;
+        MaxSeedingTime = 10080; # 7 days
+        ShareLimitAction = "Remove";
         # VPN interface binding
         Interface = "${namespace}0";
         InterfaceName = "${namespace}0";
