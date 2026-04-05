@@ -106,17 +106,19 @@ in
         restartUnits = [ "podman-janitorr.service" ];
       };
 
-      # Janitorr depends on Sonarr/Radarr/Jellyfin being ready
+      # Janitorr depends on Sonarr/Radarr/Jellyfin/Jellystat being ready
       systemd.services.podman-janitorr = {
         after = [
           "sonarr.service"
           "radarr.service"
           "jellyfin.service"
+          "podman-jellystat.service"
         ];
         wants = [
           "sonarr.service"
           "radarr.service"
           "jellyfin.service"
+          "podman-jellystat.service"
         ];
       };
 
@@ -140,7 +142,7 @@ in
               exclusion-tag: "janitorr_keep"
 
               media-deletion:
-                enabled: false
+                enabled: true
                 movie-expiration:
                   5: 15d
                   10: 30d
@@ -204,6 +206,63 @@ in
           chmod 600 "${configPath}/janitorr/application.yml"
         '';
 
+      # Jellystat - Jellyfin statistics
+      virtualisation.oci-containers.containers.jellystat-db = {
+        image = "docker.io/postgres:16-alpine";
+        environment = {
+          POSTGRES_USER = "jellystat";
+          POSTGRES_DB = "jellystat";
+        };
+        environmentFiles = [
+          nixosArgs.config.sops.templates."jellystat-db.env".path
+        ];
+        volumes = [
+          "${configPath}/jellystat-db:/var/lib/postgresql/data"
+        ];
+        extraOptions = [ "--network=host" "--shm-size=256m" ];
+      };
+
+      virtualisation.oci-containers.containers.jellystat = {
+        image = "docker.io/cyfershepard/jellystat:1.1.9";
+        environment = {
+          POSTGRES_USER = "jellystat";
+          POSTGRES_IP = "localhost";
+          POSTGRES_PORT = "5432";
+          TZ = timezone;
+        };
+        environmentFiles = [
+          nixosArgs.config.sops.templates."jellystat.env".path
+        ];
+        volumes = [
+          "${configPath}/jellystat/backup:/app/backend/backup-data"
+        ];
+        extraOptions = [ "--network=host" ];
+        dependsOn = [ "jellystat-db" ];
+      };
+
+      # Jellystat SOPS secrets
+      sops.secrets."jellystat-postgres-password" = {
+        restartUnits = [ "podman-jellystat.service" "podman-jellystat-db.service" ];
+      };
+      sops.secrets."jellystat-jwt-secret" = {
+        restartUnits = [ "podman-jellystat.service" ];
+      };
+
+      # Jellystat env templates (inject secrets into env files)
+      sops.templates."jellystat-db.env".content = ''
+        POSTGRES_PASSWORD=${nixosArgs.config.sops.placeholder."jellystat-postgres-password"}
+      '';
+      sops.templates."jellystat.env".content = ''
+        POSTGRES_PASSWORD=${nixosArgs.config.sops.placeholder."jellystat-postgres-password"}
+        JWT_SECRET=${nixosArgs.config.sops.placeholder."jellystat-jwt-secret"}
+      '';
+
+      # Jellystat depends on its database
+      systemd.services.podman-jellystat = {
+        after = [ "podman-jellystat-db.service" ];
+        requires = [ "podman-jellystat-db.service" ];
+      };
+
       # Profilarr - Profile management
       virtualisation.oci-containers.containers.profilarr = {
         image = "docker.io/santiagosayshey/profilarr:latest";
@@ -241,6 +300,9 @@ in
         "d ${configPath}/homarr/data 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/wizarr 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/janitorr 0755 ${toString uid} ${toString gid} -"
+        "d ${configPath}/jellystat-db 0755 999 999 -"
+        "d ${configPath}/jellystat 0755 ${toString uid} ${toString gid} -"
+        "d ${configPath}/jellystat/backup 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/profilarr 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/listenarr 0755 ${toString uid} ${toString gid} -"
       ];
@@ -251,6 +313,7 @@ in
         constants.ports.services.wizarr
         constants.ports.services.termix
         constants.ports.services.janitorr
+        constants.ports.services.jellystat
         constants.ports.services.profilarr
         constants.ports.services.listenarr
       ];
