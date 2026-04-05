@@ -82,6 +82,7 @@ in
         };
         volumes = [
           "${configPath}/janitorr/application.yml:/config/application.yml"
+          "/mnt/storage/media:/data/media"
         ];
         extraOptions = [ "--network=host" ];
       };
@@ -130,14 +131,14 @@ in
               port: 8978
 
             file-system:
-              access: false
+              access: true
               validate-seeding: false
               leaving-soon-dir: "/data/media/leaving-soon"
               from-scratch: false
-              free-space-check-dir: "/"
+              free-space-check-dir: "/data/media"
 
             application:
-              dry-run: true
+              dry-run: false
               leaving-soon: 14d
               exclusion-tag: "janitorr_keep"
 
@@ -219,7 +220,10 @@ in
         volumes = [
           "${configPath}/jellystat-db:/var/lib/postgresql/data"
         ];
-        extraOptions = [ "--network=host" "--shm-size=256m" ];
+        extraOptions = [
+          "--network=host"
+          "--shm-size=256m"
+        ];
       };
 
       virtualisation.oci-containers.containers.jellystat = {
@@ -242,7 +246,10 @@ in
 
       # Jellystat SOPS secrets
       sops.secrets."jellystat-postgres-password" = {
-        restartUnits = [ "podman-jellystat.service" "podman-jellystat-db.service" ];
+        restartUnits = [
+          "podman-jellystat.service"
+          "podman-jellystat-db.service"
+        ];
       };
       sops.secrets."jellystat-jwt-secret" = {
         restartUnits = [ "podman-jellystat.service" ];
