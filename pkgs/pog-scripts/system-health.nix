@@ -46,8 +46,8 @@ pog.pog {
       description = "Check Niri compositor runtime state";
     }
     {
-      name = "verbose";
-      short = "v";
+      name = "detailed";
+      short = "V";
       bool = true;
       description = "Show full output instead of summaries";
     }
@@ -111,7 +111,7 @@ pog.pog {
         else
           check_fail "User session: $USER_WARNS warnings this boot (high count)"
         fi
-        if ${flag "verbose"} && [ "$USER_WARNS" -gt 0 ]; then
+        if ${flag "detailed"} && [ "$USER_WARNS" -gt 0 ]; then
           echo ""
           journalctl --user -b -p warning --no-pager -q 2>/dev/null | tail -10
           echo ""
@@ -125,7 +125,7 @@ pog.pog {
         else
           check_fail "System: $SYS_ERRS errors this boot (high count)"
         fi
-        if ${flag "verbose"} && [ "$SYS_ERRS" -gt 0 ]; then
+        if ${flag "detailed"} && [ "$SYS_ERRS" -gt 0 ]; then
           echo ""
           journalctl -b -p err --no-pager -q 2>/dev/null | tail -10
           echo ""
@@ -138,7 +138,8 @@ pog.pog {
       if $RUN_SERVICES; then
         blue "Service Health"
 
-        USER_FAILED=$(systemctl --user --failed --no-legend --no-pager 2>/dev/null | grep -c "." || echo "0")
+        USER_FAILED=$(systemctl --user --failed --no-legend --no-pager 2>/dev/null | grep -c "." || true)
+        USER_FAILED=$((USER_FAILED + 0))
         if [ "$USER_FAILED" -eq 0 ]; then
           check_pass "No failed user services"
         else
@@ -146,7 +147,8 @@ pog.pog {
           systemctl --user --failed --no-pager 2>/dev/null | head -10
         fi
 
-        SYS_FAILED=$(systemctl --failed --no-legend --no-pager 2>/dev/null | grep -c "." || echo "0")
+        SYS_FAILED=$(systemctl --failed --no-legend --no-pager 2>/dev/null | grep -c "." || true)
+        SYS_FAILED=$((SYS_FAILED + 0))
         if [ "$SYS_FAILED" -eq 0 ]; then
           check_pass "No failed system services"
         else
@@ -199,21 +201,17 @@ pog.pog {
           check_warn "XDG Desktop Portal not responding (file dialogs may not work)"
         fi
 
-        for portal in org.freedesktop.impl.portal.Screenshot \
-                      org.freedesktop.impl.portal.ScreenCast; do
-          PORTAL_SHORT=$(echo "$portal" | awk -F. '{print $NF}')
-          if dbus-send --session --dest="$portal" \
-            --type=method_call --print-reply \
-            / org.freedesktop.DBus.Peer.Ping 2>/dev/null; then
-            check_pass "Portal: $PORTAL_SHORT is available"
-          else
-            check_warn "Portal: $PORTAL_SHORT not responding"
-          fi
-        done
-
-        if pgrep -f "xdg-desktop-portal" >/dev/null 2>&1; then
-          PORTAL_PROCS=$(pgrep -af "xdg-desktop-portal" 2>/dev/null | wc -l)
-          check_pass "XDG portal processes running ($PORTAL_PROCS)"
+        # Check for portal backend processes (impl portals don't register as bus names)
+        PORTAL_BACKENDS=$(pgrep -af "xdg-desktop-portal" 2>/dev/null || true)
+        if [ -n "$PORTAL_BACKENDS" ]; then
+          PORTAL_COUNT=$(echo "$PORTAL_BACKENDS" | wc -l)
+          check_pass "XDG portal processes running ($PORTAL_COUNT)"
+          # Check for specific backends
+          for backend in gnome gtk wlr hyprland; do
+            if echo "$PORTAL_BACKENDS" | grep -q "xdg-desktop-portal-$backend"; then
+              check_pass "Portal backend: $backend"
+            fi
+          done
         else
           check_fail "No xdg-desktop-portal processes found"
         fi
@@ -231,9 +229,10 @@ pog.pog {
           check_warn "WAYLAND_DISPLAY not set (not in a Wayland session?)"
         else
           if OUTPUTS=$(niri msg outputs 2>&1); then
-            OUTPUT_COUNT=$(echo "$OUTPUTS" | grep -c "Output" || echo "0")
+            OUTPUT_COUNT=$(echo "$OUTPUTS" | grep -c "Output" || true)
+            OUTPUT_COUNT=$((OUTPUT_COUNT + 0))
             check_pass "Niri outputs accessible ($OUTPUT_COUNT output(s))"
-            if ${flag "verbose"}; then
+            if ${flag "detailed"}; then
               echo ""
               echo "$OUTPUTS"
               echo ""
@@ -243,9 +242,10 @@ pog.pog {
           fi
 
           if WORKSPACES=$(niri msg workspaces 2>&1); then
-            WS_COUNT=$(echo "$WORKSPACES" | grep -c "Workspace" || echo "0")
+            WS_COUNT=$(echo "$WORKSPACES" | grep -c "Workspace" || true)
+            WS_COUNT=$((WS_COUNT + 0))
             check_pass "Niri workspaces accessible ($WS_COUNT workspace(s))"
-            if ${flag "verbose"}; then
+            if ${flag "detailed"}; then
               echo ""
               echo "$WORKSPACES"
               echo ""

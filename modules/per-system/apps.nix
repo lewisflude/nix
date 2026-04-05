@@ -46,6 +46,7 @@ in
             "update-all" = "Update all flake dependencies";
             "visualize-modules" = "Generate module dependency graphs";
             "calculate-qbittorrent-config" = "Calculate optimal qBittorrent settings from speed tests";
+            "system-health" = "Run comprehensive system diagnostics";
           };
           pogScript = pkgsWithPog.callPackage ../../pkgs/pog-scripts/${script-name}.nix {
             config-root = self;
@@ -79,6 +80,7 @@ in
       // lib.optionalAttrs pkgs.stdenv.isLinux {
         # Linux-only apps (require iproute2, util-linux, network namespaces)
         calculate-qbittorrent-config = mkPogApp "calculate-qbittorrent-config";
+        system-health = mkPogApp "system-health";
       };
     };
 }
