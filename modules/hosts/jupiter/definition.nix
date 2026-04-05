@@ -200,6 +200,7 @@ in
         homeManager.powerlevel10k
         homeManager.userPackages
         homeManager.claudeCode
+        homeManager.claudeDesktop
         homeManager.geminiCli
         homeManager.yazi
         homeManager.iaGet

@@ -135,17 +135,43 @@ let
         else
           { };
 
-      # Claude Desktop
+      # Claude Desktop (patched: nodePackages.asar removed from nixpkgs 2026-03-03)
       claude-desktop =
-        _final: _prev:
+        final: prev:
         if
           isLinux
           && inputs ? claude-desktop-linux
           && inputs.claude-desktop-linux ? packages
           && inputs.claude-desktop-linux.packages ? ${system}
         then
+          let
+            src = inputs.claude-desktop-linux;
+            patchy-cnb = prev.callPackage "${src}/pkgs/patchy-cnb.nix" { };
+            claude-desktop-unwrapped = prev.callPackage "${src}/pkgs/claude-desktop.nix" {
+              inherit patchy-cnb;
+              nodePackages = {
+                inherit (final) asar;
+              };
+            };
+          in
           {
-            claude-desktop = inputs.claude-desktop-linux.packages.${system}.claude-desktop-with-fhs;
+            claude-desktop = prev.buildFHSEnv {
+              name = "claude-desktop";
+              targetPkgs = p: [
+                p.docker
+                p.glibc
+                p.openssl
+                p.nodejs
+                p.uv
+              ];
+              runScript = "${claude-desktop-unwrapped}/bin/claude-desktop";
+              extraInstallCommands = ''
+                mkdir -p $out/share/applications
+                cp ${claude-desktop-unwrapped}/share/applications/claude.desktop $out/share/applications/
+                mkdir -p $out/share/icons
+                cp -r ${claude-desktop-unwrapped}/share/icons/* $out/share/icons/
+              '';
+            };
           }
         else
           { };
