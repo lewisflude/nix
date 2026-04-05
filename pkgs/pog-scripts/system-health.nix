@@ -46,6 +46,12 @@ pog.pog {
       description = "Check Niri compositor runtime state";
     }
     {
+      name = "storage";
+      short = "S";
+      bool = true;
+      description = "Check disk and ZFS pool usage";
+    }
+    {
       name = "detailed";
       short = "V";
       bool = true;
@@ -80,20 +86,23 @@ pog.pog {
       RUN_NIX=false
       RUN_DBUS=false
       RUN_NIRI=false
+      RUN_STORAGE=false
 
       if ${flag "journal"} || ${flag "all"}; then RUN_JOURNAL=true; fi
       if ${flag "services"} || ${flag "all"}; then RUN_SERVICES=true; fi
       if ${flag "nix_check"} || ${flag "all"}; then RUN_NIX=true; fi
       if ${flag "dbus"} || ${flag "all"}; then RUN_DBUS=true; fi
       if ${flag "niri"} || ${flag "all"}; then RUN_NIRI=true; fi
+      if ${flag "storage"} || ${flag "all"}; then RUN_STORAGE=true; fi
 
       # If no specific flags, run everything
-      if ! $RUN_JOURNAL && ! $RUN_SERVICES && ! $RUN_NIX && ! $RUN_DBUS && ! $RUN_NIRI; then
+      if ! $RUN_JOURNAL && ! $RUN_SERVICES && ! $RUN_NIX && ! $RUN_DBUS && ! $RUN_NIRI && ! $RUN_STORAGE; then
         RUN_JOURNAL=true
         RUN_SERVICES=true
         RUN_NIX=true
         RUN_DBUS=true
         RUN_NIRI=true
+        RUN_STORAGE=true
       fi
 
       blue "System Health Check"
@@ -259,6 +268,43 @@ pog.pog {
           else
             check_warn "niri msg focused-window returned no data (may be normal if no window focused)"
           fi
+        fi
+
+        echo ""
+      fi
+
+      # ── Category 6: Storage ───────────────────────────────────────────────
+      if $RUN_STORAGE; then
+        blue "Storage"
+
+        # Check /mnt/storage (mergerfs)
+        if mountpoint -q /mnt/storage 2>/dev/null; then
+          STORAGE_AVAIL_KB=$(df -k /mnt/storage 2>/dev/null | awk 'NR==2 {print $4}')
+          STORAGE_AVAIL_GB=$((STORAGE_AVAIL_KB / 1048576))
+          STORAGE_USE_PCT=$(df /mnt/storage 2>/dev/null | awk 'NR==2 {print $5}' | tr -d '%')
+          if [ "$STORAGE_AVAIL_GB" -lt 100 ]; then
+            check_fail "Storage: ''${STORAGE_AVAIL_GB}GB free (''${STORAGE_USE_PCT}% used) — critically low"
+          elif [ "$STORAGE_AVAIL_GB" -lt 500 ]; then
+            check_warn "Storage: ''${STORAGE_AVAIL_GB}GB free (''${STORAGE_USE_PCT}% used)"
+          else
+            check_pass "Storage: ''${STORAGE_AVAIL_GB}GB free (''${STORAGE_USE_PCT}% used)"
+          fi
+        else
+          check_warn "/mnt/storage is not mounted"
+        fi
+
+        # Check ZFS pool capacity
+        if command -v zpool &>/dev/null; then
+          while read -r POOL CAP; do
+            CAP_NUM=$(echo "$CAP" | tr -d '%')
+            if [ "$CAP_NUM" -gt 90 ]; then
+              check_fail "ZFS pool $POOL: ''${CAP} capacity — critically high"
+            elif [ "$CAP_NUM" -gt 80 ]; then
+              check_warn "ZFS pool $POOL: ''${CAP} capacity"
+            else
+              check_pass "ZFS pool $POOL: ''${CAP} capacity"
+            fi
+          done < <(zpool list -Ho name,capacity 2>/dev/null)
         fi
 
         echo ""
