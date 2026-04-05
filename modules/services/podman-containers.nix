@@ -6,12 +6,22 @@ let
 in
 {
   flake.modules.nixos.podmanContainers =
-    _:
+    { pkgs, ... }@nixosArgs:
     let
       configPath = "/var/lib/containers/supplemental";
       inherit (constants.defaults) timezone;
       uid = 1000;
       gid = 100;
+
+      # Janitorr secret paths
+      janitorrSecrets = {
+        sonarr = nixosArgs.config.sops.secrets."janitorr-sonarr-api-key".path;
+        radarr = nixosArgs.config.sops.secrets."janitorr-radarr-api-key".path;
+        jellyfin = nixosArgs.config.sops.secrets."janitorr-jellyfin-api-key".path;
+        jellyfinPassword = nixosArgs.config.sops.secrets."janitorr-jellyfin-password".path;
+        jellystat = nixosArgs.config.sops.secrets."janitorr-jellystat-api-key".path;
+        jellyseerr = nixosArgs.config.sops.secrets."janitorr-jellyseerr-api-key".path;
+      };
     in
     {
       # Enable Podman
@@ -71,10 +81,115 @@ in
           TZ = timezone;
         };
         volumes = [
-          "${configPath}/janitorr:/app/config"
+          "${configPath}/janitorr/application.yml:/config/application.yml"
         ];
         ports = [ "${toString constants.ports.services.janitorr}:8978" ];
+        extraOptions = [ "--add-host=host.containers.internal:host-gateway" ];
       };
+
+      # Janitorr SOPS secrets
+      sops.secrets."janitorr-sonarr-api-key" = {
+        restartUnits = [ "podman-janitorr.service" ];
+      };
+      sops.secrets."janitorr-radarr-api-key" = {
+        restartUnits = [ "podman-janitorr.service" ];
+      };
+      sops.secrets."janitorr-jellyfin-api-key" = {
+        restartUnits = [ "podman-janitorr.service" ];
+      };
+      sops.secrets."janitorr-jellyfin-password" = {
+        restartUnits = [ "podman-janitorr.service" ];
+      };
+      sops.secrets."janitorr-jellystat-api-key" = {
+        restartUnits = [ "podman-janitorr.service" ];
+      };
+      sops.secrets."janitorr-jellyseerr-api-key" = {
+        restartUnits = [ "podman-janitorr.service" ];
+      };
+
+      # Generate janitorr application.yml from template with injected secrets
+      systemd.services.podman-janitorr.preStart =
+        let
+          template = pkgs.writeText "janitorr-template.yml" ''
+            server:
+              port: 8978
+
+            file-system:
+              access: false
+              validate-seeding: false
+              leaving-soon-dir: "/data/media/leaving-soon"
+              from-scratch: false
+              free-space-check-dir: "/"
+
+            application:
+              dry-run: true
+              leaving-soon: 14d
+              exclusion-tag: "janitorr_keep"
+
+              media-deletion:
+                enabled: false
+                movie-expiration:
+                  5: 15d
+                  10: 30d
+                  15: 30d
+                  20: 90d
+                season-expiration:
+                  5: 15d
+                  10: 20d
+                  15: 60d
+                  20: 120d
+
+              tag-based-deletion:
+                enabled: false
+                minimum-free-disk-percent: 100
+                schedules: []
+
+            clients:
+              sonarr:
+                enabled: true
+                url: "http://host.containers.internal:${toString constants.ports.services.sonarr}"
+                api-key: "@SONARR_KEY@"
+                delete-empty-shows: true
+              radarr:
+                enabled: true
+                url: "http://host.containers.internal:${toString constants.ports.services.radarr}"
+                api-key: "@RADARR_KEY@"
+              jellyfin:
+                enabled: true
+                url: "http://host.containers.internal:${toString constants.ports.services.jellyfin}"
+                api-key: "@JELLYFIN_KEY@"
+                username: Janitorr
+                password: "@JELLYFIN_PASS@"
+                delete: true
+              emby:
+                enabled: false
+                url: ""
+                api-key: ""
+                username: ""
+                password: ""
+                delete: false
+              jellyseerr:
+                enabled: true
+                url: "http://host.containers.internal:${toString constants.ports.services.seerr}"
+                api-key: "@JELLYSEERR_KEY@"
+                match-server: false
+              jellystat:
+                enabled: true
+                url: "http://host.containers.internal:${toString constants.ports.services.jellystat}"
+                api-key: "@JELLYSTAT_KEY@"
+          '';
+        in
+        ''
+          ${pkgs.gnused}/bin/sed \
+            -e "s|@SONARR_KEY@|$(cat '${janitorrSecrets.sonarr}')|g" \
+            -e "s|@RADARR_KEY@|$(cat '${janitorrSecrets.radarr}')|g" \
+            -e "s|@JELLYFIN_KEY@|$(cat '${janitorrSecrets.jellyfin}')|g" \
+            -e "s|@JELLYFIN_PASS@|$(cat '${janitorrSecrets.jellyfinPassword}')|g" \
+            -e "s|@JELLYSTAT_KEY@|$(cat '${janitorrSecrets.jellystat}')|g" \
+            -e "s|@JELLYSEERR_KEY@|$(cat '${janitorrSecrets.jellyseerr}')|g" \
+            "${template}" > "${configPath}/janitorr/application.yml"
+          chmod 600 "${configPath}/janitorr/application.yml"
+        '';
 
       # Profilarr - Profile management
       virtualisation.oci-containers.containers.profilarr = {

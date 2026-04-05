@@ -143,6 +143,10 @@
       url = "github:Diolinux/PhotoGIMP";
       flake = false;
     };
+    claude-desktop-linux = {
+      url = "github:k3d3/claude-desktop-linux-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

@@ -135,6 +135,21 @@ let
         else
           { };
 
+      # Claude Desktop
+      claude-desktop =
+        _final: _prev:
+        if
+          isLinux
+          && inputs ? claude-desktop-linux
+          && inputs.claude-desktop-linux ? packages
+          && inputs.claude-desktop-linux.packages ? ${system}
+        then
+          {
+            claude-desktop = inputs.claude-desktop-linux.packages.${system}.claude-desktop-with-fhs;
+          }
+        else
+          { };
+
       # Awww
       awww =
         _final: _prev:

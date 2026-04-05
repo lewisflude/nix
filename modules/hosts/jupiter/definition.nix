@@ -225,6 +225,7 @@ in
         # Gaming & VR home-manager modules
         homeManager.gaming
         homeManager.vr
+        homeManager.vrchatCreation
 
         # Audio & Music Production home-manager modules
         homeManager.audio
