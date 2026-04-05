@@ -70,6 +70,8 @@ _: {
                 "node.name" = "Main-Output-Playback";
                 "audio.position" = "AUX0,AUX1";
                 "stream.dont-remix" = true;
+                "node.passive" = true;
+                "node.dont-fallback" = true;
                 "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-output";
               };
             };
@@ -82,6 +84,8 @@ _: {
                 "node.name" = "Main-Input-Capture";
                 "audio.position" = "AUX0,AUX1";
                 "stream.dont-remix" = true;
+                "node.passive" = true;
+                "node.dont-fallback" = true;
                 "node.target" = "alsa_input.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-input";
               };
               "playback.props" = {
