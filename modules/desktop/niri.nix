@@ -525,6 +525,12 @@
                 default-column-width.proportion = 0.65;
               }
 
+              # Labwc nested compositor (used for Unity Editor)
+              {
+                matches = [ { app-id = "^labwc$"; } ];
+                open-maximized = true;
+              }
+
               {
                 matches = [ { is-active = false; } ];
                 opacity = 0.95;
