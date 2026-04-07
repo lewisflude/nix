@@ -44,9 +44,23 @@ let
     inherit (constants.ports.services) huntarr;
     inherit (constants.ports.services) autopulse;
     inherit (constants.ports.services) jellystat;
+    inherit (constants.ports.services) flaresolverr;
+
+    inherit (constants.ports.services) janitorr;
+
+    # Supplemental
+    inherit (constants.ports.services) termix;
+    inherit (constants.ports.services) profilarr;
+    inherit (constants.ports.services) listenarr;
 
     # Downloads
     usenet = constants.ports.services.sabnzbd;
+    inherit (constants.ports.services) transmission;
+    inherit (constants.ports.services) navidrome;
+
+    # Streaming
+    syncthing = constants.ports.services.syncthing.sync;
+    sunshine = constants.ports.services.sunshine.http;
 
     # AI
     inherit (constants.ports.services) ollama;

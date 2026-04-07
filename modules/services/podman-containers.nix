@@ -76,7 +76,7 @@ in
 
       # Janitorr - Media cleanup
       virtualisation.oci-containers.containers.janitorr = {
-        image = "ghcr.io/schaka/janitorr:v1.3.0";
+        image = "ghcr.io/schaka/janitorr:jvm-v2.0.7";
         environment = {
           TZ = timezone;
         };
@@ -84,7 +84,7 @@ in
           "${configPath}/janitorr/application.yml:/config/application.yml"
           "/mnt/storage/media:/data/media"
         ];
-        extraOptions = [ "--network=host" ];
+        extraOptions = [ "--network=host" "--user=${toString uid}:976" ];
       };
 
       # Janitorr SOPS secrets
@@ -127,20 +127,21 @@ in
       systemd.services.podman-janitorr.preStart =
         let
           template = pkgs.writeText "janitorr-template.yml" ''
-            server:
-              port: 8978
-
             file-system:
               access: true
               validate-seeding: false
               leaving-soon-dir: "/data/media/leaving-soon"
+              media-server-leaving-soon-dir: "/mnt/storage/media/leaving-soon"
               from-scratch: false
               free-space-check-dir: "/data/media"
 
             application:
               dry-run: false
+              whole-tv-show: false
               leaving-soon: 14d
-              exclusion-tag: "janitorr_keep"
+              leaving-soon-threshold-offset-percent: 5
+              exclusion-tags:
+                - "janitorr_keep"
 
               media-deletion:
                 enabled: true
@@ -160,7 +161,14 @@ in
                 minimum-free-disk-percent: 100
                 schedules: []
 
+              episode-deletion:
+                enabled: false
+
             clients:
+              default:
+                connect-timeout: 60s
+                read-timeout: 60s
+
               sonarr:
                 enabled: true
                 url: "http://localhost:${toString constants.ports.services.sonarr}"
@@ -177,6 +185,8 @@ in
                 username: Janitorr
                 password: "@JELLYFIN_PASS@"
                 delete: true
+                exclude-favorited: false
+                leaving-soon-type: MOVIES_AND_TV
               emby:
                 enabled: false
                 url: ""
@@ -204,7 +214,7 @@ in
             -e "s|@JELLYSTAT_KEY@|$(cat '${janitorrSecrets.jellystat}')|g" \
             -e "s|@JELLYSEERR_KEY@|$(cat '${janitorrSecrets.jellyseerr}')|g" \
             "${template}" > "${configPath}/janitorr/application.yml"
-          chmod 600 "${configPath}/janitorr/application.yml"
+          chmod 644 "${configPath}/janitorr/application.yml"
         '';
 
       # Jellystat - Jellyfin statistics

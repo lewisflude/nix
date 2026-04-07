@@ -34,7 +34,14 @@ _: {
 
       # WiVRn strips the application path to just the basename when creating
       # transient systemd units, so wayvr must be in the service's ExecSearchPath
-      systemd.user.services.wivrn.path = [ pkgs.wayvr ];
+      systemd.user.services.wivrn = {
+        path = [
+          pkgs.wayvr
+          "/run/current-system/sw"
+          "/etc/profiles/per-user/lewisflude"
+        ];
+        environment.NIXOS_OZONE_WL = "1";
+      };
 
       environment.systemPackages = [ pkgs.android-tools ];
     };

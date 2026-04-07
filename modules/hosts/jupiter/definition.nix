@@ -130,6 +130,7 @@ in
         nixos.fail2ban
         nixos.mosh
         nixos.eternalTerminal
+        nixos.tailscale
 
         # ═══════════════════════════════════════════════════════════════════════
         # System Tools

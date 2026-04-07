@@ -35,16 +35,27 @@ _: {
         };
       };
 
-      # Virtual stereo sink/source for apps that crash with multichannel/pro-audio
-      # devices (e.g. Apogee Symphony Desktop). Loopback modules present simple
-      # stereo endpoints while routing to/from the Apogee's multichannel ALSA nodes.
-      # https://docs.pipewire.org/page_module_loopback.html
+      # Virtual stereo endpoints for the Apogee Symphony Desktop.
+      # null-audio-sinks provide user-facing stereo devices that appear
+      # under Sinks/Sources (not Filters). Loopback modules route audio
+      # to/from the Apogee's multichannel ALSA nodes in the background.
       extraConfig.pipewire."91-virtual-sink" = {
         "context.objects" = [
           {
-            # Virtual stereo source visible to PulseAudio clients (browsers, etc).
-            # The loopback module's nodes have object.register=false which hides them,
-            # so we use a null-audio-sink with Audio/Source/Virtual instead.
+            # User-facing stereo output — appears under Sinks in wpctl
+            factory = "adapter";
+            args = {
+              "factory.name" = "support.null-audio-sink";
+              "node.name" = "Main-Output";
+              "node.description" = "Main Output";
+              "media.class" = "Audio/Sink";
+              "audio.position" = "FL,FR";
+              "monitor.channel-volumes" = true;
+              "monitor.passthrough" = true;
+            };
+          }
+          {
+            # User-facing stereo input — appears under Sources in wpctl
             factory = "adapter";
             args = {
               "factory.name" = "support.null-audio-sink";
@@ -58,26 +69,30 @@ _: {
         ];
         "context.modules" = [
           {
+            # Route Main-Output monitor → Apogee multichannel output (AUX0,AUX1)
             name = "libpipewire-module-loopback";
             args = {
               "capture.props" = {
-                "node.name" = "Main-Output";
-                "node.description" = "Main Output";
-                "media.class" = "Audio/Sink";
+                "node.name" = "Main-Output-Route-Capture";
                 "audio.position" = "FL,FR";
+                "stream.dont-remix" = true;
+                "node.passive" = true;
+                "target.object" = "Main-Output";
+                "stream.capture.sink" = true;
               };
               "playback.props" = {
-                "node.name" = "Main-Output-Playback";
+                "node.name" = "Main-Output-Route-Playback";
                 "audio.position" = "AUX0,AUX1";
                 "stream.dont-remix" = true;
                 "node.passive" = true;
                 "node.dont-fallback" = true;
-                "node.target" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-output";
+                "node.linger" = true;
+                "target.object" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-output";
               };
             };
           }
           {
-            # Route Apogee input channels 1-2 into the Main-Input virtual source
+            # Route Apogee input channels 1-2 → Main-Input virtual source
             name = "libpipewire-module-loopback";
             args = {
               "capture.props" = {
@@ -86,13 +101,15 @@ _: {
                 "stream.dont-remix" = true;
                 "node.passive" = true;
                 "node.dont-fallback" = true;
-                "node.target" = "alsa_input.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-input";
+                "node.linger" = true;
+                "target.object" = "alsa_input.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-input";
               };
               "playback.props" = {
                 "node.name" = "Main-Input-Loopback";
                 "audio.position" = "FL,FR";
                 "stream.dont-remix" = true;
-                "node.target" = "Main-Input";
+                "node.linger" = true;
+                "target.object" = "Main-Input";
               };
             };
           }
