@@ -94,14 +94,11 @@ _: {
         "slack"
         "whatsapp"
       ];
-      masApps = {
-        "Amphetamine" = 937984704;
-        "Kagi Search" = 1622835804;
-        # Note: Xcode should be installed manually from App Store or using: mas install 497799835
-        # Automated installation via mas often fails due to size and App Store service issues
-        "Yubico Authenticator" = 1497506650;
-        "Keka" = 470158793;
-      };
+      # Mac App Store apps are installed manually.
+      # `mas install` fails non-deterministically against Apple's App Store
+      # service (even for already-installed apps), which blocks activation.
+      # Install via the App Store UI instead.
+      masApps = { };
     };
   };
 

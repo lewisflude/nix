@@ -35,18 +35,11 @@ in
     ];
   };
 
-  # macOS client: autofs on-demand NFS mount at /mnt/music
+  # macOS client: autofs on-demand NFS mount under the data volume.
+  # Modern macOS (Catalina+) has a read-only root, so autofs targets must live
+  # under /System/Volumes/Data. User-facing access is via the ~/Music-Jupiter
+  # symlink created by the home-manager module below.
   flake.modules.darwin.nfs = _: {
-    # /mnt is on the writable data volume (macOS root is read-only since Catalina)
-    environment.etc."synthetic.conf" = {
-      text = ''
-        mnt
-      '';
-      knownSha256Hashes = [
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" # empty file
-      ];
-    };
-
     environment.etc."auto_nfs".text = ''
       /System/Volumes/Data/mnt/music -${nfsOpts} ${jupiterIp}:/home/${config.username}/Music
     '';
@@ -76,4 +69,12 @@ in
       };
     };
   };
+
+  # User-facing symlink so the share is reachable as ~/Music-Jupiter.
+  flake.modules.homeManager.nfs =
+    { config, ... }:
+    {
+      home.file."Music-Jupiter".source =
+        config.lib.file.mkOutOfStoreSymlink "/System/Volumes/Data/mnt/music";
+    };
 }

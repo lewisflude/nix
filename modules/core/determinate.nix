@@ -25,7 +25,7 @@ in
         http-connections = 64;
         connect-timeout = 5;
         stalled-download-timeout = 10;
-        cores = 0;
+        cores = 4;
         sandbox = false;
         always-allow-substitutes = true;
         eval-cores = 4;

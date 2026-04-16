@@ -440,7 +440,7 @@ in
           '';
         };
 
-        memory.text = ''
+        context = ''
           # Lewis Flude - Development Environment
 
           ## Machines

@@ -67,6 +67,7 @@ in
             homeManager.terminal
             homeManager.xdg
             homeManager.nh
+            homeManager.nfs
             homeManager.sops
             homeManager.nixUser
 
@@ -126,6 +127,12 @@ in
       power.sleep.display = "never";
       power.sleep.harddisk = "never";
 
+      system.activationScripts.disableSpotlightNixStore.text = ''
+        if [ -d "/nix/store" ]; then
+          mdutil -i off /nix/store 2>/dev/null || true
+        fi
+      '';
+
       system.stateVersion = constants.defaults.darwinStateVersion;
 
       # Primary user for user-specific options (required by nix-darwin)
@@ -139,6 +146,7 @@ in
         dock = {
           autohide = true;
           show-recents = false;
+          mineffect = "scale";
         };
         finder = {
           AppleShowAllExtensions = true;
@@ -147,6 +155,11 @@ in
         NSGlobalDomain = {
           AppleInterfaceStyle = "Dark";
           "com.apple.swipescrolldirection" = false;
+          NSAutomaticWindowAnimationsEnabled = false;
+        };
+        universalaccess = {
+          reduceMotion = true;
+          reduceTransparency = true;
         };
         # Pro audio optimizations
         CustomUserPreferences = {
