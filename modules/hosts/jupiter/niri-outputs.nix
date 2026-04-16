@@ -18,9 +18,10 @@ _: {
           focus-at-startup = true;
         };
 
-        # Virtual 16:9 streaming display — kept enabled so Sunshine can validate
-        # its encoder at startup. Sunshine prep-cmd resizes to match the client.
+        # Virtual 16:9 streaming display — off by default, toggled on by Sunshine
+        # prep-cmd via `niri msg output DP-3 on` when a Moonlight client connects.
         outputs."DP-3" = {
+          enable = false;
           mode = {
             width = 1920;
             height = 1080;

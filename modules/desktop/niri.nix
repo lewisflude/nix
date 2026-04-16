@@ -44,7 +44,6 @@
 
   flake.modules.homeManager.niri =
     {
-      config,
       lib,
       pkgs,
       osConfig ? { },
@@ -161,19 +160,6 @@
             };
             screenshot-path = "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
             environment.QT_QPA_PLATFORM = "wayland";
-            outputs."DP-1" = {
-              mode = {
-                width = 3440;
-                height = 1440;
-                refresh = 164.900;
-              };
-              position = {
-                x = 0;
-                y = 0;
-              };
-              focus-at-startup = true;
-            };
-
             debug = lib.mkIf (osConfig.host.hardware.renderDevice or null != null) {
               render-drm-device = osConfig.host.hardware.renderDevice;
             };
@@ -191,13 +177,13 @@
 
               # DMS IPC binds
               "Mod+D" = dmsIpcTitle [ "call" "spotlight" "toggle" ] "Launch DMS Spotlight";
-              "Mod+V" = dmsIpcTitle [ "clipboard" "toggle" ] "Clipboard Manager";
-              "Mod+Escape" = dmsIpcTitle [ "lock" "lock" ] "Lock Screen";
-              "Mod+Shift+E" = dmsIpcTitle [ "powermenu" "toggle" ] "Power Menu";
-              "Mod+Comma" = dmsIpcTitle [ "settings" "toggle" ] "Settings";
-              "Mod+N" = dmsIpcTitle [ "control-center" "toggle" ] "Notifications";
-              "Mod+Slash" = dmsIpcTitle [ "keybinds" "toggle" ] "Show Keybinds";
-              "Mod+Shift+T" = dmsIpcTitle [ "theme" "toggle" ] "Toggle Light/Dark Theme";
+              "Mod+V" = dmsIpcTitle [ "call" "clipboard" "toggle" ] "Clipboard Manager";
+              "Mod+Escape" = dmsIpcTitle [ "call" "lock" "lock" ] "Lock Screen";
+              "Mod+Shift+E" = dmsIpcTitle [ "call" "powermenu" "toggle" ] "Power Menu";
+              "Mod+Comma" = dmsIpcTitle [ "call" "settings" "toggle" ] "Settings";
+              "Mod+N" = dmsIpcTitle [ "call" "control-center" "toggle" ] "Notifications";
+              "Mod+Slash" = dmsIpcTitle [ "call" "keybinds" "toggle" ] "Show Keybinds";
+              "Mod+Shift+T" = dmsIpcTitle [ "call" "theme" "toggle" ] "Toggle Light/Dark Theme";
 
               # App launchers
               "Mod+T" = {
@@ -394,44 +380,54 @@
 
               # Media keys (DMS IPC, available when locked)
               "XF86AudioRaiseVolume" = dmsIpcLocked [
+                "call"
                 "audio"
                 "increment"
               ];
               "XF86AudioLowerVolume" = dmsIpcLocked [
+                "call"
                 "audio"
                 "decrement"
               ];
               "XF86AudioMute" = dmsIpcLocked [
+                "call"
                 "audio"
                 "mute"
               ];
               "XF86AudioMicMute" = dmsIpcLocked [
+                "call"
                 "audio"
                 "micmute"
               ];
               "XF86AudioPlay" = dmsIpcLocked [
+                "call"
                 "mpris"
                 "playPause"
               ];
               "XF86AudioStop" = dmsIpcLocked [
+                "call"
                 "mpris"
                 "stop"
               ];
               "XF86AudioNext" = dmsIpcLocked [
+                "call"
                 "mpris"
                 "next"
               ];
               "XF86AudioPrev" = dmsIpcLocked [
+                "call"
                 "mpris"
                 "previous"
               ];
 
               # Brightness (DMS IPC, available when locked)
               "XF86MonBrightnessUp" = dmsIpcLocked [
+                "call"
                 "brightness"
                 "increment"
               ];
               "XF86MonBrightnessDown" = dmsIpcLocked [
+                "call"
                 "brightness"
                 "decrement"
               ];
@@ -480,10 +476,22 @@
               screenshot-ui-open = quick;
             };
 
+            layer-rules = [
+              {
+                matches = [ { namespace = "^quickshell$"; } ];
+                place-within-backdrop = true;
+              }
+            ];
+
             window-rules = [
               {
                 geometry-corner-radius = cornerRadius;
                 clip-to-geometry = true;
+              }
+
+              {
+                matches = [ { app-id = "^org\\.quickshell$"; } ];
+                open-floating = true;
               }
 
               {
@@ -537,25 +545,6 @@
               }
             ];
 
-            spawn-at-startup = [
-              {
-                command = [
-                  "${pkgs.argyllcms}/bin/dispwin"
-                  "-d"
-                  "1"
-                  "${config.home.homeDirectory}/.local/share/icc/aw3423dwf.icc"
-                ];
-              }
-              {
-                command = [
-                  "${pkgs.wl-gammactl}/bin/wl-gammactl"
-                  "--gamma"
-                  "1.0"
-                  "--brightness"
-                  "1.0"
-                ];
-              }
-            ];
           };
       };
     };

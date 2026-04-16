@@ -1,10 +1,13 @@
 # Sunshine game streaming server with NVENC encoding (RTX 4090)
 # KMS capture streams a virtual 16:9 display on DP-3 (EDID override, no dummy plug).
-# Niri keeps DP-3 off by default; Sunshine prep-cmd toggles it via IPC and sets
-# the resolution to match the connecting Moonlight client.
+# Niri keeps DP-3 off by default; Sunshine prep-cmd toggles it on connect and off
+# on disconnect via `niri msg` IPC.
 _: {
   flake.modules.nixos.sunshine =
-    { pkgs, ... }:
+    { pkgs, config, ... }:
+    let
+      niri = config.programs.niri.package;
+    in
     {
       # Virtual display on DP-3 via EDID override (no physical monitor needed)
       hardware.display.edid.modelines."sun-virt" =
@@ -31,10 +34,13 @@ _: {
           adapter_name = "/dev/dri/card1";
           output_name = 1; # KMS index for DP-3 (sun-virt)
 
-          # Match Moonlight client resolution/fps on connect, restore default on disconnect
-          # Guard: skip mode switch during Sunshine's startup encoder test (no client connected)
-          # TODO: re-enable dynamic resolution switching once streaming works
-          # global_prep_cmd = ...;
+          # Toggle virtual display on/off when a Moonlight client connects/disconnects
+          global_prep_cmd = builtins.toJSON [
+            {
+              do = "${niri}/bin/niri msg output DP-3 on";
+              undo = "${niri}/bin/niri msg output DP-3 off";
+            }
+          ];
 
           # NVENC (RTX 4090)
           nvenc_preset = 3;

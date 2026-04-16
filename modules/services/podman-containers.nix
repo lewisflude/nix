@@ -71,6 +71,9 @@ in
         environment = {
           TZ = timezone;
         };
+        volumes = [
+          "${configPath}/termix:/app/data"
+        ];
         ports = [ "${toString constants.ports.services.termix}:8080" ];
       };
 
@@ -84,7 +87,10 @@ in
           "${configPath}/janitorr/application.yml:/config/application.yml"
           "/mnt/storage/media:/data/media"
         ];
-        extraOptions = [ "--network=host" "--user=${toString uid}:976" ];
+        extraOptions = [
+          "--network=host"
+          "--user=${toString uid}:976"
+        ];
       };
 
       # Janitorr SOPS secrets
@@ -320,6 +326,7 @@ in
         "d ${configPath}/jellystat-db 0755 999 999 -"
         "d ${configPath}/jellystat 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/jellystat/backup 0755 ${toString uid} ${toString gid} -"
+        "d ${configPath}/termix 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/profilarr 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/listenarr 0755 ${toString uid} ${toString gid} -"
       ];

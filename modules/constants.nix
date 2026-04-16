@@ -55,6 +55,7 @@
           huntarr = 9705;
 
           syncthing = {
+            webUi = 8384;
             sync = 22000;
             discovery = 21027;
           };

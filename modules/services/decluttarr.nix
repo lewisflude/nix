@@ -6,7 +6,7 @@ let
 in
 {
   flake.modules.nixos.decluttarr =
-    _:
+    nixosArgs:
     let
       inherit (constants.defaults) timezone;
       localhost = "http://localhost";
@@ -31,15 +31,34 @@ in
           PERMITTED_ATTEMPTS = "3";
           NO_STALLED_REMOVAL_QBIT_TAG = "dont_delete";
           SONARR_URL = "${localhost}:${port "sonarr"}";
-          SONARR_KEY = "CHANGE_ME";
           RADARR_URL = "${localhost}:${port "radarr"}";
-          RADARR_KEY = "CHANGE_ME";
           LIDARR_URL = "${localhost}:${port "lidarr"}";
-          LIDARR_KEY = "CHANGE_ME";
           READARR_URL = "${localhost}:${port "readarr"}";
-          READARR_KEY = "CHANGE_ME";
           QBITTORRENT_URL = "${localhost}:${port "qbittorrent"}";
         };
+        environmentFiles = [
+          nixosArgs.config.sops.templates."decluttarr.env".path
+        ];
       };
+
+      sops.secrets."decluttarr-sonarr-api-key" = {
+        restartUnits = [ "podman-decluttarr.service" ];
+      };
+      sops.secrets."decluttarr-radarr-api-key" = {
+        restartUnits = [ "podman-decluttarr.service" ];
+      };
+      sops.secrets."decluttarr-lidarr-api-key" = {
+        restartUnits = [ "podman-decluttarr.service" ];
+      };
+      sops.secrets."decluttarr-readarr-api-key" = {
+        restartUnits = [ "podman-decluttarr.service" ];
+      };
+
+      sops.templates."decluttarr.env".content = ''
+        SONARR_KEY=${nixosArgs.config.sops.placeholder."decluttarr-sonarr-api-key"}
+        RADARR_KEY=${nixosArgs.config.sops.placeholder."decluttarr-radarr-api-key"}
+        LIDARR_KEY=${nixosArgs.config.sops.placeholder."decluttarr-lidarr-api-key"}
+        READARR_KEY=${nixosArgs.config.sops.placeholder."decluttarr-readarr-api-key"}
+      '';
     };
 }

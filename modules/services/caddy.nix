@@ -59,8 +59,7 @@ let
     inherit (constants.ports.services) navidrome;
 
     # Streaming
-    syncthing = constants.ports.services.syncthing.sync;
-    sunshine = constants.ports.services.sunshine.http;
+    syncthing = constants.ports.services.syncthing.webUi;
 
     # AI
     inherit (constants.ports.services) ollama;
@@ -92,6 +91,19 @@ in
             )
           ) localServices)
           // {
+            # Sunshine — admin panel serves HTTPS with self-signed cert
+            "sunshine.${constants.baseDomain}" = {
+              extraConfig = ''
+                reverse_proxy https://127.0.0.1:${toString constants.ports.services.sunshine.https} {
+                  transport http {
+                    tls_insecure_skip_verify
+                  }
+                  ${standardHeaders}
+                }
+                encode zstd gzip
+              '';
+            };
+
             # VPN namespace — qBittorrent runs inside a network namespace, accessed via its gateway
             "torrent.${constants.baseDomain}" =
               mkReverseProxy "${constants.networks.vpnNamespace.gateway}:${toString constants.ports.services.qbittorrent}";
