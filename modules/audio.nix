@@ -166,14 +166,10 @@ _: {
 
   # Darwin audio (macOS uses CoreAudio natively)
   flake.modules.darwin.audio =
-    { pkgs, ... }:
+    _:
     {
       homebrew.brews = [ "bwfmetaedit" ];
-      environment.systemPackages = [
-        pkgs.ffmpeg-full
-        pkgs.flac
-        pkgs.lame
-      ];
+      homebrew.casks = [ "kid3" ];
     };
 
   # Home-manager audio tools
@@ -209,15 +205,14 @@ _: {
     in
     {
       home.packages =
-        [
+        lib.optionals isLinux [
           pkgs.kid3
-        ]
-        ++ lib.optionals isLinux [
           pkgs.pwvucontrol
           pkgs.playerctl
           pkgs.crosspipe
         ]
         ++ lib.optionals isDarwin [
+          pkgs.ffmpeg-full
           pkgs.lame
           pkgs.flac
         ];

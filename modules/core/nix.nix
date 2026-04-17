@@ -53,5 +53,12 @@ in
   flake.modules.darwin.nix = _: {
     # Let Determinate Nix manage the Nix daemon
     nix.enable = false;
+
+    # Prevent Spotlight from indexing the Nix store
+    system.activationScripts.disableSpotlightNixStore.text = ''
+      if [ -d "/nix/store" ]; then
+        mdutil -i off /nix/store 2>/dev/null || true
+      fi
+    '';
   };
 }

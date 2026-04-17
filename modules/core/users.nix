@@ -23,7 +23,7 @@ in
     };
 
   # Darwin user configuration
-  flake.modules.darwin.users = {
+  flake.modules.darwin.users = _: {
     users.users.${username} = {
       home = "/Users/${username}";
       shell = "/run/current-system/sw/bin/zsh";

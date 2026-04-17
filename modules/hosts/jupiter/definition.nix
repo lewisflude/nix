@@ -111,6 +111,7 @@ in
         nixos.sabnzbd
         nixos.flaresolverr
         nixos.seerr
+        nixos.recyclarr
         nixos.autopulse
         nixos.huntarr
 
@@ -190,7 +191,6 @@ in
         homeManager.git-cliff
         homeManager.helix
         homeManager.powerlevel10k
-        homeManager.userPackages
         homeManager.claudeCode
         homeManager.geminiCli
         homeManager.yazi

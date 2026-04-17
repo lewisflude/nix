@@ -6,22 +6,12 @@ let
 in
 {
   flake.modules.nixos.podmanContainers =
-    { pkgs, ... }@nixosArgs:
+    nixosArgs:
     let
       configPath = "/var/lib/containers/supplemental";
       inherit (constants.defaults) timezone;
       uid = 1000;
       gid = 100;
-
-      # Janitorr secret paths
-      janitorrSecrets = {
-        sonarr = nixosArgs.config.sops.secrets."janitorr-sonarr-api-key".path;
-        radarr = nixosArgs.config.sops.secrets."janitorr-radarr-api-key".path;
-        jellyfin = nixosArgs.config.sops.secrets."janitorr-jellyfin-api-key".path;
-        jellyfinPassword = nixosArgs.config.sops.secrets."janitorr-jellyfin-password".path;
-        jellystat = nixosArgs.config.sops.secrets."janitorr-jellystat-api-key".path;
-        jellyseerr = nixosArgs.config.sops.secrets."janitorr-jellyseerr-api-key".path;
-      };
     in
     {
       # Enable Podman
@@ -84,7 +74,7 @@ in
           TZ = timezone;
         };
         volumes = [
-          "${configPath}/janitorr/application.yml:/config/application.yml"
+          "${nixosArgs.config.sops.templates."janitorr-application.yml".path}:/config/application.yml:ro"
           "/mnt/storage/media:/data/media"
         ];
         extraOptions = [
@@ -94,23 +84,94 @@ in
       };
 
       # Janitorr SOPS secrets
-      sops.secrets."janitorr-sonarr-api-key" = {
+      sops.secrets."janitorr-sonarr-api-key".restartUnits = [ "podman-janitorr.service" ];
+      sops.secrets."janitorr-radarr-api-key".restartUnits = [ "podman-janitorr.service" ];
+      sops.secrets."janitorr-jellyfin-api-key".restartUnits = [ "podman-janitorr.service" ];
+      sops.secrets."janitorr-jellyfin-password".restartUnits = [ "podman-janitorr.service" ];
+      sops.secrets."janitorr-jellystat-api-key".restartUnits = [ "podman-janitorr.service" ];
+      sops.secrets."janitorr-jellyseerr-api-key".restartUnits = [ "podman-janitorr.service" ];
+
+      # Janitorr config generated from sops template (replaces sed-based preStart injection)
+      sops.templates."janitorr-application.yml" = {
         restartUnits = [ "podman-janitorr.service" ];
-      };
-      sops.secrets."janitorr-radarr-api-key" = {
-        restartUnits = [ "podman-janitorr.service" ];
-      };
-      sops.secrets."janitorr-jellyfin-api-key" = {
-        restartUnits = [ "podman-janitorr.service" ];
-      };
-      sops.secrets."janitorr-jellyfin-password" = {
-        restartUnits = [ "podman-janitorr.service" ];
-      };
-      sops.secrets."janitorr-jellystat-api-key" = {
-        restartUnits = [ "podman-janitorr.service" ];
-      };
-      sops.secrets."janitorr-jellyseerr-api-key" = {
-        restartUnits = [ "podman-janitorr.service" ];
+        content = ''
+          file-system:
+            access: true
+            validate-seeding: false
+            leaving-soon-dir: "/data/media/leaving-soon"
+            media-server-leaving-soon-dir: "/mnt/storage/media/leaving-soon"
+            from-scratch: false
+            free-space-check-dir: "/data/media"
+
+          application:
+            dry-run: false
+            whole-tv-show: false
+            leaving-soon: 14d
+            leaving-soon-threshold-offset-percent: 5
+            exclusion-tags:
+              - "janitorr_keep"
+
+            media-deletion:
+              enabled: true
+              movie-expiration:
+                5: 15d
+                10: 30d
+                15: 30d
+                20: 90d
+              season-expiration:
+                5: 15d
+                10: 20d
+                15: 60d
+                20: 120d
+
+            tag-based-deletion:
+              enabled: false
+              minimum-free-disk-percent: 100
+              schedules: []
+
+            episode-deletion:
+              enabled: false
+
+          clients:
+            default:
+              connect-timeout: 60s
+              read-timeout: 60s
+
+            sonarr:
+              enabled: true
+              url: "http://localhost:${toString constants.ports.services.sonarr}"
+              api-key: "${nixosArgs.config.sops.placeholder."janitorr-sonarr-api-key"}"
+              delete-empty-shows: true
+            radarr:
+              enabled: true
+              url: "http://localhost:${toString constants.ports.services.radarr}"
+              api-key: "${nixosArgs.config.sops.placeholder."janitorr-radarr-api-key"}"
+            jellyfin:
+              enabled: true
+              url: "http://localhost:${toString constants.ports.services.jellyfin}"
+              api-key: "${nixosArgs.config.sops.placeholder."janitorr-jellyfin-api-key"}"
+              username: Janitorr
+              password: "${nixosArgs.config.sops.placeholder."janitorr-jellyfin-password"}"
+              delete: true
+              exclude-favorited: false
+              leaving-soon-type: MOVIES_AND_TV
+            emby:
+              enabled: false
+              url: ""
+              api-key: ""
+              username: ""
+              password: ""
+              delete: false
+            jellyseerr:
+              enabled: true
+              url: "http://localhost:${toString constants.ports.services.seerr}"
+              api-key: "${nixosArgs.config.sops.placeholder."janitorr-jellyseerr-api-key"}"
+              match-server: false
+            jellystat:
+              enabled: true
+              url: "http://localhost:${toString constants.ports.services.jellystat}"
+              api-key: "${nixosArgs.config.sops.placeholder."janitorr-jellystat-api-key"}"
+        '';
       };
 
       # Janitorr depends on Sonarr/Radarr/Jellyfin/Jellystat being ready
@@ -129,117 +190,38 @@ in
         ];
       };
 
-      # Generate janitorr application.yml from template with injected secrets
-      systemd.services.podman-janitorr.preStart =
-        let
-          template = pkgs.writeText "janitorr-template.yml" ''
-            file-system:
-              access: true
-              validate-seeding: false
-              leaving-soon-dir: "/data/media/leaving-soon"
-              media-server-leaving-soon-dir: "/mnt/storage/media/leaving-soon"
-              from-scratch: false
-              free-space-check-dir: "/data/media"
-
-            application:
-              dry-run: false
-              whole-tv-show: false
-              leaving-soon: 14d
-              leaving-soon-threshold-offset-percent: 5
-              exclusion-tags:
-                - "janitorr_keep"
-
-              media-deletion:
-                enabled: true
-                movie-expiration:
-                  5: 15d
-                  10: 30d
-                  15: 30d
-                  20: 90d
-                season-expiration:
-                  5: 15d
-                  10: 20d
-                  15: 60d
-                  20: 120d
-
-              tag-based-deletion:
-                enabled: false
-                minimum-free-disk-percent: 100
-                schedules: []
-
-              episode-deletion:
-                enabled: false
-
-            clients:
-              default:
-                connect-timeout: 60s
-                read-timeout: 60s
-
-              sonarr:
-                enabled: true
-                url: "http://localhost:${toString constants.ports.services.sonarr}"
-                api-key: "@SONARR_KEY@"
-                delete-empty-shows: true
-              radarr:
-                enabled: true
-                url: "http://localhost:${toString constants.ports.services.radarr}"
-                api-key: "@RADARR_KEY@"
-              jellyfin:
-                enabled: true
-                url: "http://localhost:${toString constants.ports.services.jellyfin}"
-                api-key: "@JELLYFIN_KEY@"
-                username: Janitorr
-                password: "@JELLYFIN_PASS@"
-                delete: true
-                exclude-favorited: false
-                leaving-soon-type: MOVIES_AND_TV
-              emby:
-                enabled: false
-                url: ""
-                api-key: ""
-                username: ""
-                password: ""
-                delete: false
-              jellyseerr:
-                enabled: true
-                url: "http://localhost:${toString constants.ports.services.seerr}"
-                api-key: "@JELLYSEERR_KEY@"
-                match-server: false
-              jellystat:
-                enabled: true
-                url: "http://localhost:${toString constants.ports.services.jellystat}"
-                api-key: "@JELLYSTAT_KEY@"
-          '';
-        in
-        ''
-          ${pkgs.gnused}/bin/sed \
-            -e "s|@SONARR_KEY@|$(cat '${janitorrSecrets.sonarr}')|g" \
-            -e "s|@RADARR_KEY@|$(cat '${janitorrSecrets.radarr}')|g" \
-            -e "s|@JELLYFIN_KEY@|$(cat '${janitorrSecrets.jellyfin}')|g" \
-            -e "s|@JELLYFIN_PASS@|$(cat '${janitorrSecrets.jellyfinPassword}')|g" \
-            -e "s|@JELLYSTAT_KEY@|$(cat '${janitorrSecrets.jellystat}')|g" \
-            -e "s|@JELLYSEERR_KEY@|$(cat '${janitorrSecrets.jellyseerr}')|g" \
-            "${template}" > "${configPath}/janitorr/application.yml"
-          chmod 644 "${configPath}/janitorr/application.yml"
+      # Jellystat - Jellyfin statistics (PostgreSQL runs natively, not containerized)
+      services.postgresql = {
+        enable = true;
+        ensureDatabases = [ "jellystat" ];
+        ensureUsers = [
+          {
+            name = "jellystat";
+            ensureDBOwnership = true;
+          }
+        ];
+        # Allow password auth from localhost for the jellystat container
+        authentication = ''
+          host jellystat jellystat 127.0.0.1/32 md5
+          host jellystat jellystat ::1/128 md5
         '';
+      };
 
-      # Jellystat - Jellyfin statistics
-      virtualisation.oci-containers.containers.jellystat-db = {
-        image = "docker.io/postgres:16-alpine";
-        environment = {
-          POSTGRES_USER = "jellystat";
-          POSTGRES_DB = "jellystat";
+      # Set the jellystat PostgreSQL password from SOPS after ensureUsers creates the role
+      systemd.services.jellystat-db-password = {
+        after = [ "postgresql.service" ];
+        requires = [ "postgresql.service" ];
+        before = [ "podman-jellystat.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
         };
-        environmentFiles = [
-          nixosArgs.config.sops.templates."jellystat-db.env".path
-        ];
-        volumes = [
-          "${configPath}/jellystat-db:/var/lib/postgresql/data"
-        ];
-        extraOptions = [
-          "--network=host"
-          "--shm-size=256m"
-        ];
+        script = ''
+          PASSWORD=$(cat ${nixosArgs.config.sops.secrets."jellystat-postgres-password".path})
+          ${nixosArgs.config.services.postgresql.package}/bin/psql -U postgres -c \
+            "ALTER USER jellystat WITH PASSWORD '$PASSWORD';"
+        '';
       };
 
       virtualisation.oci-containers.containers.jellystat = {
@@ -257,33 +239,32 @@ in
           "${configPath}/jellystat/backup:/app/backend/backup-data"
         ];
         extraOptions = [ "--network=host" ];
-        dependsOn = [ "jellystat-db" ];
       };
 
       # Jellystat SOPS secrets
       sops.secrets."jellystat-postgres-password" = {
-        restartUnits = [
-          "podman-jellystat.service"
-          "podman-jellystat-db.service"
-        ];
+        restartUnits = [ "podman-jellystat.service" ];
       };
       sops.secrets."jellystat-jwt-secret" = {
         restartUnits = [ "podman-jellystat.service" ];
       };
 
-      # Jellystat env templates (inject secrets into env files)
-      sops.templates."jellystat-db.env".content = ''
-        POSTGRES_PASSWORD=${nixosArgs.config.sops.placeholder."jellystat-postgres-password"}
-      '';
+      # Jellystat env template
       sops.templates."jellystat.env".content = ''
         POSTGRES_PASSWORD=${nixosArgs.config.sops.placeholder."jellystat-postgres-password"}
         JWT_SECRET=${nixosArgs.config.sops.placeholder."jellystat-jwt-secret"}
       '';
 
-      # Jellystat depends on its database
+      # Jellystat depends on PostgreSQL and its password being set
       systemd.services.podman-jellystat = {
-        after = [ "podman-jellystat-db.service" ];
-        requires = [ "podman-jellystat-db.service" ];
+        after = [
+          "postgresql.service"
+          "jellystat-db-password.service"
+        ];
+        requires = [
+          "postgresql.service"
+          "jellystat-db-password.service"
+        ];
       };
 
       # Profilarr - Profile management
@@ -323,7 +304,6 @@ in
         "d ${configPath}/homarr/data 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/wizarr 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/janitorr 0755 ${toString uid} ${toString gid} -"
-        "d ${configPath}/jellystat-db 0755 999 999 -"
         "d ${configPath}/jellystat 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/jellystat/backup 0755 ${toString uid} ${toString gid} -"
         "d ${configPath}/termix 0755 ${toString uid} ${toString gid} -"

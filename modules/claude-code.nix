@@ -475,7 +475,11 @@ in
         '';
       };
 
-      # Claude Desktop app (Linux only)
-      home.packages = lib.optionals pkgs.stdenv.isLinux [ pkgs.claude-desktop ];
+      home.packages =
+        let
+          llmAgentPkgs = pkgs.llmAgents or { };
+        in
+        lib.optionals (llmAgentPkgs ? ccusage) [ llmAgentPkgs.ccusage ]
+        ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.claude-desktop ];
     };
 }

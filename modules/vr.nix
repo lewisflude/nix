@@ -43,7 +43,6 @@ _: {
         environment.NIXOS_OZONE_WL = "1";
       };
 
-      environment.systemPackages = [ pkgs.android-tools ];
     };
 
   flake.modules.homeManager.vr =
@@ -55,6 +54,7 @@ _: {
       ...
     }:
     lib.mkIf (osConfig.services.wivrn.enable or false) {
+      home.packages = [ pkgs.android-tools ];
       xdg.configFile."openvr/openvrpaths.vrpath" = {
         force = true;
         text = builtins.toJSON {

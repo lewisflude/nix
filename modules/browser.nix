@@ -103,7 +103,9 @@ _: {
         associations.added = addedAssociations;
       };
 
-      home.packages = [ pkgs.google-chrome ];
-      home.file.".config/chrome-flags.conf".text = lib.concatStringsSep "\n" chromeFlags;
+      programs.google-chrome = {
+        enable = true;
+        commandLineArgs = chromeFlags;
+      };
     };
 }

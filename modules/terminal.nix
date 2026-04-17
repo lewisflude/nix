@@ -4,22 +4,7 @@ _: {
   flake.modules.homeManager.terminal =
     { lib, pkgs, ... }:
     {
-      home.packages = [
-        pkgs.clipse
-        pkgs.rsync
-        pkgs.trash-cli
-        pkgs.fd
-        pkgs.dust
-        pkgs.procs
-        pkgs.gping
-        pkgs._7zz-rar
-        pkgs.pigz
-        pkgs.git-extras
-      ]
-      ++ lib.optionals pkgs.stdenv.isLinux [
-        pkgs.lsof
-        pkgs.wtype
-      ];
+      home.packages = [ pkgs.clipse ] ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.wtype ];
 
       # Ghostty configuration
       # Linux: install from nixpkgs

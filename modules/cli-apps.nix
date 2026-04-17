@@ -76,10 +76,19 @@ _: {
         # Essentials
         pkgs.curl
         pkgs.tree
-        pkgs.ouch # Archive extraction
-        pkgs.sd # Modern sed alternative
-        pkgs.hyperfine # Benchmarking tool
-        pkgs.just # Modern make alternative
+        pkgs.rsync
+        pkgs.fd
+        pkgs.ouch
+        pkgs.sd
+        pkgs.hyperfine
+        pkgs.just
+        pkgs.trash-cli
+        pkgs.dust
+        pkgs.procs
+        pkgs.gping
+        pkgs._7zz-rar
+        pkgs.pigz
+        pkgs.git-extras
 
         # Nix Power Tools
         pkgs.nix-output-monitor
@@ -98,6 +107,9 @@ _: {
         # Binary caching
         pkgs.cachix
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.libnotify ];
+      ++ lib.optionals pkgs.stdenv.isLinux [
+        pkgs.libnotify
+        pkgs.lsof
+      ];
     };
 }

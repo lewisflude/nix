@@ -25,7 +25,7 @@ let
         if inputs ? comfyui && inputs.comfyui ? overlays && inputs.comfyui.overlays ? default then
           inputs.comfyui.overlays.default
         else if inputs ? comfyui && inputs.comfyui ? packages && inputs.comfyui.packages ? ${system} then
-          (_final: _prev: { comfyui = inputs.comfyui.packages.${system}.default or _prev.hello; })
+          (_final: _prev: { comfyui = inputs.comfyui.packages.${system}.default; })
         else
           noopOverlay;
 
@@ -58,9 +58,9 @@ let
         in
         {
           llmAgents = llmAgentPkgs;
-          claude-code = llmAgentPkgs.claude-code or _prev.hello;
-          gemini-cli = llmAgentPkgs.gemini-cli or _prev.hello;
-        };
+        }
+        // (if llmAgentPkgs ? claude-code then { inherit (llmAgentPkgs) claude-code; } else { })
+        // (if llmAgentPkgs ? gemini-cli then { inherit (llmAgentPkgs) gemini-cli; } else { });
 
       # GCC 15 ICE workarounds for i686-linux (Steam FHS env needs these)
       # Lowers optimization to -O1 or disables tests for packages that trigger compiler bugs
@@ -103,11 +103,6 @@ let
           }
         else
           { };
-
-      # yutu - YouTube MCP server
-      yutu = _final: prev: {
-        yutu = prev.callPackage ../pkgs/yutu.nix { };
-      };
 
       # Java 25 for Hytale
       java25 =
@@ -176,14 +171,6 @@ let
         else
           { };
 
-      # Awww
-      awww =
-        _final: _prev:
-        if inputs ? awww && inputs.awww ? packages && inputs.awww.packages ? ${system} then
-          { awww = inputs.awww.packages.${system}.default; }
-        else
-          { };
-
       # khal: sphinxcontrib-newsfeed is broken with Sphinx 9.x
       # Skip docs build entirely until upstream fixes it
       khal-fix = _final: prev: {
@@ -200,13 +187,6 @@ let
 
       # NUR
       nur = if inputs ? nur && inputs.nur ? overlays then inputs.nur.overlays.default else noopOverlay;
-
-      # Wayland packages (Linux only)
-      nixpkgs-wayland =
-        if isLinux && inputs ? nixpkgs-wayland && inputs.nixpkgs-wayland ? overlay then
-          inputs.nixpkgs-wayland.overlay
-        else
-          noopOverlay;
 
       # WiVRn with CUDA encoding support (64-bit only)
       # OpenVR compatibility paths managed by WiVRn itself since v0.23

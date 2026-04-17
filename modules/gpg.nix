@@ -29,21 +29,10 @@ _: {
         libnotify = true;
       };
 
-      environment.systemPackages = [
-        pkgs.gnupg
-      ];
     };
 
-  # ═══════════════════════════════════════════════════════════════════
-  # Darwin system-level GPG/YubiKey configuration
-  # ═══════════════════════════════════════════════════════════════════
-  flake.modules.darwin.gpg =
-    { pkgs, ... }:
-    {
-      environment.systemPackages = [
-        pkgs.gnupg
-      ];
-    };
+  # Darwin: gpg is installed via home-manager programs.gpg
+  flake.modules.darwin.gpg = _: { };
 
   # ═══════════════════════════════════════════════════════════════════
   # Home-manager GPG configuration (works on NixOS AND Darwin)

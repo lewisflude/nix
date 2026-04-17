@@ -78,8 +78,10 @@ in
             homeManager.git-cliff
             homeManager.helix
             homeManager.powerlevel10k
-            homeManager.userPackages
             homeManager.claudeCode
+            homeManager.geminiCli
+            homeManager.iaGet
+            homeManager.mpv
             homeManager.yazi
             homeManager.nicotinePlus
             homeManager.obsidian
@@ -115,77 +117,7 @@ in
       # Core System Configuration
       # =========================================================================
       networking.hostName = "mercury";
-
-      # =========================================================================
-      # Power Management (pro audio / KVM reliability)
-      # =========================================================================
-      power.sleep.computer = "never";
-      power.sleep.display = "never";
-      power.sleep.harddisk = "never";
-
-      system.activationScripts.disableSpotlightNixStore.text = ''
-        if [ -d "/nix/store" ]; then
-          mdutil -i off /nix/store 2>/dev/null || true
-        fi
-      '';
-
       system.stateVersion = constants.defaults.darwinStateVersion;
-
-      # Primary user for user-specific options (required by nix-darwin)
-      # On macOS, the actual system user is "lewisflude"
       system.primaryUser = "lewisflude";
-
-      # =========================================================================
-      # macOS System Preferences
-      # =========================================================================
-      system.defaults = {
-        dock = {
-          autohide = true;
-          show-recents = false;
-          mineffect = "scale";
-        };
-        finder = {
-          AppleShowAllExtensions = true;
-          FXEnableExtensionChangeWarning = false;
-        };
-        NSGlobalDomain = {
-          AppleInterfaceStyle = "Dark";
-          "com.apple.swipescrolldirection" = false;
-          NSAutomaticWindowAnimationsEnabled = false;
-        };
-        universalaccess = {
-          reduceMotion = true;
-          reduceTransparency = true;
-        };
-        # Pro audio optimizations
-        CustomUserPreferences = {
-          NSGlobalDomain = {
-            # Disable App Nap (prevents macOS throttling background audio apps)
-            NSAppSleepDisabled = true;
-            # Silence alert sounds (prevents unexpected audio through interface)
-            "com.apple.sound.beep.volume" = 0.0;
-            # Disable UI sounds (empty trash, screenshots, etc.)
-            "com.apple.sound.uiaudioenabled" = 0;
-          };
-          "com.apple.SoftwareUpdate" = {
-            # Disable background update checks during audio sessions
-            AutomaticCheckEnabled = false;
-            AutomaticDownload = false;
-          };
-        };
-      };
-
-      # Enable Touch ID for sudo
-      security.pam.services.sudo_local.touchIdAuth = true;
-
-      # =========================================================================
-      # Homebrew (via nix-homebrew)
-      # =========================================================================
-      nix-homebrew = {
-        enable = true;
-        enableRosetta = true;
-        user = "lewisflude";
-        autoMigrate = true;
-      };
     };
 }

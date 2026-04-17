@@ -15,8 +15,13 @@ _: {
 
         # Linters
         pkgs.luaPackages.luacheck
-
         (lib.lowPrio pkgs.lua)
+
+        # Database clients
+        pkgs.pgcli
+
+        # AI-assisted editors
+        pkgs.cursor-cli
       ];
     };
 }

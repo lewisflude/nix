@@ -182,7 +182,5 @@ in
           };
         };
       };
-
-      home.file.".config/helix/runtime/.keep".text = "";
     };
 }

@@ -7,7 +7,7 @@ let
   inherit (config) username;
 in
 {
-  flake.modules.darwin.determinate = {
+  flake.modules.darwin.determinate = _: {
     determinateNix = {
       enable = true;
 

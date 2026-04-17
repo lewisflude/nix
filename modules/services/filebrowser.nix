@@ -7,7 +7,7 @@ let
   musicDir = "/home/${username}/Music";
 in
 {
-  flake.modules.nixos.filebrowser = {
+  flake.modules.nixos.filebrowser = _: {
     services.filebrowser = {
       enable = true;
       user = username;

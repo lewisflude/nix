@@ -12,6 +12,7 @@ _: {
         pkgs.font-awesome
         pkgs.aseprite
         pkgs.nautilus
+        pkgs.seahorse
         pkgs.swayimg
       ];
 
