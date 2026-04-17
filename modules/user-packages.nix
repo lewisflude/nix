@@ -20,7 +20,6 @@ _: {
       ]
       ++ lib.optionals (llmAgentPkgs ? ccusage) [ llmAgentPkgs.ccusage ]
       ++ lib.optionals pkgs.stdenv.isLinux [
-        pkgs.libnotify
         pkgs.seahorse
       ];
     };

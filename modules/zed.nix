@@ -2,13 +2,8 @@
 # Fast, collaborative code editor
 _: {
   flake.modules.homeManager.zed =
-    { pkgs, ... }:
+    _:
     {
-      home.packages = [
-        pkgs.nixd
-        pkgs.nixfmt
-      ];
-
       programs.zed-editor = {
         enable = true;
         package = null;

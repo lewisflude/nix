@@ -112,8 +112,6 @@ _: {
         pkgs.ninja
         pkgs.portaudio
         pkgs.xcodebuild
-        pkgs.lame
-        pkgs.flac
       ];
     };
 }

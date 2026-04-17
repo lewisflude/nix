@@ -11,13 +11,6 @@ in
       group = "media";
     in
     {
-      users.users.${user} = {
-        isSystemUser = true;
-        inherit group;
-        description = "Media management user";
-      };
-      users.groups.${group} = { };
-
       services.bazarr = {
         enable = true;
         listenPort = constants.ports.services.bazarr;

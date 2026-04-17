@@ -168,6 +168,7 @@ _: {
   flake.modules.darwin.audio =
     { pkgs, ... }:
     {
+      homebrew.brews = [ "bwfmetaedit" ];
       environment.systemPackages = [
         pkgs.ffmpeg-full
         pkgs.flac
@@ -208,7 +209,10 @@ _: {
     in
     {
       home.packages =
-        lib.optionals isLinux [
+        [
+          pkgs.kid3
+        ]
+        ++ lib.optionals isLinux [
           pkgs.pwvucontrol
           pkgs.playerctl
           pkgs.crosspipe

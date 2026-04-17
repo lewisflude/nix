@@ -37,7 +37,6 @@ in
         darwin.audio
         darwin.apps
         darwin.gaming
-        darwin.karabiner
         darwin.ssh
         darwin.zed
         darwin.nfs
@@ -73,14 +72,11 @@ in
 
             # CLI apps and editors
             homeManager.cliApps
-            homeManager.atuin
-            homeManager.direnv
             homeManager.fzf
             homeManager.zellij
             homeManager.gh
             homeManager.git-cliff
             homeManager.helix
-            homeManager.nixYourShell
             homeManager.powerlevel10k
             homeManager.userPackages
             homeManager.claudeCode

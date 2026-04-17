@@ -10,6 +10,22 @@
         package = inputs.niri.packages.${config.nixpkgs.hostPlatform.system}.niri-unstable;
       };
 
+      # UWSM session management for niri
+      programs.uwsm = {
+        enable = true;
+        waylandCompositors.niri = {
+          prettyName = "Niri";
+          comment = "Niri compositor managed by UWSM";
+          binPath = lib.getExe config.programs.niri.package;
+        };
+      };
+
+      # niri-flake targets WantedBy=niri.service, but UWSM uses
+      # wayland-wm@niri-session.service — fix to target graphical-session.target
+      systemd.user.services.niri-flake-polkit.wantedBy = lib.mkForce [
+        "graphical-session.target"
+      ];
+
       # NVIDIA application profile to fix high VRAM usage with niri
       # See: https://yalter.github.io/niri/Nvidia.html#high-vram-usage-fix
       environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json" =

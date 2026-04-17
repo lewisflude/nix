@@ -3,12 +3,10 @@
 # Fallback: flatpak install flathub com.unity.UnityHub
 _: {
   flake.modules.nixos.vrchatCreation =
-    { pkgs, ... }:
+    _:
     {
       # xdgOpenUsePortal fixes Unity Hub login callback in FHS sandbox
       xdg.portal.xdgOpenUsePortal = true;
-
-      environment.systemPackages = [ pkgs.vrc-get ];
     };
 
   flake.modules.homeManager.vrchatCreation =

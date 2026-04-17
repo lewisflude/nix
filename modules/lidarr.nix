@@ -11,13 +11,6 @@ in
       group = "media";
     in
     {
-      users.users.${user} = {
-        isSystemUser = true;
-        inherit group;
-        description = "Media management user";
-      };
-      users.groups.${group} = { };
-
       systemd.tmpfiles.rules = [
         "d '/mnt/storage/media' 0770 ${user} ${group} - -"
         "d '/mnt/storage/media/music' 0770 ${user} ${group} - -"

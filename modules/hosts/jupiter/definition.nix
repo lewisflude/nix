@@ -44,8 +44,6 @@ in
         nixos.networking
         nixos.wakeOnLan
         nixos.security
-        nixos.power
-        nixos.memory
 
         # ═══════════════════════════════════════════════════════════════════════
         # Hardware Modules
@@ -53,7 +51,6 @@ in
         nixos.bluetooth
         nixos.keyboard
         nixos.mouse
-        nixos.usb
         nixos.gpg # GPG + YubiKey hardware support (merged module)
 
         # ═══════════════════════════════════════════════════════════════════════
@@ -103,6 +100,7 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         # Media Management Services
         # ═══════════════════════════════════════════════════════════════════════
+        nixos.mediaUser
         nixos.prowlarr
         nixos.radarr
         nixos.sonarr
@@ -113,8 +111,6 @@ in
         nixos.sabnzbd
         nixos.flaresolverr
         nixos.seerr
-        nixos.notifiarr
-        nixos.decluttarr
         nixos.autopulse
         nixos.huntarr
 
@@ -144,7 +140,6 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         # AI Tools
         # ═══════════════════════════════════════════════════════════════════════
-        nixos.ollama
         nixos.claudeCode
 
         # ═══════════════════════════════════════════════════════════════════════
@@ -155,7 +150,6 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         # Desktop Extras
         # ═══════════════════════════════════════════════════════════════════════
-        nixos.colord
         nixos.printing
         nixos.xdgPortal
       ];
@@ -190,18 +184,14 @@ in
 
         # CLI apps and editors
         homeManager.cliApps
-        homeManager.atuin
-        homeManager.direnv
         homeManager.fzf
         homeManager.zellij
         homeManager.gh
         homeManager.git-cliff
         homeManager.helix
-        homeManager.nixYourShell
         homeManager.powerlevel10k
         homeManager.userPackages
         homeManager.claudeCode
-        homeManager.claudeDesktop
         homeManager.geminiCli
         homeManager.yazi
         homeManager.iaGet
@@ -211,7 +201,6 @@ in
 
         # Desktop home-manager modules
         homeManager.browser
-        homeManager.davinciResolve
         homeManager.desktopApps
         homeManager.gimp
         homeManager.niri

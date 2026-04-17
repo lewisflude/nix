@@ -1,22 +1,8 @@
 # Karabiner-Elements configuration (Darwin only)
 # Dendritic pattern: nix-darwin service + home-manager config files
 _: {
-  # ==========================================================================
-  # Darwin System Configuration
-  # ==========================================================================
-  # NOTE: services.karabiner-elements.enable is disabled due to a bug in
-  # nix-darwin where the launchd plist files are missing from the derivation.
-  # Install Karabiner-Elements via Homebrew Cask instead:
-  #   brew install --cask karabiner-elements
-  # The home-manager config below still manages the JSON configuration.
-  flake.modules.darwin.karabiner = _: {
-    # services.karabiner-elements.enable = true;  # Disabled - use Homebrew
-  };
-
-  # ==========================================================================
-  # Home-Manager Configuration
-  # ==========================================================================
-  # Provides the JSON configuration files for Karabiner-Elements
+  # Karabiner-Elements is installed via Homebrew Cask (nix-darwin service is broken).
+  # This module manages only the JSON configuration files via home-manager.
   flake.modules.homeManager.karabiner =
     { lib, pkgs, ... }:
     let

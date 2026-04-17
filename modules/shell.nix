@@ -491,6 +491,27 @@ in
         ${pkgs.atuin}/bin/atuin init zsh --disable-up-arrow > $out 2>&1 || echo "export ATUIN_NOBIND=true" > $out
       '';
 
+      # Atuin - shell history sync (init script generated above, ZSH integration disabled for performance)
+      programs.atuin = {
+        enable = true;
+        enableZshIntegration = false;
+        flags = [ "--disable-up-arrow" ];
+        settings.sync_frequency = "5m";
+      };
+
+      # Direnv - per-directory environments (init script generated above)
+      programs.direnv = {
+        enable = true;
+        enableZshIntegration = false;
+        nix-direnv.enable = true;
+      };
+
+      # nix-your-shell - retain shell in nix develop/nix-shell
+      programs.nix-your-shell = {
+        enable = true;
+        enableZshIntegration = true;
+      };
+
       # Direnv layout file for Zellij integration
       home.file.".config/direnv/lib/layout_zellij.sh".text = ''
         layout_zellij() {

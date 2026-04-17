@@ -9,7 +9,7 @@ in
   };
 
   flake.modules.homeManager.claudeCode =
-    { pkgs, ... }:
+    { lib, pkgs, ... }:
     {
       programs.mcp = {
         enable = true;
@@ -474,5 +474,8 @@ in
           - **Use /blender-help** when discussing Blender plugins or workflows.
         '';
       };
+
+      # Claude Desktop app (Linux only)
+      home.packages = lib.optionals pkgs.stdenv.isLinux [ pkgs.claude-desktop ];
     };
 }

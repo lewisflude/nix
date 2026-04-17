@@ -6,12 +6,7 @@ _: {
     {
       services.printing.enable = true;
 
-      # Network printer discovery via mDNS/DNS-SD
-      services.avahi = {
-        enable = true;
-        nssmdns4 = true;
-        openFirewall = true;
-      };
+      # Avahi (mDNS printer discovery) is enabled in core/networking.nix
 
       environment.systemPackages = [ pkgs.cups-pk-helper ];
     };
