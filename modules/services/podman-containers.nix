@@ -94,6 +94,8 @@ in
       # Janitorr config generated from sops template (replaces sed-based preStart injection)
       sops.templates."janitorr-application.yml" = {
         restartUnits = [ "podman-janitorr.service" ];
+        group = "media";
+        mode = "0440";
         content = ''
           file-system:
             access: true
@@ -216,10 +218,12 @@ in
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
+          User = "postgres";
+          Group = "postgres";
         };
         script = ''
           PASSWORD=$(cat ${nixosArgs.config.sops.secrets."jellystat-postgres-password".path})
-          ${nixosArgs.config.services.postgresql.package}/bin/psql -U postgres -c \
+          ${nixosArgs.config.services.postgresql.package}/bin/psql -c \
             "ALTER USER jellystat WITH PASSWORD '$PASSWORD';"
         '';
       };
@@ -243,6 +247,7 @@ in
 
       # Jellystat SOPS secrets
       sops.secrets."jellystat-postgres-password" = {
+        owner = "postgres";
         restartUnits = [ "podman-jellystat.service" ];
       };
       sops.secrets."jellystat-jwt-secret" = {
