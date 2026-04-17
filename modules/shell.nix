@@ -512,6 +512,30 @@ in
         enableZshIntegration = true;
       };
 
+      # FZF - fuzzy finder (init script generated above)
+      programs.fzf = {
+        enable = true;
+        enableZshIntegration = false;
+        defaultOptions = [
+          "--height 40%"
+          "--border"
+        ];
+        defaultCommand = lib.mkDefault (
+          if pkgs ? fd then
+            "${lib.getExe pkgs.fd} --hidden --strip-cwd-prefix --exclude .git"
+          else if pkgs ? ripgrep then
+            "${lib.getExe pkgs.ripgrep} --files --hidden --follow --glob '!.git'"
+          else
+            null
+        );
+        fileWidgetCommand = lib.mkDefault (
+          if pkgs ? fd then
+            "${lib.getExe pkgs.fd} --type f --hidden --strip-cwd-prefix --exclude .git"
+          else
+            null
+        );
+      };
+
       # Direnv layout file for Zellij integration
       home.file.".config/direnv/lib/layout_zellij.sh".text = ''
         layout_zellij() {

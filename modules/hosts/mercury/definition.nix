@@ -3,7 +3,7 @@
 { config, inputs, ... }:
 let
   inherit (config) constants;
-  inherit (config) username useremail;
+  inherit (config) username;
   inherit (config.flake.modules) darwin homeManager;
 in
 {
@@ -72,7 +72,6 @@ in
 
             # CLI apps and editors
             homeManager.cliApps
-            homeManager.fzf
             homeManager.zellij
             homeManager.gh
             homeManager.git-cliff
@@ -106,9 +105,7 @@ in
       # =========================================================================
       host = {
         inherit username;
-        inherit useremail;
         hostname = "mercury";
-        system = "aarch64-darwin";
 
         features = { };
       };

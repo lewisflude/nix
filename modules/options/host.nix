@@ -1,7 +1,7 @@
 # Host options for the dendritic pattern
 # Defines host.* options that feature modules set when imported
 # Home-manager modules can read these via osConfig/systemConfig
-{ config, lib, ... }:
+{ lib, ... }:
 let
   inherit (lib) mkOption mkEnableOption types;
 
@@ -12,20 +12,9 @@ let
       description = "Primary user's username";
     };
 
-    useremail = mkOption {
-      type = types.str;
-      default = "";
-      description = "Primary user's email address";
-    };
-
     hostname = mkOption {
       type = types.str;
       description = "System hostname";
-    };
-
-    system = mkOption {
-      type = types.str;
-      description = "System architecture";
     };
 
     features = {
@@ -59,16 +48,9 @@ in
       };
     };
 
-    config.host = lib.mkIf (config.options.host.username.isDefined or false) {
-      system = lib.mkDefault "x86_64-linux";
-    };
   };
 
   flake.modules.darwin.hostOptions = {
     options.host = mkCommonOptions;
-
-    config.host = {
-      system = lib.mkDefault "aarch64-darwin";
-    };
   };
 }
