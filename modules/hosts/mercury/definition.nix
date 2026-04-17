@@ -41,6 +41,7 @@ in
         darwin.zed
         darwin.nfs
         darwin.vrchatCreation
+        darwin.organize
       ];
 
       # Required for Darwin
@@ -86,6 +87,7 @@ in
             homeManager.obsidian
             homeManager.zed
             homeManager.developmentTools
+            homeManager.organize
 
             # VRChat creation tools
             homeManager.vrchatCreation
