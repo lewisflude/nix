@@ -1,11 +1,15 @@
 # NFS File Sharing
 # Server: Export ~/Music from Jupiter for Ableton on Mercury
-# Client: macOS autofs (on-demand mount at /mnt/music)
+# Client: macOS launchd-managed NFS mount at /mnt/music
 { config, ... }:
 let
   jupiterIp = config.constants.hosts.jupiter.ipv4;
   mercuryIp = config.constants.hosts.mercury.ipv4;
-  nfsOpts = "fstype=nfs,resvport,soft,intr,bg,rsize=32768,wsize=32768,timeo=10,retrans=3";
+  musicPath = "/home/${config.username}/Music";
+  # Direct mount target. macOS has a read-only root since Catalina, so physical
+  # mount points must live under /System/Volumes/Data.
+  mountPoint = "/System/Volumes/Data/mnt/music";
+  mountOpts = "resvport,soft,bg,rsize=32768,wsize=32768,timeo=10,retrans=3";
 in
 {
   # NixOS server: NFS export
@@ -15,7 +19,7 @@ in
       lockdPort = 4001;
       statdPort = 4002;
       exports = ''
-        /home/${config.username}/Music ${mercuryIp}(rw,no_subtree_check,all_squash,anonuid=1001,anongid=100)
+        ${musicPath} ${mercuryIp}(rw,no_subtree_check,all_squash,anonuid=1001,anongid=100)
       '';
     };
 
@@ -35,46 +39,38 @@ in
     ];
   };
 
-  # macOS client: autofs on-demand NFS mount under the data volume.
-  # Modern macOS (Catalina+) has a read-only root, so autofs targets must live
-  # under /System/Volumes/Data. User-facing access is via the ~/Music-Jupiter
-  # symlink created by the home-manager module below.
-  flake.modules.darwin.nfs = _: {
-    environment.etc."auto_nfs".text = ''
-      /System/Volumes/Data/mnt/music -${nfsOpts} ${jupiterIp}:/home/${config.username}/Music
-    '';
-
-    environment.etc."auto_master".text = ''
-      #
-      # Automounter master map
-      #
-      +auto_master
-      /net			-hosts		-nobrowse,hidefromfinder,nosuid
-      /home			auto_home	-nobrowse,hidefromfinder
-      /Network/Servers	-fstab
-      /-			-static
-      /-			auto_nfs	-nobrowse,nosuid
-    '';
-
-    # Reload autofs at boot to pick up nix-darwin managed config
-    launchd.daemons.reload-autofs = {
-      serviceConfig = {
-        Label = "org.nix.reload-autofs";
-        ProgramArguments = [
-          "/bin/sh"
-          "-c"
-          "automount -cv"
-        ];
-        RunAtLoad = true;
+  # macOS client: direct NFS mount via launchd.
+  # Avoids nix-darwin's inability to overwrite the OS-shipped /etc/auto_master
+  # (environment.etc refuses to clobber pre-existing files), which previously
+  # left autofs unarmed and the share unmounted.
+  flake.modules.darwin.nfs =
+    { pkgs, ... }:
+    {
+      launchd.daemons.mount-jupiter-music = {
+        serviceConfig = {
+          Label = "com.lewisflude.mount-jupiter-music";
+          RunAtLoad = true;
+          KeepAlive = {
+            NetworkState = true;
+          };
+          StandardOutPath = "/var/log/mount-jupiter-music.log";
+          StandardErrorPath = "/var/log/mount-jupiter-music.log";
+        };
+        script = ''
+          set -eu
+          ${pkgs.coreutils}/bin/mkdir -p ${mountPoint}
+          if /sbin/mount | ${pkgs.gnugrep}/bin/grep -q " on ${mountPoint} "; then
+            exit 0
+          fi
+          exec /sbin/mount_nfs -o ${mountOpts} ${jupiterIp}:${musicPath} ${mountPoint}
+        '';
       };
     };
-  };
 
   # User-facing symlink so the share is reachable as ~/Music-Jupiter.
   flake.modules.homeManager.nfs =
     { config, ... }:
     {
-      home.file."Music-Jupiter".source =
-        config.lib.file.mkOutOfStoreSymlink "/System/Volumes/Data/mnt/music";
+      home.file."Music-Jupiter".source = config.lib.file.mkOutOfStoreSymlink mountPoint;
     };
 }
