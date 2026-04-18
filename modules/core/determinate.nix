@@ -28,7 +28,6 @@ in
         cores = 4;
         sandbox = false;
         always-allow-substitutes = true;
-        eval-cores = 4;
 
         # Binary caches from constants
         extra-substituters = constants.binaryCaches.substituters;

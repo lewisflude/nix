@@ -38,13 +38,6 @@ in
         extra-substituters = constants.binaryCaches.substituters;
         extra-trusted-public-keys = constants.binaryCaches.trustedPublicKeys;
       };
-
-      # Determinate Nix-specific settings (not in nix.settings schema)
-      nix.extraOptions = ''
-        eval-cores = 4
-      '';
-
-      # Note: configurationRevision removed - not needed in lower-level modules
     };
 
   # Darwin Nix configuration
