@@ -475,6 +475,10 @@
                 enable = true;
                 max-scroll-amount = "0%";
               };
+              warp-mouse-to-focus = {
+                enable = true;
+                mode = "center-xy";
+              };
               workspace-auto-back-and-forth = true;
               mouse = {
                 natural-scroll = true;
@@ -490,6 +494,7 @@
               horizontal-view-movement = snappy;
               window-close = quick;
               screenshot-ui-open = quick;
+              overview-open-close = quick;
             };
 
             layer-rules = [
