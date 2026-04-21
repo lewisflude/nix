@@ -13,7 +13,6 @@ in
       ...
     }@nixosArgs:
     let
-      inherit (lib) mkIf;
       namespace = "qbt";
       torrentPort = 62000;
       webuiPort = constants.ports.services.qbittorrent;
@@ -210,7 +209,9 @@ in
         "d '/var/lib/qbittorrent/incomplete' 0770 qbittorrent media - -"
       ];
 
-      # qBittorrent service with VPN confinement
+      # qBittorrent service with VPN confinement.
+      # SOPS credentials are injected AFTER the upstream module's ExecStartPre
+      # (which overwrites qBittorrent.conf from the Nix store on every start).
       systemd.services.qbittorrent = {
         vpnConfinement = {
           enable = true;
@@ -231,54 +232,20 @@ in
           IOSchedulingPriority = 5;
           Restart = "on-failure";
           RestartSec = "10s";
+          ExecStartPre = lib.mkAfter [
+            (pkgs.writeShellScript "qbittorrent-inject-credentials" ''
+              set -eu
+              config=/var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf
+              username=$(cat ${nixosArgs.config.sops.secrets."qbittorrent/webui/username".path})
+              password=$(cat ${nixosArgs.config.sops.secrets."qbittorrent/webui/password-pbkdf2".path})
+              ${pkgs.gnused}/bin/sed -i \
+                -e '/^WebUI\\Username=/d' \
+                -e '/^WebUI\\Password_PBKDF2=/d' \
+                -e "/^\[Preferences\]$/a WebUI\\\\Username=$username\nWebUI\\\\Password_PBKDF2=$password" \
+                "$config"
+            '')
+          ];
         };
-        # Inject SOPS credentials into config under [Preferences] section
-        preStart = mkIf (nixosArgs.config.sops.secrets ? "qbittorrent/webui/username") ''
-          CONFIG_FILE="/var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf"
-
-          if [ -f "${nixosArgs.config.sops.secrets."qbittorrent/webui/username".path}" ] && \
-             [ -f "${nixosArgs.config.sops.secrets."qbittorrent/webui/password-pbkdf2".path}" ]; then
-
-            USERNAME=$(cat "${nixosArgs.config.sops.secrets."qbittorrent/webui/username".path}")
-            PASSWORD_HASH=$(cat "${nixosArgs.config.sops.secrets."qbittorrent/webui/password-pbkdf2".path}")
-
-            TEMP_FILE=$(mktemp)
-
-            if [ -f "$CONFIG_FILE" ]; then
-              # Strip existing credential lines, then insert them after [Preferences]
-              INSERTED=false
-              while IFS= read -r line; do
-                # Skip old credential lines
-                case "$line" in
-                  "WebUI\\Username="*|"WebUI\\Password_PBKDF2="*) continue ;;
-                esac
-                echo "$line" >> "$TEMP_FILE"
-                # Insert credentials right after [Preferences] header
-                if [ "$line" = "[Preferences]" ] && [ "$INSERTED" = false ]; then
-                  echo "WebUI\\Username=$USERNAME" >> "$TEMP_FILE"
-                  echo "WebUI\\Password_PBKDF2=$PASSWORD_HASH" >> "$TEMP_FILE"
-                  INSERTED=true
-                fi
-              done < "$CONFIG_FILE"
-
-              # If no [Preferences] section existed, add one with credentials
-              if [ "$INSERTED" = false ]; then
-                echo "[Preferences]" >> "$TEMP_FILE"
-                echo "WebUI\\Username=$USERNAME" >> "$TEMP_FILE"
-                echo "WebUI\\Password_PBKDF2=$PASSWORD_HASH" >> "$TEMP_FILE"
-              fi
-            else
-              echo "[Preferences]" > "$TEMP_FILE"
-              echo "WebUI\\Username=$USERNAME" >> "$TEMP_FILE"
-              echo "WebUI\\Password_PBKDF2=$PASSWORD_HASH" >> "$TEMP_FILE"
-            fi
-
-            # Atomic move
-            mv "$TEMP_FILE" "$CONFIG_FILE"
-            chown qbittorrent:media "$CONFIG_FILE"
-            chmod 640 "$CONFIG_FILE"
-          fi
-        '';
       };
 
       # Traffic control for fair queuing
