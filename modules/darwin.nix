@@ -72,10 +72,8 @@ _: {
           "com.apple.swipescrolldirection" = false;
           NSAutomaticWindowAnimationsEnabled = false;
         };
-        universalaccess = {
-          reduceMotion = true;
-          reduceTransparency = true;
-        };
+        # universalaccess.* is TCC-protected — set manually in
+        # System Settings → Accessibility → Display.
         # Pro audio optimizations
         CustomUserPreferences = {
           NSGlobalDomain = {
