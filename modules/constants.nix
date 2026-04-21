@@ -108,11 +108,13 @@
       hosts = {
         jupiter = {
           ipv4 = "192.168.10.210";
+          tailscaleIpv4 = "100.76.12.92";
           gpgAgent = "/run/user/1001/gnupg/S.gpg-agent";
           gpgAgentExtra = "/run/user/1001/gnupg/S.gpg-agent.extra";
         };
         mercury = {
           ipv4 = "192.168.10.211";
+          tailscaleIpv4 = "100.80.145.75";
           gpgAgent = "/Users/lewisflude/.gnupg/S.gpg-agent";
           gpgAgentExtra = "/Users/lewisflude/.gnupg/S.gpg-agent.extra";
         };

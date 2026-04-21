@@ -20,6 +20,7 @@ _: {
           font-size = 14;
           font-synthetic-style = true;
           scrollback-limit = 100000;
+          shell-integration-features = "ssh-env,ssh-terminfo";
           clipboard-read = "allow";
           clipboard-write = "allow";
           clipboard-paste-protection = false;

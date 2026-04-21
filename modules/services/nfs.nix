@@ -1,10 +1,15 @@
 # NFS File Sharing
 # Server: Export ~/Music from Jupiter for Ableton on Mercury
 # Client: macOS launchd-managed NFS mount at /mnt/music
+#
+# Addressing: Both sides use Tailscale IPs so the mount is tied to the device
+# identity rather than whichever physical NIC is primary on Mercury (Wi-Fi vs
+# USB-C Ethernet dock give different LAN IPs, which caused mountd to refuse
+# with "unmatched host").
 { config, ... }:
 let
-  jupiterIp = config.constants.hosts.jupiter.ipv4;
-  mercuryIp = config.constants.hosts.mercury.ipv4;
+  jupiterIp = config.constants.hosts.jupiter.tailscaleIpv4;
+  mercuryIp = config.constants.hosts.mercury.tailscaleIpv4;
   musicPath = "/home/${config.username}/Music";
   # Direct mount target. macOS has a read-only root since Catalina, so physical
   # mount points must live under /System/Volumes/Data.
@@ -52,6 +57,7 @@ in
           RunAtLoad = true;
           KeepAlive = {
             NetworkState = true;
+            SuccessfulExit = false;
           };
           StandardOutPath = "/var/log/mount-jupiter-music.log";
           StandardErrorPath = "/var/log/mount-jupiter-music.log";
