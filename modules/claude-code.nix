@@ -63,48 +63,64 @@ in
         package = pkgs.claude-code;
         enableMcpIntegration = true;
 
-        commands = {
-          review = ''
-            Review code for bugs, best practices, performance, security, and maintainability.
-            For Nix: check pkgs scope usage, module placement, constants usage, and commit format.
-          '';
-          commit = ''
-            Generate conventional commit: <type>(<scope>): <description>
-            Types: feat, fix, refactor, docs, test, chore, style, perf
-            Use imperative mood, 50 chars max, focus on why not what.
-          '';
-          nix = ''
-            Help with Nix following repo conventions:
-            - Never use pkgs scope, use explicit pkgs.package
-            - Follow dendritic pattern: all modules are flake-parts modules
-            - Access constants via config.constants (not direct imports)
-            - Format with nix fmt
-          '';
-          debug = ''
-            Debug issues step-by-step: understand problem, gather info, identify cause, suggest fixes.
-            For Nix: use nix flake check, nix eval --show-trace, nix build --dry-run
-            For system: check journalctl -xe, home-manager logs, diagnostic scripts
-          '';
-          refactor = ''
-            Suggest refactoring for clarity, maintainability, performance, and simplicity.
-            For Nix: extract patterns, use feature flags, consolidate config, improve structure.
-          '';
-          doc = ''
-            Generate documentation: overview, purpose, usage, parameters, examples, notes.
-            For Nix modules: use mkOption with clear descriptions, types, defaults, examples.
-          '';
-          test = ''
-            Generate test cases: happy path, edge cases, error handling, integration.
-            For Nix: test with nix eval, nix build, integration tests, VM tests.
-          '';
-          explain = ''
-            Explain code clearly: purpose, how it works, key concepts, dependencies, gotchas.
-            Use plain language, provide analogies, break down complex logic.
-          '';
+        lspServers = {
+          nix = {
+            command = "${pkgs.nixd}/bin/nixd";
+            extensionToLanguage = {
+              ".nix" = "nix";
+            };
+          };
+          typescript = {
+            command = "${pkgs.typescript-language-server}/bin/typescript-language-server";
+            args = [ "--stdio" ];
+            extensionToLanguage = {
+              ".ts" = "typescript";
+              ".tsx" = "typescriptreact";
+              ".js" = "javascript";
+              ".jsx" = "javascriptreact";
+              ".mjs" = "javascript";
+              ".cjs" = "javascript";
+            };
+          };
+          python = {
+            command = "${pkgs.pyright}/bin/pyright-langserver";
+            args = [ "--stdio" ];
+            extensionToLanguage = {
+              ".py" = "python";
+              ".pyi" = "python";
+            };
+          };
+          rust = {
+            command = "${pkgs.rust-analyzer}/bin/rust-analyzer";
+            extensionToLanguage = {
+              ".rs" = "rust";
+            };
+          };
+          go = {
+            command = "${pkgs.gopls}/bin/gopls";
+            args = [ "serve" ];
+            extensionToLanguage = {
+              ".go" = "go";
+            };
+          };
         };
 
         settings = {
+          env = {
+            DISABLE_AUTOUPDATER = "1";
+            FORCE_AUTOUPDATE_PLUGINS = "1";
+          };
+
+          attribution = {
+            commit = "Co-Authored-By: Claude <noreply@anthropic.com>";
+          };
+
+          enabledPlugins = {
+            "code-simplifier@claude-plugins-official" = true;
+          };
+
           permissions = {
+            defaultMode = "acceptEdits";
             allow = [
               "Read"
               "Edit"
@@ -115,7 +131,6 @@ in
               "Bash(git *)"
               "Bash(gh *)"
               "Bash(nix *)"
-              "Bash(nh *)"
               "Bash(npm *)"
               "Bash(npx *)"
               "Bash(node *)"
@@ -143,6 +158,7 @@ in
               "Bash(mv *)"
               "Bash(touch *)"
               "Bash(which *)"
+              "Bash(mdfind *)"
               # network
               "Bash(curl *)"
               # containers (read-only)
@@ -154,6 +170,10 @@ in
               "Bash(direnv *)"
               "Bash(devenv *)"
             ];
+            ask = [
+              "Bash(git push --force*)"
+              "Bash(git push -f *)"
+            ];
             deny = [
               "Bash(sudo *)"
               "Bash(rm -rf *)"
@@ -161,8 +181,16 @@ in
               "Bash(chown *)"
               "Bash(nixos-rebuild *)"
               "Bash(darwin-rebuild *)"
+              "Bash(nh os *)"
+              "Bash(nh home *)"
+              "Read(./.env)"
+              "Read(./.env.*)"
+              "Read(./secrets/**)"
+              "Read(**/id_rsa*)"
+              "Read(**/*.pem)"
             ];
           };
+
           hooks = {
             PostToolUse = [
               {
@@ -227,7 +255,7 @@ in
         skills = {
           dendritic-pattern = ''
             ---
-            description: Dendritic pattern guide for writing and modifying .nix flake-parts modules in this repository.
+            description: Dendritic pattern guide for writing and modifying .nix flake-parts modules in this repository. Use whenever editing, creating, or refactoring .nix files in this repo.
             ---
 
             # Dendritic Pattern
@@ -290,6 +318,14 @@ in
 
             - System services, kernel, hardware, daemons, boot, networking → `flake.modules.nixos.*`
             - User apps, dotfiles, dev tools, tray applets, shell, editor → `flake.modules.homeManager.*`
+
+            ## Workflow Commands
+
+            - Scaffold new module: `nix run .#new-module`
+            - Update deps: `nix run .#update-all`
+            - Format: `nix fmt` (treefmt)
+            - Validate: `nix flake check`
+            - Never rebuild systems from within Claude — suggest `nh os switch` / `nh home switch` for the user to run.
           '';
           blender-help = ''
             ---
@@ -441,7 +477,7 @@ in
         };
 
         context = ''
-          # Lewis Flude - Development Environment
+          # Lewis Flude
 
           ## Machines
           - Jupiter: NixOS desktop (x86_64-linux), RTX 4090, ZFS
@@ -463,15 +499,6 @@ in
           ## Interests
           - 3D art: Blender (Hair Tool, CharMorph plugins), character creation
           - NixOS configuration and system administration
-
-          ## How I Want Claude to Work
-
-          - **Research first, answer second.** Use WebSearch/WebFetch/Context7/mcp-nixos before giving technical advice. Training data goes stale.
-          - **Be specific about versions.** Don't say "in Blender" — say "in Blender 4.2". Don't say "add this option" — say "this NixOS 25.05 option".
-          - **Admit gaps.** "I'm not sure, let me check" is always better than a confident wrong answer.
-          - **Walk me through things step by step** when I'm learning new tools or plugins.
-          - **Use /deep-research** for unfamiliar topics before answering.
-          - **Use /blender-help** when discussing Blender plugins or workflows.
         '';
       };
 

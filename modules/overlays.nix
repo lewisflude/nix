@@ -59,8 +59,21 @@ let
         {
           llmAgents = llmAgentPkgs;
         }
-        // (if llmAgentPkgs ? claude-code then { inherit (llmAgentPkgs) claude-code; } else { })
         // (if llmAgentPkgs ? gemini-cli then { inherit (llmAgentPkgs) gemini-cli; } else { });
+
+      # Claude Code from sadjow/claude-code-nix (hourly upstream updates, Cachix cache)
+      # Takes precedence over the llm-agents variant because composeExtensions applies
+      # later overlays last, and "n" (naming below) sorts after "l" (llm-agents).
+      native-claude-code =
+        _final: prev:
+        if
+          inputs ? claude-code-nix
+          && inputs.claude-code-nix ? packages
+          && inputs.claude-code-nix.packages ? ${system}
+        then
+          { claude-code = inputs.claude-code-nix.packages.${system}.default; }
+        else
+          { };
 
       # GCC 15 ICE workarounds for i686-linux (Steam FHS env needs these)
       # Lowers optimization to -O1 or disables tests for packages that trigger compiler bugs
