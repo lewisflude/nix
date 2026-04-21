@@ -11,14 +11,17 @@ let
   jupiterIp = config.constants.hosts.jupiter.tailscaleIpv4;
   mercuryIp = config.constants.hosts.mercury.tailscaleIpv4;
   musicPath = "/home/${config.username}/Music";
-  # Direct mount target. macOS has a read-only root since Catalina, so physical
+  samplesPath = "${musicPath}/samples";
+  # Direct mount targets. macOS has a read-only root since Catalina, so physical
   # mount points must live under /System/Volumes/Data.
-  mountPoint = "/System/Volumes/Data/mnt/music";
+  musicMount = "/System/Volumes/Data/mnt/music";
+  samplesMount = "/System/Volumes/Data/mnt/samples";
   # noowners: macOS enforces file ownership client-side, so a mode-700 dir owned
   # by Jupiter's uid 1001 is unreadable by Mercury's uid 501 even though the
   # server-side export uses all_squash. noowners bypasses the local check; the
   # server still enforces access via the IP-pinned export.
   mountOpts = "resvport,soft,bg,rsize=32768,wsize=32768,timeo=10,retrans=3,noowners";
+  exportOpts = "rw,no_subtree_check,all_squash,anonuid=1001,anongid=100";
 in
 {
   # NixOS server: NFS export
@@ -28,7 +31,8 @@ in
       lockdPort = 4001;
       statdPort = 4002;
       exports = ''
-        ${musicPath} ${mercuryIp}(rw,no_subtree_check,all_squash,anonuid=1001,anongid=100)
+        ${musicPath} ${mercuryIp}(${exportOpts})
+        ${samplesPath} ${mercuryIp}(${exportOpts})
       '';
     };
 
@@ -54,33 +58,40 @@ in
   # left autofs unarmed and the share unmounted.
   flake.modules.darwin.nfs =
     { pkgs, ... }:
-    {
-      launchd.daemons.mount-jupiter-music = {
+    let
+      mkMountDaemon = name: source: target: {
         serviceConfig = {
-          Label = "com.lewisflude.mount-jupiter-music";
+          Label = "com.lewisflude.${name}";
           RunAtLoad = true;
           KeepAlive = {
             NetworkState = true;
             SuccessfulExit = false;
           };
-          StandardOutPath = "/var/log/mount-jupiter-music.log";
-          StandardErrorPath = "/var/log/mount-jupiter-music.log";
+          StandardOutPath = "/var/log/${name}.log";
+          StandardErrorPath = "/var/log/${name}.log";
         };
         script = ''
           set -eu
-          ${pkgs.coreutils}/bin/mkdir -p ${mountPoint}
-          if /sbin/mount | ${pkgs.gnugrep}/bin/grep -q " on ${mountPoint} "; then
+          ${pkgs.coreutils}/bin/mkdir -p ${target}
+          if /sbin/mount | ${pkgs.gnugrep}/bin/grep -q " on ${target} "; then
             exit 0
           fi
-          exec /sbin/mount_nfs -o ${mountOpts} ${jupiterIp}:${musicPath} ${mountPoint}
+          exec /sbin/mount_nfs -o ${mountOpts} ${jupiterIp}:${source} ${target}
         '';
       };
+    in
+    {
+      launchd.daemons.mount-jupiter-music = mkMountDaemon "mount-jupiter-music" musicPath musicMount;
+      launchd.daemons.mount-jupiter-samples =
+        mkMountDaemon "mount-jupiter-samples" samplesPath
+          samplesMount;
     };
 
-  # User-facing symlink so the share is reachable as ~/Music-Jupiter.
+  # User-facing symlinks so the shares are reachable from $HOME.
   flake.modules.homeManager.nfs =
     { config, ... }:
     {
-      home.file."Music-Jupiter".source = config.lib.file.mkOutOfStoreSymlink mountPoint;
+      home.file."Music-Jupiter".source = config.lib.file.mkOutOfStoreSymlink musicMount;
+      home.file."Samples-Jupiter".source = config.lib.file.mkOutOfStoreSymlink samplesMount;
     };
 }
