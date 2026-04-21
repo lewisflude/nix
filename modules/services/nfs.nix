@@ -14,7 +14,11 @@ let
   # Direct mount target. macOS has a read-only root since Catalina, so physical
   # mount points must live under /System/Volumes/Data.
   mountPoint = "/System/Volumes/Data/mnt/music";
-  mountOpts = "resvport,soft,bg,rsize=32768,wsize=32768,timeo=10,retrans=3";
+  # noowners: macOS enforces file ownership client-side, so a mode-700 dir owned
+  # by Jupiter's uid 1001 is unreadable by Mercury's uid 501 even though the
+  # server-side export uses all_squash. noowners bypasses the local check; the
+  # server still enforces access via the IP-pinned export.
+  mountOpts = "resvport,soft,bg,rsize=32768,wsize=32768,timeo=10,retrans=3,noowners";
 in
 {
   # NixOS server: NFS export
