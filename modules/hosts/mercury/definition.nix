@@ -87,6 +87,7 @@ in
             homeManager.obsidian
             homeManager.zed
             homeManager.developmentTools
+            homeManager.javascript
             homeManager.organize
 
             # VRChat creation tools

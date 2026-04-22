@@ -10,6 +10,12 @@ in
 
   flake.modules.homeManager.claudeCode =
     { lib, pkgs, ... }:
+    let
+      abletonRemoteScript = pkgs.fetchurl {
+        url = "https://raw.githubusercontent.com/ahujasid/ableton-mcp/e0083285426dedb5c93ce8a532ecfbb25ae9a3ca/AbletonMCP_Remote_Script/__init__.py";
+        hash = "sha256-dYyQES4n88JQAT6yDkRXVfsD9VPA4S9RKlVtgi7XhTs=";
+      };
+    in
     {
       programs.mcp = {
         enable = true;
@@ -55,7 +61,45 @@ in
             command = "uvx";
             args = [ "mcp-nixos" ];
           };
+        }
+        // lib.optionalAttrs pkgs.stdenv.isDarwin {
+          ableton = {
+            command = "${pkgs.uv}/bin/uvx";
+            args = [ "ableton-mcp" ];
+          };
         };
+      };
+
+      # Claude Desktop (macOS app) MCP config. Claude Desktop writes its own
+      # preferences to this file, so we merge rather than overwrite.
+      home.activation = lib.optionalAttrs pkgs.stdenv.isDarwin {
+        claudeDesktopMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          CONFIG_DIR="$HOME/Library/Application Support/Claude"
+          CONFIG_FILE="$CONFIG_DIR/claude_desktop_config.json"
+          $DRY_RUN_CMD mkdir -p "$CONFIG_DIR"
+          if [ ! -s "$CONFIG_FILE" ]; then
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/tee "$CONFIG_FILE" <<<'{}' > /dev/null
+          fi
+          MCP_SERVERS=$(${pkgs.jq}/bin/jq -n \
+            --arg uvx "${pkgs.uv}/bin/uvx" \
+            '{ AbletonMCP: { command: $uvx, args: ["ableton-mcp"] } }')
+          TMP=$(${pkgs.coreutils}/bin/mktemp)
+          ${pkgs.jq}/bin/jq --argjson servers "$MCP_SERVERS" \
+            '.mcpServers = $servers' "$CONFIG_FILE" > "$TMP"
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$TMP" "$CONFIG_FILE"
+        '';
+
+        abletonRemoteScript = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          ABLETON_PREFS="$HOME/Library/Preferences/Ableton"
+          [ -d "$ABLETON_PREFS" ] || exit 0
+          for ver in "$ABLETON_PREFS"/Live*/; do
+            [ -d "$ver" ] || continue
+            DEST="$ver/User Remote Scripts/AbletonMCP"
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$DEST"
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 644 \
+              ${abletonRemoteScript} "$DEST/__init__.py"
+          done
+        '';
       };
 
       programs.claude-code = {

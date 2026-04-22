@@ -207,6 +207,7 @@ in
         homeManager.flatpak
         homeManager.theming
         homeManager.developmentTools
+        homeManager.javascript
 
         # Virtualization home-manager modules
         homeManager.gpuPassthrough
