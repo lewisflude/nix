@@ -159,28 +159,29 @@ in
             ignore = true;
             git-ignore = true;
           };
-          keys.normal = {
-            space = {
-              space = "file_picker";
-              w = ":w";
-              q = ":q";
-            };
-            "A-," = "goto_previous_buffer";
-            "A-." = "goto_next_buffer";
-            "A-w" = ":buffer-close";
-            "A-/" = "repeat_last_motion";
-            "C-," = ":config-open";
-            esc = [
-              "collapse_selection"
-              "keep_primary_selection"
-            ];
-          };
           keys.insert = {
             j = {
               k = "normal_mode";
             };
           };
         };
+
+        # yj (used by pkgs.formats.toml) truncates TOML keys at the first
+        # comma, mangling bindings like "A-,". Emit keys.normal as raw TOML.
+        extraConfig = ''
+          [keys.normal]
+          "A-," = "goto_previous_buffer"
+          "A-." = "goto_next_buffer"
+          "A-w" = ":buffer-close"
+          "A-/" = "repeat_last_motion"
+          "C-," = ":config-open"
+          esc = ["collapse_selection", "keep_primary_selection"]
+
+          [keys.normal.space]
+          space = "file_picker"
+          w = ":w"
+          q = ":q"
+        '';
       };
     };
 }
