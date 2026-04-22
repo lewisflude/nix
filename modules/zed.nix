@@ -1,48 +1,46 @@
 # Zed Editor - Dendritic Pattern
 # Fast, collaborative code editor
 _: {
-  flake.modules.homeManager.zed =
-    _:
-    {
-      programs.zed-editor = {
-        enable = true;
-        package = null;
+  flake.modules.homeManager.zed = _: {
+    programs.zed-editor = {
+      enable = true;
+      package = null;
 
-        mutableUserSettings = true;
+      mutableUserSettings = true;
 
-        userSettings = {
-          ui_font_size = 14;
-          ui_font_family = "Iosevka Nerd Font Mono";
-          buffer_font_size = 12;
+      userSettings = {
+        ui_font_size = 14;
+        ui_font_family = "Iosevka Nerd Font Mono";
+        buffer_font_size = 12;
 
-          telemetry = {
-            metrics = false;
-            diagnostics = false;
-          };
+        telemetry = {
+          metrics = false;
+          diagnostics = false;
+        };
 
-          languages = {
-            Nix = {
-              language_servers = [ "nixd" ];
-              formatter = {
-                external = {
-                  command = "nixfmt";
-                };
+        languages = {
+          Nix = {
+            language_servers = [ "nixd" ];
+            formatter = {
+              external = {
+                command = "nixfmt";
               };
             };
           };
+        };
 
-          lsp = {
-            nixd = {
-              initialization_options = {
-                formatting = {
-                  command = [ "nixfmt" ];
-                };
+        lsp = {
+          nixd = {
+            initialization_options = {
+              formatting = {
+                command = [ "nixfmt" ];
               };
             };
           };
         };
       };
     };
+  };
 
   flake.modules.darwin.zed = _: {
     homebrew.casks = [ "zed" ];

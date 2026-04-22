@@ -2,12 +2,10 @@
 # Requires: Unity 2022.3.22f1, LinuxVRChatSDKPatch (install via ALCOM)
 # Fallback: flatpak install flathub com.unity.UnityHub
 _: {
-  flake.modules.nixos.vrchatCreation =
-    _:
-    {
-      # xdgOpenUsePortal fixes Unity Hub login callback in FHS sandbox
-      xdg.portal.xdgOpenUsePortal = true;
-    };
+  flake.modules.nixos.vrchatCreation = _: {
+    # xdgOpenUsePortal fixes Unity Hub login callback in FHS sandbox
+    xdg.portal.xdgOpenUsePortal = true;
+  };
 
   flake.modules.homeManager.vrchatCreation =
     { lib, pkgs, ... }:

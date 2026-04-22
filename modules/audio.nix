@@ -165,12 +165,10 @@ _: {
   };
 
   # Darwin audio (macOS uses CoreAudio natively)
-  flake.modules.darwin.audio =
-    _:
-    {
-      homebrew.brews = [ "bwfmetaedit" ];
-      homebrew.casks = [ "kid3" ];
-    };
+  flake.modules.darwin.audio = _: {
+    homebrew.brews = [ "bwfmetaedit" ];
+    homebrew.casks = [ "kid3" ];
+  };
 
   # Home-manager audio tools
   flake.modules.homeManager.audio =

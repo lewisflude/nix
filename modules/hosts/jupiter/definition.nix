@@ -191,6 +191,7 @@ in
         homeManager.powerlevel10k
         homeManager.claudeCode
         homeManager.geminiCli
+        homeManager.openclaw
         homeManager.yazi
         homeManager.iaGet
         homeManager.mpv

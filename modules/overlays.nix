@@ -201,6 +201,14 @@ let
       # NUR
       nur = if inputs ? nur && inputs.nur ? overlays then inputs.nur.overlays.default else noopOverlay;
 
+      # OpenClaw (upstream nix-openclaw flake): replaces pkgs.openclaw with the
+      # version the home-manager module expects and adds openclaw-gateway etc.
+      nix-openclaw =
+        if inputs ? nix-openclaw && inputs.nix-openclaw ? overlays.default then
+          inputs.nix-openclaw.overlays.default
+        else
+          noopOverlay;
+
       # WiVRn with CUDA encoding support (64-bit only)
       # OpenVR compatibility paths managed by WiVRn itself since v0.23
       wivrn-cuda =

@@ -16,7 +16,11 @@
       "mcp__plugin_claude-code-home-manager_github__search_code",
       "mcp__plugin_claude-code-home-manager_github__get_file_contents",
       "mcp__plugin_claude-code-home-manager_github__search_issues",
-      "mcp__plugin_claude-code-home-manager_sequential-thinking__sequentialthinking"
+      "mcp__plugin_claude-code-home-manager_sequential-thinking__sequentialthinking",
+      "mcp__plugin_claude-code-home-manager_github__list_commits",
+      "mcp__plugin_claude-code-home-manager_github__list_releases",
+      "mcp__plugin_claude-code-home-manager_github__list_tags",
+      "mcp__plugin_claude-code-home-manager_github__list_issues"
     ]
   },
   "disableAllHooks": true,
