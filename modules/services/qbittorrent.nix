@@ -3,7 +3,10 @@
 # Usage: Import flake.modules.nixos.qbittorrent in host definition
 { config, ... }:
 let
-  inherit (config) constants;
+  inherit (config) constants username;
+  samplesPath = "/home/${username}/Music/samples";
+  musicProductionCategory = "music-production";
+  musicProductionPath = "/mnt/storage/torrents/${musicProductionCategory}";
 in
 {
   flake.modules.nixos.qbittorrent =
@@ -14,6 +17,36 @@ in
     }@nixosArgs:
     let
       namespace = "qbt";
+      samplesSync = pkgs.writeShellApplication {
+        name = "qbt-samples-sync";
+        runtimeInputs = [
+          pkgs.rsync
+          pkgs.util-linux
+          pkgs.coreutils
+        ];
+        text = ''
+          category="''${1:-}"
+          content_path="''${2:-}"
+          torrent_name="''${3:-}"
+
+          if [[ "$category" != "${musicProductionCategory}" ]]; then
+            exit 0
+          fi
+
+          if [[ -z "$content_path" || ! -e "$content_path" ]]; then
+            logger -t qbt-samples-sync "skipping '$torrent_name': missing content path '$content_path'"
+            exit 0
+          fi
+
+          dest="${samplesPath}"
+          mkdir -p "$dest"
+          logger -t qbt-samples-sync "syncing '$torrent_name' -> $dest"
+          rsync -a \
+            --chmod=ug=rwX,Dg=s,o=rX \
+            "$content_path" "$dest/"
+          logger -t qbt-samples-sync "synced '$torrent_name'"
+        '';
+      };
       # Bootstrap port only. The real listen port is assigned at runtime by
       # ProtonVPN NAT-PMP; protonvpn-portforward.service updates both
       # qBittorrent's listen port and the matching qbt0 INPUT firewall rule.
@@ -186,6 +219,14 @@ in
           Application.MemoryWorkingSetLimit = 8192;
           Network.PortForwardingEnabled = false;
           BitTorrent.Session = bittorrentSession;
+          # Run samples sync after each torrent completes. The script filters
+          # by category and is a no-op for non-music-production torrents.
+          # Note: AutoRun lives at the top-level of qBittorrent.conf, not under
+          # [Preferences], so it is declared as a sibling section below.
+          AutoRun = {
+            enabled = true;
+            program = ''${lib.getExe samplesSync} "%L" "%F" "%N"'';
+          };
         };
       };
 
@@ -200,6 +241,10 @@ in
       # Ensure media group exists
       users.groups.media = { };
 
+      # Allow the primary user to read/write files created by qBittorrent
+      # under the music-production category (files are owned by qbittorrent:media).
+      users.users.${username}.extraGroups = [ "media" ];
+
       # Ensure download directories exist with correct ownership
       systemd.tmpfiles.rules = [
         "d '/mnt/storage/torrents' 0770 qbittorrent media - -"
@@ -207,7 +252,11 @@ in
         "d '/mnt/storage/torrents/movies' 0770 qbittorrent media - -"
         "d '/mnt/storage/torrents/tv' 0770 qbittorrent media - -"
         "d '/mnt/storage/torrents/music' 0770 qbittorrent media - -"
+        "d '${musicProductionPath}' 0770 qbittorrent media - -"
         "d '/var/lib/qbittorrent/incomplete' 0770 qbittorrent media - -"
+        # Samples destination: setgid so synced files inherit the media group,
+        # letting both the user (as owner) and qbittorrent (group member) write.
+        "d '${samplesPath}' 2775 ${username} media - -"
       ];
 
       # qBittorrent service with VPN confinement.
