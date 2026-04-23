@@ -14,6 +14,9 @@ in
     }@nixosArgs:
     let
       namespace = "qbt";
+      # Bootstrap port only. The real listen port is assigned at runtime by
+      # ProtonVPN NAT-PMP; protonvpn-portforward.service updates both
+      # qBittorrent's listen port and the matching qbt0 INPUT firewall rule.
       torrentPort = 62000;
       webuiPort = constants.ports.services.qbittorrent;
 
@@ -56,7 +59,7 @@ in
         UseCategoryPathsInManualMode = true;
         SaveResumeDataInterval = 15;
         SuggestMode = false; # Ineffective in libtorrent v2 (no managed disk cache)
-        AnnounceToAllTrackers = true;
+        AnnounceToAllTrackers = false;
         ReannounceWhenAddressChanged = true;
         ConnectionSpeed = 30; # Outgoing connections/sec (libtorrent default, qbt defaults to 20)
         # I/O: POSIX mode avoids ZFS ARC memory leak with mmap
@@ -77,9 +80,9 @@ in
         SlowTorrentsDownloadRate = 10;
         SlowTorrentsUploadRate = 5;
         SlowTorrentsInactivityTimer = 60;
-        MaxRatio = 2;
-        MaxSeedingTime = 10080; # 7 days
-        ShareLimitAction = "Remove";
+        MaxRatio = -1;
+        MaxSeedingTime = -1;
+        ShareLimitAction = "Stop";
         # VPN interface binding
         Interface = "${namespace}0";
         InterfaceName = "${namespace}0";
@@ -156,12 +159,10 @@ in
             to = 8080;
           }
         ];
-        openVPNPorts = [
-          {
-            port = torrentPort;
-            protocol = "both";
-          }
-        ];
+        # Torrent-port INPUT rules are managed dynamically by
+        # protonvpn-portforward.service, since the real port is chosen by
+        # NAT-PMP at runtime, not at module-eval time.
+        openVPNPorts = [ ];
       };
 
       # qBittorrent service
