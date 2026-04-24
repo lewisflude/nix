@@ -32,6 +32,70 @@ _: {
                   dest: ~/Pictures/Screenshots/
                   on_conflict: rename_new
 
+          - name: Move screen recordings off the Desktop
+            locations: ~/Desktop
+            subfolders: false
+            filters:
+              - name:
+                  startswith: "Screen Recording"
+              - extension:
+                  - mov
+                  - mp4
+            actions:
+              - move:
+                  dest: ~/Movies/Screen Recordings/
+                  on_conflict: rename_new
+
+          - name: Sweep stale Desktop images
+            locations: ~/Desktop
+            subfolders: false
+            filters:
+              - extension:
+                  - png
+                  - jpg
+                  - jpeg
+                  - heic
+                  - avif
+              - lastmodified:
+                  days: 7
+                  mode: older
+            actions:
+              - move:
+                  dest: ~/Pictures/Inbox/
+                  on_conflict: rename_new
+
+          - name: Sort receipts into Documents/Receipts
+            locations: ~/Documents
+            subfolders: false
+            filters:
+              - name:
+                  startswith: Receipt
+              - extension:
+                  - docx
+                  - pdf
+                  - rtf
+            actions:
+              - move:
+                  dest: ~/Documents/Receipts/
+                  on_conflict: rename_new
+
+          - name: Sweep loose images from Documents root
+            locations: ~/Documents
+            subfolders: false
+            filters:
+              - extension:
+                  - png
+                  - jpg
+                  - jpeg
+                  - svg
+              - lastmodified:
+                  days: 14
+                  mode: older
+            actions:
+              - move:
+                  dest: ~/Pictures/Inbox/
+                  on_conflict: rename_new
+
           - name: Trash old installers
             locations: ~/Downloads
             subfolders: false
@@ -44,6 +108,68 @@ _: {
                   mode: older
             actions:
               - trash
+
+          - name: Trash stale torrent files
+            locations: ~/Downloads
+            subfolders: false
+            filters:
+              - extension: torrent
+              - lastmodified:
+                  days: 2
+                  mode: older
+            actions:
+              - trash
+
+          - name: Sort Downloads — Blender models
+            locations: ~/Downloads
+            subfolders: false
+            filters:
+              - extension:
+                  - blend
+                  - blend2
+                  - fbx
+                  - obj
+                  - stl
+                  - gltf
+                  - glb
+                  - usd
+                  - usdc
+                  - usdz
+                  - ply
+                  - dae
+            actions:
+              - move:
+                  dest: ~/3D/incoming/models/
+                  on_conflict: rename_new
+
+          - name: Sort Downloads — HDRIs
+            locations: ~/Downloads
+            subfolders: false
+            filters:
+              - extension:
+                  - hdr
+                  - exr
+            actions:
+              - move:
+                  dest: ~/3D/incoming/hdri/
+                  on_conflict: rename_new
+
+          - name: Sort Downloads — Ableton files
+            locations: ~/Downloads
+            subfolders: false
+            filters:
+              - extension:
+                  - als
+                  - alp
+                  - adg
+                  - adv
+                  - alc
+                  - agr
+                  - amxd
+            actions:
+              - move:
+                  dest: ~/Music/Ableton/Incoming/
+                  on_conflict: rename_new
 
           - name: Sort Downloads — PDFs and documents
             locations: ~/Downloads
@@ -116,7 +242,7 @@ _: {
                   dest: ~/Downloads/Media/
                   on_conflict: rename_new
 
-          - name: Sort Downloads — fonts
+          - name: Install downloaded fonts
             locations: ~/Downloads
             subfolders: false
             filters:
@@ -128,8 +254,8 @@ _: {
                   - eot
             actions:
               - move:
-                  dest: ~/Downloads/Fonts/
-                  on_conflict: rename_new
+                  dest: ~/Library/Fonts/
+                  on_conflict: skip
 
           - name: Archive stale loose files
             locations: ~/Downloads

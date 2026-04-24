@@ -167,7 +167,10 @@ _: {
   # Darwin audio (macOS uses CoreAudio natively)
   flake.modules.darwin.audio = _: {
     homebrew.brews = [ "bwfmetaedit" ];
-    homebrew.casks = [ "kid3" ];
+    homebrew.casks = [
+      "kid3"
+      "ableton-live-suite"
+    ];
   };
 
   # Home-manager audio tools

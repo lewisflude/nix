@@ -36,6 +36,7 @@ in
         darwin.shell
         darwin.audio
         darwin.apps
+        darwin.disableBackgroundAgents
         darwin.gaming
         darwin.ssh
         darwin.zed

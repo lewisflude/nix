@@ -77,10 +77,13 @@ _: {
         # Pro audio optimizations
         CustomUserPreferences = {
           NSGlobalDomain = {
-            NSAppSleepDisabled = true;
             "com.apple.sound.beep.volume" = 0.0;
             "com.apple.sound.uiaudioenabled" = 0;
           };
+          # Scope App Nap opt-out to the DAW only. Applying NSAppSleepDisabled
+          # to NSGlobalDomain keeps every background app resident and starves
+          # the DAW of memory under load.
+          "com.ableton.live".NSAppSleepDisabled = true;
           "com.apple.SoftwareUpdate" = {
             AutomaticCheckEnabled = false;
             AutomaticDownload = false;
