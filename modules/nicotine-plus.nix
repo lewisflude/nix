@@ -1,7 +1,7 @@
 _: {
   flake.modules.homeManager.nicotinePlus =
-    { pkgs, ... }:
+    { pkgs, lib, ... }:
     {
-      home.packages = [ pkgs.nicotine-plus ];
+      home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.nicotine-plus ];
     };
 }
