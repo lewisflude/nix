@@ -1,7 +1,16 @@
 # DankMaterialShell Configuration
 # Full desktop shell for niri with Material You theming
 # Follows: https://danklinux.com/docs/dankmaterialshell/nixos-flake
-_: {
+{ inputs, ... }:
+{
+  # DankSearch — used by the home-manager DMS module below.
+  overlays.danksearch =
+    _final: prev:
+    let
+      pkgs = inputs.danksearch.packages.${prev.stdenv.hostPlatform.system} or null;
+    in
+    if pkgs != null then { danksearch = pkgs.default; } else { };
+
   flake.modules.homeManager.dms =
     { pkgs, lib, ... }:
     lib.mkIf pkgs.stdenv.isLinux {

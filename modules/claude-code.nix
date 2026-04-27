@@ -1,9 +1,55 @@
 # Claude Code CLI configuration
-{ config, ... }:
+{ config, inputs, ... }:
 let
   inherit (config) constants;
 in
 {
+  # Claude Code from sadjow/claude-code-nix (hourly upstream updates, Cachix cache).
+  # The "n" prefix sorts after "l" (llm-agents) so this overlay applies later
+  # and wins precedence for `claude-code`.
+  overlays.native-claude-code =
+    _final: prev:
+    let
+      pkgs = inputs.claude-code-nix.packages.${prev.stdenv.hostPlatform.system} or null;
+    in
+    if pkgs != null then { claude-code = pkgs.default; } else { };
+
+  # Claude Desktop (Linux only). Patches around nodePackages.asar removal in nixpkgs 2026-03-03.
+  overlays.claude-desktop =
+    final: prev:
+    if prev.stdenv.hostPlatform.isLinux then
+      let
+        src = inputs.claude-desktop-linux;
+        patchy-cnb = prev.callPackage "${src}/pkgs/patchy-cnb.nix" { };
+        claude-desktop-unwrapped = prev.callPackage "${src}/pkgs/claude-desktop.nix" {
+          inherit patchy-cnb;
+          nodePackages = {
+            inherit (final) asar;
+          };
+        };
+      in
+      {
+        claude-desktop = prev.buildFHSEnv {
+          name = "claude-desktop";
+          targetPkgs = p: [
+            p.docker
+            p.glibc
+            p.openssl
+            p.nodejs
+            p.uv
+          ];
+          runScript = "${claude-desktop-unwrapped}/bin/claude-desktop";
+          extraInstallCommands = ''
+            mkdir -p $out/share/applications
+            cp ${claude-desktop-unwrapped}/share/applications/claude.desktop $out/share/applications/
+            mkdir -p $out/share/icons
+            cp -r ${claude-desktop-unwrapped}/share/icons/* $out/share/icons/
+          '';
+        };
+      }
+    else
+      { };
+
   flake.modules.nixos.claudeCode = _: {
     networking.firewall.allowedTCPPorts = [ constants.ports.mcp.docs ];
   };

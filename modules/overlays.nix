@@ -1,229 +1,33 @@
-# Overlay definitions
-# Dendritic pattern: Exposes overlaysForSystem as a top-level option
-{ lib, inputs, ... }:
-let
-  mkOverlaySet =
-    system:
-    let
-      isLinux = lib.hasSuffix "-linux" system;
-      noopOverlay = _final: _prev: { };
-    in
-    {
-      # Rust toolchains from fenix (better than nixpkgs)
-      fenix-overlay = inputs.fenix.overlays.default;
-
-      # Niri compositor (Linux only)
-      niri = if isLinux then inputs.niri.overlays.niri else noopOverlay;
-
-      # ComfyUI overlay: upstream exposes either overlays.default or packages.<system>.default
-      comfyui =
-        if inputs.comfyui ? overlays && inputs.comfyui.overlays ? default then
-          inputs.comfyui.overlays.default
-        else if inputs.comfyui.packages ? ${system} then
-          (_final: _prev: { comfyui = inputs.comfyui.packages.${system}.default; })
-        else
-          noopOverlay;
-
-      # Audio.nix overlay (Bitwig Studio and audio plugins, Linux only)
-      audio-nix =
-        if isLinux then
-          final: super:
-          let
-            superWithWebkit =
-              super // (if super ? webkitgtk_6_0 then { webkitgtk = super.webkitgtk_6_0; } else { });
-          in
-          inputs.audio-nix.overlays.default final superWithWebkit
-        else
-          noopOverlay;
-
-      # LLM agents
-      llm-agents =
-        _final: _prev:
-        let
-          llmAgentPkgs = inputs.llm-agents.packages.${system} or { };
-        in
-        {
-          llmAgents = llmAgentPkgs;
-        }
-        // (if llmAgentPkgs ? gemini-cli then { inherit (llmAgentPkgs) gemini-cli; } else { });
-
-      # Claude Code from sadjow/claude-code-nix (hourly upstream updates, Cachix cache)
-      # Takes precedence over the llm-agents variant because composeExtensions applies
-      # later overlays last, and "n" (naming below) sorts after "l" (llm-agents).
-      native-claude-code =
-        _final: _prev:
-        let
-          pkgs = inputs.claude-code-nix.packages.${system} or null;
-        in
-        if pkgs != null then { claude-code = pkgs.default; } else { };
-
-      # TECH-DEBT: GCC 15 ICE workarounds for i686-linux (Steam FHS env pulls these in).
-      # Each package below either ICEs at -O2 or has tests that fail under i686 GCC 15.
-      # Remove each entry by attempting `nix build .#legacyPackages.i686-linux.<pkg>` after
-      # nixpkgs bumps GCC; drop the whole overlay once all entries build cleanly.
-      # Tracked upstream: https://gcc.gnu.org/bugzilla/buglist.cgi?component=tree-optimization
-      i686-test-fixes =
-        _final: prev:
-        if prev.stdenv.hostPlatform.system == "i686-linux" then
-          let
-            lowerOptLevel =
-              pkg:
-              pkg.overrideAttrs (old: {
-                env = (old.env or { }) // {
-                  NIX_CFLAGS_COMPILE = (old.env.NIX_CFLAGS_COMPILE or "") + " -O1";
-                };
-              });
-            skipTests = pkg: pkg.overrideAttrs { doCheck = false; };
-            skipAllTests =
-              pkg:
-              pkg.overrideAttrs {
-                doCheck = false;
-                doInstallCheck = false;
-              };
-          in
-          {
-            onetbb = skipTests prev.onetbb;
-            flac = skipTests prev.flac;
-            ffmpeg-headless = skipTests prev.ffmpeg-headless;
-            libpulseaudio = skipTests prev.libpulseaudio;
-            git = lowerOptLevel (skipAllTests prev.git);
-            gitMinimal = lowerOptLevel (skipAllTests prev.gitMinimal);
-            cargo = lowerOptLevel prev.cargo;
-            sane-backends = lowerOptLevel prev.sane-backends;
-            pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-              (_python-final: python-prev: {
-                pycairo = python-prev.pycairo.overridePythonAttrs { doCheck = false; };
-                filelock = python-prev.filelock.overridePythonAttrs { doCheck = false; };
-                distutils = python-prev.distutils.overridePythonAttrs { doCheck = false; };
-                hypothesis = python-prev.hypothesis.overridePythonAttrs { doCheck = false; };
-              })
-            ];
-          }
-        else
-          { };
-
-      # Java 25 for Hytale
-      java25 =
-        final: prev:
-        let
-          jdk25 =
-            prev.temurin_25_jdk or (prev.jdk25 or (prev.openjdk25 or (builtins.trace ''
-              WARNING: Java 25 not found in nixpkgs, falling back to JDK ${prev.jdk.version}
-            '' prev.jdk)
-            )
-            );
-        in
-        {
-          inherit jdk25;
-          java25 = jdk25;
-        };
-
-      # Danksearch
-      danksearch =
-        _final: _prev:
-        let
-          pkgs = inputs.danksearch.packages.${system} or null;
-        in
-        if pkgs != null then { danksearch = pkgs.default; } else { };
-
-      # Claude Desktop (Linux only, patched: nodePackages.asar removed from nixpkgs 2026-03-03)
-      claude-desktop =
-        final: prev:
-        if isLinux then
-          let
-            src = inputs.claude-desktop-linux;
-            patchy-cnb = prev.callPackage "${src}/pkgs/patchy-cnb.nix" { };
-            claude-desktop-unwrapped = prev.callPackage "${src}/pkgs/claude-desktop.nix" {
-              inherit patchy-cnb;
-              nodePackages = {
-                inherit (final) asar;
-              };
-            };
-          in
-          {
-            claude-desktop = prev.buildFHSEnv {
-              name = "claude-desktop";
-              targetPkgs = p: [
-                p.docker
-                p.glibc
-                p.openssl
-                p.nodejs
-                p.uv
-              ];
-              runScript = "${claude-desktop-unwrapped}/bin/claude-desktop";
-              extraInstallCommands = ''
-                mkdir -p $out/share/applications
-                cp ${claude-desktop-unwrapped}/share/applications/claude.desktop $out/share/applications/
-                mkdir -p $out/share/icons
-                cp -r ${claude-desktop-unwrapped}/share/icons/* $out/share/icons/
-              '';
-            };
-          }
-        else
-          { };
-
-      # TECH-DEBT: cli-helpers 2.10.0 — three test_style_output tests assert hardcoded
-      # ANSI escapes that newer Pygments resolves differently (bg:#eee -> 255 not 7).
-      # Remove when: nixpkgs PR #493910 (bump to 2.14.0) lands.
-      # Verify: `nix-build -A python3Packages.cli-helpers` succeeds without disabledTests.
-      cli-helpers-fix = _final: prev: {
-        pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-          (_python-final: python-prev: {
-            cli-helpers = python-prev.cli-helpers.overridePythonAttrs (old: {
-              disabledTests = (old.disabledTests or [ ]) ++ [
-                "test_style_output"
-                "test_style_output_with_newlines"
-                "test_style_output_custom_tokens"
-              ];
-            });
-          })
-        ];
-      };
-
-      # TECH-DEBT: khal — sphinxcontrib-newsfeed is broken with Sphinx 9.x.
-      # Skips docs build entirely.
-      # Remove when: python3Packages.sphinxcontrib-newsfeed supports Sphinx ≥ 9, OR
-      # khal upstream switches docs framework. Tracking: https://github.com/pdlan/sphinxcontrib-newsfeed
-      # Verify: `nix-build -A khal` succeeds without this overlay.
-      khal-fix = _final: prev: {
-        khal = prev.khal.overrideAttrs (old: {
-          nativeBuildInputs = builtins.filter (d: !lib.hasInfix "sphinx" (d.name or "")) (
-            old.nativeBuildInputs or [ ]
-          );
-          outputs = [
-            "out"
-            "dist"
-          ];
-        });
-      };
-
-      # NUR
-      nur = inputs.nur.overlays.default;
-
-      # OpenClaw (upstream nix-openclaw flake): replaces pkgs.openclaw with the
-      # version the home-manager module expects and adds openclaw-gateway etc.
-      nix-openclaw = inputs.nix-openclaw.overlays.default;
-
-      # WiVRn with CUDA encoding support (x86_64-linux only)
-      # OpenVR compatibility paths managed by WiVRn itself since v0.23
-      wivrn-cuda =
-        if system == "x86_64-linux" then
-          final: prev: {
-            wivrn = prev.wivrn.override {
-              cudaSupport = true;
-              inherit (final) cudaPackages;
-            };
-          }
-        else
-          noopOverlay;
-    };
-in
+# Overlay accumulator + shared cross-cutting overlays.
+#
+# Feature-specific overlays live with their feature module (e.g. wivrn-cuda
+# in modules/vr.nix). To add an overlay, write `overlays.<name> = final: prev: {...}`
+# in the relevant module. System-conditional overlays should branch internally on
+# `prev.stdenv.hostPlatform.isLinux` etc. rather than being filtered externally.
+#
+# Composition order is alphabetical by attribute name, so name-prefix to control
+# precedence (composeExtensions applies later overlays last).
 {
+  lib,
+  config,
+  inputs,
+  ...
+}:
+{
+  options.overlays = lib.mkOption {
+    type = lib.types.lazyAttrsOf lib.types.raw;
+    default = { };
+    description = "Map of overlay name → overlay function. Contributed by feature modules.";
+  };
+
   options.overlaysForSystem = lib.mkOption {
     type = lib.types.raw;
     readOnly = true;
-    default = system: builtins.attrValues (mkOverlaySet system);
-    description = "Function: system -> [overlay] returning all configured overlays";
+    default = _system: builtins.attrValues config.overlays;
+    description = ''
+      Returns the full list of contributed overlays. The `system` arg is retained
+      for backward compatibility but unused — overlays self-branch on hostPlatform.
+    '';
   };
 
   config.flake.overlays.default =
@@ -232,8 +36,63 @@ in
       { } # nix flake check calls overlay {} {} — noop without real nixpkgs
     else
       let
-        inherit (prev.stdenv.hostPlatform) system;
-        overlayList = builtins.attrValues (mkOverlaySet system);
+        overlayList = builtins.attrValues config.overlays;
       in
       (lib.foldl' lib.composeExtensions (_: _: { }) overlayList) final prev;
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Shared / cross-cutting overlays (no single feature owner)
+  # ─────────────────────────────────────────────────────────────────────
+  config.overlays = {
+    # NUR — community packages, used wherever
+    nur = inputs.nur.overlays.default;
+
+    # ComfyUI: upstream exposes either overlays.default or packages.<system>.default
+    comfyui =
+      final: prev:
+      let
+        system = prev.stdenv.hostPlatform.system;
+      in
+      if inputs.comfyui ? overlays && inputs.comfyui.overlays ? default then
+        inputs.comfyui.overlays.default final prev
+      else if inputs.comfyui.packages ? ${system} then
+        { comfyui = inputs.comfyui.packages.${system}.default; }
+      else
+        { };
+
+    # TECH-DEBT: cli-helpers 2.10.0 — three test_style_output tests assert hardcoded
+    # ANSI escapes that newer Pygments resolves differently (bg:#eee -> 255 not 7).
+    # Remove when: nixpkgs PR #493910 (bump to 2.14.0) lands.
+    # Verify: `nix-build -A python3Packages.cli-helpers` succeeds without disabledTests.
+    cli-helpers-fix = _final: prev: {
+      pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+        (_python-final: python-prev: {
+          cli-helpers = python-prev.cli-helpers.overridePythonAttrs (old: {
+            disabledTests = (old.disabledTests or [ ]) ++ [
+              "test_style_output"
+              "test_style_output_with_newlines"
+              "test_style_output_custom_tokens"
+            ];
+          });
+        })
+      ];
+    };
+
+    # TECH-DEBT: khal — sphinxcontrib-newsfeed is broken with Sphinx 9.x.
+    # Skips docs build entirely.
+    # Remove when: python3Packages.sphinxcontrib-newsfeed supports Sphinx ≥ 9, OR
+    # khal upstream switches docs framework. Tracking: https://github.com/pdlan/sphinxcontrib-newsfeed
+    # Verify: `nix-build -A khal` succeeds without this overlay.
+    khal-fix = _final: prev: {
+      khal = prev.khal.overrideAttrs (old: {
+        nativeBuildInputs = builtins.filter (d: !lib.hasInfix "sphinx" (d.name or "")) (
+          old.nativeBuildInputs or [ ]
+        );
+        outputs = [
+          "out"
+          "dist"
+        ];
+      });
+    };
+  };
 }

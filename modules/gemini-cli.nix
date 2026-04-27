@@ -1,7 +1,18 @@
 # Gemini CLI - Dendritic Pattern
 # AI coding assistant via Google Gemini
-{ ... }:
+{ inputs, ... }:
 {
+  # LLM agents (numtide/llm-agents.nix) — provides gemini-cli + sibling agents.
+  overlays.llm-agents =
+    _final: prev:
+    let
+      llmAgentPkgs = inputs.llm-agents.packages.${prev.stdenv.hostPlatform.system} or { };
+    in
+    {
+      llmAgents = llmAgentPkgs;
+    }
+    // (if llmAgentPkgs ? gemini-cli then { inherit (llmAgentPkgs) gemini-cli; } else { });
+
   flake.modules.homeManager.geminiCli =
     {
       lib,

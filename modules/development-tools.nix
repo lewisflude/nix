@@ -1,5 +1,9 @@
 # Development tools - Formatters, linters, and language standards
-_: {
+{ inputs, ... }:
+{
+  # Rust toolchains from fenix (fresher than nixpkgs)
+  overlays.fenix = inputs.fenix.overlays.default;
+
   flake.modules.homeManager.developmentTools =
     { lib, pkgs, ... }:
     {

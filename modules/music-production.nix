@@ -4,7 +4,22 @@
 # - https://wiki.nixos.org/wiki/Audio_production
 # - https://github.com/musnix/musnix
 # - https://wiki.nixos.org/wiki/JACK
-_: {
+{ inputs, ... }:
+{
+  # audio.nix overlay (Bitwig Studio + audio plugins, Linux only).
+  # Patches super.webkitgtk → webkitgtk_6_0 because audio-nix expects the older attr name.
+  overlays.audio-nix =
+    final: super:
+    if super.stdenv.hostPlatform.isLinux then
+      let
+        superWithWebkit =
+          super
+          // (if super ? webkitgtk_6_0 then { webkitgtk = super.webkitgtk_6_0; } else { });
+      in
+      inputs.audio-nix.overlays.default final superWithWebkit
+    else
+      { };
+
   # NixOS: realtime audio optimizations via musnix
   flake.modules.nixos.musicProduction = _: {
     # musnix handles: PAM limits (memlock, rtprio), CPU governor,

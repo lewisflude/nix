@@ -2,6 +2,10 @@
 # Niri Wayland compositor with NVIDIA optimizations and home-manager settings
 { inputs, ... }:
 {
+  overlays.niri =
+    final: prev:
+    if prev.stdenv.hostPlatform.isLinux then inputs.niri.overlays.niri final prev else { };
+
   flake.modules.nixos.niri =
     { lib, config, ... }:
     {

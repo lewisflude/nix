@@ -5,6 +5,10 @@
 # `claude login` + `openclaw onboard` pairs the gateway to the Max subscription.
 { inputs, ... }:
 {
+  # Replaces pkgs.openclaw with the version the home-manager module expects;
+  # also adds openclaw-gateway etc.
+  overlays.nix-openclaw = inputs.nix-openclaw.overlays.default;
+
   flake.modules.homeManager.openclaw =
     { lib, pkgs, ... }:
     {

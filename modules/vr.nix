@@ -2,6 +2,20 @@
 # References:
 # - https://lvra.gitlab.io/docs/distros/nixos/
 _: {
+  # WiVRn with CUDA encoding support (x86_64-linux only).
+  # OpenVR compatibility paths are managed by WiVRn itself since v0.23.
+  overlays.wivrn-cuda =
+    final: prev:
+    if prev.stdenv.hostPlatform.system == "x86_64-linux" then
+      {
+        wivrn = prev.wivrn.override {
+          cudaSupport = true;
+          inherit (final) cudaPackages;
+        };
+      }
+    else
+      { };
+
   flake.modules.nixos.vr =
     { pkgs, ... }:
     {
