@@ -327,15 +327,10 @@ journalctl -u protonvpn-portforward.service -f
 
 ### Configured in NixOS
 
-Port forwarding automation:
-
-```nix
-host.services.mediaManagement.qbittorrent.vpn.portForwarding = {
-  enable = true;
-  renewInterval = "45min";
-  gateway = "10.2.0.1";
-};
-```
+Port forwarding is automated by `protonvpn-portforward.service` (timer-driven NAT-PMP
+renewal every ~45 min). The service updates qBittorrent's listen port and the matching
+qbt0 INPUT firewall rule whenever ProtonVPN reassigns. See
+`modules/services/protonvpn-portforward.nix` and `modules/services/qbittorrent.nix`.
 
 ### Claude Code Hooks
 

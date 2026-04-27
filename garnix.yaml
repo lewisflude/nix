@@ -1,8 +1,8 @@
 builds:
   include:
-    - 'nixosConfigurations.jupiter'
-    - 'devShells.x86_64-linux.default'
-    - 'formatter.x86_64-linux'
-    - 'checks.x86_64-linux.*'
-    - 'packages.x86_64-linux.*'
+    - "nixosConfigurations.jupiter"
+    - "devShells.x86_64-linux.default"
+    - "formatter.x86_64-linux"
+    - "checks.x86_64-linux.*"
+    - "packages.x86_64-linux.*"
   exclude: []
