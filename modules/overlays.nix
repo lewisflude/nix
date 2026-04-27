@@ -184,6 +184,23 @@ let
         else
           { };
 
+      # cli-helpers 2.10.0: three test_style_output tests assert hardcoded ANSI
+      # escapes that newer Pygments resolves differently (bg:#eee -> 255 not 7).
+      # Remove once nixpkgs PR #493910 (bump to 2.14.0) lands.
+      cli-helpers-fix = _final: prev: {
+        pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+          (_python-final: python-prev: {
+            cli-helpers = python-prev.cli-helpers.overridePythonAttrs (old: {
+              disabledTests = (old.disabledTests or [ ]) ++ [
+                "test_style_output"
+                "test_style_output_with_newlines"
+                "test_style_output_custom_tokens"
+              ];
+            });
+          })
+        ];
+      };
+
       # khal: sphinxcontrib-newsfeed is broken with Sphinx 9.x
       # Skip docs build entirely until upstream fixes it
       khal-fix = _final: prev: {
