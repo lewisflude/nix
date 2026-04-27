@@ -1,11 +1,11 @@
-# Host options for the dendritic pattern
-# Defines host.* options that feature modules set when imported
-# Home-manager modules can read these via osConfig/systemConfig
+# Host options for the dendritic pattern.
+# Reserved for per-host *parameters* (identity, paths, ACME emails). Toggling whether
+# a feature is active should be done by importing or omitting the module — not by an
+# enable flag here. See: https://github.com/mightyiam/dendritic
 { lib, ... }:
 let
-  inherit (lib) mkOption mkEnableOption types;
+  inherit (lib) mkOption types;
 
-  # Shared options between NixOS and Darwin
   mkCommonOptions = {
     username = mkOption {
       type = types.str;
@@ -15,26 +15,6 @@ let
     hostname = mkOption {
       type = types.str;
       description = "System hostname";
-    };
-
-    features = {
-      desktop.autoLogin = {
-        enable = mkEnableOption "auto-login";
-        user = mkOption {
-          type = types.str;
-          default = "";
-          description = "User to auto-login";
-        };
-      };
-    };
-
-    services.caddy = {
-      enable = mkEnableOption "Caddy reverse proxy";
-      email = mkOption {
-        type = types.str;
-        default = "";
-        description = "Email for ACME certificates";
-      };
     };
   };
 in

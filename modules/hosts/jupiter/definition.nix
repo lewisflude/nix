@@ -4,7 +4,7 @@
 { config, inputs, ... }:
 let
   inherit (config) constants;
-  inherit (config) username useremail;
+  inherit (config) username;
   inherit (config.flake.modules) nixos homeManager;
 in
 {
@@ -65,6 +65,7 @@ in
         nixos.graphics
         nixos.fonts
         nixos.greeter
+        nixos.greeterAutoLogin
         nixos.console
         nixos.hardwareSupport
         nixos.desktopEnvironment
@@ -231,18 +232,6 @@ in
         inherit username;
         hostname = "jupiter";
         hardware.renderDevice = "/dev/dri/renderD128";
-
-        features = {
-          desktop.autoLogin = {
-            enable = true;
-            user = username;
-          };
-        };
-
-        services.caddy = {
-          enable = true;
-          email = useremail;
-        };
       };
 
       # =========================================================================

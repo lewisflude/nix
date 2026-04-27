@@ -1,8 +1,9 @@
 # Caddy Reverse Proxy Service
-# Web server with automatic HTTPS and virtual hosts
+# Web server with automatic HTTPS and virtual hosts.
+# Hosts opt in by importing nixos.caddy; ACME email comes from top-level config.useremail.
 { config, ... }:
 let
-  inherit (config) constants;
+  inherit (config) constants useremail;
 
   # Helper functions for Caddy configuration
   standardHeaders = ''
@@ -72,17 +73,11 @@ let
 in
 {
   flake.modules.nixos.caddy =
+    { lib, ... }:
     {
-      lib,
-      ...
-    }@nixosArgs:
-    let
-      cfg = nixosArgs.config.host.services.caddy;
-    in
-    {
-      services.caddy = lib.mkIf cfg.enable {
+      services.caddy = {
         enable = true;
-        inherit (cfg) email;
+        email = useremail;
         virtualHosts =
           (lib.mapAttrs' (
             subdomain: port:
@@ -111,7 +106,7 @@ in
           };
       };
 
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.enable [
+      networking.firewall.allowedTCPPorts = [
         80
         443
       ];
