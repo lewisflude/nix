@@ -19,6 +19,7 @@
       "original": {
         "owner": "polygon",
         "repo": "audio.nix",
+        "rev": "0c1b594b941dd46b29da107f03dfc91b34d820dd",
         "type": "github"
       }
     },
@@ -138,6 +139,7 @@
       "original": {
         "owner": "k3d3",
         "repo": "claude-desktop-linux-flake",
+        "rev": "b2b040cb68231d2118906507d9cc8fd181ca6308",
         "type": "github"
       }
     },
@@ -159,6 +161,7 @@
       "original": {
         "owner": "utensils",
         "repo": "nix-comfyui",
+        "rev": "8a90889efc8fae81a8e03b8d9a8406c9f8ff425b",
         "type": "github"
       }
     },
@@ -295,8 +298,8 @@
       },
       "original": {
         "owner": "AvengeMedia",
-        "ref": "stable",
         "repo": "DankMaterialShell",
+        "rev": "bcf41ed5caff19e5750f3ef0594088492ecbadbe",
         "type": "github"
       }
     },
@@ -317,6 +320,7 @@
       "original": {
         "owner": "AvengeMedia",
         "repo": "dms-plugin-registry",
+        "rev": "9bc138ff4d250300337ea5563edc3a0a79d3c4c9",
         "type": "github"
       }
     },
@@ -1093,12 +1097,15 @@
       "original": {
         "owner": "openclaw",
         "repo": "nix-openclaw",
+        "rev": "53aac0dce0810c40c75793fdad3d41b0f7e7baaf",
         "type": "github"
       }
     },
     "nix-steipete-tools": {
       "inputs": {
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1773561580,
@@ -1237,22 +1244,6 @@
       }
     },
     "nixpkgs_2": {
-      "locked": {
-        "lastModified": 1767364772,
-        "narHash": "sha256-fFUnEYMla8b7UKjijLnMe+oVFOz6HjijGGNS1l7dYaQ=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "16c7794d0a28b5a37904d55bcca36003b9109aaa",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_3": {
       "locked": {
         "lastModified": 1776877367,
         "narHash": "sha256-EHq1/OX139R1RvBzOJ0aMRT3xnWyqtHBRUBuO1gFzjI=",
@@ -1407,7 +1398,7 @@
         "nix-index-database": "nix-index-database",
         "nix-openclaw": "nix-openclaw",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_2",
         "nur": "nur",
         "photogimp": "photogimp",
         "pog": "pog",
@@ -1537,6 +1528,7 @@
       "original": {
         "owner": "lewisflude",
         "repo": "signal-nix",
+        "rev": "2c7a7746597d12ce56a85725ba653e424aff5cb7",
         "type": "github"
       }
     },

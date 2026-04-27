@@ -40,12 +40,13 @@
       url = "github:musnix/musnix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
     dms = {
-      url = "github:AvengeMedia/DankMaterialShell/stable";
+      url = "github:AvengeMedia/DankMaterialShell/bcf41ed5caff19e5750f3ef0594088492ecbadbe";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     dms-plugin-registry = {
-      url = "github:AvengeMedia/dms-plugin-registry";
+      url = "github:AvengeMedia/dms-plugin-registry/9bc138ff4d250300337ea5563edc3a0a79d3c4c9";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     danksearch = {
@@ -74,8 +75,9 @@
       url = "github:jpetrucciani/pog";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
     signal-nix = {
-      url = "github:lewisflude/signal-nix";
+      url = "github:lewisflude/signal-nix/2c7a7746597d12ce56a85725ba653e424aff5cb7";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
@@ -86,16 +88,18 @@
     vpn-confinement = {
       url = "github:Maroka-chan/VPN-Confinement";
     };
+    # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
     comfyui = {
-      url = "github:utensils/nix-comfyui";
+      url = "github:utensils/nix-comfyui/8a90889efc8fae81a8e03b8d9a8406c9f8ff425b";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
     audio-nix = {
-      url = "github:polygon/audio.nix";
+      url = "github:polygon/audio.nix/0c1b594b941dd46b29da107f03dfc91b34d820dd";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hyprcursor-phinger = {
@@ -117,18 +121,22 @@
       url = "github:Diolinux/PhotoGIMP";
       flake = false;
     };
+    # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
     claude-desktop-linux = {
-      url = "github:k3d3/claude-desktop-linux-flake";
+      url = "github:k3d3/claude-desktop-linux-flake/b2b040cb68231d2118906507d9cc8fd181ca6308";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     claude-code-nix = {
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
+    # Deep follow on nix-steipete-tools eliminates a duplicate nixpkgs from the lock graph.
     nix-openclaw = {
-      url = "github:openclaw/nix-openclaw";
+      url = "github:openclaw/nix-openclaw/53aac0dce0810c40c75793fdad3d41b0f7e7baaf";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
+      inputs.nix-steipete-tools.inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 

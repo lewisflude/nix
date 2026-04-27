@@ -8,3 +8,58 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
+
+  # Nix flake inputs.
+  # Strategy: cheap inputs (modules/data only) auto-merge as a group; expensive
+  # inputs that build from source get individual PRs so they can be deferred.
+  # Pinned-by-rev inputs (see flake.nix) only update when their rev is bumped here.
+  - package-ecosystem: "nix"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "nix"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      cheap-flake-inputs:
+        applies-to: version-updates
+        patterns:
+          - "flake-parts"
+          - "import-tree"
+          - "process-compose-flake"
+          - "services-flake"
+          - "treefmt-nix"
+          - "git-hooks-nix"
+          - "darwin"
+          - "home-manager"
+          - "nixos-hardware"
+          - "sops-nix"
+          - "nix-homebrew"
+          - "nur"
+          - "musnix"
+          - "vpn-confinement"
+          - "nix-flatpak"
+          - "hyprcursor-phinger"
+          - "ia-get"
+          - "fenix"
+          - "pog"
+          - "solaar"
+          - "nix-index-database"
+          - "determinate"
+          - "niri"
+          - "claude-code-nix"
+          - "danksearch"
+          - "llm-agents"
+          - "photogimp"
+          - "devour-flake"
+          - "nixpkgs"
+    # Expensive inputs (audio-nix, dms, dms-plugin-registry, signal-nix,
+    # claude-desktop-linux, comfyui, nix-openclaw) are NOT in any group, so
+    # Dependabot opens an individual PR for each — defer or merge per input.
