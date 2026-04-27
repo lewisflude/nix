@@ -29,13 +29,8 @@ in
         connect-timeout = 5;
         stalled-download-timeout = 300;
         experimental-features = [
-          "ca-derivations"
-          "parse-toml-timestamps"
-          "blake3-hashes"
-          "verified-fetches"
-          "pipe-operators"
-          "no-url-literals"
-          "git-hashing"
+          "nix-command"
+          "flakes"
         ];
         extra-substituters = constants.binaryCaches.substituters;
         extra-trusted-public-keys = constants.binaryCaches.trustedPublicKeys;

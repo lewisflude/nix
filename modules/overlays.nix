@@ -59,5 +59,22 @@
         { comfyui = inputs.comfyui.packages.${system}.default; }
       else
         { };
+
+    # cli-helpers 2.10.0 in nixpkgs unstable still fails three test_style_output
+    # tests under newer Pygments. Drop this overlay once nixpkgs ships ≥ 2.14.0
+    # (track PR NixOS/nixpkgs#493910).
+    cli-helpers-fix = _final: prev: {
+      pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+        (_python-final: python-prev: {
+          cli-helpers = python-prev.cli-helpers.overridePythonAttrs (old: {
+            disabledTests = (old.disabledTests or [ ]) ++ [
+              "test_style_output"
+              "test_style_output_with_newlines"
+              "test_style_output_custom_tokens"
+            ];
+          });
+        })
+      ];
+    };
   };
 }
