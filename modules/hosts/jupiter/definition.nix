@@ -21,7 +21,6 @@ in
         inputs.sops-nix.nixosModules.sops
         inputs.niri.nixosModules.niri
         inputs.musnix.nixosModules.musnix
-        inputs.determinate.nixosModules.default
         inputs.vpn-confinement.nixosModules.default
         inputs.dms.nixosModules.default
         inputs.dms.nixosModules.greeter
@@ -102,12 +101,7 @@ in
         # Media Management Services
         # ═══════════════════════════════════════════════════════════════════════
         nixos.mediaUser
-        nixos.prowlarr
-        nixos.radarr
-        nixos.sonarr
-        nixos.lidarr
-        nixos.bazarr
-        nixos.readarr
+        nixos.arrStack
         nixos.jellyfin
         nixos.sabnzbd
         nixos.flaresolverr

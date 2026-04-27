@@ -8,26 +8,28 @@ let
 in
 {
   # NixOS Nix configuration
+  # Jupiter runs Lix (production-ready CppNix fork) — no Determinate / FlakeHub.
   flake.modules.nixos.nix =
-    { lib, ... }:
+    { lib, pkgs, ... }:
     {
+      nix.package = pkgs.lixPackageSets.stable.lix;
       nix.settings = {
         warn-dirty = false;
         trusted-users = [
           "root"
           username
         ];
-        # 13900K: 24 cores (8P+16E). 4 jobs * 6 cores = 24 threads (matches physical cores)
-        max-jobs = lib.mkDefault 4;
-        cores = lib.mkDefault 6;
+        # 13900K (24 cores). cores=0 lets each builder use all available cores;
+        # the kernel scheduler shares them across max-jobs builders.
+        max-jobs = lib.mkDefault 8;
+        cores = lib.mkDefault 0;
         max-substitution-jobs = lib.mkDefault 28;
         http-connections = lib.mkDefault 64;
         always-allow-substitutes = lib.mkDefault true;
         connect-timeout = 5;
-        stalled-download-timeout = 10;
+        stalled-download-timeout = 300;
         experimental-features = [
           "ca-derivations"
-          "fetch-closure"
           "parse-toml-timestamps"
           "blake3-hashes"
           "verified-fetches"

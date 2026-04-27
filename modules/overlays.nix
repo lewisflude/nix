@@ -59,23 +59,5 @@
         { comfyui = inputs.comfyui.packages.${system}.default; }
       else
         { };
-
-    # TECH-DEBT: cli-helpers 2.10.0 — three test_style_output tests assert hardcoded
-    # ANSI escapes that newer Pygments resolves differently (bg:#eee -> 255 not 7).
-    # Remove when: nixpkgs PR #493910 (bump to 2.14.0) lands.
-    # Verify: `nix-build -A python3Packages.cli-helpers` succeeds without disabledTests.
-    cli-helpers-fix = _final: prev: {
-      pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-        (_python-final: python-prev: {
-          cli-helpers = python-prev.cli-helpers.overridePythonAttrs (old: {
-            disabledTests = (old.disabledTests or [ ]) ++ [
-              "test_style_output"
-              "test_style_output_with_newlines"
-              "test_style_output_custom_tokens"
-            ];
-          });
-        })
-      ];
-    };
   };
 }

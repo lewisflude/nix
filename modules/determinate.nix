@@ -24,9 +24,9 @@ in
         max-substitution-jobs = 28;
         http-connections = 64;
         connect-timeout = 5;
-        stalled-download-timeout = 10;
-        cores = 4;
-        sandbox = false;
+        stalled-download-timeout = 300;
+        cores = 0;
+        sandbox = true;
         always-allow-substitutes = true;
 
         # Binary caches from constants
