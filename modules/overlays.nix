@@ -77,22 +77,5 @@
         })
       ];
     };
-
-    # TECH-DEBT: khal — sphinxcontrib-newsfeed is broken with Sphinx 9.x.
-    # Skips docs build entirely.
-    # Remove when: python3Packages.sphinxcontrib-newsfeed supports Sphinx ≥ 9, OR
-    # khal upstream switches docs framework. Tracking: https://github.com/pdlan/sphinxcontrib-newsfeed
-    # Verify: `nix-build -A khal` succeeds without this overlay.
-    khal-fix = _final: prev: {
-      khal = prev.khal.overrideAttrs (old: {
-        nativeBuildInputs = builtins.filter (d: !lib.hasInfix "sphinx" (d.name or "")) (
-          old.nativeBuildInputs or [ ]
-        );
-        outputs = [
-          "out"
-          "dist"
-        ];
-      });
-    };
   };
 }
