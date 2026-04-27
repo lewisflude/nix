@@ -1,8 +1,18 @@
+# Garnix CI builds these flake outputs and serves results from cache.garnix.io.
+#
+# nixosConfigurations.jupiter is excluded: evaluating the full system blows
+# through the free-tier evaluator's memory cap (~1.3 GB heap fragmentation
+# limit, observed empirically — Garnix issue #128). System closure caching
+# happens via local `cachix push` to lewisflude.cachix.org instead. Garnix
+# still caches devShells, packages, formatter, and individual checks here.
 builds:
   include:
-    - "nixosConfigurations.jupiter"
     - "devShells.x86_64-linux.default"
     - "formatter.x86_64-linux"
-    - "checks.x86_64-linux.*"
     - "packages.x86_64-linux.*"
-  exclude: []
+    - "checks.x86_64-linux.treefmt"
+    - "checks.x86_64-linux.pre-commit"
+  exclude:
+    # Excludes the configurations:nixos:jupiter check which evaluates the same
+    # closure as nixosConfigurations.jupiter and OOMs.
+    - "checks.x86_64-linux.configurations:nixos:jupiter"
