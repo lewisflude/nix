@@ -213,7 +213,7 @@ _: {
           pkgs.crosspipe
         ]
         ++ lib.optionals isDarwin [
-          pkgs.ffmpeg-full
+          pkgs.ffmpeg
           pkgs.lame
           pkgs.flac
         ];
