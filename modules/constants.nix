@@ -116,8 +116,7 @@
         mercury = {
           ipv4 = "192.168.10.211";
           tailscaleIpv4 = "100.80.145.75";
-          # Run `syncthing device-id` on Mercury after first build, then fill in.
-          syncthingId = "";
+          syncthingId = "3DND4DW-PRAXVKZ-67ZMX3X-LEDOZXV-BYHULLC-HZWOIXS-OHMVBM3-REPLDAD";
           gpgAgent = "/Users/lewisflude/.gnupg/S.gpg-agent";
           gpgAgentExtra = "/Users/lewisflude/.gnupg/S.gpg-agent.extra";
         };
