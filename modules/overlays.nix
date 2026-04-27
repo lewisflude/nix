@@ -57,8 +57,11 @@ let
         in
         if pkgs != null then { claude-code = pkgs.default; } else { };
 
-      # GCC 15 ICE workarounds for i686-linux (Steam FHS env needs these)
-      # Lowers optimization to -O1 or disables tests for packages that trigger compiler bugs
+      # TECH-DEBT: GCC 15 ICE workarounds for i686-linux (Steam FHS env pulls these in).
+      # Each package below either ICEs at -O2 or has tests that fail under i686 GCC 15.
+      # Remove each entry by attempting `nix build .#legacyPackages.i686-linux.<pkg>` after
+      # nixpkgs bumps GCC; drop the whole overlay once all entries build cleanly.
+      # Tracked upstream: https://gcc.gnu.org/bugzilla/buglist.cgi?component=tree-optimization
       i686-test-fixes =
         _final: prev:
         if prev.stdenv.hostPlatform.system == "i686-linux" then
@@ -159,9 +162,10 @@ let
         else
           { };
 
-      # cli-helpers 2.10.0: three test_style_output tests assert hardcoded ANSI
-      # escapes that newer Pygments resolves differently (bg:#eee -> 255 not 7).
-      # Remove once nixpkgs PR #493910 (bump to 2.14.0) lands.
+      # TECH-DEBT: cli-helpers 2.10.0 — three test_style_output tests assert hardcoded
+      # ANSI escapes that newer Pygments resolves differently (bg:#eee -> 255 not 7).
+      # Remove when: nixpkgs PR #493910 (bump to 2.14.0) lands.
+      # Verify: `nix-build -A python3Packages.cli-helpers` succeeds without disabledTests.
       cli-helpers-fix = _final: prev: {
         pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
           (_python-final: python-prev: {
@@ -176,8 +180,11 @@ let
         ];
       };
 
-      # khal: sphinxcontrib-newsfeed is broken with Sphinx 9.x
-      # Skip docs build entirely until upstream fixes it
+      # TECH-DEBT: khal — sphinxcontrib-newsfeed is broken with Sphinx 9.x.
+      # Skips docs build entirely.
+      # Remove when: python3Packages.sphinxcontrib-newsfeed supports Sphinx ≥ 9, OR
+      # khal upstream switches docs framework. Tracking: https://github.com/pdlan/sphinxcontrib-newsfeed
+      # Verify: `nix-build -A khal` succeeds without this overlay.
       khal-fix = _final: prev: {
         khal = prev.khal.overrideAttrs (old: {
           nativeBuildInputs = builtins.filter (d: !lib.hasInfix "sphinx" (d.name or "")) (

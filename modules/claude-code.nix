@@ -61,6 +61,12 @@ in
             command = "uvx";
             args = [ "mcp-nixos" ];
           };
+          obsidian = {
+            command = "${pkgs.writeShellScript "mcp-obsidian" ''
+              export PATH="${pkgs.nodejs}/bin:$PATH"
+              exec npx -y @bitbonsai/mcpvault@0.11.0 "$HOME/Obsidian Vault" "$@"
+            ''}";
+          };
         }
         // lib.optionalAttrs pkgs.stdenv.isDarwin {
           ableton = {
