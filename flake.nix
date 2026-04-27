@@ -31,11 +31,6 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # TEMPORARY: Disabled due to upstream SBCL/GitLab Common Lisp API issue
-    # Re-enable once https://gitlab.common-lisp.net/iterate/iterate is fixed
-    # mac-app-util = {
-    #   url = "github:hraban/mac-app-util";
-    # };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     niri = {
       url = "github:sodiboo/niri-flake";
@@ -63,12 +58,6 @@
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
-    # NH is available in nixpkgs - no need for flake input
-    # Using nixpkgs version avoids test failures on Darwin
-    # nh = {
-    #   url = "github:nix-community/nh";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -109,13 +98,6 @@
       url = "github:polygon/audio.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # yknotify-rs: Disabled - upstream flake has build issues on macOS
-    # Missing darwin.apple_sdk.frameworks in buildInputs
-    # Use manual install instead: go install github.com/noperator/yknotify@latest
-    # yknotify-rs = {
-    #   url = "github:reo101/yknotify-rs";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
     hyprcursor-phinger = {
       url = "github:jappie3/hyprcursor-phinger";
       inputs.nixpkgs.follows = "nixpkgs";

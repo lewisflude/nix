@@ -10,37 +10,29 @@ let
     in
     {
       # Rust toolchains from fenix (better than nixpkgs)
-      fenix-overlay =
-        if inputs ? fenix && inputs.fenix ? overlays then inputs.fenix.overlays.default else noopOverlay;
+      fenix-overlay = inputs.fenix.overlays.default;
 
       # Niri compositor (Linux only)
-      niri =
-        if isLinux && inputs ? niri && inputs.niri ? overlays then
-          inputs.niri.overlays.niri
-        else
-          noopOverlay;
+      niri = if isLinux then inputs.niri.overlays.niri else noopOverlay;
 
-      # ComfyUI overlay (native Nix package, replaces Docker container)
+      # ComfyUI overlay: upstream exposes either overlays.default or packages.<system>.default
       comfyui =
-        if inputs ? comfyui && inputs.comfyui ? overlays && inputs.comfyui.overlays ? default then
+        if inputs.comfyui ? overlays && inputs.comfyui.overlays ? default then
           inputs.comfyui.overlays.default
-        else if inputs ? comfyui && inputs.comfyui ? packages && inputs.comfyui.packages ? ${system} then
+        else if inputs.comfyui.packages ? ${system} then
           (_final: _prev: { comfyui = inputs.comfyui.packages.${system}.default; })
         else
           noopOverlay;
 
-      # Audio.nix overlay (Bitwig Studio and audio plugins)
+      # Audio.nix overlay (Bitwig Studio and audio plugins, Linux only)
       audio-nix =
-        if
-          isLinux && inputs ? audio-nix && inputs.audio-nix ? overlays && inputs.audio-nix.overlays ? default
-        then
+        if isLinux then
           final: super:
           let
             superWithWebkit =
               super // (if super ? webkitgtk_6_0 then { webkitgtk = super.webkitgtk_6_0; } else { });
-            audioNixOverlay = inputs.audio-nix.overlays.default;
           in
-          audioNixOverlay final superWithWebkit
+          inputs.audio-nix.overlays.default final superWithWebkit
         else
           noopOverlay;
 
@@ -48,13 +40,7 @@ let
       llm-agents =
         _final: _prev:
         let
-          llmAgentPkgs =
-            if
-              inputs ? llm-agents && inputs.llm-agents ? packages && inputs.llm-agents.packages ? ${system}
-            then
-              inputs.llm-agents.packages.${system}
-            else
-              { };
+          llmAgentPkgs = inputs.llm-agents.packages.${system} or { };
         in
         {
           llmAgents = llmAgentPkgs;
@@ -65,15 +51,11 @@ let
       # Takes precedence over the llm-agents variant because composeExtensions applies
       # later overlays last, and "n" (naming below) sorts after "l" (llm-agents).
       native-claude-code =
-        _final: prev:
-        if
-          inputs ? claude-code-nix
-          && inputs.claude-code-nix ? packages
-          && inputs.claude-code-nix.packages ? ${system}
-        then
-          { claude-code = inputs.claude-code-nix.packages.${system}.default; }
-        else
-          { };
+        _final: _prev:
+        let
+          pkgs = inputs.claude-code-nix.packages.${system} or null;
+        in
+        if pkgs != null then { claude-code = pkgs.default; } else { };
 
       # GCC 15 ICE workarounds for i686-linux (Steam FHS env needs these)
       # Lowers optimization to -O1 or disables tests for packages that trigger compiler bugs
@@ -136,22 +118,15 @@ let
       # Danksearch
       danksearch =
         _final: _prev:
-        if
-          inputs ? danksearch && inputs.danksearch ? packages && inputs.danksearch.packages ? ${system}
-        then
-          { danksearch = inputs.danksearch.packages.${system}.default; }
-        else
-          { };
+        let
+          pkgs = inputs.danksearch.packages.${system} or null;
+        in
+        if pkgs != null then { danksearch = pkgs.default; } else { };
 
-      # Claude Desktop (patched: nodePackages.asar removed from nixpkgs 2026-03-03)
+      # Claude Desktop (Linux only, patched: nodePackages.asar removed from nixpkgs 2026-03-03)
       claude-desktop =
         final: prev:
-        if
-          isLinux
-          && inputs ? claude-desktop-linux
-          && inputs.claude-desktop-linux ? packages
-          && inputs.claude-desktop-linux.packages ? ${system}
-        then
+        if isLinux then
           let
             src = inputs.claude-desktop-linux;
             patchy-cnb = prev.callPackage "${src}/pkgs/patchy-cnb.nix" { };
@@ -216,30 +191,22 @@ let
       };
 
       # NUR
-      nur = if inputs ? nur && inputs.nur ? overlays then inputs.nur.overlays.default else noopOverlay;
+      nur = inputs.nur.overlays.default;
 
       # OpenClaw (upstream nix-openclaw flake): replaces pkgs.openclaw with the
       # version the home-manager module expects and adds openclaw-gateway etc.
-      nix-openclaw =
-        if inputs ? nix-openclaw && inputs.nix-openclaw ? overlays.default then
-          inputs.nix-openclaw.overlays.default
-        else
-          noopOverlay;
+      nix-openclaw = inputs.nix-openclaw.overlays.default;
 
-      # WiVRn with CUDA encoding support (64-bit only)
+      # WiVRn with CUDA encoding support (x86_64-linux only)
       # OpenVR compatibility paths managed by WiVRn itself since v0.23
       wivrn-cuda =
-        if isLinux then
-          final: prev:
-          if prev.stdenv.hostPlatform.system == "x86_64-linux" then
-            {
-              wivrn = prev.wivrn.override {
-                cudaSupport = true;
-                inherit (final) cudaPackages;
-              };
-            }
-          else
-            { }
+        if system == "x86_64-linux" then
+          final: prev: {
+            wivrn = prev.wivrn.override {
+              cudaSupport = true;
+              inherit (final) cudaPackages;
+            };
+          }
         else
           noopOverlay;
     };

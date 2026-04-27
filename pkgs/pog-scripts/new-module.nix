@@ -15,10 +15,10 @@ pog.pog {
       description = "Module type";
       required = true;
       prompt = ''
-        gum choose "feature" "service" "overlay" "test" --header "Select module type:"
+        gum choose "feature" "service" --header "Select module type:"
       '';
       promptError = "Failed to get module type";
-      completion = ''echo "feature service overlay test"'';
+      completion = ''echo "feature service"'';
     }
     {
       name = "name";
@@ -65,26 +65,14 @@ pog.pog {
       debug "Name formats: upper=$NAME_UPPER, camel=$NAME_CAMEL, snake=$NAME_SNAKE"
 
 
+      OUTPUT_DIR="$REPO_ROOT/modules"
+      OUTPUT_FILE="$OUTPUT_DIR/$MODULE_NAME.nix"
       case "$MODULE_TYPE" in
         feature)
           TEMPLATE="$REPO_ROOT/templates/feature-module.nix"
-          OUTPUT_DIR="$REPO_ROOT/modules/nixos/features"
-          OUTPUT_FILE="$OUTPUT_DIR/$MODULE_NAME.nix"
           ;;
         service)
           TEMPLATE="$REPO_ROOT/templates/service-module.nix"
-          OUTPUT_DIR="$REPO_ROOT/modules/nixos/services"
-          OUTPUT_FILE="$OUTPUT_DIR/$MODULE_NAME.nix"
-          ;;
-        overlay)
-          TEMPLATE="$REPO_ROOT/templates/overlay-template.nix"
-          OUTPUT_DIR="$REPO_ROOT/overlays"
-          OUTPUT_FILE="$OUTPUT_DIR/$MODULE_NAME.nix"
-          ;;
-        test)
-          TEMPLATE="$REPO_ROOT/templates/test-module.nix"
-          OUTPUT_DIR="$REPO_ROOT/tests"
-          OUTPUT_FILE="$OUTPUT_DIR/$MODULE_NAME.nix"
           ;;
         *)
           die "Invalid module type: $MODULE_TYPE"
@@ -134,38 +122,8 @@ pog.pog {
 
       echo ""
       cyan "📋 Next steps:"
-
-      case "$MODULE_TYPE" in
-        feature)
-          echo "  1. Add feature options to modules/options/host.nix"
-          echo "  2. Implement the feature in $OUTPUT_FILE (dendritic pattern)"
-          echo "  3. Import module in host definition: modules/hosts/<hostname>/definition.nix"
-          echo "  4. Test the configuration"
-          echo ""
-          yellow "💡 Add this to modules/options/host.nix:"
-          echo ""
-          echo "    $NAME_SNAKE = {"
-          echo "      enable = mkEnableOption \"$MODULE_NAME feature\";"
-          echo "    };"
-          ;;
-        service)
-          echo "  1. Customize the service in $OUTPUT_FILE"
-          echo "  2. Add to host configuration: services.$NAME_SNAKE.enable = true"
-          echo "  3. Test the service"
-          ;;
-        overlay)
-          echo "  1. Implement package overrides in $OUTPUT_FILE"
-          echo "  2. Import in overlays/default.nix"
-          echo "  3. Rebuild to apply changes"
-          ;;
-        test)
-          echo "  1. Implement tests in $OUTPUT_FILE"
-          echo "  2. Run with: nix build .#checks.x86_64-linux.test-name"
-          ;;
-      esac
-
-      echo ""
-      blue "📖 Template reference: $TEMPLATE"
-      green "🎉 Happy hacking!"
+      echo "  1. Edit $OUTPUT_FILE"
+      echo "  2. Toggle in modules/hosts/<host>/definition.nix if it's opt-in"
+      echo "  3. nix flake check"
     '';
 }
