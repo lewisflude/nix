@@ -30,11 +30,17 @@ let
     always-allow-substitutes = true;
     warn-dirty = false;
     lazy-trees = true;
+    # Parallel evaluation. `eval-cores = 0` parallelises nix search /
+    # flake check / flake show / eval --json across all CPU cores.
+    # The `parallel-eval` experimental feature additionally exposes
+    # `builtins.parallel` for explicit use in expressions.
+    eval-cores = 0;
     extra-substituters = constants.binaryCaches.substituters;
     extra-trusted-public-keys = constants.binaryCaches.trustedPublicKeys;
     experimental-features = [
       "nix-command"
       "flakes"
+      "parallel-eval"
     ];
   };
 in
