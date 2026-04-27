@@ -85,6 +85,7 @@ in
             homeManager.yazi
             homeManager.nicotinePlus
             homeManager.obsidian
+            homeManager.syncthing
             homeManager.zed
             homeManager.developmentTools
             homeManager.javascript
