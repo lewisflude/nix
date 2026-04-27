@@ -1,50 +1,64 @@
-# Core Nix daemon configuration for NixOS and Darwin
-# Uses top-level config.username from modules/meta.nix
-# Dendritic pattern: No inputs parameter in lower-level modules
+# Nix daemon configuration — feature module.
+#
+# Both hosts run Determinate Nix (locked at 3.18.1 via the `determinate`
+# flake input) for lazy-trees and the parallel-eval substrate. All
+# Nix-daemon config is co-located here per dendritic Invariant 3
+# (cross-class co-location); shared values flow through `commonSettings`
+# so Jupiter and Mercury never drift.
+#
+# Surface areas differ by class:
+#   - NixOS: standard `nix.settings`. The Determinate NixOS module
+#     redirects /etc/nix/nix.conf -> /etc/nix/nix.custom.conf
+#     transparently, so the upstream interface keeps working.
+#   - Darwin: `determinateNix.customSettings`. nix-darwin's own Nix
+#     management is disabled because Determinate Nixd owns nix.conf.
 { config, ... }:
 let
-  inherit (config) constants;
-  inherit (config) username;
+  inherit (config) constants username;
+
+  commonSettings = {
+    trusted-users = [
+      "root"
+      username
+    ];
+    cores = 0;
+    max-substitution-jobs = 28;
+    http-connections = 64;
+    connect-timeout = 5;
+    stalled-download-timeout = 300;
+    sandbox = true;
+    always-allow-substitutes = true;
+    warn-dirty = false;
+    lazy-trees = true;
+    extra-substituters = constants.binaryCaches.substituters;
+    extra-trusted-public-keys = constants.binaryCaches.trustedPublicKeys;
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+  };
 in
 {
-  # NixOS Nix configuration
-  # Jupiter runs Lix (production-ready CppNix fork) — no Determinate / FlakeHub.
-  flake.modules.nixos.nix =
-    { lib, pkgs, ... }:
-    {
-      nix.package = pkgs.lixPackageSets.stable.lix;
-      nix.settings = {
-        warn-dirty = false;
-        trusted-users = [
-          "root"
-          username
-        ];
-        # 13900K (24 cores). cores=0 lets each builder use all available cores;
-        # the kernel scheduler shares them across max-jobs builders.
-        max-jobs = lib.mkDefault 8;
-        cores = lib.mkDefault 0;
-        max-substitution-jobs = lib.mkDefault 28;
-        http-connections = lib.mkDefault 64;
-        always-allow-substitutes = lib.mkDefault true;
-        connect-timeout = 5;
-        stalled-download-timeout = 300;
-        experimental-features = [
-          "nix-command"
-          "flakes"
-        ];
-        extra-substituters = constants.binaryCaches.substituters;
-        extra-trusted-public-keys = constants.binaryCaches.trustedPublicKeys;
+  # Jupiter — NixOS, 24-core 13900K
+  flake.modules.nixos.nix = _: {
+    nix.settings = commonSettings // {
+      max-jobs = 8;
+    };
+  };
+
+  # Mercury — Darwin laptop
+  flake.modules.darwin.nix = _: {
+    # Determinate Nixd owns /etc/nix/nix.conf; nix-darwin must not.
+    nix.enable = false;
+
+    determinateNix = {
+      enable = true;
+      customSettings = commonSettings // {
+        max-jobs = 2;
       };
     };
 
-  # Darwin Nix configuration
-  # Disable nix-darwin's Nix management since Determinate Nix handles it
-  # See: https://github.com/nix-darwin/nix-darwin/pull/1313
-  flake.modules.darwin.nix = _: {
-    # Let Determinate Nix manage the Nix daemon
-    nix.enable = false;
-
-    # Prevent Spotlight from indexing the Nix store
+    # Prevent Spotlight from indexing the Nix store.
     system.activationScripts.disableSpotlightNixStore.text = ''
       if [ -d "/nix/store" ]; then
         mdutil -i off /nix/store 2>/dev/null || true

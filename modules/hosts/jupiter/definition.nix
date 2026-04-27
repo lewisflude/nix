@@ -19,6 +19,7 @@ in
         inputs.nixos-hardware.nixosModules.common-cpu-intel
         inputs.home-manager.nixosModules.home-manager
         inputs.sops-nix.nixosModules.sops
+        inputs.determinate.nixosModules.default
         inputs.niri.nixosModules.niri
         inputs.musnix.nixosModules.musnix
         inputs.vpn-confinement.nixosModules.default

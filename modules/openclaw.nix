@@ -27,6 +27,13 @@
             };
           };
         };
+
+        # Upstream HM module declares home.file."<configPath>" *and* runs
+        # `ln -sfn` against the same path during activation. The activation
+        # script is the intended authority; the home.file entry just trips
+        # checkLinkTargets when the rendered store path changes, exhausting
+        # the .hm-backup slot. Defer to the activation script.
+        home.file.".openclaw/openclaw.json".force = true;
       };
     };
 }

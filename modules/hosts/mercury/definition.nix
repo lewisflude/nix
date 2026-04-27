@@ -27,7 +27,6 @@ in
         darwin.nixpkgs
         darwin.sops
         darwin.users
-        darwin.determinate
         darwin.homeManagerBase
 
         # ═══════════════════════════════════════════════════════════════════════

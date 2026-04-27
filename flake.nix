@@ -5,7 +5,11 @@
   # not here in nixConfig, as nixConfig requires --accept-flake-config
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # FlakeHub-hosted nixpkgs (0.1 = rolling unstable). Determinate Nix's
+    # docs recommend this over `github:nixos/nixpkgs/nixos-unstable` so the
+    # determinate input doesn't need a `follows` directive — that lets
+    # Determinate keep its FlakeHub Cache substituter coverage.
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1";
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
     process-compose-flake.url = "github:Platonic-Systems/process-compose-flake";
@@ -23,10 +27,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    determinate = {
-      url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # Per Determinate's guidance, do NOT make this follow our nixpkgs —
+    # it would lose FlakeHub Cache coverage for Determinate's own artifacts.
+    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
