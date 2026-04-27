@@ -51,7 +51,7 @@
     comfyui =
       final: prev:
       let
-        system = prev.stdenv.hostPlatform.system;
+        inherit (prev.stdenv.hostPlatform) system;
       in
       if inputs.comfyui ? overlays && inputs.comfyui.overlays ? default then
         inputs.comfyui.overlays.default final prev

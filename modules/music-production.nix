@@ -13,8 +13,7 @@
     if super.stdenv.hostPlatform.isLinux then
       let
         superWithWebkit =
-          super
-          // (if super ? webkitgtk_6_0 then { webkitgtk = super.webkitgtk_6_0; } else { });
+          super // (if super ? webkitgtk_6_0 then { webkitgtk = super.webkitgtk_6_0; } else { });
       in
       inputs.audio-nix.overlays.default final superWithWebkit
     else
