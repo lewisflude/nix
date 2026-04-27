@@ -5,11 +5,13 @@
   # not here in nixConfig, as nixConfig requires --accept-flake-config
 
   inputs = {
-    # FlakeHub-hosted nixpkgs (0.1 = rolling unstable). Determinate Nix's
-    # docs recommend this over `github:nixos/nixpkgs/nixos-unstable` so the
-    # determinate input doesn't need a `follows` directive — that lets
-    # Determinate keep its FlakeHub Cache substituter coverage.
-    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1";
+    # nixos-unstable-small: same source as nixos-unstable but advances daily
+    # (smaller required-pass set on Hydra). Trade-off vs FlakeHub's `0.1`:
+    # gives up some FlakeHub Cache substitution overlap with the determinate
+    # input, but `0.1` actually resolves to the 25.05 stable line, not
+    # unstable. Switch to `nixos-unstable` if cache coverage matters more
+    # than freshness.
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
     process-compose-flake.url = "github:Platonic-Systems/process-compose-flake";
@@ -61,6 +63,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
+
+    # Bleeding-edge XR/VR packages (wivrn, wayvr, monado, opencomposite, ...).
+    # Tracks upstream git, published to nix-community.cachix.org (already
+    # trusted via constants.binaryCaches), so no source-build penalty.
+    nixpkgs-xr = {
+      url = "github:nix-community/nixpkgs-xr";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
@@ -132,14 +142,6 @@
     claude-code-nix = {
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-    # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
-    # Deep follow on nix-steipete-tools eliminates a duplicate nixpkgs from the lock graph.
-    nix-openclaw = {
-      url = "github:openclaw/nix-openclaw/53aac0dce0810c40c75793fdad3d41b0f7e7baaf";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-      inputs.nix-steipete-tools.inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 

@@ -154,6 +154,7 @@
           "https://chaotic-nyx.cachix.org"
           "https://niri.cachix.org"
           "https://cuda-maintainers.cachix.org"
+          "https://claude-code.cachix.org"
           "https://cache.garnix.io"
         ];
 
@@ -171,6 +172,7 @@
           "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8="
           "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
           "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+          "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
           "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
         ];
       };

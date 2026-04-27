@@ -28,6 +28,9 @@ let
     stalled-download-timeout = 300;
     sandbox = true;
     always-allow-substitutes = true;
+    builders-use-substitutes = true;
+    keep-outputs = true;
+    keep-derivations = true;
     warn-dirty = false;
     lazy-trees = true;
     # Parallel evaluation. `eval-cores = 0` parallelises nix search /

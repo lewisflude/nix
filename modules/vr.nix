@@ -1,7 +1,15 @@
 # VR Module - WiVRn + xrizer for Quest headsets
 # References:
 # - https://lvra.gitlab.io/docs/distros/nixos/
-_: {
+{ inputs, ... }:
+{
+  # nixpkgs-xr: git-tracking XR/VR packages (wivrn, wayvr, monado,
+  # opencomposite, ...) with nix-community.cachix.org coverage. Linux-only.
+  # Alphabetical ordering ensures wivrn-cuda below applies after this overlay.
+  overlays.nixpkgs-xr =
+    final: prev:
+    if prev.stdenv.hostPlatform.isLinux then inputs.nixpkgs-xr.overlays.default final prev else { };
+
   # WiVRn with CUDA encoding support (x86_64-linux only).
   # OpenVR compatibility paths are managed by WiVRn itself since v0.23.
   overlays.wivrn-cuda =
