@@ -10,7 +10,6 @@
       ports = {
         mcp = {
           docs = 6280;
-          figma = 3845;
         };
 
         services = {

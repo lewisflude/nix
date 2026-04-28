@@ -85,12 +85,6 @@ in
         context7 = {
           url = "https://mcp.context7.com/mcp";
         };
-        github = {
-          url = "https://api.githubcopilot.com/mcp/";
-          headers = {
-            Authorization = "Bearer \${GITHUB_TOKEN}";
-          };
-        };
         git = {
           command = "uvx";
           args = [ "mcp-server-git" ];
@@ -130,6 +124,9 @@ in
           command = "${pkgs.uv}/bin/uvx";
           args = [ "blender-mcp" ];
         };
+        figma = {
+          url = "https://mcp.figma.com/mcp";
+        };
       }
       // lib.optionalAttrs pkgs.stdenv.isLinux {
         hass = {
@@ -137,6 +134,16 @@ in
             export HOMEASSISTANT_URL="$(cat /run/secrets/HOME_ASSISTANT_BASE_URL)"
             export HOMEASSISTANT_TOKEN="$(cat /run/secrets/HOME_ASSISTANT_TOKEN)"
             exec ${pkgs.uv}/bin/uvx ha-mcp "$@"
+          ''}";
+        };
+      }
+      // lib.optionalAttrs (secretAvailable "GITHUB_TOKEN") {
+        github = {
+          command = "${pkgs.writeShellScript "mcp-github" ''
+            export PATH="${pkgs.nodejs}/bin:$PATH"
+            GITHUB_TOKEN="$(cat ${lib.escapeShellArg (secretPath "GITHUB_TOKEN")})"
+            exec npx -y mcp-remote https://api.githubcopilot.com/mcp/ \
+              --header "Authorization: Bearer $GITHUB_TOKEN" "$@"
           ''}";
         };
       }
@@ -152,9 +159,6 @@ in
         ableton = {
           command = "${pkgs.uv}/bin/uvx";
           args = [ "ableton-mcp" ];
-        };
-        figma-desktop = {
-          url = "http://127.0.0.1:${toString constants.ports.mcp.figma}/mcp";
         };
       }
       // lib.optionalAttrs basicMemoryEnabled {
@@ -173,6 +177,10 @@ in
       # Wrap HTTP/URL servers with `npx mcp-remote` so they appear as stdio.
       # Header values may contain ${VAR} placeholders that the wrapper script
       # leaves for the shell to expand at launch time.
+      #
+      # `figma` is excluded: mcp-remote uses Dynamic Client Registration, which
+      # Figma's OAuth rejects (403). Add Figma via Claude Desktop's native
+      # Connectors UI instead — it uses a pre-registered OAuth client.
       claudeDesktopServers = lib.mapAttrs (
         name: server:
         if server ? url then
@@ -189,7 +197,7 @@ in
           }
         else
           server
-      ) mcpServers;
+      ) (lib.removeAttrs mcpServers [ "figma" ]);
 
       claudeDesktopServersJson = builtins.toJSON claudeDesktopServers;
     in
