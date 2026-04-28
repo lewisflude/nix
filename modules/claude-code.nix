@@ -55,8 +55,17 @@ in
   };
 
   flake.modules.homeManager.claudeCode =
-    { lib, pkgs, ... }:
+    {
+      lib,
+      pkgs,
+      osConfig ? { },
+      ...
+    }:
     let
+      secretAvailable =
+        name: osConfig ? sops && osConfig.sops ? secrets && osConfig.sops.secrets ? ${name};
+      secretPath = name: if secretAvailable name then osConfig.sops.secrets.${name}.path else "";
+
       abletonRemoteScript = pkgs.fetchurl {
         url = "https://raw.githubusercontent.com/ahujasid/ableton-mcp/e0083285426dedb5c93ce8a532ecfbb25ae9a3ca/AbletonMCP_Remote_Script/__init__.py";
         hash = "sha256-dYyQES4n88JQAT6yDkRXVfsD9VPA4S9RKlVtgi7XhTs=";
@@ -128,9 +137,17 @@ in
       // lib.optionalAttrs pkgs.stdenv.isLinux {
         hass = {
           command = "${pkgs.writeShellScript "mcp-hass" ''
-            export HA_URL="$(cat /run/secrets/HOME_ASSISTANT_BASE_URL)"
-            export HA_TOKEN="$(cat /run/secrets/HOME_ASSISTANT_TOKEN)"
+            export HOMEASSISTANT_URL="$(cat /run/secrets/HOME_ASSISTANT_BASE_URL)"
+            export HOMEASSISTANT_TOKEN="$(cat /run/secrets/HOME_ASSISTANT_TOKEN)"
             exec ${pkgs.uv}/bin/uvx ha-mcp "$@"
+          ''}";
+        };
+      }
+      // lib.optionalAttrs (secretAvailable "KAGI_API_KEY") {
+        kagi = {
+          command = "${pkgs.writeShellScript "mcp-kagi" ''
+            export KAGI_API_KEY="$(cat ${lib.escapeShellArg (secretPath "KAGI_API_KEY")})"
+            exec ${pkgs.uv}/bin/uvx kagimcp "$@"
           ''}";
         };
       }
