@@ -65,130 +65,172 @@ in
         url = "https://raw.githubusercontent.com/ahujasid/blender-mcp/7636d13bded82eca58eb93c3f4cd8708dfdfbe8b/addon.py";
         hash = "sha256-ipXFL9AUGg6QlD6WgEhFvSW3bJRPc1XkIrltuXH1AFA=";
       };
+
+      # Flip to true once the Obsidian vault has enough linked notes to justify
+      # a knowledge graph. Enabling indexes the vault into ~/.basic-memory and
+      # may add frontmatter/permalinks to existing notes on sync.
+      basicMemoryEnabled = false;
+      basicMemoryProject = "obsidian";
+
+      mcpServers = {
+        context7 = {
+          url = "https://mcp.context7.com/mcp";
+        };
+        github = {
+          url = "https://api.githubcopilot.com/mcp/";
+          headers = {
+            Authorization = "Bearer \${GITHUB_TOKEN}";
+          };
+        };
+        figma-desktop = {
+          url = "http://127.0.0.1:${toString constants.ports.mcp.figma}/mcp";
+        };
+        git = {
+          command = "uvx";
+          args = [ "mcp-server-git" ];
+        };
+        time = {
+          command = "uvx";
+          args = [ "mcp-server-time" ];
+        };
+        sqlite = {
+          command = "${pkgs.writeShellScript "mcp-sqlite" ''
+            exec uvx mcp-server-sqlite --db-path "$HOME/.local/share/mcp/data.db" "$@"
+          ''}";
+        };
+        playwright = {
+          command = "${pkgs.writeShellScript "mcp-playwright" ''
+            export PATH="${pkgs.nodejs}/bin:$PATH"
+            exec npx -y @playwright/mcp@0.0.68 "$@"
+          ''}";
+        };
+        sequential-thinking = {
+          command = "${pkgs.writeShellScript "mcp-sequential-thinking" ''
+            export PATH="${pkgs.nodejs}/bin:$PATH"
+            exec npx -y @modelcontextprotocol/server-sequential-thinking@2025.12.18 "$@"
+          ''}";
+        };
+        nixos = {
+          command = "uvx";
+          args = [ "mcp-nixos" ];
+        };
+        obsidian = {
+          command = "${pkgs.writeShellScript "mcp-obsidian" ''
+            export PATH="${pkgs.nodejs}/bin:$PATH"
+            exec npx -y @bitbonsai/mcpvault@0.11.0 "$HOME/Obsidian Vault" "$@"
+          ''}";
+        };
+        blender = {
+          command = "${pkgs.uv}/bin/uvx";
+          args = [ "blender-mcp" ];
+        };
+      }
+      // lib.optionalAttrs pkgs.stdenv.isLinux {
+        hass = {
+          command = "${pkgs.writeShellScript "mcp-hass" ''
+            export HA_URL="$(cat /run/secrets/HOME_ASSISTANT_BASE_URL)"
+            export HA_TOKEN="$(cat /run/secrets/HOME_ASSISTANT_TOKEN)"
+            exec ${pkgs.uv}/bin/uvx ha-mcp "$@"
+          ''}";
+        };
+      }
+      // lib.optionalAttrs pkgs.stdenv.isDarwin {
+        ableton = {
+          command = "${pkgs.uv}/bin/uvx";
+          args = [ "ableton-mcp" ];
+        };
+      }
+      // lib.optionalAttrs basicMemoryEnabled {
+        basic-memory = {
+          command = "${pkgs.writeShellScript "mcp-basic-memory" ''
+            export BASIC_MEMORY_MCP_PROJECT=${basicMemoryProject}
+            exec ${pkgs.uv}/bin/uvx basic-memory mcp "$@"
+          ''}";
+        };
+      };
+
+      claudeDesktopConfigDir =
+        if pkgs.stdenv.isDarwin then "$HOME/Library/Application Support/Claude" else "$HOME/.config/Claude";
+
+      # Claude Desktop expects stdio servers as { command, args, env } and
+      # remote servers tagged with type: "http". programs.mcp.servers stores
+      # the latter without the tag, so add it here.
+      claudeDesktopServers = lib.mapAttrs (
+        _name: server: if server ? url then { type = "http"; } // server else server
+      ) mcpServers;
+
+      claudeDesktopServersJson = builtins.toJSON claudeDesktopServers;
     in
     {
       programs.mcp = {
         enable = true;
-        servers = {
-          context7 = {
-            url = "https://mcp.context7.com/mcp";
-          };
-          github = {
-            url = "https://api.githubcopilot.com/mcp/";
-            headers = {
-              Authorization = "Bearer \${GITHUB_TOKEN}";
-            };
-          };
-          figma-desktop = {
-            url = "http://127.0.0.1:${toString constants.ports.mcp.figma}/mcp";
-          };
-          git = {
-            command = "uvx";
-            args = [ "mcp-server-git" ];
-          };
-          time = {
-            command = "uvx";
-            args = [ "mcp-server-time" ];
-          };
-          sqlite = {
-            command = "${pkgs.writeShellScript "mcp-sqlite" ''
-              exec uvx mcp-server-sqlite --db-path "$HOME/.local/share/mcp/data.db" "$@"
-            ''}";
-          };
-          playwright = {
-            command = "${pkgs.writeShellScript "mcp-playwright" ''
-              export PATH="${pkgs.nodejs}/bin:$PATH"
-              exec npx -y @playwright/mcp@0.0.68 "$@"
-            ''}";
-          };
-          sequential-thinking = {
-            command = "${pkgs.writeShellScript "mcp-sequential-thinking" ''
-              export PATH="${pkgs.nodejs}/bin:$PATH"
-              exec npx -y @modelcontextprotocol/server-sequential-thinking@2025.12.18 "$@"
-            ''}";
-          };
-          nixos = {
-            command = "uvx";
-            args = [ "mcp-nixos" ];
-          };
-          obsidian = {
-            command = "${pkgs.writeShellScript "mcp-obsidian" ''
-              export PATH="${pkgs.nodejs}/bin:$PATH"
-              exec npx -y @bitbonsai/mcpvault@0.11.0 "$HOME/Obsidian Vault" "$@"
-            ''}";
-          };
-          blender = {
-            command = "${pkgs.uv}/bin/uvx";
-            args = [ "blender-mcp" ];
-          };
-        }
-        // lib.optionalAttrs pkgs.stdenv.isLinux {
-          hass = {
-            command = "${pkgs.writeShellScript "mcp-hass" ''
-              export HA_URL="$(cat /run/secrets/HOME_ASSISTANT_BASE_URL)"
-              export HA_TOKEN="$(cat /run/secrets/HOME_ASSISTANT_TOKEN)"
-              exec ${pkgs.uv}/bin/uvx ha-mcp "$@"
-            ''}";
-          };
-        }
-        // lib.optionalAttrs pkgs.stdenv.isDarwin {
-          ableton = {
-            command = "${pkgs.uv}/bin/uvx";
-            args = [ "ableton-mcp" ];
-          };
-        };
+        servers = mcpServers;
       };
 
-      # Claude Desktop (macOS app) MCP config. Claude Desktop writes its own
-      # preferences to this file, so we merge rather than overwrite.
-      home.activation =
-        (lib.optionalAttrs pkgs.stdenv.isDarwin {
-          claudeDesktopMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            CONFIG_DIR="$HOME/Library/Application Support/Claude"
-            CONFIG_FILE="$CONFIG_DIR/claude_desktop_config.json"
-            $DRY_RUN_CMD mkdir -p "$CONFIG_DIR"
-            if [ ! -s "$CONFIG_FILE" ]; then
-              $DRY_RUN_CMD ${pkgs.coreutils}/bin/tee "$CONFIG_FILE" <<<'{}' > /dev/null
-            fi
-            MCP_SERVERS=$(${pkgs.jq}/bin/jq -n \
-              --arg uvx "${pkgs.uv}/bin/uvx" \
-              '{ AbletonMCP: { command: $uvx, args: ["ableton-mcp"] } }')
-            TMP=$(${pkgs.coreutils}/bin/mktemp)
-            ${pkgs.jq}/bin/jq --argjson servers "$MCP_SERVERS" \
-              '.mcpServers = $servers' "$CONFIG_FILE" > "$TMP"
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$TMP" "$CONFIG_FILE"
-          '';
+      # Claude Desktop reads claude_desktop_config.json. The app writes its own
+      # preferences to the same file, so merge into .mcpServers rather than
+      # overwriting the whole document.
+      home.activation = {
+        claudeDesktopMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          CONFIG_DIR="${claudeDesktopConfigDir}"
+          CONFIG_FILE="$CONFIG_DIR/claude_desktop_config.json"
+          $DRY_RUN_CMD mkdir -p "$CONFIG_DIR"
+          if [ ! -s "$CONFIG_FILE" ]; then
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/tee "$CONFIG_FILE" <<<'{}' > /dev/null
+          fi
+          TMP=$(${pkgs.coreutils}/bin/mktemp)
+          ${pkgs.jq}/bin/jq --argjson servers '${claudeDesktopServersJson}' \
+            '.mcpServers = $servers' "$CONFIG_FILE" > "$TMP"
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$TMP" "$CONFIG_FILE"
+        '';
 
-          abletonRemoteScript = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            ABLETON_PREFS="$HOME/Library/Preferences/Ableton"
-            [ -d "$ABLETON_PREFS" ] || exit 0
-            for ver in "$ABLETON_PREFS"/Live*/; do
-              [ -d "$ver" ] || continue
-              DEST="$ver/User Remote Scripts/AbletonMCP"
-              $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$DEST"
-              $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 644 \
-                ${abletonRemoteScript} "$DEST/__init__.py"
-            done
-          '';
-        })
-        // {
-          blenderMcpAddon = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            if [ -d "$HOME/.config/blender" ]; then
-              BLENDER_BASE="$HOME/.config/blender"
-            elif [ -d "$HOME/Library/Application Support/Blender" ]; then
-              BLENDER_BASE="$HOME/Library/Application Support/Blender"
-            else
-              exit 0
-            fi
-            for ver in "$BLENDER_BASE"/[0-9]*/; do
-              [ -d "$ver" ] || continue
-              DEST="$ver/scripts/addons/blender_mcp"
-              $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$DEST"
-              $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 644 \
-                ${blenderMcpAddon} "$DEST/__init__.py"
-            done
-          '';
-        };
+        blenderMcpAddon = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          if [ -d "$HOME/.config/blender" ]; then
+            BLENDER_BASE="$HOME/.config/blender"
+          elif [ -d "$HOME/Library/Application Support/Blender" ]; then
+            BLENDER_BASE="$HOME/Library/Application Support/Blender"
+          else
+            exit 0
+          fi
+          for ver in "$BLENDER_BASE"/[0-9]*/; do
+            [ -d "$ver" ] || continue
+            DEST="$ver/scripts/addons/blender_mcp"
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$DEST"
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 644 \
+              ${blenderMcpAddon} "$DEST/__init__.py"
+          done
+        '';
+      }
+      // lib.optionalAttrs pkgs.stdenv.isDarwin {
+        abletonRemoteScript = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          ABLETON_PREFS="$HOME/Library/Preferences/Ableton"
+          [ -d "$ABLETON_PREFS" ] || exit 0
+          for ver in "$ABLETON_PREFS"/Live*/; do
+            [ -d "$ver" ] || continue
+            DEST="$ver/User Remote Scripts/AbletonMCP"
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$DEST"
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 644 \
+              ${abletonRemoteScript} "$DEST/__init__.py"
+          done
+        '';
+      }
+      // lib.optionalAttrs basicMemoryEnabled {
+        basicMemoryProject = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          CONFIG_DIR="$HOME/.basic-memory"
+          CONFIG_FILE="$CONFIG_DIR/config.json"
+          $DRY_RUN_CMD mkdir -p "$CONFIG_DIR"
+          if [ ! -s "$CONFIG_FILE" ]; then
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/tee "$CONFIG_FILE" <<<'{"projects":{}}' > /dev/null
+          fi
+          TMP=$(${pkgs.coreutils}/bin/mktemp)
+          ${pkgs.jq}/bin/jq \
+            --arg name "${basicMemoryProject}" \
+            --arg path "$HOME/Obsidian Vault" \
+            '.projects[$name] = {"path": $path, "mode": "local"} | .default_project = $name' \
+            "$CONFIG_FILE" > "$TMP"
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$TMP" "$CONFIG_FILE"
+        '';
+      };
 
       programs.claude-code = {
         enable = true;
