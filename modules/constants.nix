@@ -120,6 +120,9 @@
           gpgAgent = "/Users/lewisflude/.gnupg/S.gpg-agent";
           gpgAgentExtra = "/Users/lewisflude/.gnupg/S.gpg-agent.extra";
         };
+        iphone = {
+          syncthingId = "NMKUCPE-KVQV4WW-MLPUWLS-ICPXTOM-IMZA7MV-MED4UDR-GCTZIEZ-BDDBQA2";
+        };
       };
 
       networks = {

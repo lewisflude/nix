@@ -19,6 +19,12 @@ let
   vaultLabel = "Obsidian Vault";
 
   bothConfigured = hosts.jupiter.syncthingId != "" && hosts.mercury.syncthingId != "";
+  iphoneConfigured = (hosts.iphone.syncthingId or "") != "";
+
+  iphoneDevice = lib.optionalAttrs iphoneConfigured {
+    iphone.id = hosts.iphone.syncthingId;
+  };
+  iphoneFolderDevices = lib.optional iphoneConfigured "iphone";
 
   versioning = {
     type = "simple";
@@ -60,14 +66,17 @@ in
   # Jupiter side: NixOS system service contribution.
   flake.modules.nixos.syncthing = lib.mkIf bothConfigured (_: {
     services.syncthing.settings = {
-      devices.mercury = {
-        id = hosts.mercury.syncthingId;
-        addresses = [ "tcp://${hosts.mercury.tailscaleIpv4}:22000" ];
-      };
+      devices = {
+        mercury = {
+          id = hosts.mercury.syncthingId;
+          addresses = [ "tcp://${hosts.mercury.tailscaleIpv4}:22000" ];
+        };
+      }
+      // iphoneDevice;
       folders.${vaultName} = {
         label = vaultLabel;
         path = "/home/${username}/${vaultLabel}";
-        devices = [ "mercury" ];
+        devices = [ "mercury" ] ++ iphoneFolderDevices;
         inherit versioning;
       };
     };
@@ -78,14 +87,17 @@ in
     { config, ... }:
     {
       services.syncthing.settings = {
-        devices.jupiter = {
-          id = hosts.jupiter.syncthingId;
-          addresses = [ "tcp://${hosts.jupiter.tailscaleIpv4}:22000" ];
-        };
+        devices = {
+          jupiter = {
+            id = hosts.jupiter.syncthingId;
+            addresses = [ "tcp://${hosts.jupiter.tailscaleIpv4}:22000" ];
+          };
+        }
+        // iphoneDevice;
         folders.${vaultName} = {
           label = vaultLabel;
           path = "${config.home.homeDirectory}/${vaultLabel}";
-          devices = [ "jupiter" ];
+          devices = [ "jupiter" ] ++ iphoneFolderDevices;
           inherit versioning;
         };
       };
