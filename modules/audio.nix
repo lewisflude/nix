@@ -130,9 +130,12 @@ _: {
       };
 
       wireplumber.extraConfig = {
-        # Apogee: highest session/driver priority so WirePlumber prefers it on
-        # reconnect, and disable suspend on it specifically to avoid pop/delay
-        # on resume. Suspend stays default (5s) for any other ALSA node.
+        # Apogee: top driver priority (drives the graph clock) and a session
+        # priority just under Main-Output (1400) so the Apogee is the
+        # runner-up default if Main-Output goes away. priority.driver is not
+        # subject to the 1500 ceiling — that cap only applies to session
+        # priority for default-node selection. Suspend disabled to avoid
+        # pop/delay on resume; default 5s remains for other ALSA nodes.
         "10-apogee"."monitor.alsa.rules" = [
           {
             matches = [
@@ -141,7 +144,7 @@ _: {
             ];
             actions.update-props = {
               "priority.driver" = 2000;
-              "priority.session" = 2000;
+              "priority.session" = 1300;
               "session.suspend-timeout-seconds" = 0;
             };
           }
