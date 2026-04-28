@@ -81,7 +81,6 @@ in
             homeManager.claudeCode
             homeManager.geminiCli
             homeManager.iaGet
-            homeManager.mpv
             homeManager.yazi
             homeManager.nicotinePlus
             homeManager.obsidian
