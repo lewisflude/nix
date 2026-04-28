@@ -91,9 +91,6 @@ in
             Authorization = "Bearer \${GITHUB_TOKEN}";
           };
         };
-        figma-desktop = {
-          url = "http://127.0.0.1:${toString constants.ports.mcp.figma}/mcp";
-        };
         git = {
           command = "uvx";
           args = [ "mcp-server-git" ];
@@ -155,6 +152,9 @@ in
         ableton = {
           command = "${pkgs.uv}/bin/uvx";
           args = [ "ableton-mcp" ];
+        };
+        figma-desktop = {
+          url = "http://127.0.0.1:${toString constants.ports.mcp.figma}/mcp";
         };
       }
       // lib.optionalAttrs basicMemoryEnabled {

@@ -1,5 +1,7 @@
-# Audio - Simple PipeWire configuration
-# Following NixOS wiki best practices: https://wiki.nixos.org/wiki/PipeWire
+# Audio — PipeWire/WirePlumber configuration for the Apogee Symphony Desktop.
+# Stereo "Main Output" / "Main Input" virtual sinks loopback to specific
+# multichannel ports (AUX0/AUX1) on the Apogee. macOS uses CoreAudio with a
+# launchd USB-reconnect helper.
 _: {
   # NixOS audio configuration
   flake.modules.nixos.audio = _: {
@@ -17,9 +19,7 @@ _: {
     services.pipewire = {
       enable = true;
       alsa.enable = true;
-      alsa.support32Bit = true;
       pulse.enable = true;
-      jack.enable = true;
 
       # Allow PipeWire to switch graph sample rate to match content,
       # avoiding unnecessary resampling with the Apogee.
@@ -137,13 +137,6 @@ _: {
             };
           }
         ];
-        # Disable GPU audio — not used (Apogee handles all audio)
-        "10-disable-gpu-audio"."monitor.alsa.rules" = [
-          {
-            matches = [ { "device.name" = "~alsa_card.*HDA_NVidia*"; } ];
-            actions.update-props."device.disabled" = true;
-          }
-        ];
       };
 
     };
@@ -210,7 +203,10 @@ _: {
         enable = true;
         config = {
           ProgramArguments = [ "${audioKvmRecovery}" ];
-          StartInterval = 5;
+          # launchd ThrottleInterval floors re-launch at 10s; 30s is the
+          # least-wasteful polling cadence here. For event-driven, swap to
+          # Hammerspoon's hs.usb.watcher.
+          StartInterval = 30;
           RunAtLoad = true;
           StandardOutPath = "/tmp/audio-kvm-recovery.log";
           StandardErrorPath = "/tmp/audio-kvm-recovery.err";
