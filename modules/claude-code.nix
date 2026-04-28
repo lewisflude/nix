@@ -152,11 +152,26 @@ in
       claudeDesktopConfigDir =
         if pkgs.stdenv.isDarwin then "$HOME/Library/Application Support/Claude" else "$HOME/.config/Claude";
 
-      # Claude Desktop expects stdio servers as { command, args, env } and
-      # remote servers tagged with type: "http". programs.mcp.servers stores
-      # the latter without the tag, so add it here.
+      # Claude Desktop only accepts stdio servers ({ command, args, env }).
+      # Wrap HTTP/URL servers with `npx mcp-remote` so they appear as stdio.
+      # Header values may contain ${VAR} placeholders that the wrapper script
+      # leaves for the shell to expand at launch time.
       claudeDesktopServers = lib.mapAttrs (
-        _name: server: if server ? url then { type = "http"; } // server else server
+        name: server:
+        if server ? url then
+          let
+            headerArgs = lib.concatStringsSep " " (
+              lib.mapAttrsToList (k: v: ''--header "${k}: ${v}"'') (server.headers or { })
+            );
+          in
+          {
+            command = "${pkgs.writeShellScript "mcp-remote-${name}" ''
+              export PATH="${pkgs.nodejs}/bin:$PATH"
+              exec npx -y mcp-remote ${lib.escapeShellArg server.url} ${headerArgs} "$@"
+            ''}";
+          }
+        else
+          server
       ) mcpServers;
 
       claudeDesktopServersJson = builtins.toJSON claudeDesktopServers;
