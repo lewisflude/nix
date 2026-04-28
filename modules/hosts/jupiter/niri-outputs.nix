@@ -18,8 +18,8 @@ _: {
           focus-at-startup = true;
         };
 
-        # Virtual 16:9 streaming display — off by default, toggled on by Sunshine
-        # prep-cmd via `niri msg output DP-3 on` when a Moonlight client connects.
+        # Virtual 16:9 streaming display — off by default, enabled by sunshine's
+        # systemd preStart at service start, then toggled per-stream by prep-cmd.
         outputs."DP-3" = {
           enable = false;
           mode = {

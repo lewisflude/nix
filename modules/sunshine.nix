@@ -1,7 +1,8 @@
 # Sunshine game streaming server with NVENC encoding (RTX 4090)
 # KMS capture streams a virtual 16:9 display on DP-3 (EDID override, no dummy plug).
-# Niri keeps DP-3 off by default; Sunshine prep-cmd toggles it on connect and off
-# on disconnect via `niri msg` IPC.
+# DP-3 is disabled in niri at startup; sunshine's preStart enables it once via
+# `niri msg` so the KMS connector exists when sunshine probes encoders, and the
+# global_prep_cmd handles per-stream on/off thereafter.
 _: {
   flake.modules.nixos.sunshine =
     { pkgs, config, ... }:
@@ -65,6 +66,15 @@ _: {
           LD_LIBRARY_PATH = "/run/opengl-driver/lib";
           WAYLAND_DISPLAY = "wayland-1";
         };
+        # Enable the virtual output before sunshine probes encoders. Globs for
+        # the niri socket since NIRI_SOCKET isn't inherited by user services.
+        preStart = ''
+          for sock in "$XDG_RUNTIME_DIR"/niri.wayland-1.*.sock; do
+            [ -S "$sock" ] || continue
+            NIRI_SOCKET="$sock" ${niri}/bin/niri msg output DP-3 on || true
+            break
+          done
+        '';
       };
     };
 }

@@ -42,7 +42,9 @@ _: {
       extraConfig.pipewire."91-virtual-sink" = {
         "context.objects" = [
           {
-            # User-facing stereo output — appears under Sinks in wpctl
+            # User-facing stereo output — appears under Sinks in wpctl.
+            # priority.session above the Apogee (2000) so it wins as the
+            # initial default; user selections via DMS still take precedence.
             factory = "adapter";
             args = {
               "factory.name" = "support.null-audio-sink";
@@ -52,6 +54,7 @@ _: {
               "audio.position" = "FL,FR";
               "monitor.channel-volumes" = true;
               "monitor.passthrough" = true;
+              "priority.session" = 3000;
             };
           }
           {
@@ -64,6 +67,7 @@ _: {
               "media.class" = "Audio/Source/Virtual";
               "audio.position" = "FL,FR";
               "monitor.channel-volumes" = true;
+              "priority.session" = 3000;
             };
           }
         ];
@@ -117,8 +121,10 @@ _: {
       };
 
       wireplumber.extraConfig = {
-        # Give the Apogee highest priority so WirePlumber prefers it on reconnect
-        "10-apogee-priority"."monitor.alsa.rules" = [
+        # Apogee: highest session/driver priority so WirePlumber prefers it on
+        # reconnect, and disable suspend on it specifically to avoid pop/delay
+        # on resume. Suspend stays default (5s) for any other ALSA node.
+        "10-apogee"."monitor.alsa.rules" = [
           {
             matches = [
               { "node.name" = "~alsa_output.usb-Apogee_Electronics*"; }
@@ -127,14 +133,8 @@ _: {
             actions.update-props = {
               "priority.driver" = 2000;
               "priority.session" = 2000;
+              "session.suspend-timeout-seconds" = 0;
             };
-          }
-        ];
-        # Disable device suspension to prevent audio popping/delay
-        "10-disable-suspend"."monitor.alsa.rules" = [
-          {
-            matches = [ { "node.name" = "~alsa_*"; } ];
-            actions.update-props."session.suspend-timeout-seconds" = 0;
           }
         ];
         # Disable GPU audio — not used (Apogee handles all audio)
@@ -144,21 +144,6 @@ _: {
             actions.update-props."device.disabled" = true;
           }
         ];
-
-        # Bluetooth codecs (roles left at WirePlumber defaults to include A2DP)
-        "10-bluez"."monitor.bluez.properties" = {
-          "bluez5.enable-sbc-xq" = true;
-          "bluez5.enable-msbc" = true;
-          "bluez5.enable-hw-volume" = true;
-        };
-
-        # Set the virtual stereo sink/source as defaults
-        "10-default-sink"."wireplumber.settings"."default.configured.audio.sink" = {
-          name = "Main-Output";
-        };
-        "10-default-source"."wireplumber.settings"."default.configured.audio.source" = {
-          name = "Main-Input";
-        };
       };
 
     };
