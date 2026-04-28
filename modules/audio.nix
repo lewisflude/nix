@@ -11,9 +11,10 @@ _: {
     # Threaded IRQs for lower worst-case audio latency
     boot.kernelParams = [ "threadirqs" ];
 
-    # Disable USB autosuspend for Apogee Symphony Desktop (vendor 0c60, product 002a)
+    # Disable USB autosuspend for Apogee Symphony Desktop (vendor 0c60, product 002a).
+    # power/control=on already pins the device awake; autosuspend=-1 would be redundant.
     services.udev.extraRules = ''
-      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0c60", ATTR{idProduct}=="002a", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
+      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0c60", ATTR{idProduct}=="002a", ATTR{power/control}="on"
     '';
 
     services.pipewire = {
@@ -43,8 +44,14 @@ _: {
         "context.objects" = [
           {
             # User-facing stereo output — appears under Sinks in wpctl.
-            # priority.session above the Apogee (2000) so it wins as the
-            # initial default; user selections via DMS still take precedence.
+            # priority.session 1400 keeps it under the upstream 1500 ceiling
+            # (see WirePlumber alsa node docs) while still beating the Apogee
+            # multichannel sink (1300) so Main-Output wins as initial default.
+            # Note: once `wpctl set-default` runs, WirePlumber persists the
+            # choice in ~/.local/state/wireplumber/ and that overrides
+            # priority.session forever. Use `wpctl settings --delete
+            # default.configured.audio.sink` to re-enable priority-based
+            # selection if Main-Output stops winning.
             factory = "adapter";
             args = {
               "factory.name" = "support.null-audio-sink";
@@ -54,11 +61,13 @@ _: {
               "audio.position" = "FL,FR";
               "monitor.channel-volumes" = true;
               "monitor.passthrough" = true;
-              "priority.session" = 3000;
+              "priority.session" = 1400;
             };
           }
           {
-            # User-facing stereo input — appears under Sources in wpctl
+            # User-facing stereo input — appears under Sources in wpctl.
+            # 1900 sits at the top of the documented source range (1600-2000)
+            # so this wins over the raw Apogee multichannel source.
             factory = "adapter";
             args = {
               "factory.name" = "support.null-audio-sink";
@@ -67,7 +76,7 @@ _: {
               "media.class" = "Audio/Source/Virtual";
               "audio.position" = "FL,FR";
               "monitor.channel-volumes" = true;
-              "priority.session" = 3000;
+              "priority.session" = 1900;
             };
           }
         ];
