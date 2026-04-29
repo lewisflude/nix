@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v21
+        uses: DeterminateSystems/nix-installer-action@v22
 
       - name: Setup Nix Cache
         uses: DeterminateSystems/magic-nix-cache-action@v13
@@ -71,7 +71,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v21
+        uses: DeterminateSystems/nix-installer-action@v22
 
       - name: Setup Nix Cache
         uses: DeterminateSystems/magic-nix-cache-action@v13
@@ -96,7 +96,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v21
+        uses: DeterminateSystems/nix-installer-action@v22
 
       - name: Setup Nix Cache
         uses: DeterminateSystems/magic-nix-cache-action@v13
@@ -135,7 +135,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v21
+        uses: DeterminateSystems/nix-installer-action@v22
 
       - name: Setup Nix Cache
         uses: DeterminateSystems/magic-nix-cache-action@v13
