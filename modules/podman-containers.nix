@@ -15,12 +15,7 @@ in
     in
     {
       # Enable Podman
-      virtualisation.podman = {
-        enable = true;
-        # Provides /run/docker.sock for tools that speak the Docker API
-        # (e.g. claude-desktop's FHS env bundles `pkgs.docker`).
-        dockerSocket.enable = true;
-      };
+      virtualisation.podman.enable = true;
 
       virtualisation.oci-containers.backend = "podman";
 

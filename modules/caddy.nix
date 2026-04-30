@@ -42,7 +42,6 @@ let
     inherit (constants.ports.services) readarr;
     inherit (constants.ports.services) bazarr;
     inherit (constants.ports.services) notifiarr;
-    inherit (constants.ports.services) huntarr;
     inherit (constants.ports.services) autopulse;
     inherit (constants.ports.services) jellystat;
     inherit (constants.ports.services) flaresolverr;

@@ -51,7 +51,6 @@
           filebrowser = 8400;
           notifiarr = 5454;
           autopulse = 2875;
-          huntarr = 9705;
 
           syncthing = {
             webUi = 8384;
