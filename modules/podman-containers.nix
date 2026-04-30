@@ -17,8 +17,9 @@ in
       # Enable Podman
       virtualisation.podman = {
         enable = true;
+        # Provides /run/docker.sock for tools that speak the Docker API
+        # (e.g. claude-desktop's FHS env bundles `pkgs.docker`).
         dockerSocket.enable = true;
-        defaultNetwork.settings.dns_enabled = true;
       };
 
       virtualisation.oci-containers.backend = "podman";
@@ -35,11 +36,17 @@ in
           "${configPath}/homarr/data:/data"
         ];
         ports = [ "${toString constants.ports.services.homarr}:7575" ];
+        # sdnotify=healthy makes podman send READY=1 to systemd only after the
+        # first successful healthcheck, so podman-homarr.service is only marked
+        # active once healthy. Without this, the transient healthcheck unit can
+        # fail during activation and propagate as exit 4 from nixos-rebuild.
+        podman.sdnotify = "healthy";
         extraOptions = [
           "--health-cmd=wget --no-verbose --tries=1 --spider http://localhost:7575/ || exit 1"
           "--health-interval=30s"
           "--health-timeout=10s"
           "--health-retries=3"
+          "--health-start-period=60s"
         ];
       };
 
