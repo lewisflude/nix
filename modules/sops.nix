@@ -31,6 +31,12 @@ in
         gnupg.sshKeyPaths = [ "/etc/ssh/ssh_host_rsa_key" ];
         defaultSopsFile = ../secrets/secrets.yaml;
         secrets = {
+          # Decrypted to /run/secrets-for-users before user creation.
+          # Owner cannot be set (users do not yet exist at decrypt time).
+          hashedPassword = {
+            neededForUsers = true;
+            mode = "0400";
+          };
           CIRCLECI_TOKEN = mkSecret { allowUserRead = true; };
           GITHUB_TOKEN = mkSecret { allowUserRead = true; };
           LATITUDE = mkSecret { };

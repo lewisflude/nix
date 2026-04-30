@@ -8,27 +8,29 @@ let
 in
 {
   # NixOS home-manager base configuration (structure only)
-  flake.modules.nixos.homeManagerBase = _: {
-    home-manager = {
-      useGlobalPkgs = true;
-      useUserPackages = true;
-      backupFileExtension = "hm-backup";
+  flake.modules.nixos.homeManagerBase =
+    { lib, ... }:
+    {
+      home-manager = {
+        useGlobalPkgs = true;
+        useUserPackages = true;
+        backupFileExtension = "hm-backup";
 
-      users.${username} =
-        { osConfig, ... }:
-        {
-          # Auto-config: username, homeDirectory, stateVersion
-          home.stateVersion = osConfig.system.stateVersion;
-          home.username = username;
-          home.homeDirectory = "/home/${username}";
-          programs.home-manager.enable = true;
-          programs.git.settings.user.email = useremail;
+        users.${username} =
+          { osConfig, ... }:
+          {
+            # Auto-config: username, homeDirectory, stateVersion
+            home.stateVersion = osConfig.system.stateVersion;
+            home.username = lib.mkDefault username;
+            home.homeDirectory = lib.mkDefault "/home/${username}";
+            programs.home-manager.enable = true;
+            programs.git.settings.user.email = useremail;
 
-          # Disable options.json generation to avoid derivation context warning
-          manual.json.enable = false;
-        };
+            # Disable options.json generation to avoid derivation context warning
+            manual.json.enable = false;
+          };
+      };
     };
-  };
 
   # Darwin home-manager base configuration (structure only)
   flake.modules.darwin.homeManagerBase =

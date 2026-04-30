@@ -7,7 +7,12 @@ in
 {
   # Merges into the same jupiter NixOS configuration as definition.nix
   configurations.nixos.jupiter.module =
-    { pkgs, lib, ... }:
+    {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
     {
       # =========================================================================
       # Kernel & Hardware
@@ -21,7 +26,6 @@ in
       ];
       boot.kernelModules = [
         "kvm-intel"
-        "zfs"
         "hid_sony"
       ];
 
@@ -97,7 +101,7 @@ in
       # =========================================================================
       boot.loader = {
         systemd-boot.enable = true;
-        systemd-boot.configurationLimit = 5;
+        systemd-boot.configurationLimit = 20;
         efi.canTouchEfiVariables = true;
       };
 
@@ -136,7 +140,7 @@ in
       # =========================================================================
       users.mutableUsers = false;
       users.users.${username} = {
-        hashedPassword = "$6$qowedYl/fO.6KTXt$Dxs8LBnylnLfNsqlfyC76XGziJX/MNI3hhgRHsvRCfXCebUtDFLSF1ObUcyzYZiVYZJ1Y8N50qr4/6EvkKZpa1";
+        hashedPasswordFile = config.sops.secrets.hashedPassword.path;
         openssh.authorizedKeys.keys = [
           "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEyBDIzK/OoFY7M1i96wP9wE+OeKk56iTvPwStEiFc+k lewis@lewisflude.com"
           "sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBGB2FdscjELsv6fQ4dwLN7ky3Blye+pxJHBfACdYmxhgPodPaRLqbekyrt+XDdXvQYmuiZ0XIa/fL4/452g5MWcAAAAEc3NoOg== lewis@lewisflude.com"
@@ -145,11 +149,7 @@ in
         ];
         extraGroups = [
           "dialout"
-          "admin"
           "wheel"
-          "staff"
-          "_developer"
-          "git"
           "i2c"
           "media"
           "video"

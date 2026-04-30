@@ -116,6 +116,6 @@ in
       # =========================================================================
       networking.hostName = "mercury";
       system.stateVersion = constants.defaults.darwinStateVersion;
-      system.primaryUser = "lewisflude";
+      system.primaryUser = username;
     };
 }
