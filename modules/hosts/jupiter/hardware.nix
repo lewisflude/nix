@@ -51,10 +51,6 @@ in
           device = "/dev/disk/by-label/BOOT";
           fsType = "vfat";
         };
-        "/var/lib/docker" = {
-          device = "npool/docker";
-          fsType = "zfs";
-        };
         "/mnt/disk1" = {
           device = "/dev/disk/by-id/ata-WDC_WD140EDFZ-11A0VA0_9LGED2YG-part1";
           fsType = "xfs";

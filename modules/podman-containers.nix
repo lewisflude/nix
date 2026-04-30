@@ -63,8 +63,9 @@ in
       };
 
       # Termix - Terminal web UI
+      # Pinned to digest of :latest as of 2026-04-30 (upstream tags only :latest)
       virtualisation.oci-containers.containers.termix = {
-        image = "ghcr.io/lukegus/termix:latest";
+        image = "ghcr.io/lukegus/termix@sha256:52e45c1ea3fb85be5b3ade5ff42eed0946fe81131cbd834f6960e00797f17f86";
         environment = {
           TZ = timezone;
         };
@@ -280,8 +281,9 @@ in
       };
 
       # Profilarr - Profile management
+      # Pinned to digest of :latest as of 2026-04-30
       virtualisation.oci-containers.containers.profilarr = {
-        image = "docker.io/santiagosayshey/profilarr:latest";
+        image = "docker.io/santiagosayshey/profilarr@sha256:8a514f8429cd33885166facc9eb6504fa9ded056c737609e5e8ef32ae0afb350";
         environment = {
           TZ = timezone;
           PUID = toString uid;
@@ -294,8 +296,9 @@ in
       };
 
       # Listenarr - Music tracker
+      # Pinned to digest of :canary as of 2026-04-30
       virtualisation.oci-containers.containers.listenarr = {
-        image = "ghcr.io/therobbiedavis/listenarr:canary";
+        image = "ghcr.io/therobbiedavis/listenarr@sha256:c917f40d7a79f89e10ecef754cf4fd189f018a55ad561f3a8f95f6766e47086b";
         environment = {
           TZ = timezone;
           PUID = toString uid;

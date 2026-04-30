@@ -36,15 +36,21 @@ in
     in
     {
       imports = [
+        # WARNING: ghcr.io/plexguide/huntarr is unmaintained. The upstream
+        # repo was deleted after security disclosures
+        # (see https://github.com/MGHazz/huntarr.io-archive). The image is
+        # currently 403 on ghcr.io; only locally cached layers will pull.
+        # Replace with refringe/huntarr2 or NIBRAJvai/newtarr, or remove.
         (mkContainer {
           name = "huntarr";
           image = "ghcr.io/plexguide/huntarr:latest";
           port = constants.ports.services.huntarr;
           containerPort = 9705;
         })
+        # Pinned to digest of :latest as of 2026-04-30
         (mkContainer {
           name = "autopulse";
-          image = "ghcr.io/dan-online/autopulse:latest";
+          image = "ghcr.io/dan-online/autopulse@sha256:383b63d25a30ea3945b23462aba0864094c3f76614854bce19edaca26a34b160";
           port = constants.ports.services.autopulse;
           containerPort = 2875;
           extraEnv = {
