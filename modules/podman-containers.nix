@@ -218,9 +218,12 @@ in
 
       # Set the jellystat password and grant DB ownership after ensureUsers
       # / ensureDatabases have run. Both statements are idempotent.
+      # `ensureDatabases` runs in postgresql-setup.service, NOT in
+      # postgresql.service's postStart, so we must order against the setup
+      # unit explicitly — otherwise the ALTER DATABASE races with DB creation.
       systemd.services.jellystat-db-password = {
-        after = [ "postgresql.service" ];
-        requires = [ "postgresql.service" ];
+        after = [ "postgresql-setup.service" ];
+        requires = [ "postgresql-setup.service" ];
         before = [ "podman-jellystat.service" ];
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
