@@ -201,23 +201,23 @@ in
       };
 
       # Jellystat - Jellyfin statistics (PostgreSQL runs natively, not containerized)
+      # The container hardcodes its database name as `jfstat` and runs
+      # `CREATE DATABASE jfstat` if missing — but the unprivileged `jellystat`
+      # role can't create databases, so we provision it declaratively here.
+      # `ensureDBOwnership` only works when DB name == user name, so ownership
+      # is granted by the jellystat-db-password oneshot below.
       services.postgresql = {
         enable = true;
-        ensureDatabases = [ "jellystat" ];
-        ensureUsers = [
-          {
-            name = "jellystat";
-            ensureDBOwnership = true;
-          }
-        ];
-        # Allow password auth from localhost for the jellystat container
+        ensureDatabases = [ "jfstat" ];
+        ensureUsers = [ { name = "jellystat"; } ];
         authentication = ''
-          host jellystat jellystat 127.0.0.1/32 md5
-          host jellystat jellystat ::1/128 md5
+          host jfstat jellystat 127.0.0.1/32 md5
+          host jfstat jellystat ::1/128 md5
         '';
       };
 
-      # Set the jellystat PostgreSQL password from SOPS after ensureUsers creates the role
+      # Set the jellystat password and grant DB ownership after ensureUsers
+      # / ensureDatabases have run. Both statements are idempotent.
       systemd.services.jellystat-db-password = {
         after = [ "postgresql.service" ];
         requires = [ "postgresql.service" ];
@@ -231,8 +231,9 @@ in
         };
         script = ''
           PASSWORD=$(cat ${nixosArgs.config.sops.secrets."jellystat-postgres-password".path})
-          ${nixosArgs.config.services.postgresql.package}/bin/psql -c \
-            "ALTER USER jellystat WITH PASSWORD '$PASSWORD';"
+          psql=${nixosArgs.config.services.postgresql.package}/bin/psql
+          $psql -c "ALTER USER jellystat WITH PASSWORD '$PASSWORD';"
+          $psql -c "ALTER DATABASE jfstat OWNER TO jellystat;"
         '';
       };
 
