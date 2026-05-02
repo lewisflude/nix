@@ -331,6 +331,7 @@ in
 
           enabledPlugins = {
             "code-simplifier@claude-plugins-official" = true;
+            "figma@claude-plugins-official" = true;
           };
 
           permissions = {
