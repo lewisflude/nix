@@ -320,6 +320,8 @@ in
         };
 
         settings = {
+          effort = "high";
+
           env = {
             DISABLE_AUTOUPDATER = "1";
             FORCE_AUTOUPDATE_PLUGINS = "1";
