@@ -33,6 +33,14 @@ _: {
           };
         };
 
+        # Hardware HDMI dummy plug. Required so NVIDIA's proprietary driver
+        # brings up its KMS modeset pipeline — without a real DDC EDID on at
+        # least one connector, sunshine fails with "Unable to find display or
+        # encoder". Kept disabled here so niri/DMS don't render to it; only the
+        # plug's electrical presence at the DRM layer matters. The actual
+        # streaming surface is DP-3 above.
+        outputs."HDMI-A-1".enable = false;
+
         spawn-at-startup = [
           {
             command = [
