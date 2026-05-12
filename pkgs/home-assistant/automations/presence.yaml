@@ -1,0 +1,48 @@
+- id: set_away_mode
+  alias: Set Away mode when everyone leaves
+  description: Set house mode to Away when both residents have been away for 10 minutes
+  trigger:
+    - platform: state
+      entity_id:
+        - device_tracker.lewiss_phone
+        - device_tracker.bexs_phone
+      to: not_home
+      for: "00:10:00"
+  condition:
+    - condition: state
+      entity_id: device_tracker.lewiss_phone
+      state: not_home
+    - condition: state
+      entity_id: device_tracker.bexs_phone
+      state: not_home
+  action:
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.house_mode
+      data:
+        option: Away
+
+- id: set_home_mode
+  alias: Set Home mode when anyone arrives
+  description: Set house mode to Home when either resident arrives
+  trigger:
+    - platform: state
+      entity_id:
+        - device_tracker.lewiss_phone
+        - device_tracker.bexs_phone
+      to: home
+  condition:
+    - condition: state
+      entity_id: input_select.house_mode
+      state:
+        - Away
+        - Sleep
+  action:
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.house_mode
+      data:
+        option: Home
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.sleep_mode

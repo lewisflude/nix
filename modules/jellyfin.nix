@@ -1,48 +1,29 @@
 # Jellyfin Service Module - Dendritic Pattern
 # Media server with hardware transcoding
-# Usage: Import config.flake.modules.nixos.jellyfin in host definition
+# User/group declared centrally in media-user.nix (with render/video extraGroups).
 { config, ... }:
 let
   inherit (config) constants;
+  inherit (config.lib) media;
 in
 {
   flake.modules.nixos.jellyfin =
     { lib, ... }:
-    let
-      inherit (lib) mkDefault;
-      user = "media";
-      group = "media";
-    in
     {
-      users.users.${user} = {
-        isSystemUser = true;
-        inherit group;
-        description = "Media management user";
-        # Add to render/video groups for hardware acceleration
-        extraGroups = [
-          "render"
-          "video"
-        ];
-      };
-      users.groups.${group} = { };
-
       services.jellyfin = {
         enable = true;
         openFirewall = false;
-        inherit user group;
+        inherit (media) user group;
       };
 
-      systemd.services.jellyfin = {
-        after = [ "mnt-storage.mount" ];
-        requires = [ "mnt-storage.mount" ];
-      };
+      systemd.services.jellyfin = media.serviceDefaults;
 
       networking.firewall = {
-        allowedTCPPorts = mkDefault [
+        allowedTCPPorts = lib.mkDefault [
           constants.ports.services.jellyfin # 8096 - HTTP
           8920 # HTTPS
         ];
-        allowedUDPPorts = mkDefault [
+        allowedUDPPorts = lib.mkDefault [
           1900 # DLNA discovery
           7359 # Client discovery
         ];

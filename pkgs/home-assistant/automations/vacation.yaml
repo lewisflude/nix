@@ -1,0 +1,36 @@
+- id: vacation_mode_on
+  alias: Set frost protection for vacation
+  description: Set all heating to frost protection and house mode to Away
+  trigger:
+    - platform: state
+      entity_id: input_boolean.vacation_mode
+      to: "on"
+  action:
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.house_mode
+      data:
+        option: Away
+    - action: climate.set_temperature
+      target:
+        entity_id:
+          - climate.bedroom
+          - climate.guest_bedroom
+          - climate.hallway
+          - climate.kitchen
+      data:
+        temperature: 7
+
+- id: vacation_mode_off
+  alias: Restore heating after vacation
+  description: Restore house mode to Home when vacation ends
+  trigger:
+    - platform: state
+      entity_id: input_boolean.vacation_mode
+      to: "off"
+  action:
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.house_mode
+      data:
+        option: Home

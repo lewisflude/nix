@@ -4,6 +4,7 @@
 { config, ... }:
 let
   inherit (config) constants username;
+  inherit (config.lib) media;
   samplesPath = "/home/${username}/Music/samples";
   musicProductionCategory = "music-production";
   musicProductionPath = "/mnt/storage/torrents/${musicProductionCategory}";
@@ -230,7 +231,8 @@ in
         };
       };
 
-      # User and group
+      # qBittorrent runs as its own system user but in the media group.
+      # The media group itself is declared centrally in media-user.nix.
       users.users.qbittorrent = {
         isSystemUser = true;
         group = "media";
@@ -238,25 +240,25 @@ in
         createHome = true;
       };
 
-      # Ensure media group exists
-      users.groups.media = { };
-
       # Allow the primary user to read/write files created by qBittorrent
       # under the music-production category (files are owned by qbittorrent:media).
       users.users.${username}.extraGroups = [ "media" ];
 
-      # Ensure download directories exist with correct ownership
+      # Ensure download directories exist with correct ownership.
+      # Note: media.mkDir owns paths as media:media; qbittorrent (also in `media` group)
+      # writes with UMask 0002, so files are group-writable. This matches the previous
+      # qbittorrent:media ownership in effective access terms.
       systemd.tmpfiles.rules = [
-        "d '/mnt/storage/torrents' 0770 qbittorrent media - -"
+        (media.mkDir "/mnt/storage/torrents")
         # Category subdirectories (matching SABnzbd pattern)
-        "d '/mnt/storage/torrents/movies' 0770 qbittorrent media - -"
-        "d '/mnt/storage/torrents/tv' 0770 qbittorrent media - -"
-        "d '/mnt/storage/torrents/music' 0770 qbittorrent media - -"
-        "d '${musicProductionPath}' 0770 qbittorrent media - -"
-        "d '/var/lib/qbittorrent/incomplete' 0770 qbittorrent media - -"
+        (media.mkDir "/mnt/storage/torrents/movies")
+        (media.mkDir "/mnt/storage/torrents/tv")
+        (media.mkDir "/mnt/storage/torrents/music")
+        (media.mkDir musicProductionPath)
+        (media.mkDir "/var/lib/qbittorrent/incomplete")
         # Samples destination: setgid so synced files inherit the media group,
         # letting both the user (as owner) and qbittorrent (group member) write.
-        "d '${samplesPath}' 2775 ${username} media - -"
+        "d '${samplesPath}' 2775 ${username} ${media.group} - -"
       ];
 
       # qBittorrent service with VPN confinement.

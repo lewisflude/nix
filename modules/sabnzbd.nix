@@ -1,49 +1,36 @@
 # SABnzbd Service Module - Dendritic Pattern
 # Usenet downloader for automated media retrieval
-# Usage: Import flake.modules.nixos.sabnzbd in host definition
+# Usage: Import flake.modules.nixos.sabnzbd in host definition.
+# User/group declared centrally in media-user.nix.
 { config, ... }:
 let
   inherit (config) constants;
+  inherit (config.lib) media;
 in
 {
-  # ==========================================================================
-  # NixOS System Configuration
-  # ==========================================================================
   flake.modules.nixos.sabnzbd =
     { lib, ... }:
     let
       inherit (lib) mkDefault;
-
-      # Default configuration (can be overridden by hosts)
-      user = "media";
-      group = "media";
       port = constants.ports.services.sabnzbd;
       downloadDir = "/var/lib/sabnzbd/incomplete";
       completeDir = "/mnt/storage/usenet";
     in
     {
-      # Ensure media user/group exist
-      users.users.${user} = mkDefault {
-        isSystemUser = true;
-        inherit group;
-        description = "Media management user";
-      };
-      users.groups.${group} = mkDefault { };
-
       # Ensure required directories exist (0770 so media group members can write)
       systemd.tmpfiles.rules = [
-        "d '${downloadDir}' 0770 ${user} ${group} - -"
-        "d '${completeDir}' 0770 ${user} ${group} - -"
-        "d '/var/lib/sabnzbd/nzb_backup' 0770 ${user} ${group} - -"
+        (media.mkDir downloadDir)
+        (media.mkDir completeDir)
+        (media.mkDir "/var/lib/sabnzbd/nzb_backup")
         # Category subdirectories (TRASHguides)
-        "d '${completeDir}/movies' 0770 ${user} ${group} - -"
-        "d '${completeDir}/tv' 0770 ${user} ${group} - -"
-        "d '${completeDir}/music' 0770 ${user} ${group} - -"
+        (media.mkDir "${completeDir}/movies")
+        (media.mkDir "${completeDir}/tv")
+        (media.mkDir "${completeDir}/music")
       ];
 
       services.sabnzbd = {
         enable = true;
-        inherit user group;
+        inherit (media) user group;
         configFile = null; # use settings instead (default is non-null for stateVersion < 26.05)
         settings = {
           misc = {
@@ -103,14 +90,10 @@ in
         };
       };
 
-      # I/O and CPU nice priorities to prevent starving compositor
-      systemd.services.sabnzbd = {
-        after = [ "mnt-storage.mount" ];
-        requires = [ "mnt-storage.mount" ];
+      # I/O and CPU nice priorities to prevent starving compositor.
+      # serviceDefaults provides TZ/after/requires/UMask; nice priorities are sabnzbd-specific.
+      systemd.services.sabnzbd = lib.recursiveUpdate media.serviceDefaults {
         serviceConfig = {
-          # Match qBittorrent's UMask so files are group-writable (0664/0775)
-          # Without this, SABnzbd uses default 0022 → files are 0644 → Sonarr/Radarr can't write
-          UMask = "0002";
           # Nice priority: 19 = lowest CPU priority (background process)
           Nice = 19;
           # I/O priority: best-effort class 7 = lowest I/O priority

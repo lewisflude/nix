@@ -1,0 +1,22 @@
+get_entity_attributes:
+  alias: Get Entity Attributes
+  description: Fetches and returns the state and attributes of an entity.
+  fields:
+    entity_name:
+      description: Name of the entity
+      example: Kids Light
+  sequence:
+    - variables:
+        entity_id: |
+          {% set matched_entity = states | selectattr('name', 'equalto', entity_name) | map(attribute='entity_id') | first %}
+          {{ matched_entity if matched_entity else entity_name }}
+    - condition: template
+      value_template: "{{ entity_id is defined and states(entity_id) not in ['unavailable', 'unknown'] }}"
+      alias: Check entity exists and is available
+    - variables:
+        attr:
+          entity_id: "{{ entity_id }}"
+          state: "{{ states(entity_id) }}"
+          attributes: "{{ states[entity_id].attributes }}"
+    - stop: Returning entity state and attributes
+      response_variable: attr

@@ -4,6 +4,7 @@
 { config, ... }:
 let
   inherit (config) constants;
+  inherit (config.lib) media;
 in
 {
   flake.modules.nixos.arrStack =
@@ -11,47 +12,48 @@ in
     let
       inherit (nixosArgs) lib;
       cfg = nixosArgs.config;
-      inherit (lib) mkDefault mkForce optional;
-      user = "media";
-      group = "media";
-      tz = constants.defaults.timezone;
-      mediaDirRule = sub: "d '/mnt/storage/media/${sub}' 0770 ${user} ${group} - -";
-      storageBound = {
-        environment.TZ = mkDefault tz;
-        after = [ "mnt-storage.mount" ] ++ optional cfg.services.prowlarr.enable "prowlarr.service";
-        requires = [ "mnt-storage.mount" ];
+      inherit (lib)
+        mkDefault
+        mkForce
+        optional
+        recursiveUpdate
+        ;
+      # serviceDefaults provides TZ/after/requires/UMask. Override UMask via mkForce
+      # because some upstream modules set their own default.
+      storageBound = recursiveUpdate media.serviceDefaults {
+        after = optional cfg.services.prowlarr.enable "prowlarr.service";
         serviceConfig.UMask = mkForce "0002";
       };
     in
     {
       systemd.tmpfiles.rules = [
-        "d '/mnt/storage/media' 0770 ${user} ${group} - -"
-        (mediaDirRule "movies")
-        (mediaDirRule "tv")
-        (mediaDirRule "music")
-        "d '/mnt/storage/books' 0770 ${user} ${group} - -"
+        (media.mkDir media.mediaRoot)
+        (media.mkDir "${media.mediaRoot}/movies")
+        (media.mkDir "${media.mediaRoot}/tv")
+        (media.mkDir "${media.mediaRoot}/music")
+        (media.mkDir "${media.storageRoot}/books")
       ];
 
       services.radarr = {
         enable = true;
-        inherit user group;
+        inherit (media) user group;
       };
       services.sonarr = {
         enable = true;
-        inherit user group;
+        inherit (media) user group;
         dataDir = "/var/lib/sonarr/.config/Sonarr";
       };
       services.lidarr = {
         enable = true;
-        inherit user group;
+        inherit (media) user group;
       };
       services.readarr = {
         enable = true;
-        inherit user group;
+        inherit (media) user group;
       };
       services.bazarr = {
         enable = true;
-        inherit user group;
+        inherit (media) user group;
         listenPort = constants.ports.services.bazarr;
       };
       services.prowlarr.enable = true;
@@ -70,19 +72,18 @@ in
       systemd.services.lidarr = storageBound;
       systemd.services.readarr = storageBound;
 
-      systemd.services.bazarr = {
-        environment.TZ = mkDefault tz;
+      systemd.services.bazarr = recursiveUpdate media.serviceDefaults {
+        # bazarr depends on sonarr/radarr completing scans; storage mount is shared via serviceDefaults.
         after =
           optional cfg.services.sonarr.enable "sonarr.service"
           ++ optional cfg.services.radarr.enable "radarr.service";
         serviceConfig.UMask = mkForce "0002";
       };
 
-      systemd.services.prowlarr = {
-        environment.TZ = mkDefault tz;
+      systemd.services.prowlarr = recursiveUpdate media.serviceDefaults {
         serviceConfig = {
-          User = user;
-          Group = group;
+          User = media.user;
+          Group = media.group;
           UMask = mkForce "0002";
         };
       };

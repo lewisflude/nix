@@ -1,0 +1,27 @@
+play_music:
+  alias: Play Music
+  description: Search and play music using Music Assistant
+  fields:
+    query:
+      description: Search query for music (artist, song, album, genre)
+      example: play some jazz
+      required: true
+    area:
+      description: Area name for playback location
+      example: living room
+      required: false
+    media_player:
+      description: Media player entity for playback
+      example: media_player.music_assistant
+      default: media_player.music_assistant
+  sequence:
+    - condition: template
+      value_template: "{{ states(media_player) not in ['unavailable', 'unknown'] }}"
+      alias: Check media player is available
+    - action: media_player.play_media
+      target:
+        entity_id: "{{ media_player }}"
+        area_id: "{{ area | default('') }}"
+      data:
+        media_content_type: music
+        media_content_id: "{{ query }}"

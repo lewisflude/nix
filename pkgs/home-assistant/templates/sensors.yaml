@@ -1,0 +1,26 @@
+- sensor:
+    - name: Average House Temperature
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state: |
+        {% set temps = [
+          states('sensor.bedroom_temperature') | float(0),
+          states('sensor.guest_bedroom_temperature') | float(0),
+          states('sensor.living_room_temperature') | float(0),
+          states('sensor.kitchen_temperature') | float(0),
+          states('sensor.office_temperature') | float(0)
+        ] %}
+        {% set valid_temps = temps | select('>', 0) | list %}
+        {{ (valid_temps | sum / (valid_temps | length)) | round(1) if valid_temps | length > 0 else 0 }}
+      availability: |
+        {{ [
+          states('sensor.bedroom_temperature'),
+          states('sensor.guest_bedroom_temperature'),
+          states('sensor.living_room_temperature'),
+          states('sensor.kitchen_temperature'),
+          states('sensor.office_temperature')
+        ] | reject('in', ['unknown', 'unavailable']) | list | length > 0 }}
+    - name: Home Occupied
+      state: |
+        {{ is_state('input_select.house_mode', 'Home') or
+           is_state('input_select.house_mode', 'Guest') }}

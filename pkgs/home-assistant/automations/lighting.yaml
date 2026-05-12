@@ -1,0 +1,123 @@
+- id: lights_on_at_sunset
+  alias: Turn on lights at sunset
+  description: Turn on living area lights when the sun sets and someone is home
+  trigger:
+    - platform: sun
+      event: sunset
+  condition:
+    - condition: state
+      entity_id: input_select.house_mode
+      state:
+        - Home
+        - Guest
+  action:
+    - action: light.turn_on
+      target:
+        entity_id:
+          - light.living_room
+          - light.living_room_pendant
+          - light.dining_room
+          - light.dining_room_pendant
+
+- id: office_light_on_at_sunset
+  alias: Turn on office light at sunset
+  description: >-
+    Turn on office/shed light when sun sets and someone is home. No brightness
+    specified so adaptive lighting takes over.
+  trigger:
+    - platform: sun
+      event: sunset
+  condition:
+    - condition: state
+      entity_id: input_select.house_mode
+      state:
+        - Home
+        - Guest
+  action:
+    - action: light.turn_on
+      target:
+        entity_id: light.office
+
+- id: lights_off_late_at_night
+  alias: Turn off lights late at night
+  description: Turn off all lights at 23:30 unless media is actively playing
+  trigger:
+    - platform: time
+      at: "23:30:00"
+  condition:
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: media_player.living_room
+          state: playing
+  action:
+    - action: light.turn_off
+      target:
+        entity_id:
+          - light.living_room
+          - light.living_room_pendant
+          - light.dining_room
+          - light.dining_room_pendant
+          - light.office
+          - light.bedroom
+          - light.kitchen
+          - light.hallway
+          - light.hue_play_1
+          - light.hue_play_2
+          - light.hue_iris_1
+          - light.hue_gradient_lightstrip_1
+          - light.hue_gradient_lightstrip_2
+
+- id: movie_mode_dim
+  alias: Dim lights for movie mode
+  description: Dim living room lights and turn off pendants when media starts playing after dark
+  trigger:
+    - platform: state
+      entity_id: media_player.living_room
+      to: playing
+  condition:
+    - condition: state
+      entity_id: sun.sun
+      state: below_horizon
+  action:
+    - action: light.turn_off
+      target:
+        entity_id:
+          - light.living_room_pendant
+          - light.dining_room
+          - light.dining_room_pendant
+    - action: light.turn_on
+      target:
+        entity_id:
+          - light.living_room
+          - light.hue_play_1
+          - light.hue_play_2
+          - light.hue_iris_1
+          - light.hue_gradient_lightstrip_1
+          - light.hue_gradient_lightstrip_2
+      data:
+        brightness_pct: 15
+
+- id: movie_mode_restore
+  alias: Restore lights after movie mode
+  description: Restore living room lights when media stops playing after dark
+  trigger:
+    - platform: state
+      entity_id: media_player.living_room
+      from: playing
+  condition:
+    - condition: state
+      entity_id: sun.sun
+      state: below_horizon
+  action:
+    - action: light.turn_on
+      target:
+        entity_id:
+          - light.living_room
+          - light.living_room_pendant
+          - light.dining_room
+          - light.dining_room_pendant
+    - action: adaptive_lighting.set_manual_control
+      data:
+        entity_id: switch.adaptive_lighting_living_dining_room_adaptive_lighting
+        manual_control: false

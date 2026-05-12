@@ -1,0 +1,109 @@
+- id: heating_eco_when_away
+  alias: Set heating to eco when away
+  description: Lower all thermostats to 15C when house mode is Away
+  trigger:
+    - platform: state
+      entity_id: input_select.house_mode
+      to: Away
+  action:
+    - action: climate.set_temperature
+      target:
+        entity_id:
+          - climate.bedroom
+          - climate.guest_bedroom
+          - climate.hallway
+          - climate.kitchen
+      data:
+        temperature: 15
+
+- id: heating_comfort_when_home
+  alias: Set comfortable heating when home
+  description: Restore normal heating temperatures when house mode is Home
+  trigger:
+    - platform: state
+      entity_id: input_select.house_mode
+      to: Home
+  action:
+    - action: climate.set_temperature
+      target:
+        entity_id: climate.bedroom
+      data:
+        temperature: 20
+    - action: climate.set_temperature
+      target:
+        entity_id: climate.kitchen
+      data:
+        temperature: 20
+    - action: climate.set_temperature
+      target:
+        entity_id: climate.hallway
+      data:
+        temperature: 18
+    - action: climate.set_temperature
+      target:
+        entity_id: climate.guest_bedroom
+      data:
+        temperature: 17
+
+- id: lower_heating_at_bedtime
+  alias: Lower heating at bedtime
+  description: Reduce non-bedroom heating when house mode is Sleep
+  trigger:
+    - platform: state
+      entity_id: input_select.house_mode
+      to: Sleep
+  action:
+    - action: climate.set_temperature
+      target:
+        entity_id: climate.bedroom
+      data:
+        temperature: 19
+    - action: climate.set_temperature
+      target:
+        entity_id:
+          - climate.kitchen
+          - climate.hallway
+          - climate.guest_bedroom
+      data:
+        temperature: 15
+
+- id: heating_off_window_open
+  alias: Turn off heating when window opens
+  description: Turn off radiator when Tado detects an open window
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.bedroom_window
+        - binary_sensor.guest_bedroom_window
+        - binary_sensor.hallway_window
+        - binary_sensor.kitchen_window
+      to: "on"
+      for: "00:00:30"
+  action:
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: "{{ trigger.entity_id | replace('binary_sensor.', 'climate.') | replace('_window', '') }}"
+      data:
+        hvac_mode: "off"
+
+- id: heating_restore_window_closed
+  alias: Restore heating when window closes
+  description: Set radiator back to auto when window closes
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.bedroom_window
+        - binary_sensor.guest_bedroom_window
+        - binary_sensor.hallway_window
+        - binary_sensor.kitchen_window
+      to: "off"
+  condition:
+    - condition: state
+      entity_id: input_boolean.vacation_mode
+      state: "off"
+  action:
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: "{{ trigger.entity_id | replace('binary_sensor.', 'climate.') | replace('_window', '') }}"
+      data:
+        hvac_mode: auto

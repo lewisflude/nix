@@ -1,0 +1,43 @@
+- id: sleep_mode_activate
+  alias: Activate sleep mode
+  description: Set house mode to Sleep and enable adaptive lighting sleep mode
+  trigger:
+    - platform: state
+      entity_id: input_boolean.sleep_mode
+      to: "on"
+  action:
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.house_mode
+      data:
+        option: Sleep
+    - action: switch.turn_on
+      target:
+        entity_id:
+          - switch.adaptive_lighting_sleep_mode_office_adaptive_lighting
+          - switch.adaptive_lighting_sleep_mode_living_dining_room_adaptive_lighting
+          - switch.adaptive_lighting_sleep_mode_bedroom_adaptive_lighting
+          - switch.adaptive_lighting_sleep_mode_kitchen_adaptive_lighting
+          - switch.adaptive_lighting_sleep_mode_hallway_adaptive_lighting
+
+- id: sleep_mode_deactivate
+  alias: Deactivate sleep mode
+  description: Restore house mode to Home and disable adaptive lighting sleep mode
+  trigger:
+    - platform: state
+      entity_id: input_boolean.sleep_mode
+      to: "off"
+  action:
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.house_mode
+      data:
+        option: Home
+    - action: switch.turn_off
+      target:
+        entity_id:
+          - switch.adaptive_lighting_sleep_mode_office_adaptive_lighting
+          - switch.adaptive_lighting_sleep_mode_living_dining_room_adaptive_lighting
+          - switch.adaptive_lighting_sleep_mode_bedroom_adaptive_lighting
+          - switch.adaptive_lighting_sleep_mode_kitchen_adaptive_lighting
+          - switch.adaptive_lighting_sleep_mode_hallway_adaptive_lighting
