@@ -96,6 +96,16 @@
 
       baseDomain = "blmt.io";
 
+      user = {
+        name = "Lewis Flude";
+        email = "lewis@lewisflude.com";
+      };
+
+      gpg = {
+        signingKey = "64CA14D5A2396CC0";
+        sshAuthKey = "495B10388160753867D2B6F7CAED2ED08F4D4323";
+      };
+
       defaults = {
         timezone = "Europe/London";
         locale = "en_GB.UTF-8";

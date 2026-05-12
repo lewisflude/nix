@@ -5,7 +5,8 @@
 # - NixOS: PC/SC daemon, udev rules, GPG smartcard support, touch detector
 # - Darwin: GPG packages
 # - Home-Manager: GPG agent, signing config, YubiKey tools
-_: {
+{ config, ... }:
+{
   # ═══════════════════════════════════════════════════════════════════
   # NixOS system-level GPG/YubiKey configuration
   # ═══════════════════════════════════════════════════════════════════
@@ -31,32 +32,19 @@ _: {
 
     };
 
-  # Darwin: gpg is installed via home-manager programs.gpg
-  flake.modules.darwin.gpg = _: { };
-
   # ═══════════════════════════════════════════════════════════════════
   # Home-manager GPG configuration (works on NixOS AND Darwin)
   # ═══════════════════════════════════════════════════════════════════
   flake.modules.homeManager.gpg =
-    {
-      config,
+    hmArgs@{
       pkgs,
       lib,
       ...
     }:
     let
+      hmConfig = hmArgs.config;
       inherit (pkgs.stdenv) isDarwin;
-      gtkThemeName = config.theming.signal.gtk.themeName or null;
-      # Cache TTLs following drduh/YubiKey-Guide recommendations
-      # Note: These primarily affect non-smartcard operations; YubiKey PIN
-      # is cached by hardware until removal (these don't override that)
-      pinCacheTtl = {
-        gpg = {
-          default = 60; # 1 minute idle timeout (drduh recommendation)
-          max = 120; # 2 minutes max (drduh recommendation)
-        };
-        ssh = 60; # 1 minute for SSH keys
-      };
+      gtkThemeName = hmConfig.theming.signal.gtk.themeName or null;
     in
     {
       home.packages = [
@@ -98,9 +86,9 @@ _: {
         enable = true;
         enableScDaemon = true;
         enableSshSupport = true;
-        enableZshIntegration = false;
+        enableZshIntegration = true;
         enableExtraSocket = true;
-        sshKeys = [ "495B10388160753867D2B6F7CAED2ED08F4D4323" ];
+        sshKeys = [ config.constants.gpg.sshAuthKey ];
         pinentry.package =
           if isDarwin then
             pkgs.pinentry_mac
@@ -113,13 +101,13 @@ _: {
                 exec ${pkgs.pinentry-gnome3}/bin/pinentry-gnome3 "$@"
               fi
             '';
-        defaultCacheTtl = pinCacheTtl.gpg.default;
-        maxCacheTtl = pinCacheTtl.gpg.max;
-        defaultCacheTtlSsh = pinCacheTtl.ssh;
-        maxCacheTtlSsh = pinCacheTtl.gpg.max; # Use same max as GPG
-        grabKeyboardAndMouse = true;
+        defaultCacheTtl = 60; # 1 minute idle timeout (drduh recommendation)
+        maxCacheTtl = 120; # 2 minutes max (drduh recommendation)
+        defaultCacheTtlSsh = 60;
+        maxCacheTtlSsh = 120;
+        grabKeyboardAndMouse = !isDarwin; # GTK pinentry only
         noAllowExternalCache = true;
-        extraConfig = "allow-preset-passphrase\nallow-loopback-pinentry";
+        extraConfig = "allow-loopback-pinentry";
       };
     };
 }
