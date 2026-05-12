@@ -12,8 +12,8 @@
 ## Architecture
 
 Dendritic pattern: every `.nix` file (except `flake.nix`) is a flake-parts
-module. See @DENDRITIC_PATTERN.md for full reference. Use `/dendritic-pattern`
-skill when writing modules.
+module. Use the `/dendritic-pattern` skill when writing modules; see
+`DENDRITIC_PATTERN.md` in this repo for the full reference.
 
 Key rules:
 

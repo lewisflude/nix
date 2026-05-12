@@ -1,6 +1,7 @@
 # Darwin Feature Module
 # Homebrew casks, brews, Mac App Store apps, and Darwin-specific home-manager packages
-_: {
+{ inputs, ... }:
+{
   # ==========================================================================
   # Darwin System Configuration
   # ==========================================================================
@@ -99,6 +100,14 @@ _: {
       # Touch ID for sudo
       security.pam.services.sudo_local.touchIdAuth = true;
 
+      # Work around Homebrew API regressions during activation by forcing
+      # cask/formula resolution through the local taps instead of JSON API
+      # responses fetched at switch time.
+      environment.variables = {
+        HOMEBREW_NO_ENV_HINTS = "1";
+        HOMEBREW_NO_INSTALL_FROM_API = "1";
+      };
+
       # ========================================================================
       # nix-homebrew
       # ========================================================================
@@ -107,6 +116,15 @@ _: {
         enableRosetta = true;
         user = config.host.username;
         autoMigrate = true;
+        # Declarative taps: with HOMEBREW_NO_INSTALL_FROM_API=1, brew resolves
+        # casks/formulae from local tap clones. Pinning them as flake inputs
+        # removes the runtime clone step from activation.
+        taps = {
+          "homebrew/homebrew-core" = inputs.homebrew-core;
+          "homebrew/homebrew-cask" = inputs.homebrew-cask;
+          "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
+        };
+        mutableTaps = false;
       };
 
       # ========================================================================
@@ -116,15 +134,16 @@ _: {
         enable = true;
         onActivation = {
           cleanup = "zap";
-          autoUpdate = true;
+          # Keep `darwin-rebuild switch` deterministic. Homebrew's current API
+          # path is failing on several casks during activation; update Brew
+          # explicitly outside activation until that is resolved upstream.
+          autoUpdate = false;
           upgrade = true;
         };
         caskArgs = {
           no_quarantine = true;
         };
-        taps = [
-          "j178/tap"
-        ];
+        taps = builtins.attrNames config.nix-homebrew.taps;
         brews = [
           "circleci"
           "mas"
@@ -142,7 +161,7 @@ _: {
           "google-chrome"
           "gpg-suite"
           "imageoptim"
-          "linear-linear"
+          "linear"
           "logi-options+"
           "logitune"
           "loom"

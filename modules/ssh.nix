@@ -23,8 +23,11 @@ in
         MaxSessions = 10;
         MaxStartups = "10:30:100";
         LoginGraceTime = 30;
-        ClientAliveInterval = 30;
-        ClientAliveCountMax = 3;
+        # iOS SSH clients can be suspended while Prompt is in the background.
+        # Keep server-side probes permissive enough that short app/background
+        # interruptions do not kill otherwise healthy sessions.
+        ClientAliveInterval = 60;
+        ClientAliveCountMax = 30;
         TCPKeepAlive = false;
         X11Forwarding = false;
         AllowTcpForwarding = true;

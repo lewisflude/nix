@@ -38,6 +38,8 @@ in
         darwin.disableBackgroundAgents
         darwin.gaming
         darwin.ssh
+        darwin.eternalTerminal
+        darwin.tailscale
         darwin.zed
         darwin.nfs
         darwin.vrchatCreation
@@ -79,6 +81,7 @@ in
             homeManager.helix
             homeManager.powerlevel10k
             homeManager.claudeCode
+            homeManager.codex
             homeManager.geminiCli
             homeManager.iaGet
             homeManager.yazi

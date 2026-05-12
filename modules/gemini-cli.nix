@@ -1,6 +1,14 @@
 # Gemini CLI - Dendritic Pattern
 # AI coding assistant via Google Gemini
-{ inputs, ... }:
+{
+  config,
+  inputs,
+  lib,
+  ...
+}:
+let
+  trustedCasePattern = lib.concatMapStringsSep "|" (d: "${d}|${d}/*") config.trustedDirs;
+in
 {
   # LLM agents (numtide/llm-agents.nix) — provides gemini-cli + sibling agents.
   overlays.llm-agents =
@@ -17,6 +25,7 @@
     {
       lib,
       pkgs,
+      config,
       osConfig ? { },
       ...
     }:
@@ -89,5 +98,22 @@
       home.sessionVariables = lib.mkIf (secretAvailable "GEMINI_API_KEY") {
         GEMINI_API_KEY_FILE = secretPath "GEMINI_API_KEY";
       };
+
+      programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
+        lib.mkAfter ''
+          if command -v gemini >/dev/null 2>&1; then
+            gemini() {
+              case "$PWD" in
+                ${trustedCasePattern})
+                  command gemini --yolo "$@"
+                  ;;
+                *)
+                  command gemini "$@"
+                  ;;
+              esac
+            }
+          fi
+        ''
+      );
     };
 }

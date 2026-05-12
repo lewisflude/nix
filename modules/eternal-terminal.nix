@@ -19,4 +19,14 @@ in
       constants.ports.services.eternalTerminal
     ];
   };
+
+  # ==========================================================================
+  # Darwin System Configuration
+  # ==========================================================================
+  flake.modules.darwin.eternalTerminal = _: {
+    services.eternal-terminal = {
+      enable = true;
+      port = constants.ports.services.eternalTerminal;
+    };
+  };
 }

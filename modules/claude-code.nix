@@ -1,7 +1,13 @@
 # Claude Code CLI configuration
-{ config, inputs, ... }:
+{
+  config,
+  inputs,
+  lib,
+  ...
+}:
 let
   inherit (config) constants;
+  trustedCasePattern = lib.concatMapStringsSep "|" (d: "${d}|${d}/*") config.trustedDirs;
 in
 {
   # Claude Code from sadjow/claude-code-nix (hourly upstream updates, Cachix cache).
@@ -58,6 +64,7 @@ in
     {
       lib,
       pkgs,
+      config,
       osConfig ? { },
       ...
     }:
@@ -85,56 +92,18 @@ in
         context7 = {
           url = "https://mcp.context7.com/mcp";
         };
-        git = {
-          command = "uvx";
-          args = [ "mcp-server-git" ];
-        };
-        time = {
-          command = "uvx";
-          args = [ "mcp-server-time" ];
-        };
-        sqlite = {
-          command = "${pkgs.writeShellScript "mcp-sqlite" ''
-            exec uvx mcp-server-sqlite --db-path "$HOME/.local/share/mcp/data.db" "$@"
-          ''}";
-        };
         playwright = {
           command = "${pkgs.writeShellScript "mcp-playwright" ''
             export PATH="${pkgs.nodejs}/bin:$PATH"
             exec npx -y @playwright/mcp@0.0.68 "$@"
           ''}";
         };
-        sequential-thinking = {
-          command = "${pkgs.writeShellScript "mcp-sequential-thinking" ''
-            export PATH="${pkgs.nodejs}/bin:$PATH"
-            exec npx -y @modelcontextprotocol/server-sequential-thinking@2025.12.18 "$@"
-          ''}";
-        };
         nixos = {
           command = "uvx";
           args = [ "mcp-nixos" ];
         };
-        obsidian = {
-          command = "${pkgs.writeShellScript "mcp-obsidian" ''
-            export PATH="${pkgs.nodejs}/bin:$PATH"
-            exec npx -y @bitbonsai/mcpvault@0.11.0 "$HOME/Obsidian Vault" "$@"
-          ''}";
-        };
-        blender = {
-          command = "${pkgs.uv}/bin/uvx";
-          args = [ "blender-mcp" ];
-        };
         figma = {
           url = "https://mcp.figma.com/mcp";
-        };
-      }
-      // lib.optionalAttrs pkgs.stdenv.isLinux {
-        hass = {
-          command = "${pkgs.writeShellScript "mcp-hass" ''
-            export HOMEASSISTANT_URL="$(cat /run/secrets/HOME_ASSISTANT_BASE_URL)"
-            export HOMEASSISTANT_TOKEN="$(cat /run/secrets/HOME_ASSISTANT_TOKEN)"
-            exec ${pkgs.uv}/bin/uvx ha-mcp "$@"
-          ''}";
         };
       }
       // lib.optionalAttrs (secretAvailable "GITHUB_TOKEN") {
@@ -153,12 +122,6 @@ in
             export KAGI_API_KEY="$(cat ${lib.escapeShellArg (secretPath "KAGI_API_KEY")})"
             exec ${pkgs.uv}/bin/uvx kagimcp "$@"
           ''}";
-        };
-      }
-      // lib.optionalAttrs pkgs.stdenv.isDarwin {
-        ableton = {
-          command = "${pkgs.uv}/bin/uvx";
-          args = [ "ableton-mcp" ];
         };
       }
       // lib.optionalAttrs basicMemoryEnabled {
@@ -206,6 +169,21 @@ in
         enable = true;
         servers = mcpServers;
       };
+
+      programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
+        lib.mkAfter ''
+          claude() {
+            case "$PWD" in
+              ${trustedCasePattern})
+                command claude --dangerously-skip-permissions "$@"
+                ;;
+              *)
+                command claude "$@"
+                ;;
+            esac
+          }
+        ''
+      );
 
       # Claude Desktop reads claude_desktop_config.json. The app writes its own
       # preferences to the same file, so merge into .mcpServers rather than
@@ -320,8 +298,6 @@ in
         };
 
         settings = {
-          effort = "high";
-
           env = {
             DISABLE_AUTOUPDATER = "1";
             FORCE_AUTOUPDATE_PLUGINS = "1";
@@ -376,8 +352,12 @@ in
               "Bash(touch *)"
               "Bash(which *)"
               "Bash(mdfind *)"
+              "Bash(awk *)"
               # network
               "Bash(curl *)"
+              # MCP read-only
+              "mcp__plugin_claude-code-home-manager_figma__get_screenshot"
+              "mcp__plugin_claude-code-home-manager_figma__get_metadata"
               # containers (read-only)
               "Bash(docker ps *)"
               "Bash(docker logs *)"
@@ -439,33 +419,6 @@ in
             - Use strong, explicit types. Avoid any/unknown. Prefer type annotations.
             - Only comment non-obvious logic. Code should be self-documenting.
             - Delete dead code rather than commenting it out.
-          '';
-          research-first = ''
-            # Research-First Protocol
-
-            ## Before Answering Technical Questions
-
-            - **Verify before stating.** Never fabricate package names, option names, API signatures, CLI flags, menu paths, or version numbers. If unsure, look it up or say so.
-            - **Use available tools.** Prefer Context7, WebSearch, WebFetch, and mcp-nixos over training data for anything version-specific, recently changed, or niche.
-            - **Admit uncertainty explicitly.** Say "I'm not sure" or "Let me check" rather than guessing. Confidence without verification is harmful.
-            - **Cite sources.** When referencing documentation, include where you found it.
-            - **Specify versions.** Always mention which version of software, library, or API your advice applies to.
-
-            ## Tool Priority for Verification
-
-            1. **Context7** — library/framework docs (React, Django, Prisma, etc.)
-            2. **mcp-nixos** — NixOS packages, options, Home Manager options, nix-darwin settings
-            3. **WebSearch** — recent changes, changelogs, niche tools, community solutions
-            4. **WebFetch** — read specific documentation pages, wikis, READMEs
-            5. **Grep/Glob** — verify claims against the actual codebase
-
-            ## Especially Important For
-
-            - NixOS/Home Manager option names and types
-            - Blender plugin UIs, menus, and settings (these change between versions)
-            - CLI tool flags and subcommands
-            - Hardware-specific configuration
-            - Any domain where your training data may be sparse or outdated
           '';
         };
 

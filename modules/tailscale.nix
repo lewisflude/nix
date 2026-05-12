@@ -10,4 +10,8 @@ _: {
 
     networking.firewall.trustedInterfaces = [ "tailscale0" ];
   };
+
+  flake.modules.darwin.tailscale = _: {
+    services.tailscale.enable = true;
+  };
 }

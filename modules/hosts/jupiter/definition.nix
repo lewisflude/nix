@@ -137,6 +137,7 @@ in
         # AI Tools
         # ═══════════════════════════════════════════════════════════════════════
         nixos.claudeCode
+        nixos.githubRunners
 
         # ═══════════════════════════════════════════════════════════════════════
         # Container Services
@@ -186,6 +187,7 @@ in
         homeManager.helix
         homeManager.powerlevel10k
         homeManager.claudeCode
+        homeManager.codex
         homeManager.geminiCli
         homeManager.yazi
         homeManager.iaGet
