@@ -189,6 +189,20 @@ in
       # preferences to the same file, so merge into .mcpServers rather than
       # overwriting the whole document.
       home.activation = {
+        # Home-manager symlinks ~/.claude/settings.json to a read-only /nix/store path.
+        # Claude Code's /effort and /model commands need to write to that file, so we
+        # replace the symlink with a writable copy after activation. Rebuilds reset the
+        # file to the declarative values; runtime /effort changes persist until the next
+        # `nh home switch`.
+        claudeCodeMutableSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          SETTINGS="$HOME/.claude/settings.json"
+          if [ -L "$SETTINGS" ]; then
+            TARGET=$(${pkgs.coreutils}/bin/readlink -f "$SETTINGS")
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm "$SETTINGS"
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 644 "$TARGET" "$SETTINGS"
+          fi
+        '';
+
         claudeDesktopMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           CONFIG_DIR="${claudeDesktopConfigDir}"
           CONFIG_FILE="$CONFIG_DIR/claude_desktop_config.json"

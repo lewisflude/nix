@@ -100,10 +100,6 @@ in
           "CASE_GLOB"
           "BAD_PATTERN"
           "MULTIOS"
-          "INTERACTIVE_COMMENTS"
-          "LONG_LIST_JOBS"
-          "NOTIFY"
-          "HASH_LIST_ALL"
         ];
 
         history = {
@@ -258,20 +254,6 @@ in
           ''}
         '';
 
-        completionInit = ''
-          autoload -Uz compinit
-          mkdir -p ${hmConfig.xdg.cacheHome}/zsh
-          fpath=(${pkgs.zsh-completions}/share/zsh/site-functions $fpath)
-          local zcompdump="${hmConfig.xdg.cacheHome}/zsh/.zcompdump"
-          if [[ ! -f "$zcompdump" ]] || [[ -n "$(find "$zcompdump" -mtime +1 2>/dev/null)" ]]; then
-            compinit -d "$zcompdump"
-          else
-            compinit -C -d "$zcompdump"
-          fi
-          zstyle ':completion:*' use-cache yes
-          zstyle ':completion:*' cache-path ${hmConfig.xdg.cacheHome}/zsh
-        '';
-
         initContent = lib.mkMerge [
           ''
             ZSH_AUTOSUGGEST_STRATEGY=(history completion)
@@ -291,14 +273,6 @@ in
             source ${sources.zsh-defer.src}/zsh-defer.plugin.zsh
           '')
           (lib.mkAfter ''
-            # ════════════════════════════════════════════════════════════════
-            # Cached Initialization (Performance Optimization)
-            # ════════════════════════════════════════════════════════════════
-            [[ -f ~/.config/zsh/zoxide-init.zsh ]] && source ~/.config/zsh/zoxide-init.zsh
-            [[ -f ~/.config/zsh/fzf-init.zsh ]] && source ~/.config/zsh/fzf-init.zsh
-            [[ -f ~/.config/zsh/direnv-init.zsh ]] && source ~/.config/zsh/direnv-init.zsh
-            [[ -f ~/.config/zsh/atuin-init.zsh ]] && zsh-defer source ~/.config/zsh/atuin-init.zsh
-
             # ════════════════════════════════════════════════════════════════
             # Dynamic Variables & GPG Configuration
             # ════════════════════════════════════════════════════════════════
@@ -347,6 +321,9 @@ in
             # ════════════════════════════════════════════════════════════════
             # Zstyle Configuration (Completion Styling)
             # ════════════════════════════════════════════════════════════════
+            fpath=(${pkgs.zsh-completions}/share/zsh/site-functions $fpath)
+            zstyle ':completion:*' use-cache yes
+            zstyle ':completion:*' cache-path ${hmConfig.xdg.cacheHome}/zsh
             zstyle ':completion:*' completer _complete _match _approximate
             zstyle ':completion:*:match:*' original only
             zstyle ':completion:*:approximate:*' max-errors 1 numeric
@@ -366,17 +343,7 @@ in
             zstyle ':completion:*:cd:*' ignore-parents parent pwd
             zstyle ':completion:*' file-patterns '%p:globbed-files *(-/):directories' '*:all-files'
 
-            # ════════════════════════════════════════════════════════════════
-            # Shell Options & Correction
-            # ════════════════════════════════════════════════════════════════
             unsetopt FLOW_CONTROL
-
-            if [[ ! -o interactive || ! -t 1 || "$TERM_PROGRAM" == "vscode" || "$TERM_PROGRAM" == "cursor" ]]; then
-              unsetopt CORRECT CORRECT_ALL
-            else
-              setopt CORRECT
-              unsetopt CORRECT_ALL
-            fi
 
             # ════════════════════════════════════════════════════════════════
             # Custom Functions (Load Immediately)
@@ -384,51 +351,19 @@ in
             [[ -f "${hmConfig.home.homeDirectory}/.config/nix/lib/zsh/functions.zsh" ]] && source "${hmConfig.home.homeDirectory}/.config/nix/lib/zsh/functions.zsh"
             [[ -f "${hmConfig.home.homeDirectory}/.config/nix/lib/zsh/p10k-diagnostics.zsh" ]] && source "${hmConfig.home.homeDirectory}/.config/nix/lib/zsh/p10k-diagnostics.zsh"
 
-            # ════════════════════════════════════════════════════════════════
-            # Terminfo-Based Keybindings
-            # ════════════════════════════════════════════════════════════════
+            # Terminfo-based keybindings (non-default ones only — zsh handles arrows/Home/End)
             typeset -g -A key
-            key[Home]="''${terminfo[khome]}"
-            key[End]="''${terminfo[kend]}"
-            key[Insert]="''${terminfo[kich1]}"
             key[Backspace]="''${terminfo[kbs]}"
-            key[Delete]="''${terminfo[kdch1]}"
-            key[Up]="''${terminfo[kcuu1]}"
-            key[Down]="''${terminfo[kcud1]}"
-            key[Left]="''${terminfo[kcub1]}"
-            key[Right]="''${terminfo[kcuf1]}"
-            key[PageUp]="''${terminfo[kpp]}"
-            key[PageDown]="''${terminfo[knp]}"
             key[Shift-Tab]="''${terminfo[kcbt]}"
             key[Control-Left]="''${terminfo[kLFT5]}"
             key[Control-Right]="''${terminfo[kRIT5]}"
             key[Control-Delete]="''${terminfo[kDC5]}"
-
-            [[ -n "''${key[Home]}"      ]] && bindkey -- "''${key[Home]}"       beginning-of-line
-            [[ -n "''${key[End]}"       ]] && bindkey -- "''${key[End]}"        end-of-line
-            [[ -n "''${key[Insert]}"    ]] && bindkey -- "''${key[Insert]}"     overwrite-mode
             [[ -n "''${key[Backspace]}" ]] && bindkey -- "''${key[Backspace]}"  backward-delete-char
-            [[ -n "''${key[Delete]}"    ]] && bindkey -- "''${key[Delete]}"     delete-char
-            [[ -n "''${key[Up]}"        ]] && bindkey -- "''${key[Up]}"         up-line-or-history
-            [[ -n "''${key[Down]}"      ]] && bindkey -- "''${key[Down]}"       down-line-or-history
-            [[ -n "''${key[Left]}"      ]] && bindkey -- "''${key[Left]}"       backward-char
-            [[ -n "''${key[Right]}"     ]] && bindkey -- "''${key[Right]}"      forward-char
-            [[ -n "''${key[PageUp]}"    ]] && bindkey -- "''${key[PageUp]}"     beginning-of-buffer-or-history
-            [[ -n "''${key[PageDown]}"  ]] && bindkey -- "''${key[PageDown]}"   end-of-buffer-or-history
             [[ -n "''${key[Shift-Tab]}" ]] && bindkey -- "''${key[Shift-Tab]}"  reverse-menu-complete
             [[ -n "''${key[Control-Left]}"  ]] && bindkey -- "''${key[Control-Left]}"  backward-word
             [[ -n "''${key[Control-Right]}" ]] && bindkey -- "''${key[Control-Right]}" forward-word
-            bindkey '^H' backward-kill-word
             [[ -n "''${key[Control-Delete]}" ]] && bindkey -- "''${key[Control-Delete]}" kill-word
-
-            # Application Mode (Terminal State Management)
-            if (( ''${+terminfo[smkx]} && ''${+terminfo[rmkx]} )); then
-              autoload -Uz add-zle-hook-widget
-              function zle_application_mode_start { echoti smkx }
-              function zle_application_mode_stop { echoti rmkx }
-              add-zle-hook-widget -Uz zle-line-init zle_application_mode_start
-              add-zle-hook-widget -Uz zle-line-finish zle_application_mode_stop
-            fi
+            bindkey '^H' backward-kill-word
 
             # Ghostty Multiline Support
             function _ghostty_insert_newline() { LBUFFER+=$'\n' }
@@ -467,55 +402,33 @@ in
         DIRENV_TIMEOUT = "5s";
       };
 
-      # Zoxide configuration
-      # Note: enableZshIntegration disabled - using cached init script for performance
       programs.zoxide = {
         enable = true;
-        enableZshIntegration = false;
+        enableZshIntegration = true;
         options = [ "--cmd cd" ];
       };
 
-      # Pre-generated init scripts for performance
-      # These are cached at build time instead of running init commands on every shell startup
-      home.file.".config/zsh/zoxide-init.zsh".source = pkgs.runCommand "zoxide-init" { } ''
-        ${pkgs.zoxide}/bin/zoxide init zsh --cmd cd > $out
-      '';
-      home.file.".config/zsh/fzf-init.zsh".source = pkgs.runCommand "fzf-init" { } ''
-        ${pkgs.fzf}/bin/fzf --zsh > $out 2>/dev/null || echo "# fzf init" > $out
-      '';
-      home.file.".config/zsh/direnv-init.zsh".source = pkgs.runCommand "direnv-init" { } ''
-        ${pkgs.direnv}/bin/direnv hook zsh > $out
-      '';
-      home.file.".config/zsh/atuin-init.zsh".source = pkgs.runCommand "atuin-init" { } ''
-        export HOME="$TMPDIR"; mkdir -p "$HOME/.config/atuin"
-        ${pkgs.atuin}/bin/atuin init zsh --disable-up-arrow > $out 2>&1 || echo "export ATUIN_NOBIND=true" > $out
-      '';
-
-      # Atuin - shell history sync (init script generated above, ZSH integration disabled for performance)
       programs.atuin = {
         enable = true;
-        enableZshIntegration = false;
+        enableZshIntegration = true;
         flags = [ "--disable-up-arrow" ];
         settings.sync_frequency = "5m";
       };
 
-      # Direnv - per-directory environments (init script generated above)
       programs.direnv = {
         enable = true;
-        enableZshIntegration = false;
+        enableZshIntegration = true;
         nix-direnv.enable = true;
       };
 
-      # nix-your-shell - retain shell in nix develop/nix-shell
       programs.nix-your-shell = {
         enable = true;
         enableZshIntegration = true;
       };
 
-      # FZF - fuzzy finder (init script generated above)
       programs.fzf = {
         enable = true;
-        enableZshIntegration = false;
+        enableZshIntegration = true;
         defaultOptions = [
           "--height 40%"
           "--border"
