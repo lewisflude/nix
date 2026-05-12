@@ -21,7 +21,6 @@ _: {
         to = [ to ];
         conditions = [ mnk88Condition ];
       };
-      keyToKey = fromKey: toKey: mapKey { key_code = fromKey; } { key_code = toKey; };
       keyToShell = fromKey: cmd: mapKey { key_code = fromKey; } { shell_command = cmd; };
       keyToMod =
         fromKey: toKey: mods:
@@ -29,6 +28,37 @@ _: {
           key_code = toKey;
           modifiers = mods;
         };
+
+      complexRules = [
+        {
+          description = "MNK88: Launcher keys (F13 → Ghostty, Print Screen → Browser)";
+          manipulators = [
+            (keyToShell "f13" "open -a Ghostty")
+            (keyToShell "print_screen" "open -a Safari")
+          ];
+        }
+        {
+          description = "MNK88: Window management via F16–F19 (Rectangle chords)";
+          manipulators = [
+            (keyToMod "f16" "return_or_enter" [
+              "left_control"
+              "left_option"
+            ])
+            (keyToMod "f17" "left_arrow" [
+              "left_control"
+              "left_option"
+            ])
+            (keyToMod "f18" "c" [
+              "left_control"
+              "left_option"
+            ])
+            (keyToMod "f19" "right_arrow" [
+              "left_control"
+              "left_option"
+            ])
+          ];
+        }
+      ];
 
       karabinerConfig = {
         global = {
@@ -44,7 +74,7 @@ _: {
               "basic.to_if_alone_timeout_milliseconds" = 200;
               "basic.simultaneous_threshold_milliseconds" = 50;
             };
-            complex_modifications.rules = [ ];
+            complex_modifications.rules = complexRules;
             simple_modifications = [ ];
             virtual_hid_keyboard = {
               country_code = 0;
@@ -58,56 +88,6 @@ _: {
     lib.mkIf pkgs.stdenv.isDarwin {
       home.file.".config/karabiner/karabiner.json" = {
         text = builtins.toJSON karabinerConfig;
-        force = true;
-      };
-
-      home.file.".config/karabiner/assets/complex_modifications/mnk88-wkl.json" = {
-        text = builtins.toJSON {
-          title = "MNK88 WKL swaps and launchers";
-          rules = [
-            {
-              description = "MNK88: Caps Lock → Control";
-              manipulators = [ (keyToKey "caps_lock" "left_control") ];
-            }
-            {
-              description = "MNK88: Swap Option↔Command, Control↔Option";
-              manipulators = [
-                (keyToKey "left_option" "left_command")
-                (keyToKey "left_control" "left_option")
-                (keyToKey "right_option" "right_command")
-                (keyToKey "right_control" "right_option")
-              ];
-            }
-            {
-              description = "MNK88: Launcher keys (F13 → Ghostty, Print Screen → Browser)";
-              manipulators = [
-                (keyToShell "f13" "open -a Ghostty")
-                (keyToShell "print_screen" "open -a \"Safari\" || open -a \"Arc\" || open -a \"Google Chrome\"")
-              ];
-            }
-            {
-              description = "MNK88: Window management via F16–F19 (Rectangle chords)";
-              manipulators = [
-                (keyToMod "f16" "return_or_enter" [
-                  "left_control"
-                  "left_option"
-                ])
-                (keyToMod "f17" "left_arrow" [
-                  "left_control"
-                  "left_option"
-                ])
-                (keyToMod "f18" "c" [
-                  "left_control"
-                  "left_option"
-                ])
-                (keyToMod "f19" "right_arrow" [
-                  "left_control"
-                  "left_option"
-                ])
-              ];
-            }
-          ];
-        };
         force = true;
       };
     };
