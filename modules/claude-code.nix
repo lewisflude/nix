@@ -298,6 +298,8 @@ in
         };
 
         settings = {
+          effort = "medium";
+
           env = {
             DISABLE_AUTOUPDATER = "1";
             FORCE_AUTOUPDATE_PLUGINS = "1";
