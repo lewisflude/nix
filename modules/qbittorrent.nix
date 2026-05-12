@@ -4,7 +4,7 @@
 { config, ... }:
 let
   inherit (config) constants username;
-  inherit (config.lib) media;
+  media = config.mediaLib;
   samplesPath = "/home/${username}/Music/samples";
   musicProductionCategory = "music-production";
   musicProductionPath = "/mnt/storage/torrents/${musicProductionCategory}";
@@ -231,46 +231,49 @@ in
         };
       };
 
-      # qBittorrent runs as its own system user but in the media group.
+      # qBittorrent runs as its own system user but is a member of the media group.
       # The media group itself is declared centrally in media-user.nix.
       users.users.qbittorrent = {
         isSystemUser = true;
-        group = "media";
+        inherit (media) group;
         home = "/var/lib/qbittorrent";
         createHome = true;
       };
 
       # Allow the primary user to read/write files created by qBittorrent
       # under the music-production category (files are owned by qbittorrent:media).
-      users.users.${username}.extraGroups = [ "media" ];
+      users.users.${username}.extraGroups = [ media.group ];
 
       # Ensure download directories exist with correct ownership.
-      # Note: media.mkDir owns paths as media:media; qbittorrent (also in `media` group)
-      # writes with UMask 0002, so files are group-writable. This matches the previous
-      # qbittorrent:media ownership in effective access terms.
-      systemd.tmpfiles.rules = [
-        (media.mkDir "/mnt/storage/torrents")
-        # Category subdirectories (matching SABnzbd pattern)
-        (media.mkDir "/mnt/storage/torrents/movies")
-        (media.mkDir "/mnt/storage/torrents/tv")
-        (media.mkDir "/mnt/storage/torrents/music")
-        (media.mkDir musicProductionPath)
-        (media.mkDir "/var/lib/qbittorrent/incomplete")
-        # Samples destination: setgid so synced files inherit the media group,
-        # letting both the user (as owner) and qbittorrent (group member) write.
-        "d '${samplesPath}' 2775 ${username} ${media.group} - -"
-      ];
+      # qbittorrent owns its dirs (rather than media-lib's mkDir which uses media:media)
+      # because qbittorrent.service runs as user `qbittorrent`. Group is `media` so other
+      # group members (e.g. *arr services) can read/write through UMask 0002.
+      systemd.tmpfiles.rules =
+        let
+          mkQbtDir = p: "d '${p}' 0770 qbittorrent ${media.group} - -";
+        in
+        [
+          (mkQbtDir "/mnt/storage/torrents")
+          # Category subdirectories (matching SABnzbd pattern)
+          (mkQbtDir "/mnt/storage/torrents/movies")
+          (mkQbtDir "/mnt/storage/torrents/tv")
+          (mkQbtDir "/mnt/storage/torrents/music")
+          (mkQbtDir musicProductionPath)
+          (mkQbtDir "/var/lib/qbittorrent/incomplete")
+          # Samples destination: setgid so synced files inherit the media group,
+          # letting both the user (as owner) and qbittorrent (group member) write.
+          "d '${samplesPath}' 2775 ${username} ${media.group} - -"
+        ];
 
       # qBittorrent service with VPN confinement.
       # SOPS credentials are injected AFTER the upstream module's ExecStartPre
       # (which overwrites qBittorrent.conf from the Nix store on every start).
-      systemd.services.qbittorrent = {
+      # serviceDefaults supplies TZ/after/requires/UMask; everything else is qbittorrent-specific.
+      systemd.services.qbittorrent = lib.recursiveUpdate media.serviceDefaults {
         vpnConfinement = {
           enable = true;
           vpnNamespace = namespace;
         };
-        after = [ "mnt-storage.mount" ];
-        requires = [ "mnt-storage.mount" ];
         wants = [ "network-online.target" ];
         unitConfig = {
           StartLimitBurst = 5;

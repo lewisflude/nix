@@ -1,10 +1,10 @@
 # Jellyfin Service Module - Dendritic Pattern
-# Media server with hardware transcoding
+# Media server with hardware transcoding.
 # User/group declared centrally in media-user.nix (with render/video extraGroups).
 { config, ... }:
 let
   inherit (config) constants;
-  inherit (config.lib) media;
+  media = config.mediaLib;
 in
 {
   flake.modules.nixos.jellyfin =

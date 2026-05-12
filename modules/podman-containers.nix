@@ -3,7 +3,7 @@
 { config, ... }:
 let
   inherit (config) constants;
-  inherit (config.lib) media;
+  media = config.mediaLib;
 in
 {
   flake.modules.nixos.podmanContainers =
@@ -13,7 +13,7 @@ in
       cfg = nixosArgs.config;
       configPath = "/var/lib/containers/supplemental";
       inherit (constants.defaults) timezone;
-      # uid/gid used for supplemental containers that run as the primary interactive user.
+      # uid/gid for supplemental containers that run as the primary interactive user.
       uid = 1000;
       gid = 100;
       # Media user/group resolved from the central media-user module — used by janitorr.
@@ -32,7 +32,10 @@ in
         {
           container = {
             inherit image;
-            environment = { TZ = timezone; } // extraEnv;
+            environment = {
+              TZ = timezone;
+            }
+            // extraEnv;
             volumes = [ "${configPath}/${name}:/config" ] ++ extraVolumes;
             ports = [ "${toString port}:${toString internalPort}" ];
           };
@@ -108,12 +111,12 @@ in
         ];
       };
 
-      # Wizarr — stores DB under /data/database, override default volume mapping
+      # Wizarr — stores DB under /data/database (override default volume mapping)
       virtualisation.oci-containers.containers.wizarr = supplemental.wizarr.container // {
         volumes = [ "${configPath}/wizarr:/data/database" ];
       };
 
-      # Termix — stores state under /app/data, override default volume mapping
+      # Termix — stores state under /app/data (override default volume mapping)
       virtualisation.oci-containers.containers.termix = supplemental.termix.container // {
         volumes = [ "${configPath}/termix:/app/data" ];
       };
@@ -126,8 +129,8 @@ in
 
       # Janitorr - Media cleanup (bespoke: host network, sops template, complex deps).
       # `--user` derives uid/gid from the media user declared in media-user.nix.
-      # Previous code hardcoded `1000:976` — 1000 is the interactive user, not media; the bug
-      # only worked because the media group happened to be GID 976 at runtime.
+      # Previous code hardcoded `1000:976` — uid 1000 was the interactive user (not media)
+      # and gid 976 was whatever the media group happened to be allocated at runtime.
       virtualisation.oci-containers.containers.janitorr = {
         image = "ghcr.io/schaka/janitorr:jvm-v2.0.7";
         environment = {
@@ -143,15 +146,30 @@ in
         ];
       };
 
-      # Janitorr SOPS secrets — bulk restart-units config
-      sops.secrets = media.restartUnits [ "podman-janitorr.service" ] [
-        "janitorr-sonarr-api-key"
-        "janitorr-radarr-api-key"
-        "janitorr-jellyfin-api-key"
-        "janitorr-jellyfin-password"
-        "janitorr-jellystat-api-key"
-        "janitorr-jellyseerr-api-key"
-      ];
+      # Janitorr + Jellystat SOPS secrets — bulk-defined.
+      # Janitorr restartUnits use the media-lib helper; jellystat needs a postgres owner
+      # so it's defined separately.
+      sops.secrets =
+        (media.restartUnits
+          [ "podman-janitorr.service" ]
+          [
+            "janitorr-sonarr-api-key"
+            "janitorr-radarr-api-key"
+            "janitorr-jellyfin-api-key"
+            "janitorr-jellyfin-password"
+            "janitorr-jellystat-api-key"
+            "janitorr-jellyseerr-api-key"
+          ]
+        )
+        // {
+          "jellystat-postgres-password" = {
+            owner = "postgres";
+            restartUnits = [ "podman-jellystat.service" ];
+          };
+          "jellystat-jwt-secret" = {
+            restartUnits = [ "podman-jellystat.service" ];
+          };
+        };
 
       # Janitorr config generated from sops template (replaces sed-based preStart injection)
       sops.templates."janitorr-application.yml" = {
@@ -311,16 +329,7 @@ in
         extraOptions = [ "--network=host" ];
       };
 
-      # Jellystat SOPS secrets
-      sops.secrets."jellystat-postgres-password" = {
-        owner = "postgres";
-        restartUnits = [ "podman-jellystat.service" ];
-      };
-      sops.secrets."jellystat-jwt-secret" = {
-        restartUnits = [ "podman-jellystat.service" ];
-      };
-
-      # Jellystat env template
+      # Jellystat env template (secrets are defined above alongside janitorr's)
       sops.templates."jellystat.env".content = ''
         POSTGRES_PASSWORD=${nixosArgs.config.sops.placeholder."jellystat-postgres-password"}
         JWT_SECRET=${nixosArgs.config.sops.placeholder."jellystat-jwt-secret"}

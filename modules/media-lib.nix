@@ -37,7 +37,7 @@ let
   };
 in
 {
-  options.lib.media = lib.mkOption {
+  options.mediaLib = lib.mkOption {
     type = lib.types.raw;
     readOnly = true;
     default = media;

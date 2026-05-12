@@ -4,7 +4,7 @@
 { config, ... }:
 let
   inherit (config) constants;
-  inherit (config.lib) media;
+  media = config.mediaLib;
 in
 {
   flake.modules.nixos.arrStack =
@@ -19,7 +19,7 @@ in
         recursiveUpdate
         ;
       # serviceDefaults provides TZ/after/requires/UMask. Override UMask via mkForce
-      # because some upstream modules set their own default.
+      # because upstream modules sometimes set a stricter default.
       storageBound = recursiveUpdate media.serviceDefaults {
         after = optional cfg.services.prowlarr.enable "prowlarr.service";
         serviceConfig.UMask = mkForce "0002";
@@ -73,7 +73,6 @@ in
       systemd.services.readarr = storageBound;
 
       systemd.services.bazarr = recursiveUpdate media.serviceDefaults {
-        # bazarr depends on sonarr/radarr completing scans; storage mount is shared via serviceDefaults.
         after =
           optional cfg.services.sonarr.enable "sonarr.service"
           ++ optional cfg.services.radarr.enable "radarr.service";

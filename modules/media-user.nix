@@ -1,5 +1,6 @@
-# Shared media user/group for arr stack services, jellyfin, sabnzbd, qbittorrent, podman containers.
-# Centralises declaration with explicit uid/gid so containers can derive `--user`.
+# Shared media user/group for arr stack, jellyfin, sabnzbd, qbittorrent, podman containers.
+# Centralised with explicit uid/gid so containers (e.g. janitorr) can derive `--user`
+# from `config.users.users.media.uid` instead of hardcoded numbers.
 _: {
   flake.modules.nixos.mediaUser = _: {
     users.users.media = {
@@ -7,7 +8,7 @@ _: {
       group = "media";
       description = "Media management user";
       uid = 994;
-      # render/video for jellyfin hardware acceleration
+      # render/video for jellyfin hardware acceleration (formerly declared in jellyfin.nix)
       extraGroups = [
         "render"
         "video"

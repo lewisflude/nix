@@ -1,11 +1,10 @@
 # SABnzbd Service Module - Dendritic Pattern
-# Usenet downloader for automated media retrieval
-# Usage: Import flake.modules.nixos.sabnzbd in host definition.
+# Usenet downloader for automated media retrieval.
 # User/group declared centrally in media-user.nix.
 { config, ... }:
 let
   inherit (config) constants;
-  inherit (config.lib) media;
+  media = config.mediaLib;
 in
 {
   flake.modules.nixos.sabnzbd =
@@ -90,8 +89,7 @@ in
         };
       };
 
-      # I/O and CPU nice priorities to prevent starving compositor.
-      # serviceDefaults provides TZ/after/requires/UMask; nice priorities are sabnzbd-specific.
+      # serviceDefaults supplies TZ/after/requires/UMask; nice priorities are sabnzbd-specific.
       systemd.services.sabnzbd = lib.recursiveUpdate media.serviceDefaults {
         serviceConfig = {
           # Nice priority: 19 = lowest CPU priority (background process)
@@ -102,8 +100,6 @@ in
         };
       };
 
-      networking.firewall.allowedTCPPorts = mkDefault [
-        port
-      ];
+      networking.firewall.allowedTCPPorts = mkDefault [ port ];
     };
 }
