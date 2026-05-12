@@ -3,11 +3,10 @@
 {
   config,
   inputs,
-  lib,
   ...
 }:
 let
-  trustedCasePattern = lib.concatMapStringsSep "|" (d: "${d}|${d}/*") config.trustedDirs;
+  inherit (config) trustedDirs aiCli;
 in
 {
   # LLM agents (numtide/llm-agents.nix) — provides gemini-cli + sibling agents.
@@ -29,91 +28,67 @@ in
       osConfig ? { },
       ...
     }:
-    let
-      # Secret helper
-      secretAvailable =
-        name: osConfig ? sops && osConfig.sops ? secrets && osConfig.sops.secrets ? ${name};
-      secretPath = name: if secretAvailable name then osConfig.sops.secrets.${name}.path else "";
-
-      # Command configurations
-      commands = {
-        commit = {
-          model = "gemini-2.0-flash-exp";
-          prompt = "Generate a conventional commit message for the staged changes.";
-        };
-        explain = {
-          model = "gemini-2.0-flash-exp";
-          prompt = "Explain the following code clearly and concisely.";
-        };
-        review = {
-          model = "gemini-2.0-flash-exp";
-          prompt = "Review this code for bugs, best practices, and improvements.";
-        };
-        refactor = {
-          model = "gemini-2.0-flash-exp";
-          prompt = "Suggest refactoring to improve clarity and maintainability.";
-        };
-        debug = {
-          model = "gemini-2.0-flash-exp";
-          prompt = "Help debug this code and suggest fixes.";
-        };
-        test = {
-          model = "gemini-2.0-flash-exp";
-          prompt = "Generate test cases for this code.";
-        };
-        "nix-review" = {
-          model = "gemini-2.0-flash-exp";
-          prompt = "Review this Nix code for best practices and improvements.";
-        };
-      };
-
-      # Generate command config files
-      mkCommandConfig = name: cmdConfig: {
-        name = ".gemini/command-${name}.toml";
-        value = {
-          text = ''
-            model = "${cmdConfig.model}"
-            prompt = """
-            ${cmdConfig.prompt}
-            """
-          '';
-        };
-      };
-    in
     {
       programs.gemini-cli = {
         enable = true;
         package = pkgs.gemini-cli;
+        enableMcpIntegration = true;
+        defaultModel = "gemini-2.5-flash";
         settings = {
-          model = "gemini-2.0-flash-exp";
+          model = "gemini-2.5-flash";
           temperature = 0.7;
           streaming = true;
         };
+        commands = {
+          commit = {
+            description = "Generate a conventional commit message for the staged changes.";
+            prompt = "Generate a conventional commit message for the staged changes.";
+          };
+          explain = {
+            description = "Explain code clearly and concisely.";
+            prompt = "Explain the following code clearly and concisely.";
+          };
+          review = {
+            description = "Review code for bugs, best practices, and improvements.";
+            prompt = "Review this code for bugs, best practices, and improvements.";
+          };
+          refactor = {
+            description = "Suggest refactoring to improve clarity and maintainability.";
+            prompt = "Suggest refactoring to improve clarity and maintainability.";
+          };
+          debug = {
+            description = "Help debug code and suggest fixes.";
+            prompt = "Help debug this code and suggest fixes.";
+          };
+          test = {
+            description = "Generate test cases for code.";
+            prompt = "Generate test cases for this code.";
+          };
+          nix-review = {
+            description = "Review Nix code for best practices.";
+            prompt = "Review this Nix code for best practices and improvements.";
+          };
+        };
       };
 
-      # Command configurations
-      home.file = lib.listToAttrs (lib.mapAttrsToList mkCommandConfig commands);
+      programs.mcp = {
+        enable = true;
+        servers = aiCli.mcpServers pkgs osConfig;
+      };
 
       # Environment variable for API key (loaded from SOPS)
-      home.sessionVariables = lib.mkIf (secretAvailable "GEMINI_API_KEY") {
-        GEMINI_API_KEY_FILE = secretPath "GEMINI_API_KEY";
+      home.sessionVariables = lib.mkIf (aiCli.secretAvailable osConfig "GEMINI_API_KEY") {
+        GEMINI_API_KEY_FILE = aiCli.secretPath osConfig "GEMINI_API_KEY";
       };
 
       programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
-        lib.mkAfter ''
-          if command -v gemini >/dev/null 2>&1; then
-            gemini() {
-              case "$PWD" in
-                ${trustedCasePattern})
-                  command gemini --yolo "$@"
-                  ;;
-                *)
-                  command gemini "$@"
-                  ;;
-              esac
-            }
-          fi
-        ''
+        lib.mkAfter (
+          aiCli.mkTrustedWrapper {
+            cmd = "gemini";
+            trustedFlag = "--yolo";
+            inherit trustedDirs;
+          }
+        )
       );
     };
 }

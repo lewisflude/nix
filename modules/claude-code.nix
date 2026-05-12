@@ -2,12 +2,10 @@
 {
   config,
   inputs,
-  lib,
   ...
 }:
 let
-  inherit (config) constants;
-  trustedCasePattern = lib.concatMapStringsSep "|" (d: "${d}|${d}/*") config.trustedDirs;
+  inherit (config) constants aiCli trustedDirs;
 in
 {
   # Claude Code from sadjow/claude-code-nix (hourly upstream updates, Cachix cache).
@@ -69,9 +67,8 @@ in
       ...
     }:
     let
-      secretAvailable =
-        name: osConfig ? sops && osConfig.sops ? secrets && osConfig.sops.secrets ? ${name};
-      secretPath = name: if secretAvailable name then osConfig.sops.secrets.${name}.path else "";
+      secretAvailable = aiCli.secretAvailable osConfig;
+      secretPath = aiCli.secretPath osConfig;
 
       abletonRemoteScript = pkgs.fetchurl {
         url = "https://raw.githubusercontent.com/ahujasid/ableton-mcp/e0083285426dedb5c93ce8a532ecfbb25ae9a3ca/AbletonMCP_Remote_Script/__init__.py";
@@ -88,50 +85,24 @@ in
       basicMemoryEnabled = false;
       basicMemoryProject = "obsidian";
 
-      mcpServers = {
-        context7 = {
-          url = "https://mcp.context7.com/mcp";
+      mcpServers =
+        aiCli.mcpServers pkgs osConfig
+        // lib.optionalAttrs (secretAvailable "KAGI_API_KEY") {
+          kagi = {
+            command = "${pkgs.writeShellScript "mcp-kagi" ''
+              export KAGI_API_KEY="$(cat ${lib.escapeShellArg (secretPath "KAGI_API_KEY")})"
+              exec ${pkgs.uv}/bin/uvx kagimcp "$@"
+            ''}";
+          };
+        }
+        // lib.optionalAttrs basicMemoryEnabled {
+          basic-memory = {
+            command = "${pkgs.writeShellScript "mcp-basic-memory" ''
+              export BASIC_MEMORY_MCP_PROJECT=${basicMemoryProject}
+              exec ${pkgs.uv}/bin/uvx basic-memory mcp "$@"
+            ''}";
+          };
         };
-        playwright = {
-          command = "${pkgs.writeShellScript "mcp-playwright" ''
-            export PATH="${pkgs.nodejs}/bin:$PATH"
-            exec npx -y @playwright/mcp@0.0.68 "$@"
-          ''}";
-        };
-        nixos = {
-          command = "uvx";
-          args = [ "mcp-nixos" ];
-        };
-        figma = {
-          url = "https://mcp.figma.com/mcp";
-        };
-      }
-      // lib.optionalAttrs (secretAvailable "GITHUB_TOKEN") {
-        github = {
-          command = "${pkgs.writeShellScript "mcp-github" ''
-            export PATH="${pkgs.nodejs}/bin:$PATH"
-            GITHUB_TOKEN="$(cat ${lib.escapeShellArg (secretPath "GITHUB_TOKEN")})"
-            exec npx -y mcp-remote https://api.githubcopilot.com/mcp/ \
-              --header "Authorization: Bearer $GITHUB_TOKEN" "$@"
-          ''}";
-        };
-      }
-      // lib.optionalAttrs (secretAvailable "KAGI_API_KEY") {
-        kagi = {
-          command = "${pkgs.writeShellScript "mcp-kagi" ''
-            export KAGI_API_KEY="$(cat ${lib.escapeShellArg (secretPath "KAGI_API_KEY")})"
-            exec ${pkgs.uv}/bin/uvx kagimcp "$@"
-          ''}";
-        };
-      }
-      // lib.optionalAttrs basicMemoryEnabled {
-        basic-memory = {
-          command = "${pkgs.writeShellScript "mcp-basic-memory" ''
-            export BASIC_MEMORY_MCP_PROJECT=${basicMemoryProject}
-            exec ${pkgs.uv}/bin/uvx basic-memory mcp "$@"
-          ''}";
-        };
-      };
 
       claudeDesktopConfigDir =
         if pkgs.stdenv.isDarwin then "$HOME/Library/Application Support/Claude" else "$HOME/.config/Claude";
@@ -171,18 +142,13 @@ in
       };
 
       programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
-        lib.mkAfter ''
-          claude() {
-            case "$PWD" in
-              ${trustedCasePattern})
-                command claude --dangerously-skip-permissions "$@"
-                ;;
-              *)
-                command claude "$@"
-                ;;
-            esac
+        lib.mkAfter (
+          aiCli.mkTrustedWrapper {
+            cmd = "claude";
+            trustedFlag = "--dangerously-skip-permissions";
+            inherit trustedDirs;
           }
-        ''
+        )
       );
 
       # Claude Desktop reads claude_desktop_config.json. The app writes its own
@@ -312,11 +278,10 @@ in
         };
 
         settings = {
-          effort = "medium";
+          effortLevel = "medium";
 
           env = {
             DISABLE_AUTOUPDATER = "1";
-            FORCE_AUTOUPDATE_PLUGINS = "1";
           };
 
           attribution = {
@@ -360,13 +325,6 @@ in
               "Bash(prettier *)"
               # filesystem
               "Bash(jq *)"
-              "Bash(ls *)"
-              "Bash(wc *)"
-              "Bash(mkdir *)"
-              "Bash(cp *)"
-              "Bash(mv *)"
-              "Bash(touch *)"
-              "Bash(which *)"
               "Bash(mdfind *)"
               "Bash(awk *)"
               # network
@@ -424,18 +382,6 @@ in
               }
             ];
           };
-        };
-
-        rules = {
-          code-style = ''
-            # Code Style
-
-            - Write concise, minimal code. Prefer terse patterns over verbose/defensive ones.
-            - Use functional patterns (map, filter, reduce, pipe) over imperative loops.
-            - Use strong, explicit types. Avoid any/unknown. Prefer type annotations.
-            - Only comment non-obvious logic. Code should be self-documenting.
-            - Delete dead code rather than commenting it out.
-          '';
         };
 
         skills = {
@@ -553,43 +499,6 @@ in
             - If a step doesn't match what the user sees, troubleshoot version differences
             - Suggest the user check Preferences > Add-ons to confirm the addon is enabled and its version
           '';
-          deep-research = ''
-            ---
-            description: Research a topic thoroughly before answering. Use when investigating unfamiliar libraries, APIs, tools, or workflows where accuracy matters more than speed.
-            ---
-
-            # Deep Research Mode
-
-            Research the given topic thoroughly before providing any answer.
-
-            ## Process
-
-            1. **Identify what needs verification.** Break the question into specific factual claims that need checking.
-            2. **Search broadly first.** Use WebSearch to find current, authoritative sources. Look for:
-               - Official documentation
-               - Recent changelog entries or release notes
-               - GitHub issues or discussions
-               - Community forums (Reddit, Discourse, Stack Overflow)
-            3. **Read primary sources.** Use WebFetch to read the actual documentation pages, not just search snippets.
-            4. **Use specialized tools.** Context7 for library docs, mcp-nixos for Nix options.
-            5. **Cross-reference.** Verify claims against multiple sources when possible.
-            6. **Synthesize with citations.** Present findings with source links.
-
-            ## Output Format
-
-            Structure your response as:
-            - **Answer** — the verified information
-            - **Sources** — links to documentation or references used
-            - **Caveats** — what you couldn't verify, version-specific notes, or known gaps
-            - **Version info** — which versions this applies to
-
-            ## Rules
-
-            - Never state something as fact without a source
-            - If you find conflicting information, present both sides
-            - If documentation is sparse, say so explicitly
-            - Prefer official docs over blog posts over forum answers
-          '';
         };
 
         commands = {
@@ -699,30 +608,6 @@ in
           '';
         };
 
-        context = ''
-          # Lewis Flude
-
-          ## Machines
-          - Jupiter: NixOS desktop (x86_64-linux), RTX 4090, ZFS
-          - Mercury: macOS laptop (aarch64-darwin)
-
-          ## Primary Tools
-          - Editor: Helix (hx)
-          - Shell: ZSH (Atuin, Powerlevel10k)
-          - Terminal: Zellij
-          - Git: GPG-signed, lazygit, gh CLI
-          - Envs: Nix flakes, devenv, direnv
-
-          ## Languages
-          Nix, TypeScript, Python, Go, Rust
-
-          ## Conventions
-          - Conventional commits: <type>(<scope>): <description>
-
-          ## Interests
-          - 3D art: Blender (Hair Tool, CharMorph plugins), character creation
-          - NixOS configuration and system administration
-        '';
       };
 
       home.packages =
