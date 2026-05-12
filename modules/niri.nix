@@ -122,13 +122,12 @@
                     value.action.move-column-to-workspace = n;
                   }
                 ]
-              ) (lib.range 6 9)
+              ) (lib.range 1 9)
             );
 
             floatingApps = map (id: { app-id = id; }) [
               "xdg-desktop-portal-gtk"
               "xdg-desktop-portal-gnome"
-              "^pinentry-"
               "gcr-prompter"
               "nm-connection-editor"
               "blueman-manager"
@@ -178,7 +177,6 @@
               path = lib.getExe pkgs.xwayland-satellite-unstable;
             };
             screenshot-path = "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
-            environment.QT_QPA_PLATFORM = "wayland";
             debug = lib.mkIf (osConfig.host.hardware.renderDevice or null != null) {
               render-drm-device = osConfig.host.hardware.renderDevice;
             };
@@ -189,11 +187,6 @@
                 repeat = false;
                 hotkey-overlay.title = "Toggle Overview";
               };
-              "Mod+Shift+Slash" = {
-                action.show-hotkey-overlay = { };
-                hotkey-overlay.title = "Show Hotkey Overlay";
-              };
-
               # DMS IPC binds
               "Mod+D" = dmsIpcTitle [ "call" "spotlight" "toggle" ] "Launch DMS Spotlight";
               "Mod+V" = dmsIpcTitle [ "call" "clipboard" "toggle" ] "Clipboard Manager";
@@ -514,23 +507,11 @@
               }
 
               {
-                matches = [ { app-id = "^org\\.quickshell$"; } ];
-                open-floating = true;
-              }
-
-              {
-                matches = floatingApps;
-                open-floating = true;
-              }
-
-              {
-                matches = [ { app-id = "^1password$"; } ];
-                open-floating = true;
-                block-out-from = "screencast";
-              }
-
-              {
                 matches = [
+                  { app-id = "^org\\.quickshell$"; }
+                ]
+                ++ floatingApps
+                ++ [
                   {
                     app-id = "^firefox";
                     title = "^Picture-in-Picture$";
@@ -538,6 +519,12 @@
                   { title = "^Picture in picture$"; }
                 ];
                 open-floating = true;
+              }
+
+              {
+                matches = [ { app-id = "^1password$"; } ];
+                open-floating = true;
+                block-out-from = "screencast";
               }
 
               {
