@@ -107,6 +107,27 @@ in
       claudeDesktopConfigDir =
         if pkgs.stdenv.isDarwin then "$HOME/Library/Application Support/Claude" else "$HOME/.config/Claude";
 
+      # Filesystem MCP is Claude Desktop-only: the CLI clients have native
+      # Read/Edit/Write tools and don't need a duplicate. Paths use ~ which the
+      # wrapper script expands at launch, so the allowlist resolves per-user.
+      claudeDesktopFilesystemDirs = [
+        "~/Obsidian Vault"
+        "~/Music/samples"
+        "~/.config/nix"
+        "~/Documents"
+      ];
+
+      claudeDesktopFilesystemServer = {
+        command = "${pkgs.writeShellScript "mcp-filesystem" ''
+          export PATH="${pkgs.nodejs}/bin:$PATH"
+          exec ${pkgs.nodejs}/bin/npx -y @modelcontextprotocol/server-filesystem ${
+            lib.concatMapStringsSep " " (
+              d: ''"${lib.replaceStrings [ "~" ] [ "\${HOME}" ] d}"''
+            ) claudeDesktopFilesystemDirs
+          } "$@"
+        ''}";
+      };
+
       # Claude Desktop only accepts stdio servers ({ command, args, env }).
       # Wrap HTTP/URL servers with `npx mcp-remote` so they appear as stdio.
       # Header values may contain ${VAR} placeholders that the wrapper script
@@ -115,23 +136,27 @@ in
       # `figma` is excluded: mcp-remote uses Dynamic Client Registration, which
       # Figma's OAuth rejects (403). Add Figma via Claude Desktop's native
       # Connectors UI instead — it uses a pre-registered OAuth client.
-      claudeDesktopServers = lib.mapAttrs (
-        name: server:
-        if server ? url then
-          let
-            headerArgs = lib.concatStringsSep " " (
-              lib.mapAttrsToList (k: v: ''--header "${k}: ${v}"'') (server.headers or { })
-            );
-          in
-          {
-            command = "${pkgs.writeShellScript "mcp-remote-${name}" ''
-              export PATH="${pkgs.nodejs}/bin:$PATH"
-              exec npx -y mcp-remote ${lib.escapeShellArg server.url} ${headerArgs} "$@"
-            ''}";
-          }
-        else
-          server
-      ) (lib.removeAttrs mcpServers [ "figma" ]);
+      claudeDesktopServers =
+        lib.mapAttrs (
+          name: server:
+          if server ? url then
+            let
+              headerArgs = lib.concatStringsSep " " (
+                lib.mapAttrsToList (k: v: ''--header "${k}: ${v}"'') (server.headers or { })
+              );
+            in
+            {
+              command = "${pkgs.writeShellScript "mcp-remote-${name}" ''
+                export PATH="${pkgs.nodejs}/bin:$PATH"
+                exec npx -y mcp-remote ${lib.escapeShellArg server.url} ${headerArgs} "$@"
+              ''}";
+            }
+          else
+            server
+        ) (lib.removeAttrs mcpServers [ "figma" ])
+        // {
+          filesystem = claudeDesktopFilesystemServer;
+        };
 
       claudeDesktopServersJson = builtins.toJSON claudeDesktopServers;
     in
