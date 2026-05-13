@@ -120,11 +120,19 @@ in
       claudeDesktopFilesystemServer = {
         command = "${pkgs.writeShellScript "mcp-filesystem" ''
           export PATH="${pkgs.nodejs}/bin:$PATH"
-          exec ${pkgs.nodejs}/bin/npx -y @modelcontextprotocol/server-filesystem ${
+          dirs=()
+          for d in ${
             lib.concatMapStringsSep " " (
               d: ''"${lib.replaceStrings [ "~" ] [ "\${HOME}" ] d}"''
             ) claudeDesktopFilesystemDirs
-          } "$@"
+          }; do
+            if [ -d "$d" ]; then
+              dirs+=("$d")
+            else
+              echo "mcp-filesystem: skipping missing dir $d" >&2
+            fi
+          done
+          exec ${pkgs.nodejs}/bin/npx -y @modelcontextprotocol/server-filesystem "''${dirs[@]}" "$@"
         ''}";
       };
 

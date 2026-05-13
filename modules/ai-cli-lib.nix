@@ -16,8 +16,9 @@ let
         url = "https://mcp.context7.com/mcp";
       };
       git = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [ "mcp-server-git" ];
+        command = "${pkgs.writeShellScript "mcp-git" ''
+          exec ${pkgs.uv}/bin/uvx --from mcp-server-git mcp-server-git "$@"
+        ''}";
       };
       sqlite = {
         command = "${pkgs.writeShellScript "mcp-sqlite" ''
@@ -31,8 +32,9 @@ let
         ''}";
       };
       nixos = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [ "mcp-nixos" ];
+        command = "${pkgs.writeShellScript "mcp-nixos" ''
+          exec ${pkgs.uv}/bin/uvx --from mcp-nixos mcp-nixos "$@"
+        ''}";
       };
       figma = {
         url = "https://mcp.figma.com/mcp";
