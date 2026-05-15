@@ -643,6 +643,13 @@ in
 
       };
 
+      # claudeCodeMutableSettings above replaces Home Manager's
+      # ~/.claude/settings.json symlink with a writable file after each
+      # activation. On the next activation, Home Manager must overwrite that
+      # mutable file instead of trying to create a .hm-backup that may already
+      # exist from an earlier switch.
+      home.file.".claude/settings.json".force = true;
+
       home.packages =
         let
           llmAgentPkgs = pkgs.llmAgents or { };

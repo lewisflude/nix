@@ -10,8 +10,9 @@
 #   - NixOS: standard `nix.settings`. The Determinate NixOS module
 #     redirects /etc/nix/nix.conf -> /etc/nix/nix.custom.conf
 #     transparently, so the upstream interface keeps working.
-#   - Darwin: `determinateNix.customSettings`. nix-darwin's own Nix
-#     management is disabled because Determinate Nixd owns nix.conf.
+#   - Darwin: `determinateNix.customSettings`. Determinate Nixd owns
+#     nix.conf, and the Determinate nix-darwin module handles that
+#     integration while keeping nix-darwin's Nix-dependent modules usable.
 { config, ... }:
 let
   inherit (config) constants username;
@@ -57,9 +58,6 @@ in
 
   # Mercury — Darwin laptop
   flake.modules.darwin.nix = _: {
-    # Determinate Nixd owns /etc/nix/nix.conf; nix-darwin must not.
-    nix.enable = false;
-
     determinateNix = {
       enable = true;
       customSettings = commonSettings // {

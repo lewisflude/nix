@@ -44,6 +44,7 @@ in
         darwin.nfs
         darwin.vrchatCreation
         darwin.organize
+        darwin.githubRunners
       ];
 
       # Required for Darwin

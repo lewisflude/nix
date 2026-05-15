@@ -33,6 +33,159 @@ _: {
       };
     };
 
+  flake.modules.darwin.githubRunners =
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    let
+      inherit (lib)
+        concatStringsSep
+        escapeShellArg
+        makeBinPath
+        mkBefore
+        ;
+
+      user = config.host.username;
+      runnerName = "mercury-tunnels";
+      runnerLabel = "tunnels-macos";
+      runnerUrl = "https://github.com/beigethreat/tunnels";
+      tokenFile = config.sops.secrets.GITHUB_TOKEN.path;
+      stateDir = "/var/lib/github-runners/${runnerName}";
+      logDir = "/var/log/github-runners/${runnerName}";
+      workDir = "/private/var/lib/github-runners/_work/${runnerName}";
+      runnerPackage = pkgs.github-runner.override {
+        nodeRuntimes = [
+          "node20"
+          "node24"
+        ];
+      };
+      labels = [
+        "macos"
+        "arm64"
+        runnerLabel
+      ];
+      path = makeBinPath (
+        with pkgs;
+        [
+          bashInteractive
+          cmake
+          coreutils
+          curl
+          findutils
+          git
+          gnutar
+          gzip
+          jq
+          just
+          nix
+        ]
+      );
+      configureRunner = pkgs.writeShellApplication {
+        name = "configure-github-runner-${runnerLabel}";
+        runtimeInputs = [
+          runnerPackage
+        ];
+        text = ''
+          set -euo pipefail
+
+          token="$(<"${tokenFile}")"
+          # shellcheck disable=SC2054
+          args=(
+            --unattended
+            --disableupdate
+            --work ${escapeShellArg workDir}
+            --url ${escapeShellArg runnerUrl}
+            --labels ${escapeShellArg (concatStringsSep "," labels)}
+            --name ${escapeShellArg runnerName}
+            --replace
+          )
+
+          if [[ "$token" == ghp_* || "$token" == github_pat_* ]]; then
+            args+=(--pat "$token")
+          else
+            args+=(--token "$token")
+          fi
+
+          config.sh "''${args[@]}"
+        '';
+      };
+    in
+    {
+      launchd.daemons.github-runner-tunnels-macos = {
+        serviceConfig = {
+          Label = "github-runner-${runnerLabel}";
+          KeepAlive = {
+            Crashed = false;
+          };
+          ProcessType = "Interactive";
+          RunAtLoad = true;
+          StandardErrorPath = "${logDir}/launchd-stderr.log";
+          StandardOutPath = "${logDir}/launchd-stdout.log";
+          ThrottleInterval = 30;
+          UserName = user;
+          WatchPaths = [
+            "/etc/resolv.conf"
+            "/Library/Preferences/SystemConfiguration/NetworkInterfaces.plist"
+            tokenFile
+          ];
+          WorkingDirectory = stateDir;
+        };
+
+        script = ''
+          set -euo pipefail
+
+          export HOME=${escapeShellArg stateDir}
+          export RUNNER_ROOT=${escapeShellArg stateDir}
+          export PATH=${escapeShellArg path}:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+          echo "Configuring GitHub Actions Runner"
+          ${pkgs.findutils}/bin/find ${escapeShellArg workDir} -mindepth 1 -delete
+
+          if [[ ! -f "$RUNNER_ROOT/.runner" ]]; then
+            ${configureRunner}/bin/configure-github-runner-${runnerLabel}
+          fi
+
+          exec ${runnerPackage}/bin/Runner.Listener run --startuptype service
+        '';
+      };
+
+      system.activationScripts.launchd.text = mkBefore ''
+        set -euo pipefail
+
+        old_label="actions.runner.beigethreat-tunnels.mercury-tunnels"
+        old_plist="/Users/${config.host.username}/Library/LaunchAgents/$old_label.plist"
+        old_dir="/Users/${config.host.username}/actions-runner-tunnels-macos"
+        uid="$(id -u ${config.host.username})"
+
+        if [ -e "$old_plist" ]; then
+          /bin/launchctl bootout "gui/$uid/$old_label" 2>/dev/null || true
+          /bin/rm -f "$old_plist"
+        fi
+
+        if [ -d "$old_dir" ] && [ -z "$(/bin/ls -A "$old_dir")" ]; then
+          /bin/rmdir "$old_dir" 2>/dev/null || true
+        fi
+
+        echo >&2 "setting up GitHub Runner '${runnerName}'..."
+        # shellcheck disable=SC2174
+        ${pkgs.coreutils}/bin/mkdir -p -m u=rwx,g=rx,o= ${escapeShellArg stateDir}
+        ${pkgs.coreutils}/bin/chown ${escapeShellArg user} ${escapeShellArg stateDir}
+        # shellcheck disable=SC2174
+        ${pkgs.coreutils}/bin/mkdir -p -m u=rwx,g=rx,o= ${escapeShellArg logDir}
+        ${pkgs.coreutils}/bin/chown ${escapeShellArg user} ${escapeShellArg logDir}
+        # shellcheck disable=SC2174
+        ${pkgs.coreutils}/bin/mkdir -p -m u=rwx,g=rx,o= ${escapeShellArg workDir}
+        ${pkgs.coreutils}/bin/chown ${escapeShellArg user} ${escapeShellArg workDir}
+
+        if /bin/launchctl print system/github-runner-${runnerLabel} >/dev/null 2>&1; then
+          /bin/launchctl kickstart -k system/github-runner-${runnerLabel} >/dev/null 2>&1 || true
+        fi
+      '';
+    };
+
   flake.modules.homeManager.gh =
     { pkgs, ... }:
     {
