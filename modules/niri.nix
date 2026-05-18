@@ -181,6 +181,33 @@
               render-drm-device = osConfig.host.hardware.renderDevice;
             };
 
+            environment = {
+              NIXOS_OZONE_WL = "1";
+              MOZ_ENABLE_WAYLAND = "1";
+            };
+
+            cursor = {
+              hide-when-typing = true;
+              hide-after-inactive-ms = 5000;
+            };
+
+            layout = {
+              gaps = 16;
+              always-center-single-column = true;
+              preset-column-widths = [
+                { proportion = 1.0 / 3.0; }
+                { proportion = 1.0 / 2.0; }
+                { proportion = 2.0 / 3.0; }
+                { proportion = 1.0; }
+              ];
+              preset-window-heights = [
+                { proportion = 1.0 / 3.0; }
+                { proportion = 1.0 / 2.0; }
+                { proportion = 2.0 / 3.0; }
+                { proportion = 1.0; }
+              ];
+            };
+
             binds = {
               "Mod+O" = {
                 action.toggle-overview = { };
