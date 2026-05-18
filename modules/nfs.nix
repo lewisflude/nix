@@ -38,9 +38,19 @@ in
 
           ${pkgs.coreutils}/bin/mkdir -p ${musicMount}
 
-          if /sbin/mount | ${pkgs.gnugrep}/bin/grep -q " on ${musicMount} "; then
-            log "${musicMount} is already mounted"
-            exit 0
+          mount_line=$(/sbin/mount | ${pkgs.gnugrep}/bin/grep " on ${musicMount} " || true)
+          if [ -n "$mount_line" ]; then
+            if printf '%s\n' "$mount_line" | ${pkgs.gnugrep}/bin/grep -q '(smbfs,'; then
+              log "${musicMount} is already mounted via SMB"
+              exit 0
+            fi
+
+            log "${musicMount} is mounted with the wrong filesystem: $mount_line"
+            log "unmounting stale mount before SMB remount"
+            if ! /sbin/umount -f ${musicMount}; then
+              log "failed to unmount stale mount at ${musicMount}"
+              exit 1
+            fi
           fi
 
           password=$(${pkgs.coreutils}/bin/tr -d '\r\n' < ${passwordPath})
@@ -52,7 +62,7 @@ in
             exit 1
           fi
 
-          if ! /sbin/mount | ${pkgs.gnugrep}/bin/grep -q " on ${musicMount} "; then
+          if ! /sbin/mount | ${pkgs.gnugrep}/bin/grep " on ${musicMount} " | ${pkgs.gnugrep}/bin/grep -q '(smbfs,'; then
             log "mount command returned success but ${musicMount} is not mounted"
             exit 1
           fi
