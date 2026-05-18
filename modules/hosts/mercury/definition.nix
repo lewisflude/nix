@@ -41,7 +41,7 @@ in
         darwin.eternalTerminal
         darwin.tailscale
         darwin.zed
-        darwin.nfs
+        darwin.jupiter-music
         darwin.vrchatCreation
         darwin.organize
         darwin.githubRunners
@@ -70,7 +70,7 @@ in
             homeManager.terminal
             homeManager.xdg
             homeManager.nh
-            homeManager.nfs
+            homeManager.jupiter-music
             homeManager.sops
             homeManager.nixUser
 
