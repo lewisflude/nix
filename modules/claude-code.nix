@@ -647,8 +647,10 @@ in
       # ~/.claude/settings.json symlink with a writable file after each
       # activation. On the next activation, Home Manager must overwrite that
       # mutable file instead of trying to create a .hm-backup that may already
-      # exist from an earlier switch.
-      home.file.".claude/settings.json".force = true;
+      # exist from an earlier switch. The key must match the absolute-path key
+      # used by programs.claude-code (cfg.configDir defaults to
+      # "${homeDirectory}/.claude") to avoid a target-conflict assertion.
+      home.file."${config.home.homeDirectory}/.claude/settings.json".force = true;
 
       home.packages =
         let
