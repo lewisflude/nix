@@ -58,6 +58,7 @@ in
           QDRANT_API_KEY = mkSecret { allowUserRead = true; };
           PINECONE_API_KEY = mkSecret { allowUserRead = true; };
           E2B_API_KEY = mkSecret { allowUserRead = true; };
+          "samba/lewisflude-password" = mkSecret { };
         };
       };
 
@@ -92,6 +93,7 @@ in
           KAGI_API_KEY = mkDarwinSecret;
           OPENAI_API_KEY = mkDarwinSecret;
           HOME_ASSISTANT_TOKEN = mkDarwinSecret;
+          "samba/lewisflude-password" = mkDarwinSecret;
         };
       };
     };

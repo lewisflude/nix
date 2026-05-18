@@ -1,10 +1,14 @@
 # Samba File Sharing Service
-# Server: SMB shares with optimized performance settings (storage share)
-# Music share moved to NFS — see nfs.nix
-_: {
+# Server: SMB shares with optimized performance settings.
+{ config, ... }:
+let
+  inherit (config) username;
+  musicPath = "/home/${username}/Music";
+in
+{
   # NixOS server: SMB shares
   flake.modules.nixos.samba =
-    { pkgs, ... }:
+    { config, pkgs, ... }:
     {
       services = {
         samba = {
@@ -53,6 +57,16 @@ _: {
               "force directory mode" = "0770";
               "case sensitive" = "auto";
             };
+            music = {
+              path = musicPath;
+              browseable = "yes";
+              writable = "true";
+              "valid users" = username;
+              "force user" = username;
+              "create mask" = "0664";
+              "directory mask" = "0775";
+              "case sensitive" = "auto";
+            };
           };
         };
         samba-wsdd = {
@@ -87,5 +101,23 @@ _: {
         };
       };
       systemd.services.samba.path = [ pkgs.cifs-utils ];
+      systemd.services.samba-lewisflude-password = {
+        description = "Provision Samba password for ${username}";
+        wantedBy = [ "multi-user.target" ];
+        after = [
+          "samba-smbd.service"
+          "sops-nix.service"
+        ];
+        requires = [ "sops-nix.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+        script = ''
+          set -eu
+          password=$(cat ${config.sops.secrets."samba/lewisflude-password".path})
+          printf '%s\n%s\n' "$password" "$password" | ${pkgs.samba}/bin/smbpasswd -a -s ${username}
+        '';
+      };
     };
 }
