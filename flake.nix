@@ -124,7 +124,7 @@
     };
     # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
     audio-nix = {
-      url = "github:polygon/audio.nix/0c1b594b941dd46b29da107f03dfc91b34d820dd";
+      url = "github:polygon/audio.nix/d2a8d0ae02658b688b93e18c6f8c4e88f576db69";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hyprcursor-phinger = {
