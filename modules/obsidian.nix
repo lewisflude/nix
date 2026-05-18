@@ -22,7 +22,10 @@ let
   iphoneConfigured = (hosts.iphone.syncthingId or "") != "";
 
   iphoneDevice = lib.optionalAttrs iphoneConfigured {
-    iphone.id = hosts.iphone.syncthingId;
+    iphone = {
+      id = hosts.iphone.syncthingId;
+      addresses = [ "tcp://${hosts.iphone.tailscaleIpv4}:22000" ];
+    };
   };
   iphoneFolderDevices = lib.optional iphoneConfigured "iphone";
 

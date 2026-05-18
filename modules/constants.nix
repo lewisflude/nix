@@ -129,6 +129,7 @@
           gpgAgentExtra = "/Users/lewisflude/.gnupg/S.gpg-agent.extra";
         };
         iphone = {
+          tailscaleIpv4 = "100.83.166.64";
           syncthingId = "NMKUCPE-KVQV4WW-MLPUWLS-ICPXTOM-IMZA7MV-MED4UDR-GCTZIEZ-BDDBQA2";
         };
       };
