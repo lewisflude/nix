@@ -99,7 +99,8 @@ in
         deps = [ "setupSecrets" ];
         text = ''
           if [ -f ${config.sops.secrets."samba/lewisflude-password".path} ]; then
-            password=$(cat ${config.sops.secrets."samba/lewisflude-password".path})
+            password=$(${pkgs.coreutils}/bin/tr -d '\r\n' \
+              < ${config.sops.secrets."samba/lewisflude-password".path})
             printf '%s\n%s\n' "$password" "$password" \
               | ${pkgs.samba}/bin/smbpasswd -sa ${username}
           fi

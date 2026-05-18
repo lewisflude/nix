@@ -80,8 +80,6 @@ in
 
           /bin/wait4path ${keychainReady}
 
-          ${pkgs.coreutils}/bin/mkdir -p ${musicMount}
-
           mount_line=$(/sbin/mount | ${pkgs.gnugrep}/bin/grep " on ${musicMount} " || true)
           if [ -n "$mount_line" ]; then
             if printf '%s\n' "$mount_line" | ${pkgs.gnugrep}/bin/grep -q '(smbfs,'; then
@@ -96,6 +94,8 @@ in
               exit 1
             fi
           fi
+
+          ${pkgs.coreutils}/bin/mkdir -p ${musicMount}
 
           log "mounting //${username}@${jupiterIp}/music at ${musicMount}"
           if ! /sbin/mount -t smbfs -o soft,nobrowse "//${username}@${jupiterIp}/music" ${musicMount}; then
