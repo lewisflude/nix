@@ -59,7 +59,7 @@
     };
     # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
     dms = {
-      url = "github:AvengeMedia/DankMaterialShell/bcf41ed5caff19e5750f3ef0594088492ecbadbe";
+      url = "github:AvengeMedia/DankMaterialShell/eb5afcdc40ea5446c27e18552ff4a19f9daf9484";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     dms-plugin-registry = {

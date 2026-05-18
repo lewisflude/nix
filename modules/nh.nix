@@ -20,14 +20,11 @@ in
           extraArgs = "--keep-since 4d --keep 3";
         };
         flake = flakePath;
+        osFlake = flakePath;
+        homeFlake = flakePath;
+        darwinFlake = flakePath;
       };
 
-      home.sessionVariables = {
-        NH_FLAKE = flakePath;
-        NH_OS_FLAKE = flakePath;
-        NH_HOME_FLAKE = flakePath;
-        NH_DARWIN_FLAKE = flakePath;
-        NH_NOM = "1";
-      };
+      home.sessionVariables.NH_NOM = "1";
     };
 }
