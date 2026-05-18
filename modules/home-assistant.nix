@@ -84,11 +84,6 @@ in
         ];
 
         config = {
-          # Lovelace dashboard configuration
-          lovelace = {
-            mode = "yaml";
-          };
-
           # Core Home Assistant configuration
           homeassistant = {
             name = "Home";

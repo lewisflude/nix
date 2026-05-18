@@ -63,7 +63,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     dms-plugin-registry = {
-      url = "github:AvengeMedia/dms-plugin-registry/9bc138ff4d250300337ea5563edc3a0a79d3c4c9";
+      url = "github:AvengeMedia/dms-plugin-registry/fde8456bb08af0715041451592c461af66709b70";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     danksearch = {

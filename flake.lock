@@ -307,17 +307,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1777254891,
-        "narHash": "sha256-Mkpyd4Jhr7zhQLpaolA4Bx6QeKMudpdls6z8NxJziuQ=",
+        "lastModified": 1778751506,
+        "narHash": "sha256-1uKZUme0C7vo3KSwlttK4l/0OWB/ktabKAD7kRHR5dE=",
         "owner": "AvengeMedia",
         "repo": "dms-plugin-registry",
-        "rev": "9bc138ff4d250300337ea5563edc3a0a79d3c4c9",
+        "rev": "fde8456bb08af0715041451592c461af66709b70",
         "type": "github"
       },
       "original": {
         "owner": "AvengeMedia",
         "repo": "dms-plugin-registry",
-        "rev": "9bc138ff4d250300337ea5563edc3a0a79d3c4c9",
+        "rev": "fde8456bb08af0715041451592c461af66709b70",
         "type": "github"
       }
     },
