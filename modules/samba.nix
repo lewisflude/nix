@@ -14,16 +14,11 @@ in
         samba = {
           enable = true;
           openFirewall = true;
+          nmbd.enable = false;
           settings = {
             global = {
               "browseable" = "yes";
               "smb encrypt" = "required";
-              "socket options" = "TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=131072 SO_SNDBUF=131072";
-              "read raw" = "yes";
-              "write raw" = "yes";
-              "max xmit" = "65535";
-              "dead time" = "15";
-              "getwd cache" = "yes";
               "server multi channel support" = "yes";
               "dns proxy" = "no";
               "load printers" = "no";
@@ -100,23 +95,14 @@ in
           };
         };
       };
-      systemd.services.samba.path = [ pkgs.cifs-utils ];
-      systemd.services.samba-lewisflude-password = {
-        description = "Provision Samba password for ${username}";
-        wantedBy = [ "multi-user.target" ];
-        after = [
-          "samba-smbd.service"
-          "sops-nix.service"
-        ];
-        requires = [ "sops-nix.service" ];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-        };
-        script = ''
-          set -eu
-          password=$(cat ${config.sops.secrets."samba/lewisflude-password".path})
-          printf '%s\n%s\n' "$password" "$password" | ${pkgs.samba}/bin/smbpasswd -a -s ${username}
+      system.activationScripts.sambaPassword = {
+        deps = [ "setupSecrets" ];
+        text = ''
+          if [ -f ${config.sops.secrets."samba/lewisflude-password".path} ]; then
+            password=$(cat ${config.sops.secrets."samba/lewisflude-password".path})
+            printf '%s\n%s\n' "$password" "$password" \
+              | ${pkgs.samba}/bin/smbpasswd -sa ${username}
+          fi
         '';
       };
     };
