@@ -58,58 +58,54 @@ in
       programs.ssh = {
         enable = true;
         enableDefaultConfig = false;
-        matchBlocks = {
+        settings = {
           "*" = {
-            addKeysToAgent = "yes";
-            identitiesOnly = true;
-            hashKnownHosts = true;
-            forwardAgent = false;
-            controlMaster = "auto";
-            controlPath = "~/.ssh/sockets/%r@%h-%p";
-            controlPersist = "600";
-            serverAliveInterval = 15;
-            serverAliveCountMax = 4;
-            sendEnv = [ "TERM" ];
-            extraOptions = {
-              TCPKeepAlive = "no";
-            };
+            AddKeysToAgent = "yes";
+            IdentitiesOnly = true;
+            HashKnownHosts = true;
+            ForwardAgent = false;
+            ControlMaster = "auto";
+            ControlPath = "~/.ssh/sockets/%r@%h-%p";
+            ControlPersist = "600";
+            ServerAliveInterval = 15;
+            ServerAliveCountMax = 4;
+            SendEnv = [ "TERM" ];
+            TCPKeepAlive = false;
           };
 
           "192.168.10.1" = {
-            extraOptions = {
-              RequestTTY = "yes";
-              SetEnv = "TERM=vt100";
-            };
+            RequestTTY = "yes";
+            SetEnv.TERM = "vt100";
           };
 
           "github.com" = {
-            user = "git";
+            User = "git";
           };
 
           "jupiter" = {
-            hostname = constants.hosts.jupiter.ipv4;
-            user = hmArgs.config.home.username;
-            forwardAgent = true;
-            remoteForwards = [
+            HostName = constants.hosts.jupiter.ipv4;
+            User = hmArgs.config.home.username;
+            ForwardAgent = true;
+            RemoteForward = [
               {
                 bind.address = constants.hosts.jupiter.gpgAgent;
                 host.address = localExtraSocket;
               }
             ];
-            extraOptions.StreamLocalBindUnlink = "yes";
+            StreamLocalBindUnlink = true;
           };
 
           "mercury" = {
-            hostname = constants.hosts.mercury.ipv4;
-            user = hmArgs.config.home.username;
-            forwardAgent = true;
-            remoteForwards = [
+            HostName = constants.hosts.mercury.ipv4;
+            User = hmArgs.config.home.username;
+            ForwardAgent = true;
+            RemoteForward = [
               {
                 bind.address = constants.hosts.mercury.gpgAgent;
                 host.address = localExtraSocket;
               }
             ];
-            extraOptions.StreamLocalBindUnlink = "yes";
+            StreamLocalBindUnlink = true;
           };
         };
       };
