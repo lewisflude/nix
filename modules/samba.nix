@@ -26,9 +26,10 @@ in
               "disable spoolss" = "yes";
               "aio read size" = "16384";
               "aio write size" = "16384";
-              # macOS compatibility (fruit VFS); readdir_attr collapses
-              # stat-per-file into the directory listing for macOS clients.
-              "vfs objects" = "catia fruit streams_xattr readdir_attr";
+              # macOS compatibility (fruit VFS). fruit:aapl enables the AAPL
+              # SMB2 create context which collapses stat-per-file into the
+              # directory listing for macOS clients (supersedes readdir_attr).
+              "vfs objects" = "catia fruit streams_xattr";
               "fruit:aapl" = "yes";
               "fruit:nfs_aces" = "no";
               "fruit:copyfile" = "yes";
