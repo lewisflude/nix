@@ -27,7 +27,6 @@ let
     http-connections = 64;
     connect-timeout = 5;
     stalled-download-timeout = 300;
-    sandbox = true;
     always-allow-substitutes = true;
     builders-use-substitutes = true;
     keep-outputs = true;
@@ -53,6 +52,7 @@ in
   flake.modules.nixos.nix = _: {
     nix.settings = commonSettings // {
       max-jobs = 8;
+      sandbox = true;
     };
   };
 
@@ -62,6 +62,9 @@ in
       enable = true;
       customSettings = commonSettings // {
         max-jobs = 2;
+        # github-runner on Darwin ships a sandbox profile, which Nix only
+        # permits when sandboxing is relaxed.
+        sandbox = "relaxed";
       };
     };
 
