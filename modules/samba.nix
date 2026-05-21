@@ -17,10 +17,9 @@ in
           nmbd.enable = false;
           settings = {
             global = {
-              "log level" = "3 auth:5 auth_audit:5";
-              "smb encrypt" = "desired";
+              "smb encrypt" = "required";
               "server min protocol" = "SMB3_00";
-              "server multi channel support" = "no";
+              "server multi channel support" = "yes";
               "dns proxy" = "no";
               "load printers" = "no";
               "printcap name" = "/dev/null";
@@ -100,16 +99,24 @@ in
           };
         };
       };
-      system.activationScripts.sambaPassword = {
-        deps = [ "setupSecrets" ];
-        text = ''
-          if [ -f ${config.sops.secrets."samba/lewisflude-password".path} ]; then
-            password=$(${pkgs.coreutils}/bin/tr -d '\r\n' \
-              < ${config.sops.secrets."samba/lewisflude-password".path})
+      systemd.services.samba-smbd.serviceConfig.ExecStartPre = [
+        "+${pkgs.writeShellScript "samba-sync-password" ''
+          set -euo pipefail
+          secret=${config.sops.secrets."samba/lewisflude-password".path}
+          if [ ! -f "$secret" ]; then
+            echo "samba-sync-password: secret $secret not present, skipping"
+            exit 0
+          fi
+          password=$(${pkgs.coreutils}/bin/tr -d '\r\n' < "$secret")
+          if ${pkgs.samba}/bin/pdbedit -L \
+              | ${pkgs.gnugrep}/bin/grep -q "^${username}:"; then
+            printf '%s\n%s\n' "$password" "$password" \
+              | ${pkgs.samba}/bin/smbpasswd -s ${username}
+          else
             printf '%s\n%s\n' "$password" "$password" \
               | ${pkgs.samba}/bin/smbpasswd -sa ${username}
           fi
-        '';
-      };
+        ''}"
+      ];
     };
 }

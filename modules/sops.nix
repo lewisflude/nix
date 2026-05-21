@@ -58,7 +58,9 @@ in
           QDRANT_API_KEY = mkSecret { allowUserRead = true; };
           PINECONE_API_KEY = mkSecret { allowUserRead = true; };
           E2B_API_KEY = mkSecret { allowUserRead = true; };
-          "samba/lewisflude-password" = mkSecret { };
+          "samba/lewisflude-password" = mkSecret { } // {
+            restartUnits = [ "samba-smbd.service" ];
+          };
         };
       };
 
