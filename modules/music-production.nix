@@ -19,6 +19,12 @@
     else
       { };
 
+  # drumrack — generates Ableton Drum Rack .adg files from samples on the
+  # SMB-mounted library, for Ableton on Mercury to load.
+  overlays.drumrack = _final: prev: {
+    drumrack = prev.callPackage ../pkgs/drumrack { };
+  };
+
   # NixOS: realtime audio optimizations via musnix
   flake.modules.nixos.musicProduction = _: {
     # musnix handles: PAM limits (memlock, rtprio), CPU governor,
@@ -68,6 +74,9 @@
         # MIDI routing
         pkgs.alsa-utils # aconnect, amidi, aplaymidi
         pkgs.qpwgraph # PipeWire/JACK/ALSA patchbay GUI
+
+        # Sample-library tooling
+        pkgs.drumrack # generate Ableton Drum Rack .adg files from samples
 
         # Synths
         pkgs.vital # Wavetable synth

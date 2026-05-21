@@ -1,4 +1,4 @@
-# FlareSolverr Service Module
+# FlareSolverr container module
 # Cloudflare bypass for Prowlarr and *arr stack
 { config, ... }:
 let
@@ -6,15 +6,18 @@ let
 in
 {
   flake.modules.nixos.flaresolverr = _: {
-    services.flaresolverr = {
-      enable = true;
-      openFirewall = true;
-      port = constants.ports.services.flaresolverr;
-    };
+    virtualisation.podman.enable = true;
+    virtualisation.oci-containers.backend = "podman";
 
-    systemd.services.flaresolverr.environment = {
-      TZ = constants.defaults.timezone;
-      LOG_LEVEL = "info";
+    virtualisation.oci-containers.containers.flaresolverr = {
+      image = "ghcr.io/flaresolverr/flaresolverr:latest";
+      ports = [ "127.0.0.1:${toString constants.ports.services.flaresolverr}:8191" ];
+      environment = {
+        TZ = constants.defaults.timezone;
+        LOG_LEVEL = "info";
+        LOG_HTML = "false";
+        CAPTCHA_SOLVER = "none";
+      };
     };
   };
 }

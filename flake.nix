@@ -5,13 +5,9 @@
   # not here in nixConfig, as nixConfig requires --accept-flake-config
 
   inputs = {
-    # nixos-unstable-small: same source as nixos-unstable but advances daily
-    # (smaller required-pass set on Hydra). Trade-off vs FlakeHub's `0.1`:
-    # gives up some FlakeHub Cache substitution overlap with the determinate
-    # input, but `0.1` actually resolves to the 25.05 stable line, not
-    # unstable. Switch to `nixos-unstable` if cache coverage matters more
-    # than freshness.
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
+    # Regular unstable has better binary cache coverage than
+    # nixos-unstable-small, which matters for expensive packages like Chromium.
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
     process-compose-flake.url = "github:Platonic-Systems/process-compose-flake";
