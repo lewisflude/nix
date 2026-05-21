@@ -18,9 +18,9 @@ in
           settings = {
             global = {
               "log level" = "3 auth:5 auth_audit:5";
-              "smb encrypt" = "required";
+              "smb encrypt" = "desired";
               "server min protocol" = "SMB3_00";
-              "server multi channel support" = "yes";
+              "server multi channel support" = "no";
               "dns proxy" = "no";
               "load printers" = "no";
               "printcap name" = "/dev/null";
