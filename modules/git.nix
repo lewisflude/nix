@@ -38,7 +38,7 @@
           help.autocorrect = "prompt";
           rerere.enabled = true;
           column.ui = "auto";
-          url."git@github.com:".insteadOf = "https://github.com/";
+          url."git@github.com:lewisflude/".insteadOf = "https://github.com/lewisflude/";
           alias = {
             co = "checkout";
             st = "status";
