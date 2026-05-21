@@ -17,8 +17,8 @@ in
           nmbd.enable = false;
           settings = {
             global = {
-              "browseable" = "yes";
               "smb encrypt" = "required";
+              "server min protocol" = "SMB3_00";
               "server multi channel support" = "yes";
               "dns proxy" = "no";
               "load printers" = "no";
@@ -26,9 +26,12 @@ in
               "disable spoolss" = "yes";
               "aio read size" = "16384";
               "aio write size" = "16384";
-              # macOS compatibility (fruit VFS)
-              "vfs objects" = "catia fruit streams_xattr";
+              # macOS compatibility (fruit VFS); readdir_attr collapses
+              # stat-per-file into the directory listing for macOS clients.
+              "vfs objects" = "catia fruit streams_xattr readdir_attr";
               "fruit:aapl" = "yes";
+              "fruit:nfs_aces" = "no";
+              "fruit:copyfile" = "yes";
               "fruit:metadata" = "stream";
               "fruit:model" = "MacSamba";
               "fruit:posix_rename" = "yes";
