@@ -17,6 +17,7 @@ in
           nmbd.enable = false;
           settings = {
             global = {
+              "log level" = "3 auth:5 auth_audit:5";
               "smb encrypt" = "required";
               "server min protocol" = "SMB3_00";
               "server multi channel support" = "yes";
