@@ -1,16 +1,13 @@
 # Mount jupiter's music share over SMB into the user session on mercury.
 #
 # Runs in user context (LaunchAgents, not LaunchDaemons) so mount_smbfs can
-# read credentials from the user's login.keychain — this is the macOS-native
-# pattern that Finder + "Connect to Server" uses. The keychain entry is
-# provisioned from the sops secret at session start; the mount agent waits on
-# a ready-sentinel before invoking mount_smbfs.
+# read credentials from the user's login.keychain. This is the macOS-native
+# pattern that Finder + "Connect to Server" uses.
 { config, ... }:
 let
   inherit (config) constants username;
   jupiterIp = constants.hosts.jupiter.ipv4;
   mountPoint = "/Users/${username}/mnt/jupiter-music";
-  keychainReady = "/Users/${username}/Library/Caches/jupiter-smb-keychain.ready";
 in
 {
   flake.modules.darwin.jupiter-music =
@@ -19,47 +16,6 @@ in
       passwordPath = config.sops.secrets."samba/lewisflude-password".path;
     in
     {
-      launchd.agents.provision-jupiter-smb-keychain = {
-        serviceConfig = {
-          Label = "com.lewisflude.provision-jupiter-smb-keychain";
-          RunAtLoad = true;
-          StandardOutPath = "/Users/${username}/Library/Logs/provision-jupiter-smb-keychain.log";
-          StandardErrorPath = "/Users/${username}/Library/Logs/provision-jupiter-smb-keychain.log";
-        };
-        script = ''
-          set -eu
-
-          log() {
-            printf '%s %s\n' "$(${pkgs.coreutils}/bin/date -Is)" "$*"
-          }
-
-          ${pkgs.coreutils}/bin/rm -f ${keychainReady}
-
-          if [ ! -f ${passwordPath} ]; then
-            log "secret ${passwordPath} not present yet, skipping"
-            exit 0
-          fi
-
-          password=$(${pkgs.coreutils}/bin/tr -d '\r\n' < ${passwordPath})
-
-          /usr/bin/security delete-internet-password \
-            -a ${username} -s ${jupiterIp} -r 'smb ' \
-            >/dev/null 2>&1 || true
-
-          if ! /usr/bin/security add-internet-password \
-            -a ${username} -s ${jupiterIp} -r 'smb ' \
-            -w "$password" \
-            -T /sbin/mount_smbfs -T /usr/bin/security; then
-            log "failed to add jupiter SMB credentials to login.keychain"
-            exit 1
-          fi
-
-          ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname ${keychainReady})"
-          ${pkgs.coreutils}/bin/touch ${keychainReady}
-          log "provisioned jupiter SMB credentials in login.keychain"
-        '';
-      };
-
       launchd.agents.mount-jupiter-music = {
         serviceConfig = {
           Label = "com.lewisflude.mount-jupiter-music";
@@ -79,7 +35,21 @@ in
             printf '%s %s\n' "$(${pkgs.coreutils}/bin/date -Is)" "$*"
           }
 
-          /bin/wait4path ${keychainReady}
+          /bin/wait4path ${passwordPath}
+
+          password=$(${pkgs.coreutils}/bin/tr -d '\r\n' < ${passwordPath})
+
+          /usr/bin/security delete-internet-password \
+            -a ${username} -s ${jupiterIp} -r 'smb ' \
+            >/dev/null 2>&1 || true
+
+          if ! /usr/bin/security add-internet-password \
+            -a ${username} -s ${jupiterIp} -r 'smb ' \
+            -w "$password" \
+            -T /sbin/mount_smbfs -T /usr/bin/security; then
+            log "failed to add jupiter SMB credentials to login.keychain"
+            exit 1
+          fi
 
           mount_line=$(/sbin/mount | ${pkgs.gnugrep}/bin/grep " on ${mountPoint} " || true)
           if [ -n "$mount_line" ]; then

@@ -17,6 +17,7 @@ in
           nmbd.enable = false;
           settings = {
             global = {
+              "security" = "user";
               "smb encrypt" = "required";
               "server min protocol" = "SMB3_00";
               "server multi channel support" = "yes";
@@ -104,8 +105,8 @@ in
           set -euo pipefail
           secret=${config.sops.secrets."samba/lewisflude-password".path}
           if [ ! -f "$secret" ]; then
-            echo "samba-sync-password: secret $secret not present, skipping"
-            exit 0
+            echo "samba-sync-password: secret $secret not present"
+            exit 1
           fi
           password=$(${pkgs.coreutils}/bin/tr -d '\r\n' < "$secret")
           if ${pkgs.samba}/bin/pdbedit -L \
