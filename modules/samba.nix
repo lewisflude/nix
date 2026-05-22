@@ -101,23 +101,23 @@ in
         };
       };
       system.activationScripts.init-smbpasswd.text = ''
-          set -euo pipefail
+        set -euo pipefail
 
-          secret=${config.sops.secrets."samba/lewisflude-password".path}
-          if [ ! -f "$secret" ]; then
-            echo "init-smbpasswd: secret $secret not present" >&2
-            exit 1
-          fi
+        secret=${config.sops.secrets."samba/lewisflude-password".path}
+        if [ ! -f "$secret" ]; then
+          echo "init-smbpasswd: secret $secret not present" >&2
+          exit 1
+        fi
 
-          password=$(${pkgs.coreutils}/bin/tr -d '\r\n' < "$secret")
-          if ${pkgs.samba}/bin/pdbedit -L \
-              | ${pkgs.gnugrep}/bin/grep -q "^${username}:"; then
-            printf '%s\n%s\n' "$password" "$password" \
-              | ${pkgs.samba}/bin/smbpasswd -s ${username}
-          else
-            printf '%s\n%s\n' "$password" "$password" \
-              | ${pkgs.samba}/bin/smbpasswd -sa ${username}
-          fi
+        password=$(${pkgs.coreutils}/bin/tr -d '\r\n' < "$secret")
+        if ${pkgs.samba}/bin/pdbedit -L \
+            | ${pkgs.gnugrep}/bin/grep -q "^${username}:"; then
+          printf '%s\n%s\n' "$password" "$password" \
+            | ${pkgs.samba}/bin/smbpasswd -s ${username}
+        else
+          printf '%s\n%s\n' "$password" "$password" \
+            | ${pkgs.samba}/bin/smbpasswd -sa ${username}
+        fi
       '';
     };
 }
