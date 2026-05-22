@@ -577,7 +577,7 @@ in
             argument-hint: [folder path | theme description]
             ---
 
-            You are building an Ableton Drum Rack `.adg` from samples in `~/Music/samples`. The library is SMB-mounted on Mercury (macOS) at `/Users/lewisflude/mnt/jupiter-music/samples/`, where Ableton Live consumes the generated rack. The `drumrack` CLI handles the .adg mechanics; your job is curation and confirmation.
+            You are building an Ableton Drum Rack `.adg` from samples in `~/Music/samples`. The library is SMB-mounted on Mercury (macOS) at `/Volumes/music/samples/`, where Ableton Live consumes the generated rack. The `drumrack` CLI handles the .adg mechanics; your job is curation and confirmation.
 
             ## Modes
 
@@ -614,7 +614,7 @@ in
             - **Default output location:** sibling of the source kit folder (folder mode) or under the most-relevant pack directory (vibe mode). This keeps racks colocated with their samples — matches how Live's pack convention works.
             - **All samples must live under `~/Music/samples/`.** The CLI errors otherwise. If the user picks a sample elsewhere, surface the error rather than working around it.
             - **MIDI layout reminder:** standard Push 4×4 drum grid is C1=36 (kick row, bottom) through D#2=51 (perc row, top). Pads on other notes are valid but won't sit on the visible Push pad grid.
-            - **Mac path translation is automatic** — the CLI rewrites `~/Music/samples/...` to `/Users/lewisflude/mnt/jupiter-music/samples/...` in the .adg. Don't pre-translate.
+            - **Mac path translation is automatic** — the CLI rewrites `~/Music/samples/...` to `/Volumes/music/samples/...` in the .adg. Don't pre-translate.
             - On success, print the mac path of the output and remind the user to refresh Live's browser to see the new rack.
           '';
         };

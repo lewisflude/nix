@@ -1,10 +1,16 @@
-# Mount jupiter's music share on mercury with macOS autofs.
+# Mount jupiter's `music` SMB share on mercury via a launchd user agent.
+#
+# Replaces the previous autofs-based setup: macOS autofs mounts SMB as guest,
+# which made the share unbrowsable. The user-agent approach mounts as the
+# logged-in user via the Keychain — the Keychain entry is seeded declaratively
+# from the sops secret so the workflow stays fully Nix-managed.
 { config, ... }:
 let
   inherit (config) constants username;
   jupiterIp = constants.hosts.jupiter.ipv4;
-  mountPoint = "/Users/${username}/mnt/jupiter-music";
-  mountRoot = "/Users/${username}/mnt";
+  shareName = "music";
+  mountPoint = "/Volumes/${shareName}";
+  mountUrl = "smb://${jupiterIp}/${shareName}";
 in
 {
   flake.modules.darwin.jupiter-music =
@@ -17,53 +23,52 @@ in
     let
       inherit (lib) escapeShellArg;
       passwordPath = config.sops.secrets."samba/lewisflude-password".path;
-      updateAutoMaster = pkgs.writeText "update-auto-master.py" ''
-        import pathlib
-        import sys
 
-        source, target, begin, end, entry = sys.argv[1:]
-        path = pathlib.Path(source)
-        text = path.read_text() if path.exists() else ""
-        lines = text.splitlines()
-
-        out = []
-        in_block = False
-        for line in lines:
-            if line == begin:
-                in_block = True
-                continue
-            if in_block and line == end:
-                in_block = False
-                continue
-            if not in_block:
-                out.append(line)
-
-        if out and out[-1] != "":
-            out.append("")
-
-        if in_block:
-            raise SystemExit(f"unterminated managed block in {source}")
-
-        out.extend([begin, entry, end])
-        pathlib.Path(target).write_text("\n".join(out) + "\n")
-      '';
-    in
-    {
-      system.activationScripts.jupiterMusicAutofs.text = ''
+      provisionKeychain = pkgs.writeShellScript "provision-jupiter-smb-keychain" ''
         set -euo pipefail
 
         password_path=${escapeShellArg passwordPath}
-        mount_root=${escapeShellArg mountRoot}
-        mount_point=${escapeShellArg mountPoint}
-        auto_map=/etc/auto_jupiter_music
-        auto_master=/etc/auto_master
-        begin_marker="# BEGIN nix-darwin jupiter-music"
-        end_marker="# END nix-darwin jupiter-music"
-
         if [ ! -f "$password_path" ]; then
-          echo "jupiter-music-autofs: missing Samba password secret: $password_path" >&2
+          echo "provision-jupiter-smb-keychain: missing $password_path" >&2
           exit 1
         fi
+
+        password="$(/usr/bin/tr -d '\r\n' < "$password_path")"
+
+        # -U updates the existing entry if present, otherwise creates one.
+        # -r "smb " is the four-character protocol code expected by macOS for
+        # SMB Internet password items. NetAuthAgent must be trusted to read
+        # the entry non-interactively at mount time.
+        /usr/bin/security add-internet-password -U \
+          -a ${escapeShellArg username} \
+          -s ${escapeShellArg jupiterIp} \
+          -P 445 \
+          -r "smb " \
+          -D "Network Password" \
+          -T /System/Library/CoreServices/NetAuthAgent.app \
+          -T /usr/bin/security \
+          -w "$password" \
+          "$HOME/Library/Keychains/login.keychain-db"
+      '';
+
+      mountScript = pkgs.writeShellScript "mount-jupiter-music" ''
+        set -euo pipefail
+
+        if /sbin/mount | /usr/bin/grep -q " on ${mountPoint} (smbfs"; then
+          exit 0
+        fi
+
+        # Finder's "mount volume" goes through the same Keychain auth path as
+        # `open smb://...`, but without surfacing a Finder window each time.
+        /usr/bin/osascript -e 'tell application "Finder" to mount volume "${mountUrl}"' \
+          >/dev/null
+      '';
+    in
+    {
+      # Tear down the old autofs map + any leftover custom launchd agents from
+      # previous iterations of this module.
+      system.activationScripts.jupiterMusicCleanupAutofs.text = ''
+        set -euo pipefail
 
         uid="$(/usr/bin/id -u ${escapeShellArg username})"
         for label in \
@@ -74,32 +79,40 @@ in
           /bin/rm -f "/Users/${username}/Library/LaunchAgents/$label.plist"
         done
 
-        mount_line="$(/sbin/mount | ${pkgs.gnugrep}/bin/grep " on $mount_point " || true)"
-        if [ -n "$mount_line" ] && printf '%s\n' "$mount_line" | ${pkgs.gnugrep}/bin/grep -q '(smbfs,'; then
-          /sbin/umount -f "$mount_point" 2>/dev/null || true
+        # Unmount any existing autofs/SMB mount on the legacy path so the new
+        # /Volumes/${shareName} mount can take over cleanly.
+        legacy_mount="/Users/${username}/mnt/jupiter-music"
+        if /sbin/mount | /usr/bin/grep -q " on $legacy_mount "; then
+          /sbin/umount -f "$legacy_mount" 2>/dev/null || true
         fi
 
-        /bin/mkdir -p "$mount_root"
-
-        password="$(${pkgs.coreutils}/bin/tr -d '\r\n' < "$password_path")"
-        encoded_password="$(${pkgs.python3}/bin/python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$password")"
-
-        tmp_map="$(${pkgs.coreutils}/bin/mktemp)"
-        ${pkgs.coreutils}/bin/chmod 0600 "$tmp_map"
-        printf '%s\n' \
-          "jupiter-music -fstype=smbfs,soft,nobrowse,noowners,nosuid,rw smb://${username}:$encoded_password@${jupiterIp}/music" \
-          > "$tmp_map"
-        /usr/sbin/chown root:wheel "$tmp_map"
-        /usr/bin/install -m 0600 -o root -g wheel "$tmp_map" "$auto_map"
-        /bin/rm -f "$tmp_map"
-
-        tmp_master="$(${pkgs.coreutils}/bin/mktemp)"
-        ${pkgs.python3}/bin/python3 ${updateAutoMaster} "$auto_master" "$tmp_master" "$begin_marker" "$end_marker" "$mount_root $auto_map"
-        /usr/bin/install -m 0644 -o root -g wheel "$tmp_master" "$auto_master"
-        /bin/rm -f "$tmp_master"
-
-        /usr/sbin/automount -vc
+        if [ -f /etc/auto_jupiter_music ]; then
+          /bin/rm -f /etc/auto_jupiter_music
+        fi
+        if [ -f /etc/auto_master ] && /usr/bin/grep -q "BEGIN nix-darwin jupiter-music" /etc/auto_master; then
+          /usr/bin/sed -i ''' '/# BEGIN nix-darwin jupiter-music/,/# END nix-darwin jupiter-music/d' /etc/auto_master
+          /usr/sbin/automount -vc || true
+        fi
       '';
+
+      launchd.user.agents.provision-jupiter-smb-keychain = {
+        serviceConfig = {
+          ProgramArguments = [ "${provisionKeychain}" ];
+          RunAtLoad = true;
+          StandardErrorPath = "/tmp/provision-jupiter-smb-keychain.log";
+        };
+      };
+
+      launchd.user.agents.mount-jupiter-music = {
+        serviceConfig = {
+          ProgramArguments = [ "${mountScript}" ];
+          RunAtLoad = true;
+          # Watchdog: re-mounts after sleep/wake or network changes drop the
+          # share. The script is a no-op when the mount is already healthy.
+          StartInterval = 60;
+          StandardErrorPath = "/tmp/mount-jupiter-music.log";
+        };
+      };
     };
 
   flake.modules.homeManager.jupiter-music =

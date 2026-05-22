@@ -1,12 +1,11 @@
 # Samba File Sharing Service
-# Server: SMB shares with optimized performance settings.
+# Server: SMB shares with hardened defaults + macOS (vfs_fruit) optimisations.
 { config, ... }:
 let
   inherit (config) username;
   musicPath = "/home/${username}/Music";
 in
 {
-  # NixOS server: SMB shares
   flake.modules.nixos.samba =
     { config, pkgs, ... }:
     {
@@ -17,19 +16,25 @@ in
           nmbd.enable = false;
           settings = {
             global = {
+              "workgroup" = "WORKGROUP";
+              "server string" = "jupiter";
+              "netbios name" = "jupiter";
               "security" = "user";
-              "smb encrypt" = "required";
               "server min protocol" = "SMB3_00";
               "server multi channel support" = "yes";
+              "smb encrypt" = "required";
+              "hosts allow" = "192.168.0.0/16 10.0.0.0/8 172.16.0.0/12 100.64.0.0/10 127.0.0.1";
+              "hosts deny" = "0.0.0.0/0";
               "dns proxy" = "no";
               "load printers" = "no";
               "printcap name" = "/dev/null";
               "disable spoolss" = "yes";
               "aio read size" = "16384";
               "aio write size" = "16384";
-              # macOS compatibility (fruit VFS). fruit:aapl enables the AAPL
-              # SMB2 create context which collapses stat-per-file into the
-              # directory listing for macOS clients (supersedes readdir_attr).
+
+              # macOS compatibility (vfs_fruit). fruit:aapl enables the AAPL
+              # SMB2 create context so Finder/Ableton get a single round-trip
+              # for directory listings instead of stat-per-file.
               "vfs objects" = "catia fruit streams_xattr";
               "fruit:aapl" = "yes";
               "fruit:nfs_aces" = "no";
@@ -100,6 +105,7 @@ in
           };
         };
       };
+
       system.activationScripts.init-smbpasswd.text = ''
         set -euo pipefail
 
