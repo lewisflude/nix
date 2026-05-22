@@ -58,7 +58,7 @@ in
           ${pkgs.coreutils}/bin/mkdir -p ${mountPoint}
 
           log "mounting //${username}@${jupiterIp}/music at ${mountPoint}"
-          if ! /sbin/mount -t smbfs -o soft,nobrowse,filemode=0644,dirmode=0755 "//${username}:$encoded_password@${jupiterIp}/music" ${mountPoint}; then
+          if ! /sbin/mount_smbfs -o soft,nobrowse -f 0644 -d 0755 "//${username}:$encoded_password@${jupiterIp}/music" ${mountPoint}; then
             log "mount failed"
             exit 1
           fi
