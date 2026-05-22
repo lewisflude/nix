@@ -1,71 +1,98 @@
-# Mount jupiter's music share over SMB into the user session on mercury.
-#
-# Runs in user context (LaunchAgents, not LaunchDaemons) so the mount belongs
-# to the logged-in macOS user session.
+# Mount jupiter's music share on mercury with macOS autofs.
 { config, ... }:
 let
   inherit (config) constants username;
   jupiterIp = constants.hosts.jupiter.ipv4;
   mountPoint = "/Users/${username}/mnt/jupiter-music";
+  mountRoot = "/Users/${username}/mnt";
 in
 {
   flake.modules.darwin.jupiter-music =
-    { config, pkgs, ... }:
+    { config, lib, pkgs, ... }:
     let
+      inherit (lib) escapeShellArg;
       passwordPath = config.sops.secrets."samba/lewisflude-password".path;
     in
     {
-      launchd.agents.mount-jupiter-music = {
-        serviceConfig = {
-          Label = "com.lewisflude.mount-jupiter-music";
-          RunAtLoad = true;
-          KeepAlive = {
-            NetworkState = true;
-            SuccessfulExit = false;
-          };
-          ThrottleInterval = 60;
-          StandardOutPath = "/Users/${username}/Library/Logs/mount-jupiter-music.log";
-          StandardErrorPath = "/Users/${username}/Library/Logs/mount-jupiter-music.log";
-        };
-        script = ''
-          set -eu
+      system.activationScripts.jupiterMusicAutofs.text = ''
+        set -euo pipefail
 
-          log() {
-            printf '%s %s\n' "$(${pkgs.coreutils}/bin/date -Is)" "$*"
-          }
+        password_path=${escapeShellArg passwordPath}
+        mount_root=${escapeShellArg mountRoot}
+        mount_point=${escapeShellArg mountPoint}
+        auto_map=/etc/auto_jupiter_music
+        auto_master=/etc/auto_master
+        begin_marker="# BEGIN nix-darwin jupiter-music"
+        end_marker="# END nix-darwin jupiter-music"
 
-          /bin/wait4path ${passwordPath}
+        if [ ! -f "$password_path" ]; then
+          echo "jupiter-music-autofs: missing Samba password secret: $password_path" >&2
+          exit 1
+        fi
 
-          password=$(${pkgs.coreutils}/bin/tr -d '\r\n' < ${passwordPath})
-          encoded_password=$(${pkgs.python3}/bin/python3 -c \
-            'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' \
-            "$password")
+        uid="$(/usr/bin/id -u ${escapeShellArg username})"
+        for label in \
+          com.lewisflude.mount-jupiter-music \
+          com.lewisflude.provision-jupiter-smb-keychain
+        do
+          /bin/launchctl bootout "gui/$uid/$label" 2>/dev/null || true
+        done
 
-          mount_line=$(/sbin/mount | ${pkgs.gnugrep}/bin/grep " on ${mountPoint} " || true)
-          if [ -n "$mount_line" ]; then
-            if printf '%s\n' "$mount_line" | ${pkgs.gnugrep}/bin/grep -q '(smbfs,'; then
-              log "${mountPoint} is already mounted via SMB"
-              exit 0
-            fi
+        mount_line="$(/sbin/mount | ${pkgs.gnugrep}/bin/grep " on $mount_point " || true)"
+        if [ -n "$mount_line" ] && printf '%s\n' "$mount_line" | ${pkgs.gnugrep}/bin/grep -q '(smbfs,'; then
+          /sbin/umount -f "$mount_point" 2>/dev/null || true
+        fi
 
-            log "stale non-SMB mount, unmounting: $mount_line"
-            if ! /sbin/umount -f ${mountPoint}; then
-              log "failed to unmount stale mount at ${mountPoint}"
-              exit 1
-            fi
-          fi
+        /bin/mkdir -p "$mount_root"
 
-          ${pkgs.coreutils}/bin/mkdir -p ${mountPoint}
+        password="$(${pkgs.coreutils}/bin/tr -d '\r\n' < "$password_path")"
+        encoded_password="$(${pkgs.python3}/bin/python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$password")"
 
-          log "mounting //${username}@${jupiterIp}/music at ${mountPoint}"
-          if ! /sbin/mount_smbfs -o soft,nobrowse -f 0644 -d 0755 "//${username}:$encoded_password@${jupiterIp}/music" ${mountPoint}; then
-            log "mount failed"
-            exit 1
-          fi
+        tmp_map="$(${pkgs.coreutils}/bin/mktemp)"
+        ${pkgs.coreutils}/bin/chmod 0600 "$tmp_map"
+        printf '%s\n' \
+          "jupiter-music -fstype=smbfs,soft,nobrowse,noowners,nosuid,rw smb://${username}:$encoded_password@${jupiterIp}/music" \
+          > "$tmp_map"
+        /usr/sbin/chown root:wheel "$tmp_map"
+        /usr/bin/install -m 0600 -o root -g wheel "$tmp_map" "$auto_map"
+        /bin/rm -f "$tmp_map"
 
-          log "mounted //${username}@${jupiterIp}/music at ${mountPoint}"
-        '';
-      };
+        tmp_master="$(${pkgs.coreutils}/bin/mktemp)"
+        ${pkgs.python3}/bin/python3 - "$auto_master" "$tmp_master" "$begin_marker" "$end_marker" "$mount_root $auto_map" <<'PY'
+import pathlib
+import sys
+
+source, target, begin, end, entry = sys.argv[1:]
+path = pathlib.Path(source)
+text = path.read_text() if path.exists() else ""
+lines = text.splitlines()
+
+out = []
+in_block = False
+for line in lines:
+    if line == begin:
+        in_block = True
+        continue
+    if in_block and line == end:
+        in_block = False
+        continue
+    if not in_block:
+        out.append(line)
+
+if out and out[-1] != "":
+    out.append("")
+
+if in_block:
+    raise SystemExit(f"unterminated managed block in {source}")
+
+out.extend([begin, entry, end])
+pathlib.Path(target).write_text("\n".join(out) + "\n")
+PY
+        /usr/bin/install -m 0644 -o root -g wheel "$tmp_master" "$auto_master"
+        /bin/rm -f "$tmp_master"
+
+        /usr/sbin/automount -vc
+      '';
     };
 
   flake.modules.homeManager.jupiter-music =
