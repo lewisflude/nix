@@ -1,8 +1,7 @@
 # Mount jupiter's music share over SMB into the user session on mercury.
 #
-# Runs in user context (LaunchAgents, not LaunchDaemons) so mount_smbfs can
-# read credentials from the user's login.keychain. This is the macOS-native
-# pattern that Finder + "Connect to Server" uses.
+# Runs in user context (LaunchAgents, not LaunchDaemons) so the mount belongs
+# to the logged-in macOS user session.
 { config, ... }:
 let
   inherit (config) constants username;
@@ -38,18 +37,9 @@ in
           /bin/wait4path ${passwordPath}
 
           password=$(${pkgs.coreutils}/bin/tr -d '\r\n' < ${passwordPath})
-
-          /usr/bin/security delete-internet-password \
-            -a ${username} -s ${jupiterIp} -r 'smb ' \
-            >/dev/null 2>&1 || true
-
-          if ! /usr/bin/security add-internet-password \
-            -a ${username} -s ${jupiterIp} -r 'smb ' \
-            -w "$password" \
-            -T /sbin/mount_smbfs -T /usr/bin/security; then
-            log "failed to add jupiter SMB credentials to login.keychain"
-            exit 1
-          fi
+          encoded_password=$(${pkgs.python3}/bin/python3 -c \
+            'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' \
+            "$password")
 
           mount_line=$(/sbin/mount | ${pkgs.gnugrep}/bin/grep " on ${mountPoint} " || true)
           if [ -n "$mount_line" ]; then
@@ -68,7 +58,7 @@ in
           ${pkgs.coreutils}/bin/mkdir -p ${mountPoint}
 
           log "mounting //${username}@${jupiterIp}/music at ${mountPoint}"
-          if ! /sbin/mount -t smbfs -o soft,nobrowse "//${username}@${jupiterIp}/music" ${mountPoint}; then
+          if ! /sbin/mount -t smbfs -o soft,nobrowse "//${username}:$encoded_password@${jupiterIp}/music" ${mountPoint}; then
             log "mount failed"
             exit 1
           fi
