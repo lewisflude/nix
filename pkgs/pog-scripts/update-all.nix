@@ -1,7 +1,6 @@
 {
   pkgs,
   pog,
-  config-root,
 }:
 pog.pog {
   name = "update-all";
@@ -30,6 +29,7 @@ pog.pog {
   ];
 
   runtimeInputs = [
+    pkgs.coreutils
     pkgs.git
     pkgs.nix
     pkgs.nvfetcher
@@ -38,7 +38,19 @@ pog.pog {
 
   script =
     helpers: with helpers; ''
-      FLAKE_DIR="${config-root}"
+      find_flake_dir() {
+        if [ -n "''${NIX_CONFIG_ROOT:-}" ]; then
+          printf '%s\n' "$NIX_CONFIG_ROOT"
+        elif git_root=$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null); then
+          printf '%s\n' "$git_root"
+        else
+          printf '%s\n' "$PWD"
+        fi
+      }
+
+      FLAKE_DIR="$(find_flake_dir)"
+      [ -f "$FLAKE_DIR/flake.nix" ] || die "Not in a flake checkout: $FLAKE_DIR"
+      [ -w "$FLAKE_DIR" ] || die "Flake checkout is not writable: $FLAKE_DIR"
       cd "$FLAKE_DIR" || die "Failed to change to flake directory"
 
       blue "🚀 Starting Update Process"
@@ -64,7 +76,7 @@ pog.pog {
             NIX_CONFIG="access-tokens = github.com=$GITHUB_TOKEN"
             export NIX_CONFIG
           fi
-          nix flake update
+          nix flake update || die "Failed to update flake inputs"
           green "✅ Flake inputs updated"
         fi
       else
@@ -79,7 +91,7 @@ pog.pog {
             debug "DRY RUN: Would update ZSH plugins with nvfetcher"
           else
             cd "$FLAKE_DIR/home/common" || die "Failed to change to home/common directory"
-            nvfetcher -c zsh-plugins.toml -o _sources 2>&1 | grep -v "trace:" || true
+            nvfetcher -c zsh-plugins.toml -o _sources || die "Failed to update ZSH plugins"
             green "✅ ZSH plugins updated"
           fi
         else
@@ -96,7 +108,7 @@ pog.pog {
           debug "DRY RUN: Would update overlay sources with nvfetcher"
         else
           cd "$FLAKE_DIR/overlays" || die "Failed to change to overlays directory"
-          nvfetcher -c sources.toml -o _sources 2>&1 | grep -v "trace:" || true
+          nvfetcher -c sources.toml -o _sources || die "Failed to update overlay sources"
           green "✅ Overlay sources updated"
           cyan "   Note: You may need to update additional hashes (like npmDepsHash) manually"
         fi

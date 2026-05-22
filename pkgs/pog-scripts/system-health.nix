@@ -1,7 +1,6 @@
 {
   pkgs,
   pog,
-  config-root,
 }:
 pog.pog {
   name = "system-health";
@@ -64,6 +63,7 @@ pog.pog {
     pkgs.nix
     pkgs.dbus
     pkgs.coreutils
+    pkgs.git
     pkgs.gnugrep
     pkgs.gawk
     pkgs.procps
@@ -71,7 +71,18 @@ pog.pog {
 
   script =
     helpers: with helpers; ''
-      FLAKE_DIR="${config-root}"
+      find_flake_dir() {
+        if [ -n "''${NIX_CONFIG_ROOT:-}" ]; then
+          printf '%s\n' "$NIX_CONFIG_ROOT"
+        elif git_root=$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null); then
+          printf '%s\n' "$git_root"
+        else
+          printf '%s\n' "$PWD"
+        fi
+      }
+
+      FLAKE_DIR="$(find_flake_dir)"
+      [ -f "$FLAKE_DIR/flake.nix" ] || die "Not in a flake checkout: $FLAKE_DIR"
       PASSED=0
       FAILED=0
       WARNINGS=0

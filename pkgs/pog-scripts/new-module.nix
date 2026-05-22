@@ -1,7 +1,6 @@
 {
   pkgs,
   pog,
-  config-root,
 }:
 pog.pog {
   name = "new-module";
@@ -45,13 +44,26 @@ pog.pog {
 
   runtimeInputs = [
     pkgs.coreutils
+    pkgs.git
     pkgs.gnused
     pkgs.gum
   ];
 
   script =
     helpers: with helpers; ''
-      REPO_ROOT="${config-root}"
+      find_repo_root() {
+        if [ -n "''${NIX_CONFIG_ROOT:-}" ]; then
+          printf '%s\n' "$NIX_CONFIG_ROOT"
+        elif git_root=$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null); then
+          printf '%s\n' "$git_root"
+        else
+          printf '%s\n' "$PWD"
+        fi
+      }
+
+      REPO_ROOT="$(find_repo_root)"
+      [ -f "$REPO_ROOT/flake.nix" ] || die "Not in a flake checkout: $REPO_ROOT"
+      [ -w "$REPO_ROOT" ] || die "Repository is not writable: $REPO_ROOT"
       MODULE_TYPE="$type"
       MODULE_NAME="$name"
 

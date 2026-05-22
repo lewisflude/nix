@@ -3,7 +3,6 @@
 {
   inputs,
   config,
-  self,
   lib,
   ...
 }:
@@ -48,9 +47,7 @@ in
             "calculate-qbittorrent-config" = "Calculate optimal qBittorrent settings from speed tests";
             "system-health" = "Run comprehensive system diagnostics";
           };
-          pogScript = pkgsWithPog.callPackage ../../pkgs/pog-scripts/${script-name}.nix {
-            config-root = self;
-          };
+          pogScript = pkgsWithPog.callPackage ../../pkgs/pog-scripts/${script-name}.nix { };
         in
         {
           type = "app";
