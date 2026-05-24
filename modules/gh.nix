@@ -10,6 +10,9 @@ _: {
         tokenFile = config.sops.secrets.GITHUB_TOKEN.path;
         tokenType = "access";
         replace = true;
+        nodeRuntimes = [
+          "node24"
+        ];
 
         extraLabels = [
           "linux"
@@ -58,7 +61,6 @@ _: {
       workDir = "/private/var/lib/github-runners/_work/${runnerName}";
       runnerPackage = pkgs.github-runner.override {
         nodeRuntimes = [
-          "node20"
           "node24"
         ];
       };
