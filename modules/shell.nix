@@ -329,6 +329,25 @@ in
             [[ -f "${hmConfig.home.homeDirectory}/.config/nix/lib/zsh/functions.zsh" ]] && source "${hmConfig.home.homeDirectory}/.config/nix/lib/zsh/functions.zsh"
             [[ -f "${hmConfig.home.homeDirectory}/.config/nix/lib/zsh/p10k-diagnostics.zsh" ]] && source "${hmConfig.home.homeDirectory}/.config/nix/lib/zsh/p10k-diagnostics.zsh"
 
+            # Make narrow SSH clients usable for long clickable links.
+            function linkcols() {
+              emulate -L zsh
+              local cols="''${1:-240}"
+
+              if [[ "$cols" != <-> || "$cols" -lt 80 ]]; then
+                print -u2 "usage: linkcols [columns>=80]"
+                return 2
+              fi
+
+              command stty cols "$cols" 2>/dev/null || return
+              export COLUMNS="$cols"
+              print "Terminal columns set to $cols for this session"
+            }
+
+            if [[ -o interactive && -n "''${SSH_TTY:-}" && -n "''${PROMPT_LINK_COLS:-}" ]]; then
+              linkcols "$PROMPT_LINK_COLS" >/dev/null
+            fi
+
             # Terminfo-based keybindings (non-default ones only — zsh handles arrows/Home/End)
             typeset -g -A key
             key[Backspace]="''${terminfo[kbs]}"

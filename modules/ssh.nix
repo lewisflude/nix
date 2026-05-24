@@ -29,6 +29,7 @@ in
         ClientAliveInterval = 60;
         ClientAliveCountMax = 30;
         TCPKeepAlive = false;
+        AcceptEnv = [ "PROMPT_LINK_COLS" ];
         X11Forwarding = false;
         AllowTcpForwarding = true;
         AllowAgentForwarding = true;
@@ -117,6 +118,7 @@ in
   flake.modules.darwin.ssh = _: {
     environment.etc."ssh/sshd_config.d/200-gpg-forwarding.conf".text = ''
       StreamLocalBindUnlink yes
+      AcceptEnv PROMPT_LINK_COLS
     '';
   };
 }
