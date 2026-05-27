@@ -106,12 +106,12 @@ in
         };
       };
 
-      system.activationScripts.init-smbpasswd.text = ''
+      systemd.services.samba-smbd.preStart = ''
         set -euo pipefail
 
         secret=${config.sops.secrets."samba/lewisflude-password".path}
         if [ ! -f "$secret" ]; then
-          echo "init-smbpasswd: secret $secret not present" >&2
+          echo "samba-sync-password: secret $secret not present" >&2
           exit 1
         fi
 
