@@ -3,13 +3,6 @@ _: {
   flake.modules.nixos.githubRunners =
     { config, pkgs, ... }:
     {
-      # The github-runners module sets WorkingDirectory= and BindPaths= against
-      # workDir but does not create it. Ensure it exists before the service
-      # starts (and survives reboots, unlike the default /run location).
-      systemd.tmpfiles.rules = [
-        "d /var/lib/github-runners/jupiter-tunnels 0750 github-runner github-runner - -"
-      ];
-
       services.github-runners.tunnels-linux = {
         enable = true;
         url = "https://github.com/beigethreat/tunnels";
@@ -17,10 +10,12 @@ _: {
         tokenFile = config.sops.secrets.GITHUB_TOKEN.path;
         tokenType = "access";
         replace = true;
-        # Persist _work across reboots: the default work dir lives under
+        # Persist _work across reboots. The default work dir lives under
         # /run (tmpfs) and is wiped on boot, which also wipes the ccache/CPM
         # caches that CI workflows store under ${{ github.workspace }}/.
-        workDir = "/var/lib/github-runners/jupiter-tunnels";
+        # Reuse the unit's StateDirectory path (created+owned by systemd for
+        # the DynamicUser the runner runs as).
+        workDir = "/var/lib/github-runner/tunnels-linux";
         nodeRuntimes = [
           "node24"
         ];
