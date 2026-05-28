@@ -5,6 +5,7 @@ _: {
     {
       services.github-runners.tunnels-linux = {
         enable = true;
+        package = pkgs.github-runner;
         url = "https://github.com/beigethreat/plugins";
         name = "jupiter-tunnels";
         tokenFile = config.sops.secrets.GITHUB_TOKEN.path;
@@ -18,7 +19,6 @@ _: {
         # also wipe the runner's tokens if they shared a path.
         workDir = "/var/lib/github-runner-work/tunnels-linux";
         nodeRuntimes = [
-          "node20"
           "node24"
         ];
 
@@ -85,7 +85,6 @@ _: {
       workDir = "/private/var/lib/github-runners/_work/${runnerName}";
       runnerPackage = pkgs.github-runner.override {
         nodeRuntimes = [
-          "node20"
           "node24"
         ];
       };
