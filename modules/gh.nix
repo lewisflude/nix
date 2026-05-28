@@ -10,6 +10,10 @@ _: {
         tokenFile = config.sops.secrets.GITHUB_TOKEN.path;
         tokenType = "access";
         replace = true;
+        # Persist _work across reboots: the default work dir lives under
+        # /run (tmpfs) and is wiped on boot, which also wipes the ccache/CPM
+        # caches that CI workflows store under ${{ github.workspace }}/.
+        workDir = "/var/lib/github-runners/jupiter-tunnels";
         nodeRuntimes = [
           "node24"
         ];
