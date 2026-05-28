@@ -13,9 +13,10 @@ _: {
         # Persist _work across reboots. The default work dir lives under
         # /run (tmpfs) and is wiped on boot, which also wipes the ccache/CPM
         # caches that CI workflows store under ${{ github.workspace }}/.
-        # Reuse the unit's StateDirectory path (created+owned by systemd for
-        # the DynamicUser the runner runs as).
-        workDir = "/var/lib/github-runner/tunnels-linux";
+        # Must be distinct from the StateDirectory: the unconfigure script
+        # ends with `find $WORK_DIRECTORY -mindepth 1 -delete`, which would
+        # also wipe the runner's tokens if they shared a path.
+        workDir = "/var/lib/github-runner-work/tunnels-linux";
         nodeRuntimes = [
           "node24"
         ];
@@ -40,6 +41,15 @@ _: {
           pluginval
         ];
       };
+
+      # The github-runners module BindPaths the workDir into the service's
+      # mount namespace but does not create it. Add a second StateDirectory
+      # entry so systemd creates and chowns it for the DynamicUser the
+      # runner runs as.
+      systemd.services.github-runner-tunnels-linux.serviceConfig.StateDirectory = [
+        "github-runner/tunnels-linux"
+        "github-runner-work/tunnels-linux"
+      ];
     };
 
   flake.modules.darwin.githubRunners =
