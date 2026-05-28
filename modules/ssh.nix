@@ -70,7 +70,10 @@ in
             ControlPersist = "600";
             ServerAliveInterval = 15;
             ServerAliveCountMax = 4;
-            SendEnv = [ "TERM" ];
+            SendEnv = [
+              "TERM"
+              "PROMPT_LINK_COLS"
+            ];
             TCPKeepAlive = false;
           };
 

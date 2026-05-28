@@ -36,6 +36,7 @@ _: {
             bufferline = "multiple";
             true-color = true;
             undercurl = true;
+            clipboard-provider = "termcode";
             color-modes = true;
             scrolloff = 8;
             rulers = [

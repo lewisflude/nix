@@ -122,7 +122,7 @@ _: {
           KeepAlive = {
             Crashed = false;
           };
-          ProcessType = "Interactive";
+          ProcessType = "Standard";
           RunAtLoad = true;
           StandardErrorPath = "${logDir}/launchd-stderr.log";
           StandardOutPath = "${logDir}/launchd-stdout.log";

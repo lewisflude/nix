@@ -97,6 +97,8 @@ in
 
       launchd.user.agents.provision-jupiter-smb-keychain = {
         serviceConfig = {
+          LowPriorityIO = true;
+          ProcessType = "Background";
           ProgramArguments = [ "${provisionKeychain}" ];
           RunAtLoad = true;
           StandardErrorPath = "/tmp/provision-jupiter-smb-keychain.log";
@@ -105,6 +107,8 @@ in
 
       launchd.user.agents.mount-jupiter-music = {
         serviceConfig = {
+          LowPriorityIO = true;
+          ProcessType = "Background";
           ProgramArguments = [ "${mountScript}" ];
           RunAtLoad = true;
           # Watchdog: re-mounts after sleep/wake or network changes drop the

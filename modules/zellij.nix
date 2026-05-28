@@ -6,6 +6,11 @@ _: {
       programs.zellij = {
         enable = true;
         enableZshIntegration = false;
+        settings = {
+          copy_clipboard = "system";
+          copy_on_select = true;
+          osc8_hyperlinks = true;
+        };
 
         layouts.default = ''
           layout {
@@ -28,6 +33,18 @@ _: {
             && -z "''${ET_NO_ZELLIJ:-}" \
             && -t 0 \
             && -t 1 ]] && command -v zellij >/dev/null 2>&1; then
+            prompt_link_cols="''${PROMPT_LINK_COLS:-}"
+            if [[ -z "$prompt_link_cols" && "''${COLUMNS:-0}" == <-> && "''${COLUMNS:-0}" -lt 100 ]]; then
+              prompt_link_cols=240
+            fi
+            if [[ -n "$prompt_link_cols" \
+              && "$prompt_link_cols" != 0 \
+              && "$prompt_link_cols" == <-> \
+              && "$prompt_link_cols" -ge 80 ]]; then
+              command stty cols "$prompt_link_cols" 2>/dev/null || true
+              export COLUMNS="$prompt_link_cols"
+            fi
+            unset prompt_link_cols
             exec zellij attach -c eternal-terminal
           fi
         ''

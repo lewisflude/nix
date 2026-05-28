@@ -61,6 +61,8 @@ in
     determinateNix = {
       enable = true;
       customSettings = commonSettings // {
+        cores = 2;
+        eval-cores = 4;
         max-jobs = 2;
         # github-runner on Darwin ships a sandbox profile, which Nix only
         # permits when sandboxing is relaxed.

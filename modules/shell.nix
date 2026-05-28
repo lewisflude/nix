@@ -344,8 +344,15 @@ in
               print "Terminal columns set to $cols for this session"
             }
 
-            if [[ -o interactive && -n "''${SSH_TTY:-}" && -n "''${PROMPT_LINK_COLS:-}" ]]; then
-              linkcols "$PROMPT_LINK_COLS" >/dev/null
+            if [[ -o interactive && ( -n "''${SSH_TTY:-}" || -n "''${ET_VERSION:-}" ) ]]; then
+              prompt_link_cols="''${PROMPT_LINK_COLS:-}"
+              if [[ -z "$prompt_link_cols" && "''${COLUMNS:-0}" == <-> && "''${COLUMNS:-0}" -lt 100 ]]; then
+                prompt_link_cols=240
+              fi
+              if [[ -n "$prompt_link_cols" && "$prompt_link_cols" != 0 ]]; then
+                linkcols "$prompt_link_cols" >/dev/null
+              fi
+              unset prompt_link_cols
             fi
 
             # Terminfo-based keybindings (non-default ones only — zsh handles arrows/Home/End)

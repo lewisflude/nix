@@ -3,8 +3,41 @@
 _: {
   flake.modules.homeManager.terminal =
     { lib, pkgs, ... }:
+    let
+      osc52Copy = pkgs.writeShellApplication {
+        name = "osc52-copy";
+        runtimeInputs = [ pkgs.coreutils ];
+        text = ''
+          if [ "$#" -gt 0 ]; then
+            payload=$(printf '%s' "$*" | base64 | tr -d '\r\n')
+          else
+            payload=$(base64 | tr -d '\r\n')
+          fi
+
+          if [ -e /dev/tty ]; then
+            printf '\033]52;c;%s\a' "$payload" > /dev/tty
+          else
+            printf '\033]52;c;%s\a' "$payload"
+          fi
+        '';
+      };
+
+      osc52Test = pkgs.writeShellApplication {
+        name = "osc52-test";
+        runtimeInputs = [ osc52Copy ];
+        text = ''
+          osc52-copy "osc52-copy-ok"
+          printf 'Sent OSC 52 clipboard test: osc52-copy-ok\n'
+        '';
+      };
+    in
     {
-      home.packages = [ pkgs.clipse ] ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.wtype ];
+      home.packages = [
+        pkgs.clipse
+        osc52Copy
+        osc52Test
+      ]
+      ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.wtype ];
 
       # Ghostty configuration
       # Linux: install from nixpkgs

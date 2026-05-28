@@ -274,6 +274,8 @@ _: {
       launchd.agents.organize = {
         enable = true;
         config = {
+          LowPriorityIO = true;
+          ProcessType = "Background";
           ProgramArguments = [
             "/opt/homebrew/bin/organize"
             "run"

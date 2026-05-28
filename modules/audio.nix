@@ -214,6 +214,8 @@ _: {
       launchd.agents.audio-kvm-recovery = lib.mkIf isDarwin {
         enable = true;
         config = {
+          LowPriorityIO = true;
+          ProcessType = "Background";
           ProgramArguments = [ "${audioKvmRecovery}" ];
           # launchd ThrottleInterval floors re-launch at 10s; 30s is the
           # least-wasteful polling cadence here. For event-driven, swap to
