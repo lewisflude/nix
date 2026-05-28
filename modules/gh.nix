@@ -1,7 +1,7 @@
 # GitHub CLI and GitHub Actions runner configuration
 _: {
   flake.modules.nixos.githubRunners =
-    { config, pkgs, ... }:
+    { config, lib, pkgs, ... }:
     {
       services.github-runners.tunnels-linux = {
         enable = true;
@@ -45,11 +45,18 @@ _: {
       # The github-runners module BindPaths the workDir into the service's
       # mount namespace but does not create it. Add a second StateDirectory
       # entry so systemd creates and chowns it for the DynamicUser the
-      # runner runs as.
-      systemd.services.github-runner-tunnels-linux.serviceConfig.StateDirectory = [
-        "github-runner/tunnels-linux"
-        "github-runner-work/tunnels-linux"
-      ];
+      # runner runs as, and clear BindPaths — the StateDirectory mechanism
+      # already exposes the path to the namespace, and an additional
+      # BindPaths over the same symlink path makes the CHDIR step fail
+      # with EACCES when the working directory resolves through the
+      # bind mount.
+      systemd.services.github-runner-tunnels-linux.serviceConfig = {
+        StateDirectory = lib.mkForce [
+          "github-runner/tunnels-linux"
+          "github-runner-work/tunnels-linux"
+        ];
+        BindPaths = lib.mkForce [ ];
+      };
     };
 
   flake.modules.darwin.githubRunners =
