@@ -3,6 +3,13 @@ _: {
   flake.modules.nixos.githubRunners =
     { config, pkgs, ... }:
     {
+      # The github-runners module sets WorkingDirectory= and BindPaths= against
+      # workDir but does not create it. Ensure it exists before the service
+      # starts (and survives reboots, unlike the default /run location).
+      systemd.tmpfiles.rules = [
+        "d /var/lib/github-runners/jupiter-tunnels 0750 github-runner github-runner - -"
+      ];
+
       services.github-runners.tunnels-linux = {
         enable = true;
         url = "https://github.com/beigethreat/tunnels";
