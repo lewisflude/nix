@@ -1,7 +1,12 @@
 # GitHub CLI and GitHub Actions runner configuration
 _: {
   flake.modules.nixos.githubRunners =
-    { config, lib, pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     {
       services.github-runners.tunnels-linux = {
         enable = true;

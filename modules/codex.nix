@@ -184,6 +184,32 @@ in
             $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$existing_json" "$cleaned_json" "$cleaned_toml"
           }
 
+          repair_codex_hooks_json() {
+            local hooks_file=$1
+            local stale_hooks=${lib.escapeShellArg "${homeDirectory}/Code/Tunnels/.codex/hooks"}
+            local hooks_dir tmp
+
+            hooks_dir="$(${pkgs.coreutils}/bin/dirname "$hooks_file")/hooks"
+            [ -s "$hooks_file" ] || return 0
+            [ -d "$hooks_dir" ] || return 0
+
+            tmp=$(${pkgs.coreutils}/bin/mktemp)
+            if ${pkgs.jq}/bin/jq --arg stale "$stale_hooks" --arg hooks_dir "$hooks_dir" '
+              def replace_stale_hook_path:
+                if type == "string" then split($stale) | join($hooks_dir) else . end;
+              walk(if type == "object" and has("command") then .command |= replace_stale_hook_path else . end)
+            ' "$hooks_file" > "$tmp"; then
+              if ! ${pkgs.diffutils}/bin/cmp -s "$hooks_file" "$tmp"; then
+                $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$tmp" "$hooks_file"
+              else
+                $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$tmp"
+              fi
+            else
+              echo "warning: failed to parse $hooks_file during Codex hook repair; leaving it unchanged" >&2
+              $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$tmp"
+            fi
+          }
+
           GLOBAL_CODEX_CLEANUP='
             del(.features.codex_hooks)
             | del(.mcp_servers."sequential-thinking")
@@ -207,6 +233,9 @@ in
             if [ -d "$trusted_dir" ]; then
               ${pkgs.findutils}/bin/find "$trusted_dir" -maxdepth 4 -path '*/.codex/config.toml' -type f 2>/dev/null | while IFS= read -r project_config; do
                 cleanup_codex_config "$project_config" "$PROJECT_CODEX_CLEANUP"
+              done
+              ${pkgs.findutils}/bin/find "$trusted_dir" -maxdepth 4 -path '*/.codex/hooks.json' -type f 2>/dev/null | while IFS= read -r project_hooks; do
+                repair_codex_hooks_json "$project_hooks"
               done
             fi
           done

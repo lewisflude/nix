@@ -42,6 +42,7 @@ in
         darwin.tailscale
         darwin.zed
         darwin.jupiter-music
+        darwin.musicProduction
         darwin.vrchatCreation
         darwin.organize
         darwin.githubRunners

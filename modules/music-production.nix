@@ -47,6 +47,45 @@
     ];
   };
 
+  # Darwin: pro-audio prefs for Ableton + FabFilter on macOS.
+  # FabFilter's macOS renderer stutters on high-refresh-rate / ultrawide
+  # displays (see e.g. AW3423DWF @ 165 Hz). Disabling GraphicsAcceleration
+  # forces the CPU path, which on Apple Silicon is paradoxically smoother.
+  # Each plug-in keeps its own prefs domain; com.fabfilter.Common is a shared
+  # fallback. Toggle the value here to 1 if you ever want to A/B test.
+  flake.modules.darwin.musicProduction = _: {
+    system.defaults.CustomUserPreferences =
+      let
+        fabfilterDomains = [
+          "com.fabfilter.Common"
+          "com.fabfilter.Pro-Q.4"
+          "com.fabfilter.Pro-Q.3"
+          "com.fabfilter.Pro-C.3"
+          "com.fabfilter.Pro-C.2"
+          "com.fabfilter.Pro-MB.1"
+          "com.fabfilter.Pro-L.2"
+          "com.fabfilter.Pro-R.2"
+          "com.fabfilter.Pro-G.1"
+          "com.fabfilter.Pro-DS.1"
+          "com.fabfilter.Saturn.2"
+          "com.fabfilter.Twin.3"
+          "com.fabfilter.Timeless.3"
+          "com.fabfilter.Volcano.3"
+          "com.fabfilter.One.3"
+          "com.fabfilter.Micro.1"
+          "com.fabfilter.Simplon.1"
+        ];
+      in
+      builtins.listToAttrs (
+        map (d: {
+          name = d;
+          value = {
+            GraphicsAcceleration = 0;
+          };
+        }) fabfilterDomains
+      );
+  };
+
   # Home-manager: Ardour + LV2 plugins
   # Note: LV2 plugins preferred over VST2 due to nixpkgs bug #310307
   flake.modules.homeManager.musicProduction =
