@@ -43,20 +43,37 @@ _: {
         ];
       };
 
-      # The github-runners module BindPaths the workDir into the service's
-      # mount namespace but does not create it. Add a second StateDirectory
-      # entry so systemd creates and chowns it for the DynamicUser the
-      # runner runs as, and clear BindPaths — the StateDirectory mechanism
-      # already exposes the path to the namespace, and an additional
-      # BindPaths over the same symlink path makes the CHDIR step fail
-      # with EACCES when the working directory resolves through the
-      # bind mount.
+      # The github-runners module defaults to DynamicUser=true, which causes
+      # systemd to bind-mount the StateDirectory with MS_NOEXEC. That prevents
+      # CI from executing binaries it just built (juceaide, plugin .so, etc).
+      # Switch to a static user/group: no noexec applied, runner can build+run.
+      users.users.github-runner-tunnels = {
+        isSystemUser = true;
+        group = "github-runner-tunnels";
+        home = "/var/lib/github-runner-work/tunnels-linux";
+        createHome = false;
+      };
+      users.groups.github-runner-tunnels = { };
+
+      systemd.tmpfiles.rules = [
+        "d /var/lib/github-runner/tunnels-linux 0700 github-runner-tunnels github-runner-tunnels - -"
+        "d /var/lib/github-runner-work 0755 root root - -"
+        "d /var/lib/github-runner-work/tunnels-linux 0750 github-runner-tunnels github-runner-tunnels - -"
+      ];
+
       systemd.services.github-runner-tunnels-linux.serviceConfig = {
-        StateDirectory = lib.mkForce [
-          "github-runner/tunnels-linux"
-          "github-runner-work/tunnels-linux"
-        ];
+        DynamicUser = lib.mkForce false;
+        User = "github-runner-tunnels";
+        Group = "github-runner-tunnels";
+        StateDirectory = lib.mkForce [ ];
         BindPaths = lib.mkForce [ ];
+        # ProtectSystem=strict marks /var read-only; explicitly allow writes
+        # to the runner state + work dirs now that StateDirectory no longer
+        # adds them to the writable set automatically.
+        ReadWritePaths = [
+          "/var/lib/github-runner/tunnels-linux"
+          "/var/lib/github-runner-work/tunnels-linux"
+        ];
       };
     };
 
