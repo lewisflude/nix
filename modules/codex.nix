@@ -91,6 +91,49 @@ in
         - Ableton references samples by absolute path - warn the user before moving anything that's already been dragged into a live project.
       '';
 
+      home.file.".codex/skills/organize-samples/SKILL.md".text = ''
+        ---
+        name: organize-samples
+        description: Use when the user asks to organize, organise, tidy, sort, classify, or move samples in ~/Music/samples, especially after music-production torrents land. Surveys the sample library, proposes a taxonomy, and moves items only after confirmation.
+        metadata:
+          short-description: Organize ~/Music/samples safely
+        ---
+
+        # Organize Samples
+
+        You are tidying the user's sample library at `~/Music/samples`. This folder is NFS-exported to Mercury (macOS) and consumed by Ableton Live, so the layout must stay stable and human-browsable.
+
+        New content lands here automatically via qBittorrent's `music-production` category. Each completed torrent arrives as `~/Music/samples/<torrent-name>/`.
+
+        ## Workflow
+
+        1. Survey the top level of `~/Music/samples`.
+        2. For each unorganized entry, note the name, size with `du -sh`, and a one-line type guess such as drum kit, synth preset pack, loop pack, stems, or multisample. Use `file` and extensions to inform the guess.
+        3. Propose moves before changing anything. Present a source -> destination table and wait for approval.
+        4. Preserve commercial packs as whole folders under `packs/<pack-name>/` when they already have useful internal structure such as `Kicks/`, `Snares/`, or `Presets/`.
+        5. Move with `mv`; do not copy, delete, or overwrite. If a destination exists, ask the user.
+        6. After approved moves, use `rmdir` only for empty source directories.
+
+        ## Baseline Taxonomy
+
+        Prefer the user's existing folders. If extending the layout, use this baseline unless the library has clearly diverged:
+
+        - `drums/` - oneshots, kits, breaks
+        - `loops/` - melodic/rhythmic loops
+        - `synths/` - presets, patches, multisamples
+        - `stems/` - song stems, acapellas
+        - `fx/` - risers, impacts, foley, textures
+        - `packs/` - commercial sample packs kept whole
+
+        ## Guardrails
+
+        - Treat ambiguous items as questions for the user.
+        - If the request includes a focus such as drums, synths, or loops, restrict the pass to matching items.
+        - Never touch files outside `~/Music/samples`.
+        - Never delete. Surface junk-looking files such as thumbnails, `.DS_Store`, or torrent metadata and let the user decide.
+        - Ableton references samples by absolute path. Warn before moving anything that may already have been dragged into a Live project.
+      '';
+
       programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
         lib.mkAfter (
           aiCli.mkTrustedWrapper {
