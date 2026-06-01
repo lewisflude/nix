@@ -20,13 +20,8 @@ in
     ];
   };
 
-  # ==========================================================================
-  # Darwin System Configuration
-  # ==========================================================================
-  flake.modules.darwin.eternalTerminal = _: {
-    services.eternal-terminal = {
-      enable = true;
-      port = constants.ports.services.eternalTerminal;
-    };
-  };
+  # Darwin intentionally omitted: nix-darwin's services.eternal-terminal
+  # mis-models etserver's self-daemonize under launchd (parent forks and
+  # exits, launchd records EX_CONFIG=78 and refuses to restart). Use mosh
+  # over SSH on macOS instead.
 }

@@ -116,12 +116,15 @@ in
     };
 
   # ===========================================================================
-  # Darwin: SSH server GPG forwarding support
+  # Darwin: enable Apple's sshd via nix-darwin (flips Remote Login on)
   # ===========================================================================
   flake.modules.darwin.ssh = _: {
-    environment.etc."ssh/sshd_config.d/200-gpg-forwarding.conf".text = ''
-      StreamLocalBindUnlink yes
-      AcceptEnv PROMPT_LINK_COLS
-    '';
+    services.openssh = {
+      enable = true;
+      extraConfig = ''
+        StreamLocalBindUnlink yes
+        AcceptEnv PROMPT_LINK_COLS
+      '';
+    };
   };
 }
