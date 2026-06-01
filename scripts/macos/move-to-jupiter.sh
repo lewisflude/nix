@@ -155,7 +155,7 @@ run_task() {
 
   ssh "$JUPITER_HOST" "mkdir -p $(remote_quote "$dest")"
 
-  local rsync_args=(-a --partial --human-readable --progress)
+  local rsync_args=(-a --partial --human-readable --info=progress2,stats1 --timeout=120)
   if [[ "$mode" == "dry-run" ]]; then
     rsync_args+=(--dry-run)
   fi
