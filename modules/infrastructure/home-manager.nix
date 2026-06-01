@@ -23,6 +23,9 @@ in
             home.stateVersion = osConfig.system.stateVersion;
             home.username = lib.mkDefault username;
             home.homeDirectory = lib.mkDefault "/home/${username}";
+            # We intentionally track unstable for both nixpkgs and home-manager;
+            # the branches occasionally drift across a release cut.
+            home.enableNixpkgsReleaseCheck = false;
             programs.home-manager.enable = true;
             programs.git.settings.user.email = useremail;
 
@@ -46,6 +49,9 @@ in
           home.stateVersion = constants.defaults.stateVersion;
           home.username = lib.mkDefault username;
           home.homeDirectory = lib.mkDefault "/Users/${username}";
+          # We intentionally track unstable for both nixpkgs and home-manager;
+          # the branches occasionally drift across a release cut.
+          home.enableNixpkgsReleaseCheck = false;
           programs.home-manager.enable = true;
           programs.git.settings.user.email = useremail;
 

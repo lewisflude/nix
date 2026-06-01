@@ -48,9 +48,9 @@ TASKS=(
   "roughstructure-project|${HOME}/Music/RoughStructure Project|/home/lewisflude/Music/projects/from-mac-ableton-projects/RoughStructure_Project|safe|Standalone Ableton project"
   "justwanted-project|${HOME}/Music/Ableton/JustWantedToGetAlong Project|/home/lewisflude/Music/projects/from-mac-ableton-projects/JustWantedToGetAlong_Project|safe|Standalone Ableton project"
   "nicotine-downloads|${HOME}/.local/share/nicotine/downloads|/mnt/storage/torrents/music-production/nicotine-from-mac|safe|Nicotine downloads"
-  "icloud-downloads|${HOME}/Library/Mobile Documents/com~apple~CloudDocs/Downloads|/mnt/storage/backups/macbook/icloud-downloads|contents|iCloud Drive Downloads contents"
-  "icloud-document-backups|${HOME}/Library/Mobile Documents/com~apple~CloudDocs/Documents/Backups|/mnt/storage/backups/macbook/icloud-documents-backups|safe|iCloud Drive document backups"
-  "lightroom-originals|${HOME}/Pictures/Lightroom Library.lrlibrary/9f77c25a53aa4806b7dd5825df9f74a2/originals|/mnt/storage/backups/macbook/lightroom-originals|archive|Lightroom originals archive copy"
+  "icloud-downloads|${HOME}/Library/Mobile Documents/com~apple~CloudDocs/Downloads|/mnt/storage/from-mac/macbook/icloud-downloads|contents|iCloud Drive Downloads contents"
+  "icloud-document-backups|${HOME}/Library/Mobile Documents/com~apple~CloudDocs/Documents/Backups|/mnt/storage/from-mac/macbook/icloud-documents-backups|safe|iCloud Drive document backups"
+  "lightroom-originals|${HOME}/Pictures/Lightroom Library.lrlibrary/9f77c25a53aa4806b7dd5825df9f74a2/originals|/mnt/storage/from-mac/macbook/lightroom-originals|archive|Lightroom originals archive copy"
   "music-app-media|${HOME}/Music/Music/Media.localized/Music|/mnt/storage/media/music/from-mac-music-app|archive|Apple Music media archive copy"
 )
 
