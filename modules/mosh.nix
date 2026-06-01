@@ -30,4 +30,22 @@ _: {
         '')
       ];
     };
+
+  # ==========================================================================
+  # Darwin System Configuration
+  # ==========================================================================
+  # macOS doesn't need a daemon — mosh-server is exec'd over SSH on demand.
+  # Just put the binary on PATH (and provide the cmosh-server symlink that
+  # the Termix iOS app expects).
+  flake.modules.darwin.mosh =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [
+        pkgs.mosh
+        (pkgs.runCommand "cmosh-server-symlink" { } ''
+          mkdir -p $out/bin
+          ln -s ${pkgs.mosh}/bin/mosh-server $out/bin/cmosh-server
+        '')
+      ];
+    };
 }
