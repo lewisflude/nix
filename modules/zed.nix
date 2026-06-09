@@ -27,6 +27,13 @@ _: {
               };
             };
           };
+          CSS = {
+            language_servers = [
+              "tailwindcss-intellisense-css"
+              "!vscode-css-language-server"
+              "..."
+            ];
+          };
         };
 
         lsp = {
@@ -35,6 +42,17 @@ _: {
               formatting = {
                 command = [ "nixfmt" ];
               };
+            };
+          };
+          tailwindcss-language-server = {
+            settings = {
+              classFunctions = [
+                "cva"
+                "cx"
+                "clsx"
+                "cn"
+                "tw"
+              ];
             };
           };
         };
