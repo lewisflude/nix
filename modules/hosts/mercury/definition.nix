@@ -84,7 +84,7 @@ in
             homeManager.powerlevel10k
             homeManager.claudeCode
             homeManager.codex
-            homeManager.geminiCli
+            homeManager.antigravityCli
             homeManager.iaGet
             homeManager.yazi
             homeManager.nicotinePlus

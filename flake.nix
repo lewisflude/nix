@@ -32,7 +32,17 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    nix-homebrew = {
+      url = "github:zhaofengli/nix-homebrew";
+      # Override nix-homebrew's pinned brew (5.1.14), whose macOS detection
+      # returns ":dunno" on this Darwin build and aborts `brew bundle` during
+      # darwin activation. 6.0.0+ adds support for newer macOS versions.
+      inputs.brew-src.follows = "brew-src";
+    };
+    brew-src = {
+      url = "github:Homebrew/brew/6.0.2";
+      flake = false;
+    };
     homebrew-core = {
       url = "github:Homebrew/homebrew-core";
       flake = false;

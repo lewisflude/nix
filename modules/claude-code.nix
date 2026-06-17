@@ -87,6 +87,17 @@ in
 
       mcpServers =
         aiCli.mcpServers pkgs osConfig
+        // {
+          # SPICEBridge (PyPI-only, not in nixpkgs): run via uvx with ngspice on
+          # PATH for the simulation backend. Local stdio only — never the
+          # `setup-cloud` wizard, which opens a public Cloudflare tunnel.
+          spicebridge = {
+            command = "${pkgs.writeShellScript "mcp-spicebridge" ''
+              export PATH="${pkgs.ngspice}/bin:$PATH"
+              exec ${pkgs.uv}/bin/uvx spicebridge "$@"
+            ''}";
+          };
+        }
         // lib.optionalAttrs (secretAvailable "KAGI_API_KEY") {
           kagi = {
             command = "${pkgs.writeShellScript "mcp-kagi" ''

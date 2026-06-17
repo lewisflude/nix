@@ -187,7 +187,7 @@ in
         homeManager.powerlevel10k
         homeManager.claudeCode
         homeManager.codex
-        homeManager.geminiCli
+        homeManager.antigravityCli
         homeManager.yazi
         homeManager.iaGet
         homeManager.mpv

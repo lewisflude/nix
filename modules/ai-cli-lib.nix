@@ -1,4 +1,4 @@
-# Shared helpers for AI CLI modules (claude-code, codex, gemini-cli).
+# Shared helpers for AI CLI modules (claude-code, codex, antigravity-cli).
 # Exposed as top-level `config.aiCli`. Consumers should merge their own
 # additions onto the values returned here rather than redefining them.
 { lib, ... }:

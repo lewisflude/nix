@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Remember whether the user pinned a host explicitly; if they did, we never
+# second-guess it with the Tailscale fallback below.
+JUPITER_HOST_EXPLICIT="${JUPITER_HOST:+yes}"
 JUPITER_HOST="${JUPITER_HOST:-jupiter}"
 TRASH_ROOT="${HOME}/.Trash/jupiter-moved-$(date +%Y%m%d-%H%M%S)"
 
@@ -37,11 +40,15 @@ USAGE
 }
 
 # Format:
-# task_name|local_source|remote_destination|cleanup_policy|description
+# task_name|local_source|remote_destination|cleanup_policy|description[|rsync_filter]
 # cleanup_policy:
 #   safe       --move may move local source to Trash after a successful rsync
 #   contents   --move may move the contents of local_source to Trash, not the folder
 #   archive    never remove locally; copy-only archive
+# rsync_filter (optional 6th field): extra rsync filter args used to select a
+#   subset of local_source (e.g. only top-level audio files). When set, --move is
+#   refused for the task because a filtered delete is unsafe; the copy is kept and
+#   you prune the source manually after verifying.
 TASKS=(
   "ableton-projects|${HOME}/Music/Ableton/Projects|/home/lewisflude/Music/projects/from-mac-ableton-projects|safe|Ableton project archive"
   "ableton-bounced|${HOME}/Music/Ableton/Bounced|/home/lewisflude/Music/recordings/from-mac-bounced|safe|Ableton bounced audio"
@@ -52,6 +59,9 @@ TASKS=(
   "icloud-document-backups|${HOME}/Library/Mobile Documents/com~apple~CloudDocs/Documents/Backups|/mnt/storage/from-mac/macbook/icloud-documents-backups|safe|iCloud Drive document backups"
   "lightroom-originals|${HOME}/Pictures/Lightroom Library.lrlibrary/9f77c25a53aa4806b7dd5825df9f74a2/originals|/mnt/storage/from-mac/macbook/lightroom-originals|archive|Lightroom originals archive copy"
   "music-app-media|${HOME}/Music/Music/Media.localized/Music|/mnt/storage/media/music/from-mac-music-app|archive|Apple Music media archive copy"
+  "icloud-loose-recordings|${HOME}/Library/Mobile Documents/com~apple~CloudDocs|/mnt/storage/from-mac/macbook/icloud-loose-recordings|archive|Loose audio recordings dumped in iCloud Drive root|--exclude=*/ --include=*.wav --include=*.aif --include=*.aiff --include=*.mp3 --include=*.asd --exclude=*"
+  "icloud-darklake-backup|${HOME}/Library/Mobile Documents/com~apple~CloudDocs/Darklake MacBookPro Backup|/mnt/storage/from-mac/macbook/darklake-macbookpro-backup|safe|Darklake MacBookPro backup (code, projects, GPG keys)"
+  "icloud-documents|${HOME}/Library/Mobile Documents/com~apple~CloudDocs/Documents|/mnt/storage/from-mac/macbook/icloud-documents-live|archive|Live iCloud Drive Documents (copy-only; active working data)"
 )
 
 if [[ "${EUID}" -eq 0 ]]; then
@@ -75,7 +85,7 @@ list_tasks() {
   printf "%-24s  %-8s  %s\n" "TASK" "CLEANUP" "DESTINATION"
   printf "%-24s  %-8s  %s\n" "----" "-------" "-----------"
   for task in "${TASKS[@]}"; do
-    IFS='|' read -r name src dest cleanup desc <<<"$task"
+    IFS='|' read -r name src dest cleanup desc filter <<<"$task"
     printf "%-24s  %-8s  %s\n" "$name" "$cleanup" "${JUPITER_HOST}:${dest}"
   done
 }
@@ -88,6 +98,41 @@ warn() {
   printf "WARN: %s\n" "$*" >&2
 }
 
+ssh_reachable() {
+  ssh -o BatchMode=yes -o ConnectTimeout=10 "$1" true 2>/dev/null
+}
+
+# Tailscale's MagicDNS name for jupiter routes over the LAN directly when local,
+# so it costs nothing on-site and keeps working off-site. Returns the tailnet IP.
+tailscale_ip() {
+  local bin
+  for bin in tailscale /Applications/Tailscale.app/Contents/MacOS/Tailscale; do
+    command -v "$bin" >/dev/null 2>&1 || [[ -x "$bin" ]] || continue
+    "$bin" status 2>/dev/null | awk '$2 == "jupiter" { print $1; exit }'
+    return 0
+  done
+}
+
+# Pick a reachable host: the configured one first, then a Tailscale fallback
+# (unless the user pinned JUPITER_HOST explicitly).
+resolve_host() {
+  if ssh_reachable "$JUPITER_HOST"; then
+    return 0
+  fi
+  if [[ -n "$JUPITER_HOST_EXPLICIT" ]]; then
+    die "cannot connect to ${JUPITER_HOST} with SSH"
+  fi
+  warn "Cannot reach ${JUPITER_HOST} over the configured route; trying Tailscale."
+  local ip
+  ip="$(tailscale_ip)"
+  if [[ -n "$ip" ]] && ssh_reachable "${USER}@${ip}"; then
+    JUPITER_HOST="${USER}@${ip}"
+    warn "Using Tailscale host: ${JUPITER_HOST}"
+    return 0
+  fi
+  die "cannot connect to jupiter over the configured route or Tailscale"
+}
+
 die() {
   printf "ERROR: %s\n" "$*" >&2
   exit 1
@@ -95,9 +140,9 @@ die() {
 
 has_task() {
   local wanted="$1"
-  local task name src dest cleanup desc
+  local task name src dest cleanup desc filter
   for task in "${TASKS[@]}"; do
-    IFS='|' read -r name src dest cleanup desc <<<"$task"
+    IFS='|' read -r name src dest cleanup desc filter <<<"$task"
     [[ "$name" == "$wanted" ]] && return 0
   done
   return 1
@@ -142,6 +187,7 @@ run_task() {
   local dest="$3"
   local cleanup="$4"
   local desc="$5"
+  local filter="${6:-}"
 
   if [[ ! -e "$src" ]]; then
     warn "Skipping ${name}; source does not exist: ${src}"
@@ -152,6 +198,7 @@ run_task() {
   printf "Source:      %s\n" "$src"
   printf "Destination: %s:%s\n" "$JUPITER_HOST" "$dest"
   printf "Policy:      %s\n" "$cleanup"
+  [[ -n "$filter" ]] && printf "Filter:      %s\n" "$filter"
 
   ssh "$JUPITER_HOST" "mkdir -p $(remote_quote "$dest")"
 
@@ -159,12 +206,21 @@ run_task() {
   if [[ "$mode" == "dry-run" ]]; then
     rsync_args+=(--dry-run)
   fi
+  if [[ -n "$filter" ]]; then
+    # Word-split deliberately: the filter holds multiple rsync flags.
+    # shellcheck disable=SC2206
+    rsync_args+=($filter)
+  fi
 
   # Trailing slashes copy the contents into the destination directory.
   rsync "${rsync_args[@]}" "${src}/" "${JUPITER_HOST}:${dest}/"
 
   if [[ "$mode" == "move" ]]; then
-    cleanup_source "$src" "$cleanup" "$name"
+    if [[ -n "$filter" ]]; then
+      warn "Refusing to auto-remove filtered task ${name}; copy kept. Prune the source manually after verifying on ${JUPITER_HOST}."
+    else
+      cleanup_source "$src" "$cleanup" "$name"
+    fi
   fi
 }
 
@@ -216,15 +272,14 @@ Archive-only tasks will not be removed locally.
 EOF
 fi
 
-ssh -o BatchMode=yes -o ConnectTimeout=10 "$JUPITER_HOST" "true" \
-  || die "cannot connect to ${JUPITER_HOST} with SSH"
+resolve_host
 
 for task in "${TASKS[@]}"; do
-  IFS='|' read -r name src dest cleanup desc <<<"$task"
+  IFS='|' read -r name src dest cleanup desc filter <<<"$task"
   if [[ -n "$only" && "$name" != "$only" ]]; then
     continue
   fi
-  run_task "$name" "$src" "$dest" "$cleanup" "$desc"
+  run_task "$name" "$src" "$dest" "$cleanup" "$desc" "$filter"
 done
 
 log "Done"

@@ -1,5 +1,5 @@
-# Gemini CLI - Dendritic Pattern
-# AI coding assistant via Google Gemini
+# Antigravity CLI - Dendritic Pattern
+# AI coding assistant via Google Antigravity
 {
   config,
   inputs,
@@ -9,7 +9,7 @@ let
   inherit (config) trustedDirs aiCli;
 in
 {
-  # LLM agents (numtide/llm-agents.nix) — provides gemini-cli + sibling agents.
+  # LLM agents (numtide/llm-agents.nix) - provides antigravity-cli + sibling agents.
   overlays.llm-agents =
     _final: prev:
     let
@@ -18,9 +18,9 @@ in
     {
       llmAgents = llmAgentPkgs;
     }
-    // (if llmAgentPkgs ? gemini-cli then { inherit (llmAgentPkgs) gemini-cli; } else { });
+    // (if llmAgentPkgs ? antigravity-cli then { inherit (llmAgentPkgs) antigravity-cli; } else { });
 
-  flake.modules.homeManager.geminiCli =
+  flake.modules.homeManager.antigravityCli =
     {
       lib,
       pkgs,
@@ -29,9 +29,9 @@ in
       ...
     }:
     {
-      programs.gemini-cli = {
+      programs.antigravity-cli = {
         enable = true;
-        package = pkgs.gemini-cli;
+        package = pkgs.antigravity-cli;
         enableMcpIntegration = true;
         defaultModel = "gemini-2.5-flash";
         settings = {
@@ -84,8 +84,8 @@ in
       programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
         lib.mkAfter (
           aiCli.mkTrustedWrapper {
-            cmd = "gemini";
-            trustedFlag = "--yolo";
+            cmd = "antigravity";
+            trustedFlag = "--dangerously-skip-permissions";
             inherit trustedDirs;
           }
         )
