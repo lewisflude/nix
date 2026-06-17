@@ -93,6 +93,7 @@ in
             homeManager.zed
             homeManager.developmentTools
             homeManager.javascript
+            homeManager.electronics
             homeManager.organize
 
             # VRChat creation tools
