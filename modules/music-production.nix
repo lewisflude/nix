@@ -38,7 +38,7 @@
 
     # Ensure systemd user sessions also get unlimited memlock
     # (PAM limits alone are insufficient with systemd-managed sessions)
-    systemd.user.extraConfig = "DefaultLimitMEMLOCK=infinity";
+    systemd.user.settings.Manager.DefaultLimitMEMLOCK = "infinity";
 
     # Kernel modules for MIDI device support
     boot.kernelModules = [

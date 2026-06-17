@@ -80,10 +80,7 @@ in
 
       systemd = {
         settings.Manager.DefaultLimitNOFILE = "524288";
-        user.extraConfig = ''
-          [Manager]
-          DefaultLimitNOFILE=524288
-        '';
+        user.settings.Manager.DefaultLimitNOFILE = "524288";
       };
 
       environment.etc = {
