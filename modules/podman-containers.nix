@@ -7,7 +7,7 @@ let
 in
 {
   flake.modules.nixos.podmanContainers =
-    nixosArgs:
+    nixosArgs@{ pkgs, ... }:
     let
       inherit (nixosArgs) lib;
       cfg = nixosArgs.config;
@@ -256,18 +256,53 @@ in
         '';
       };
 
-      # Janitorr depends on Sonarr/Radarr/Jellyfin/Jellystat being ready
+      # Janitorr probes Jellyseerr's API at startup to build its jellyseerrRestService
+      # bean; if seerr isn't answering yet the bean construction throws and the whole
+      # Spring context aborts, so the process exits and systemd restarts it. systemd
+      # considering seerr.service "started" (process launched) is not enough — the Node
+      # app needs time to become API-ready — so on a slow boot janitorr crash-loops until
+      # seerr responds (this reached a restart counter of 1001 on the 2026-06-17 boot).
+      # Gate janitorr on seerr's API actually answering, not just its unit starting.
+      systemd.services.janitorr-wait-seerr = {
+        description = "Wait for Jellyseerr API before starting Janitorr";
+        after = [ "seerr.service" ];
+        wants = [ "seerr.service" ];
+        before = [ "podman-janitorr.service" ];
+        requiredBy = [ "podman-janitorr.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+        # Best-effort: poll up to ~5min, then start janitorr anyway (no worse than the
+        # old crash-loop). seerr's /api/v1/status needs no auth and returns 200 when ready.
+        script = ''
+          for _ in $(seq 1 60); do
+            if ${pkgs.curl}/bin/curl -fsS -o /dev/null --max-time 5 \
+                "http://localhost:${toString constants.ports.services.seerr}/api/v1/status"; then
+              echo "Jellyseerr API is ready"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Jellyseerr API still not ready after ~5min; starting Janitorr anyway" >&2
+          exit 0
+        '';
+      };
+
+      # Janitorr depends on Sonarr/Radarr/Jellyfin/Jellystat/Jellyseerr being ready
       systemd.services.podman-janitorr = {
         after = [
           "sonarr.service"
           "radarr.service"
           "jellyfin.service"
+          "seerr.service"
           "podman-jellystat.service"
         ];
         wants = [
           "sonarr.service"
           "radarr.service"
           "jellyfin.service"
+          "seerr.service"
           "podman-jellystat.service"
         ];
       };

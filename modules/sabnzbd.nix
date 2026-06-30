@@ -97,6 +97,8 @@ in
           # I/O priority: best-effort class 7 = lowest I/O priority
           IOSchedulingClass = "best-effort";
           IOSchedulingPriority = 7;
+          Restart = "on-failure";
+          RestartSec = "10s";
         };
       };
 

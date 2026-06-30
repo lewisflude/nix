@@ -64,7 +64,7 @@ TASKS=(
   "icloud-documents|${HOME}/Library/Mobile Documents/com~apple~CloudDocs/Documents|/mnt/storage/from-mac/macbook/icloud-documents-live|archive|Live iCloud Drive Documents (copy-only; active working data)"
 )
 
-if [[ "${EUID}" -eq 0 ]]; then
+if [[ ${EUID} -eq 0 ]]; then
   cat >&2 <<'EOF'
 ERROR: do not run this script with sudo.
 
@@ -107,7 +107,7 @@ ssh_reachable() {
 tailscale_ip() {
   local bin
   for bin in tailscale /Applications/Tailscale.app/Contents/MacOS/Tailscale; do
-    command -v "$bin" >/dev/null 2>&1 || [[ -x "$bin" ]] || continue
+    command -v "$bin" >/dev/null 2>&1 || [[ -x $bin ]] || continue
     "$bin" status 2>/dev/null | awk '$2 == "jupiter" { print $1; exit }'
     return 0
   done
@@ -119,13 +119,13 @@ resolve_host() {
   if ssh_reachable "$JUPITER_HOST"; then
     return 0
   fi
-  if [[ -n "$JUPITER_HOST_EXPLICIT" ]]; then
+  if [[ -n $JUPITER_HOST_EXPLICIT ]]; then
     die "cannot connect to ${JUPITER_HOST} with SSH"
   fi
   warn "Cannot reach ${JUPITER_HOST} over the configured route; trying Tailscale."
   local ip
   ip="$(tailscale_ip)"
-  if [[ -n "$ip" ]] && ssh_reachable "${USER}@${ip}"; then
+  if [[ -n $ip ]] && ssh_reachable "${USER}@${ip}"; then
     JUPITER_HOST="${USER}@${ip}"
     warn "Using Tailscale host: ${JUPITER_HOST}"
     return 0
@@ -143,7 +143,7 @@ has_task() {
   local task name src dest cleanup desc filter
   for task in "${TASKS[@]}"; do
     IFS='|' read -r name src dest cleanup desc filter <<<"$task"
-    [[ "$name" == "$wanted" ]] && return 0
+    [[ $name == "$wanted" ]] && return 0
   done
   return 1
 }
@@ -155,29 +155,29 @@ cleanup_source() {
   local trash_dest="${TRASH_ROOT}/${name}"
 
   case "$cleanup" in
-    safe)
-      mkdir -p "$TRASH_ROOT"
-      mv "$src" "$trash_dest"
-      printf "Moved local source to Trash staging: %s\n" "$trash_dest"
-      ;;
-    contents)
-      mkdir -p "$trash_dest"
-      shopt -s dotglob nullglob
-      local entries=("$src"/*)
-      shopt -u dotglob nullglob
-      if ((${#entries[@]} == 0)); then
-        printf "No local contents left to move for %s\n" "$src"
-      else
-        mv "${entries[@]}" "$trash_dest/"
-        printf "Moved local contents to Trash staging: %s\n" "$trash_dest"
-      fi
-      ;;
-    archive)
-      printf "Archive-only task; keeping local source in place: %s\n" "$src"
-      ;;
-    *)
-      die "unknown cleanup policy '${cleanup}' for ${name}"
-      ;;
+  safe)
+    mkdir -p "$TRASH_ROOT"
+    mv "$src" "$trash_dest"
+    printf "Moved local source to Trash staging: %s\n" "$trash_dest"
+    ;;
+  contents)
+    mkdir -p "$trash_dest"
+    shopt -s dotglob nullglob
+    local entries=("$src"/*)
+    shopt -u dotglob nullglob
+    if ((${#entries[@]} == 0)); then
+      printf "No local contents left to move for %s\n" "$src"
+    else
+      mv "${entries[@]}" "$trash_dest/"
+      printf "Moved local contents to Trash staging: %s\n" "$trash_dest"
+    fi
+    ;;
+  archive)
+    printf "Archive-only task; keeping local source in place: %s\n" "$src"
+    ;;
+  *)
+    die "unknown cleanup policy '${cleanup}' for ${name}"
+    ;;
   esac
 }
 
@@ -189,7 +189,7 @@ run_task() {
   local desc="$5"
   local filter="${6:-}"
 
-  if [[ ! -e "$src" ]]; then
+  if [[ ! -e $src ]]; then
     warn "Skipping ${name}; source does not exist: ${src}"
     return 0
   fi
@@ -198,15 +198,15 @@ run_task() {
   printf "Source:      %s\n" "$src"
   printf "Destination: %s:%s\n" "$JUPITER_HOST" "$dest"
   printf "Policy:      %s\n" "$cleanup"
-  [[ -n "$filter" ]] && printf "Filter:      %s\n" "$filter"
+  [[ -n $filter ]] && printf "Filter:      %s\n" "$filter"
 
   ssh "$JUPITER_HOST" "mkdir -p $(remote_quote "$dest")"
 
   local rsync_args=(-a --partial --human-readable --info=progress2,stats1 --timeout=120)
-  if [[ "$mode" == "dry-run" ]]; then
+  if [[ $mode == "dry-run" ]]; then
     rsync_args+=(--dry-run)
   fi
-  if [[ -n "$filter" ]]; then
+  if [[ -n $filter ]]; then
     # Word-split deliberately: the filter holds multiple rsync flags.
     # shellcheck disable=SC2206
     rsync_args+=($filter)
@@ -215,8 +215,8 @@ run_task() {
   # Trailing slashes copy the contents into the destination directory.
   rsync "${rsync_args[@]}" "${src}/" "${JUPITER_HOST}:${dest}/"
 
-  if [[ "$mode" == "move" ]]; then
-    if [[ -n "$filter" ]]; then
+  if [[ $mode == "move" ]]; then
+    if [[ -n $filter ]]; then
       warn "Refusing to auto-remove filtered task ${name}; copy kept. Prune the source manually after verifying on ${JUPITER_HOST}."
     else
       cleanup_source "$src" "$cleanup" "$name"
@@ -226,41 +226,41 @@ run_task() {
 
 while (($#)); do
   case "$1" in
-    --dry-run)
-      mode="dry-run"
-      ;;
-    --copy)
-      mode="copy"
-      ;;
-    --move)
-      mode="move"
-      ;;
-    --only)
-      shift
-      [[ $# -gt 0 ]] || die "--only requires a task name"
-      only="$1"
-      ;;
-    --list)
-      list_tasks
-      exit 0
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      die "unknown argument: $1"
-      ;;
+  --dry-run)
+    mode="dry-run"
+    ;;
+  --copy)
+    mode="copy"
+    ;;
+  --move)
+    mode="move"
+    ;;
+  --only)
+    shift
+    [[ $# -gt 0 ]] || die "--only requires a task name"
+    only="$1"
+    ;;
+  --list)
+    list_tasks
+    exit 0
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    die "unknown argument: $1"
+    ;;
   esac
   shift
 done
 
-if [[ -n "$only" ]] && ! has_task "$only"; then
+if [[ -n $only ]] && ! has_task "$only"; then
   list_tasks >&2
   die "unknown task for --only: ${only}"
 fi
 
-if [[ "$mode" == "move" ]]; then
+if [[ $mode == "move" ]]; then
   cat <<EOF
 Running in --move mode.
 
@@ -276,7 +276,7 @@ resolve_host
 
 for task in "${TASKS[@]}"; do
   IFS='|' read -r name src dest cleanup desc filter <<<"$task"
-  if [[ -n "$only" && "$name" != "$only" ]]; then
+  if [[ -n $only && $name != "$only" ]]; then
     continue
   fi
   run_task "$name" "$src" "$dest" "$cleanup" "$desc" "$filter"
@@ -284,13 +284,13 @@ done
 
 log "Done"
 case "$mode" in
-  dry-run)
-    printf "Dry run only. Re-run with --copy to transfer, or --move to transfer and stage safe local sources in Trash.\n"
-    ;;
-  copy)
-    printf "Copied files to Jupiter. Local files were left in place.\n"
-    ;;
-  move)
-    printf "Transferred files and staged safe local sources in Trash. Check Jupiter before emptying Trash.\n"
-    ;;
+dry-run)
+  printf "Dry run only. Re-run with --copy to transfer, or --move to transfer and stage safe local sources in Trash.\n"
+  ;;
+copy)
+  printf "Copied files to Jupiter. Local files were left in place.\n"
+  ;;
+move)
+  printf "Transferred files and staged safe local sources in Trash. Check Jupiter before emptying Trash.\n"
+  ;;
 esac

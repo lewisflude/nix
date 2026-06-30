@@ -287,6 +287,9 @@ in
           IOSchedulingPriority = 5;
           Restart = "on-failure";
           RestartSec = "10s";
+          MemoryHigh = "8G";
+          MemoryMax = "12G";
+          OOMPolicy = "stop";
           ExecStartPre = lib.mkAfter [
             (pkgs.writeShellScript "qbittorrent-inject-credentials" ''
               set -eu

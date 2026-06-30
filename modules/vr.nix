@@ -10,15 +10,16 @@
     final: prev:
     if prev.stdenv.hostPlatform.isLinux then inputs.nixpkgs-xr.overlays.default final prev else { };
 
-  # WiVRn with CUDA encoding support (x86_64-linux only).
+  # WiVRn with CUDA/NVENC encoding support (x86_64-linux only).
   # OpenVR compatibility paths are managed by WiVRn itself since v0.23.
+  # Since wivrn 26.6, NVENC is wired through ffmpeg and the package no longer
+  # accepts a `cudaPackages` argument — `cudaSupport` alone toggles WIVRN_USE_NVENC.
   overlays.wivrn-cuda =
     final: prev:
     if prev.stdenv.hostPlatform.system == "x86_64-linux" then
       {
         wivrn = prev.wivrn.override {
           cudaSupport = true;
-          inherit (final) cudaPackages;
         };
       }
     else

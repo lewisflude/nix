@@ -1,37 +1,29 @@
 # Zellij - Terminal multiplexer
+#
+# No SSH auto-attach: connection persistence is handled at the transport layer
+# by mosh / eternal-terminal, which already survive disconnects, sleep, and
+# network changes. Zellij is a manual multiplexer for panes (`zj` / `zellij`),
+# so remote shells never mirror-fight over a shared session.
 _: {
-  flake.modules.homeManager.zellij =
-    { config, lib, ... }:
-    {
-      programs.zellij = {
-        enable = true;
-        enableZshIntegration = false;
-        settings = {
-          copy_clipboard = "system";
-          copy_on_select = true;
-          osc8_hyperlinks = true;
-          scroll_buffer_size = 100000;
-        };
-
-        layouts.default = ''
-          layout {
-            pane focus=true {
-              cwd "~"
-              command "zsh"
-            }
-          }
-        '';
+  flake.modules.homeManager.zellij = {
+    programs.zellij = {
+      enable = true;
+      enableZshIntegration = false;
+      settings = {
+        copy_clipboard = "system";
+        copy_on_select = true;
+        osc8_hyperlinks = true;
+        scroll_buffer_size = 100000;
       };
 
-      programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
-        lib.mkBefore ''
-          # Anchor remote interactive shells in one server-side zellij session.
-          if [[ $- == *i* && -z "''${ZELLIJ:-}" && -z "''${NO_AUTO_ZELLIJ:-}" \
-            && ( -n "''${SSH_CONNECTION:-}" || -n "''${SSH_TTY:-}" || -n "''${ET_VERSION:-}" ) ]] \
-            && command -v zellij >/dev/null 2>&1; then
-            exec zellij attach -c remote
-          fi
-        ''
-      );
+      layouts.default = ''
+        layout {
+          pane focus=true {
+            cwd "~"
+            command "zsh"
+          }
+        }
+      '';
     };
+  };
 }

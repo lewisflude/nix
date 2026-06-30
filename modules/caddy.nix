@@ -21,6 +21,19 @@ let
     '';
   };
 
+  mkPrivateReverseProxy = target: {
+    extraConfig = ''
+      @private remote_ip 127.0.0.1/32 ::1 ${constants.networks.lan.secondary} 100.64.0.0/10
+      handle @private {
+        reverse_proxy ${target} {
+          ${standardHeaders}
+        }
+        encode zstd gzip
+      }
+      respond 403
+    '';
+  };
+
   # subdomain -> port for all services proxied via 127.0.0.1
   localServices = {
     # Infrastructure
@@ -100,7 +113,7 @@ in
 
             # VPN namespace — qBittorrent runs inside a network namespace, accessed via its gateway
             "torrent.${constants.baseDomain}" =
-              mkReverseProxy "${constants.networks.vpnNamespace.gateway}:${toString constants.ports.services.qbittorrent}";
+              mkPrivateReverseProxy "${constants.networks.vpnNamespace.gateway}:${toString constants.ports.services.qbittorrent}";
 
           };
       };
