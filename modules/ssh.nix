@@ -52,16 +52,25 @@ in
       # isDarwin tells us which host we're building for.
       localExtraSocket =
         if isDarwin then constants.hosts.mercury.gpgAgentExtra else constants.hosts.jupiter.gpgAgentExtra;
+
+      authorizedKeysFile = pkgs.writeText "authorized_keys" (lib.concatLines constants.authorizedKeys);
     in
     {
-      home.file = {
-        ".ssh/sockets/.keep".text = "";
-      }
+      home.file.".ssh/sockets/.keep".text = "";
+
       # On Darwin (mercury), Apple's sshd reads ~/.ssh/authorized_keys directly —
-      # there is no NixOS openssh.authorizedKeys option. Provision it declaratively
-      # from the shared key list so mercury stays in sync with jupiter.
-      // lib.optionalAttrs isDarwin {
-        ".ssh/authorized_keys".text = lib.concatLines constants.authorizedKeys;
+      # there is no NixOS openssh.authorizedKeys option. Provision it from the shared
+      # key list.
+      #
+      # IMPORTANT: this MUST install a real file, not a home.file store symlink.
+      # macOS sshd enforces StrictModes by resolving the symlink and rejecting any
+      # authorized_keys whose real path lives under the group-writable /nix/store,
+      # which silently breaks ALL pubkey auth. Copy the content into ~/.ssh instead.
+      home.activation = lib.optionalAttrs isDarwin {
+        authorizedKeys = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -d -m 700 "$HOME/.ssh"
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 600 ${authorizedKeysFile} "$HOME/.ssh/authorized_keys"
+        '';
       };
 
       programs.ssh = {
