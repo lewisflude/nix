@@ -44,7 +44,7 @@ in
   # Home-manager: SSH client configuration
   # ===========================================================================
   flake.modules.homeManager.ssh =
-    { pkgs, ... }@hmArgs:
+    { pkgs, lib, ... }@hmArgs:
     let
       inherit (pkgs.stdenv) isDarwin;
 
@@ -54,7 +54,15 @@ in
         if isDarwin then constants.hosts.mercury.gpgAgentExtra else constants.hosts.jupiter.gpgAgentExtra;
     in
     {
-      home.file.".ssh/sockets/.keep".text = "";
+      home.file = {
+        ".ssh/sockets/.keep".text = "";
+      }
+      # On Darwin (mercury), Apple's sshd reads ~/.ssh/authorized_keys directly —
+      # there is no NixOS openssh.authorizedKeys option. Provision it declaratively
+      # from the shared key list so mercury stays in sync with jupiter.
+      // lib.optionalAttrs isDarwin {
+        ".ssh/authorized_keys".text = lib.concatLines constants.authorizedKeys;
+      };
 
       programs.ssh = {
         enable = true;
@@ -118,10 +126,40 @@ in
   # ===========================================================================
   # Darwin: enable Apple's sshd via nix-darwin (flips Remote Login on)
   # ===========================================================================
+  # Apple's sshd is configured via a drop-in that the system sshd_config
+  # Includes, so these directives mirror jupiter's hardened NixOS settings
+  # (services.openssh.settings above) using equivalent sshd_config syntax.
   flake.modules.darwin.ssh = _: {
     services.openssh = {
       enable = true;
       extraConfig = ''
+        Port 22
+
+        PasswordAuthentication no
+        KbdInteractiveAuthentication no
+        PubkeyAuthentication yes
+        PermitEmptyPasswords no
+        PermitRootLogin no
+
+        Compression no
+        MaxAuthTries 3
+        MaxSessions 10
+        MaxStartups 10:30:100
+        LoginGraceTime 30
+
+        # iOS SSH clients can be suspended while Prompt is in the background.
+        # Keep server-side probes permissive enough that short app/background
+        # interruptions do not kill otherwise healthy sessions.
+        ClientAliveInterval 60
+        ClientAliveCountMax 30
+        TCPKeepAlive no
+
+        X11Forwarding no
+        AllowTcpForwarding yes
+        AllowAgentForwarding yes
+        PermitTunnel no
+        UseDNS no
+
         StreamLocalBindUnlink yes
         AcceptEnv PROMPT_LINK_COLS
       '';
