@@ -445,12 +445,15 @@ in
           else
             null
         );
-        fileWidgetCommand = lib.mkDefault (
+        fileWidget.command = lib.mkDefault (
           if pkgs ? fd then
             "${lib.getExe pkgs.fd} --type f --hidden --strip-cwd-prefix --exclude .git"
           else
             null
         );
+        # Atuin owns Ctrl-R (see _atuin_search_widget binding above); disable
+        # fzf's competing history widget to avoid the double-binding warning.
+        historyWidget.command = "";
       };
 
       # Direnv layout file for Zellij integration
