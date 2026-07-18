@@ -1212,11 +1212,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1784082414,
-        "narHash": "sha256-1Br1Uv3KNDuB0gvRdMFqRdQGyAzGyls/UEhj8i8E5iI=",
+        "lastModified": 1784341546,
+        "narHash": "sha256-akXg/mFYDSTG+3vs2lNJpJSLZO+Tg9oF619LlXHSBl8=",
         "owner": "nix-community",
         "repo": "nixpkgs-xr",
-        "rev": "36cef5645b6b2a57c48914d78c5e2c476890ad47",
+        "rev": "499bbd9ef425436982b44baed6ff497c84594374",
         "type": "github"
       },
       "original": {
