@@ -4,10 +4,6 @@ _: {
   flake.modules.nixos.zfs =
     { pkgs, ... }:
     {
-      boot.extraModprobeConfig = ''
-        options zfs zfs_bclone_enabled=1
-      '';
-
       boot.zfs = {
         extraPools = [ "npool" ];
         devNodes = "/dev/disk/by-id";
