@@ -87,6 +87,16 @@ in
 
       swapDevices = [ { device = "/dev/disk/by-uuid/65835c4c-3b5f-4ced-bf61-c73a6e76e562"; } ];
 
+      # Compressed RAM swap on top of the 4 GiB partition. Gives systemd-oomd
+      # real headroom during heavy parallel source builds instead of instantly
+      # exhausting the tiny partition. zstd is fast and compresses build/heap
+      # pages well; the device only consumes RAM as pages are actually swapped.
+      zramSwap = {
+        enable = true;
+        algorithm = "zstd";
+        memoryPercent = 40;
+      };
+
       environment.systemPackages = [
         pkgs.mergerfs
         pkgs.xfsprogs
