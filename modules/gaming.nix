@@ -13,11 +13,6 @@ in
       lib,
       ...
     }:
-    let
-      patchedBwrap = pkgs.bubblewrap.overrideAttrs (o: {
-        patches = (o.patches or [ ]) ++ [ ../patches/bwrap.patch ];
-      });
-    in
     {
       programs.steam = {
         enable = true;
@@ -27,20 +22,11 @@ in
         extraCompatPackages = [
           pkgs.proton-ge-bin
         ];
+        # Steam now requires unprivileged user namespaces (same as Flatpak):
+        # https://github.com/flatpak/flatpak/wiki/User-namespace-requirements
+        # Use the default (non-setuid) bubblewrap FHS env so Steam can create
+        # its own user namespaces — a setuid/setcap bwrap breaks this check.
         package = pkgs.steam.override {
-          buildFHSEnv =
-            args:
-            (
-              (pkgs.buildFHSEnv.override {
-                bubblewrap = patchedBwrap;
-              })
-              (
-                args
-                // {
-                  extraBwrapArgs = (args.extraBwrapArgs or [ ]) ++ [ "--cap-add ALL" ];
-                }
-              )
-            );
           extraProfile = ''
             unset TZ
           '';

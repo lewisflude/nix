@@ -73,7 +73,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     danksearch = {
-      url = "github:AvengeMedia/danksearch";
+      # Pinned to last-good rev: HEAD (ef9b768, 2026-07-14 "migrate to dankgo
+      # common modules") ships an inconsistent vendor/modules.txt and fails to
+      # build. This rev's upstream vendorHash matches the override in modules/dms.nix.
+      url = "github:AvengeMedia/danksearch/1269b4688cc9";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     solaar = {
