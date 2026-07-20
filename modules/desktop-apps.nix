@@ -6,7 +6,6 @@ _: {
     lib.mkIf pkgs.stdenv.isLinux {
       home.packages = [
         (pkgs.blender.override { cudaSupport = true; })
-        pkgs.davinci-resolve
         pkgs.telegram-desktop
         pkgs.file-roller
         pkgs.font-awesome

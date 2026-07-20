@@ -106,6 +106,12 @@ in
         "nvidia-drm.fbdev=1"
         "nvidia-modeset.conceal_vrr_caps=1"
         "cfg80211.ieee80211_regdom=GB"
+        # Cap ZFS ARC at 24 GiB (of 62 GiB). Uncapped, ARC grows to ~all RAM
+        # and doesn't evict fast enough against parallel source builds
+        # (home-assistant, sunshine, wivrn-cuda) that compile in the tmpfs
+        # /tmp, so systemd-oomd kills the build. 24 GiB leaves ~38 GiB free.
+        # Takes effect on reboot (kernel-module param).
+        "zfs.zfs_arc_max=25769803776"
       ];
 
       boot.tmp = {
