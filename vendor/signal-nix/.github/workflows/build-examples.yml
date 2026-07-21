@@ -1,0 +1,83 @@
+name: Build Examples
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-examples:
+    name: Build ${{ matrix.example }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          - basic
+          - full-desktop
+          - custom-brand
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v9
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v2
+
+      - name: Evaluate example configuration
+        run: |
+          nix eval .#homeManagerModules.default --apply 'x: "OK"'
+
+      - name: Check example syntax
+        run: |
+          nix-instantiate --parse examples/${{ matrix.example }}.nix > /dev/null
+
+      - name: Verify example structure
+        run: |
+          nix eval --impure --expr '
+            let
+              example = import ./examples/${{ matrix.example }}.nix;
+            in
+              if builtins.isAttrs example 
+                && example ? inputs 
+                && example ? outputs
+              then "OK" 
+              else throw "Invalid flake structure"
+          '
+
+  validate-modules:
+    name: Validate Modules
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v9
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v2
+
+      - name: Check module evaluations
+        run: |
+          echo "Checking default module..."
+          nix eval .#homeManagerModules.default --apply 'x: "OK"'
+          
+          echo "Checking ironbar module..."
+          nix eval .#homeManagerModules.ironbar --apply 'x: "OK"'
+          
+          echo "Checking gtk module..."
+          nix eval .#homeManagerModules.gtk --apply 'x: "OK"'
+          
+          echo "Checking helix module..."
+          nix eval .#homeManagerModules.helix --apply 'x: "OK"'
+
+      - name: Validate library functions
+        run: |
+          nix eval .#lib --apply 'x: "OK"'

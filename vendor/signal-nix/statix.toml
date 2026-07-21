@@ -1,0 +1,8 @@
+# Statix configuration for Signal-Nix
+# https://github.com/nerdypepper/statix
+
+# Ignore test directories where repeated keys and other patterns are intentional
+[ignore]
+files = [
+  "./tests/**"
+]

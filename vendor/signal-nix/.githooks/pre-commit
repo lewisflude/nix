@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# Pre-commit hook to validate Nix syntax and module structure
+# Catches syntax errors and common module issues before they're committed
+
+set -e
+
+echo "🔍 Running pre-commit checks..."
+
+# Get list of staged .nix files
+staged_files=$(git diff --cached --name-only --diff-filter=ACMR | grep '\.nix$' || true)
+
+if [ -z "$staged_files" ]; then
+    echo "✅ No Nix files to check"
+    exit 0
+fi
+
+echo "📝 Checking Nix files for syntax errors..."
+errors=0
+
+# Check each file for syntax errors
+for file in $staged_files; do
+    if [ -f "$file" ]; then
+        echo "  Checking $file..."
+        if ! nix-instantiate --parse "$file" > /dev/null 2>&1; then
+            echo "❌ Syntax error in $file"
+            nix-instantiate --parse "$file" 2>&1 | head -n 10
+            errors=$((errors + 1))
+        fi
+    fi
+done
+
+if [ $errors -gt 0 ]; then
+    echo ""
+    echo "❌ Found $errors file(s) with syntax errors"
+    echo "   Fix the errors above and try again"
+    exit 1
+fi
+
+echo "✅ All Nix files have valid syntax"
+
+# Check for common module structure issues
+echo "🏗️  Checking module structure..."
+module_files=$(echo "$staged_files" | grep -E "modules/.*\.nix$" || true)
+
+if [ -n "$module_files" ]; then
+    for file in $module_files; do
+        if [ -f "$file" ]; then
+            # Check if module sets configuration but doesn't use mkDefault
+            # Look for programs.*.settings or programs.*.config assignments
+            if grep -q "programs\.[a-z]*\.\(settings\|config\) =" "$file" 2>/dev/null; then
+                # Check if mkDefault is imported
+                if ! grep -q "inherit.*mkDefault" "$file" 2>/dev/null; then
+                    echo "⚠️  WARNING: $file sets program configuration but doesn't import mkDefault"
+                    echo "   Add 'mkDefault' to the inherit line: inherit (lib) mkIf mkDefault;"
+                    echo "   Then wrap all config values with mkDefault to allow user overrides"
+                    echo "   See: docs/mkDefault-guide.md"
+                    echo ""
+                    errors=$((errors + 1))
+                fi
+                
+                # Check if there are naked assignments (without mkDefault)
+                # This is a heuristic check - looks for = followed by a value without mkDefault
+                if grep -E "^\s+[a-z_-]+ = [^m]" "$file" | grep -v "mkDefault" | grep -q "=" 2>/dev/null; then
+                    # Only warn if it's in a settings/config block
+                    if grep -B 20 "^\s+[a-z_-]+ = [^m]" "$file" | grep -q "programs\.[a-z]*\.\(settings\|config\)" 2>/dev/null; then
+                        echo "⚠️  WARNING: $file may have configuration values without mkDefault"
+                        echo "   All values in programs.*.settings or programs.*.config should use mkDefault"
+                        echo "   Example: color = mkDefault colors.text-primary.hex;"
+                        echo "   See: docs/mkDefault-guide.md"
+                        echo ""
+                    fi
+                fi
+            fi
+            
+            # Check for _module.args at top level (wrong)
+            if grep -q "^  _module\.args = {" "$file" 2>/dev/null; then
+                echo "⚠️  WARNING: $file has _module.args at top level"
+                echo "   This will cause 'unsupported attribute' error"
+                echo "   _module.args must be inside 'config', not at top level"
+                echo ""
+                echo "   Correct pattern:"
+                echo "   config = lib.mkMerge ["
+                echo "     { _module.args = {...}; }"
+                echo "     (lib.mkIf cfg.enable {...})"
+                echo "   ];"
+                echo ""
+                errors=$((errors + 1))
+            fi
+            
+            # Check for _module.args inside mkIf (wrong - causes infinite recursion)
+            if grep -A 3 "lib.mkIf.*enable" "$file" | grep -q "_module\.args" 2>/dev/null; then
+                echo "⚠️  WARNING: $file may have _module.args inside conditional block"
+                echo "   This can cause infinite recursion"
+                echo "   _module.args should be in unconditional config section"
+                echo ""
+                errors=$((errors + 1))
+            fi
+            
+            # Check that modules use proper structure
+            if grep -q "options\." "$file" && ! grep -q "config =" "$file" 2>/dev/null; then
+                echo "⚠️  WARNING: $file has options but no config section"
+                echo "   NixOS modules should have both 'options' and 'config'"
+                echo ""
+            fi
+        fi
+    done
+fi
+
+if [ $errors -gt 0 ]; then
+    echo ""
+    echo "❌ Found $errors module structure issue(s)"
+    echo "   Review the warnings above and fix before committing"
+    echo ""
+    echo "   See: docs/MODULE_ARGS_INFINITE_RECURSION.md"
+    exit 1
+fi
+
+# Optional: Run formatter check
+echo "🎨 Checking formatting..."
+if command -v nixfmt &> /dev/null; then
+    for file in $staged_files; do
+        if [ -f "$file" ]; then
+            if ! nixfmt --check "$file" 2>/dev/null; then
+                echo "⚠️  $file is not formatted (run 'nix fmt' to fix)"
+            fi
+        fi
+    done
+fi
+
+echo "✅ Pre-commit checks passed!"
+exit 0

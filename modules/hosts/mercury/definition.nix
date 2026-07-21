@@ -61,7 +61,7 @@ in
             # External home-manager modules
             inputs.nix-index-database.homeModules.nix-index
             inputs.sops-nix.homeManagerModules.sops
-            inputs.signal-nix.homeManagerModules.default
+            homeManager.signal
 
             # Core home-manager modules
             homeManager.shell

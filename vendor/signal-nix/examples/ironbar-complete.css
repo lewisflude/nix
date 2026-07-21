@@ -1,0 +1,162 @@
+/**
+ * EXAMPLE: Ironbar Configuration with Signal Colors
+ * 
+ * This example shows how to consume Signal's color palette in your ironbar config.
+ * Signal provides ONLY colors - you control all styling and layout.
+ * 
+ * Step 1: Enable signal-nix ironbar colors in your home-manager config:
+ *   theming.signal.ironbar.enable = true;
+ * 
+ * Step 2: Import the color palette in your Nix config's CSS like this:
+ *   programs.ironbar.style = pkgs.writeText "ironbar-style.css" ''
+ *     @import url("${config.theming.signal.colors.ironbar.cssFile}");
+ *     /* Your styles here */
+ *   '';
+ * 
+ * Step 3: Use Signal's @define-color tokens in your styles
+ */
+
+/* =============================================================================
+   SIGNAL COLOR TOKENS AVAILABLE
+   ============================================================================= */
+
+/* Signal provides these color tokens automatically:
+ * - @text_primary, @text_secondary, @text_tertiary
+ * - @surface_base, @surface_emphasis
+ * - @accent_focus, @accent_success, @accent_warning, @accent_danger
+ */
+
+/* =============================================================================
+   YOUR CUSTOM STYLES - Using Signal Colors
+   ============================================================================= */
+
+* {
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.background {
+  background-color: transparent;
+}
+
+#bar {
+  background-color: transparent;
+  margin: 12px;
+}
+
+/* Text Styling */
+label {
+  color: @text_primary; /* Signal color */
+}
+
+/* Workspaces */
+.workspaces button {
+  color: @text_tertiary; /* Signal color */
+  background-color: transparent;
+  border: none;
+  padding: 4px 8px;
+  margin: 0 4px;
+  border-radius: 12px;
+}
+
+.workspaces button.focused {
+  color: @text_primary; /* Signal color */
+  border-left: 3px solid @accent_focus; /* Signal color */
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.workspaces button:hover {
+  color: @text_primary; /* Signal color */
+}
+
+/* Window Title */
+.focused {
+  padding: 4px 20px;
+}
+
+.focused label {
+  color: @text_secondary; /* Signal color */
+}
+
+.focused.active {
+  border-left: 3px solid @accent_focus; /* Signal color */
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.focused.active label {
+  color: @text_primary; /* Signal color */
+}
+
+/* Control Buttons */
+button {
+  background-color: transparent;
+  border: none;
+  color: @text_primary; /* Signal color */
+}
+
+button:hover {
+  opacity: 1.0;
+}
+
+/* System Tray */
+.tray .item {
+  padding: 4px;
+  margin: 0 3px;
+  border-radius: 10px;
+}
+
+/* Battery */
+.battery {
+  font-family: monospace;
+}
+
+.battery.warning {
+  color: @accent_warning; /* Signal color */
+  border-left: 3px solid @accent_warning; /* Signal color */
+}
+
+.battery.critical {
+  color: @accent_danger; /* Signal color */
+  border-left: 3px solid @accent_danger; /* Signal color */
+}
+
+/* Clock */
+.clock {
+  font-family: monospace;
+  color: @text_primary; /* Signal color */
+  padding: 0 16px;
+}
+
+/* Power Button */
+.power {
+  color: @accent_danger; /* Signal color */
+}
+
+/* Notifications */
+.notifications {
+  padding: 0 8px;
+}
+
+/* Layout (Islands) */
+#bar #start,
+#bar #center,
+#bar #end {
+  background-color: @surface_base; /* Signal color */
+  border: 2px solid @surface_emphasis; /* Signal color */
+  border-radius: 16px;
+  padding: 4px 16px;
+}
+
+#bar #start {
+  margin-right: 16px;
+}
+
+#bar #center {
+  margin: 0 8px;
+}
+
+#bar #end {
+  margin-left: 16px;
+}

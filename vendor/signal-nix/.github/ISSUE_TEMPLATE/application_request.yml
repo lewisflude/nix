@@ -1,0 +1,202 @@
+name: Application Integration Request
+description: Request Signal integration for a new application
+title: "[App Request]: "
+labels: ["enhancement", "new-app"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new application integration! This helps us prioritize which apps to support next.
+
+  - type: input
+    id: app-name
+    attributes:
+      label: Application Name
+      description: Name of the application you'd like to see integrated
+      placeholder: e.g., Alacritty, Zellij, nvim
+    validations:
+      required: true
+
+  - type: input
+    id: app-website
+    attributes:
+      label: Application Website/Repository
+      description: Link to the official website or GitHub repository
+      placeholder: https://github.com/...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: app-category
+    attributes:
+      label: Application Category
+      description: What type of application is this?
+      options:
+        - Terminal Emulator
+        - Terminal Multiplexer
+        - Text Editor
+        - Code Editor
+        - File Manager
+        - Application Launcher
+        - Status Bar / Panel
+        - Notification Daemon
+        - Window Manager
+        - Compositor
+        - System Monitor
+        - Media Player
+        - Web Browser
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: Which platforms does this application support?
+      multiple: true
+      options:
+        - Linux
+        - macOS
+        - Both Linux and macOS
+    validations:
+      required: true
+
+  - type: dropdown
+    id: config-format
+    attributes:
+      label: Configuration Format
+      description: How is this application configured?
+      options:
+        - TOML
+        - YAML
+        - JSON
+        - RON
+        - INI
+        - Custom Format
+        - Environment Variables
+        - Command-line Flags
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: theming-capability
+    attributes:
+      label: Theming Capability
+      description: Describe how this application supports theming/customization
+      placeholder: |
+        - Supports custom color schemes via config file
+        - Has 16 color palette support
+        - Supports true color (24-bit)
+        - Has separate light/dark mode configs
+        - etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: config-example
+    attributes:
+      label: Configuration Example
+      description: Provide an example of the application's color configuration
+      placeholder: |
+        [colors]
+        foreground = "#e0e0e0"
+        background = "#1a1a1a"
+        ...
+      render: toml
+
+  - type: input
+    id: config-location
+    attributes:
+      label: Configuration Location
+      description: Where does the application store its configuration?
+      placeholder: e.g., ~/.config/app/config.toml, XDG_CONFIG_HOME/app/
+
+  - type: textarea
+    id: documentation
+    attributes:
+      label: Configuration Documentation
+      description: Link to theming/color configuration documentation
+      placeholder: https://docs.example.com/theming
+
+  - type: dropdown
+    id: home-manager
+    attributes:
+      label: Home Manager Support
+      description: Does this application already have a Home Manager module?
+      options:
+        - "Yes - Official nixpkgs"
+        - "Yes - Third-party"
+        - "No"
+        - "Unsure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why Should Signal Support This?
+      description: Explain why this application would be a valuable addition to Signal
+      placeholder: I use this application daily because...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: usage
+    attributes:
+      label: Usage Frequency
+      description: How often do you use this application?
+      options:
+        - Daily - Core to my workflow
+        - Weekly - Regular use
+        - Monthly - Occasional use
+        - Rarely - Would use more if themed
+    validations:
+      required: true
+
+  - type: dropdown
+    id: popularity
+    attributes:
+      label: Community Popularity
+      description: How popular is this application in the community?
+      options:
+        - Very Popular (1000+ GitHub stars or widely known)
+        - Moderately Popular (100-1000 stars)
+        - Niche but Active
+        - New/Emerging
+        - Unsure
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Would you be willing to help with the integration?
+      options:
+        - label: I can help test the integration
+        - label: I can provide configuration examples
+        - label: I can help write the Nix module
+        - label: I can help with documentation
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or information about the application
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: I have checked that this application is actively maintained
+          required: false
+        - label: I have reviewed the application's theming documentation
+          required: false

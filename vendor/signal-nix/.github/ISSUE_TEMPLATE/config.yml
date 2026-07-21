@@ -1,0 +1,17 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/lewisflude/signal-nix/discussions
+    about: Ask questions, share ideas, and discuss Signal with the community
+  
+  - name: 📚 Documentation
+    url: https://github.com/lewisflude/signal-nix#documentation
+    about: Browse the documentation and guides
+  
+  - name: 🎨 Signal Palette
+    url: https://github.com/lewisflude/signal-palette
+    about: Report issues with color definitions or palette exports
+  
+  - name: 🐦 Twitter/X
+    url: https://twitter.com/lewisflude
+    about: Follow for updates and announcements

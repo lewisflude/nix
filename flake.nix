@@ -109,11 +109,13 @@
       url = "github:jpetrucciani/pog";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
-    signal-nix = {
-      url = "github:lewisflude/signal-nix/2c7a7746597d12ce56a85725ba653e424aff5cb7";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
+    # signal-nix is vendored locally under ./vendor/signal-nix (see modules/signal.nix).
+    # These are its two runtime dependencies, pinned to the revs it was locked against.
+    signal-palette = {
+      url = "github:lewisflude/signal-palette/398cafbf15772892350a3cc822e285842e292388";
+    };
+    nix-colorizer = {
+      url = "github:nutsalhan87/nix-colorizer/c9ce6c710f4ed749f773104a8092a3e542dd1d7c";
     };
     devour-flake = {
       url = "github:srid/devour-flake";

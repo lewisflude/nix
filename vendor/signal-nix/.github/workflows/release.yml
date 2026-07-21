@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v9
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v2
+
+      - name: Validate flake
+        run: |
+          nix flake check --all-systems
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          if [ -f CHANGELOG.md ]; then
+            # Extract changelog for current version
+            VERSION="${GITHUB_REF#refs/tags/}"
+            echo "version=${VERSION}" >> $GITHUB_OUTPUT
+            
+            # Get changelog section (simplified - adjust as needed)
+            CHANGELOG=$(sed -n "/## ${VERSION}/,/## /p" CHANGELOG.md | sed '$d')
+            
+            # Write to file for use in release
+            echo "${CHANGELOG}" > RELEASE_NOTES.md
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+            echo "version=${VERSION}" >> $GITHUB_OUTPUT
+            echo "Release ${VERSION}" > RELEASE_NOTES.md
+            git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> RELEASE_NOTES.md
+          fi
+
+      - name: Package examples
+        run: |
+          mkdir -p release-assets
+          tar -czf release-assets/examples.tar.gz examples/
+          tar -czf release-assets/modules.tar.gz modules/
+          cp README.md release-assets/
+          cp LICENSE release-assets/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: RELEASE_NOTES.md
+          files: |
+            release-assets/examples.tar.gz
+            release-assets/modules.tar.gz
+            release-assets/README.md
+            release-assets/LICENSE
+          draft: false
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update flake lock comment
+        run: |
+          echo "Release created! Users can update their flake input:"
+          echo "signal.url = \"github:lewisflude/signal-nix/${GITHUB_REF#refs/tags/}\";"

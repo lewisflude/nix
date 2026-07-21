@@ -1,0 +1,145 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in Signal
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the information below to help us diagnose and fix the issue.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-component
+    attributes:
+      label: Affected Component
+      description: Which component is experiencing the issue?
+      options:
+        - Ironbar
+        - GTK Theme
+        - Helix Editor
+        - Ghostty Terminal
+        - Fuzzel Launcher
+        - bat (CLI)
+        - fzf (CLI)
+        - lazygit (CLI)
+        - yazi (CLI)
+        - Core Module System
+        - Brand Governance
+        - Multiple Components
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: theme-mode
+    attributes:
+      label: Theme Mode
+      description: Which theme mode are you using?
+      options:
+        - Dark Mode
+        - Light Mode
+        - Auto Mode
+        - Both
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Enable '...'
+        2. Configure '...'
+        3. Run '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: Tell us what should happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Tell us what actually happens
+    validations:
+      required: true
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Configuration
+      description: Your Signal configuration (please redact any sensitive information)
+      placeholder: |
+        theming.signal = {
+          enable = true;
+          mode = "dark";
+          # ... rest of config
+        };
+      render: nix
+    validations:
+      required: true
+
+  - type: textarea
+    id: system-info
+    attributes:
+      label: System Information
+      description: Information about your system
+      placeholder: |
+        - OS: NixOS 24.05 / nix-darwin
+        - nixpkgs: unstable (commit hash)
+        - home-manager version:
+        - signal-nix version:
+        - signal-palette version:
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: Any error messages or relevant logs
+      placeholder: Paste logs here
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: I am using the latest version of signal-nix
+          required: false
+        - label: I have tried rebuilding with `nixos-rebuild` or `darwin-rebuild`
+          required: false
+        - label: I have checked the [troubleshooting guide](https://github.com/lewisflude/signal-nix#troubleshooting)
+          required: false

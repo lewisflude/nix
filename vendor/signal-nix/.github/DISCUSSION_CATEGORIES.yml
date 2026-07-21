@@ -1,0 +1,43 @@
+# GitHub Discussions Categories Configuration
+# This file can be used as reference when manually setting up discussion categories
+
+categories:
+  - name: 📢 Announcements
+    description: Official announcements and updates about Signal
+    emoji: "📢"
+    
+  - name: 💬 General
+    description: General discussion about Signal Design System
+    emoji: "💬"
+    
+  - name: 💡 Ideas
+    description: Share ideas for new features or improvements
+    emoji: "💡"
+    
+  - name: 🙋 Q&A
+    description: Ask questions about using Signal
+    emoji: "🙋"
+    format: question
+    
+  - name: 🎨 Show and Tell
+    description: Share your Signal setup and screenshots
+    emoji: "🎨"
+    
+  - name: 🔧 Development
+    description: Discuss development, contributions, and technical topics
+    emoji: "🔧"
+    
+  - name: 📱 Application Requests
+    description: Request support for new applications
+    emoji: "📱"
+    
+  - name: 🐛 Bug Reports
+    description: Report bugs (prefer GitHub Issues for structured reporting)
+    emoji: "🐛"
+
+# Notes for setup:
+# 1. Go to repository Settings → Features → Discussions (enable)
+# 2. Go to Discussions tab
+# 3. Click "Set up Discussions"
+# 4. Manually create categories based on this file
+# 5. Set appropriate permissions (public/private, who can post)
