@@ -103,8 +103,9 @@ in
         nixos.mediaUser
         nixos.arrStack
         nixos.jellyfin
+        nixos.audiobookshelf
         nixos.sabnzbd
-        nixos.flaresolverr
+        nixos.byparr
         nixos.seerr
         nixos.recyclarr
         nixos.simpleContainers

@@ -35,9 +35,13 @@
           sabnzbd = 8084;
           navidrome = 4533;
           bazarr = 6767;
-          readarr = 8787;
-          flaresolverr = 8191;
+          readarr = 8787; # retired (Readarr archived upstream); kept for legacy refs
+          byparr = 8191; # FlareSolverr drop-in replacement (same port, Camoufox-based)
           musicAssistant = 8095;
+          audiobookshelf = 13378;
+          calibreWeb = 8093; # Calibre-Web-Automated host port (container listens on 8083)
+          huntarr = 9705;
+          cleanuparr = 11011;
 
           # Container supplemental services
           homarr = 7575;

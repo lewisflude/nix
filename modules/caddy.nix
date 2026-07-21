@@ -47,17 +47,22 @@ let
     inherit (constants.ports.services) homarr;
     inherit (constants.ports.services) wizarr;
 
+    # Books
+    audiobooks = constants.ports.services.audiobookshelf;
+    books = constants.ports.services.calibreWeb;
+
     # Arr Stack
     inherit (constants.ports.services) prowlarr;
     inherit (constants.ports.services) sonarr;
     inherit (constants.ports.services) radarr;
     inherit (constants.ports.services) lidarr;
-    inherit (constants.ports.services) readarr;
     inherit (constants.ports.services) bazarr;
+    inherit (constants.ports.services) huntarr;
+    inherit (constants.ports.services) cleanuparr;
     inherit (constants.ports.services) notifiarr;
     inherit (constants.ports.services) autopulse;
     inherit (constants.ports.services) jellystat;
-    inherit (constants.ports.services) flaresolverr;
+    inherit (constants.ports.services) byparr;
 
     inherit (constants.ports.services) janitorr;
 

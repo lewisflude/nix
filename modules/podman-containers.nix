@@ -79,6 +79,38 @@ in
             PGID = toString gid;
           };
         };
+        # Huntarr — backfills missing content and quality-cutoff upgrades that arr
+        # RSS monitoring never revisits, in indexer-safe batches. Talks to the arr
+        # APIs over localhost only, so no media mount is needed.
+        huntarr = mkSupplementalContainer {
+          name = "huntarr";
+          # Docker Hub only (no ghcr mirror). Docker Hub blocks anonymous digest
+          # resolution from this network, so pinned by tag; run
+          # `podman inspect huntarr --format '{{.ImageDigest}}'` after first pull to pin.
+          image = "docker.io/huntarr/huntarr:latest";
+          port = constants.ports.services.huntarr;
+          internalPort = 9705;
+          extraEnv = {
+            PUID = toString uid;
+            PGID = toString gid;
+          };
+        };
+        # Cleanuparr — removes stalled/orphaned/malware-injected downloads and manages
+        # seeding across qBittorrent + the arrs via their APIs (no media mount).
+        # PRIVATE TRACKER SAFETY: configure removal/seeding rules in the web UI to
+        # respect ratio/seed-time obligations, and do NOT enable orphan file cleanup
+        # without a media mount. See [[user_private_trackers]].
+        cleanuparr = mkSupplementalContainer {
+          name = "cleanuparr";
+          # Pinned to digest of :latest as of 2026-07-21.
+          image = "ghcr.io/cleanuparr/cleanuparr@sha256:efd08729a33223a6a5bae267afcbeffe4bd2876b3f03144a025968adb8e3cc7e";
+          port = constants.ports.services.cleanuparr;
+          internalPort = 11011;
+          extraEnv = {
+            PUID = toString uid;
+            PGID = toString gid;
+          };
+        };
       };
     in
     {
@@ -126,6 +158,32 @@ in
 
       # Listenarr — default /config layout
       virtualisation.oci-containers.containers.listenarr = supplemental.listenarr.container;
+
+      # Huntarr — default /config layout
+      virtualisation.oci-containers.containers.huntarr = supplemental.huntarr.container;
+
+      # Cleanuparr — default /config layout
+      virtualisation.oci-containers.containers.cleanuparr = supplemental.cleanuparr.container;
+
+      # Calibre-Web-Automated — ebook library + auto-ingest watch folder. Runs as the
+      # media user so it can read/write /mnt/storage/books; replaces the ebook side of
+      # the retired Readarr. Exposed via Caddy only (127.0.0.1 bind). Drop ebooks into
+      # the ingest dir and CWA imports + converts them into the Calibre library.
+      virtualisation.oci-containers.containers.calibre-web-automated = {
+        # Pinned to digest of :latest as of 2026-07-21.
+        image = "ghcr.io/crocodilestick/calibre-web-automated@sha256:c31a738b6d5ec6982c050063dd3f063b6943eb1051fc81144789f840d9093a8d";
+        environment = {
+          TZ = timezone;
+          PUID = toString mediaUid;
+          PGID = toString mediaGid;
+        };
+        volumes = [
+          "${configPath}/calibre-web-automated:/config"
+          "/mnt/storage/books/library:/calibre-library"
+          "/mnt/storage/books/ingest:/cwa-book-ingest"
+        ];
+        ports = [ "127.0.0.1:${toString constants.ports.services.calibreWeb}:8083" ];
+      };
 
       # Janitorr - Media cleanup (bespoke: host network, sops template, complex deps).
       # `--user` derives uid/gid from the media user declared in media-user.nix.
@@ -396,6 +454,13 @@ in
         supplemental.termix.tmpfilesDir
         supplemental.profilarr.tmpfilesDir
         supplemental.listenarr.tmpfilesDir
+        supplemental.huntarr.tmpfilesDir
+        supplemental.cleanuparr.tmpfilesDir
+        # Calibre-Web-Automated: config owned by media user; book library + ingest
+        # under /mnt/storage/books (0770 media media, like the rest of the stack).
+        (media.mkContainerDir "${configPath}/calibre-web-automated" mediaUid mediaGid)
+        (media.mkDir "${media.storageRoot}/books/library")
+        (media.mkDir "${media.storageRoot}/books/ingest")
       ];
 
       networking.firewall.allowedTCPPorts = lib.mkDefault [
@@ -406,6 +471,8 @@ in
         constants.ports.services.jellystat
         supplemental.profilarr.firewallPort
         supplemental.listenarr.firewallPort
+        supplemental.huntarr.firewallPort
+        supplemental.cleanuparr.firewallPort
       ];
 
       # Enable automatic image pruning (nixpkgs provides podman-prune service)

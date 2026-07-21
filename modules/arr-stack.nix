@@ -1,6 +1,8 @@
-# *arr media management stack: prowlarr (indexer), radarr/sonarr/lidarr/readarr
+# *arr media management stack: prowlarr (indexer), radarr/sonarr/lidarr
 # (downloaders), bazarr (subtitles). Co-located in one module — they share
 # user/group, storage mount dependency, and systemd boilerplate.
+# Readarr was retired (archived upstream); books are handled by Calibre-Web-Automated
+# (ebooks) and Audiobookshelf (audiobooks) instead.
 { config, ... }:
 let
   inherit (config) constants;
@@ -47,10 +49,6 @@ in
         enable = true;
         inherit (media) user group;
       };
-      services.readarr = {
-        enable = true;
-        inherit (media) user group;
-      };
       services.bazarr = {
         enable = true;
         inherit (media) user group;
@@ -62,7 +60,6 @@ in
         constants.ports.services.radarr
         constants.ports.services.sonarr
         constants.ports.services.lidarr
-        constants.ports.services.readarr
         constants.ports.services.bazarr
         constants.ports.services.prowlarr
       ];
@@ -70,7 +67,6 @@ in
       systemd.services.radarr = storageBound;
       systemd.services.sonarr = storageBound;
       systemd.services.lidarr = storageBound;
-      systemd.services.readarr = storageBound;
 
       systemd.services.bazarr = recursiveUpdate media.serviceDefaults {
         after =
