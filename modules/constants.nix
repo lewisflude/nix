@@ -87,9 +87,9 @@
         sshAuthKey = "495B10388160753867D2B6F7CAED2ED08F4D4323";
       };
 
-      # SSH public keys authorized for the primary user across all hosts.
-      # Single source of truth: consumed by jupiter (NixOS openssh.authorizedKeys)
-      # and mercury (home-manager ~/.ssh/authorized_keys on Darwin).
+      # SSH public keys authorized for the primary user.
+      # Single source of truth: consumed by jupiter (NixOS openssh.authorizedKeys).
+      # Mercury does not accept remote SSH logins.
       authorizedKeys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEyBDIzK/OoFY7M1i96wP9wE+OeKk56iTvPwStEiFc+k lewis@lewisflude.com"
         "sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBGB2FdscjELsv6fQ4dwLN7ky3Blye+pxJHBfACdYmxhgPodPaRLqbekyrt+XDdXvQYmuiZ0XIa/fL4/452g5MWcAAAAEc3NoOg== lewis@lewisflude.com"
