@@ -66,7 +66,6 @@ Port forwarding, VPN management, and storage monitoring for media services.
 
 **Key Scripts**:
 
-- `protonvpn-natpmp-portforward.sh` - Automated port forwarding (integrated)
 - `monitor-protonvpn-portforward.sh` - VPN monitoring
 - `verify-qbittorrent-vpn.sh` - Complete verification
 - `diagnose-qbittorrent-seeding.sh` - Seeding diagnostics
@@ -150,8 +149,7 @@ Validate system configuration before deployment.
 
 - **Claude Code Hooks** (5) → `.claude/settings.json`
   - All hooks run automatically during Claude Code sessions
-- **qBittorrent/VPN** (7) → NixOS modules
-  - `protonvpn-natpmp-portforward.sh` - systemd service
+- **qBittorrent/VPN** (6) → NixOS modules
   - `show-protonvpn-port.sh` - system package
   - `monitor-protonvpn-portforward.sh` - system package
   - `verify-qbittorrent-vpn.sh` - system package
@@ -360,7 +358,6 @@ using the category paths for new code.
 
 Some scripts are integrated into the system and should not be run manually:
 
-- `protonvpn-natpmp-portforward.sh` - Runs via systemd timer
 - Claude Code hooks - Run automatically by Claude Code
 
 Others are safe to run anytime:

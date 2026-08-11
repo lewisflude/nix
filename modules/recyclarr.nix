@@ -66,9 +66,14 @@ in
         };
       };
 
-      # serviceDefaults supplies TZ (and the shared storage/network ordering);
-      # recyclarr keeps its own upstream User/Group.
-      systemd.services.recyclarr = media.serviceDefaults;
+      # serviceDefaults supplies TZ and the shared network ordering; recyclarr
+      # keeps its own upstream User/Group. The storage-mount dependency is
+      # dropped: recyclarr only talks to the *arr APIs over HTTP and never reads
+      # /mnt/storage, so it stays useful while the array is down.
+      systemd.services.recyclarr = media.serviceDefaults // {
+        after = builtins.filter (unit: unit != "mnt-storage.mount") media.serviceDefaults.after;
+        requires = builtins.filter (unit: unit != "mnt-storage.mount") media.serviceDefaults.requires;
+      };
 
       # Rotating either API key restarts recyclarr too (concatenates with the
       # podman-janitorr.service restart unit set in podman-containers.nix).

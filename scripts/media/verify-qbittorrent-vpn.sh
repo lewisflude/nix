@@ -205,7 +205,7 @@ phase3_qbittorrent() {
         print_success "Port matches NAT-PMP assignment"
       else
         print_failure "Port mismatch! qBittorrent: $qb_port, NAT-PMP: $natpmp_port"
-        echo "  Run: ./scripts/protonvpn-natpmp-portforward.sh"
+        echo "  Restart the forwarder: sudo systemctl restart protonvpn-portforward.service"
       fi
     fi
   else
@@ -254,7 +254,7 @@ phase4_summary() {
   echo ""
   echo "Automation:"
   echo "  - Run monitoring: ./scripts/monitor-protonvpn-portforward.sh"
-  echo "  - Update port: ./scripts/protonvpn-natpmp-portforward.sh"
+  echo "  - Update port: sudo systemctl restart protonvpn-portforward.service"
   echo ""
   echo "WebUI: http://$(hostname -I | awk '{print $1}'):8080"
 
