@@ -44,6 +44,7 @@ in
         nixos.networking
         nixos.wakeOnLan
         nixos.security
+        nixos.crashRecovery
 
         # ═══════════════════════════════════════════════════════════════════════
         # Hardware Modules
