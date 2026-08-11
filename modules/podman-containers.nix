@@ -2,7 +2,7 @@
 # OCI container services using Podman
 { config, ... }:
 let
-  inherit (config) constants;
+  inherit (config) constants containerLib;
   media = config.mediaLib;
 in
 {
@@ -10,7 +10,7 @@ in
     nixosArgs@{ pkgs, ... }:
     let
       cfg = nixosArgs.config;
-      configPath = "/var/lib/containers/supplemental";
+      inherit (containerLib) configRoot;
       inherit (constants.defaults) timezone;
       # uid/gid for supplemental containers that run as the primary interactive user.
       uid = 1000;
@@ -19,49 +19,30 @@ in
       mediaUid = cfg.users.users.${media.user}.uid;
       mediaGid = cfg.users.groups.${media.group}.gid;
 
-      mkSupplementalContainer =
-        {
-          name,
-          image,
-          port,
-          internalPort,
-          extraEnv ? { },
-          extraVolumes ? [ ],
-        }:
-        {
-          container = {
-            inherit image;
-            environment = {
-              TZ = timezone;
-            }
-            // extraEnv;
-            volumes = [ "${configPath}/${name}:/config" ] ++ extraVolumes;
-            ports = [ "${toString port}:${toString internalPort}" ];
-          };
-          tmpfilesDir = media.mkContainerDir "${configPath}/${name}" uid gid;
-          firewallPort = port;
-        };
-
+      # Supplemental containers: the single source for their container definitions,
+      # state directories and firewall ports (derived by containerLib.mkContainers).
       supplemental = {
-        wizarr = mkSupplementalContainer {
-          name = "wizarr";
+        wizarr = {
           image = "ghcr.io/wizarrrr/wizarr:4.1.1";
           port = constants.ports.services.wizarr;
           internalPort = 5690;
+          configMount = "/data/database";
+          openFirewall = true;
         };
-        termix = mkSupplementalContainer {
-          name = "termix";
+        termix = {
           # Pinned to digest of :latest as of 2026-04-30 (upstream tags only :latest)
           image = "ghcr.io/lukegus/termix@sha256:52e45c1ea3fb85be5b3ade5ff42eed0946fe81131cbd834f6960e00797f17f86";
           port = constants.ports.services.termix;
           internalPort = 8080;
+          configMount = "/app/data";
+          openFirewall = true;
         };
-        listenarr = mkSupplementalContainer {
-          name = "listenarr";
+        listenarr = {
           # Pinned to digest of :canary as of 2026-04-30
           image = "ghcr.io/therobbiedavis/listenarr@sha256:c917f40d7a79f89e10ecef754cf4fd189f018a55ad561f3a8f95f6766e47086b";
           port = constants.ports.services.listenarr;
           internalPort = 8686;
+          openFirewall = true;
           extraEnv = {
             PUID = toString uid;
             PGID = toString gid;
@@ -82,12 +63,12 @@ in
         # PRIVATE TRACKER SAFETY: configure removal/seeding rules in the web UI to
         # respect ratio/seed-time obligations, and do NOT enable orphan file cleanup
         # without a media mount. See [[user_private_trackers]].
-        cleanuparr = mkSupplementalContainer {
-          name = "cleanuparr";
+        cleanuparr = {
           # Pinned to digest of :latest as of 2026-07-21.
           image = "ghcr.io/cleanuparr/cleanuparr@sha256:efd08729a33223a6a5bae267afcbeffe4bd2876b3f03144a025968adb8e3cc7e";
           port = constants.ports.services.cleanuparr;
           internalPort = 11011;
+          openFirewall = true;
           extraEnv = {
             PUID = toString uid;
             PGID = toString gid;
@@ -96,6 +77,8 @@ in
       };
     in
     {
+      imports = [ (containerLib.mkContainers supplemental) ];
+
       virtualisation.podman.enable = true;
       virtualisation.oci-containers.backend = "podman";
 
@@ -106,9 +89,9 @@ in
           TZ = timezone;
         };
         volumes = [
-          "${configPath}/homarr/configs:/app/data/configs"
-          "${configPath}/homarr/icons:/app/public/icons"
-          "${configPath}/homarr/data:/data"
+          "${configRoot}/homarr/configs:/app/data/configs"
+          "${configRoot}/homarr/icons:/app/public/icons"
+          "${configRoot}/homarr/data:/data"
         ];
         ports = [ "${toString constants.ports.services.homarr}:7575" ];
         # sdnotify=healthy makes podman send READY=1 to systemd only after the
@@ -125,22 +108,6 @@ in
         ];
       };
 
-      # Wizarr — stores DB under /data/database (override default volume mapping)
-      virtualisation.oci-containers.containers.wizarr = supplemental.wizarr.container // {
-        volumes = [ "${configPath}/wizarr:/data/database" ];
-      };
-
-      # Termix — stores state under /app/data (override default volume mapping)
-      virtualisation.oci-containers.containers.termix = supplemental.termix.container // {
-        volumes = [ "${configPath}/termix:/app/data" ];
-      };
-
-      # Listenarr — default /config layout
-      virtualisation.oci-containers.containers.listenarr = supplemental.listenarr.container;
-
-      # Cleanuparr — default /config layout
-      virtualisation.oci-containers.containers.cleanuparr = supplemental.cleanuparr.container;
-
       # Calibre-Web-Automated — ebook library + auto-ingest watch folder. Runs as the
       # media user so it can read/write /mnt/storage/books; replaces the ebook side of
       # the retired Readarr. Exposed via Caddy only (127.0.0.1 bind). Drop ebooks into
@@ -154,9 +121,9 @@ in
           PGID = toString mediaGid;
         };
         volumes = [
-          "${configPath}/calibre-web-automated:/config"
-          "/mnt/storage/books/library:/calibre-library"
-          "/mnt/storage/books/ingest:/cwa-book-ingest"
+          "${configRoot}/calibre-web-automated:/config"
+          "${media.storageRoot}/books/library:/calibre-library"
+          "${media.storageRoot}/books/ingest:/cwa-book-ingest"
         ];
         ports = [ "127.0.0.1:${toString constants.ports.services.calibreWeb}:8083" ];
         # Same reason as homarr above: the image ships its own HEALTHCHECK, and CWA
@@ -177,7 +144,7 @@ in
         };
         volumes = [
           "${nixosArgs.config.sops.templates."janitorr-application.yml".path}:/config/application.yml:ro"
-          "/mnt/storage/media:/data/media"
+          "${media.mediaRoot}:/data/media"
         ];
         extraOptions = [
           "--network=host"
@@ -220,7 +187,7 @@ in
             access: true
             validate-seeding: false
             leaving-soon-dir: "/data/media/leaving-soon"
-            media-server-leaving-soon-dir: "/mnt/storage/media/leaving-soon"
+            media-server-leaving-soon-dir: "${media.mediaRoot}/leaving-soon"
             from-scratch: false
             free-space-check-dir: "/data/media"
 
@@ -398,7 +365,7 @@ in
           nixosArgs.config.sops.templates."jellystat.env".path
         ];
         volumes = [
-          "${configPath}/jellystat/backup:/app/backend/backup-data"
+          "${configRoot}/jellystat/backup:/app/backend/backup-data"
         ];
         extraOptions = [ "--network=host" ];
       };
@@ -423,35 +390,28 @@ in
 
       # Create config directories
       systemd.tmpfiles.rules = [
-        (media.mkContainerDir configPath uid gid)
-        (media.mkContainerDir "${configPath}/homarr" uid gid)
-        (media.mkContainerDir "${configPath}/homarr/configs" uid gid)
-        (media.mkContainerDir "${configPath}/homarr/icons" uid gid)
-        (media.mkContainerDir "${configPath}/homarr/data" uid gid)
-        (media.mkContainerDir "${configPath}/janitorr" uid gid)
-        (media.mkContainerDir "${configPath}/jellystat" uid gid)
-        (media.mkContainerDir "${configPath}/jellystat/backup" uid gid)
-        supplemental.wizarr.tmpfilesDir
-        supplemental.termix.tmpfilesDir
-        supplemental.listenarr.tmpfilesDir
-        supplemental.cleanuparr.tmpfilesDir
+        (media.mkContainerDir configRoot uid gid)
+        (media.mkContainerDir "${configRoot}/homarr" uid gid)
+        (media.mkContainerDir "${configRoot}/homarr/configs" uid gid)
+        (media.mkContainerDir "${configRoot}/homarr/icons" uid gid)
+        (media.mkContainerDir "${configRoot}/homarr/data" uid gid)
+        (media.mkContainerDir "${configRoot}/janitorr" uid gid)
+        (media.mkContainerDir "${configRoot}/jellystat" uid gid)
+        (media.mkContainerDir "${configRoot}/jellystat/backup" uid gid)
         # Calibre-Web-Automated: config owned by media user; book library + ingest
         # under /mnt/storage/books (0770 media media, like the rest of the stack).
-        (media.mkContainerDir "${configPath}/calibre-web-automated" mediaUid mediaGid)
+        (media.mkContainerDir "${configRoot}/calibre-web-automated" mediaUid mediaGid)
         (media.mkDir "${media.storageRoot}/books/library")
         (media.mkDir "${media.storageRoot}/books/ingest")
       ];
 
       # Not mkDefault: see the note in jellyfin.nix — mkDefault port lists lose to
       # networking.nix's normal-priority definition instead of merging with it.
+      # (the supplemental containers' ports are opened by containerLib.mkContainers)
       networking.firewall.allowedTCPPorts = [
         constants.ports.services.homarr
-        supplemental.wizarr.firewallPort
-        supplemental.termix.firewallPort
         constants.ports.services.janitorr
         constants.ports.services.jellystat
-        supplemental.listenarr.firewallPort
-        supplemental.cleanuparr.firewallPort
       ];
 
       # Enable automatic image pruning (nixpkgs provides podman-prune service)

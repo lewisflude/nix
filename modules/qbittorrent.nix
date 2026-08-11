@@ -7,7 +7,8 @@ let
   media = config.mediaLib;
   samplesPath = "/home/${username}/Music/samples";
   musicProductionCategory = "music-production";
-  musicProductionPath = "/mnt/storage/torrents/${musicProductionCategory}";
+  torrentsRoot = "${media.storageRoot}/torrents";
+  musicProductionPath = "${torrentsRoot}/${musicProductionCategory}";
 in
 {
   flake.modules.nixos.qbittorrent =
@@ -17,7 +18,8 @@ in
       ...
     }@nixosArgs:
     let
-      namespace = "qbt";
+      inherit (constants.networks) vpn;
+      inherit (vpn) namespace;
       samplesSync = pkgs.writeShellApplication {
         name = "qbt-samples-sync";
         runtimeInputs = [
@@ -57,7 +59,7 @@ in
       # BitTorrent session configuration
       bittorrentSession = {
         # Download paths: NVMe for incomplete (fast I/O), HDD for complete (capacity)
-        DefaultSavePath = "/mnt/storage/torrents";
+        DefaultSavePath = torrentsRoot;
         TempPathEnabled = true;
         TempPath = "/var/lib/qbittorrent/incomplete";
         Port = torrentPort;
@@ -126,7 +128,7 @@ in
         # VPN interface binding
         Interface = "${namespace}0";
         InterfaceName = "${namespace}0";
-        InterfaceAddress = "10.2.0.2";
+        InterfaceAddress = vpn.interfaceAddress;
         DisableIPv6 = true;
       };
     in
@@ -196,7 +198,7 @@ in
         portMappings = [
           {
             from = webuiPort;
-            to = 8080;
+            to = webuiPort;
           }
         ];
         # Torrent-port INPUT rules are managed dynamically by
@@ -210,7 +212,7 @@ in
         enable = true;
         user = "qbittorrent";
         group = "media";
-        webuiPort = 8080; # Internal port, mapped via VPN namespace
+        inherit webuiPort; # Namespace-internal port, republished by vpnNamespaces.portMappings
         torrentingPort = torrentPort;
         openFirewall = false; # Handled by VPN namespace
         serverConfig = {
@@ -246,10 +248,6 @@ in
         createHome = true;
       };
 
-      # Allow the primary user to read/write files created by qBittorrent
-      # under the music-production category (files are owned by qbittorrent:media).
-      users.users.${username}.extraGroups = [ media.group ];
-
       # Ensure download directories exist with correct ownership.
       # qbittorrent owns its dirs (rather than media-lib's mkDir which uses media:media)
       # because qbittorrent.service runs as user `qbittorrent`. Group is `media` so other
@@ -259,11 +257,11 @@ in
           mkQbtDir = p: "d '${p}' 0770 qbittorrent ${media.group} - -";
         in
         [
-          (mkQbtDir "/mnt/storage/torrents")
+          (mkQbtDir torrentsRoot)
           # Category subdirectories (matching SABnzbd pattern)
-          (mkQbtDir "/mnt/storage/torrents/movies")
-          (mkQbtDir "/mnt/storage/torrents/tv")
-          (mkQbtDir "/mnt/storage/torrents/music")
+          (mkQbtDir "${torrentsRoot}/movies")
+          (mkQbtDir "${torrentsRoot}/tv")
+          (mkQbtDir "${torrentsRoot}/music")
           (mkQbtDir musicProductionPath)
           (mkQbtDir "/var/lib/qbittorrent/incomplete")
           # Samples destination: setgid so synced files inherit the media group,

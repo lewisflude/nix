@@ -51,6 +51,11 @@ pog.pog {
       description = "Check disk and ZFS pool usage";
     }
     {
+      name = "storage_mount";
+      description = "Mount point checked by the storage category";
+      default = "/mnt/storage";
+    }
+    {
       name = "detailed";
       short = "V";
       bool = true;
@@ -288,11 +293,11 @@ pog.pog {
       if $RUN_STORAGE; then
         blue "Storage"
 
-        # Check /mnt/storage (mergerfs)
-        if mountpoint -q /mnt/storage 2>/dev/null; then
-          STORAGE_AVAIL_KB=$(df -k /mnt/storage 2>/dev/null | awk 'NR==2 {print $4}')
+        # Check the media storage mount (mergerfs)
+        if mountpoint -q "$storage_mount" 2>/dev/null; then
+          STORAGE_AVAIL_KB=$(df -k "$storage_mount" 2>/dev/null | awk 'NR==2 {print $4}')
           STORAGE_AVAIL_GB=$((STORAGE_AVAIL_KB / 1048576))
-          STORAGE_USE_PCT=$(df /mnt/storage 2>/dev/null | awk 'NR==2 {print $5}' | tr -d '%')
+          STORAGE_USE_PCT=$(df "$storage_mount" 2>/dev/null | awk 'NR==2 {print $5}' | tr -d '%')
           if [ "$STORAGE_AVAIL_GB" -lt 100 ]; then
             check_fail "Storage: ''${STORAGE_AVAIL_GB}GB free (''${STORAGE_USE_PCT}% used) — critically low"
           elif [ "$STORAGE_AVAIL_GB" -lt 500 ]; then
@@ -301,7 +306,7 @@ pog.pog {
             check_pass "Storage: ''${STORAGE_AVAIL_GB}GB free (''${STORAGE_USE_PCT}% used)"
           fi
         else
-          check_warn "/mnt/storage is not mounted"
+          check_warn "$storage_mount is not mounted"
         fi
 
         # Check ZFS pool capacity

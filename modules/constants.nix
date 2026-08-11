@@ -131,8 +131,17 @@
           prefix = "192.168.10.";
           secondaryPrefix = "192.168.0.";
         };
+        # ProtonVPN WireGuard tunnel used by the confined qBittorrent stack.
+        # qbittorrent.nix and protonvpn-portforward.nix both consume these and
+        # MUST agree: the port-forward loop re-asserts `interfaceAddress` on the
+        # qBittorrent WebUI every time NAT-PMP hands out a new port, so a drift
+        # between the two silently binds the torrent listener to the wrong
+        # address. The interface inside the namespace is `${namespace}0`.
         vpn = {
           cidr = "10.2.0.0/24";
+          namespace = "qbt";
+          interfaceAddress = "10.2.0.2";
+          gateway = "10.2.0.1";
         };
         vpnNamespace = {
           gateway = "192.168.15.1";

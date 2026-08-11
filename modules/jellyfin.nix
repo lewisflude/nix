@@ -8,7 +8,7 @@ let
 in
 {
   flake.modules.nixos.jellyfin =
-    { pkgs, ... }:
+    { pkgs, lib, ... }:
     {
       services.jellyfin = {
         enable = true;
@@ -23,7 +23,9 @@ in
       # (try-and-retry) per upstream guidance. Idempotent: only rewrites when the
       # value isn't already correct, so it doesn't churn Jellyfin-owned state.
       # See https://jellyfin.org/posts/SQLite-locking/ and jellyfin/jellyfin#14047.
-      systemd.services.jellyfin = media.serviceDefaults // {
+      # recursiveUpdate (not //) so a future serviceConfig addition here merges
+      # with the shared UMask instead of clobbering it.
+      systemd.services.jellyfin = lib.recursiveUpdate media.serviceDefaults {
         preStart = ''
           db="/var/lib/jellyfin/config/database.xml"
           if [ -f "$db" ]; then

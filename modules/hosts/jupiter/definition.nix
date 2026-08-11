@@ -105,10 +105,8 @@ in
         nixos.jellyfin
         nixos.audiobookshelf
         nixos.sabnzbd
-        nixos.byparr
         nixos.seerr
         nixos.recyclarr
-        nixos.simpleContainers
 
         # ═══════════════════════════════════════════════════════════════════════
         # VPN & Downloads
@@ -148,6 +146,7 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         # Container Services
         # ═══════════════════════════════════════════════════════════════════════
+        nixos.containers # autopulse, byparr (list-driven simple containers)
         nixos.podmanContainers
 
         # ═══════════════════════════════════════════════════════════════════════

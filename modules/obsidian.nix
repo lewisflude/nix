@@ -14,6 +14,7 @@
 let
   inherit (config) username;
   inherit (config.constants) hosts;
+  syncPort = toString config.constants.ports.services.syncthing.sync;
 
   vaultName = "obsidian-vault";
   vaultLabel = "Obsidian Vault";
@@ -24,7 +25,7 @@ let
   iphoneDevice = lib.optionalAttrs iphoneConfigured {
     iphone = {
       id = hosts.iphone.syncthingId;
-      addresses = [ "tcp://${hosts.iphone.tailscaleIpv4}:22000" ];
+      addresses = [ "tcp://${hosts.iphone.tailscaleIpv4}:${syncPort}" ];
     };
   };
   iphoneFolderDevices = lib.optional iphoneConfigured "iphone";
@@ -72,7 +73,7 @@ in
       devices = {
         mercury = {
           id = hosts.mercury.syncthingId;
-          addresses = [ "tcp://${hosts.mercury.tailscaleIpv4}:22000" ];
+          addresses = [ "tcp://${hosts.mercury.tailscaleIpv4}:${syncPort}" ];
         };
       }
       // iphoneDevice;
@@ -93,7 +94,7 @@ in
         devices = {
           jupiter = {
             id = hosts.jupiter.syncthingId;
-            addresses = [ "tcp://${hosts.jupiter.tailscaleIpv4}:22000" ];
+            addresses = [ "tcp://${hosts.jupiter.tailscaleIpv4}:${syncPort}" ];
           };
         }
         // iphoneDevice;

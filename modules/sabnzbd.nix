@@ -13,7 +13,7 @@ in
       inherit (lib) mkDefault;
       port = constants.ports.services.sabnzbd;
       downloadDir = "/var/lib/sabnzbd/incomplete";
-      completeDir = "/mnt/storage/usenet";
+      completeDir = "${media.storageRoot}/usenet";
     in
     {
       # Ensure required directories exist (0770 so media group members can write)
@@ -67,7 +67,7 @@ in
           };
 
           # Categories for Starr apps (TRASHguides)
-          # dir paths are relative to complete_dir (/mnt/storage/usenet)
+          # dir paths are relative to complete_dir
           categories = {
             "*" = {
               name = "*";

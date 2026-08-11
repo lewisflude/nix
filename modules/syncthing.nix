@@ -9,6 +9,8 @@
 let
   inherit (config) constants;
   inherit (config) username;
+  syncthingPorts = constants.ports.services.syncthing;
+  guiAddress = "127.0.0.1:${toString syncthingPorts.webUi}";
 in
 {
   # ==========================================================================
@@ -34,7 +36,7 @@ in
             relaysEnabled = false; # Disable relay servers (direct connections only)
           };
           gui = {
-            address = mkDefault "127.0.0.1:8384";
+            address = mkDefault guiAddress;
           };
         };
       };
@@ -43,10 +45,10 @@ in
       # Not mkDefault: see the note in jellyfin.nix — mkDefault port lists lose to
       # networking.nix's normal-priority definition instead of merging with it.
       networking.firewall = {
-        allowedTCPPorts = [ constants.ports.services.syncthing.sync ];
+        allowedTCPPorts = [ syncthingPorts.sync ];
         allowedUDPPorts = [
-          constants.ports.services.syncthing.sync
-          constants.ports.services.syncthing.discovery
+          syncthingPorts.sync
+          syncthingPorts.discovery
         ];
       };
     };
@@ -68,7 +70,7 @@ in
             localAnnounceEnabled = lib.mkDefault true;
             relaysEnabled = lib.mkDefault false;
           };
-          gui.address = lib.mkDefault "127.0.0.1:8384";
+          gui.address = lib.mkDefault guiAddress;
         };
       };
     };

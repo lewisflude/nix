@@ -15,6 +15,7 @@
 { config, ... }:
 let
   inherit (config) constants;
+  media = config.mediaLib;
   ports = constants.ports.services;
 in
 {
@@ -65,9 +66,9 @@ in
         };
       };
 
-      systemd.services.recyclarr.environment = {
-        TZ = constants.defaults.timezone;
-      };
+      # serviceDefaults supplies TZ (and the shared storage/network ordering);
+      # recyclarr keeps its own upstream User/Group.
+      systemd.services.recyclarr = media.serviceDefaults;
 
       # Rotating either API key restarts recyclarr too (concatenates with the
       # podman-janitorr.service restart unit set in podman-containers.nix).

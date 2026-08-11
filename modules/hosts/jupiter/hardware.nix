@@ -186,11 +186,11 @@ in
       users.users.${username} = {
         hashedPasswordFile = config.sops.secrets.hashedPassword.path;
         openssh.authorizedKeys.keys = constants.authorizedKeys;
+        # "media" is contributed by media-user.nix, which owns that group.
         extraGroups = [
           "dialout"
           "wheel"
           "i2c"
-          "media"
           "video"
           "uinput"
           "libvirtd"

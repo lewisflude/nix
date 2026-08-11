@@ -1,15 +1,21 @@
 # ProtonVPN Port Forwarding Module
 # Long-running NAT-PMP port forwarding with qBittorrent API integration
 # Runs inside VPN namespace via vpnConfinement with 30s renewal loop
-_: {
+{ config, ... }:
+let
+  inherit (config) constants;
+  inherit (constants.networks) vpn;
+in
+{
   flake.modules.nixos.protonvpnPortforward =
     { pkgs, ... }:
     let
-      namespace = "qbt";
-      gateway = "10.2.0.1";
+      inherit (vpn) namespace gateway;
       leaseDuration = 60;
       renewInterval = 30;
-      qbtWebUIPort = 8080;
+      # Must match qbittorrent.nix: the WebUI is reachable on this port from
+      # inside the VPN namespace.
+      qbtWebUIPort = constants.ports.services.qbittorrent;
 
       portforwardScript = pkgs.writeShellApplication {
         name = "protonvpn-portforward";
@@ -112,7 +118,7 @@ _: {
               log_info "Updating qBittorrent port from $CURRENT_PORT to $PUBLIC_PORT..."
               curl -s -m 10 -X POST \
                 "http://$QBT_HOST/api/v2/app/setPreferences" \
-                --data "json={\"listen_port\": $PUBLIC_PORT, \"current_interface_name\": \"$IFACE\", \"current_interface_address\": \"10.2.0.2\"}" \
+                --data "json={\"listen_port\": $PUBLIC_PORT, \"current_interface_name\": \"$IFACE\", \"current_interface_address\": \"${vpn.interfaceAddress}\"}" \
                 2>/dev/null || log_error "Failed to update qBittorrent port"
             fi
 

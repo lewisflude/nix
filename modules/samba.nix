@@ -3,6 +3,7 @@
 { config, ... }:
 let
   inherit (config) username;
+  media = config.mediaLib;
   musicPath = "/home/${username}/Music";
 in
 {
@@ -52,10 +53,10 @@ in
               "guest ok" = "no";
             };
             storage = {
-              path = "/mnt/storage";
+              path = media.storageRoot;
               writable = "true";
-              "valid users" = "@media";
-              "force group" = "media";
+              "valid users" = "@${media.group}";
+              "force group" = media.group;
               "create mask" = "0664";
               "directory mask" = "0775";
               "force create mode" = "0660";
