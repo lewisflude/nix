@@ -40,7 +40,6 @@
           musicAssistant = 8095;
           audiobookshelf = 13378;
           calibreWeb = 8093; # Calibre-Web-Automated host port (container listens on 8083)
-          huntarr = 9705;
           cleanuparr = 11011;
 
           # Container supplemental services
@@ -51,7 +50,6 @@
           doplarr = 3142;
           comfyui = 8188;
           janitorr = 8485;
-          profilarr = 6868;
           filebrowser = 8400;
           notifiarr = 5454;
           autopulse = 2875;

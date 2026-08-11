@@ -102,6 +102,8 @@ in
         };
       };
 
-      networking.firewall.allowedTCPPorts = mkDefault [ port ];
+      # Not mkDefault: see the note in jellyfin.nix — mkDefault port lists lose to
+      # networking.nix's normal-priority definition instead of merging with it.
+      networking.firewall.allowedTCPPorts = [ port ];
     };
 }

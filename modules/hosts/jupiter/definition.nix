@@ -67,6 +67,7 @@ in
         nixos.greeter
         nixos.greeterAutoLogin
         nixos.console
+        nixos.shell
         nixos.hardwareSupport
         nixos.desktopEnvironment
         nixos.desktopUserGroups
@@ -134,6 +135,12 @@ in
         nixos.restic
 
         # ═══════════════════════════════════════════════════════════════════════
+        # Hardware Health Monitoring
+        # ═══════════════════════════════════════════════════════════════════════
+        nixos.alerts # Alert fan-out (journal + Home Assistant + MTA if present)
+        nixos.smartd # SMART attribute monitoring and scheduled self-tests
+
+        # ═══════════════════════════════════════════════════════════════════════
         # AI Tools
         # ═══════════════════════════════════════════════════════════════════════
         nixos.claudeCode
@@ -166,7 +173,6 @@ in
         inputs.dms.homeModules.niri
         inputs.dms-plugin-registry.homeModules.default
         inputs.hyprcursor-phinger.homeManagerModules.hyprcursor-phinger
-        homeManager.signal
 
         # Core home-manager modules
         homeManager.shell
@@ -185,7 +191,6 @@ in
         homeManager.gh
         homeManager.git-cliff
         homeManager.helix
-        homeManager.powerlevel10k
         homeManager.claudeCode
         homeManager.codex
         homeManager.antigravityCli

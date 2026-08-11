@@ -15,13 +15,15 @@ in
       inherit (nixosArgs) lib;
       cfg = nixosArgs.config;
       inherit (lib)
-        mkDefault
         mkForce
         optional
         recursiveUpdate
         ;
-      # serviceDefaults provides TZ/after/requires/UMask. Override UMask via mkForce
-      # because upstream modules sometimes set a stricter default.
+      # serviceDefaults provides TZ/after/requires/UMask (the latter as mkDefault).
+      # radarr and sonarr are the only servarr modules that pin UMask themselves
+      # ("0022", normal priority, in their upstream hardening block) and neither
+      # exposes an option for it, so mkForce is the only way past them. bazarr and
+      # prowlarr set no UMask at all and inherit the default untouched.
       storageBound = recursiveUpdate media.serviceDefaults {
         after = optional cfg.services.prowlarr.enable "prowlarr.service";
         serviceConfig.UMask = mkForce "0002";
@@ -56,7 +58,9 @@ in
       };
       services.prowlarr.enable = true;
 
-      networking.firewall.allowedTCPPorts = mkDefault [
+      # Not mkDefault: see the note in jellyfin.nix — mkDefault port lists lose to
+      # networking.nix's normal-priority definition instead of merging with it.
+      networking.firewall.allowedTCPPorts = [
         constants.ports.services.radarr
         constants.ports.services.sonarr
         constants.ports.services.lidarr
@@ -72,14 +76,12 @@ in
         after =
           optional cfg.services.sonarr.enable "sonarr.service"
           ++ optional cfg.services.radarr.enable "radarr.service";
-        serviceConfig.UMask = mkForce "0002";
       };
 
       systemd.services.prowlarr = recursiveUpdate media.serviceDefaults {
         serviceConfig = {
           User = media.user;
           Group = media.group;
-          UMask = mkForce "0002";
         };
       };
     };

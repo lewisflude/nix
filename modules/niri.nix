@@ -79,6 +79,7 @@
       ];
 
       home.pointerCursor = {
+        enable = true;
         name = "phinger-cursors-light";
         package = pkgs.phinger-cursors;
         size = 32;
@@ -89,7 +90,10 @@
       programs.hyprcursor-phinger.enable = true;
 
       programs.niri = {
-        package = pkgs.niri-unstable;
+        # Use the niri-flake package built against its pinned nixpkgs (see the
+        # nixpkgs-niri note in flake.nix) rather than the overlay against the
+        # system nixpkgs, which currently throws on the removed libdisplay-info_0_2.
+        package = inputs.niri.packages.${pkgs.stdenv.hostPlatform.system}.niri-unstable;
         settings =
           let
             dmsIpc = args: {

@@ -1,4 +1,4 @@
-# Desktop theming - GTK, Qt, fonts, and signal-nix integration
+# Desktop theming - GTK, Qt, and fonts
 _: {
   flake.modules.homeManager.theming =
     { lib, pkgs, ... }:
@@ -7,11 +7,6 @@ _: {
     in
     {
       # =========================================================================
-      # Signal Design System (Cross-platform)
-      # =========================================================================
-      theming.signal.enable = true;
-
-      # =========================================================================
       # Packages
       # =========================================================================
       home.packages = lib.optionals isLinux [
@@ -19,17 +14,20 @@ _: {
       ];
 
       # =========================================================================
-      # GTK Overrides (on top of signal-nix) - Linux only
+      # GTK - Linux only
       # =========================================================================
       gtk = lib.mkIf isLinux {
         enable = true;
         gtk4.theme = null;
-        iconTheme = lib.mkForce {
+        # Set explicitly since signal-nix was removed. It used to apply exactly
+        # this pair, so naming it here keeps icons unchanged rather than falling
+        # back to whatever the GTK default resolves to.
+        iconTheme = {
           name = "Adwaita";
           package = pkgs.adwaita-icon-theme;
         };
         # Cursor theme managed by home.pointerCursor in niri.nix
-        font = lib.mkForce {
+        font = {
           name = "Iosevka";
           package = pkgs.iosevka-bin;
           size = 12;

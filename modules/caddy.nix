@@ -57,7 +57,6 @@ let
     inherit (constants.ports.services) radarr;
     inherit (constants.ports.services) lidarr;
     inherit (constants.ports.services) bazarr;
-    inherit (constants.ports.services) huntarr;
     inherit (constants.ports.services) cleanuparr;
     inherit (constants.ports.services) notifiarr;
     inherit (constants.ports.services) autopulse;
@@ -68,7 +67,6 @@ let
 
     # Supplemental
     inherit (constants.ports.services) termix;
-    inherit (constants.ports.services) profilarr;
     inherit (constants.ports.services) listenarr;
 
     # Downloads

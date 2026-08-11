@@ -57,8 +57,14 @@
     };
     niri = {
       url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # Pinned off main nixpkgs: niri-flake HEAD (9ee3e13) still asserts
+      # `libdisplay-info_0_2.version == "0.2.0"`, but nixpkgs removed that
+      # package (throw alias) on 2026-08-04. Follow the last-good nixpkgs
+      # (241313f, which still ships libdisplay-info_0_2 0.2.0) until
+      # niri-flake switches to libdisplay-info_0_3/libdisplay-info upstream.
+      inputs.nixpkgs.follows = "nixpkgs-niri";
     };
+    nixpkgs-niri.url = "github:NixOS/nixpkgs/241313f4e8e508cb9b13278c2b0fa25b9ca27163";
     musnix = {
       url = "github:musnix/musnix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -108,14 +114,6 @@
     pog = {
       url = "github:jpetrucciani/pog";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-    # signal-nix is vendored locally under ./vendor/signal-nix (see modules/signal.nix).
-    # These are its two runtime dependencies, pinned to the revs it was locked against.
-    signal-palette = {
-      url = "github:lewisflude/signal-palette/398cafbf15772892350a3cc822e285842e292388";
-    };
-    nix-colorizer = {
-      url = "github:nutsalhan87/nix-colorizer/c9ce6c710f4ed749f773104a8092a3e542dd1d7c";
     };
     devour-flake = {
       url = "github:srid/devour-flake";

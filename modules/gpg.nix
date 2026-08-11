@@ -36,15 +36,13 @@
   # Home-manager GPG configuration (works on NixOS AND Darwin)
   # ═══════════════════════════════════════════════════════════════════
   flake.modules.homeManager.gpg =
-    hmArgs@{
+    {
       pkgs,
       lib,
       ...
     }:
     let
-      hmConfig = hmArgs.config;
       inherit (pkgs.stdenv) isDarwin;
-      gtkThemeName = hmConfig.theming.signal.gtk.themeName or null;
     in
     {
       home.packages = [
@@ -86,7 +84,12 @@
         enable = true;
         enableScDaemon = true;
         enableSshSupport = true;
-        enableZshIntegration = true;
+        # Replaced by the deferred version below. home-manager's integration
+        # runs gpg-connect-agent synchronously in every interactive shell, which
+        # is both a fork+IPC per shell and console I/O during powerlevel10k's
+        # instant prompt window. SSH_AUTH_SOCK is unaffected: that is emitted by
+        # enableSshSupport, not by this option.
+        enableZshIntegration = false;
         enableExtraSocket = true;
         sshKeys = [ config.constants.gpg.sshAuthKey ];
         pinentry.package =
@@ -97,7 +100,6 @@
               if [ -n "$SSH_CONNECTION" ] || [ -z "$DISPLAY" ]; then
                 exec ${pkgs.pinentry-tty}/bin/pinentry-tty "$@"
               else
-                ${lib.optionalString (gtkThemeName != null) "export GTK_THEME=\"${gtkThemeName}\""}
                 exec ${pkgs.pinentry-gnome3}/bin/pinentry-gnome3 "$@"
               fi
             '';
@@ -109,5 +111,17 @@
         noAllowExternalCache = true;
         extraConfig = "allow-loopback-pinentry";
       };
+
+      # Deferred replacement for services.gpg-agent.enableZshIntegration.
+      # GPG_TTY is set synchronously (pinentry needs it, and it costs nothing);
+      # only the agent round-trip is deferred until after the prompt is up.
+      programs.zsh.initContent = lib.mkAfter ''
+        export GPG_TTY=$TTY
+        if (( ''${+functions[zsh-defer]} )); then
+          zsh-defer -c '${pkgs.gnupg}/bin/gpg-connect-agent --quiet updatestartuptty /bye >/dev/null'
+        else
+          ${pkgs.gnupg}/bin/gpg-connect-agent --quiet updatestartuptty /bye >/dev/null
+        fi
+      '';
     };
 }

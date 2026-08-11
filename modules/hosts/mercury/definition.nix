@@ -61,7 +61,6 @@ in
             # External home-manager modules
             inputs.nix-index-database.homeModules.nix-index
             inputs.sops-nix.homeManagerModules.sops
-            homeManager.signal
 
             # Core home-manager modules
             homeManager.shell
@@ -81,7 +80,6 @@ in
             homeManager.gh
             homeManager.git-cliff
             homeManager.helix
-            homeManager.powerlevel10k
             homeManager.claudeCode
             homeManager.codex
             homeManager.antigravityCli

@@ -94,6 +94,7 @@ in
           spicebridge = {
             command = "${pkgs.writeShellScript "mcp-spicebridge" ''
               export PATH="${pkgs.ngspice}/bin:$PATH"
+              ${aiCli.uvxEnv pkgs}
               exec ${pkgs.uv}/bin/uvx spicebridge "$@"
             ''}";
           };
@@ -102,6 +103,7 @@ in
           kagi = {
             command = "${pkgs.writeShellScript "mcp-kagi" ''
               export KAGI_API_KEY="$(cat ${lib.escapeShellArg (secretPath "KAGI_API_KEY")})"
+              ${aiCli.uvxEnv pkgs}
               exec ${pkgs.uv}/bin/uvx kagimcp "$@"
             ''}";
           };
@@ -110,6 +112,7 @@ in
           basic-memory = {
             command = "${pkgs.writeShellScript "mcp-basic-memory" ''
               export BASIC_MEMORY_MCP_PROJECT=${basicMemoryProject}
+              ${aiCli.uvxEnv pkgs}
               exec ${pkgs.uv}/bin/uvx basic-memory mcp "$@"
             ''}";
           };

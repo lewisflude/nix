@@ -1,17 +1,11 @@
 # Per-system pog overlay
 # Dendritic pattern: Provides pog overlay extension for packages
-{ inputs, config, ... }:
+{ inputs, ... }:
 let
   # Helper to safely get pog overlay if available
   getPogOverlay =
-    system:
-    if
-      inputs ? pog
-      && inputs.pog ? overlays
-      && inputs.pog.overlays ? ${system}
-      && inputs.pog.overlays.${system} ? default
-    then
-      inputs.pog.overlays.${system}.default
+    if inputs ? pog && inputs.pog ? overlays && inputs.pog.overlays ? default then
+      inputs.pog.overlays.default
     else
       (_final: _prev: { });
 in
@@ -19,8 +13,8 @@ in
   # Provides pog overlay extension for packages that need it
   # Sets config._module.args.pkgsWithPog for modules that require pog
   perSystem =
-    { system, ... }:
+    { pkgs, ... }:
     {
-      _module.args.pkgsWithPog = config._module.args.pkgs.extend (getPogOverlay system);
+      _module.args.pkgsWithPog = pkgs.extend getPogOverlay;
     };
 }

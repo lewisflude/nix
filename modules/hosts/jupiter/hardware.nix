@@ -33,6 +33,17 @@ in
         cpu.intel.updateMicrocode = true;
         enableAllFirmware = true;
         i2c.enable = true;
+
+        # Decode machine check exceptions. The kernel logged a bare
+        # "mce: [Hardware Error]: Machine check events logged" on 2026-08-08
+        # with nothing to decode it, seven hours before the memory corruption
+        # that killed the box — leaving RAM/IMC unruled-out. record=true backs
+        # the event log with sqlite so `ras-mc-ctl --errors` can report DIMM,
+        # bank and error type after the fact.
+        rasdaemon = {
+          enable = true;
+          record = true;
+        };
       };
 
       # =========================================================================
@@ -70,13 +81,25 @@ in
         "/mnt/storage" = {
           device = "/mnt/disk1:/mnt/disk2";
           fsType = "fuse.mergerfs";
+          # cache.files=off (mergerfs' own default) is deliberate. The old
+          # cache.files=partial + dropcacheonclose=true recipe existed only
+          # because FUSE could not do shared mmap without page caching. Kernel
+          # >= 6.6 added direct-io-allow-mmap, which mergerfs enables
+          # automatically, so page caching is no longer needed for mmap.
+          #
+          # Keeping it on was actively harmful here: on 2026-08-08/09 five
+          # `BUG: Bad page map` faults hit mmap'd .mkv files on this mount
+          # (fuse_file_mmap -> filemap_fault -> fuse_read_folio), each writing a
+          # bogus PFN into a PTE, ending in a hard lockup. Turning the page
+          # cache off removes that code path entirely. Reads still hit the
+          # branch filesystems' own page cache, so this also drops the double
+          # caching dropcacheonclose was papering over.
           options = [
             "defaults"
             "nonempty"
             "allow_other"
             "use_ino"
-            "cache.files=partial"
-            "dropcacheonclose=true"
+            "cache.files=off"
             "category.create=mfs"
             "minfreespace=1G"
             "fsname=mergerfs"
@@ -109,6 +132,15 @@ in
         systemd-boot.enable = true;
         systemd-boot.configurationLimit = 20;
         efi.canTouchEfiVariables = true;
+
+        # This is non-ECC memory on a consumer platform: no EDAC memory
+        # controller registers, so correctable DRAM errors are structurally
+        # invisible and rasdaemon can only ever report "No Memory errors"
+        # regardless of the truth. Given the history of memory-corruption-
+        # shaped Oopses on this box, having memtest one keypress away in the
+        # boot menu turns "was it RAM?" from a guess into a test. Adds a menu
+        # entry only — nothing runs automatically.
+        systemd-boot.memtest86.enable = true;
       };
 
       boot.kernelParams = [

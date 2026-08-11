@@ -9,6 +9,21 @@ let
   secretPath =
     osConfig: name: if secretAvailable osConfig name then osConfig.sops.secrets.${name}.path else "";
 
+  # Several MCP servers depend on urllib3 directly (kagimcp pulls fastmcp,
+  # pydantic, python-dateutil, typing-extensions, urllib3 — no requests, no
+  # httpx, no certifi). urllib3 verifies against ssl.create_default_context(),
+  # i.e. the *system* trust store, and uv's standalone CPython resolves that to
+  # /etc/ssl/cert.pem — which does not exist on NixOS. Every request then dies
+  # with CERTIFICATE_VERIFY_FAILED. Servers built on requests/httpx happen to
+  # work anyway because those vendor certifi, which is why this only bites some
+  # of them. Exporting SSL_CERT_FILE in the wrapper fixes it regardless of how
+  # the calling CLI was launched, which home.sessionVariables alone does not
+  # guarantee for a desktop-session process.
+  caBundle = pkgs: "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+
+  # Prelude for every uvx-based MCP wrapper.
+  uvxEnv = pkgs: "export SSL_CERT_FILE=${caBundle pkgs}";
+
   mcpServers =
     pkgs: osConfig:
     {
@@ -17,11 +32,13 @@ let
       };
       git = {
         command = "${pkgs.writeShellScript "mcp-git" ''
+          ${uvxEnv pkgs}
           exec ${pkgs.uv}/bin/uvx --from mcp-server-git mcp-server-git "$@"
         ''}";
       };
       sqlite = {
         command = "${pkgs.writeShellScript "mcp-sqlite" ''
+          ${uvxEnv pkgs}
           exec ${pkgs.uv}/bin/uvx mcp-server-sqlite --db-path "$HOME/.local/share/mcp/data.db" "$@"
         ''}";
       };
@@ -33,6 +50,7 @@ let
       };
       nixos = {
         command = "${pkgs.writeShellScript "mcp-nixos" ''
+          ${uvxEnv pkgs}
           exec ${pkgs.uv}/bin/uvx --from mcp-nixos mcp-nixos "$@"
         ''}";
       };
@@ -45,6 +63,7 @@ let
         command = "${pkgs.writeShellScript "mcp-hass" ''
           export HOMEASSISTANT_URL="$(cat /run/secrets/HOME_ASSISTANT_BASE_URL)"
           export HOMEASSISTANT_TOKEN="$(cat /run/secrets/HOME_ASSISTANT_TOKEN)"
+          ${uvxEnv pkgs}
           exec ${pkgs.uv}/bin/uvx ha-mcp "$@"
         ''}";
       };
@@ -158,6 +177,8 @@ in
       inherit
         secretAvailable
         secretPath
+        caBundle
+        uvxEnv
         mcpServers
         mkTrustedWrapper
         mkJsonMergeActivation

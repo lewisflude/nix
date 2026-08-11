@@ -39,10 +39,12 @@ in
         };
       };
 
-      # Firewall configuration
+      # Firewall configuration.
+      # Not mkDefault: see the note in jellyfin.nix — mkDefault port lists lose to
+      # networking.nix's normal-priority definition instead of merging with it.
       networking.firewall = {
-        allowedTCPPorts = mkDefault [ constants.ports.services.syncthing.sync ];
-        allowedUDPPorts = mkDefault [
+        allowedTCPPorts = [ constants.ports.services.syncthing.sync ];
+        allowedUDPPorts = [
           constants.ports.services.syncthing.sync
           constants.ports.services.syncthing.discovery
         ];

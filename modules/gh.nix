@@ -3,7 +3,6 @@ _: {
   flake.modules.nixos.githubRunners =
     {
       config,
-      lib,
       pkgs,
       ...
     }:
@@ -16,6 +15,14 @@ _: {
         tokenFile = config.sops.secrets.GITHUB_TOKEN.path;
         tokenType = "access";
         replace = true;
+        # The module defaults to DynamicUser=true, which makes systemd put the
+        # StateDirectory under /var/lib/private and bind-mount it MS_NOEXEC. That
+        # stops CI executing binaries it just built (juceaide, plugin .so, etc).
+        # Setting user/group is the module's own opt-out: it derives
+        # DynamicUser=false from these. The account itself is defined below —
+        # the upstream module never creates it.
+        user = "github-runner-tunnels";
+        group = "github-runner-tunnels";
         # Persist _work across reboots. The default work dir lives under
         # /run (tmpfs) and is wiped on boot, which also wipes the ccache/CPM
         # caches that CI workflows store under ${{ github.workspace }}/.
@@ -34,24 +41,21 @@ _: {
           "tunnels-heavy"
         ];
 
-        extraPackages = with pkgs; [
-          awscli2
-          bashInteractive
-          cmake
-          coreutils
-          curl
-          git
-          jq
-          just
-          nix
-          pluginval
+        extraPackages = [
+          pkgs.awscli2
+          pkgs.bashInteractive
+          pkgs.cmake
+          pkgs.coreutils
+          pkgs.curl
+          pkgs.git
+          pkgs.jq
+          pkgs.just
+          pkgs.nix
+          pkgs.pluginval
         ];
       };
 
-      # The github-runners module defaults to DynamicUser=true, which causes
-      # systemd to bind-mount the StateDirectory with MS_NOEXEC. That prevents
-      # CI from executing binaries it just built (juceaide, plugin .so, etc).
-      # Switch to a static user/group: no noexec applied, runner can build+run.
+      # Static account backing the user/group set on the runner above.
       users.users.github-runner-tunnels = {
         isSystemUser = true;
         group = "github-runner-tunnels";
@@ -60,26 +64,14 @@ _: {
       };
       users.groups.github-runner-tunnels = { };
 
+      # Only the work dir needs pre-creating: it is the source of the module's
+      # BindPaths= and systemd will not create it. The state and logs dirs are
+      # created, chowned and made writable under ProtectSystem=strict by the
+      # module's own StateDirectory=/LogsDirectory=.
       systemd.tmpfiles.rules = [
-        "d /var/lib/github-runner/tunnels-linux 0700 github-runner-tunnels github-runner-tunnels - -"
         "d /var/lib/github-runner-work 0755 root root - -"
         "d /var/lib/github-runner-work/tunnels-linux 0750 github-runner-tunnels github-runner-tunnels - -"
       ];
-
-      systemd.services.github-runner-tunnels-linux.serviceConfig = {
-        DynamicUser = lib.mkForce false;
-        User = "github-runner-tunnels";
-        Group = "github-runner-tunnels";
-        StateDirectory = lib.mkForce [ ];
-        BindPaths = lib.mkForce [ ];
-        # ProtectSystem=strict marks /var read-only; explicitly allow writes
-        # to the runner state + work dirs now that StateDirectory no longer
-        # adds them to the writable set automatically.
-        ReadWritePaths = [
-          "/var/lib/github-runner/tunnels-linux"
-          "/var/lib/github-runner-work/tunnels-linux"
-        ];
-      };
     };
 
   flake.modules.darwin.githubRunners =
@@ -115,22 +107,19 @@ _: {
         "arm64"
         runnerLabel
       ];
-      path = makeBinPath (
-        with pkgs;
-        [
-          bashInteractive
-          cmake
-          coreutils
-          curl
-          findutils
-          git
-          gnutar
-          gzip
-          jq
-          just
-          nix
-        ]
-      );
+      path = makeBinPath [
+        pkgs.bashInteractive
+        pkgs.cmake
+        pkgs.coreutils
+        pkgs.curl
+        pkgs.findutils
+        pkgs.git
+        pkgs.gnutar
+        pkgs.gzip
+        pkgs.jq
+        pkgs.just
+        pkgs.nix
+      ];
       configureRunner = pkgs.writeShellApplication {
         name = "configure-github-runner-${runnerLabel}";
         runtimeInputs = [

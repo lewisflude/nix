@@ -18,7 +18,17 @@ let
 
     serviceDefaults = {
       environment.TZ = lib.mkDefault tz;
-      after = [ "mnt-storage.mount" ];
+      # Order after DNS/network is up as well as the storage mount. Prowlarr in
+      # particular hits its metadata endpoints (indexers.prowlarr.com,
+      # prowlarr.servarr.com) on startup and threw "Name or service not known" at
+      # boot when it raced ahead of network-online. `wants` pulls the target into
+      # the boot; radarr/sonarr/bazarr inherit the ordering transitively via their
+      # own after=[prowlarr/sonarr/radarr] chains even though they override `after`.
+      after = [
+        "mnt-storage.mount"
+        "network-online.target"
+      ];
+      wants = [ "network-online.target" ];
       requires = [ "mnt-storage.mount" ];
       serviceConfig.UMask = lib.mkDefault "0002";
     };

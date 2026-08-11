@@ -54,7 +54,10 @@ _: {
           font-synthetic-style = true;
           scrollback-limit = 100000;
           shell-integration-features = "cursor,sudo,title,ssh-env,ssh-terminfo";
-          clipboard-read = "allow";
+          # Ghostty's own default. "allow" lets anything running in the terminal
+          # — including whatever is on the far end of an SSH session — read the
+          # system clipboard silently over OSC 52. osc52-copy only needs write.
+          clipboard-read = "ask";
           clipboard-write = "allow";
           image-storage-limit = 320000000;
           keybind = [ ''shift+enter=text:\n'' ];

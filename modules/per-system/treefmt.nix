@@ -14,6 +14,9 @@
         settings.global.excludes = [
           "secrets/*.yaml"
           "flake.lock"
+          # Vendored third-party flakes: not ours to format, and prettier
+          # hard-fails on some of their YAML, which reddens `nix fmt` wholesale.
+          "vendor/*"
         ];
 
         # Nix formatters
@@ -35,11 +38,7 @@
           includes = [ "*.nix" ];
           excludes = [
             "**/systems.nix"
-            "**/palette.nix"
-            "**/wlsunset.nix"
-            "**/polkit-gnome.nix"
             "**/gemini-cli.nix"
-            "**/video-conferencing.nix"
             "**/keyboard.nix"
           ];
         };

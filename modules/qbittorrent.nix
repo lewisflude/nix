@@ -96,7 +96,13 @@ in
         AnnounceToAllTrackers = false;
         ReannounceWhenAddressChanged = true;
         ConnectionSpeed = 30; # Outgoing connections/sec (libtorrent default, qbt defaults to 20)
-        # I/O: POSIX mode avoids ZFS ARC memory leak with mmap
+        # I/O: POSIX mode avoids ZFS ARC memory leak with mmap, and keeps
+        # libtorrent off the FUSE mmap path on /mnt/storage that produced the
+        # 2026-08-09 page-table corruption (see mergerfs notes in
+        # hosts/jupiter/hardware.nix). Note this alone was NOT sufficient — it
+        # was already set when that crash happened and qBittorrent was still
+        # observed in fuse_file_mmap, so the mount-level cache.files=off is the
+        # load-bearing fix. Do not revert either without the other.
         DiskIOType = 2; # 0=default, 1=mmap, 2=POSIX
         AsyncIOThreadsCount = 10; # 32 causes HDD thrashing; NVMe handles parallelism in hardware
         HashingThreadsCount = 4; # v2 ties hashing to disk reads; 8 thrashes HDDs on recheck

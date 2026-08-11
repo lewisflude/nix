@@ -9,7 +9,6 @@ in
   flake.modules.nixos.podmanContainers =
     nixosArgs@{ pkgs, ... }:
     let
-      inherit (nixosArgs) lib;
       cfg = nixosArgs.config;
       configPath = "/var/lib/containers/supplemental";
       inherit (constants.defaults) timezone;
@@ -57,17 +56,6 @@ in
           port = constants.ports.services.termix;
           internalPort = 8080;
         };
-        profilarr = mkSupplementalContainer {
-          name = "profilarr";
-          # Pinned to digest of :latest as of 2026-04-30
-          image = "docker.io/santiagosayshey/profilarr@sha256:8a514f8429cd33885166facc9eb6504fa9ded056c737609e5e8ef32ae0afb350";
-          port = constants.ports.services.profilarr;
-          internalPort = 6868;
-          extraEnv = {
-            PUID = toString uid;
-            PGID = toString gid;
-          };
-        };
         listenarr = mkSupplementalContainer {
           name = "listenarr";
           # Pinned to digest of :canary as of 2026-04-30
@@ -79,22 +67,16 @@ in
             PGID = toString gid;
           };
         };
-        # Huntarr — backfills missing content and quality-cutoff upgrades that arr
-        # RSS monitoring never revisits, in indexer-safe batches. Talks to the arr
-        # APIs over localhost only, so no media mount is needed.
-        huntarr = mkSupplementalContainer {
-          name = "huntarr";
-          # Docker Hub only (no ghcr mirror). Docker Hub blocks anonymous digest
-          # resolution from this network, so pinned by tag; run
-          # `podman inspect huntarr --format '{{.ImageDigest}}'` after first pull to pin.
-          image = "docker.io/huntarr/huntarr:latest";
-          port = constants.ports.services.huntarr;
-          internalPort = 9705;
-          extraEnv = {
-            PUID = toString uid;
-            PGID = toString gid;
-          };
-        };
+        # Huntarr was removed on 2026-08-11. In February 2026 critical
+        # unauthenticated auth-bypass vulnerabilities were disclosed in 9.4.2 and
+        # earlier — settings reachable without authentication, stored passwords
+        # readable in plaintext, and the API keys of every connected arr app
+        # exposed. Upstream deleted the GitHub repo, the Docker Hub image and the
+        # docs site rather than patch it; only a third-party read-only archive
+        # survives, marked "not under active development, use at your own risk".
+        # The image pull had been failing since, so it never actually ran here.
+        # Do not reinstate from the archive: it would hand out arr credentials.
+
         # Cleanuparr — removes stalled/orphaned/malware-injected downloads and manages
         # seeding across qBittorrent + the arrs via their APIs (no media mount).
         # PRIVATE TRACKER SAFETY: configure removal/seeding rules in the web UI to
@@ -153,14 +135,8 @@ in
         volumes = [ "${configPath}/termix:/app/data" ];
       };
 
-      # Profilarr — default /config layout
-      virtualisation.oci-containers.containers.profilarr = supplemental.profilarr.container;
-
       # Listenarr — default /config layout
       virtualisation.oci-containers.containers.listenarr = supplemental.listenarr.container;
-
-      # Huntarr — default /config layout
-      virtualisation.oci-containers.containers.huntarr = supplemental.huntarr.container;
 
       # Cleanuparr — default /config layout
       virtualisation.oci-containers.containers.cleanuparr = supplemental.cleanuparr.container;
@@ -452,9 +428,7 @@ in
         (media.mkContainerDir "${configPath}/jellystat/backup" uid gid)
         supplemental.wizarr.tmpfilesDir
         supplemental.termix.tmpfilesDir
-        supplemental.profilarr.tmpfilesDir
         supplemental.listenarr.tmpfilesDir
-        supplemental.huntarr.tmpfilesDir
         supplemental.cleanuparr.tmpfilesDir
         # Calibre-Web-Automated: config owned by media user; book library + ingest
         # under /mnt/storage/books (0770 media media, like the rest of the stack).
@@ -463,15 +437,15 @@ in
         (media.mkDir "${media.storageRoot}/books/ingest")
       ];
 
-      networking.firewall.allowedTCPPorts = lib.mkDefault [
+      # Not mkDefault: see the note in jellyfin.nix — mkDefault port lists lose to
+      # networking.nix's normal-priority definition instead of merging with it.
+      networking.firewall.allowedTCPPorts = [
         constants.ports.services.homarr
         supplemental.wizarr.firewallPort
         supplemental.termix.firewallPort
         constants.ports.services.janitorr
         constants.ports.services.jellystat
-        supplemental.profilarr.firewallPort
         supplemental.listenarr.firewallPort
-        supplemental.huntarr.firewallPort
         supplemental.cleanuparr.firewallPort
       ];
 

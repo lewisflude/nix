@@ -32,6 +32,8 @@ stdenv.mkDerivation rec {
   dontBuild = true;
 
   meta = {
+    # No mainProgram: this is a Cockpit web extension, installed entirely under
+    # $out/share. It ships no executable, so lib.getExe is not applicable.
     description = "Cockpit UI for podman containers";
     license = lib.licenses.lgpl21;
     homepage = "https://github.com/cockpit-project/cockpit-podman";

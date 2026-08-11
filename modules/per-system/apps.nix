@@ -2,39 +2,13 @@
 # Dendritic pattern: Provides CLI apps for each system
 {
   inputs,
-  config,
   lib,
   ...
 }:
-let
-  inherit (inputs) nixpkgs;
-  inherit (config) myLib overlaysForSystem;
-in
 {
   perSystem =
-    { system, ... }:
+    { pkgs, pkgsWithPog, ... }:
     let
-      # Get pkgs and pkgsWithPog from module args
-      pkgs =
-        config._module.args.pkgs or (import nixpkgs {
-          inherit system;
-          overlays = overlaysForSystem system;
-          config = myLib.mkPkgsConfig;
-        });
-      # Get pog overlay if available
-      getPogOverlay =
-        if
-          inputs ? pog
-          && inputs.pog ? overlays
-          && inputs.pog.overlays ? ${system}
-          && inputs.pog.overlays.${system} ? default
-        then
-          inputs.pog.overlays.${system}.default
-        else
-          (_final: _prev: { });
-      # Create pkgsWithPog by extending pkgs with pog overlay
-      pkgsWithPog = config._module.args.pkgsWithPog or (pkgs.extend getPogOverlay);
-
       # Helper to create POG app definitions
       mkPogApp =
         script-name:

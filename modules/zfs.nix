@@ -69,6 +69,28 @@ _: {
           interval = "monthly";
           pools = [ "npool" ];
         };
+
+        # ZED watches pool events (checksum errors, device faults, degraded
+        # vdevs, finished scrubs) and, until now, told nobody about them — the
+        # monthly scrub's result only existed in `zpool status` until someone
+        # thought to look. npool has no redundancy, so a checksum error is not
+        # a "ZFS will heal it" event; it is data already lost, and the sooner
+        # it is known the better.
+        #
+        # enableMail is deliberately left off: it asserts on
+        # services.mail.sendmailSetuidWrapper, and no MTA is installed here.
+        # Setting the ZED_EMAIL_* variables directly points ZED at the alerts
+        # fan-out instead, which reaches Home Assistant and the journal.
+        zed.settings = {
+          ZED_EMAIL_ADDR = [ "root" ];
+          ZED_EMAIL_PROG = "${config.alerts.notify}/bin/system-alert";
+          ZED_EMAIL_OPTS = "-s '@SUBJECT@' @ADDRESS@";
+
+          # Report successful scrubs too, not just failures. A scrub that
+          # stops running is itself a problem, and silence cannot distinguish
+          # "healthy" from "the timer died three months ago".
+          ZED_NOTIFY_VERBOSE = true;
+        };
       };
 
       # Match the userland CLI to the pinned kernel module (2.3.8), not the
