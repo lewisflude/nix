@@ -66,24 +66,29 @@ pog.pog {
               local interface="$1"
               local namespace="$2"
 
-              blue "Running speed test..."
+              # Progress goes to stderr: stdout of this function is captured by
+              # the caller and must contain nothing but the measured speed.
+              blue "Running speed test..." >&2
 
               # Create test file (10MB)
               dd if=/dev/zero of=/tmp/qbt-speedtest.tmp bs=1M count=10 2>/dev/null
 
-              # Test upload with httpbin (10MB file)
-              local cmd="curl -s --max-time 60 --interface $interface \
-                -X POST -H 'Content-Type: application/octet-stream' \
-                --data-binary @/tmp/qbt-speedtest.tmp \
-                https://httpbin.org/post"
+              # Test upload with httpbin (10MB file). Kept as an array so the
+              # header argument survives without an eval.
+              local -a cmd=(
+                curl -s --max-time 60 --interface "$interface"
+                -X POST -H "Content-Type: application/octet-stream"
+                --data-binary @/tmp/qbt-speedtest.tmp
+                https://httpbin.org/post
+              )
 
               if [ -n "$namespace" ]; then
                 START_TIME=$(date +%s.%N)
-                sudo ip netns exec "$namespace" $cmd >/dev/null 2>&1 || die "Speed test failed in VPN namespace"
+                sudo ip netns exec "$namespace" "''${cmd[@]}" >/dev/null 2>&1 || die "Speed test failed in VPN namespace"
                 END_TIME=$(date +%s.%N)
               else
                 START_TIME=$(date +%s.%N)
-                eval $cmd >/dev/null 2>&1 || die "Speed test failed"
+                "''${cmd[@]}" >/dev/null 2>&1 || die "Speed test failed"
                 END_TIME=$(date +%s.%N)
               fi
 
@@ -95,7 +100,7 @@ pog.pog {
               UPLOAD_MBPS=$(echo "scale=2; ($FILE_SIZE * 8) / ($DURATION * 1000000)" | bc)
               UPLOAD_KBPS=$(echo "scale=0; ($FILE_SIZE) / ($DURATION * 1024)" | bc)
 
-              green "Upload: $UPLOAD_MBPS Mbit/s ($UPLOAD_KBPS KB/s)"
+              green "Upload: $UPLOAD_MBPS Mbit/s ($UPLOAD_KBPS KB/s)" >&2
 
               echo "$UPLOAD_KBPS"
             }
@@ -210,7 +215,8 @@ pog.pog {
             }
 
             output_summary() {
-              local storage_upper=$(echo "$STORAGE_TYPE" | tr '[:lower:]' '[:upper:]')
+              local storage_upper
+              storage_upper=$(echo "$STORAGE_TYPE" | tr '[:lower:]' '[:upper:]')
               cat << EOF
 
       ╔══════════════════════════════════════════════════════════╗

@@ -52,6 +52,7 @@ pog.pog {
     }
     {
       name = "storage_mount";
+      short = "m";
       description = "Mount point checked by the storage category";
       default = "/mnt/storage";
     }
