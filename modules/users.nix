@@ -15,9 +15,15 @@ in
     users.users.${username} = {
       isNormalUser = true;
       description = username;
+      # Union of admin + desktop group membership. The desktop groups used to
+      # live in a separate `desktopUserGroups` module that declared extraGroups
+      # for this same user; consolidated here so the account has one owner.
       extraGroups = [
         "wheel"
         "networkmanager"
+        "audio"
+        "video"
+        "input"
       ];
     };
   };

@@ -1,7 +1,9 @@
+# Nicotine+ — Soulseek client.
+# nicotine-plus supports aarch64-darwin as well as Linux, so no platform guard.
 _: {
   flake.modules.homeManager.nicotinePlus =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
-      home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.nicotine-plus ];
+      home.packages = [ pkgs.nicotine-plus ];
     };
 }

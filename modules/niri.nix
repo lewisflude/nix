@@ -106,6 +106,15 @@
             dmsIpcLocked = args: dmsIpc args // { allow-when-locked = true; };
             dmsIpcTitle = args: title: dmsIpc args // { hotkey-overlay.title = title; };
 
+            # `{ action.<name> = <value>; hotkey-overlay.title = <title>; }` —
+            # the shape almost every titled bind below has. mkTitled covers the
+            # common no-argument action; mkTitledArg the ones that take a value.
+            mkTitledArg = name: value: title: {
+              action.${name} = value;
+              hotkey-overlay.title = title;
+            };
+            mkTitled = name: mkTitledArg name { };
+
             workspaceBinds = builtins.listToAttrs (
               builtins.concatMap (
                 n:
@@ -228,19 +237,10 @@
               "Mod+Shift+T" = dmsIpcTitle [ "call" "theme" "toggle" ] "Toggle Light/Dark Theme";
 
               # App launchers
-              "Mod+T" = {
-                action.spawn = [ "ghostty" ];
-                hotkey-overlay.title = "Open Terminal";
-              };
-              "Mod+B" = {
-                action.spawn = [ "google-chrome-stable" ];
-                hotkey-overlay.title = "Open Browser";
-              };
+              "Mod+T" = mkTitledArg "spawn" [ "ghostty" ] "Open Terminal";
+              "Mod+B" = mkTitledArg "spawn" [ "google-chrome-stable" ] "Open Browser";
 
-              "Mod+Q" = {
-                action.close-window = { };
-                hotkey-overlay.title = "Close Window";
-              };
+              "Mod+Q" = mkTitled "close-window" "Close Window";
 
               # Focus navigation (vim + arrows)
               "Mod+H".action.focus-column-left = { };
@@ -253,30 +253,12 @@
               "Mod+Right".action.focus-column-right = { };
 
               # Window layout
-              "Mod+F" = {
-                action.maximize-column = { };
-                hotkey-overlay.title = "Maximize Column";
-              };
-              "Mod+Shift+F" = {
-                action.fullscreen-window = { };
-                hotkey-overlay.title = "Fullscreen Window";
-              };
-              "Mod+M" = {
-                action.maximize-window-to-edges = { };
-                hotkey-overlay.title = "Maximize Window (no gaps)";
-              };
-              "Mod+W" = {
-                action.toggle-column-tabbed-display = { };
-                hotkey-overlay.title = "Toggle Tabbed Display";
-              };
-              "Mod+Space" = {
-                action.toggle-window-floating = { };
-                hotkey-overlay.title = "Toggle Window Floating";
-              };
-              "Mod+Shift+V" = {
-                action.switch-focus-between-floating-and-tiling = { };
-                hotkey-overlay.title = "Switch Focus Floating/Tiling";
-              };
+              "Mod+F" = mkTitled "maximize-column" "Maximize Column";
+              "Mod+Shift+F" = mkTitled "fullscreen-window" "Fullscreen Window";
+              "Mod+M" = mkTitled "maximize-window-to-edges" "Maximize Window (no gaps)";
+              "Mod+W" = mkTitled "toggle-column-tabbed-display" "Toggle Tabbed Display";
+              "Mod+Space" = mkTitled "toggle-window-floating" "Toggle Window Floating";
+              "Mod+Shift+V" = mkTitled "switch-focus-between-floating-and-tiling" "Switch Focus Floating/Tiling";
 
               # Move windows (vim + arrows)
               "Mod+Ctrl+H".action.move-column-left = { };
@@ -294,64 +276,22 @@
               "Mod+Ctrl+End".action.move-column-to-last = { };
 
               # Column/window sizing
-              "Mod+Minus" = {
-                action.set-column-width = "-10%";
-                hotkey-overlay.title = "Decrease Column Width";
-              };
-              "Mod+Equal" = {
-                action.set-column-width = "+10%";
-                hotkey-overlay.title = "Increase Column Width";
-              };
-              "Mod+Shift+Minus" = {
-                action.set-window-height = "-10%";
-                hotkey-overlay.title = "Decrease Window Height";
-              };
-              "Mod+Shift+Equal" = {
-                action.set-window-height = "+10%";
-                hotkey-overlay.title = "Increase Window Height";
-              };
-              "Mod+R" = {
-                action.switch-preset-column-width = { };
-                hotkey-overlay.title = "Cycle Column Width Presets";
-              };
-              "Mod+Shift+R" = {
-                action.switch-preset-window-height = { };
-                hotkey-overlay.title = "Cycle Window Height Presets";
-              };
-              "Mod+Ctrl+R" = {
-                action.reset-window-height = { };
-                hotkey-overlay.title = "Reset Window Height";
-              };
-              "Mod+C" = {
-                action.center-column = { };
-                hotkey-overlay.title = "Center Column";
-              };
-              "Mod+Ctrl+C" = {
-                action.center-visible-columns = { };
-                hotkey-overlay.title = "Center All Visible Columns";
-              };
-              "Mod+Ctrl+F" = {
-                action.expand-column-to-available-width = { };
-                hotkey-overlay.title = "Expand Column to Fill";
-              };
+              "Mod+Minus" = mkTitledArg "set-column-width" "-10%" "Decrease Column Width";
+              "Mod+Equal" = mkTitledArg "set-column-width" "+10%" "Increase Column Width";
+              "Mod+Shift+Minus" = mkTitledArg "set-window-height" "-10%" "Decrease Window Height";
+              "Mod+Shift+Equal" = mkTitledArg "set-window-height" "+10%" "Increase Window Height";
+              "Mod+R" = mkTitled "switch-preset-column-width" "Cycle Column Width Presets";
+              "Mod+Shift+R" = mkTitled "switch-preset-window-height" "Cycle Window Height Presets";
+              "Mod+Ctrl+R" = mkTitled "reset-window-height" "Reset Window Height";
+              "Mod+C" = mkTitled "center-column" "Center Column";
+              "Mod+Ctrl+C" = mkTitled "center-visible-columns" "Center All Visible Columns";
+              "Mod+Ctrl+F" = mkTitled "expand-column-to-available-width" "Expand Column to Fill";
 
               # Column consume/expel
-              "Mod+BracketLeft" = {
-                action.consume-or-expel-window-left = { };
-                hotkey-overlay.title = "Consume/Expel Window Left";
-              };
-              "Mod+BracketRight" = {
-                action.consume-or-expel-window-right = { };
-                hotkey-overlay.title = "Consume/Expel Window Right";
-              };
-              "Mod+Shift+Comma" = {
-                action.consume-window-into-column = { };
-                hotkey-overlay.title = "Consume Window into Column";
-              };
-              "Mod+Period" = {
-                action.expel-window-from-column = { };
-                hotkey-overlay.title = "Expel Window from Column";
-              };
+              "Mod+BracketLeft" = mkTitled "consume-or-expel-window-left" "Consume/Expel Window Left";
+              "Mod+BracketRight" = mkTitled "consume-or-expel-window-right" "Consume/Expel Window Right";
+              "Mod+Shift+Comma" = mkTitled "consume-window-into-column" "Consume Window into Column";
+              "Mod+Period" = mkTitled "expel-window-from-column" "Expel Window from Column";
 
               # Monitor focus/move (vim + arrows)
               "Mod+Shift+H".action.focus-monitor-left = { };
@@ -475,19 +415,14 @@
               ];
 
               # System
-              "Mod+Shift+P" = {
-                action.power-off-monitors = { };
-                hotkey-overlay.title = "Power Off Monitors";
-              };
+              "Mod+Shift+P" = mkTitled "power-off-monitors" "Power Off Monitors";
+              # Not mkTitled: carries allow-inhibiting alongside the action.
               "Mod+Shift+Escape" = {
                 action.toggle-keyboard-shortcuts-inhibit = { };
                 allow-inhibiting = false;
                 hotkey-overlay.title = "Toggle Shortcut Inhibitor";
               };
-              "Ctrl+Alt+Delete" = {
-                action.quit = { };
-                hotkey-overlay.title = "Quit Niri";
-              };
+              "Ctrl+Alt+Delete" = mkTitled "quit" "Quit Niri";
             }
             // workspaceBinds;
 

@@ -1,5 +1,27 @@
 # GitHub CLI and GitHub Actions runner configuration
-_: {
+{ config, ... }:
+let
+  # Captured from the top-level scope before the lower-level modules shadow `config`.
+  inherit (config) username;
+
+  # Facts shared by the Linux and macOS self-hosted runners.
+  runnerUrl = "https://github.com/beigethreat/plugins";
+  runnerNodeRuntimes = [ "node24" ];
+
+  # Toolchain both runners need. Each platform appends its own extras below;
+  # the divergence is deliberate, so do not merge the two lists.
+  commonRunnerPackages = pkgs: [
+    pkgs.bashInteractive
+    pkgs.cmake
+    pkgs.coreutils
+    pkgs.curl
+    pkgs.git
+    pkgs.jq
+    pkgs.just
+    pkgs.nix
+  ];
+in
+{
   flake.modules.nixos.githubRunners =
     {
       config,
@@ -10,7 +32,7 @@ _: {
       services.github-runners.tunnels-linux = {
         enable = true;
         package = pkgs.github-runner;
-        url = "https://github.com/beigethreat/plugins";
+        url = runnerUrl;
         name = "jupiter-tunnels";
         tokenFile = config.sops.secrets.GITHUB_TOKEN.path;
         tokenType = "access";
@@ -30,9 +52,7 @@ _: {
         # ends with `find $WORK_DIRECTORY -mindepth 1 -delete`, which would
         # also wipe the runner's tokens if they shared a path.
         workDir = "/var/lib/github-runner-work/tunnels-linux";
-        nodeRuntimes = [
-          "node24"
-        ];
+        nodeRuntimes = runnerNodeRuntimes;
 
         extraLabels = [
           "linux"
@@ -41,16 +61,9 @@ _: {
           "tunnels-heavy"
         ];
 
-        extraPackages = [
+        # Linux-only extras: AWS uploads and plugin validation run on this runner.
+        extraPackages = commonRunnerPackages pkgs ++ [
           pkgs.awscli2
-          pkgs.bashInteractive
-          pkgs.cmake
-          pkgs.coreutils
-          pkgs.curl
-          pkgs.git
-          pkgs.jq
-          pkgs.just
-          pkgs.nix
           pkgs.pluginval
         ];
       };
@@ -89,37 +102,31 @@ _: {
         mkBefore
         ;
 
-      user = config.host.username;
+      user = username;
       runnerName = "mercury-tunnels";
       runnerLabel = "tunnels-macos";
-      runnerUrl = "https://github.com/beigethreat/plugins";
       tokenFile = config.sops.secrets.GITHUB_TOKEN.path;
       stateDir = "/var/lib/github-runners/${runnerName}";
       logDir = "/var/log/github-runners/${runnerName}";
       workDir = "/private/var/lib/github-runners/_work/${runnerName}";
       runnerPackage = pkgs.github-runner.override {
-        nodeRuntimes = [
-          "node24"
-        ];
+        nodeRuntimes = runnerNodeRuntimes;
       };
       labels = [
         "macos"
         "arm64"
         runnerLabel
       ];
-      path = makeBinPath [
-        pkgs.bashInteractive
-        pkgs.cmake
-        pkgs.coreutils
-        pkgs.curl
-        pkgs.findutils
-        pkgs.git
-        pkgs.gnutar
-        pkgs.gzip
-        pkgs.jq
-        pkgs.just
-        pkgs.nix
-      ];
+      # macOS-only extras: the system tar/gzip/find are BSD variants, so the
+      # runner needs GNU ones on PATH.
+      path = makeBinPath (
+        commonRunnerPackages pkgs
+        ++ [
+          pkgs.findutils
+          pkgs.gnutar
+          pkgs.gzip
+        ]
+      );
       configureRunner = pkgs.writeShellApplication {
         name = "configure-github-runner-${runnerLabel}";
         runtimeInputs = [
@@ -191,20 +198,6 @@ _: {
 
       system.activationScripts.launchd.text = mkBefore ''
         set -euo pipefail
-
-        old_label="actions.runner.beigethreat-tunnels.mercury-tunnels"
-        old_plist="/Users/${config.host.username}/Library/LaunchAgents/$old_label.plist"
-        old_dir="/Users/${config.host.username}/actions-runner-tunnels-macos"
-        uid="$(id -u ${config.host.username})"
-
-        if [ -e "$old_plist" ]; then
-          /bin/launchctl bootout "gui/$uid/$old_label" 2>/dev/null || true
-          /bin/rm -f "$old_plist"
-        fi
-
-        if [ -d "$old_dir" ] && [ -z "$(/bin/ls -A "$old_dir")" ]; then
-          /bin/rmdir "$old_dir" 2>/dev/null || true
-        fi
 
         echo >&2 "setting up GitHub Runner '${runnerName}'..."
         # shellcheck disable=SC2174

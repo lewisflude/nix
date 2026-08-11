@@ -70,7 +70,6 @@ in
         nixos.shell
         nixos.hardwareSupport
         nixos.desktopEnvironment
-        nixos.desktopUserGroups
 
         # ═══════════════════════════════════════════════════════════════════════
         # Gaming & VR
@@ -229,11 +228,7 @@ in
       # =========================================================================
       # Host Identity
       # =========================================================================
-      host = {
-        inherit username;
-        hostname = "jupiter";
-        hardware.renderDevice = "/dev/dri/renderD128";
-      };
+      host.hardware.renderDevice = "/dev/dri/renderD128";
 
       # =========================================================================
       # Core System Configuration

@@ -18,6 +18,41 @@ in
       templatesDir = ../pkgs/home-assistant/templates;
 
       nixosConfig = nixosArgs.config;
+
+      # Every adaptive_lighting zone shares these defaults; only the per-room
+      # arguments below differ. sleep_color_temp always tracks min_color_temp.
+      mkAdaptive =
+        {
+          name,
+          lights,
+          transition,
+          min_brightness,
+          max_brightness,
+          min_color_temp,
+          max_color_temp,
+          sleep_brightness,
+          sunrise_time ? null,
+        }:
+        {
+          inherit
+            name
+            lights
+            transition
+            min_brightness
+            max_brightness
+            min_color_temp
+            max_color_temp
+            sleep_brightness
+            sunrise_time
+            ;
+          prefer_rgb_color = false;
+          initial_transition = 1;
+          interval = 90;
+          sleep_color_temp = min_color_temp;
+          sunset_time = null;
+          take_over_control = true;
+          detect_non_ha_changes = true;
+        };
     in
     {
       # SOPS secrets configuration
@@ -96,6 +131,11 @@ in
             currency = "GBP";
             internal_url = "http://localhost:${toString constants.ports.services.homeAssistant}";
             allowlist_external_dirs = [ "/var/lib/hass" ];
+            customize = {
+              "sensor.average_house_temperature" = {
+                friendly_name = "Average Temperature";
+              };
+            };
           };
 
           default_config = { };
@@ -175,27 +215,20 @@ in
           # Adaptive Lighting - Circadian rhythm lighting
           adaptive_lighting = [
             # Office - Productivity-optimized
-            {
+            (mkAdaptive {
               name = "Office Adaptive Lighting";
               lights = [ "light.office" ];
-              prefer_rgb_color = false;
-              initial_transition = 1;
               transition = 45;
-              interval = 90;
               min_brightness = 45;
               max_brightness = 100;
               min_color_temp = 2000;
               max_color_temp = 5500;
               sleep_brightness = 5;
-              sleep_color_temp = 2000;
               sunrise_time = "07:00:00";
-              sunset_time = null;
-              take_over_control = true;
-              detect_non_ha_changes = true;
-            }
+            })
 
             # Living & Dining Room (open plan) - Balanced comfort
-            {
+            (mkAdaptive {
               name = "Living Dining Room Adaptive Lighting";
               lights = [
                 "light.living_room"
@@ -203,81 +236,51 @@ in
                 "light.dining_room"
                 "light.dining_room_pendant"
               ];
-              prefer_rgb_color = false;
-              initial_transition = 1;
               transition = 60;
-              interval = 90;
               min_brightness = 30;
               max_brightness = 85;
               min_color_temp = 2000;
               max_color_temp = 5000;
               sleep_brightness = 3;
-              sleep_color_temp = 2000;
-              sunrise_time = null;
-              sunset_time = null;
-              take_over_control = true;
-              detect_non_ha_changes = true;
-            }
+            })
 
             # Bedroom - Warm, relaxed
-            {
+            (mkAdaptive {
               name = "Bedroom Adaptive Lighting";
               lights = [ "light.bedroom" ];
-              prefer_rgb_color = false;
-              initial_transition = 1;
               transition = 60;
-              interval = 90;
               min_brightness = 20;
               max_brightness = 80;
               min_color_temp = 2000;
               max_color_temp = 4000;
               sleep_brightness = 1;
-              sleep_color_temp = 2000;
               sunrise_time = "07:30:00";
-              sunset_time = null;
-              take_over_control = true;
-              detect_non_ha_changes = true;
-            }
+            })
 
             # Kitchen - Bright task lighting
-            {
+            (mkAdaptive {
               name = "Kitchen Adaptive Lighting";
               lights = [ "light.kitchen" ];
-              prefer_rgb_color = false;
-              initial_transition = 1;
               transition = 30;
-              interval = 90;
               min_brightness = 50;
               max_brightness = 100;
               min_color_temp = 2200;
               max_color_temp = 5500;
               sleep_brightness = 5;
-              sleep_color_temp = 2200;
               sunrise_time = "06:30:00";
-              sunset_time = null;
-              take_over_control = true;
-              detect_non_ha_changes = true;
-            }
+            })
 
             # Hallway - Functional, short transitions
-            {
+            (mkAdaptive {
               name = "Hallway Adaptive Lighting";
               lights = [ "light.hallway" ];
-              prefer_rgb_color = false;
-              initial_transition = 1;
               transition = 15;
-              interval = 90;
               min_brightness = 30;
               max_brightness = 90;
               min_color_temp = 2200;
               max_color_temp = 5000;
               sleep_brightness = 3;
-              sleep_color_temp = 2200;
-              sunrise_time = null;
-              sunset_time = null;
-              take_over_control = true;
-              detect_non_ha_changes = true;
-            }
+            })
           ];
 
           # Home zone
@@ -328,12 +331,6 @@ in
                 "Guest"
               ];
               icon = "mdi:home-variant";
-            };
-          };
-
-          homeassistant.customize = {
-            "sensor.average_house_temperature" = {
-              friendly_name = "Average Temperature";
             };
           };
         };

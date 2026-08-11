@@ -14,13 +14,14 @@
 
         services = {
           restic = 8000;
-          ollama = 11434;
           openWebui = 7000;
           homeAssistant = 8123;
-          cockpit = 9090;
-          dante = 1080;
           eternalTerminal = 2022;
-          mosh = 60000; # Actually uses range 60000-61000
+          # Mosh allocates one UDP port per session from this range.
+          mosh = {
+            from = 60000;
+            to = 61000;
+          };
 
           # Media management services
           jellyfin = 8096;
@@ -31,11 +32,8 @@
           listenarr = 5000;
           prowlarr = 9696;
           qbittorrent = 8080;
-          transmission = 9091;
           sabnzbd = 8084;
-          navidrome = 4533;
           bazarr = 6767;
-          readarr = 8787; # retired (Readarr archived upstream); kept for legacy refs
           byparr = 8191; # FlareSolverr drop-in replacement (same port, Camoufox-based)
           musicAssistant = 8095;
           audiobookshelf = 13378;
@@ -47,11 +45,8 @@
           wizarr = 5690;
           jellystat = 3000;
           termix = 8083;
-          doplarr = 3142;
-          comfyui = 8188;
           janitorr = 8485;
           filebrowser = 8400;
-          notifiarr = 5454;
           autopulse = 2875;
 
           syncthing = {
@@ -69,8 +64,6 @@
             video = 48000;
           };
 
-          hytaleServer = 5520;
-
           wyoming = {
             whisper = 10300;
             piper = 10200;
@@ -78,7 +71,6 @@
         };
 
         gaming = {
-          steamLinkDiscovery = 27031;
           steamLinkTcp = 27036;
           steamLinkStreaming = 27037;
           steamLinkUdp = [
@@ -88,20 +80,7 @@
         };
       };
 
-      timeouts = {
-        service = {
-          start = "300";
-          stop = "90";
-          restart = "30";
-        };
-      };
-
       baseDomain = "blmt.io";
-
-      user = {
-        name = "Lewis Flude";
-        email = "lewis@lewisflude.com";
-      };
 
       gpg = {
         signingKey = "64CA14D5A2396CC0";
@@ -160,12 +139,6 @@
         };
         localhost = {
           ipv4 = "127.0.0.1";
-          ipv6 = "::1";
-          cidr = "127.0.0.1/32";
-        };
-        all = {
-          ipv4 = "0.0.0.0";
-          cidr = "0.0.0.0/0";
         };
       };
 

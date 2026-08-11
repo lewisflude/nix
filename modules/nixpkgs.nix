@@ -4,10 +4,7 @@
 # stay aligned (single source of truth in modules/lib.nix).
 { config, ... }:
 let
-  inherit (config) overlaysForSystem myLib;
-
-  nixosOverlays = overlaysForSystem "x86_64-linux";
-  darwinOverlays = overlaysForSystem "aarch64-darwin";
+  inherit (config) overlayList myLib;
 in
 {
   flake.modules.nixos.nixpkgs =
@@ -16,13 +13,13 @@ in
       nixpkgs.config = myLib.mkPkgsConfig;
       # Ordered after external NixOS module overlays so our overrides
       # (e.g. wivrn CUDA) take precedence.
-      nixpkgs.overlays = lib.mkAfter nixosOverlays;
+      nixpkgs.overlays = lib.mkAfter overlayList;
     };
 
   flake.modules.darwin.nixpkgs =
     { lib, ... }:
     {
       nixpkgs.config = myLib.mkPkgsConfig;
-      nixpkgs.overlays = lib.mkAfter darwinOverlays;
+      nixpkgs.overlays = lib.mkAfter overlayList;
     };
 }

@@ -1,9 +1,13 @@
 # GPU Passthrough
 # Dynamic VFIO GPU passthrough for Windows VM with NVIDIA RTX 4090
 # Uses iGPU for host display when VM is running, rebinds nvidia when stopped
-_: {
+{ config, ... }:
+let
+  inherit (config) username;
+in
+{
   flake.modules.nixos.gpuPassthrough =
-    { pkgs, config, ... }:
+    { pkgs, ... }:
     {
       # IOMMU support
       boot.kernelParams = [
@@ -117,8 +121,8 @@ _: {
 
       # Shared folder for VM file transfers via virtiofs
       systemd.tmpfiles.rules = [
-        "f /dev/shm/looking-glass 0660 ${config.host.username} libvirtd -"
-        "d /home/${config.host.username}/vm-shared 0755 ${config.host.username} users -"
+        "f /dev/shm/looking-glass 0660 ${username} libvirtd -"
+        "d /home/${username}/vm-shared 0755 ${username} users -"
       ];
     };
 

@@ -79,11 +79,17 @@ in
         hash = "sha256-ipXFL9AUGg6QlD6WgEhFvSW3bJRPc1XkIrltuXH1AFA=";
       };
 
-      # Flip to true once the Obsidian vault has enough linked notes to justify
-      # a knowledge graph. Enabling indexes the vault into ~/.basic-memory and
-      # may add frontmatter/permalinks to existing notes on sync.
-      basicMemoryEnabled = false;
-      basicMemoryProject = "obsidian";
+      # Shared prompt body, also used by the Codex skill (modules/codex.nix).
+      # Each consumer supplies its own frontmatter.
+      organizeSamplesCommand = ''
+        ---
+        description: Organise ~/Music/samples after new music-production torrents have landed. Surveys, proposes a taxonomy, and moves items with confirmation.
+        allowed-tools: Bash(ls:*), Bash(find:*), Bash(file:*), Bash(du:*), Bash(mv:*), Bash(mkdir:*), Bash(rmdir:*), Read, Glob, Grep
+        argument-hint: [optional focus: drums|synths|loops|...]
+        ---
+
+      ''
+      + builtins.readFile ../pkgs/prompts/organize-samples.md;
 
       mcpServers =
         aiCli.mcpServers pkgs osConfig
@@ -105,15 +111,6 @@ in
               export KAGI_API_KEY="$(cat ${lib.escapeShellArg (secretPath "KAGI_API_KEY")})"
               ${aiCli.uvxEnv pkgs}
               exec ${pkgs.uv}/bin/uvx kagimcp "$@"
-            ''}";
-          };
-        }
-        // lib.optionalAttrs basicMemoryEnabled {
-          basic-memory = {
-            command = "${pkgs.writeShellScript "mcp-basic-memory" ''
-              export BASIC_MEMORY_MCP_PROJECT=${basicMemoryProject}
-              ${aiCli.uvxEnv pkgs}
-              exec ${pkgs.uv}/bin/uvx basic-memory mcp "$@"
             ''}";
           };
         };
@@ -257,23 +254,6 @@ in
             $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 644 \
               ${abletonRemoteScript} "$DEST/__init__.py"
           done
-        '';
-      }
-      // lib.optionalAttrs basicMemoryEnabled {
-        basicMemoryProject = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          CONFIG_DIR="$HOME/.basic-memory"
-          CONFIG_FILE="$CONFIG_DIR/config.json"
-          $DRY_RUN_CMD mkdir -p "$CONFIG_DIR"
-          if [ ! -s "$CONFIG_FILE" ]; then
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/tee "$CONFIG_FILE" <<<'{"projects":{}}' > /dev/null
-          fi
-          TMP=$(${pkgs.coreutils}/bin/mktemp)
-          ${pkgs.jq}/bin/jq \
-            --arg name "${basicMemoryProject}" \
-            --arg path "$HOME/Obsidian Vault" \
-            '.projects[$name] = {"path": $path, "mode": "local"} | .default_project = $name' \
-            "$CONFIG_FILE" > "$TMP"
-          $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$TMP" "$CONFIG_FILE"
         '';
       };
 
@@ -432,277 +412,19 @@ in
         };
 
         skills = {
-          dendritic-pattern = ''
-            ---
-            description: Dendritic pattern guide for writing and modifying .nix flake-parts modules in this repository. Use whenever editing, creating, or refactoring .nix files in this repo.
-            ---
-
-            # Dendritic Pattern
-
-            Every .nix file (except flake.nix) is a flake-parts module.
-
-            ## Module Template
-
-            ```nix
-            { config, ... }:
-            let
-              constants = config.constants;
-            in
-            {
-              flake.modules.nixos.featureName = { pkgs, lib, ... }: {
-                # NixOS system config (services, kernel, hardware, daemons)
-              };
-
-              flake.modules.homeManager.featureName = { pkgs, ... }: {
-                # Home-manager config (user apps, dotfiles, dev tools, shell)
-              };
-            }
-            ```
-
-            ## Two Scopes — Avoiding Config Shadowing
-
-            Use a named parameter to access platform config without shadowing outer (flake-parts) config:
-
-            ```nix
-            { config, ... }:
-            {
-              flake.modules.nixos.shell = nixosArgs: {
-                # config = flake-parts top-level (outer scope)
-                # nixosArgs.config = NixOS platform config
-                users.users.''${config.username}.shell = nixosArgs.config.programs.fish.package;
-              };
-            }
-            ```
-
-            If you don't need platform config, destructure normally:
-
-            ```nix
-            { config, ... }:
-            {
-              flake.modules.nixos.shell = { pkgs, ... }: {
-                users.users.''${config.username}.shell = pkgs.fish;
-              };
-            }
-            ```
-
-            ## Anti-Patterns
-
-            - `{ config, pkgs, ... }:` inside module body — **shadows outer config**
-            - `with pkgs;` — use explicit `pkgs.package`
-            - `specialArgs = { inherit inputs; }` — access `inputs` from outer scope
-            - `import ../lib/constants.nix` — use `config.constants`
-            - Importing modules in infrastructure — hosts compose features, infrastructure only transforms
-
-            ## Placement Rules
-
-            - System services, kernel, hardware, daemons, boot, networking → `flake.modules.nixos.*`
-            - User apps, dotfiles, dev tools, tray applets, shell, editor → `flake.modules.homeManager.*`
-
-            ## Workflow Commands
-
-            - Scaffold new module: `nix run .#new-module`
-            - Update deps: `nix run .#update-all`
-            - Format: `nix fmt` (treefmt)
-            - Validate: `nix flake check`
-            - Never rebuild systems from within Claude — suggest `nh os switch` / `nh home switch` for the user to run.
-          '';
-          blender-help = ''
-            ---
-            description: Help with Blender plugins, addons, and 3D workflows. Use when discussing Hair Tool, CharMorph, bpy API, or any Blender-related topic.
-            ---
-
-            # Blender Plugin & Workflow Assistant
-
-            You are helping a user learn and use Blender plugins. The user may be working with Hair Tool, CharMorph, or other addons.
-
-            ## Research Protocol
-
-            **Always verify before answering.** Blender plugin UIs, settings, and workflows change between versions. Never guess at menu locations, panel names, parameter names, or keyboard shortcuts.
-
-            1. **Ask which Blender version** the user is running (4.x vs 3.x matters significantly)
-            2. **Ask which plugin version** they have installed
-            3. **WebSearch** for the plugin's current documentation, changelog, or wiki
-            4. **WebFetch** the plugin's official docs page if available
-            5. **Search for video tutorial transcripts** or forum posts for step-by-step workflows
-
-            ## Hair Tool Specifics
-
-            - Hair Tool is a paid Blender addon for hair/fur creation and grooming
-            - UI and workflow changed significantly between Blender 3.x and 4.x
-            - Key concepts: hair curves, guide curves, interpolation, clumping, braiding
-            - Always verify panel locations — they move between versions
-
-            ## CharMorph Specifics
-
-            - CharMorph is an open-source character creation addon for Blender
-            - Uses morphing/shape keys for character customization
-            - Key concepts: morphs, materials, presets, fitting, asset library
-            - Documentation may be sparse — search GitHub issues and wiki
-
-            ## General Approach
-
-            - Walk through steps one at a time, confirming the user can see each UI element
-            - Include screenshots references when possible (suggest the user share screenshots)
-            - If a step doesn't match what the user sees, troubleshoot version differences
-            - Suggest the user check Preferences > Add-ons to confirm the addon is enabled and its version
-          '';
+          dendritic-pattern = builtins.readFile ../pkgs/claude-code/skills/dendritic-pattern.md;
+          blender-help = builtins.readFile ../pkgs/claude-code/skills/blender-help.md;
         };
 
         commands = {
-          organize-samples = ''
-            ---
-            description: Organise ~/Music/samples after new music-production torrents have landed. Surveys, proposes a taxonomy, and moves items with confirmation.
-            allowed-tools: Bash(ls:*), Bash(find:*), Bash(file:*), Bash(du:*), Bash(mv:*), Bash(mkdir:*), Bash(rmdir:*), Read, Glob, Grep
-            argument-hint: [optional focus: drums|synths|loops|...]
-            ---
-
-            You are tidying the user's sample library at `~/Music/samples`. This folder is NFS-exported to Mercury (macOS) and consumed by Ableton Live, so the layout must stay stable and human-browsable.
-
-            New content lands here automatically via qBittorrent's `music-production` category. Each completed torrent arrives as `~/Music/samples/<torrent-name>/`.
-
-            ## Workflow
-
-            1. **Survey.** List the top level of `~/Music/samples`. For each unorganised entry, note: name, size (`du -sh`), and a one-line guess at its type (drum kit, synth preset pack, loop pack, stems, multisample, etc.). Use `file` / extensions to inform the guess.
-            2. **Propose a taxonomy.** Use or extend the user's existing folders. Prefer this baseline unless the user has diverged:
-               - `drums/` — oneshots, kits, breaks
-               - `loops/` — melodic/rhythmic loops
-               - `synths/` — presets, patches, multisamples
-               - `stems/` — song stems, acapellas
-               - `fx/` — risers, impacts, foley, textures
-               - `packs/` — commercial sample packs kept whole
-            3. **Confirm before moving.** Present the proposed moves in a table (source → destination) and wait for approval. Never move without confirmation.
-            4. **Preserve structure.** If a torrent arrives as a well-structured sample pack (e.g. nested `Kicks/`, `Snares/`, `Presets/`), keep it whole under `packs/<pack-name>/`. Do not flatten commercial packs.
-            5. **Move, never copy or delete.** Use `mv`. If a destination already exists, ask the user — do not overwrite.
-            6. **Clean up empties.** After moves, `rmdir` empty source dirs (but never `rm -rf`).
-
-            ## Guardrails
-
-            - Treat anything ambiguous as a question for the user rather than a guess.
-            - If `$ARGUMENTS` is set (e.g. `drums`), restrict the pass to items that look like that category.
-            - Never touch files outside `~/Music/samples`.
-            - Never delete. If something looks like junk (thumbnails, `.DS_Store`, torrent metadata), surface it and let the user decide.
-            - Ableton references samples by absolute path — warn the user before moving anything that's already been dragged into a live project.
-          '';
-
-          build-drum-rack = ''
-            ---
-            description: Generate Ableton Drum Rack .adg files from samples. Folder mode picks deterministically; vibe mode curates by theme.
-            allowed-tools: Bash(drumrack:*), Bash(ls:*), Bash(find:*), Bash(file:*), Bash(du:*), Bash(test:*), Read, Glob, Grep
-            argument-hint: [folder path | theme description]
-            ---
-
-            You are building an Ableton Drum Rack `.adg` from samples in `~/Music/samples`. The library is SMB-mounted on Mercury (macOS) at `/Volumes/music/samples/`, where Ableton Live consumes the generated rack. The `drumrack` CLI handles the .adg mechanics; your job is curation and confirmation.
-
-            ## Modes
-
-            - **Folder mode** — `$ARGUMENTS` is an existing directory containing categorised samples (`Kicks/`, `Snares/`, `Claps/`, `Hats/`, `Perc/`, etc.). Deterministic; uses alphabetical pick per category, 4×4 Push layout (C1–D#2).
-            - **Vibe mode** — `$ARGUMENTS` describes a theme (e.g. "dark 80s industrial", "warm boom-bap", "footwork"). You search the library, propose pads, get confirmation, then drive the generator with a JSON spec.
-
-            ## Workflow — folder mode
-
-            1. Run `drumrack build-from-folder "$ARGUMENTS" --dry-run`. This prints the proposed pad→sample table.
-            2. Show the table to the user and ask for confirmation (or to swap any pads).
-            3. On confirmation, re-run without `--dry-run`. The `.adg` lands beside the source folder.
-
-            ## Workflow — vibe mode
-
-            1. Map the theme to candidate folders. Use the user's library taxonomy (see `organize-samples`): start with `~/Music/samples/drums/oneshots/` and `~/Music/samples/Packs/` for category folders matching the theme. Use `find`/`Glob` with case-insensitive name matches; sample-library hints in filenames (genre tags, drum-machine names) are useful.
-            2. Propose 4–16 pads as a table: pad #, MIDI note (C1=36 ascending), pad name, candidate sample path. Cover at least kicks + snares + hats; add percs if the theme calls for it.
-            3. Ask the user to confirm or swap individual pads.
-            4. Build a JSON spec:
-               ```json
-               {
-                 "name": "<kit name>",
-                 "out_path": "/home/lewisflude/Music/samples/<dest>/<kit name>.adg",
-                 "pads": [
-                   {"midi_note": 36, "name": "Kick", "sample": "/home/.../kick.wav"},
-                   ...
-                 ]
-               }
-               ```
-            5. Pipe it: `echo '<spec-json>' | drumrack build-from-spec -`.
-
-            ## Guardrails
-
-            - **Never overwrite.** If the target `.adg` already exists, ask for a new name. The CLI errors out without `--force`; do not pass `--force` without explicit user permission.
-            - **Default output location:** sibling of the source kit folder (folder mode) or under the most-relevant pack directory (vibe mode). This keeps racks colocated with their samples — matches how Live's pack convention works.
-            - **All samples must live under `~/Music/samples/`.** The CLI errors otherwise. If the user picks a sample elsewhere, surface the error rather than working around it.
-            - **MIDI layout reminder:** standard Push 4×4 drum grid is C1=36 (kick row, bottom) through D#2=51 (perc row, top). Pads on other notes are valid but won't sit on the visible Push pad grid.
-            - **Mac path translation is automatic** — the CLI rewrites `~/Music/samples/...` to `/Volumes/music/samples/...` in the .adg. Don't pre-translate.
-            - On success, print the mac path of the output and remind the user to refresh Live's browser to see the new rack.
-          '';
+          organize-samples = organizeSamplesCommand;
+          build-drum-rack = builtins.readFile ../pkgs/claude-code/commands/build-drum-rack.md;
         };
 
         agents = {
-          nix-module = ''
-            ---
-            name: nix-module
-            description: Creates and modifies Nix modules following the dendritic pattern. Use when writing or refactoring .nix files.
-            tools: Read, Write, Edit, Glob, Grep, Bash
-            model: inherit
-            ---
-
-            You are a Nix module specialist for a repository using the dendritic pattern with flake-parts.
-
-            ## Architecture Rules
-
-            - Every .nix file (except flake.nix) is a flake-parts module
-            - Two levels: top-level (flake-parts) and platform-level (NixOS/Darwin/home-manager)
-            - Access shared values via top-level `config.*`, never use `specialArgs`
-            - Access constants via `config.constants`, never import directly
-            - Use named parameters (e.g., `nixosArgs`) to avoid shadowing outer `config`
-            - Never use `with pkgs;`, always use explicit `pkgs.package`
-            - Hosts compose features via imports; infrastructure only transforms
-
-            ## Module Template
-
-            ```nix
-            { config, ... }:
-            {
-              flake.modules.homeManager.featureName = { pkgs, ... }: {
-                # home-manager config here
-              };
-
-              flake.modules.nixos.featureName = { pkgs, lib, ... }: {
-                # NixOS system config here
-              };
-            }
-            ```
-
-            ## Placement Rules
-
-            - System services, kernel, hardware, daemons -> flake.modules.nixos.*
-            - User apps, dotfiles, dev tools, tray applets -> flake.modules.homeManager.*
-            - Format all output with nixfmt
-          '';
-
-          code-reviewer = ''
-            ---
-            name: code-reviewer
-            description: Reviews code for quality, security, and correctness. Use proactively after writing or modifying code.
-            tools: Read, Grep, Glob, Bash
-            model: inherit
-            ---
-
-            You are a senior code reviewer. Review all changes for:
-
-            ## Checklist
-
-            1. **Correctness** - Logic errors, off-by-ones, null/undefined access, race conditions
-            2. **Security** - Injection, XSS, secrets in code, unsafe deserialization, path traversal
-            3. **Performance** - N+1 queries, unnecessary allocations, missing indexes, blocking I/O
-            4. **Style** - Consistent naming, no dead code, minimal comments, functional patterns
-            5. **Nix-specific** - No `with pkgs;`, correct module placement, constants via config, no specialArgs
-
-            ## Process
-
-            1. Run `git diff` to see changes
-            2. Read each modified file
-            3. Report issues by priority: Critical > Warning > Suggestion
-            4. Be specific: include file path and line number for each issue
-          '';
+          nix-module = builtins.readFile ../pkgs/claude-code/agents/nix-module.md;
+          code-reviewer = builtins.readFile ../pkgs/claude-code/agents/code-reviewer.md;
         };
-
       };
 
       # claudeCodeMutableSettings above replaces Home Manager's

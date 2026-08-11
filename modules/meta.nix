@@ -17,5 +17,12 @@
       default = "lewis@lewisflude.com";
       description = "Primary user's email address";
     };
+
+    userfullname = lib.mkOption {
+      type = lib.types.singleLineStr;
+      readOnly = true;
+      default = "Lewis Flude";
+      description = "Primary user's full name (git author, etc.)";
+    };
   };
 }

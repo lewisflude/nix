@@ -2,6 +2,8 @@
 # Dendritic pattern: Provides development services (postgres, redis, ollama, etc.)
 { inputs, ... }:
 {
+  imports = [ inputs.process-compose-flake.flakeModule ];
+
   perSystem = _: {
     # Development services - run with: nix run .#dev
     process-compose."dev" = {

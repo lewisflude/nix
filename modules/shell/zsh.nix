@@ -87,12 +87,13 @@ in
         defaultKeymap = "emacs";
         enableVteIntegration = true;
 
+        # Only options that actually differ from zsh's own defaults. AUTO_MENU,
+        # AUTO_LIST, AUTO_PARAM_SLASH, BAD_PATTERN, CASE_GLOB, MULTIOS and
+        # NOMATCH are all on out of the box (`zsh -f -c '[[ -o … ]]'`), so
+        # setting them here was pure noise. Do not re-add them.
         setOptions = [
-          "AUTO_MENU"
           "COMPLETE_IN_WORD"
           "ALWAYS_TO_END"
-          "AUTO_LIST"
-          "AUTO_PARAM_SLASH"
           "AUTO_PUSHD"
           "PUSHD_IGNORE_DUPS"
           "PUSHD_SILENT"
@@ -103,10 +104,6 @@ in
           "GLOBSTARSHORT"
           "NUMERIC_GLOB_SORT"
           "MARK_DIRS"
-          "NOMATCH"
-          "CASE_GLOB"
-          "BAD_PATTERN"
-          "MULTIOS"
         ];
 
         history = {

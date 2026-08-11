@@ -1,7 +1,11 @@
 # Mosh Service Module - Dendritic Pattern
 # Mobile shell with UDP-based SSH alternative for better roaming
 # Usage: Import flake.modules.nixos.mosh in host definition
-_: {
+{ config, ... }:
+let
+  inherit (config.constants.ports.services) mosh;
+in
+{
   # ==========================================================================
   # NixOS System Configuration
   # ==========================================================================
@@ -13,14 +17,18 @@ _: {
       programs.mosh = {
         enable = true;
 
-        # Automatically open UDP ports 60000-61000 in firewall
-        # Mosh uses this range for establishing connections
-        openFirewall = true;
+        # Firewall is opened explicitly below from the shared constant rather
+        # than by the module's hardcoded 60000-61000, so the port range has a
+        # single source of truth in modules/constants.nix.
+        openFirewall = false;
 
         # Enable libutempter for proper utmp/wtmp logging
         # This allows 'who' and 'last' commands to work with mosh sessions
         withUtempter = true;
       };
+
+      # Mosh allocates one UDP port per session from this range.
+      networking.firewall.allowedUDPPortRanges = [ mosh ];
 
       # Workaround for termix mobile app bug - it calls 'cmosh-server' instead of 'mosh-server'
       environment.systemPackages = [

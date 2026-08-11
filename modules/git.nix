@@ -16,8 +16,8 @@
           signByDefault = true;
         };
         settings = {
-          user.name = config.constants.user.name;
-          user.email = config.constants.user.email;
+          user.name = config.userfullname;
+          user.email = config.useremail;
           init.defaultBranch = "main";
           core.editor = "hx";
           pull.rebase = true;
@@ -56,14 +56,6 @@
         options = {
           navigate = true;
           features = "side-by-side line-numbers decorations";
-        };
-      };
-
-      programs.gh = {
-        enable = true;
-        settings = {
-          git_protocol = "ssh";
-          prompt = "enabled";
         };
       };
     };

@@ -173,8 +173,6 @@
         # Dendritic pattern: auto-import all modules
         # This replaces flake-parts/core.nix - all per-system and flake outputs are in modules/
         (inputs.import-tree ./modules)
-        # Process-compose needs explicit import (external flake module)
-        inputs.process-compose-flake.flakeModule
       ];
     };
 }

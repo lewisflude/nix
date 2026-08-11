@@ -6,12 +6,11 @@ _: {
     {
       programs.helix = {
         enable = true;
+        # nixfmt/taplo/yamlfmt come from homeManager.developmentTools and
+        # yaml-language-server from homeManager.cliApps — both land in the same
+        # profile as helix on every host that imports it, so only nixd is unique.
         extraPackages = [
           pkgs.nixd
-          pkgs.yaml-language-server
-          pkgs.taplo
-          pkgs.nixfmt
-          pkgs.yamlfmt
         ];
         languages.language = [
           {

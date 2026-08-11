@@ -4,7 +4,7 @@
 { config, ... }:
 let
   # Top-level values from dendritic options
-  inherit (config) username useremail constants;
+  inherit (config) username constants;
 in
 {
   # NixOS home-manager base configuration (structure only)
@@ -27,7 +27,6 @@ in
             # the branches occasionally drift across a release cut.
             home.enableNixpkgsReleaseCheck = false;
             programs.home-manager.enable = true;
-            programs.git.settings.user.email = useremail;
 
             # Disable options.json generation to avoid derivation context warning
             manual.json.enable = false;
@@ -53,7 +52,6 @@ in
           # the branches occasionally drift across a release cut.
           home.enableNixpkgsReleaseCheck = false;
           programs.home-manager.enable = true;
-          programs.git.settings.user.email = useremail;
 
           # Disable options.json generation to avoid derivation context warning
           manual.json.enable = false;

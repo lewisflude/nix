@@ -159,6 +159,11 @@ in
           "/mnt/storage/books/ingest:/cwa-book-ingest"
         ];
         ports = [ "127.0.0.1:${toString constants.ports.services.calibreWeb}:8083" ];
+        # Same reason as homarr above: the image ships its own HEALTHCHECK, and CWA
+        # needs ~90s to boot, so the transient healthcheck unit fails a couple of
+        # times while the container is still "starting". Without sdnotify=healthy
+        # the activation script snapshots that failure and nixos-rebuild exits 4.
+        podman.sdnotify = "healthy";
       };
 
       # Janitorr - Media cleanup (bespoke: host network, sops template, complex deps).

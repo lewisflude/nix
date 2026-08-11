@@ -5,15 +5,11 @@ let
   # Hoisted out of the attrset so the helpers can compose without `rec`, which
   # nix.dev lists as an anti-pattern (shadowing a name inside `rec` produces
   # hard-to-debug infinite recursion). Consumers still see one `config.myLib`.
-  isLinux = system: lib.hasSuffix "-linux" system;
   isDarwin = system: lib.hasSuffix "-darwin" system;
 
   homeDir = system: username: if isDarwin system then "/Users/${username}" else "/home/${username}";
 
   myLib = {
-    # Platform detection
-    inherit isLinux isDarwin;
-
     # Cross-platform path helpers (composed from homeDir)
     inherit homeDir;
     configDir = system: username: "${homeDir system username}/.config";
@@ -43,8 +39,6 @@ in
     type = lib.types.raw;
     readOnly = true;
     default = myLib;
-    description = "Shared library functions (platform detection, path helpers, pkgs config)";
+    description = "Shared library functions (path helpers, pkgs config)";
   };
-
-  config.flake.lib = myLib;
 }

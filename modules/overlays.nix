@@ -20,14 +20,13 @@
     description = "Map of overlay name → overlay function. Contributed by feature modules.";
   };
 
-  options.overlaysForSystem = lib.mkOption {
+  # Flat, system-independent list of every contributed overlay. Overlays
+  # self-branch on `prev.stdenv.hostPlatform`, so there is nothing to filter.
+  options.overlayList = lib.mkOption {
     type = lib.types.raw;
     readOnly = true;
-    default = _system: builtins.attrValues config.overlays;
-    description = ''
-      Returns the full list of contributed overlays. The `system` arg is retained
-      for backward compatibility but unused — overlays self-branch on hostPlatform.
-    '';
+    default = builtins.attrValues config.overlays;
+    description = "All contributed overlays, in alphabetical attribute order.";
   };
 
   config.flake.overlays.default =
@@ -35,10 +34,7 @@
     if !(prev ? stdenv) then
       { } # nix flake check calls overlay {} {} — noop without real nixpkgs
     else
-      let
-        overlayList = builtins.attrValues config.overlays;
-      in
-      (lib.foldl' lib.composeExtensions (_: _: { }) overlayList) final prev;
+      (lib.foldl' lib.composeExtensions (_: _: { }) config.overlayList) final prev;
 
   # ─────────────────────────────────────────────────────────────────────
   # Shared / cross-cutting overlays (no single feature owner)

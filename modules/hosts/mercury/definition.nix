@@ -22,7 +22,6 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         # Core Modules (dendritic: each concern has its own module)
         # ═══════════════════════════════════════════════════════════════════════
-        darwin.hostOptions
         darwin.nix
         darwin.nixpkgs
         darwin.sops
@@ -106,14 +105,6 @@ in
             homeManager.theming
           ];
         };
-
-      # =========================================================================
-      # Host Identity
-      # =========================================================================
-      host = {
-        inherit username;
-        hostname = "mercury";
-      };
 
       # =========================================================================
       # Core System Configuration

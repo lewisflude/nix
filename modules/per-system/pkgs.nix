@@ -3,7 +3,7 @@
 { config, inputs, ... }:
 let
   inherit (inputs) nixpkgs;
-  inherit (config) myLib overlaysForSystem;
+  inherit (config) myLib overlayList;
 in
 {
   # Sets up pkgs for each system with overlays applied
@@ -13,7 +13,7 @@ in
     let
       pkgsWithOverlays = import nixpkgs {
         inherit system;
-        overlays = overlaysForSystem system;
+        overlays = overlayList;
         config = myLib.mkPkgsConfig;
       };
     in

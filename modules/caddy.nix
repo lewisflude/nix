@@ -37,7 +37,6 @@ let
   # subdomain -> port for all services proxied via 127.0.0.1
   localServices = {
     # Infrastructure
-    inherit (constants.ports.services) cockpit;
     ha = constants.ports.services.homeAssistant;
     assistant = constants.ports.services.musicAssistant;
 
@@ -58,7 +57,6 @@ let
     inherit (constants.ports.services) lidarr;
     inherit (constants.ports.services) bazarr;
     inherit (constants.ports.services) cleanuparr;
-    inherit (constants.ports.services) notifiarr;
     inherit (constants.ports.services) autopulse;
     inherit (constants.ports.services) jellystat;
     inherit (constants.ports.services) byparr;
@@ -71,16 +69,12 @@ let
 
     # Downloads
     usenet = constants.ports.services.sabnzbd;
-    inherit (constants.ports.services) transmission;
-    inherit (constants.ports.services) navidrome;
 
     # Streaming
     syncthing = constants.ports.services.syncthing.webUi;
 
     # AI
-    inherit (constants.ports.services) ollama;
     openwebui = constants.ports.services.openWebui;
-    inherit (constants.ports.services) comfyui;
 
     # File sharing
     files = constants.ports.services.filebrowser;

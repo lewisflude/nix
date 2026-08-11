@@ -9,24 +9,18 @@
   perSystem =
     { pkgs, pkgsWithPog, ... }:
     let
-      # Helper to create POG app definitions
+      # Helper to create POG app definitions. `pog.pog` propagates its own
+      # `description` to `meta.description`, so the script file is the single
+      # source of truth — adding one here needs no description to be restated.
       mkPogApp =
         script-name:
         let
-          descriptions = {
-            "new-module" = "Scaffold new NixOS/home-manager modules";
-            "setup-cachix" = "Configure Cachix binary cache";
-            "update-all" = "Update all flake dependencies";
-            "visualize-modules" = "Generate module dependency graphs";
-            "calculate-qbittorrent-config" = "Calculate optimal qBittorrent settings from speed tests";
-            "system-health" = "Run comprehensive system diagnostics";
-          };
           pogScript = pkgsWithPog.callPackage ../../pkgs/pog-scripts/${script-name}.nix { };
         in
         {
           type = "app";
           program = "${pogScript}/bin/${script-name}";
-          meta.description = descriptions.${script-name} or "POG script: ${script-name}";
+          meta.description = pogScript.meta.description or "POG script: ${script-name}";
         };
       # Import devour-flake (lazy evaluation - only when the app is used)
       devour-flake = import inputs.devour-flake {

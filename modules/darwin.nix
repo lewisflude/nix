@@ -1,6 +1,10 @@
 # Darwin Feature Module
 # Homebrew casks, brews, Mac App Store apps, and Darwin-specific home-manager packages
-{ inputs, ... }:
+{ config, inputs, ... }:
+let
+  # Captured from the top-level scope before the darwin module shadows `config`.
+  inherit (config) username;
+in
 {
   # ==========================================================================
   # Darwin System Configuration
@@ -114,7 +118,7 @@
       nix-homebrew = {
         enable = true;
         enableRosetta = true;
-        user = config.host.username;
+        user = username;
         autoMigrate = true;
         # Declarative taps: with HOMEBREW_NO_INSTALL_FROM_API=1, brew resolves
         # casks/formulae from local tap clones. Pinning them as flake inputs
