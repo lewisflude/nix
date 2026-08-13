@@ -359,6 +359,15 @@ in
           POSTGRES_USER = "jellystat";
           POSTGRES_IP = "localhost";
           POSTGRES_PORT = "5432";
+          # PGDATABASE, not POSTGRES_DB. backend/create_database.js builds its
+          # pg.Client with no `database` field, so node-pg falls back to
+          # PGDATABASE and then to the *user* name — it was connecting to a
+          # nonexistent db "jellystat" purely to issue `CREATE DATABASE jfstat`,
+          # logging a stack trace on every start. Pointing it at jfstat makes
+          # that CREATE fail with "already exists", which the app swallows.
+          # backend/db.js already sets database explicitly, so the app itself
+          # was always fine; this only silences the bootstrap noise.
+          PGDATABASE = "jfstat";
           TZ = timezone;
         };
         environmentFiles = [

@@ -7,9 +7,9 @@ _: {
         powerOnBoot = true;
         settings = {
           General = {
+            # Experimental is required by Home Assistant / bleak for the BlueZ
+            # AdvertisementMonitor D-Bus API — do not remove.
             Experimental = true;
-            Enable = "Source,Sink,Media,Socket";
-            AutoEnable = true;
           };
         };
       };
