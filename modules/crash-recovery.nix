@@ -104,8 +104,18 @@ _: {
       # Verify after switching (nowayout=0 here, so the watchdog stops on close
       # and this is safe to poke on a live pool):
       #   cat /sys/class/watchdog/watchdog0/state   # must read: active
+      # RuntimeWatchdogSec is 10min, not 60s. At 60s the iTCO resets the box if
+      # userspace fails to ping for a single minute — on a host that runs ZFS
+      # scrubs and mergerfs over two 14TB disks, an ordinary I/O stall clears
+      # that bar. The 2026-08-11 20:52:50 outage fits: journal stops mid-line,
+      # no shutdown sequence, and — decisively — NO pstore record despite
+      # hardlockup_panic=1 above, which is what a genuine NMI-detectable lockup
+      # would have produced. An external reset writes nothing anywhere. That
+      # event landed 3h25m after this module first armed the watchdog at 60s.
+      # 10min still catches a real hang while sitting far above any plausible
+      # I/O stall.
       systemd.settings.Manager = {
-        RuntimeWatchdogSec = "60s";
+        RuntimeWatchdogSec = "10min";
         RebootWatchdogSec = "10min";
       };
 

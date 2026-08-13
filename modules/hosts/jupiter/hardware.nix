@@ -167,6 +167,19 @@ in
       networking.networkmanager.enable = true;
       powerManagement.cpuFreqGovernor = lib.mkDefault "schedutil";
 
+      # SATA link power management: force max_performance on every port.
+      #
+      # nixpkgs sets CONFIG_SATA_MOBILE_LPM_POLICY=3 (med_power_with_dipm)
+      # kernel-wide for power savings, and kernel 6.9's commit 7627a0edef54
+      # ("ata: ahci: Drop low power policy board type") removed the gate that
+      # used to confine that policy to mobile chipsets. The result is that this
+      # desktop PCH applies DIPM to the 14TB helium HDDs, which do not tolerate
+      # it: both /mnt/disk1 and /mnt/disk2 threw `SError: { CommWake LinkSeq }`
+      # interface fatal errors and failed READ FPDMA QUEUED commands on PHY
+      # wake-up. Note the absent bits — no BadCRC/10B8B/Dispar — which is what
+      # distinguishes an LPM wake-handshake fault from a marginal cable.
+      powerManagement.scsiLinkPolicy = "max_performance";
+
       # Prevent suspend when KVM-switched away (no display = idle)
       services.logind.settings.Login = {
         IdleAction = "ignore";
