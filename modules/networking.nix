@@ -11,7 +11,14 @@ _: {
         networkmanager.enable = lib.mkDefault false;
         firewall = {
           enable = true;
-          allowedTCPPorts = [ 22 ]; # SSH
+          # SSH is deliberately NOT opened here. eno2 carries both LAN traffic
+          # and router-forwarded WAN traffic, so an interface-scoped rule cannot
+          # separate them — opening 22 globally published sshd to the internet
+          # (98 fail2ban bans and sustained root/ansible/zimbra brute-force
+          # attempts in a single 21h boot). tailscale0 is already in
+          # networking.firewall.trustedInterfaces (see tailscale.nix), so SSH
+          # remains reachable over the tailnet with no port exposed.
+          allowedTCPPorts = [ ];
           allowedUDPPorts = [ 123 ]; # NTP
         };
       };

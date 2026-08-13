@@ -12,6 +12,14 @@ in
     services.openssh = {
       enable = true;
       ports = [ 22 ];
+      # openFirewall defaults to true, which is what actually published sshd to
+      # the internet: eno2 carries both LAN and router-forwarded WAN traffic, so
+      # a globally-open 22 is a WAN-open 22. One 21h boot logged sustained
+      # root/ansible/zimbra brute-force attempts and 98 fail2ban bans. Key-only
+      # auth meant none could succeed, but the exposure is unnecessary —
+      # tailscale0 is in networking.firewall.trustedInterfaces (tailscale.nix),
+      # so SSH still works over the tailnet with no port open to the network.
+      openFirewall = false;
       settings = {
         PasswordAuthentication = false;
         KbdInteractiveAuthentication = false;
