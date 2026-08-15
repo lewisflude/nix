@@ -37,92 +37,84 @@ _: {
       };
 
       # Virtual stereo endpoints for the Apogee Symphony Desktop.
-      # null-audio-sinks provide user-facing stereo devices that appear
-      # under Sinks/Sources (not Filters). Loopback modules route audio
-      # to/from the Apogee's multichannel ALSA nodes in the background.
+      #
+      # The card offers no stereo profile — only `multichannel-*` and
+      # `pro-audio`, both of which expose all 10 channels as AUX0..AUX9 (ACP
+      # does not trust the driver chmap, so positions are unnamed). Stereo
+      # apps therefore need a virtual FL/FR endpoint bridged to AUX0/AUX1.
+      #
+      # A single loopback module *is* the virtual device: setting
+      # `media.class = "Audio/Sink"` on capture.props (or "Audio/Source" on
+      # playback.props) makes the user-facing side appear under Sinks/Sources,
+      # with the other side targeting the Apogee. No null-audio-sink needed.
+      # https://docs.pipewire.org/page_module_loopback.html
       extraConfig.pipewire."91-virtual-sink" = {
-        "context.objects" = [
-          {
-            # User-facing stereo output — appears under Sinks in wpctl.
-            # priority.session 1400 keeps it under the upstream 1500 ceiling
-            # (see WirePlumber alsa node docs) while still beating the Apogee
-            # multichannel sink (1300) so Main-Output wins as initial default.
-            # Note: once `wpctl set-default` runs, WirePlumber persists the
-            # choice in ~/.local/state/wireplumber/ and that overrides
-            # priority.session forever. Use `wpctl settings --delete
-            # default.configured.audio.sink` to re-enable priority-based
-            # selection if Main-Output stops winning.
-            factory = "adapter";
-            args = {
-              "factory.name" = "support.null-audio-sink";
-              "node.name" = "Main-Output";
-              "node.description" = "Main Output";
-              "media.class" = "Audio/Sink";
-              "audio.position" = "FL,FR";
-              "monitor.channel-volumes" = true;
-              "monitor.passthrough" = true;
-              "priority.session" = 1400;
-            };
-          }
-          {
-            # User-facing stereo input — appears under Sources in wpctl.
-            # 1900 sits at the top of the documented source range (1600-2000)
-            # so this wins over the raw Apogee multichannel source.
-            factory = "adapter";
-            args = {
-              "factory.name" = "support.null-audio-sink";
-              "node.name" = "Main-Input";
-              "node.description" = "Main Input";
-              "media.class" = "Audio/Source/Virtual";
-              "audio.position" = "FL,FR";
-              "monitor.channel-volumes" = true;
-              "priority.session" = 1900;
-            };
-          }
-        ];
         "context.modules" = [
           {
-            # Route Main-Output monitor → Apogee multichannel output (AUX0,AUX1)
+            # Main Output (stereo sink) → Apogee playback channels 1-2
             name = "libpipewire-module-loopback";
             args = {
+              "node.description" = "Main Output";
               "capture.props" = {
-                "node.name" = "Main-Output-Route-Capture";
-                "audio.position" = "FL,FR";
-                "stream.dont-remix" = true;
-                "node.passive" = true;
-                "target.object" = "Main-Output";
-                "stream.capture.sink" = true;
+                "node.name" = "Main-Output";
+                "media.class" = "Audio/Sink";
+                "audio.position" = [
+                  "FL"
+                  "FR"
+                ];
+                # 1400 stays under the upstream 1500 ceiling while beating the
+                # Apogee multichannel sink (1300), so this wins as initial
+                # default. Once `wpctl set-default` runs, WirePlumber persists
+                # the choice in ~/.local/state/wireplumber/default-nodes and
+                # that overrides priority.session permanently — clear it with
+                # `wpctl settings --delete default.configured.audio.sink`.
+                "priority.session" = 1400;
               };
               "playback.props" = {
-                "node.name" = "Main-Output-Route-Playback";
-                "audio.position" = "AUX0,AUX1";
+                "node.name" = "Main-Output-Playback";
+                "audio.position" = [
+                  "AUX0"
+                  "AUX1"
+                ];
                 "stream.dont-remix" = true;
+                "target.object" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-output";
+                # Passive so this link alone never keeps the Apogee busy,
+                # letting it idle-suspend. dont-fallback + linger make the node
+                # wait silently for the Apogee instead of spilling into the
+                # default sink when the KVM takes the device away.
                 "node.passive" = true;
                 "node.dont-fallback" = true;
                 "node.linger" = true;
-                "target.object" = "alsa_output.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-output";
               };
             };
           }
           {
-            # Route Apogee input channels 1-2 → Main-Input virtual source
+            # Apogee capture channels 1-2 → Main Input (stereo source)
             name = "libpipewire-module-loopback";
             args = {
+              "node.description" = "Main Input";
               "capture.props" = {
                 "node.name" = "Main-Input-Capture";
-                "audio.position" = "AUX0,AUX1";
+                "audio.position" = [
+                  "AUX0"
+                  "AUX1"
+                ];
                 "stream.dont-remix" = true;
+                "target.object" = "alsa_input.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-input";
                 "node.passive" = true;
                 "node.dont-fallback" = true;
                 "node.linger" = true;
-                "target.object" = "alsa_input.usb-Apogee_Electronics_Corp_Symphony_Desktop-00.multichannel-input";
               };
               "playback.props" = {
-                "node.name" = "Main-Input-Loopback";
-                "audio.position" = "FL,FR";
-                "stream.dont-remix" = true;
-                "node.linger" = true;
-                "target.object" = "Main-Input";
+                "node.name" = "Main-Input";
+                "media.class" = "Audio/Source";
+                "audio.position" = [
+                  "FL"
+                  "FR"
+                ];
+                # Top of the documented source range (1600-2000), so this wins
+                # over the raw Apogee multichannel source.
+                "priority.session" = 1900;
               };
             };
           }
@@ -134,8 +126,11 @@ _: {
         # priority just under Main-Output (1400) so the Apogee is the
         # runner-up default if Main-Output goes away. priority.driver is not
         # subject to the 1500 ceiling — that cap only applies to session
-        # priority for default-node selection. Suspend disabled to avoid
-        # pop/delay on resume; default 5s remains for other ALSA nodes.
+        # priority for default-node selection.
+        #
+        # Idle suspend is deliberately left at the 5s default: it is the only
+        # mechanism that closes and reopens the ALSA PCM, which is how the
+        # device recovers from a wedged state after the KVM re-enumerates it.
         "10-apogee"."monitor.alsa.rules" = [
           {
             matches = [
@@ -145,7 +140,6 @@ _: {
             actions.update-props = {
               "priority.driver" = 2000;
               "priority.session" = 1300;
-              "session.suspend-timeout-seconds" = 0;
             };
           }
         ];

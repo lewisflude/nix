@@ -68,17 +68,40 @@ in
           if [ -r "$ha_token_file" ]; then
             ha_url=${lib.escapeShellArg cfg.homeAssistant.baseUrl}
             ha_token="$(tr -d '[:space:]' < "$ha_token_file")"
-            if ! jq -n --arg title "$subject" --arg message "$body" \
-                 '{title: $title, message: $message}' \
-               | curl --silent --show-error --max-time 15 \
-                   --request POST \
-                   --header "Authorization: Bearer $ha_token" \
-                   --header "Content-Type: application/json" \
-                   --data @- \
-                   "$ha_url/api/services/${cfg.homeAssistant.service}" \
-                   >/dev/null; then
-              echo "system-alert: Home Assistant push failed" >&2
-            fi
+
+            # Retry rather than one shot. Home Assistant's unit reaching
+            # "started" is not the same as its HTTP API accepting connections —
+            # it takes tens of seconds more to bind. The 2026-08-14 12:55 crash
+            # report was lost to exactly that gap: crash-report.service ran at
+            # 12:57:17 and got `curl: (7) Failed to connect to 127.0.0.1:8123
+            # after 0 ms`, so the one notification that mattered most all week
+            # never arrived. Ordering alone cannot close this (see
+            # crash-recovery.nix); the sender has to wait for the socket.
+            #
+            # Bounded at three attempts so an alert raised while HA is
+            # genuinely down still returns promptly. The journal already has
+            # the message by this point, so a give-up here loses a channel,
+            # never the alert.
+            ha_attempt=1
+            while :; do
+              if jq -n --arg title "$subject" --arg message "$body" \
+                   '{title: $title, message: $message}' \
+                 | curl --silent --show-error --max-time 10 \
+                     --request POST \
+                     --header "Authorization: Bearer $ha_token" \
+                     --header "Content-Type: application/json" \
+                     --data @- \
+                     "$ha_url/api/services/${cfg.homeAssistant.service}" \
+                     >/dev/null; then
+                break
+              fi
+              if [ "$ha_attempt" -ge 3 ]; then
+                echo "system-alert: Home Assistant push failed after 3 attempts" >&2
+                break
+              fi
+              sleep 15
+              ha_attempt=$((ha_attempt + 1))
+            done
           fi
 
           # Real e-mail, if and only if an MTA has been installed. Nothing

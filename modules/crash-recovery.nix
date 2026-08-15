@@ -138,7 +138,21 @@ _: {
       # read.
       systemd.services.crash-report = {
         description = "Report an unclean shutdown and any new crash dumps";
-        after = [ "systemd-pstore.service" ];
+
+        # home-assistant is ordered-after but deliberately not wanted: this
+        # reporter must never be the reason HA starts, and on a host without HA
+        # the ordering is simply ignored. It exists because the 2026-08-14
+        # 12:55 hang produced a report at 12:57:17 that died with `curl: (7)
+        # Failed to connect to 127.0.0.1:8123` — HA had not started yet.
+        #
+        # Ordering alone does not fix that: the unit reports "started" well
+        # before the API binds. The retry loop in alerts.nix covers the
+        # remaining gap. Both are needed — this removes the bulk of the wait,
+        # the retry absorbs what is left.
+        after = [
+          "systemd-pstore.service"
+          "home-assistant.service"
+        ];
         wants = [ "systemd-pstore.service" ];
         wantedBy = [ "multi-user.target" ];
 

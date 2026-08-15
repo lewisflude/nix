@@ -137,6 +137,7 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         nixos.alerts # Alert fan-out (journal + Home Assistant + MTA if present)
         nixos.smartd # SMART attribute monitoring and scheduled self-tests
+        nixos.hardwareErrors # MCE surveillance + sensors/stability tooling
 
         # ═══════════════════════════════════════════════════════════════════════
         # AI Tools
