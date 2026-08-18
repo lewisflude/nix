@@ -34,6 +34,7 @@ pog.pog {
     pkgs.nix
     pkgs.nvfetcher
     pkgs.gum
+    pkgs.jq
   ];
 
   script =
@@ -114,6 +115,44 @@ pog.pog {
         fi
       else
         debug "No overlays/sources.toml found, skipping"
+      fi
+
+      # Report inputs that `nix flake update` cannot move, so pins that have
+      # quietly gone stale are visible instead of silently frozen forever.
+      cyan "4️⃣  Pinned Inputs"
+      cd "$FLAKE_DIR" || die "Failed to change to flake directory"
+      PINNED=$(jq -r '
+        . as $lock
+        | $lock.nodes.root.inputs
+        | to_entries[]
+        | .key as $name
+        | ($lock.nodes[(.value | if type == "array" then .[0] else . end)]) as $node
+        # A ref only counts as a pin when it names a commit or a tag; branch
+        # refs (master, nixos-unstable, latest) still move on update.
+        | ($node.original.rev // (
+            $node.original.ref // ""
+            | select(test("^[0-9a-f]{7,40}$") or test("^v?[0-9]+\\."))
+          )) as $pin
+        | select($pin != null and $pin != "")
+        | "\($name)\t\($pin[0:12])\t\($node.locked.lastModified // 0)"
+      ' flake.lock) || die "Failed to read flake.lock"
+
+      if [ -z "$PINNED" ]; then
+        green "✅ No commit- or tag-pinned inputs"
+      else
+        echo "  Frozen until bumped by hand:"
+        NOW=$(date +%s)
+        while IFS=$'\t' read -r pin_name pin_rev pin_time; do
+          AGE=$(( (NOW - pin_time) / 86400 ))
+          LINE=$(printf '  %-22s %-14s %4d days old' "$pin_name" "$pin_rev" "$AGE")
+          if [ "$AGE" -gt 365 ]; then
+            red "$LINE"
+          elif [ "$AGE" -gt 180 ]; then
+            yellow "$LINE"
+          else
+            echo "$LINE"
+          fi
+        done <<< "$PINNED"
       fi
 
       # Summary

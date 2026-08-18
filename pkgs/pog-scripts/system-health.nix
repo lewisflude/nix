@@ -192,6 +192,18 @@ pog.pog {
 
         cd "$FLAKE_DIR" || die "Failed to change to flake directory: $FLAKE_DIR"
 
+        # Store/daemon sanity: PATH has one nix, profiles are gcroots, client
+        # and daemon protocols agree. Cheap, and catches a broken install that
+        # would otherwise show up as confusing build failures.
+        if CONFIG_CHECK=$(nix config check 2>&1); then
+          check_pass "nix config check passed"
+        else
+          check_warn "nix config check reported issues"
+        fi
+        if ${flag "detailed"} && [ -n "$CONFIG_CHECK" ]; then
+          echo "$CONFIG_CHECK"
+        fi
+
         if nix flake check --no-build 2>&1; then
           check_pass "nix flake check passed (eval only)"
         else

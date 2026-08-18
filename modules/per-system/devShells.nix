@@ -15,6 +15,9 @@ _: {
           pkgs.direnv
           pkgs.nix-direnv
           pkgs.nix-update
+          # Parallel `nix flake check` replacement: evaluates and builds host
+          # closures concurrently and streams per-derivation failures.
+          pkgs.nix-fast-build
           pkgs.cocogitto
           pkgs.git-cliff
           pkgs.vulnix
