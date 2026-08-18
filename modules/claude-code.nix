@@ -105,6 +105,33 @@ in
             ''}";
           };
         }
+        // lib.optionalAttrs pkgs.stdenv.isDarwin {
+          # KiCAD MCP (mixelpixx/KiCAD-MCP-Server, not in nixpkgs): a Node server
+          # built as pkgs.kicad-mcp that drives KiCAD through its bundled Python
+          # `pcbnew` bindings. KICAD_PYTHON must point at KiCAD.app's own python3
+          # so pcbnew's ABI matches the installed KiCAD; PYTHONPATH is derived from
+          # that interpreter (mirrors the project's setup-macos.sh) rather than
+          # hardcoding a minor version. Darwin-only: this is the macOS KiCAD.app
+          # layout — KiCAD on Linux would use a nixpkgs interpreter instead.
+          kicad = {
+            command = "${pkgs.writeShellScript "mcp-kicad" ''
+              # Prefer the venv built by the kicadMcpVenv activation hook: it has
+              # the third-party Python deps and still sees pcbnew via
+              # --system-site-packages. Fall back to KiCAD's own interpreter if
+              # the venv hasn't been provisioned yet.
+              kicad_py="$HOME/.local/share/kicad-mcp/venv/bin/python"
+              [ -x "$kicad_py" ] || kicad_py="/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3"
+              if [ -x "$kicad_py" ]; then
+                export KICAD_PYTHON="$kicad_py"
+                export PYTHONPATH="$("$kicad_py" -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"
+              fi
+              export NODE_ENV=production
+              export LOG_LEVEL=info
+              export KICAD_AUTO_LAUNCH=false
+              exec ${pkgs.kicad-mcp}/bin/kicad-mcp "$@"
+            ''}";
+          };
+        }
         // lib.optionalAttrs (secretAvailable "KAGI_API_KEY") {
           kagi = {
             command = "${pkgs.writeShellScript "mcp-kagi" ''
@@ -244,6 +271,31 @@ in
         '';
       }
       // lib.optionalAttrs pkgs.stdenv.isDarwin {
+        # KiCAD's bundled Python is 3.9 (EOL, no longer in nixpkgs) and the MCP
+        # server's Python side needs sexpdata/Pillow/pydantic/cairosvg/etc. Build
+        # a venv from KiCAD's own interpreter (--system-site-packages keeps pcbnew
+        # visible) and pip-install the server's pinned requirements. Re-runs only
+        # when requirements.txt changes (stamped by its store path). Skips cleanly
+        # on machines without KiCAD installed.
+        kicadMcpVenv = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          KICAD_PY="/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3"
+          if [ ! -x "$KICAD_PY" ]; then
+            echo "kicad-mcp: KiCAD Python not found, skipping venv provisioning" >&2
+          else
+            VENV_DIR="$HOME/.local/share/kicad-mcp/venv"
+            REQ="${inputs.kicad-mcp-server}/requirements.txt"
+            STAMP="$HOME/.local/share/kicad-mcp/.requirements-stamp"
+            if [ ! -x "$VENV_DIR/bin/python" ]; then
+              $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$HOME/.local/share/kicad-mcp"
+              $DRY_RUN_CMD "$KICAD_PY" -m venv --system-site-packages "$VENV_DIR"
+            fi
+            if [ "$(${pkgs.coreutils}/bin/cat "$STAMP" 2>/dev/null)" != "$REQ" ]; then
+              $DRY_RUN_CMD "$VENV_DIR/bin/python" -m pip install --disable-pip-version-check -r "$REQ" \
+                && $DRY_RUN_CMD ${pkgs.coreutils}/bin/tee "$STAMP" <<<"$REQ" > /dev/null
+            fi
+          fi
+        '';
+
         abletonRemoteScript = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           ABLETON_PREFS="$HOME/Library/Preferences/Ableton"
           [ -d "$ABLETON_PREFS" ] || exit 0

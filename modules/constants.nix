@@ -88,8 +88,8 @@
       };
 
       # SSH public keys authorized for the primary user.
-      # Single source of truth: consumed by jupiter (NixOS openssh.authorizedKeys).
-      # Mercury does not accept remote SSH logins.
+      # Single source of truth: consumed by jupiter (NixOS openssh.authorizedKeys)
+      # and mercury (nix-darwin users.users.<name>.openssh.authorizedKeys).
       authorizedKeys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEyBDIzK/OoFY7M1i96wP9wE+OeKk56iTvPwStEiFc+k lewis@lewisflude.com"
         "sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBGB2FdscjELsv6fQ4dwLN7ky3Blye+pxJHBfACdYmxhgPodPaRLqbekyrt+XDdXvQYmuiZ0XIa/fL4/452g5MWcAAAAEc3NoOg== lewis@lewisflude.com"

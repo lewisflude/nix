@@ -36,6 +36,7 @@ in
         darwin.apps
         darwin.disableBackgroundAgents
         darwin.gaming
+        darwin.ssh
         darwin.tailscale
         darwin.zed
         darwin.jupiter-music

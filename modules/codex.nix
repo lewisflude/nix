@@ -50,7 +50,7 @@ in
     {
       home.packages = [
         pkgs.codex
-        pkgs.remarshal
+        pkgs.yj
       ];
 
       home.sessionVariables = {
@@ -108,9 +108,9 @@ in
             cleaned_toml=$(${pkgs.coreutils}/bin/mktemp)
 
             if [ -s "$config_file" ]; then
-              if ${pkgs.remarshal}/bin/remarshal -f toml -t json "$config_file" "$existing_json"; then
+              if ${pkgs.yj}/bin/yj -tj < "$config_file" > "$existing_json"; then
                 ${pkgs.jq}/bin/jq "$jq_filter" "$existing_json" > "$cleaned_json"
-                ${pkgs.remarshal}/bin/remarshal -f json -t toml "$cleaned_json" "$cleaned_toml"
+                ${pkgs.yj}/bin/yj -jt < "$cleaned_json" > "$cleaned_toml"
                 $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$cleaned_toml" "$config_file"
               else
                 echo "warning: failed to parse $config_file during Codex cleanup; leaving it unchanged" >&2

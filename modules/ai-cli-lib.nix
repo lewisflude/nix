@@ -128,7 +128,7 @@ let
         ${
           if needsRemarshal then
             ''
-              if ! ${pkgs.remarshal}/bin/remarshal -f toml -t json "$CONFIG_FILE" "$EXISTING_JSON"; then
+              if ! ${pkgs.yj}/bin/yj -tj < "$CONFIG_FILE" > "$EXISTING_JSON"; then
                 echo "warning: failed to parse $CONFIG_FILE; preserving it and applying defaults to a fresh config" >&2
                 ${pkgs.coreutils}/bin/cp "$CONFIG_FILE" "$CONFIG_FILE.hm-backup"
                 ${pkgs.coreutils}/bin/printf '{}' > "$EXISTING_JSON"
@@ -155,7 +155,7 @@ let
       ${
         if needsRemarshal then
           ''
-            ${pkgs.remarshal}/bin/remarshal -f json -t toml "$MERGED_JSON" "$MERGED_OUT"
+            ${pkgs.yj}/bin/yj -jt < "$MERGED_JSON" > "$MERGED_OUT"
             $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$MERGED_OUT" "$CONFIG_FILE"
           ''
         else

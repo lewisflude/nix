@@ -40,7 +40,10 @@
       inputs.brew-src.follows = "brew-src";
     };
     brew-src = {
-      url = "github:Homebrew/brew/6.0.2";
+      # Must track the homebrew-core/cask taps below: newer formulae use DSL
+      # features (Homebrew::InstallSteps::DSL#run, Resource::Patch#type) that
+      # older brew can't parse, making formulae "unreadable" during activation.
+      url = "github:Homebrew/brew/6.0.18";
       flake = false;
     };
     homebrew-core = {
@@ -163,6 +166,12 @@
     claude-code-nix = {
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # KiCAD MCP server (Node/TypeScript, not published to npm or in nixpkgs).
+    # Built from source via pkgs/kicad-mcp.nix; consumed by modules/kicad-mcp.nix.
+    kicad-mcp-server = {
+      url = "github:mixelpixx/KiCAD-MCP-Server";
+      flake = false;
     };
   };
 

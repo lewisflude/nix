@@ -15,6 +15,11 @@ in
         useGlobalPkgs = true;
         useUserPackages = true;
         backupFileExtension = "hm-backup";
+        # Overwrite a stale .hm-backup instead of aborting activation. Apps
+        # that rewrite their own config (e.g. Zed does atomic writes on launch,
+        # replacing the store symlink with a real file) otherwise leave a
+        # backup that collides on the next rebuild.
+        overwriteBackup = true;
 
         users.${username} =
           { osConfig, ... }:
@@ -42,6 +47,11 @@ in
         useGlobalPkgs = true;
         useUserPackages = true;
         backupFileExtension = "hm-backup";
+        # Overwrite a stale .hm-backup instead of aborting activation. Apps
+        # that rewrite their own config (e.g. Zed does atomic writes on launch,
+        # replacing the store symlink with a real file) otherwise leave a
+        # backup that collides on the next rebuild.
+        overwriteBackup = true;
 
         users.${username} = _: {
           # Auto-config: username, homeDirectory, stateVersion

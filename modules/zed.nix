@@ -28,7 +28,12 @@ _: {
         enable = true;
         package = null;
 
-        mutableUserSettings = true;
+        # Manage settings.json declaratively as a store symlink. Do NOT set
+        # this to true: mutableUserSettings freezes settings.json on first
+        # write, so later Nix changes are silently ignored AND any pinned LSP
+        # store paths break the moment they're garbage-collected. Let Zed
+        # auto-manage the language-server binaries instead of pinning them.
+        mutableUserSettings = false;
 
         userSettings = {
           ui_font_size = 14;
@@ -39,6 +44,26 @@ _: {
           telemetry = {
             metrics = false;
             diagnostics = false;
+          };
+
+          # Panels (theme is owned by the signal-nix Zed module).
+          project_panel.dock = "left";
+          outline_panel.dock = "left";
+          collaboration_panel.dock = "left";
+          git_panel.dock = "left";
+
+          agent = {
+            dock = "right";
+            default_profile = "ask";
+            default_model = {
+              provider = "anthropic";
+              model = "claude-sonnet-4-5-latest";
+            };
+            tool_permissions = {
+              default = "allow";
+            };
+            favorite_models = [ ];
+            model_parameters = [ ];
           };
 
           languages = {
@@ -62,6 +87,27 @@ _: {
             TSX = biomeFormat;
             JSON = biomeFormat;
             JSONC = biomeFormat;
+            Python = {
+              format_on_save = "on";
+              formatter = {
+                external = {
+                  command = "ruff";
+                  arguments = [
+                    "format"
+                    "--stdin-filename"
+                    "{buffer_path}"
+                  ];
+                };
+              };
+              language_servers = [
+                "basedpyright"
+                "ruff"
+              ];
+            };
+            Rust = {
+              format_on_save = "on";
+              formatter = "language_server";
+            };
           };
 
           lsp = {
@@ -69,6 +115,13 @@ _: {
               initialization_options = {
                 formatting = {
                   command = [ "nixfmt" ];
+                };
+              };
+            };
+            rust-analyzer = {
+              initialization_options = {
+                check = {
+                  command = "clippy";
                 };
               };
             };
