@@ -1530,17 +1530,17 @@
         "signal-palette": "signal-palette"
       },
       "locked": {
-        "lastModified": 1770555238,
-        "narHash": "sha256-Na/e6hj5FBgR08q1UrCbXTyccHk0YcaVacEfj/FaTKE=",
+        "lastModified": 1787047372,
+        "narHash": "sha256-AU0jTNZcOdeacNhudCPfA4i/izW1bpOtWS2vtfVAQyw=",
         "owner": "lewisflude",
         "repo": "signal-nix",
-        "rev": "2c7a7746597d12ce56a85725ba653e424aff5cb7",
+        "rev": "cd11e720feffd2ab1668ec0e2c8eae9dd037ceb9",
         "type": "github"
       },
       "original": {
         "owner": "lewisflude",
         "repo": "signal-nix",
-        "rev": "2c7a7746597d12ce56a85725ba653e424aff5cb7",
+        "rev": "cd11e720feffd2ab1668ec0e2c8eae9dd037ceb9",
         "type": "github"
       }
     },

@@ -30,7 +30,7 @@
     # signal-palette is pulled transitively; follows dedupe the shared inputs.
     # Pinned by rev — bump deliberately (it's actively developed upstream).
     signal-nix = {
-      url = "github:lewisflude/signal-nix/2c7a7746597d12ce56a85725ba653e424aff5cb7";
+      url = "github:lewisflude/signal-nix/cd11e720feffd2ab1668ec0e2c8eae9dd037ceb9";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
       inputs.flake-parts.follows = "flake-parts";
