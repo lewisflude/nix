@@ -18,13 +18,13 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "kicad-mcp";
-  version = "2.5.0";
+  version = "2.6.0";
 
   inherit src;
 
   # Computed with `prefetch-npm-deps package-lock.json`. Bump when the input's
   # package-lock.json changes.
-  npmDepsHash = "sha256-aGNXI2KC7XKpdGh3hg9QKefRyGNG8fufyvzMCXpMnpg=";
+  npmDepsHash = "sha256-QlrIhfin80CpTaEKs7ujqW4m1rF/ENUY0aEdD8SBMHc=";
 
   nativeBuildInputs = [ makeWrapper ];
 

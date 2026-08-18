@@ -9,7 +9,9 @@
     {
       home.packages = [
         # Development environments
-        pkgs.devenv
+        # From upstream flake, not nixpkgs: the channel lags devenv releases
+        # by weeks. See the input comment in flake.nix.
+        inputs.devenv.packages.${pkgs.system}.devenv
 
         # Formatters
         pkgs.nixfmt

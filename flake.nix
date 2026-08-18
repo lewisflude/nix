@@ -122,6 +122,13 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # devenv releases faster than nixos-unstable channel bumps (2.2.3 upstream
+    # vs 2.2.1 in the channel). Upstream builds against its own pinned nixpkgs
+    # and patched Nix, published to devenv.cachix.org (trusted via
+    # constants.binaryCaches), so inputs are deliberately NOT followed --
+    # overriding them would forfeit every cache hit and rebuild from source.
+    devenv.url = "github:cachix/devenv";
+
     fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
