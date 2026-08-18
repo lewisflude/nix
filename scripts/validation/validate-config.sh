@@ -65,7 +65,6 @@ echo "Checking required infrastructure files..."
 required_files=(
   "modules/constants.nix"
   "modules/meta.nix"
-  "lib/functions.nix"
   "DENDRITIC_PATTERN.md"
 )
 

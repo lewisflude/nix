@@ -7,7 +7,8 @@
 - **Never create docs/scripts** — no new `.md` or `.sh` files without explicit
   permission. Update existing files instead.
 - **Use POG scripts** (`pkgs/pog-scripts/`) for new CLI tools, not shell
-  scripts.
+  scripts. `scripts/` holds pre-existing one-off diagnostic shell scripts that
+  are not part of any build — fix them in place, but never add to them.
 
 ## Architecture
 
