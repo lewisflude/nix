@@ -143,7 +143,10 @@ in
         };
 
       claudeDesktopConfigDir =
-        if pkgs.stdenv.hostPlatform.isDarwin then "$HOME/Library/Application Support/Claude" else "$HOME/.config/Claude";
+        if pkgs.stdenv.hostPlatform.isDarwin then
+          "$HOME/Library/Application Support/Claude"
+        else
+          "$HOME/.config/Claude";
 
       # Filesystem MCP is Claude Desktop-only: the CLI clients have native
       # Read/Edit/Write tools and don't need a duplicate. Paths use ~ which the

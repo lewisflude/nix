@@ -109,7 +109,10 @@ in
       inherit (pkgs.stdenv.hostPlatform) system;
       dataDir = myLib.dataDir system hmArgs.config.home.username;
       keyFilePath =
-        if pkgs.stdenv.hostPlatform.isDarwin then "${dataDir}/sops-nix/key.txt" else "/var/lib/sops-nix/key.txt";
+        if pkgs.stdenv.hostPlatform.isDarwin then
+          "${dataDir}/sops-nix/key.txt"
+        else
+          "/var/lib/sops-nix/key.txt";
     in
     {
       sops.age = {
