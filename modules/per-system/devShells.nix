@@ -18,6 +18,9 @@ _: {
           # Parallel `nix flake check` replacement: evaluates and builds host
           # closures concurrently and streams per-derivation failures.
           pkgs.nix-fast-build
+          # Batch nixf-tidy: the semantic analysis nixd already runs in the
+          # editor, over the whole tree. Catches scope errors statix/deadnix miss.
+          pkgs.nixf-diagnose
           pkgs.cocogitto
           pkgs.git-cliff
           pkgs.vulnix
