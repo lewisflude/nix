@@ -9,9 +9,17 @@
     {
       home.packages = [
         # Development environments
-        # From upstream flake, not nixpkgs: the channel lags devenv releases
-        # by weeks. See the input comment in flake.nix.
-        inputs.devenv.packages.${pkgs.stdenv.hostPlatform.system}.devenv
+        # Linux: upstream flake, which the channel lags by weeks (see the input
+        # comment in flake.nix). Darwin: nixpkgs, because the flake's pinned
+        # cachix has no aarch64-darwin cache hit and its Haskell test suite
+        # aborts on a libffi trampoline assertion (closures.c:258) when built
+        # locally -- the same Darwin failure noted for pgcli below.
+        (
+          if pkgs.stdenv.hostPlatform.isDarwin then
+            pkgs.devenv
+          else
+            inputs.devenv.packages.${pkgs.stdenv.hostPlatform.system}.devenv
+        )
 
         # Formatters
         pkgs.nixfmt
