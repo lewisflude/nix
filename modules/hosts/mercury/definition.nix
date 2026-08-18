@@ -100,8 +100,11 @@ in
             homeManager.karabiner
             homeManager.audio
 
-            # Theming (cross-platform signal-nix)
+            # Theming: signal-nix colours apps (cross-platform); theming provides
+            # fontconfig here (its GTK/icon bits are Linux-gated). macOS system
+            # chrome can't be themed, so signal is home-manager only on Darwin.
             homeManager.theming
+            homeManager.signal
           ];
         };
 

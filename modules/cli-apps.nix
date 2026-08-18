@@ -45,17 +45,11 @@ _: {
       programs.btop.enable = true;
 
       # Git TUI - lazygit
+      # Colours (gui.theme) are owned by signal-nix via autoEnable; only
+      # behaviour (paging) is set here.
       programs.lazygit = {
         enable = true;
         settings = {
-          gui.theme = {
-            lightTheme = false;
-            activeBorderColor = [
-              "green"
-              "bold"
-            ];
-            inactiveBorderColor = [ "white" ];
-          };
           git.paging = {
             colorArg = "always";
             pager = "delta --dark --paging=never";

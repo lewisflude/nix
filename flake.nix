@@ -25,6 +25,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Signal Design System — the user's own OKLCH + APCA theming framework.
+    # Provides consistent, perceptually-uniform colours across ~95 app modules.
+    # signal-palette is pulled transitively; follows dedupe the shared inputs.
+    # Pinned by rev — bump deliberately (it's actively developed upstream).
+    signal-nix = {
+      url = "github:lewisflude/signal-nix/2c7a7746597d12ce56a85725ba653e424aff5cb7";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+      inputs.flake-parts.follows = "flake-parts";
+      inputs.import-tree.follows = "import-tree";
+    };
+
     # Per Determinate's guidance, do NOT make this follow our nixpkgs —
     # it would lose FlakeHub Cache coverage for Determinate's own artifacts.
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";

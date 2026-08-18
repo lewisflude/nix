@@ -966,6 +966,21 @@
         "type": "github"
       }
     },
+    "nix-colorizer": {
+      "locked": {
+        "lastModified": 1750078528,
+        "narHash": "sha256-NuGAJx61f/r0xrpyOTUEsO+MDNpso0qE99k2/apv3as=",
+        "owner": "nutsalhan87",
+        "repo": "nix-colorizer",
+        "rev": "c9ce6c710f4ed749f773104a8092a3e542dd1d7c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nutsalhan87",
+        "repo": "nix-colorizer",
+        "type": "github"
+      }
+    },
     "nix-flatpak": {
       "locked": {
         "lastModified": 1767983141,
@@ -1216,6 +1231,22 @@
         "type": "github"
       }
     },
+    "nmt": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1705307515,
+        "narHash": "sha256-krVKx3/u1mDo8qe5qylYgmwAmlAPHa1BSPDzxq09FmI=",
+        "owner": "~rycee",
+        "repo": "nmt",
+        "rev": "1562940b7765a32f1987bd9a3ee6a4fa034c9429",
+        "type": "sourcehut"
+      },
+      "original": {
+        "owner": "~rycee",
+        "repo": "nmt",
+        "type": "sourcehut"
+      }
+    },
     "nur": {
       "inputs": {
         "flake-parts": "flake-parts_5",
@@ -1381,6 +1412,7 @@
         "pog": "pog",
         "process-compose-flake": "process-compose-flake",
         "services-flake": "services-flake",
+        "signal-nix": "signal-nix",
         "solaar": "solaar",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix_3",
@@ -1476,6 +1508,54 @@
       "original": {
         "owner": "juspay",
         "repo": "services-flake",
+        "type": "github"
+      }
+    },
+    "signal-nix": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "home-manager": [
+          "home-manager"
+        ],
+        "import-tree": [
+          "import-tree"
+        ],
+        "nix-colorizer": "nix-colorizer",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nmt": "nmt",
+        "signal-palette": "signal-palette"
+      },
+      "locked": {
+        "lastModified": 1770555238,
+        "narHash": "sha256-Na/e6hj5FBgR08q1UrCbXTyccHk0YcaVacEfj/FaTKE=",
+        "owner": "lewisflude",
+        "repo": "signal-nix",
+        "rev": "2c7a7746597d12ce56a85725ba653e424aff5cb7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lewisflude",
+        "repo": "signal-nix",
+        "rev": "2c7a7746597d12ce56a85725ba653e424aff5cb7",
+        "type": "github"
+      }
+    },
+    "signal-palette": {
+      "locked": {
+        "lastModified": 1768685232,
+        "narHash": "sha256-0sn0ugGm3Ae8sEZhtpL+gz8fo81D+2x6HH5wBdYpji8=",
+        "owner": "lewisflude",
+        "repo": "signal-palette",
+        "rev": "398cafbf15772892350a3cc822e285842e292388",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lewisflude",
+        "repo": "signal-palette",
         "type": "github"
       }
     },

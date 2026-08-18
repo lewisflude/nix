@@ -68,6 +68,7 @@ in
         nixos.greeter
         nixos.greeterAutoLogin
         nixos.console
+        nixos.signal
         nixos.shell
         nixos.hardwareSupport
         nixos.desktopEnvironment
@@ -209,6 +210,7 @@ in
         homeManager.dms
         homeManager.flatpak
         homeManager.theming
+        homeManager.signal
         homeManager.developmentTools
         homeManager.javascript
 

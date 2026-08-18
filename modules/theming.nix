@@ -19,13 +19,10 @@ _: {
       gtk = lib.mkIf isLinux {
         enable = true;
         gtk4.theme = null;
-        # Set explicitly since signal-nix was removed. It used to apply exactly
-        # this pair, so naming it here keeps icons unchanged rather than falling
-        # back to whatever the GTK default resolves to.
-        iconTheme = {
-          name = "Adwaita";
-          package = pkgs.adwaita-icon-theme;
-        };
+        # signal-nix owns GTK colours (gtk3/gtk4 extraCss) AND the icon theme
+        # (it sets Adwaita itself), so no iconTheme here. gtk.enable above is what
+        # lets signal's autoEnable detect and theme GTK; the font stays ours since
+        # signal does not set gtk.font.
         # Cursor theme managed by home.pointerCursor in niri.nix
         font = {
           name = "Iosevka";
