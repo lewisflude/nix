@@ -11,7 +11,7 @@ _: {
       ...
     }:
     let
-      inherit (pkgs.stdenv) isDarwin;
+      inherit (pkgs.stdenv.hostPlatform) isDarwin;
       configPath = "${config.home.homeDirectory}/.config/organize/config.yaml";
     in
     lib.mkIf isDarwin {

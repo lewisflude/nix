@@ -56,7 +56,7 @@ in
 
   flake.modules.homeManager.dms =
     { pkgs, lib, ... }:
-    lib.mkIf pkgs.stdenv.isLinux {
+    lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       home.packages = [
         pkgs.danksearch
         pkgs.kdePackages.kimageformats

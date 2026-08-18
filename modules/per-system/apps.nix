@@ -42,7 +42,7 @@
           program = "${devour-flake}/bin/devour-flake";
         };
       }
-      // lib.optionalAttrs pkgs.stdenv.isLinux {
+      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
         # Linux-only apps (require iproute2, util-linux, network namespaces)
         calculate-qbittorrent-config = mkPogApp "calculate-qbittorrent-config";
         system-health = mkPogApp "system-health";

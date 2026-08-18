@@ -11,7 +11,7 @@
         # Development environments
         # From upstream flake, not nixpkgs: the channel lags devenv releases
         # by weeks. See the input comment in flake.nix.
-        inputs.devenv.packages.${pkgs.system}.devenv
+        inputs.devenv.packages.${pkgs.stdenv.hostPlatform.system}.devenv
 
         # Formatters
         pkgs.nixfmt

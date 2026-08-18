@@ -187,7 +187,7 @@ in
   # ==========================================================================
   flake.modules.homeManager.darwin =
     { lib, pkgs, ... }:
-    lib.mkIf pkgs.stdenv.isDarwin {
+    lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
       home.packages = [
         pkgs.ninja
         pkgs.portaudio

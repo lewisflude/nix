@@ -6,7 +6,7 @@
     let
       gimpVersion = lib.versions.majorMinor pkgs.gimp.version;
     in
-    lib.mkIf pkgs.stdenv.isLinux {
+    lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       home.packages = [ pkgs.gimp-with-plugins ];
 
       # Symlink PhotoGIMP shortcuts — the main value of the patch.

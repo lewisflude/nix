@@ -3,7 +3,7 @@ _: {
   flake.modules.homeManager.theming =
     { lib, pkgs, ... }:
     let
-      inherit (pkgs.stdenv) isLinux;
+      inherit (pkgs.stdenv.hostPlatform) isLinux;
     in
     {
       # =========================================================================

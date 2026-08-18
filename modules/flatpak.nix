@@ -13,7 +13,7 @@ _: {
   # ===========================================================================
   flake.modules.homeManager.flatpak =
     { lib, pkgs, ... }:
-    lib.mkIf pkgs.stdenv.isLinux {
+    lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       xdg.systemDirs.data = [
         "/var/lib/flatpak/exports/share"
         "$HOME/.local/share/flatpak/exports/share"

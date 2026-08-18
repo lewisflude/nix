@@ -161,7 +161,7 @@ _: {
   flake.modules.homeManager.audio =
     { pkgs, lib, ... }:
     let
-      inherit (pkgs.stdenv) isLinux isDarwin;
+      inherit (pkgs.stdenv.hostPlatform) isLinux isDarwin;
       audioKvmRecovery = pkgs.writeShellScript "audio-kvm-recovery" ''
         # Auto-switch to Apogee Symphony Desktop after KVM switch
         PREFERRED="Symphony Desktop"

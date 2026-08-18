@@ -3,7 +3,7 @@
 _: {
   flake.modules.homeManager.desktopApps =
     { lib, pkgs, ... }:
-    lib.mkIf pkgs.stdenv.isLinux {
+    lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       home.packages = [
         (pkgs.blender.override { cudaSupport = true; })
         pkgs.telegram-desktop

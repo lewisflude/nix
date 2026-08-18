@@ -60,7 +60,7 @@ _: {
       home.packages = [
         pkgs.vrc-get
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         unityhub-fhs
         unity-labwc
         pkgs.labwc

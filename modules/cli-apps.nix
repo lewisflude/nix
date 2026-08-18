@@ -101,7 +101,7 @@ _: {
         # Binary caching
         pkgs.cachix
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         pkgs.libnotify
         pkgs.lsof
       ];

@@ -11,7 +11,7 @@ _: {
     {
       xdg = {
         enable = true;
-        userDirs = lib.mkIf pkgs.stdenv.isLinux {
+        userDirs = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
           enable = true;
           createDirectories = true;
           setSessionVariables = true;

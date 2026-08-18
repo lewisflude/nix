@@ -108,7 +108,7 @@ in
       lib,
       ...
     }:
-    lib.mkIf pkgs.stdenv.isLinux {
+    lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       programs.mangohud = {
         enable = true;
         enableSessionWide = false;

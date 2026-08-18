@@ -54,7 +54,7 @@ in
   flake.modules.homeManager.ssh =
     { pkgs, ... }@hmArgs:
     let
-      inherit (pkgs.stdenv) isDarwin;
+      inherit (pkgs.stdenv.hostPlatform) isDarwin;
 
       # The local extra socket (source of forward) — on the machine you're sitting at.
       # isDarwin tells us which host we're building for.

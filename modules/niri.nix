@@ -68,7 +68,7 @@
       osConfig ? { },
       ...
     }:
-    lib.mkIf pkgs.stdenv.isLinux {
+    lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       home.packages = [
         pkgs.grim
         pkgs.slurp

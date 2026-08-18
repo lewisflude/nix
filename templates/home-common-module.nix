@@ -34,7 +34,7 @@ _: {
       };
 
       # User services (systemd --user on Linux)
-      services.example = lib.mkIf pkgs.stdenv.isLinux {
+      services.example = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         enable = true;
       };
     };

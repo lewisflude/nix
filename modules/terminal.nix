@@ -37,14 +37,14 @@ _: {
         osc52Copy
         osc52Test
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.wtype ];
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.wtype ];
 
       # Ghostty configuration
       # Linux: install from nixpkgs
       # macOS: package = null (installed via Homebrew), but config managed by home-manager
       programs.ghostty = {
         enable = true;
-        package = if pkgs.stdenv.isLinux then pkgs.ghostty else null;
+        package = if pkgs.stdenv.hostPlatform.isLinux then pkgs.ghostty else null;
         enableZshIntegration = true;
         settings = {
           window-decoration = "server";

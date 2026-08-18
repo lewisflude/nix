@@ -8,7 +8,7 @@ _: {
     {
       programs.zsh.shellAliases = {
         # System rebuild
-        switch = if pkgs.stdenv.isLinux then "nh os switch" else "nh darwin switch";
+        switch = if pkgs.stdenv.hostPlatform.isLinux then "nh os switch" else "nh darwin switch";
 
         # Core utilities.
         #

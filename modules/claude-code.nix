@@ -105,7 +105,7 @@ in
             ''}";
           };
         }
-        // lib.optionalAttrs pkgs.stdenv.isDarwin {
+        // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
           # KiCAD MCP (mixelpixx/KiCAD-MCP-Server, not in nixpkgs): a Node server
           # built as pkgs.kicad-mcp that drives KiCAD through its bundled Python
           # `pcbnew` bindings. KICAD_PYTHON must point at KiCAD.app's own python3
@@ -143,7 +143,7 @@ in
         };
 
       claudeDesktopConfigDir =
-        if pkgs.stdenv.isDarwin then "$HOME/Library/Application Support/Claude" else "$HOME/.config/Claude";
+        if pkgs.stdenv.hostPlatform.isDarwin then "$HOME/Library/Application Support/Claude" else "$HOME/.config/Claude";
 
       # Filesystem MCP is Claude Desktop-only: the CLI clients have native
       # Read/Edit/Write tools and don't need a duplicate. Paths use ~ which the
@@ -270,7 +270,7 @@ in
           done
         '';
       }
-      // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
         # KiCAD's bundled Python is 3.9 (EOL, no longer in nixpkgs) and the MCP
         # server's Python side needs sexpdata/Pillow/pydantic/cairosvg/etc. Build
         # a venv from KiCAD's own interpreter (--system-site-packages keeps pcbnew
@@ -493,6 +493,6 @@ in
           llmAgentPkgs = pkgs.llmAgents or { };
         in
         lib.optionals (llmAgentPkgs ? ccusage) [ llmAgentPkgs.ccusage ]
-        ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.claude-desktop ];
+        ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.claude-desktop ];
     };
 }

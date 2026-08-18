@@ -58,7 +58,7 @@ let
         url = "https://mcp.figma.com/mcp";
       };
     }
-    // lib.optionalAttrs pkgs.stdenv.isLinux {
+    // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
       hass = {
         command = "${pkgs.writeShellScript "mcp-hass" ''
           export HOMEASSISTANT_URL="$(cat /run/secrets/HOME_ASSISTANT_BASE_URL)"
