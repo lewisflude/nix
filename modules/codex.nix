@@ -37,14 +37,18 @@ in
           }) resolvedTrustedDirs
         );
 
-        profiles.trusted = {
-          approval_policy = "never";
-          sandbox_mode = "workspace-write";
-        };
-
         features.hooks = true;
 
         mcp_servers = mcpServers;
+      };
+
+      # Codex >= 0.147 uses "profile v2": each profile lives in its own
+      # $CODEX_HOME/<name>.config.toml, layered over config.toml. A legacy
+      # [profiles.<name>] table (or a top-level `profile = ...` selector) in
+      # config.toml is a hard error the moment `--profile` is passed.
+      codexTrustedProfile = {
+        approval_policy = "never";
+        sandbox_mode = "workspace-write";
       };
     in
     {
@@ -93,11 +97,57 @@ in
         }
       );
 
+      # Move any legacy [profiles.<name>] table out of config.toml and into
+      # <name>.config.toml before the cleanup below deletes it, so hand-tuned
+      # profile keys survive the migration.
+      home.activation.codexProfileMigration = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        legacy_config=${lib.escapeShellArg "${homeDirectory}/.codex/config.toml"}
+        [ -s "$legacy_config" ] || legacy_config=""
+
+        if [ -n "$legacy_config" ]; then
+          legacy_json=$(${pkgs.coreutils}/bin/mktemp)
+          if ${pkgs.yj}/bin/yj -tj < "$legacy_config" > "$legacy_json"; then
+            ${pkgs.jq}/bin/jq -r '.profiles // {} | keys[]' "$legacy_json" | while IFS= read -r profile_name; do
+              profile_file=${lib.escapeShellArg "${homeDirectory}/.codex"}/"$profile_name".config.toml
+              profile_existing=$(${pkgs.coreutils}/bin/mktemp)
+              profile_merged=$(${pkgs.coreutils}/bin/mktemp)
+              profile_toml=$(${pkgs.coreutils}/bin/mktemp)
+
+              if [ -s "$profile_file" ] && ${pkgs.yj}/bin/yj -tj < "$profile_file" > "$profile_existing"; then
+                :
+              else
+                ${pkgs.coreutils}/bin/printf '{}' > "$profile_existing"
+              fi
+
+              # Legacy keys lose to whatever the profile file already declares.
+              ${pkgs.jq}/bin/jq --arg name "$profile_name" \
+                --slurpfile existing "$profile_existing" \
+                '(.profiles[$name] // {}) * $existing[0]' "$legacy_json" > "$profile_merged"
+              ${pkgs.yj}/bin/yj -jt < "$profile_merged" > "$profile_toml"
+              $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$profile_toml" "$profile_file"
+
+              $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$profile_existing" "$profile_merged" "$profile_toml"
+            done
+          else
+            echo "warning: failed to parse $legacy_config during Codex profile migration; leaving it unchanged" >&2
+          fi
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$legacy_json"
+        fi
+      '';
+
+      home.activation.codexTrustedProfile = lib.hm.dag.entryAfter [ "codexProfileMigration" ] (
+        aiCli.mkJsonMergeActivation pkgs {
+          format = "toml";
+          path = "${homeDirectory}/.codex/trusted.config.toml";
+          desired = codexTrustedProfile;
+        }
+      );
+
       home.activation.codexConfigCleanup =
         let
           trustedDirArgs = lib.escapeShellArgs resolvedTrustedDirs;
         in
-        lib.hm.dag.entryAfter [ "codexConfig" ] ''
+        lib.hm.dag.entryAfter [ "codexConfig" "codexTrustedProfile" ] ''
           cleanup_codex_config() {
             local config_file=$1
             local jq_filter=$2
@@ -152,6 +202,8 @@ in
             | del(.mcp_servers.time)
             | del(.mcp_servers.git.args)
             | del(.mcp_servers.nixos.args)
+            | del(.profile)
+            | del(.profiles)
             | .features.hooks = true
           '
           PROJECT_CODEX_CLEANUP='
