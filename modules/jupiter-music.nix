@@ -58,6 +58,13 @@ in
           exit 0
         fi
 
+        # Bail out silently when jupiter is unreachable. Without this, the
+        # Finder mount below raises a modal "problem connecting to the server"
+        # alert on every StartInterval tick while the server is down.
+        if ! /usr/bin/nc -z -G 2 -w 2 ${jupiterIp} 445 >/dev/null 2>&1; then
+          exit 0
+        fi
+
         # Finder's "mount volume" goes through the same Keychain auth path as
         # `open smb://...`, but without surfacing a Finder window each time.
         /usr/bin/osascript -e 'tell application "Finder" to mount volume "${mountUrl}"' \
