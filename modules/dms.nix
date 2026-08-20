@@ -45,14 +45,7 @@ in
     let
       pkgs = inputs.danksearch.packages.${prev.stdenv.hostPlatform.system} or null;
     in
-    if pkgs != null then
-      {
-        danksearch = pkgs.default.overrideAttrs (_old: {
-          vendorHash = "sha256-Gq3tVwe39m5KGfkI3DEnQEQEGs/cLDCiwx6XFM61f6c=";
-        });
-      }
-    else
-      { };
+    if pkgs != null then { danksearch = pkgs.default; } else { };
 
   flake.modules.homeManager.dms =
     { pkgs, lib, ... }:

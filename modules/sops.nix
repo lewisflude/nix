@@ -58,6 +58,9 @@ in
           QDRANT_API_KEY = mkSecret { allowUserRead = true; };
           PINECONE_API_KEY = mkSecret { allowUserRead = true; };
           E2B_API_KEY = mkSecret { allowUserRead = true; };
+          UNSPLASH_API_KEY = mkSecret { allowUserRead = true; };
+          PEXELS_API_KEY = mkSecret { allowUserRead = true; };
+          PIXABAY_API_KEY = mkSecret { allowUserRead = true; };
           "samba/lewisflude-password" = mkSecret { } // {
             restartUnits = [ "samba-smbd.service" ];
           };
@@ -93,6 +96,9 @@ in
           CIRCLECI_TOKEN = mkDarwinSecret;
           GITHUB_TOKEN = mkDarwinSecret;
           KAGI_API_KEY = mkDarwinSecret;
+          UNSPLASH_API_KEY = mkDarwinSecret;
+          PEXELS_API_KEY = mkDarwinSecret;
+          PIXABAY_API_KEY = mkDarwinSecret;
           OPENAI_API_KEY = mkDarwinSecret;
           HOME_ASSISTANT_TOKEN = mkDarwinSecret;
           "samba/lewisflude-password" = mkDarwinSecret;

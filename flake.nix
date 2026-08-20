@@ -86,18 +86,18 @@
     };
     # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
     dms = {
-      url = "github:AvengeMedia/DankMaterialShell/eb5afcdc40ea5446c27e18552ff4a19f9daf9484";
+      url = "github:AvengeMedia/DankMaterialShell/fde8bb64871f5cfd0175145eca5cc5ee66c887c6";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     dms-plugin-registry = {
-      url = "github:AvengeMedia/dms-plugin-registry/fde8456bb08af0715041451592c461af66709b70";
+      url = "github:AvengeMedia/dms-plugin-registry/422e564cf9a3e1b03f69e4ad5d8743fb70de76fd";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     danksearch = {
-      # Pinned to last-good rev: HEAD (ef9b768, 2026-07-14 "migrate to dankgo
-      # common modules") ships an inconsistent vendor/modules.txt and fails to
-      # build. This rev's upstream vendorHash matches the override in modules/dms.nix.
-      url = "github:AvengeMedia/danksearch/1269b4688cc9";
+      # Pinned by rev — bump deliberately. Upstream fixed the broken
+      # vendor/modules.txt in 4b4905e (2026-07-19); keep the vendorHash
+      # override in modules/dms.nix in sync when bumping.
+      url = "github:AvengeMedia/danksearch/632c2909bb1bb534b574c22c1347de0e6521e58a";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     solaar = {
@@ -146,7 +146,7 @@
     };
     # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
     comfyui = {
-      url = "github:utensils/nix-comfyui/8a90889efc8fae81a8e03b8d9a8406c9f8ff425b";
+      url = "github:utensils/nix-comfyui/328374fa65e767378bc09fba9a2fa23b7b8536c1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents = {
@@ -155,7 +155,7 @@
     };
     # Pinned by rev — bump deliberately to control when expensive rebuilds happen.
     audio-nix = {
-      url = "github:polygon/audio.nix/d2a8d0ae02658b688b93e18c6f8c4e88f576db69";
+      url = "github:polygon/audio.nix/5f5bf980572d476f5ff6b3ae12c4e4da7e6b3d3e";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hyprcursor-phinger = {

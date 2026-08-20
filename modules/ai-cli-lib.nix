@@ -68,6 +68,44 @@ let
         ''}";
       };
     }
+    //
+      lib.optionalAttrs
+        (lib.any (secretAvailable osConfig) [
+          "UNSPLASH_API_KEY"
+          "PEXELS_API_KEY"
+          "PIXABAY_API_KEY"
+        ])
+        {
+          # Stock images (Zulelee/stock-images-mcp): not on PyPI, so uvx installs
+          # straight from the git tag. Pinned to a rev so a push upstream can't
+          # silently change what runs. Each of the three providers is independent:
+          # the server skips any platform whose key is unset, so this is enabled as
+          # soon as *one* key exists in sops.
+          stock-images = {
+            command = "${pkgs.writeShellScript "mcp-stock-images" (
+              lib.concatStrings (
+                map
+                  (
+                    var:
+                    lib.optionalString (secretAvailable osConfig var) ''
+                      export ${var}="$(cat ${lib.escapeShellArg (secretPath osConfig var)})"
+                    ''
+                  )
+                  [
+                    "UNSPLASH_API_KEY"
+                    "PEXELS_API_KEY"
+                    "PIXABAY_API_KEY"
+                  ]
+              )
+              + ''
+                ${uvxEnv pkgs}
+                exec ${pkgs.uv}/bin/uvx \
+                  --from "git+https://github.com/Zulelee/stock-images-mcp@35b43441d648ca7fc60e3196f25c1d3eef82ca86" \
+                  stock-images-mcp "$@"
+              ''
+            )}";
+          };
+        }
     // lib.optionalAttrs (secretAvailable osConfig "GITHUB_TOKEN") {
       github = {
         command = "${pkgs.writeShellScript "mcp-github" ''
