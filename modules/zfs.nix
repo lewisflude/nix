@@ -38,6 +38,22 @@ _: {
       # here. Revisit once 2.4.x has proven stable upstream.
       boot.zfs.package = lib.mkDefault pkgs.zfs_2_3;
 
+      # Keep block cloning off — explicitly, not by trusting the default.
+      # On 2026-07-18 the bclone crash above was "fixed" by deleting the
+      # `zfs_bclone_enabled=1` line and relying on the default being 0. That
+      # held on 2.4.3, but the 2.3 pin three days later moved us to 2.3.8,
+      # where the default is 1 — so block cloning came back on silently and
+      # ran that way until 2026-08-22, when a live read of
+      # /sys/module/zfs/parameters/zfs_bclone_enabled showed 1. A default is
+      # not a setting; pin it.
+      #
+      # It is still worth pinning off on 2.3.8 specifically: zfs-2.3.9
+      # (2026-08-21) carries "Fix reads for blocks freed after being cloned"
+      # (openzfs PR #18421, #18724), where such reads return wrong content.
+      # nixpkgs is still on 2.3.8, so we are running with that bug live.
+      # Revisit once zfs_2_3 >= 2.3.9 is in nixpkgs.
+      boot.extraModprobeConfig = "options zfs zfs_bclone_enabled=0";
+
       # Auto-recover from a wedged kernel thread instead of hanging indefinitely.
       # On 2026-06-21 a `zfs list` (run by the frequent auto-snapshot timer) hit an
       # OpenZFS spl_panic in fnvlist_pack; the thread died holding ZFS locks, txg_sync
