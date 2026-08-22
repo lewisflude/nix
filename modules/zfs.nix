@@ -52,7 +52,15 @@ _: {
       # (openzfs PR #18421, #18724), where such reads return wrong content.
       # nixpkgs is still on 2.3.8, so we are running with that bug live.
       # Revisit once zfs_2_3 >= 2.3.9 is in nixpkgs.
-      boot.extraModprobeConfig = "options zfs zfs_bclone_enabled=0";
+      #
+      # kernelParams, NOT boot.extraModprobeConfig: `/` is npool/root, so zfs
+      # loads in the initrd, before the final system's /etc/modprobe.d exists.
+      # systemd-initrd does copy modprobe.d/nixos.conf in, so modprobe config
+      # happens to work today — but only while boot.initrd.systemd.enable is
+      # true, and a silently-reverted bclone setting is exactly the failure we
+      # are fixing. The kernel command line applies at module load either way.
+      # This is also the form the NixOS ZFS wiki uses (`zfs.zfs_arc_max=...`).
+      boot.kernelParams = [ "zfs.zfs_bclone_enabled=0" ];
 
       # Auto-recover from a wedged kernel thread instead of hanging indefinitely.
       # On 2026-06-21 a `zfs list` (run by the frequent auto-snapshot timer) hit an
