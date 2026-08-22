@@ -24,8 +24,6 @@ in
         inputs.musnix.nixosModules.musnix
         inputs.vpn-confinement.nixosModules.default
         inputs.dms.nixosModules.default
-        inputs.dms.nixosModules.greeter
-        inputs.solaar.nixosModules.default
 
         # ═══════════════════════════════════════════════════════════════════════
         # Core Modules (dendritic: each concern has its own module)
@@ -65,7 +63,6 @@ in
         nixos.niri
         nixos.graphics
         nixos.fonts
-        nixos.greeter
         nixos.greeterAutoLogin
         nixos.console
         nixos.signal

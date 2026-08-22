@@ -1,27 +1,18 @@
 # Greeter Configuration
-# greetd with DMS greeter and (optionally) auto-login.
-# Composition is dendritic: import nixos.greeter alone for the login screen,
-# or also import nixos.greeterAutoLogin to skip the screen and auto-login as config.username.
-# Follows: https://danklinux.com/docs/dankmaterialshell/nixos-flake
-{ config, inputs, ... }:
+# greetd auto-login straight into a niri session.
+#
+# The DankMaterialShell greeter used to live in the dms flake as
+# `programs.dank-material-shell.greeter`. Upstream moved it to a separate
+# dank-greeter repo (`programs.dms-greeter`) and left `nixosModules.greeter`
+# as an empty stub, so the old option no longer exists. We don't re-add it:
+# auto-login skips the login screen entirely, so a greeter UI would never be
+# shown. greetd itself is still what starts the session.
+{ inputs, config, ... }:
 let
   # Captured from the top-level scope before the NixOS module shadows `config`.
   inherit (config) username;
 in
 {
-  flake.modules.nixos.greeter = _: {
-    # https://danklinux.com/docs/dankmaterialshell/home-manager#greeter-options
-    programs.dank-material-shell.greeter = {
-      enable = true;
-      compositor.name = "niri";
-      logs = {
-        save = true;
-        path = "/tmp/dms-greeter.log";
-      };
-      configHome = "/home/${username}";
-    };
-  };
-
   flake.modules.nixos.greeterAutoLogin =
     { pkgs, config, ... }:
     let
@@ -32,9 +23,12 @@ in
       };
     in
     {
-      services.greetd.settings = {
-        initial_session = session;
-        default_session = session;
+      services.greetd = {
+        enable = true;
+        settings = {
+          initial_session = session;
+          default_session = session;
+        };
       };
     };
 }

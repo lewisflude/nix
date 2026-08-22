@@ -720,24 +720,6 @@
         "type": "github"
       }
     },
-    "flake-utils_4": {
-      "inputs": {
-        "systems": "systems_6"
-      },
-      "locked": {
-        "lastModified": 1694529238,
-        "narHash": "sha256-zsNZZGTGnMOf9YpHKJqMSsa0dXbfmxeoJ7xHlrt+xmY=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "ff7b65b44d01cf9ba6a71320833626af21126384",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "ghostty": {
       "flake": false,
       "locked": {
@@ -1682,7 +1664,6 @@
         "process-compose-flake": "process-compose-flake",
         "services-flake": "services-flake",
         "signal-nix": "signal-nix",
-        "solaar": "solaar",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix_4",
         "vpn-confinement": "vpn-confinement"
@@ -1849,26 +1830,6 @@
         "type": "github"
       }
     },
-    "solaar": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "utils": "utils"
-      },
-      "locked": {
-        "lastModified": 1783018147,
-        "narHash": "sha256-mqQiBqpTYNFxA/LyOdTIpvV+B1/cNOB38aYyXj3iXvY=",
-        "rev": "1870d5bd8c5ddb54b64eb67c6c32fead1aab9276",
-        "revCount": 87,
-        "type": "tarball",
-        "url": "https://api.flakehub.com/f/pinned/Svenum/Solaar-Flake/0.1.8/019f242c-41c0-7c53-8623-829eb5b3e441/source.tar.gz"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://flakehub.com/f/Svenum/Solaar-Flake/%2A.tar.gz"
-      }
-    },
     "sops-nix": {
       "inputs": {
         "nixpkgs": [
@@ -1964,21 +1925,6 @@
         "type": "github"
       }
     },
-    "systems_6": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
@@ -2060,25 +2006,6 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "type": "github"
-      }
-    },
-    "utils": {
-      "inputs": {
-        "flake-utils": "flake-utils_4"
-      },
-      "locked": {
-        "lastModified": 1779563444,
-        "narHash": "sha256-+rEagECcF6BhWfLs8VCkPqsBuxxSSIRxMlgjXj6G8UQ=",
-        "owner": "gytis-ivaskevicius",
-        "repo": "flake-utils-plus",
-        "rev": "a00f6f51907b5c74d2fde086b10b19d446d15717",
-        "type": "github"
-      },
-      "original": {
-        "owner": "gytis-ivaskevicius",
-        "repo": "flake-utils-plus",
-        "rev": "a00f6f51907b5c74d2fde086b10b19d446d15717",
         "type": "github"
       }
     },

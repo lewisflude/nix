@@ -100,10 +100,6 @@
       url = "github:AvengeMedia/danksearch/632c2909bb1bb534b574c22c1347de0e6521e58a";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    solaar = {
-      url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     # Bleeding-edge XR/VR packages (wivrn, wayvr, monado, opencomposite, ...).
