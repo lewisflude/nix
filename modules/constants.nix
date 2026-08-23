@@ -40,7 +40,6 @@ let
       # Container supplemental services
       homarr = 7575;
       wizarr = 5690;
-      jellystat = 3000;
       termix = 8083;
       janitorr = 8485;
       filebrowser = 8400;

@@ -58,7 +58,6 @@ let
     inherit (constants.ports.services) bazarr;
     inherit (constants.ports.services) cleanuparr;
     inherit (constants.ports.services) autopulse;
-    inherit (constants.ports.services) jellystat;
     inherit (constants.ports.services) byparr;
 
     inherit (constants.ports.services) janitorr;

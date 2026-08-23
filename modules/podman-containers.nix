@@ -152,30 +152,17 @@ in
         ];
       };
 
-      # Janitorr + Jellystat SOPS secrets — bulk-defined.
-      # Janitorr restartUnits use the media-lib helper; jellystat needs a postgres owner
-      # so it's defined separately.
+      # Janitorr SOPS secrets — bulk-defined via the media-lib helper.
       sops.secrets =
-        (media.restartUnits
+        media.restartUnits
           [ "podman-janitorr.service" ]
           [
             "janitorr-sonarr-api-key"
             "janitorr-radarr-api-key"
             "janitorr-jellyfin-api-key"
             "janitorr-jellyfin-password"
-            "janitorr-jellystat-api-key"
             "janitorr-jellyseerr-api-key"
-          ]
-        )
-        // {
-          "jellystat-postgres-password" = {
-            owner = "postgres";
-            restartUnits = [ "podman-jellystat.service" ];
-          };
-          "jellystat-jwt-secret" = {
-            restartUnits = [ "podman-jellystat.service" ];
-          };
-        };
+          ];
 
       # Janitorr config generated from sops template (replaces sed-based preStart injection)
       sops.templates."janitorr-application.yml" = {
@@ -255,10 +242,6 @@ in
               url: "http://localhost:${toString constants.ports.services.seerr}"
               api-key: "${nixosArgs.config.sops.placeholder."janitorr-jellyseerr-api-key"}"
               match-server: false
-            jellystat:
-              enabled: true
-              url: "http://localhost:${toString constants.ports.services.jellystat}"
-              api-key: "${nixosArgs.config.sops.placeholder."janitorr-jellystat-api-key"}"
         '';
       };
 
@@ -295,121 +278,19 @@ in
         '';
       };
 
-      # Janitorr depends on Sonarr/Radarr/Jellyfin/Jellystat/Jellyseerr being ready
+      # Janitorr depends on Sonarr/Radarr/Jellyfin/Jellyseerr being ready
       systemd.services.podman-janitorr = {
         after = [
           "sonarr.service"
           "radarr.service"
           "jellyfin.service"
           "seerr.service"
-          "podman-jellystat.service"
         ];
         wants = [
           "sonarr.service"
           "radarr.service"
           "jellyfin.service"
           "seerr.service"
-          "podman-jellystat.service"
-        ];
-      };
-
-      # Jellystat - Jellyfin statistics (PostgreSQL runs natively, not containerized)
-      # The container hardcodes its database name as `jfstat` and runs
-      # `CREATE DATABASE jfstat` unconditionally on every start, so we
-      # provision the DB declaratively here and let that CREATE collide.
-      # `ensureDBOwnership` only works when DB name == user name, so ownership
-      # is granted by the jellystat-db-password oneshot below.
-      #
-      # createdb is granted even though we create jfstat ourselves and the role
-      # never needs to make a database. backend/create_database.js suppresses
-      # the failed CREATE only when the error text contains "already exists";
-      # without this clause Postgres rejects the statement at the privilege
-      # check — which runs *before* the name-collision check — so it returns
-      # "permission denied to create database" instead, misses the suppression,
-      # and logs a stack trace on every single start. Granting createdb is what
-      # lets the CREATE fail the *intended* way. Upstream documents no required
-      # privileges at all (CyferShepard/Jellystat#327 is unanswered), so this is
-      # derived from the source rather than from docs.
-      services.postgresql = {
-        enable = true;
-        ensureDatabases = [ "jfstat" ];
-        ensureUsers = [
-          {
-            name = "jellystat";
-            ensureClauses.createdb = true;
-          }
-        ];
-        authentication = ''
-          host jfstat jellystat 127.0.0.1/32 md5
-          host jfstat jellystat ::1/128 md5
-        '';
-      };
-
-      # Set the jellystat password and grant DB ownership after ensureUsers
-      # / ensureDatabases have run. Both statements are idempotent.
-      # `ensureDatabases` runs in postgresql-setup.service, NOT in
-      # postgresql.service's postStart, so we must order against the setup
-      # unit explicitly — otherwise the ALTER DATABASE races with DB creation.
-      systemd.services.jellystat-db-password = {
-        after = [ "postgresql-setup.service" ];
-        requires = [ "postgresql-setup.service" ];
-        before = [ "podman-jellystat.service" ];
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          User = "postgres";
-          Group = "postgres";
-        };
-        script = ''
-          PASSWORD=$(cat ${nixosArgs.config.sops.secrets."jellystat-postgres-password".path})
-          psql=${nixosArgs.config.services.postgresql.package}/bin/psql
-          $psql -c "ALTER USER jellystat WITH PASSWORD '$PASSWORD';"
-          $psql -c "ALTER DATABASE jfstat OWNER TO jellystat;"
-        '';
-      };
-
-      virtualisation.oci-containers.containers.jellystat = {
-        image = "docker.io/cyfershepard/jellystat:1.1.9";
-        environment = {
-          POSTGRES_USER = "jellystat";
-          POSTGRES_IP = "localhost";
-          POSTGRES_PORT = "5432";
-          # PGDATABASE, not POSTGRES_DB. backend/create_database.js builds its
-          # pg.Client with no `database` field, so node-pg falls back to
-          # PGDATABASE and then to the *user* name — it was connecting to a
-          # nonexistent db "jellystat" purely to issue `CREATE DATABASE jfstat`,
-          # logging a stack trace on every start. Pointing it at jfstat makes
-          # that CREATE fail with "already exists", which the app swallows.
-          # backend/db.js already sets database explicitly, so the app itself
-          # was always fine; this only silences the bootstrap noise.
-          PGDATABASE = "jfstat";
-          TZ = timezone;
-        };
-        environmentFiles = [
-          nixosArgs.config.sops.templates."jellystat.env".path
-        ];
-        volumes = [
-          "${configRoot}/jellystat/backup:/app/backend/backup-data"
-        ];
-        extraOptions = [ "--network=host" ];
-      };
-
-      # Jellystat env template (secrets are defined above alongside janitorr's)
-      sops.templates."jellystat.env".content = ''
-        POSTGRES_PASSWORD=${nixosArgs.config.sops.placeholder."jellystat-postgres-password"}
-        JWT_SECRET=${nixosArgs.config.sops.placeholder."jellystat-jwt-secret"}
-      '';
-
-      # Jellystat depends on PostgreSQL and its password being set
-      systemd.services.podman-jellystat = {
-        after = [
-          "postgresql.service"
-          "jellystat-db-password.service"
-        ];
-        requires = [
-          "postgresql.service"
-          "jellystat-db-password.service"
         ];
       };
 
@@ -421,8 +302,6 @@ in
         (media.mkContainerDir "${configRoot}/homarr/icons" uid gid)
         (media.mkContainerDir "${configRoot}/homarr/data" uid gid)
         (media.mkContainerDir "${configRoot}/janitorr" uid gid)
-        (media.mkContainerDir "${configRoot}/jellystat" uid gid)
-        (media.mkContainerDir "${configRoot}/jellystat/backup" uid gid)
         # Calibre-Web-Automated: config owned by media user; book library + ingest
         # under /mnt/storage/books (0770 media media, like the rest of the stack).
         (media.mkContainerDir "${configRoot}/calibre-web-automated" mediaUid mediaGid)
@@ -436,7 +315,6 @@ in
       networking.firewall.allowedTCPPorts = [
         constants.ports.services.homarr
         constants.ports.services.janitorr
-        constants.ports.services.jellystat
       ];
 
       # Enable automatic image pruning (nixpkgs provides podman-prune service)

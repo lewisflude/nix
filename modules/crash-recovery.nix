@@ -28,9 +28,12 @@
 # MCE on 2026-08-11 keeps a hardware contribution on the table without being
 # evidence for it.
 #
-# Either way this module is about *surviving and reporting* crashes, not
-# preventing them — prevention was the mergerfs change, and if it worked the
-# reporter below is how we find out.
+# This module was originally about *surviving and reporting* crashes, not
+# preventing them — prevention was the mergerfs change, and the reporter below
+# is how we found out it was not enough. Section 3 is the one exception, added
+# 2026-08-23 once the whole pstore corpus was finally read end to end: it is a
+# prevention knob, and it lives here because crash policy should be readable in
+# one place.
 _: {
   flake.modules.nixos.crashRecovery =
     {
@@ -129,6 +132,67 @@ _: {
         RebootWatchdogSec = "10min";
       };
 
+      # ─────────────────────────────────────────────────────────────────────
+      # 3. Cap CPU frequency — the one knob that slows the actual fault
+      # ─────────────────────────────────────────────────────────────────────
+      #
+      # Reading all ~70 pstore records at once on 2026-08-22 changed the
+      # diagnosis. Individually each crash looked like a software bug and was
+      # filed as one; together they are ~40 *distinct* faulting RIPs spread
+      # across unrelated subsystems (nvidia, zram, the scheduler, VFS, page
+      # cache, slab, memcg accounting, coredump). ZFS accounts for ~6 of them,
+      # which is why every ZFS-version fix here was followed by more crashes
+      # somewhere else. Three findings settle it: the kernel's own linked-list
+      # corruption detector (__list_add_valid_or_report) fired ~12 times, one
+      # usercopy_abort, and several records where RIP is garbage — 0x0, 0x81,
+      # and once a heap address being executed. Software does not set RIP to
+      # 0x81. Crash-days/month then accelerated: Jun 3, Jul 12, Aug 8-in-23.
+      #
+      # That is an i9-13900K in the Raptor Lake Vmin-shift population,
+      # corroborated by the corrected L2 icache MCE of 2026-08-11. Microcode is
+      # already 0x137 (early-loaded over the board's 0x12b), but microcode only
+      # stops *further* degradation — a part that has already shifted stays
+      # shifted. The real fix is an RMA under Intel's extended 5-year warranty.
+      #
+      # The direction of the workaround is counterintuitive and easy to get
+      # backwards. Vmin shift means the core now needs *more* voltage than it
+      # used to, so an undervolt makes it worse, and the crashes cluster at idle
+      # and light load rather than under stress. But adding voltage accelerates
+      # the damage. Lowering the *frequency* is the only lever that helps both
+      # ways at once: it drops the required Vmin and the requested VID together.
+      # Do not reach for intel-undervolt here — MSR 0x150 is locked on desktop
+      # RPL and it is the wrong direction regardless.
+      #
+      # Why tmpfiles rather than a service or a kernel parameter: per the
+      # kernel's intel_pstate documentation, max_perf_pct is a sysfs attribute
+      # with no command-line equivalent, and it resets to 100 on every boot (the
+      # only related parameter, intel_pstate=per_cpu_perf_limits, *removes* the
+      # global attribute instead of setting it). There is no NixOS option for
+      # it. tmpfiles.d(5)'s `w` type — "write the argument parameter to a file,
+      # if the file exists" — is the documented mechanism for exactly this, and
+      # its own manual page uses a /proc/sys write as the example. It also
+      # re-applies on `nixos-rebuild switch`, not just at boot, which a
+      # boot-time oneshot would not.
+      #
+      # 86% of maximum turbo, i.e. roughly 5.8GHz -> ~5.0GHz on the P-cores.
+      # Chosen to be a meaningful step down while leaving the machine fast
+      # enough to not notice during normal desktop and transcode work; if
+      # crashes continue, lower it further before concluding it did not help.
+      #
+      # Plain `w` (not `w-`): the path is guaranteed to exist on this host, and
+      # if intel_pstate ever stops loading, a visible activation failure is the
+      # correct outcome for a mitigation this load-bearing — silence would let
+      # the box run uncapped without anyone noticing.
+      #
+      # Verify after switching:
+      #   cat /sys/devices/system/cpu/intel_pstate/max_perf_pct   # must read: 86
+      #
+      # This is a holding action, not a repair. It buys uptime until the CPU is
+      # replaced; it does not undo degradation that has already happened.
+      systemd.tmpfiles.settings."10-rpl-vmin-cap" = {
+        "/sys/devices/system/cpu/intel_pstate/max_perf_pct"."w".argument = "86";
+      };
+
       # Coredumps earn their keep here — the 2026-08-23 01:39 V8 abort in
       # homarr's Next.js render worker, and the Cleanuparr/Radarr/Lidarr SIGSEGV
       # cluster of 2026-08-17, are the evidence that the faults span unrelated
@@ -147,7 +211,7 @@ _: {
       };
 
       # ─────────────────────────────────────────────────────────────────────
-      # 3. Say something when it happens
+      # 4. Say something when it happens
       # ─────────────────────────────────────────────────────────────────────
       #
       # The forensics layer already worked and nobody knew: 96 pstore records
