@@ -42,6 +42,7 @@ where Ableton Live consumes the generated rack. The `drumrack` CLI handles the
    theme calls for it.
 3. Ask the user to confirm or swap individual pads.
 4. Build a JSON spec:
+
    ```json
    {
      "name": "<kit name>",
@@ -52,6 +53,7 @@ where Ableton Live consumes the generated rack. The `drumrack` CLI handles the
      ]
    }
    ```
+
 5. Pipe it: `echo '<spec-json>' | drumrack build-from-spec -`.
 
 ## Guardrails
