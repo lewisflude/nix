@@ -332,6 +332,68 @@ Every file having a different type means the reader must determine each file's
 role from context, and auto-importing becomes impossible because different files
 must be routed to different evaluations.
 
+### Shadowed `config`
+
+```nix
+{ config, ... }:                    # outer: the top-level (flake-parts) config
+{
+  flake.modules.nixos.foo =
+    { config, ... }:                # inner: the NixOS config — shadows the outer
+    { services.foo.keyFile = config.sops.secrets.foo.path; };
+}
+```
+
+**Violates:** Invariant 5 (top-level value sharing), in spirit — the two scopes
+become indistinguishable at the point of use.
+
+Every file is a top-level module *and* usually contributes a lower-level module,
+so two distinct `config` scopes exist in one file. Binding both to the name
+`config` makes which one a reference resolves to depend on its position in the
+file, and getting it wrong is silent: the wrong scope simply lacks the
+attribute, or — worse — has one.
+
+**A file must not have two `config` bindings in scope.** Satisfy this one of two
+ways:
+
+1. **The outer scope needs `config`** — name the lower-level module's arguments
+   and reach through them: `nixosArgs@{ pkgs, lib, ... }` / `hmArgs@{ pkgs, ... }`,
+   then `nixosArgs.config.sops.secrets.foo.path`. Unqualified `config` then
+   always means the top level. This is the convention in
+   [mightyiam/infra](https://github.com/mightyiam/infra), which uses
+   `nixosArgs` / `hmArgs` / `userArgs` throughout and never rebinds `config`.
+2. **The outer scope does not need `config`** — start the file `_:` or
+   `{ lib, ... }:` and destructure `config` normally in the lower-level module.
+   This is the convention in [vic/vix](https://github.com/vic/vix) and
+   [drupol/infra](https://github.com/drupol/infra).
+
+Capturing outer values in a `let` before shadowing does work, and several
+modules here relied on it, but it makes correctness depend on reading order and
+gives no error when a later edit gets it wrong. Do not rely on it.
+
+**Exception:** `perSystem = { config, ... }:` is flake-parts' own documented
+form; leave it as-is.
+
+### Feature module gated off by a host
+
+```nix
+# modules/hardware-errors.nix
+systemd = lib.mkIf config.hardware.rasdaemon.enable { ... };   # nothing here enables it
+```
+
+**Violates:** Invariant 3 (cross-class co-location) — the feature's closure is
+split across a feature file and a host file.
+
+If a module exists to consume a service, it should enable that service.
+Otherwise importing the feature does nothing until some host separately
+remembers the daemon, and the failure is silent. Importing a module should
+enable the feature it provides.
+
+This is distinct from an **optional integration**, which is fine and common:
+`lib.mkIf config.programs.zsh.enable` in a module that adds zsh completions is
+adding to something that may or may not be present, not disabling itself.
+nixpkgs does this throughout. The test is whether the `mkIf` guards an extra, or
+guards the entire point of the module.
+
 ---
 
 ## Common Misconceptions

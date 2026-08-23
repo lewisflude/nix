@@ -295,7 +295,15 @@ stdenv.mkDerivation (finalAttrs: {
 })
 ```
 
-This survives `overrideAttrs` correctly, where `rec` does not.
+This survives `overrideAttrs` correctly, where `rec` does not — `rec`
+self-references are fixed at definition time and ignore later overrides.
+
+**Caveat on that example:** referencing `finalAttrs.version` next to a literal
+`hash` makes `version` *look* overridable when it is not — override it alone and
+the hash no longer matches. nixpkgs warns about this at eval (issue #310373):
+override `version` **and** `src` together, or derive the version from the source
+itself, as `pkgs/kicad-mcp.nix` does with
+`lib.importJSON "${src}/package.json"`.
 
 ### 4.3 `pname` + `version`, not `name`
 
@@ -311,6 +319,20 @@ src = builtins.path { path = ./.; name = "myproject"; };
 New command-line tooling goes in `pkgs/pog-scripts/` — typed flags, `--help`,
 and shellcheck for free. Not a bare `writeShellScriptBin`, and not a new file in
 `scripts/` (see `CLAUDE.md`).
+
+Scope of this rule, so it is not over-applied:
+
+- It covers **new, user-facing** commands — things with flags, that a human
+  invokes and might need `--help` for.
+- It does **not** cover inline glue: systemd `ExecStart` wrappers, activation
+  hooks, MCP server launchers, udev helpers. `pkgs.writeShellApplication` is the
+  right tool there and is what nixpkgs itself uses.
+- POG scripts are delivered as `nix run .#<name>` apps via
+  `modules/per-system/apps.nix`, using a `perSystem` `pkgsWithPog`. NixOS-eval
+  `pkgs` has no `pog` attribute, so a script destined for
+  `environment.systemPackages` would first need the pog overlay wired into
+  `config.overlayList`. Weigh that before converting an existing
+  `writeShellApplication` that lives next to the feature it serves.
 
 ---
 
@@ -382,10 +404,16 @@ not.
 - [ ] Every `mkForce` has a comment justifying it
 - [ ] New options have `type`, `default`, `description`
 - [ ] Values flow through `config.*`, not `specialArgs` or direct imports
+- [ ] No two `config` bindings in scope in one file (use `nixosArgs` / `hmArgs`)
 - [ ] Module placed in the right scope (`nixos` vs `homeManager`)
+- [ ] Feature modules own their whole closure — a module does not gate itself
+      off on a daemon a host has to remember to enable
+- [ ] Host files carry only machine facts, not policy
 - [ ] `nixpkgs.*` not set from a Home Manager module (`useGlobalPkgs`)
 - [ ] `stateVersion` untouched
-- [ ] New CLI tooling is a POG script
+- [ ] New CLI tooling is a POG script (see §4.4 for what this excludes)
+- [ ] New constants earn their place (§3.6); no `defaultText` churn on
+      `internal` helper options (§3.5)
 - [ ] `nix fmt` and `nix flake check` pass
 
 ---
