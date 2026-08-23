@@ -181,21 +181,98 @@ If two modules fight over one value, the fix is usually an option, not a
 ### 3.4 Options are typed and documented
 
 When you add an option, give it a real `type`, a `default`, and a `description`.
-Use `defaultText` when the default is a computed expression, so docs do not leak
-store paths (see `modules/alerts.nix`).
 
-### 3.5 Do not reach across the module boundary
+Use `defaultText` only when the option is **rendered into a manual** and its
+default would render badly — chiefly `default = pkgs.foo`, which becomes a store
+path. That means options declared inside `flake.modules.nixos.*` /
+`flake.modules.homeManager.*`, which `documentation.nixos.enable` feeds to
+`nixosOptionsDoc`. See `modules/alerts.nix`.
+
+### 3.5 Top-level helper options: `types.raw`, `internal`, no `defaultText`
+
+`config.constants`, `config.myLib`, `config.containerLib`, `config.mediaLib`,
+`config.aiCli` and `config.overlayList` are `types.raw` + `readOnly`, and the
+helper-library ones also carry `internal = true; visible = false;`. **This is
+deliberate — do not flag the absent `defaultText` on them.**
+
+Why `types.raw`:
+
+- `raw` is `check = value: true; merge = mergeOneOption` — one definition,
+  passed through untouched, no recursion into the value. These options have
+  exactly one authoritative definition, which is what `mergeOneOption` enforces.
+- `types.anything` is wrong for anything containing lambdas: its merge applies
+  every definition to the argument and merges the results, which has caused real
+  infinite-recursion bugs upstream. Note `raw` does not accumulate — an option
+  that several modules contribute to needs `lazyAttrsOf raw` (see
+  `config.overlays`).
+- Upstream precedent: nixpkgs types `_module.args` as `lazyAttrsOf raw` +
+  `internal`; flake-parts types `processedFlake` as `raw` + `readOnly`.
+- **Typing `constants` as a submodule would not improve typo errors.** The
+  module system validates option *definitions*, never *reads*.
+  `config.constants.ports.services.jellyfn` gives the identical
+  `attribute 'jellyfn' missing … Did you mean jellyfin?` either way. Port values
+  are already range-checked where consumed (`allowedTCPPorts` is `listOf port`).
+
+Why no `defaultText`: it has **no effect on evaluation** — it is read in one
+place in nixpkgs (`optionAttrSetToDocList`), reachable only via
+`nixosOptionsDoc`, which this repo never calls on top-level options. And
+`internal = true` settles it structurally: `make-options-doc` filters on
+`opt.visible && !opt.internal` before rendering any default.
+
+### 3.6 When a value earns a place in `config.constants`
+
+All three must hold:
+
+1. **It is arbitrary** — not a well-known name like `127.0.0.1` or `/tmp`.
+2. **Two or more modules must agree on it**, or something breaks silently. See
+   the comment on `constants.networks.vpn` for the model case.
+3. **It could plausibly change** — a subnet, a port, a state version.
+
+A constant with one consumer is indirection for its own sake; inline it.
+`127.0.0.1` fails all three: it cannot change, and
+`"127.0.0.1:${toString port}"` reads better at every call site than a reference
+that sends you to another file to learn nothing.
+
+Deleting a constant with zero consumers is a fix, not a regression — but check
+first whether zero consumers means the *wiring* is missing rather than the
+constant being dead. `constants.defaults.locale` was the latter: nothing set
+`i18n.defaultLocale`, so the machine ran on the wrong locale entirely.
+
+`constants.ports` carries a duplicate-port assertion. If it fires, two services
+claim the same port — restructure rather than exempting.
+
+### 3.7 Do not reach across the module boundary
 
 Read values from `config.*` (platform scope) or the repo's top-level
 `config.constants` / `config.username`. Never `import ../lib/foo.nix` directly,
 and never thread values through `specialArgs`. This is the dendritic rule; see
 `DENDRITIC_PATTERN.md`.
 
-### 3.6 Prefer upstream options to hand-written files
+### 3.8 Prefer upstream options to hand-written files
 
 An option that already exists is tested, typed, and migrates with the release.
 Reach for `environment.etc` / `home.file` / `xdg.configFile` only when no option
 covers the setting. Verify the option exists before using it (§6).
+
+A hand-written blob is usually a bug in waiting, because it silently ignores
+every structured option for the same thing. `modules/security.nix` used to set
+`security.pam.services.greetd.text`, which replaced the generated stack and
+dropped `pinverification=1` from the u2f line — upstream's greetd module already
+delegates to `login`, so the correct fix was to delete the block entirely.
+
+**Exception — applications that own their config file at runtime.** Codex,
+Claude Code and Claude Desktop rewrite their own config (auth state, model
+selection, UI state). `programs.<x>.settings` installs a read-only store
+symlink, which breaks those writes. Such files are merged in at activation via
+`aiCli.mkJsonMergeActivation` — the same technique Home Manager itself ships as
+`impureConfigMerger` for `programs.zed-editor`, `programs.t3code` and
+`programs.prismlauncher`. Read the comment on that helper before "fixing" it.
+
+The exception is narrow: it covers only files the app **writes**. Files it
+merely reads — Codex skills, `<name>.config.toml` profiles — must use the
+upstream options, and getting that wrong has bitten here (a `home.file`-managed
+`SKILL.md` symlink is silently ignored by Codex, which only accepts a symlinked
+skill *directory*).
 
 ---
 

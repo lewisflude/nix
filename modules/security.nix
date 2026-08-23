@@ -42,6 +42,11 @@ in
             # also inert: greetd injects XDG_SESSION_CLASS itself, and per
             # pam_systemd(8) that env var takes precedence over `class=`.
 
+            # NOTE: `security.sudo.wheelNeedsPassword = false` below compiles to
+            # NOPASSWD on the %wheel rule, which means sudo never invokes PAM at
+            # all — so this line is currently inert. It is kept (rather than
+            # deleted) so that flipping wheelNeedsPassword back to true restores
+            # a password prompt rather than silently demanding a YubiKey touch.
             sudo.u2f.enable = false; # Use password for sudo (desktop workflow)
             login.u2f.enable = true; # YubiKey required at login (proves physical presence)
           };
@@ -59,7 +64,20 @@ in
           };
         };
         polkit.enable = true;
+
+        # Passwordless sudo: appropriate for a passwordless account with a
+        # YubiKey required at login. This is security policy rather than a
+        # property of any one machine, so it lives with the PAM configuration
+        # above instead of in a host's hardware file — the two interact (see the
+        # note on sudo.u2f.enable).
+        #
+        # `security.sudo.enable` is already true by default in nixpkgs, so only
+        # the policy is set here.
+        sudo.wheelNeedsPassword = false;
       };
+
+      # sudo requires wheel; this module is what makes wheel meaningful.
+      users.users.${username}.extraGroups = [ "wheel" ];
 
       services.gnome.gnome-keyring.enable = true;
 

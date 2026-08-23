@@ -21,6 +21,10 @@ in
         "vfio_pci"
       ];
 
+      # This module is what creates the libvirtd group, so it also grants
+      # membership rather than leaving a host file to remember.
+      users.users.${username}.extraGroups = [ "libvirtd" ];
+
       # Virtualization stack
       virtualisation.libvirtd = {
         enable = true;
