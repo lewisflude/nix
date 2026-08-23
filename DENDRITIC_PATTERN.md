@@ -346,7 +346,7 @@ must be routed to different evaluations.
 **Violates:** Invariant 5 (top-level value sharing), in spirit — the two scopes
 become indistinguishable at the point of use.
 
-Every file is a top-level module *and* usually contributes a lower-level module,
+Every file is a top-level module _and_ usually contributes a lower-level module,
 so two distinct `config` scopes exist in one file. Binding both to the name
 `config` makes which one a reference resolves to depend on its position in the
 file, and getting it wrong is silent: the wrong scope simply lacks the
@@ -356,10 +356,10 @@ attribute, or — worse — has one.
 ways:
 
 1. **The outer scope needs `config`** — name the lower-level module's arguments
-   and reach through them: `nixosArgs@{ pkgs, lib, ... }` / `hmArgs@{ pkgs, ... }`,
-   then `nixosArgs.config.sops.secrets.foo.path`. Unqualified `config` then
-   always means the top level. This is the convention in
-   [mightyiam/infra](https://github.com/mightyiam/infra), which uses
+   and reach through them: `nixosArgs@{ pkgs, lib, ... }` /
+   `hmArgs@{ pkgs, ... }`, then `nixosArgs.config.sops.secrets.foo.path`.
+   Unqualified `config` then always means the top level. This is the convention
+   in [mightyiam/infra](https://github.com/mightyiam/infra), which uses
    `nixosArgs` / `hmArgs` / `userArgs` throughout and never rebinds `config`.
 2. **The outer scope does not need `config`** — start the file `_:` or
    `{ lib, ... }:` and destructure `config` normally in the lower-level module.

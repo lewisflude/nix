@@ -208,7 +208,7 @@ Why `types.raw`:
 - Upstream precedent: nixpkgs types `_module.args` as `lazyAttrsOf raw` +
   `internal`; flake-parts types `processedFlake` as `raw` + `readOnly`.
 - **Typing `constants` as a submodule would not improve typo errors.** The
-  module system validates option *definitions*, never *reads*.
+  module system validates option _definitions_, never _reads_.
   `config.constants.ports.services.jellyfn` gives the identical
   `attribute 'jellyfn' missing … Did you mean jellyfin?` either way. Port values
   are already range-checked where consumed (`allowedTCPPorts` is `listOf port`).
@@ -234,7 +234,7 @@ A constant with one consumer is indirection for its own sake; inline it.
 that sends you to another file to learn nothing.
 
 Deleting a constant with zero consumers is a fix, not a regression — but check
-first whether zero consumers means the *wiring* is missing rather than the
+first whether zero consumers means the _wiring_ is missing rather than the
 constant being dead. `constants.defaults.locale` was the latter: nothing set
 `i18n.defaultLocale`, so the machine ran on the wrong locale entirely.
 
@@ -272,7 +272,7 @@ The exception is narrow: it covers only files the app **writes**. Files it
 merely reads — Codex skills, `<name>.config.toml` profiles — must use the
 upstream options, and getting that wrong has bitten here (a `home.file`-managed
 `SKILL.md` symlink is silently ignored by Codex, which only accepts a symlinked
-skill *directory*).
+skill _directory_).
 
 ---
 
@@ -299,7 +299,7 @@ This survives `overrideAttrs` correctly, where `rec` does not — `rec`
 self-references are fixed at definition time and ignore later overrides.
 
 **Caveat on that example:** referencing `finalAttrs.version` next to a literal
-`hash` makes `version` *look* overridable when it is not — override it alone and
+`hash` makes `version` _look_ overridable when it is not — override it alone and
 the hash no longer matches. nixpkgs warns about this at eval (issue #310373):
 override `version` **and** `src` together, or derive the version from the source
 itself, as `pkgs/kicad-mcp.nix` does with
