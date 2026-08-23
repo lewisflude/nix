@@ -32,17 +32,8 @@ in
         cpu.intel.updateMicrocode = true;
         enableAllFirmware = true;
         i2c.enable = true;
-
-        # Decode machine check exceptions. The kernel logged a bare
-        # "mce: [Hardware Error]: Machine check events logged" on 2026-08-08
-        # with nothing to decode it, seven hours before the memory corruption
-        # that killed the box — leaving RAM/IMC unruled-out. record=true backs
-        # the event log with sqlite so `ras-mc-ctl --errors` can report DIMM,
-        # bank and error type after the fact.
-        rasdaemon = {
-          enable = true;
-          record = true;
-        };
+        # rasdaemon lives in modules/hardware-errors.nix, the module that reads
+        # its database.
       };
 
       # =========================================================================
@@ -197,27 +188,21 @@ in
         HandleLidSwitch = "ignore";
       };
 
-      # Passwordless sudo: appropriate for passwordless account with YubiKey at login
-      security.sudo = {
-        enable = true;
-        wheelNeedsPassword = false;
-      };
-
       # =========================================================================
       # User Credentials & Groups
       # =========================================================================
-      users.mutableUsers = false;
+      # sudo policy now lives in modules/security.nix, which owns PAM for this
+      # account; "wheel" and "libvirtd" moved to the modules that create the
+      # need (security.nix and gpu-passthrough.nix). What stays here is the
+      # host's own credentials plus groups tied to this machine's hardware.
       users.users.${username} = {
         hashedPasswordFile = nixosArgs.config.sops.secrets.hashedPassword.path;
         openssh.authorizedKeys.keys = constants.authorizedKeys;
-        # "media" is contributed by media-user.nix, which owns that group.
         extraGroups = [
-          "dialout"
-          "wheel"
-          "i2c"
+          "dialout" # serial/MIDI hardware on this box
+          "i2c" # paired with hardware.i2c.enable above
+          "uinput" # keyd/mouse remapping on this box
           "video"
-          "uinput"
-          "libvirtd"
         ];
       };
     };

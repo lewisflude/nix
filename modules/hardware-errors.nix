@@ -36,11 +36,23 @@ _: {
   flake.modules.nixos.hardwareErrors =
     {
       pkgs,
-      lib,
       config,
       ...
     }:
     {
+      # This module exists to consume rasdaemon's database, so it owns the
+      # daemon rather than gating on a host remembering to switch it on --
+      # importing the feature enables what the feature needs. `record` is
+      # already the nixpkgs default, so only `enable` is set here.
+      #
+      # Decodes machine check exceptions: the kernel logged a bare
+      # "mce: [Hardware Error]: Machine check events logged" on 2026-08-08 with
+      # nothing to decode it, seven hours before the memory corruption that
+      # killed the box, leaving RAM/IMC unruled-out. The sqlite-backed event log
+      # is what lets `ras-mc-ctl --errors` report DIMM, bank and error type
+      # after the fact.
+      hardware.rasdaemon.enable = true;
+
       environment.systemPackages = [
         # `sensors` was simply absent on this host, so package temperature and
         # thermal behaviour around a crash were unobservable. coretemp
@@ -61,7 +73,7 @@ _: {
 
       # Everything below reads rasdaemon's database, so it is meaningless
       # without the daemon that fills it.
-      systemd = lib.mkIf config.hardware.rasdaemon.enable {
+      systemd = {
         services.mce-watch = {
           description = "Report new machine check events recorded by rasdaemon";
 

@@ -12,6 +12,11 @@ in
 {
   # NixOS user account
   flake.modules.nixos.users = _: {
+    # Declarative accounts: passwords come from sops (see modules/sops.nix and
+    # each host's hashedPasswordFile), never from `passwd`. Host-independent
+    # account policy, so it belongs with the account rather than in a host file.
+    users.mutableUsers = false;
+
     users.users.${username} = {
       isNormalUser = true;
       description = username;
