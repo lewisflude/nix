@@ -8,7 +8,7 @@ let
 in
 {
   flake.modules.nixos.samba =
-    { config, pkgs, ... }:
+    { pkgs, ... }@nixosArgs:
     {
       services = {
         samba = {
@@ -110,7 +110,7 @@ in
       systemd.services.samba-smbd.preStart = ''
         set -euo pipefail
 
-        secret=${config.sops.secrets."samba/lewisflude-password".path}
+        secret=${nixosArgs.config.sops.secrets."samba/lewisflude-password".path}
         if [ ! -f "$secret" ]; then
           echo "samba-sync-password: secret $secret not present" >&2
           exit 1

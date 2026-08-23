@@ -44,7 +44,7 @@ _: {
       # 1. Turn a wedged kernel into a reboot
       # ─────────────────────────────────────────────────────────────────────
       #
-      # `kernel.panic = 30` (set in the zfs module) only helps once something
+      # `kernel.panic = 30` (below) only helps once something
       # has actually panicked. Nothing here had: panic_on_oops defaulted to 0,
       # so every Oops above killed the faulting task and left the box running
       # with corrupt page tables until it fully hung. Every crash in this host's
@@ -67,12 +67,22 @@ _: {
       #   softlockup_panic - busy ZFS/mergerfs I/O legitimately stalls tasks
       #                      past the soft-lockup threshold; this would reboot a
       #                      healthy box mid-scrub.
-      #   hung_task_panic  - already 1 at a 300s timeout in the zfs module.
-      #                      Leave it; revisit only once the watchdog below is
-      #                      confirmed armed and has proven itself.
+      #
+      # hung_task_panic came from the ZFS module originally: on 2026-06-21 a
+      # `zfs list` (run by the frequent auto-snapshot timer) hit an OpenZFS
+      # spl_panic in fnvlist_pack; the thread died holding ZFS locks, txg_sync
+      # and others blocked 491s+, and the box stayed frozen ~28h until a manual
+      # reboot. Panic on a task hung > 300s so a recurrence self-recovers in
+      # minutes. 300s (not the 120s default) tolerates transient I/O stalls; if
+      # a disk's SATA link is flaky this could still trigger an unwanted reboot.
+      # It lives here rather than in zfs.nix because none of these are
+      # ZFS-specific and crash policy should be readable in one place.
       boot.kernel.sysctl = {
         "kernel.panic_on_oops" = 1;
         "kernel.hardlockup_panic" = 1;
+        "kernel.hung_task_timeout_secs" = 300;
+        "kernel.hung_task_panic" = 1;
+        "kernel.panic" = 30;
       };
 
       # ─────────────────────────────────────────────────────────────────────

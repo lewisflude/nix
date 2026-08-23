@@ -18,9 +18,11 @@ in
       # Union of admin + desktop group membership. The desktop groups used to
       # live in a separate `desktopUserGroups` module that declared extraGroups
       # for this same user; consolidated here so the account has one owner.
+      # No "networkmanager": this fleet runs systemd-networkd (see
+      # modules/networking.nix), so the NetworkManager module never creates that
+      # group and listing it here would warn on every activation.
       extraGroups = [
         "wheel"
-        "networkmanager"
         "audio"
         "video"
         "input"

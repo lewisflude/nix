@@ -932,15 +932,16 @@
     "kicad-mcp-server": {
       "flake": false,
       "locked": {
-        "lastModified": 1786718013,
-        "narHash": "sha256-YVfEVRKy0N1ZN64eNmHEukDXnWGcjyD8RWPB21jluTs=",
+        "lastModified": 1787253574,
+        "narHash": "sha256-faCTkstk6LEm9qctoRObtlATUOW8JNQ645LepAFsgMI=",
         "owner": "mixelpixx",
         "repo": "KiCAD-MCP-Server",
-        "rev": "91189c59ee492bfa7401abf4532d381e32b977ac",
+        "rev": "aa53d52c2e37a13cb3574a6e0acf2c728b4d6bfb",
         "type": "github"
       },
       "original": {
         "owner": "mixelpixx",
+        "ref": "v2.7.0",
         "repo": "KiCAD-MCP-Server",
         "type": "github"
       }
@@ -1275,7 +1276,9 @@
     },
     "nixos-hardware": {
       "inputs": {
-        "nixpkgs": "nixpkgs_4"
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1787144466,
@@ -1476,19 +1479,6 @@
     },
     "nixpkgs_4": {
       "locked": {
-        "lastModified": 1767892417,
-        "narHash": "sha256-8bW3q88CEg2u4hSP66Vf4lpbLonHz7hqDNBMcCY7E9U=",
-        "rev": "3497aa5c9457a9d88d71fa93a4a8368816fbeeba",
-        "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.05pre924538.3497aa5c9457/nixexprs.tar.xz"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz"
-      }
-    },
-    "nixpkgs_5": {
-      "locked": {
         "lastModified": 1787135253,
         "narHash": "sha256-RD2kNWCG+Bjo6h+JVjWVNntZs2GtRoeY2xHjts/FNkA=",
         "owner": "NixOS",
@@ -1655,7 +1645,7 @@
         "nix-homebrew": "nix-homebrew",
         "nix-index-database": "nix-index-database",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_5",
+        "nixpkgs": "nixpkgs_4",
         "nixpkgs-niri": "nixpkgs-niri",
         "nixpkgs-xr": "nixpkgs-xr",
         "nur": "nur",

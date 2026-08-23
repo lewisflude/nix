@@ -25,6 +25,9 @@
   options.overlayList = lib.mkOption {
     type = lib.types.raw;
     readOnly = true;
+    # Repo plumbing; see NIX_PRACTICES.md section 3.5.
+    internal = true;
+    visible = false;
     default = builtins.attrValues config.overlays;
     description = "All contributed overlays, in alphabetical attribute order.";
   };

@@ -6,11 +6,7 @@ let
 in
 {
   flake.modules.nixos.security =
-    {
-      pkgs,
-      lib,
-      ...
-    }@nixosArgs:
+    { pkgs, ... }:
     {
       security = {
         pam = {
@@ -28,33 +24,27 @@ in
               value = "1048576";
             }
           ];
-          services =
-            let
-              basePamConfig = ''
-                account required ${pkgs.linux-pam}/lib/security/pam_unix.so
-                auth sufficient ${pkgs.pam_u2f}/lib/security/pam_u2f.so authfile=/etc/u2f_mappings cue nouserok userpresence=1 origin=pam://yubi
-                auth sufficient ${pkgs.linux-pam}/lib/security/pam_unix.so
-                auth optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so
-                password sufficient ${pkgs.linux-pam}/lib/security/pam_unix.so yescrypt
-                password optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so use_authtok
-                session required ${pkgs.linux-pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
-                session required ${pkgs.linux-pam}/lib/security/pam_unix.so
-                session required ${pkgs.linux-pam}/lib/security/pam_limits.so conf=/etc/security/limits.conf
-                session optional ${pkgs.gnome-keyring}/lib/security/pam_gnome_keyring.so auto_start
-              '';
-            in
-            {
-              login.enableGnomeKeyring = true;
-              niri.enableGnomeKeyring = true;
+          services = {
+            login.enableGnomeKeyring = true;
+            niri.enableGnomeKeyring = true;
 
-              greetd.text = ''
-                ${basePamConfig}
-                session required ${pkgs.systemd}/lib/security/pam_systemd.so class=greeter
-              '';
+            # No `greetd.text` here on purpose.
+            #
+            # Upstream's greetd module sets `useDefaultRules = false` and
+            # delegates its whole stack to `login` via substack/include, so
+            # everything configured on `login` above and in `security.pam.u2f`
+            # below already applies to the greeter. Setting `.text` replaces the
+            # generated stack wholesale (upstream's own `text` is only a
+            # mkDefault), which previously dropped `pinverification=1` from the
+            # u2f line, plus pam_loginuid and pam_lastlog2.
+            #
+            # The `pam_systemd ... class=greeter` line that used to live here was
+            # also inert: greetd injects XDG_SESSION_CLASS itself, and per
+            # pam_systemd(8) that env var takes precedence over `class=`.
 
-              sudo.u2fAuth = false; # Use password for sudo (desktop workflow)
-              login.u2fAuth = true; # YubiKey required at login (proves physical presence)
-            };
+            sudo.u2f.enable = false; # Use password for sudo (desktop workflow)
+            login.u2f.enable = true; # YubiKey required at login (proves physical presence)
+          };
           u2f = {
             enable = true;
             control = "sufficient";
@@ -90,12 +80,11 @@ in
           text = "${username}:PaGbsjJa2IPXjK/nuSZEgqrqcP9JoxEO0IVVinIyfEXR0EbctKkhinM6f50ccHj7uSdy+YM2O+ToKVhqv5ynyQ==,cFyPyH4AUHDjTXelbVpfnc4DnESr8xJWyZC42DwEiofkoqQdt0lBdxPGLwjviysl7WlH+jlEw3Yhe5TBiBLNOg==,es256,+presence";
           mode = "0644";
         };
-        "security/limits.conf" = {
-          text = lib.concatMapStringsSep "\n" (
-            limit: "${limit.domain} ${limit.type} ${limit.item} ${toString limit.value}"
-          ) nixosArgs.config.security.pam.loginLimits;
-          mode = "0644";
-        };
+        # /etc/security/limits.conf is deliberately NOT written here. NixOS never
+        # creates that path: security.pam.services.<name>.limits defaults to
+        # security.pam.loginLimits and reaches PAM as
+        # `pam_limits.so conf=/nix/store/...-limits.conf`. This entry existed
+        # only to feed the hand-written greetd stack removed above.
       };
 
       # Note: GPG agent is configured via home-manager in modules/gpg.nix

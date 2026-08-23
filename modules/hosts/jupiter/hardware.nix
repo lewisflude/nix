@@ -10,9 +10,8 @@ in
     {
       pkgs,
       lib,
-      config,
       ...
-    }:
+    }@nixosArgs:
     {
       # =========================================================================
       # Kernel & Hardware
@@ -164,8 +163,20 @@ in
       # =========================================================================
       # Host-Specific System Tweaks
       # =========================================================================
-      networking.networkmanager.enable = true;
       powerManagement.cpuFreqGovernor = lib.mkDefault "schedutil";
+
+      # eno2 is Jupiter's onboard Intel NIC. The interface name is a host
+      # hardware fact, so the .network unit lives here rather than in the shared
+      # nixos.networking feature module.
+      #
+      # NetworkManager is deliberately NOT enabled on this host: nixos.networking
+      # runs systemd-networkd, and enabling both put two DHCP clients and two
+      # default routes on this NIC. See the assertion in modules/networking.nix.
+      systemd.network.networks."10-main" = {
+        matchConfig.Name = "eno2";
+        DHCP = "yes";
+        networkConfig.IPv6AcceptRA = true;
+      };
 
       # SATA link power management: force max_performance on every port.
       #
@@ -197,7 +208,7 @@ in
       # =========================================================================
       users.mutableUsers = false;
       users.users.${username} = {
-        hashedPasswordFile = config.sops.secrets.hashedPassword.path;
+        hashedPasswordFile = nixosArgs.config.sops.secrets.hashedPassword.path;
         openssh.authorizedKeys.keys = constants.authorizedKeys;
         # "media" is contributed by media-user.nix, which owns that group.
         extraGroups = [

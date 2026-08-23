@@ -27,8 +27,10 @@ _: {
         enable = true;
       };
 
-      # Dotfiles
-      home.file.".config/example/config.toml" = {
+      # Dotfiles: prefer xdg.configFile over a hardcoded home.file ".config/..."
+      # path, so XDG_CONFIG_HOME is respected. Reach for home.file only for
+      # paths that genuinely live outside XDG.
+      xdg.configFile."example/config.toml" = {
         text = ''
           home_directory = "${config.home.homeDirectory}"
           setting = "value"

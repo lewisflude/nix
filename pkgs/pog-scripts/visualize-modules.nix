@@ -69,16 +69,16 @@ pog.pog {
         edge [fontname="Arial", fontsize=10];
 
         // Styling
-        graph [bgcolor="
-        node [fillcolor="
-        edge [color="
+        graph [bgcolor="#f8f9fa", pad="0.5", ranksep="1.0", nodesep="0.5"];
+        node [fillcolor="#e3f2fd", style="rounded,filled", color="#1976d2"];
+        edge [color="#757575"];
 
         // Subgraphs for organization (dendritic pattern)
         subgraph cluster_infrastructure {
             label="Infrastructure";
             style=filled;
-            color="
-            fillcolor="
+            color="#90caf9";
+            fillcolor="#e3f2fd";
     EOF
 
 
@@ -93,17 +93,17 @@ pog.pog {
 
         cat >> "$GRAPH_FILE" <<'EOF'
 
-        subgraph cluster_core {
-            label="Core Modules";
+        subgraph cluster_features {
+            label="Feature Modules";
             style=filled;
-            color="
-            fillcolor="
+            color="#b39ddb";
+            fillcolor="#ede7f6";
     EOF
 
-        find "$REPO_ROOT/modules/core" -name "*.nix" 2>/dev/null | while read -r file; do
+        find "$REPO_ROOT/modules" -maxdepth 1 -name "*.nix" 2>/dev/null | while read -r file; do
             local module_name
             module_name=$(basename "$file" .nix)
-            echo "          \"core_$module_name\" [label=\"$module_name\"];" >> "$GRAPH_FILE"
+            echo "          \"feature_$module_name\" [label=\"$module_name\"];" >> "$GRAPH_FILE"
         done
 
         echo "      }" >> "$GRAPH_FILE"
@@ -114,8 +114,8 @@ pog.pog {
         subgraph cluster_hosts {
             label="Host Definitions";
             style=filled;
-            color="
-            fillcolor="
+            color="#c5e1a5";
+            fillcolor="#f1f8e9";
     EOF
 
         find "$REPO_ROOT/modules/hosts" -name "definition.nix" 2>/dev/null | while read -r file; do
@@ -177,14 +177,14 @@ pog.pog {
           echo "Infrastructure Modules:"
           find "$REPO_ROOT/modules/infrastructure" -name "*.nix" 2>/dev/null | wc -l | xargs echo "  Files:"
           echo ""
-          echo "Core Modules:"
-          find "$REPO_ROOT/modules/core" -name "*.nix" 2>/dev/null | wc -l | xargs echo "  Files:"
+          echo "Feature Modules:"
+          find "$REPO_ROOT/modules" -maxdepth 1 -name "*.nix" 2>/dev/null | wc -l | xargs echo "  Files:"
           echo ""
           echo "Host Definitions:"
           find "$REPO_ROOT/modules/hosts" -name "definition.nix" 2>/dev/null | wc -l | xargs echo "  Hosts:"
           echo ""
-          echo "Feature Modules (flake.modules.*):"
-          find "$REPO_ROOT/modules" -maxdepth 1 -name "*.nix" 2>/dev/null | wc -l | xargs echo "  Top-level files:"
+          echo "Per-system Modules:"
+          find "$REPO_ROOT/modules/per-system" -name "*.nix" 2>/dev/null | wc -l | xargs echo "  Files:"
           echo ""
         } >> "$summary_file"
 

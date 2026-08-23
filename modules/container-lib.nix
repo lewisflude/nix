@@ -76,6 +76,9 @@ in
   options.containerLib = lib.mkOption {
     type = lib.types.raw;
     readOnly = true;
+    # Repo plumbing; see NIX_PRACTICES.md section 3.5.
+    internal = true;
+    visible = false;
     default = containerLib;
     description = "Shared OCI container helpers (state dir root, container builder, list-driven module builder).";
   };

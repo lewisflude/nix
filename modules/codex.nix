@@ -52,27 +52,51 @@ in
       };
     in
     {
-      home.packages = [
-        pkgs.codex
-        pkgs.yj
-      ];
+      # pkgs.codex comes from programs.codex below; yj is used by the activation
+      # scripts that merge/repair Codex's own TOML.
+      home.packages = [ pkgs.yj ];
+
+      programs.codex = {
+        enable = true;
+        package = pkgs.codex;
+
+        # Deliberately NOT using `settings` or `enableMcpIntegration`.
+        #
+        # Both make `mergedSettings != { }`, which makes the module install
+        # ~/.codex/config.toml as a read-only /nix/store symlink. Codex rewrites
+        # that file at runtime (model selection, [tui.*] state, per-tool approval
+        # decisions, plugin enablement), so it must stay a real, writable file —
+        # see home.activation.codexConfig below and the rationale on
+        # aiCli.mkJsonMergeActivation.
+        #
+        # Files Codex does NOT write are safe to let Home Manager own, and are
+        # declared here rather than via home.file.
+        settings = { };
+        enableMcpIntegration = false;
+
+        # Codex only loads a skill when the skill *directory* is the symlink.
+        # A symlinked SKILL.md inside a real directory — what `home.file` produces
+        # — is silently ignored (openai/codex#10470). This option generates the
+        # supported shape.
+        skills.organize-samples = ''
+          ---
+          name: organize-samples
+          description: Use when the user asks to organize, organise, tidy, sort, classify, or move samples in ~/Music/samples, especially after music-production torrents land. Surveys the sample library, proposes a taxonomy, and moves items only after confirmation.
+          metadata:
+            short-description: Organize ~/Music/samples safely
+          ---
+
+        ''
+        + builtins.readFile ../pkgs/prompts/organize-samples.md;
+
+        # Profile v2: written to ~/.codex/trusted.config.toml. Codex reads these
+        # but does not write them, so a store symlink is safe here.
+        profiles.trusted = codexTrustedProfile;
+      };
 
       home.sessionVariables = {
         CODEX_DISABLE_AUTOUPDATER = "1";
       };
-
-      # Shared prompt body, also used by the Claude Code command
-      # (modules/claude-code.nix). Only the frontmatter is per-consumer.
-      home.file.".codex/skills/organize-samples/SKILL.md".text = ''
-        ---
-        name: organize-samples
-        description: Use when the user asks to organize, organise, tidy, sort, classify, or move samples in ~/Music/samples, especially after music-production torrents land. Surveys the sample library, proposes a taxonomy, and moves items only after confirmation.
-        metadata:
-          short-description: Organize ~/Music/samples safely
-        ---
-
-      ''
-      + builtins.readFile ../pkgs/prompts/organize-samples.md;
 
       programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
         lib.mkAfter (
@@ -109,6 +133,19 @@ in
           if ${pkgs.yj}/bin/yj -tj < "$legacy_config" > "$legacy_json"; then
             ${pkgs.jq}/bin/jq -r '.profiles // {} | keys[]' "$legacy_json" | while IFS= read -r profile_name; do
               profile_file=${lib.escapeShellArg "${homeDirectory}/.codex"}/"$profile_name".config.toml
+
+              # Profiles declared in programs.codex.profiles are Home Manager
+              # store symlinks. `mv`-ing over one replaces it with a real file,
+              # and the next switch then aborts with "in the way". Codex keeps
+              # re-adding [profiles.trusted] to config.toml, so this loop would
+              # hit that case on most activations.
+              case " ${lib.concatStringsSep " " (lib.attrNames config.programs.codex.profiles)} " in
+                *" $profile_name "*)
+                  echo "note: profile '$profile_name' is managed by Home Manager; dropping the legacy copy from config.toml without migrating it" >&2
+                  continue
+                  ;;
+              esac
+
               profile_existing=$(${pkgs.coreutils}/bin/mktemp)
               profile_merged=$(${pkgs.coreutils}/bin/mktemp)
               profile_toml=$(${pkgs.coreutils}/bin/mktemp)
@@ -135,19 +172,11 @@ in
         fi
       '';
 
-      home.activation.codexTrustedProfile = lib.hm.dag.entryAfter [ "codexProfileMigration" ] (
-        aiCli.mkJsonMergeActivation pkgs {
-          format = "toml";
-          path = "${homeDirectory}/.codex/trusted.config.toml";
-          desired = codexTrustedProfile;
-        }
-      );
-
       home.activation.codexConfigCleanup =
         let
           trustedDirArgs = lib.escapeShellArgs resolvedTrustedDirs;
         in
-        lib.hm.dag.entryAfter [ "codexConfig" "codexTrustedProfile" ] ''
+        lib.hm.dag.entryAfter [ "codexConfig" "codexProfileMigration" ] ''
           cleanup_codex_config() {
             local config_file=$1
             local jq_filter=$2

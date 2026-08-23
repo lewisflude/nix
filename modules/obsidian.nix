@@ -87,24 +87,21 @@ in
   });
 
   # Mercury side (and any other home-manager peer): user-scope contribution.
-  flake.modules.homeManager.syncthing = lib.mkIf bothConfigured (
-    { config, ... }:
-    {
-      services.syncthing.settings = {
-        devices = {
-          jupiter = {
-            id = hosts.jupiter.syncthingId;
-            addresses = [ "tcp://${hosts.jupiter.tailscaleIpv4}:${syncPort}" ];
-          };
-        }
-        // iphoneDevice;
-        folders.${vaultName} = {
-          label = vaultLabel;
-          path = "${config.home.homeDirectory}/${vaultLabel}";
-          devices = [ "jupiter" ] ++ iphoneFolderDevices;
-          inherit versioning;
+  flake.modules.homeManager.syncthing = lib.mkIf bothConfigured (hmArgs: {
+    services.syncthing.settings = {
+      devices = {
+        jupiter = {
+          id = hosts.jupiter.syncthingId;
+          addresses = [ "tcp://${hosts.jupiter.tailscaleIpv4}:${syncPort}" ];
         };
+      }
+      // iphoneDevice;
+      folders.${vaultName} = {
+        label = vaultLabel;
+        path = "${hmArgs.config.home.homeDirectory}/${vaultLabel}";
+        devices = [ "jupiter" ] ++ iphoneFolderDevices;
+        inherit versioning;
       };
-    }
-  );
+    };
+  });
 }

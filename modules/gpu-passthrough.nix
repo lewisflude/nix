@@ -67,9 +67,19 @@ in
             # Run: lspci -nn | grep NVIDIA to find your PCI IDs
             # Then set these in the script or pass as args
 
-            # Refuse if GPU-dependent services are running
+            # Refuse if GPU-dependent services are running.
+            #
+            # This script writes to /sys/bus/pci/drivers/*/{bind,unbind}, so it
+            # runs as root -- but the services are in the *desktop user's*
+            # session. A bare `systemctl --user` under sudo queries root's user
+            # bus, which has neither unit, so the guard would silently always
+            # pass and let us pull the GPU out from under a live VR session.
+            # Resolve the invoking user's bus explicitly.
+            guard_uid="''${SUDO_UID:-$(id -u)}"
             for svc in wivrn sunshine; do
-              if systemctl --user is-active "$svc.service" 2>/dev/null; then
+              if XDG_RUNTIME_DIR="/run/user/$guard_uid" \
+                 DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$guard_uid/bus" \
+                 systemctl --user --machine="$guard_uid@.host" is-active "$svc.service" >/dev/null 2>&1; then
                 echo "ERROR: $svc is running. Stop it first: systemctl --user stop $svc" >&2
                 exit 1
               fi

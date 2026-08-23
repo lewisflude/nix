@@ -38,6 +38,11 @@ in
   options.myLib = lib.mkOption {
     type = lib.types.raw;
     readOnly = true;
+    # Repo plumbing, not a user-facing knob. `internal` excludes it from any
+    # generated option docs, which settles the `defaultText` question for a
+    # lambda-bearing default -- see NIX_PRACTICES.md section 3.5.
+    internal = true;
+    visible = false;
     default = myLib;
     description = "Shared library functions (path helpers, pkgs config)";
   };

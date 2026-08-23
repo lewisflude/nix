@@ -24,16 +24,16 @@ file (except `flake.nix`) is a flake-parts module.
 │   ├── hosts/                # Host definitions (compose features)
 │   │   ├── jupiter/          # Linux workstation
 │   │   └── mercury/          # macOS laptop
-│   ├── core/                 # Essential system configuration
-│   ├── services/             # System services
-│   ├── desktop/              # Desktop environment modules
+│   ├── per-system/           # perSystem outputs (treefmt, checks, apps, shells)
+│   ├── shell/                # Shell configuration (zsh, prompt, integrations)
+│   ├── options/              # Option declarations
 │   ├── constants.nix         # Shared constants (config.constants)
 │   ├── meta.nix              # Shared metadata (config.username, etc.)
-│   └── *.nix                 # Feature modules
-├── hosts/                    # Host metadata (username, system, features)
+│   └── *.nix                 # Feature modules (one file per feature)
+├── overlays/                 # nixpkgs overlays + nvfetcher sources
 ├── secrets/                  # SOPS-encrypted secrets
-├── shells/                   # Development environments
-├── scripts/                  # Utility scripts
+├── templates/                # Module scaffolding templates
+├── scripts/                  # Pre-existing one-off diagnostic scripts
 └── pkgs/                     # Custom packages and POG scripts
 ```
 

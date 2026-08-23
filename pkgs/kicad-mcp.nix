@@ -18,13 +18,17 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "kicad-mcp";
-  version = "2.6.0";
+
+  # Read out of the pinned source itself so it cannot disagree with what is
+  # actually being built. Not IFD: `src` is a flake input, i.e. already a
+  # realised store path at eval time.
+  inherit ((lib.importJSON "${src}/package.json")) version;
 
   inherit src;
 
   # Computed with `prefetch-npm-deps package-lock.json`. Bump when the input's
   # package-lock.json changes.
-  npmDepsHash = "sha256-QlrIhfin80CpTaEKs7ujqW4m1rF/ENUY0aEdD8SBMHc=";
+  npmDepsHash = "sha256-LBUZmYzYnaVyuU0/fwy6t3yoIIb8Qbve/mF/Fv6Y6qg=";
 
   nativeBuildInputs = [ makeWrapper ];
 

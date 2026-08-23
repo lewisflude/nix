@@ -9,11 +9,6 @@ _: {
       ...
     }:
     {
-      boot.zfs = {
-        extraPools = [ "npool" ];
-        devNodes = "/dev/disk/by-id";
-      };
-
       # Pin to an LTS kernel. ZFS is an out-of-tree module, so the rootfs
       # depends on it building AND behaving against whatever kernel we run, and
       # nixpkgs' default floats. The NixOS ZFS wiki recommends an LTS kernel and
@@ -69,19 +64,6 @@ _: {
       # This is also the form the NixOS ZFS wiki uses (`zfs.zfs_arc_max=...`).
       boot.kernelParams = [ "zfs.zfs_bclone_enabled=0" ];
 
-      # Auto-recover from a wedged kernel thread instead of hanging indefinitely.
-      # On 2026-06-21 a `zfs list` (run by the frequent auto-snapshot timer) hit an
-      # OpenZFS spl_panic in fnvlist_pack; the thread died holding ZFS locks, txg_sync
-      # and others blocked 491s+, and the box stayed frozen ~28h until a manual reboot.
-      # Panic (and reboot) on a task hung > 300s so a recurrence self-recovers in minutes.
-      # NOTE: 300s (not the 120s default) tolerates transient I/O stalls; if a disk's
-      # SATA link is flaky this could still trigger an unwanted reboot.
-      boot.kernel.sysctl = {
-        "kernel.hung_task_timeout_secs" = 300;
-        "kernel.hung_task_panic" = 1;
-        "kernel.panic" = 30;
-      };
-
       services.zfs = {
         autoSnapshot = {
           enable = true;
@@ -124,8 +106,5 @@ _: {
         };
       };
 
-      # Match the userland CLI to the pinned kernel module (2.3.8), not the
-      # nixpkgs default (2.4.x), so `zfs`/`zpool` never mismatch the module.
-      environment.systemPackages = [ config.boot.zfs.package ];
     };
 }

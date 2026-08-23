@@ -70,9 +70,12 @@ pog.pog {
         if ${flag "dry_run"}; then
           debug "DRY RUN: Would run 'nix flake update'"
         else
-          # Use GITHUB_TOKEN if available for higher rate limits
-          if [ -r /run/secrets-for-users/GITHUB_TOKEN ]; then
-            GITHUB_TOKEN="$(cat /run/secrets-for-users/GITHUB_TOKEN)"
+          # Use GITHUB_TOKEN if available for higher rate limits.
+          # /run/secrets, not /run/secrets-for-users: only secrets declared with
+          # `neededForUsers = true` land in the latter, and in modules/sops.nix
+          # that is `hashedPassword` alone.
+          if [ -r /run/secrets/GITHUB_TOKEN ]; then
+            GITHUB_TOKEN="$(cat /run/secrets/GITHUB_TOKEN)"
             export GITHUB_TOKEN
             NIX_CONFIG="access-tokens = github.com=$GITHUB_TOKEN"
             export NIX_CONFIG

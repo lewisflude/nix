@@ -77,10 +77,13 @@ in
   # ===========================================================================
   flake.modules.darwin.sops =
     let
+      # Owner-only. `owner = username` already grants the access these secrets
+      # need; on macOS `group = "admin"` is every administrator account, so the
+      # group bit widened the blast radius for nothing. Mirrors the NixOS
+      # mkSecret default of 0400.
       mkDarwinSecret = {
-        mode = "0640";
+        mode = "0400";
         owner = username;
-        group = "admin";
       };
     in
     {

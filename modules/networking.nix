@@ -2,7 +2,12 @@
 # Provides systemd-networkd, resolved, avahi, and firewall
 _: {
   flake.modules.nixos.networking =
-    { pkgs, lib, ... }:
+    {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
     {
       networking = {
         enableIPv6 = lib.mkDefault true;
@@ -26,17 +31,39 @@ _: {
       # Suppress harmless USB audio quirk messages for Apogee Symphony Desktop
       boot.kernelParams = [ "usbcore.quirks=0c60:002a:b" ];
 
+      # Enabling NetworkManager alongside networkd is a silent conflict: nixpkgs
+      # has no assertion for it, NM does not populate `unmanaged-devices` from
+      # networkd's .network units, and the one warning that would fire
+      # (network-interfaces.nix) is gated on `useDHCP = true` — which the
+      # NetworkManager module itself sets to false. The result is two DHCP
+      # clients, two default routes and duplicate SLAAC addresses on one link,
+      # with resolved logging `LinkBusy` on every boot. Make it loud instead.
+      assertions = [
+        {
+          assertion = !(config.networking.useNetworkd && config.networking.networkmanager.enable);
+          message = ''
+            Both systemd-networkd and NetworkManager are enabled. They will both
+            claim the same links. Pick one backend; for wifi alongside networkd
+            use networking.wireless.iwd instead of NetworkManager.
+          '';
+        }
+      ];
+
       systemd.network = {
         enable = true;
         wait-online = {
           timeout = 10;
           anyInterface = true;
         };
-        networks."10-main" = {
-          matchConfig.Name = "eno2";
-          DHCP = "yes";
-          networkConfig.IPv6AcceptRA = true;
-        };
+        # No networks."<name>" here: interface names are host hardware facts.
+        # See modules/hosts/jupiter/hardware.nix for Jupiter's eno2 unit.
+      };
+
+      # Don't drop the uplink across a rebuild — restart rather than stop+start.
+      # Matches nix-community/srvos and Mic92/dotfiles.
+      systemd.services = {
+        systemd-networkd.stopIfChanged = false;
+        systemd-resolved.stopIfChanged = false;
       };
 
       services = {

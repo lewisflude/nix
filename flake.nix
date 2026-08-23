@@ -100,7 +100,14 @@
       url = "github:AvengeMedia/danksearch/632c2909bb1bb534b574c22c1347de0e6521e58a";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixos-hardware.url = "github:NixOS/nixos-hardware";
+    # follows nixpkgs: the consumed output (nixosModules) is a plain attrset of
+    # module paths that never touches nixpkgs, and the unfollowed input is a
+    # channel *tarball* that can never dedupe and is refetched on every lock
+    # update.
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Bleeding-edge XR/VR packages (wivrn, wayvr, monado, opencomposite, ...).
     # Tracks upstream git, published to nix-community.cachix.org (already
@@ -184,8 +191,12 @@
     };
     # KiCAD MCP server (Node/TypeScript, not published to npm or in nixpkgs).
     # Built from source via pkgs/kicad-mcp.nix; consumed by modules/kicad-mcp.nix.
+    # Pinned by tag -- bump deliberately, together with npmDepsHash in
+    # pkgs/kicad-mcp.nix. Upstream publishes semver releases, so an unpinned
+    # branch lets `nix flake update` move the source out from under the
+    # derivation's hashes. `version` is read from the source itself there.
     kicad-mcp-server = {
-      url = "github:mixelpixx/KiCAD-MCP-Server";
+      url = "github:mixelpixx/KiCAD-MCP-Server?ref=v2.7.0";
       flake = false;
     };
   };

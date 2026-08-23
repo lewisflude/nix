@@ -58,16 +58,25 @@ let
         url = "https://mcp.figma.com/mcp";
       };
     }
-    // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
-      hass = {
-        command = "${pkgs.writeShellScript "mcp-hass" ''
-          export HOMEASSISTANT_URL="$(cat /run/secrets/HOME_ASSISTANT_BASE_URL)"
-          export HOMEASSISTANT_TOKEN="$(cat /run/secrets/HOME_ASSISTANT_TOKEN)"
-          ${uvxEnv pkgs}
-          exec ${pkgs.uv}/bin/uvx ha-mcp "$@"
-        ''}";
-      };
-    }
+    //
+      lib.optionalAttrs
+        (
+          pkgs.stdenv.hostPlatform.isLinux
+          && lib.all (secretAvailable osConfig) [
+            "HOME_ASSISTANT_BASE_URL"
+            "HOME_ASSISTANT_TOKEN"
+          ]
+        )
+        {
+          hass = {
+            command = "${pkgs.writeShellScript "mcp-hass" ''
+              export HOMEASSISTANT_URL="$(cat ${lib.escapeShellArg (secretPath osConfig "HOME_ASSISTANT_BASE_URL")})"
+              export HOMEASSISTANT_TOKEN="$(cat ${lib.escapeShellArg (secretPath osConfig "HOME_ASSISTANT_TOKEN")})"
+              ${uvxEnv pkgs}
+              exec ${pkgs.uv}/bin/uvx ha-mcp "$@"
+            ''}";
+          };
+        }
     //
       lib.optionalAttrs
         (lib.any (secretAvailable osConfig) [
@@ -141,6 +150,32 @@ let
       fi
     '';
 
+  # Merge declared settings into a config file the *application* owns.
+  #
+  # Why not `home.file` or `programs.<x>.settings`? Those install a read-only
+  # /nix/store symlink. Codex rewrites ~/.codex/config.toml at runtime (model
+  # selection, [tui.*] state, per-tool approval decisions, plugin enablement);
+  # Claude Code rewrites ~/.claude/settings.json; Claude Desktop rewrites
+  # claude_desktop_config.json. Against a symlink those writes fail, or replace
+  # the symlink with a real file — after which the next switch aborts with
+  # "Existing file ... is in the way".
+  #
+  # This is NOT a bespoke workaround. Home Manager ships the same technique as
+  # `impureConfigMerger` in programs.zed-editor (where mutableUserSettings
+  # defaults to *true*), programs.t3code and programs.prismlauncher, and
+  # programs.obsidian runs an equivalent `jq -s '(.[0] // {}) * (.[1] // {})'`
+  # merge unconditionally. A native `home.file.<name>.mutable` option is still
+  # only a proposal (nix-community/home-manager#3090, open since 2022, and
+  # #9759). An upstream PR doing exactly this for gemini-cli (#8707) was closed
+  # unmerged because maintainers are split on it, not because it is wrong.
+  #
+  # Known and accepted limitation: `*` merge NEVER DELETES. Removing a key here
+  # leaves it in the on-disk file forever — delete it by hand, or add it to the
+  # relevant `del(...)` filter in modules/codex.nix's codexConfigCleanup.
+  #
+  # Do not "fix" this by switching to programs.<x>.settings. Files the app does
+  # NOT write — Codex skills, <name>.config.toml profiles — SHOULD use the
+  # upstream options; only app-written files belong here.
   mkJsonMergeActivation =
     pkgs:
     {
@@ -210,6 +245,9 @@ in
   options.aiCli = lib.mkOption {
     type = lib.types.raw;
     readOnly = true;
+    # Repo plumbing; see NIX_PRACTICES.md section 3.5.
+    internal = true;
+    visible = false;
     description = "Shared helpers for AI CLI modules (secrets, MCP servers, trusted-dir wrappers, activation snippets).";
     default = {
       inherit

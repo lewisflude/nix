@@ -76,10 +76,11 @@ in
         servers = aiCli.mcpServers pkgs osConfig;
       };
 
-      # Environment variable for API key (loaded from SOPS)
-      home.sessionVariables = lib.mkIf (aiCli.secretAvailable osConfig "GEMINI_API_KEY") {
-        GEMINI_API_KEY_FILE = aiCli.secretPath osConfig "GEMINI_API_KEY";
-      };
+      # No GEMINI_API_KEY wiring here on purpose: the secret is not declared in
+      # modules/sops.nix for either platform, so a `secretAvailable` guard on it
+      # is permanently false and the export never happened. Declare the secret
+      # in sops.nix (and add it to secrets/secrets.yaml) before adding it back —
+      # a guard that can never fire reads as working configuration and is not.
 
       programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
         lib.mkAfter (

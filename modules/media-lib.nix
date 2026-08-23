@@ -50,6 +50,9 @@ in
   options.mediaLib = lib.mkOption {
     type = lib.types.raw;
     readOnly = true;
+    # Repo plumbing; see NIX_PRACTICES.md section 3.5.
+    internal = true;
+    visible = false;
     default = media;
     description = "Shared media stack helpers (user/group, paths, systemd defaults, tmpfiles, sops restart).";
   };

@@ -237,6 +237,7 @@ in
       networking.hostName = "jupiter";
       networking.hostId = "8425e349";
       time.timeZone = constants.defaults.timezone;
+      i18n.defaultLocale = constants.defaults.locale;
       system.stateVersion = constants.defaults.stateVersion;
 
       # Hardware config, boot, filesystems, and user credentials are in hardware.nix

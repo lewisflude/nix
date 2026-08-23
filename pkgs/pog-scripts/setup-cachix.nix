@@ -16,7 +16,7 @@ pog.pog {
     }
   ];
 
-  argumentCompletion = ''printf "%s\n" user ci push push-shells push-all watch stats'';
+  argumentCompletion = ''printf "%s\n" user ci push push-shells push-all watch stats help'';
 
   flags = [
     {
@@ -138,12 +138,14 @@ pog.pog {
       yellow "→ This uses devour-flake for efficient single-evaluation builds"
       yellow "→ Building all outputs (this may take a while)..."
 
-      # Use devour-flake to build all outputs in one evaluation
-      # This is much faster than building outputs individually
-      nix build github:srid/devour-flake \
-        -L --no-link --print-out-paths \
-        --override-input flake . \
-        | cachix push "$CACHE_NAME"
+      # Use devour-flake to build all outputs in one evaluation.
+      # This is much faster than building outputs individually.
+      #
+      # `nix run .#devour-flake` rather than `nix build github:srid/devour-flake`:
+      # the flake already carries devour-flake as a locked input (flake.nix:136,
+      # wired up in modules/per-system/apps.nix), so the bare URL would fetch an
+      # unpinned default branch at runtime and ignore the lock.
+      nix run .#devour-flake -- . | cachix push "$CACHE_NAME"
 
       green "✓ All outputs built and pushed to cache: $CACHE_NAME"
       yellow "→ This includes: packages, apps, devShells, checks, nixosConfigurations, darwinConfigurations"
@@ -199,7 +201,9 @@ pog.pog {
       stats)
         show_stats
         ;;
-      help|--help|-h)
+      # `--help` and `-h` are consumed by pog before this body runs; only the
+      # bare `help` subcommand reaches here.
+      help)
         cyan "Cachix Setup Tool"
         echo ""
         echo "Commands:"
@@ -212,7 +216,7 @@ pog.pog {
         echo "  stats        Show cache statistics"
         echo ""
         echo "Flags:"
-        echo "  -c, --cache <name>   Cachix cache name (default: nix-config)"
+        echo "  -c, --cache <name>   Cachix cache name (default: lewisflude)"
         echo "  -s, --system <sys>   System to push (for push command)"
         echo ""
         echo "Environment:"
