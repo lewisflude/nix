@@ -69,39 +69,46 @@ in
             ha_url=${lib.escapeShellArg cfg.homeAssistant.baseUrl}
             ha_token="$(tr -d '[:space:]' < "$ha_token_file")"
 
-            # Retry rather than one shot. Home Assistant's unit reaching
-            # "started" is not the same as its HTTP API accepting connections —
-            # it takes tens of seconds more to bind. The 2026-08-14 12:55 crash
-            # report was lost to exactly that gap: crash-report.service ran at
-            # 12:57:17 and got `curl: (7) Failed to connect to 127.0.0.1:8123
-            # after 0 ms`, so the one notification that mattered most all week
-            # never arrived. Ordering alone cannot close this (see
-            # crash-recovery.nix); the sender has to wait for the socket.
+            # Let curl do the waiting. Home Assistant's unit reaching "started"
+            # is not the same as its HTTP API accepting connections: on
+            # 2026-08-23 systemd logged "Started Home Assistant" at 13:56:47.991
+            # and HA logged "initialized in 14.54s" at 13:57:07. Ordering
+            # crash-report after the unit (crash-recovery.nix) cannot close a 20s
+            # gap — only waiting on the socket can. The 2026-08-14 12:55 crash
+            # report was lost to exactly that gap, and the hand-rolled 3x15s loop
+            # that replaced it cleared the bar only by luck: every boot since
+            # burned attempt 1 on ECONNREFUSED and narrated it in the journal as
+            # a `curl: (7) Failed to connect` line that looked like a real fault.
             #
-            # Bounded at three attempts so an alert raised while HA is
-            # genuinely down still returns promptly. The journal already has
-            # the message by this point, so a give-up here loses a channel,
-            # never the alert.
-            ha_attempt=1
-            while :; do
-              if jq -n --arg title "$subject" --arg message "$body" \
-                   '{title: $title, message: $message}' \
-                 | curl --silent --show-error --max-time 10 \
-                     --request POST \
-                     --header "Authorization: Bearer $ha_token" \
-                     --header "Content-Type: application/json" \
-                     --data @- \
-                     "$ha_url/api/services/${cfg.homeAssistant.service}" \
-                     >/dev/null; then
-                break
-              fi
-              if [ "$ha_attempt" -ge 3 ]; then
-                echo "system-alert: Home Assistant push failed after 3 attempts" >&2
-                break
-              fi
-              sleep 15
-              ha_attempt=$((ha_attempt + 1))
-            done
+            # --retry-connrefused is the load-bearing flag: plain --retry does
+            # not consider ECONNREFUSED retryable, which is the one error that
+            # actually occurs here. --fail turns an expired token (401) into a
+            # failure instead of a silently non-2xx success, which the previous
+            # version swallowed.
+            #
+            # The body goes to a file rather than @-: curl cannot replay stdin
+            # across a retry, so every retried POST would send an empty body.
+            #
+            # Widening the window to 120s does not delay boot. crash-report is
+            # WantedBy=multi-user.target with no Before=, so nothing waits on it.
+            # The journal already has the message by this point, so giving up
+            # loses a channel, never the alert.
+            payload="$(mktemp)"
+            trap 'rm -f "$payload"' EXIT
+            jq -n --arg title "$subject" --arg message "$body" \
+              '{title: $title, message: $message}' > "$payload"
+
+            if ! curl --silent --show-error --fail \
+                 --retry 20 --retry-delay 5 --retry-connrefused --retry-all-errors \
+                 --retry-max-time 120 --max-time 10 \
+                 --request POST \
+                 --header "Authorization: Bearer $ha_token" \
+                 --header "Content-Type: application/json" \
+                 --data @"$payload" \
+                 "$ha_url/api/services/${cfg.homeAssistant.service}" \
+                 >/dev/null; then
+              echo "system-alert: Home Assistant push failed after 120s of retries" >&2
+            fi
           fi
 
           # Real e-mail, if and only if an MTA has been installed. Nothing

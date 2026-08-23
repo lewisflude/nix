@@ -129,6 +129,23 @@ _: {
         RebootWatchdogSec = "10min";
       };
 
+      # Coredumps earn their keep here — the 2026-08-23 01:39 V8 abort in
+      # homarr's Next.js render worker, and the Cleanuparr/Radarr/Lidarr SIGSEGV
+      # cluster of 2026-08-17, are the evidence that the faults span unrelated
+      # runtimes. Keep collecting them. Unbounded, though, they are a liability
+      # on this host: /var/lib/systemd/coredump had reached 3.2G by 2026-08-23,
+      # and zstd-compressing a multi-gigabyte node or CoreCLR heap is a heavy
+      # all-core, memory-pressuring job that fires exactly when the machine is
+      # already misbehaving. Cap the per-process work and the total footprint;
+      # the backtrace systemd writes to the journal survives either way, and
+      # that is the part the crash report above actually reads.
+      systemd.coredump.settings.Coredump = {
+        ProcessSizeMax = "2G";
+        ExternalSizeMax = "2G";
+        MaxUse = "2G";
+        KeepFree = "20G";
+      };
+
       # ─────────────────────────────────────────────────────────────────────
       # 3. Say something when it happens
       # ─────────────────────────────────────────────────────────────────────
@@ -263,12 +280,22 @@ _: {
               # "Oops: Oops: 0002" line — the 2026-08-23 report reached us as
               # four Part headers and no backtrace, which is what prompted this.
               #
+              # Restricting find to dmesg.txt was NOT sufficient: systemd-pstore
+              # copies the chunk headers into the reassembled file too, so the
+              # 12:12 and 13:24 reports on 2026-08-23 still arrived as "Oops#1
+              # Part1 / Part10 / Part11 / Part12" and no trace. Drop the headers
+              # explicitly. Note also that a record can hold both 001/ and 002/
+              # subdirectories (two panics in one death), so find legitimately
+              # concatenates more than one dmesg.txt per record.
+              #
               # No sort -u: these lines are a stack, and order is the meaning.
               for n in $new_records; do
                 echo "--- $n ---"
                 find "$pstore/$n" -name dmesg.txt -exec \
                   grep -hE 'BUG:|Oops:|WARNING:|general protection fault|RIP:|Call Trace|^ [a-z_0-9]+\+0x' {} + \
-                  2>/dev/null | head -25 || true
+                  2>/dev/null \
+                  | grep -v '^Oops#[0-9]* Part[0-9]*$' \
+                  | head -25 || true
                 echo
               done
             else
