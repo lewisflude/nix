@@ -66,11 +66,15 @@ in
         mode = "0400";
       };
 
+      # `services.home-assistant.openFirewall` was removed upstream: the frontend
+      # port lives in the UI-managed config rather than YAML, so it can no longer
+      # be derived at eval time. 8123 is the Home Assistant default.
+      networking.firewall.allowedTCPPorts = [ 8123 ];
+
       # Home Assistant service
       services.home-assistant = {
         enable = true;
         configDir = "/var/lib/hass";
-        openFirewall = true;
 
         extraComponents = [
           # Core

@@ -38,7 +38,6 @@
           includes = [ "*.nix" ];
           excludes = [
             "**/systems.nix"
-            "**/keyboard.nix"
           ];
         };
 

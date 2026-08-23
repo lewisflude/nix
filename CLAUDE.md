@@ -1,57 +1,24 @@
 # Nix Config — AI Guidelines
 
-## Critical Rules
+**Read [`AGENTS.md`](AGENTS.md) first.** It is the canonical instruction file
+for all agents in this repo; this file exists because Claude Code loads it
+automatically.
+
+The three rules that must never be violated, restated here so they are always in
+context:
 
 - **Never rebuild systems** — no `nh os switch`, `sudo nixos-rebuild`,
   `sudo darwin-rebuild`. Suggest commands for the user to run.
 - **Never create docs/scripts** — no new `.md` or `.sh` files without explicit
   permission. Update existing files instead.
-- **Use POG scripts** (`pkgs/pog-scripts/`) for new CLI tools, not shell
-  scripts. `scripts/` holds pre-existing one-off diagnostic shell scripts that
-  are not part of any build — fix them in place, but never add to them.
+- **Use POG scripts** (`pkgs/pog-scripts/`) for new CLI tools. `scripts/` holds
+  pre-existing one-off diagnostics — fix them in place, never add to them.
 
-## Architecture
+Everything else lives in:
 
-Dendritic pattern: every `.nix` file (except `flake.nix`) is a flake-parts
-module. Use the `/dendritic-pattern` skill when writing modules; see
-`DENDRITIC_PATTERN.md` in this repo for the full reference.
-
-Key rules:
-
-- Two scopes: top-level (flake-parts `config.*`) and platform-level
-  (NixOS/Darwin/home-manager)
-- Share values via top-level `config.*` — no `specialArgs`
-- Constants via `config.constants` — no direct imports
-- Hosts compose features via imports; infrastructure only transforms
-
-## Module Placement
-
-- **`flake.modules.nixos.*`** — system services, kernel, hardware, daemons,
-  boot, networking
-- **`flake.modules.homeManager.*`** — user apps, dotfiles, dev tools, shell,
-  editor, tray applets
-
-## Common Tasks
-
-- New module: `nix run .#new-module`
-- Update deps: `nix run .#update-all`
-- Format: `nix fmt`
-- Check: `nix flake check`
-
-## Conventions
-
-- Conventional commits: `<type>(<scope>): <description>`
-- Never use `with pkgs;` — use explicit `pkgs.package`
-- Format all Nix with `nix fmt` (treefmt-nix)
-
-## Verification Protocol (NixOS-Specific)
-
-- **Use mcp-nixos** to verify NixOS options, Home Manager options, and package
-  names exist before suggesting them. Never invent option paths.
-- **Check flake.lock** for actual nixpkgs version in use before giving
-  version-specific advice.
-- **Use Context7** for library/framework docs when writing modules that
-  configure third-party tools.
-- **WebSearch** for niche packages or options you're uncertain about.
-- If an option or package can't be verified, say so and suggest the user check
-  with `nix search` or `man configuration.nix`.
+- [`AGENTS.md`](AGENTS.md) — orientation, architecture, verification protocol,
+  commands
+- [`DENDRITIC_PATTERN.md`](DENDRITIC_PATTERN.md) — module architecture (also
+  available as the `/dendritic-pattern` skill)
+- [`NIX_PRACTICES.md`](NIX_PRACTICES.md) — Nix language, packaging, options,
+  secrets, and the review checklist

@@ -123,10 +123,12 @@ nix develop  # Sets up pre-commit hooks and formatters
 
 ## Documentation
 
-| Document                                       | Description                                 |
-| ---------------------------------------------- | ------------------------------------------- |
-| [`DENDRITIC_PATTERN.md`](DENDRITIC_PATTERN.md) | Complete dendritic pattern documentation    |
-| [`CLAUDE.md`](CLAUDE.md)                       | AI assistant guidelines and module patterns |
+| Document                                       | Description                                                   |
+| ---------------------------------------------- | ------------------------------------------------------------- |
+| [`DENDRITIC_PATTERN.md`](DENDRITIC_PATTERN.md) | Module architecture: invariants, anti-patterns, checklist     |
+| [`NIX_PRACTICES.md`](NIX_PRACTICES.md)         | Nix/NixOS/Home Manager best practices and anti-patterns       |
+| [`AGENTS.md`](AGENTS.md)                       | Instructions for AI coding agents (Claude, Codex, Copilot, …) |
+| [`CLAUDE.md`](CLAUDE.md)                       | Claude Code entry point (points at `AGENTS.md`)               |
 
 ## Available Tools
 

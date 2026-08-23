@@ -202,6 +202,7 @@ in
         homeManager.browser
         homeManager.desktopApps
         homeManager.gimp
+        homeManager.keyboard
         homeManager.niri
         homeManager.niriOutputsJupiter
         homeManager.dms
