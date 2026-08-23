@@ -136,7 +136,17 @@ in
       boot.kernelParams = [
         "nvidia-drm.modeset=1"
         "nvidia-drm.fbdev=1"
-        "nvidia-modeset.conceal_vrr_caps=1"
+        # nvidia-modeset.conceal_vrr_caps=1 was here. It zeroes the DRM
+        # `vrr_capable` connector property on *every* connector, so niri
+        # reported the AW3423DWF as "Variable refresh rate: not supported"
+        # and no compositor could tell suppression apart from a panel that
+        # genuinely lacks VRR. NVIDIA documents the parameter for displays
+        # with VRR-incompatible features (ULMB) — a backlight-strobing
+        # technique a QD-OLED panel cannot have. VRR is now gated where it
+        # belongs: per-output `variable-refresh-rate on-demand` in
+        # modules/hosts/jupiter/niri-outputs.nix, which keeps the desktop at
+        # a fixed 165 Hz (where QD-OLED VRR flicker is worst) and enables VRR
+        # only for windows matching the rules in modules/niri.nix.
         "cfg80211.ieee80211_regdom=GB"
         # Cap ZFS ARC at 24 GiB (of 62 GiB). Uncapped, ARC grows to ~all RAM
         # and doesn't evict fast enough against parallel source builds

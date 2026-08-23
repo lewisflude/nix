@@ -16,6 +16,18 @@ _: {
             y = 0;
           };
           focus-at-startup = true;
+
+          # QD-OLED VRR flicker is worst on the desktop: dark UI at low,
+          # erratically varying framerates. It is least noticeable in games,
+          # which are also the only place VRR pays for itself. "on-demand"
+          # holds a fixed 164.9 Hz until a window carrying the
+          # `variable-refresh-rate` rule (steam_app_*, gamescope — see
+          # modules/niri.nix) appears on this output.
+          #
+          # Requires that nvidia-modeset.conceal_vrr_caps stays out of
+          # boot.kernelParams; with it set the driver reports vrr_capable=0
+          # and niri silently ignores this.
+          variable-refresh-rate = "on-demand";
         };
 
         # Virtual 16:9 streaming display — off by default, enabled by sunshine's

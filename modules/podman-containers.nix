@@ -315,14 +315,30 @@ in
 
       # Jellystat - Jellyfin statistics (PostgreSQL runs natively, not containerized)
       # The container hardcodes its database name as `jfstat` and runs
-      # `CREATE DATABASE jfstat` if missing — but the unprivileged `jellystat`
-      # role can't create databases, so we provision it declaratively here.
+      # `CREATE DATABASE jfstat` unconditionally on every start, so we
+      # provision the DB declaratively here and let that CREATE collide.
       # `ensureDBOwnership` only works when DB name == user name, so ownership
       # is granted by the jellystat-db-password oneshot below.
+      #
+      # createdb is granted even though we create jfstat ourselves and the role
+      # never needs to make a database. backend/create_database.js suppresses
+      # the failed CREATE only when the error text contains "already exists";
+      # without this clause Postgres rejects the statement at the privilege
+      # check — which runs *before* the name-collision check — so it returns
+      # "permission denied to create database" instead, misses the suppression,
+      # and logs a stack trace on every single start. Granting createdb is what
+      # lets the CREATE fail the *intended* way. Upstream documents no required
+      # privileges at all (CyferShepard/Jellystat#327 is unanswered), so this is
+      # derived from the source rather than from docs.
       services.postgresql = {
         enable = true;
         ensureDatabases = [ "jfstat" ];
-        ensureUsers = [ { name = "jellystat"; } ];
+        ensureUsers = [
+          {
+            name = "jellystat";
+            ensureClauses.createdb = true;
+          }
+        ];
         authentication = ''
           host jfstat jellystat 127.0.0.1/32 md5
           host jfstat jellystat ::1/128 md5

@@ -248,13 +248,27 @@ _: {
             if [ -n "$new_records" ]; then
               echo "New crash dumps in $pstore:$new_records"
               echo
-              # The first BUG/Oops line is what identifies the fault; the rest of
-              # a dmesg record is pages of module lists that no one reads in a
-              # notification. Full records stay on disk for follow-up.
+              # What identifies a fault is the RIP and the call trace, not the
+              # BUG: line — "NULL pointer dereference" alone names no function
+              # and is not actionable. The rest of a dmesg record is pages of
+              # module lists nobody reads in a notification, so this takes the
+              # fault lines only. Full records stay on disk for follow-up.
+              #
+              # Read *only* the reassembled dmesg.txt. systemd-pstore walks the
+              # raw dmesg-efi_pstore-* fragments in reverse order and stitches
+              # them into that one file; the fragments themselves each begin
+              # with an "Oops#1 Part12" chunk header. A recursive grep over the
+              # record directory matches those headers too, and because '#'
+              # (0x23) sorts before ':' (0x3a) they crowded out the real
+              # "Oops: Oops: 0002" line — the 2026-08-23 report reached us as
+              # four Part headers and no backtrace, which is what prompted this.
+              #
+              # No sort -u: these lines are a stack, and order is the meaning.
               for n in $new_records; do
                 echo "--- $n ---"
-                grep -rhoE '(BUG|Oops|WARNING|general protection fault).{0,120}' \
-                  "$pstore/$n" 2>/dev/null | sort -u | head -5 || true
+                find "$pstore/$n" -name dmesg.txt -exec \
+                  grep -hE 'BUG:|Oops:|WARNING:|general protection fault|RIP:|Call Trace|^ [a-z_0-9]+\+0x' {} + \
+                  2>/dev/null | head -25 || true
                 echo
               done
             else
@@ -275,6 +289,7 @@ _: {
 
         path = [
           pkgs.coreutils
+          pkgs.findutils
           pkgs.gnugrep
           pkgs.systemd
         ]
