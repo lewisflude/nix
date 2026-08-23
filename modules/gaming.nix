@@ -48,6 +48,13 @@ in
         };
       };
 
+      # ntsync (CONFIG_NTSYNC=m, kernel 6.14+) implements NT synchronisation
+      # primitives in-kernel; Wine 11 / Proton 11 use /dev/ntsync instead of
+      # esync/fsync when it exists. The module ships no modalias, so nothing
+      # autoloads it on demand -- without this line the device node never
+      # appears and Proton silently falls back.
+      boot.kernelModules = [ "ntsync" ];
+
       programs.gamescope = {
         enable = true;
         capSysNice = true;
