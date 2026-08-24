@@ -8,7 +8,6 @@ let
   samplesPath = "/home/${username}/Music/samples";
   musicProductionCategory = "music-production";
   torrentsRoot = "${media.storageRoot}/torrents";
-  musicProductionPath = "${torrentsRoot}/${musicProductionCategory}";
 in
 {
   flake.modules.nixos.qbittorrent =
@@ -258,11 +257,20 @@ in
         in
         [
           (mkQbtDir torrentsRoot)
-          # Category subdirectories (matching SABnzbd pattern)
-          (mkQbtDir "${torrentsRoot}/movies")
-          (mkQbtDir "${torrentsRoot}/tv")
-          (mkQbtDir "${torrentsRoot}/music")
-          (mkQbtDir musicProductionPath)
+          # No rules for the category subdirectories (movies/tv/music/
+          # music-production). systemd refuses to canonicalize a path that
+          # changes owner mid-traversal, and /mnt/storage is media:media while
+          # torrents/ is qbittorrent:media — so every boot logged four
+          #   Detected unsafe path transition /mnt/storage -> /mnt/storage/torrents
+          # lines and systemd-tmpfiles-setup exited 73. The rules were skipped,
+          # not applied, so they had not been doing anything since the systemd
+          # version that added the check; the directories on disk are correct
+          # only because qBittorrent creates a category dir on first use and
+          # inherits 0770 qbittorrent:media from torrentsRoot above.
+          #
+          # Keeping the parent rule is what matters: it is the one that fixes
+          # ownership if it drifts, and it applies cleanly because /mnt/storage
+          # itself is only the *start* of the traversal, not a transition.
           (mkQbtDir "/var/lib/qbittorrent/incomplete")
           # Samples destination: setgid so synced files inherit the media group,
           # letting both the user (as owner) and qbittorrent (group member) write.

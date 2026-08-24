@@ -117,6 +117,7 @@ in
         # Security & Networking
         # ═══════════════════════════════════════════════════════════════════════
         nixos.fail2ban
+        nixos.monero # monerod, pruned, loopback RPC only
         nixos.mosh
         nixos.eternalTerminal
         nixos.tailscale
@@ -203,6 +204,7 @@ in
         homeManager.desktopApps
         homeManager.gimp
         homeManager.keyboard
+        homeManager.monero # Feather wallet
         homeManager.niri
         homeManager.niriOutputsJupiter
         homeManager.dms

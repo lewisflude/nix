@@ -45,6 +45,13 @@ let
       filebrowser = 8400;
       autopulse = 2875;
 
+      # Monero node. Both are loopback/outbound only -- neither is opened in
+      # the firewall (see modules/monero.nix).
+      monero = {
+        rpc = 18081;
+        p2p = 18080;
+      };
+
       syncthing = {
         webUi = 8384;
         sync = 22000;

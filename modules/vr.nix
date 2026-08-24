@@ -3,12 +3,20 @@
 # - https://lvra.gitlab.io/docs/distros/nixos/
 { inputs, ... }:
 {
-  # nixpkgs-xr: git-tracking XR/VR packages (wivrn, wayvr, monado,
-  # opencomposite, ...) with nix-community.cachix.org coverage. Linux-only.
+  # nixpkgs-xr: git-tracking XR/VR packages (wayvr, monado, opencomposite, ...)
+  # with nix-community.cachix.org coverage. Linux-only.
   # Alphabetical ordering ensures wivrn-cuda below applies after this overlay.
+  #
+  # wivrn is deliberately excluded: the overlay ships an untagged git checkout,
+  # and the headset client must run the exact same version as the server. Taking
+  # wivrn from nixpkgs (a tagged release) means the released client APK matches;
+  # the nightly server would need a matching nightly APK from upstream CI.
   overlays.nixpkgs-xr =
     final: prev:
-    if prev.stdenv.hostPlatform.isLinux then inputs.nixpkgs-xr.overlays.default final prev else { };
+    if prev.stdenv.hostPlatform.isLinux then
+      removeAttrs (inputs.nixpkgs-xr.overlays.default final prev) [ "wivrn" ]
+    else
+      { };
 
   # WiVRn with CUDA/NVENC encoding support (x86_64-linux only).
   # OpenVR compatibility paths are managed by WiVRn itself since v0.23.
