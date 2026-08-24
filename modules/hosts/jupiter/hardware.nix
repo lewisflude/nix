@@ -48,6 +48,20 @@ in
           device = "npool/home";
           fsType = "zfs";
         };
+        # monerod's LMDB writes 4K pages at random offsets. On npool/root
+        # (recordsize=1M, zstd-3) each one forces a read-decompress-modify-
+        # recompress-rewrite of a full 1M record, so a trickle of block writes
+        # becomes a sustained write storm against a pool with no redundancy.
+        # 16K matches LMDB's page clustering and removes the amplification;
+        # logbias=throughput keeps the bulk sync out of the ZIL.
+        #
+        # Deliberately no nofail: a missing dataset should fail loudly rather
+        # than silently fall back to writing into npool/root at 1M records.
+        # Create it before rebuilding -- see modules/monero.nix.
+        "/var/lib/monero" = {
+          device = "npool/monero";
+          fsType = "zfs";
+        };
         "/boot" = {
           device = "/dev/disk/by-label/BOOT";
           fsType = "vfat";

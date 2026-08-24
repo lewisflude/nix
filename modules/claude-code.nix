@@ -422,13 +422,52 @@ in
               # env tools
               "Bash(direnv *)"
               "Bash(devenv *)"
+              # read-only root diagnostics (storage, hardware, logs)
+              "Bash(sudo zpool status *)"
+              "Bash(sudo zpool list *)"
+              "Bash(sudo zpool get *)"
+              "Bash(sudo zpool events *)"
+              "Bash(sudo zpool iostat *)"
+              "Bash(sudo zpool history *)"
+              "Bash(sudo zfs list *)"
+              "Bash(sudo zfs get *)"
+              "Bash(sudo smartctl *)"
+              "Bash(sudo nvme list*)"
+              "Bash(sudo nvme smart-log *)"
+              "Bash(sudo ras-mc-ctl *)"
+              "Bash(sudo dmesg*)"
+              "Bash(sudo journalctl *)"
+              "Bash(sudo systemctl status *)"
+              "Bash(sudo ls /var/lib/systemd/pstore*)"
+              "Bash(sudo cat /var/lib/systemd/pstore/*)"
             ];
             ask = [
               "Bash(git push --force*)"
               "Bash(git push -f *)"
             ];
             deny = [
-              "Bash(sudo *)"
+              # Narrow sudo denies instead of a blanket "Bash(sudo *)": the
+              # blanket rule also blocked read-only diagnostics (zpool status,
+              # smartctl, pstore forensics) that genuinely need root. Deny beats
+              # allow and applies even in bypass-permissions mode, so only
+              # destructive or system-mutating sudo forms belong here.
+              "Bash(sudo rm *)"
+              "Bash(sudo chmod *)"
+              "Bash(sudo chown *)"
+              "Bash(sudo dd *)"
+              "Bash(sudo mkfs*)"
+              "Bash(sudo nixos-rebuild *)"
+              "Bash(sudo darwin-rebuild *)"
+              "Bash(sudo nh *)"
+              "Bash(sudo zpool create *)"
+              "Bash(sudo zpool destroy *)"
+              "Bash(sudo zpool remove *)"
+              "Bash(sudo zpool replace *)"
+              "Bash(sudo zpool labelclear *)"
+              "Bash(sudo zfs destroy *)"
+              "Bash(sudo zfs rollback *)"
+              "Bash(sudo zfs rename *)"
+              "Bash(sudo zfs receive *)"
               "Bash(rm -rf *)"
               "Bash(chmod *)"
               "Bash(chown *)"

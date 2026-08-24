@@ -5,6 +5,10 @@
 # which blocks your wallet asks for and the IP asking, which is enough to
 # fingerprint a wallet over time. Feather talks to 127.0.0.1 so nothing about
 # your addresses or scan pattern leaves the box.
+#
+# dataDir stays at the module default /var/lib/monero, which is a dedicated ZFS
+# dataset (npool/monero, recordsize=16K) declared in hosts/jupiter/hardware.nix
+# -- the LMDB write-amplification note lives there.
 { config, ... }:
 let
   inherit (config) constants;
@@ -20,6 +24,17 @@ in
       # is fully validating and fully private for your own wallet -- the only
       # thing it can't do is serve historical blocks to other people's syncs.
       prune = true;
+
+      # --max-concurrency. Unlimited (0) lets initial sync fan block
+      # verification across all 32 threads, which starves the rest of
+      # system.slice for the day or two the sync takes. systemd's knobs are
+      # the wrong tool for this: Nice only orders tasks within a cgroup under
+      # cgroup v2, and IOWeight is inert because ZFS issues writes from the
+      # z_wr_iss kernel threads -- monero.service's io.stat reads wbytes=0 on
+      # every device. Capping concurrency at the source is what actually
+      # works. 8 of 32 leaves the P-cores free; steady state needs one thread
+      # for one block every two minutes.
+      limits.threads = 8;
 
       rpc = {
         # Loopback only. Not in the firewall, not reachable over Tailscale.
