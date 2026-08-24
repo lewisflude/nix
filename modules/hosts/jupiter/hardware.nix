@@ -55,6 +55,11 @@ in
         # 16K matches LMDB's page clustering and removes the amplification;
         # logbias=throughput keeps the bulk sync out of the ZIL.
         #
+        # lz4 rather than the zstd-3 used everywhere else on npool: blockchain
+        # data is ring signatures and hashes, i.e. near-incompressible, so
+        # zstd would burn CPU on every read-modify-write for no ratio. lz4's
+        # early abort makes that check almost free.
+        #
         # Deliberately no nofail: a missing dataset should fail loudly rather
         # than silently fall back to writing into npool/root at 1M records.
         # Create it before rebuilding -- see modules/monero.nix.
