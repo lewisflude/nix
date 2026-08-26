@@ -94,8 +94,11 @@ in
             User = "git";
           };
 
+          # Tailnet addresses, not LAN ones: these aliases have to resolve from
+          # anywhere, and neither host advertises subnet routes, so a
+          # 192.168.10.x HostName only works while you are on the home LAN.
           "jupiter" = {
-            HostName = constants.hosts.jupiter.ipv4;
+            HostName = constants.hosts.jupiter.tailscaleIpv4;
             User = hmArgs.config.home.username;
             ForwardAgent = true;
             RemoteForward = [
@@ -108,7 +111,7 @@ in
           };
 
           "mercury" = {
-            HostName = constants.hosts.mercury.ipv4;
+            HostName = constants.hosts.mercury.tailscaleIpv4;
             User = hmArgs.config.home.username;
             ForwardAgent = true;
             RemoteForward = [

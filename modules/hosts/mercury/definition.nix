@@ -36,6 +36,7 @@ in
         darwin.apps
         darwin.disableBackgroundAgents
         darwin.gaming
+        darwin.mosh
         darwin.ssh
         darwin.tailscale
         darwin.zed
