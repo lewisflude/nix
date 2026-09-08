@@ -96,10 +96,20 @@ in
         };
       };
 
-      # Power management (pro audio / KVM reliability)
-      power.sleep.computer = "never";
-      power.sleep.display = "never";
-      power.sleep.harddisk = "never";
+      # Power management (pro audio / KVM reliability).
+      #
+      # nix-darwin's `power.sleep.*` writes with `pmset -a`, which applies the
+      # same profile to every power source. That kept the display and disks
+      # awake on battery too, which drains the machine badly when unplugged.
+      # Set the two profiles separately instead: never sleep on AC, where the
+      # DAW and KVM need it, and normal laptop behaviour on battery.
+      system.activationScripts.powerProfiles = ''
+        # AC: pro audio / KVM — never sleep.
+        pmset -c displaysleep 0 sleep 0 disksleep 0
+
+        # Battery: conserve. Power Nap off so sleep actually stays asleep.
+        pmset -b displaysleep 5 sleep 15 disksleep 10 powernap 0
+      '';
 
       # Touch ID for sudo
       security.pam.services.sudo_local.touchIdAuth = true;
