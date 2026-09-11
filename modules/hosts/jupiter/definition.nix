@@ -155,6 +155,7 @@ in
         # ═══════════════════════════════════════════════════════════════════════
         nixos.printing
         nixos.xdgPortal
+        nixos.davinciResolve
       ];
 
       # Required for NixOS
@@ -201,6 +202,7 @@ in
 
         # Desktop home-manager modules
         homeManager.browser
+        homeManager.davinciResolve
         homeManager.desktopApps
         homeManager.gimp
         homeManager.keyboard
