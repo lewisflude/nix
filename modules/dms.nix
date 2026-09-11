@@ -76,10 +76,19 @@ in
           includes = {
             enable = true;
             override = true;
+            # These are appended to ~/.config/niri/config.kdl *after* the
+            # generated hm.kdl, and niri includes are positional: a later
+            # include overrides anything set before it. So this list is
+            # exactly the set of things DMS is allowed to win on.
+            #
+            # "layout" is deliberately absent. It used to override gaps,
+            # focus-ring width, and the geometry window rule from
+            # modules/niri/, which made those Nix values dead config. Layout
+            # is owned by modules/niri/layout.nix; changing gaps or border
+            # width in the DMS settings panel no longer has any effect.
             filesToInclude = [
               "alttab"
               "colors"
-              "layout"
               "wpblur"
             ];
           };
