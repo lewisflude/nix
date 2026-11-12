@@ -107,9 +107,6 @@ _: {
         # Workflow
         pkgs.cocogitto
         pkgs.yaml-language-server
-
-        # Binary caching
-        pkgs.cachix
       ]
       ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         pkgs.libnotify
