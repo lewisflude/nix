@@ -58,9 +58,12 @@ in
     determinateNix = {
       enable = true;
       customSettings = commonSettings // {
-        cores = 2;
+        # M4 Pro: 10 performance + 4 efficiency cores. 6/3 lets a single
+        # heavy build (e.g. cachix's GHC compile) use several performance
+        # cores while leaving headroom for interactive use during a rebuild.
+        cores = 6;
         eval-cores = 4;
-        max-jobs = 2;
+        max-jobs = 3;
         # github-runner on Darwin ships a sandbox profile, which Nix only
         # permits when sandboxing is relaxed.
         sandbox = "relaxed";
