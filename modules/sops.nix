@@ -44,6 +44,7 @@ in
           HOME_ASSISTANT_BASE_URL = mkSecret { };
           HOME_ASSISTANT_TOKEN = mkSecret { allowUserRead = true; };
           KAGI_API_KEY = mkSecret { allowUserRead = true; };
+          GOOGLE_SHEETS_SERVICE_ACCOUNT = mkSecret { allowUserRead = true; };
           OBSIDIAN_API_KEY = mkSecret { allowUserRead = true; };
           OPENAI_API_KEY = mkSecret { allowUserRead = true; };
           restic-password = mkSecret { allowUserRead = true; };
@@ -99,11 +100,13 @@ in
           CIRCLECI_TOKEN = mkDarwinSecret;
           GITHUB_TOKEN = mkDarwinSecret;
           KAGI_API_KEY = mkDarwinSecret;
+          GOOGLE_SHEETS_SERVICE_ACCOUNT = mkDarwinSecret;
           UNSPLASH_API_KEY = mkDarwinSecret;
           PEXELS_API_KEY = mkDarwinSecret;
           PIXABAY_API_KEY = mkDarwinSecret;
           OPENAI_API_KEY = mkDarwinSecret;
           HOME_ASSISTANT_TOKEN = mkDarwinSecret;
+          OBSIDIAN_API_KEY = mkDarwinSecret;
           "samba/lewisflude-password" = mkDarwinSecret;
         };
       };

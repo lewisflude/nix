@@ -15,17 +15,28 @@ _: {
       # an explicit pin over computing "latest ZFS-compatible" (which silently
       # walks backwards as kernels go EOL).
       #
-      # Was 6.12 because ZFS 2.4.3 oopsed on 6.18 (`kernel BUG at fs/namei.c:844`
-      # via zfs_getattr_fast/try_to_unlazy) on 2026-07-18. That reason expired
-      # with the move to the 2.3 branch below: 2.3.8 declares 4.18-7.0 support,
-      # and nixpkgs builds the kmod fine on 6.18 (it marks it broken on 7.2, so
-      # do NOT go past 6.18 while pinned to zfs_2_3). 6.18 is LTS with the same
-      # projected EOL as 6.12 (Dec 2028) and buys ntsync (6.14, Proton/Wine) and
-      # FUSE-over-io_uring for the mergerfs pool.
+      # Back to 6.12 on 2026-09-11. This pin was moved to 6.18 on the theory
+      # that `kernel BUG at fs/namei.c:844` (via try_to_unlazy, in the RCU
+      # path-walk fast path) was ZFS 2.4.3's fault and so "expired" with the
+      # move to the 2.3 branch below. That theory is wrong. Every pstore dump
+      # on Jupiter carrying that signature -- 11 of them, 2026-06-29 through
+      # 2026-09-11 -- is on 6.18.x (.33, .36, .45), and the last two (08-24 and
+      # 09-11) are on 2.3.8, not 2.4.3. Zero occurrences on 6.12. The common
+      # factor is the kernel, not the ZFS version.
+      #
+      # The 09-11 panic hit mid-rsync and cost real data: the box went down
+      # unclean, XFS replayed metadata but not the unflushed page cache, and
+      # the tail of a 53 GB transfer to /mnt/storage came back as 0-byte files
+      # plus one clip truncated 170 MB short -- after rsync had exited 0.
+      #
+      # Going back costs ntsync (6.14, Proton/Wine) and FUSE-over-io_uring for
+      # the mergerfs pool. Worth it: 6.12 is LTS with the same projected EOL
+      # (Dec 2028) and is inside zfs_2_3's declared support window. Do NOT
+      # return to 6.18 without evidence the namei BUG is fixed upstream.
       #
       # mkDefault so a host can override; bump deliberately, never with `switch`
       # -- stage with `nh os boot` so the old generation stays bootable.
-      boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_6_18;
+      boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_6_12;
 
       # Pin ZFS to the 2.3 LTS series. nixpkgs' default `pkgs.zfs` floats to
       # 2.4.x, and 2.4.3 hard-crashed Jupiter three times in three days with

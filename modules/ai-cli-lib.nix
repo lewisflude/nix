@@ -115,6 +115,18 @@ let
             )}";
           };
         }
+    // lib.optionalAttrs (secretAvailable osConfig "OBSIDIAN_API_KEY") {
+      # mcp-obsidian (MarkusPfundstein): talks to the Obsidian Local REST API
+      # community plugin. Requires that plugin installed and enabled in
+      # Obsidian, with its API key copied into the OBSIDIAN_API_KEY secret.
+      obsidian = {
+        command = "${pkgs.writeShellScript "mcp-obsidian" ''
+          export OBSIDIAN_API_KEY="$(cat ${lib.escapeShellArg (secretPath osConfig "OBSIDIAN_API_KEY")})"
+          ${uvxEnv pkgs}
+          exec ${pkgs.uv}/bin/uvx mcp-obsidian "$@"
+        ''}";
+      };
+    }
     // lib.optionalAttrs (secretAvailable osConfig "GITHUB_TOKEN") {
       github = {
         command = "${pkgs.writeShellScript "mcp-github" ''
@@ -122,6 +134,32 @@ let
           GITHUB_TOKEN="$(cat ${lib.escapeShellArg (secretPath osConfig "GITHUB_TOKEN")})"
           exec ${pkgs.nodejs}/bin/npx -y mcp-remote https://api.githubcopilot.com/mcp/ \
             --header "Authorization: Bearer $GITHUB_TOKEN" "$@"
+        ''}";
+      };
+    }
+    // lib.optionalAttrs (secretAvailable osConfig "GOOGLE_SHEETS_SERVICE_ACCOUNT") {
+      # Google Sheets (xing5/mcp-google-sheets): in-place cell and formula
+      # editing, which the Claude.ai Google Drive connector cannot do — its
+      # update_file only touches title/parent metadata.
+      #
+      # Auth is a Google Cloud service account. sops-nix decrypts the whole key
+      # JSON to a file, so SERVICE_ACCOUNT_PATH points at the secret path
+      # directly rather than cat-ing it into a variable like the token-shaped
+      # secrets above. The service account only sees spreadsheets explicitly
+      # shared with its client_email.
+      #
+      # Pinned rather than @latest (upstream's recommendation) so a PyPI release
+      # cannot silently change what runs — same reasoning as stock-images.
+      #
+      # --with "mcp<2" because 0.6.3 declares only mcp>=1.8.0, so uv resolves
+      # mcp 2.x, where mcp.server.fastmcp was renamed to mcp.server.mcpserver.
+      # The server then dies at import with ModuleNotFoundError and Claude Code
+      # reports it as CONNECTION_CLOSED. Drop this once upstream moves to 2.x.
+      google-sheets = {
+        command = "${pkgs.writeShellScript "mcp-google-sheets" ''
+          export SERVICE_ACCOUNT_PATH=${lib.escapeShellArg (secretPath osConfig "GOOGLE_SHEETS_SERVICE_ACCOUNT")}
+          ${uvxEnv pkgs}
+          exec ${pkgs.uv}/bin/uvx --with 'mcp<2' mcp-google-sheets@0.6.3 "$@"
         ''}";
       };
     };
