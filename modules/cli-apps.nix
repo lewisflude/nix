@@ -99,7 +99,12 @@ _: {
         pkgs.yaml-language-server
 
         # Binary caching
-        pkgs.cachix
+        # Builds from source on aarch64-darwin when the pinned nixpkgs rev
+        # lacks a cache hit; its Haskell test suite then aborts on the same
+        # libffi trampoline assertion as pgcli below, so skip checks.
+        (pkgs.cachix.overrideAttrs (_: {
+          doCheck = false;
+        }))
       ]
       ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         pkgs.libnotify
