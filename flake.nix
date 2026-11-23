@@ -45,30 +45,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew = {
+      # Do not override inputs.brew-src: nix-homebrew vendors bin/brew from the
+      # brew release it pins, so a different brew-src breaks activation.
       url = "github:zhaofengli/nix-homebrew";
-      # Override nix-homebrew's pinned brew (5.1.14), whose macOS detection
-      # returns ":dunno" on this Darwin build and aborts `brew bundle` during
-      # darwin activation. 6.0.0+ adds support for newer macOS versions.
-      inputs.brew-src.follows = "brew-src";
-    };
-    brew-src = {
-      # Must track the homebrew-core/cask taps below: newer formulae use DSL
-      # features (Homebrew::InstallSteps::DSL#run, Resource::Patch#type) that
-      # older brew can't parse, making formulae "unreadable" during activation.
-      url = "github:Homebrew/brew/6.0.18";
-      flake = false;
-    };
-    homebrew-core = {
-      url = "github:Homebrew/homebrew-core";
-      flake = false;
-    };
-    homebrew-cask = {
-      url = "github:Homebrew/homebrew-cask";
-      flake = false;
-    };
-    homebrew-bundle = {
-      url = "github:Homebrew/homebrew-bundle";
-      flake = false;
     };
     niri = {
       url = "github:sodiboo/niri-flake";
