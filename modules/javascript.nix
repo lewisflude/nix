@@ -7,7 +7,7 @@ _: {
     { config, pkgs, ... }:
     {
       home.packages = [
-        pkgs.nodejs_22
+        pkgs.nodejs_24
         pkgs.pnpm
       ];
 
