@@ -2,7 +2,7 @@
 # Fast, collaborative code editor
 _: {
   flake.modules.homeManager.zed =
-    _:
+    { lib, pkgs, ... }:
     let
       # Format JS/TS/JSON with Biome (matches the pkgs.biome toolchain).
       # Biome's LSP only attaches when a project has a biome.json, so this
@@ -10,9 +10,7 @@ _: {
       biomeFormat = {
         formatter = [
           {
-            code_actions = {
-              "source.organizeImports.biome" = true;
-            };
+            code_action = "source.organizeImports.biome";
           }
           {
             language_server = {
@@ -24,6 +22,9 @@ _: {
       };
     in
     {
+      # Zed does not download nixd itself; it must be on PATH.
+      home.packages = [ pkgs.nixd ];
+
       programs.zed-editor = {
         enable = true;
         package = null;
@@ -35,18 +36,63 @@ _: {
         # auto-manage the language-server binaries instead of pinning them.
         mutableUserSettings = false;
 
+        extensions = [
+          "astro"
+          "biome"
+          "dockerfile"
+          "html"
+          "nix"
+          "toml"
+          "wgsl"
+        ];
+
         userSettings = {
+          # signal-nix installs only the theme variant for its configured mode
+          # (dark), but sets mode = "system". Pin it so macOS light appearance
+          # doesn't select the uninstalled "Signal Light".
+          theme.mode = lib.mkForce "dark";
+
           ui_font_size = 14;
           ui_font_family = "Iosevka Nerd Font Mono";
-          buffer_font_size = 12;
+          buffer_font_size = 14;
           buffer_font_family = "Iosevka Nerd Font Mono";
+          buffer_font_features = {
+            calt = true;
+            liga = true;
+            dlig = true;
+          };
+
+          # Editing - mirrors helix.nix where Zed has an equivalent.
+          autosave = "on_focus_change";
+          format_on_save = "on";
+          soft_wrap = "editor_width";
+          relative_line_numbers = "enabled";
+          vertical_scroll_margin = 8;
+          wrap_guides = [
+            80
+            120
+          ];
+          sticky_scroll.enabled = true;
+          inlay_hints.enabled = true;
+          diagnostics.inline = {
+            enabled = true;
+            max_severity = "error";
+          };
+
+          tabs = {
+            file_icons = true;
+            git_status = true;
+            show_diagnostics = "errors";
+          };
+
+          terminal.font_size = 14;
 
           telemetry = {
             metrics = false;
             diagnostics = false;
           };
 
-          # Panels (theme is owned by the signal-nix Zed module).
+          # Panels (theme colours are owned by the signal-nix Zed module).
           project_panel.dock = "left";
           outline_panel.dock = "left";
           collaboration_panel.dock = "left";
@@ -88,17 +134,8 @@ _: {
             JSON = biomeFormat;
             JSONC = biomeFormat;
             Python = {
-              format_on_save = "on";
-              formatter = {
-                external = {
-                  command = "ruff";
-                  arguments = [
-                    "format"
-                    "--stdin-filename"
-                    "{buffer_path}"
-                  ];
-                };
-              };
+              # Ruff's LSP, which Zed installs itself; there is no ruff on PATH.
+              formatter.language_server.name = "ruff";
               language_servers = [
                 "basedpyright"
                 "ruff"
