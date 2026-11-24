@@ -367,7 +367,7 @@ in
           };
 
           attribution = {
-            commit = "Co-Authored-By: Claude <noreply@anthropic.com>";
+            commit = "";
           };
 
           enabledPlugins = {
