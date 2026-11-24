@@ -111,6 +111,10 @@ _: {
       ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         pkgs.libnotify
         pkgs.lsof
+      ]
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+        # Disk cleanup (`mo`); preview with --dry-run, as `mo clean` deletes permanently
+        pkgs.mole-cleaner
       ];
     };
 }
