@@ -1,4 +1,4 @@
-# Directories where AI coding agents (Claude Code, Codex, Gemini CLI) skip
+# Directories where AI coding agents (Codex, Antigravity CLI) skip
 # permission prompts. Consumers wrap each tool's binary with a zsh function
 # that injects the tool's bypass flag when $PWD is under one of these paths.
 #

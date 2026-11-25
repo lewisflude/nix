@@ -39,7 +39,8 @@ let
       sqlite = {
         command = "${pkgs.writeShellScript "mcp-sqlite" ''
           ${uvxEnv pkgs}
-          exec ${pkgs.uv}/bin/uvx mcp-server-sqlite --db-path "$HOME/.local/share/mcp/data.db" "$@"
+          # mcp 2.x dropped Server.list_resources, which this server still uses.
+          exec ${pkgs.uv}/bin/uvx --with 'mcp<2' mcp-server-sqlite --db-path "$HOME/.local/share/mcp/data.db" "$@"
         ''}";
       };
       playwright = {
@@ -108,7 +109,8 @@ let
               )
               + ''
                 ${uvxEnv pkgs}
-                exec ${pkgs.uv}/bin/uvx \
+                # Its mcp release imports a private helper removed in newer pydantic.
+                exec ${pkgs.uv}/bin/uvx --with 'pydantic<2.12' \
                   --from "git+https://github.com/Zulelee/stock-images-mcp@35b43441d648ca7fc60e3196f25c1d3eef82ca86" \
                   stock-images-mcp "$@"
               ''

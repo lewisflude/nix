@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (config) constants aiCli trustedDirs;
+  inherit (config) constants aiCli;
 in
 {
   # Claude Code from sadjow/claude-code-nix (hourly upstream updates, Cachix cache).
@@ -62,7 +62,6 @@ in
     {
       lib,
       pkgs,
-      config,
       osConfig ? { },
       ...
     }:
@@ -208,6 +207,79 @@ in
         };
 
       claudeDesktopServersJson = builtins.toJSON claudeDesktopServers;
+
+      jq = lib.getExe pkgs.jq;
+      git = lib.getExe pkgs.git;
+
+      statusLineScript = pkgs.writeShellScript "claude-status-line" ''
+        input=$(cat)
+        dir=$(${jq} -r '.workspace.current_dir // .cwd // "."' <<<"$input")
+        branch=$(${git} -C "$dir" branch --show-current 2>/dev/null)
+        ${jq} -r --arg branch "$branch" '
+          [ .model.display_name + (if .effort.level then " (\(.effort.level))" else "" end),
+            "\(.context_window.used_percentage // 0 | floor)% context",
+            (.workspace.current_dir // .cwd // "" | split("/") | last // ""),
+            $branch
+          ] | map(select(. != null and . != "")) | join(" | ")' <<<"$input"
+      '';
+
+      notifyHook = pkgs.writeShellScript "claude-notify" ''
+        message=$(${jq} -r '.message // "Claude Code needs your attention"')
+        ${
+          if pkgs.stdenv.hostPlatform.isDarwin then
+            ''
+              /usr/bin/osascript \
+                -e 'on run argv' \
+                -e 'display notification (item 1 of argv) with title "Claude Code"' \
+                -e 'end run' "$message" >/dev/null 2>&1 || true
+            ''
+          else
+            ''
+              ${lib.getExe pkgs.libnotify} --app-name="Claude Code" -- "Claude Code" "$message" || true
+            ''
+        }
+      '';
+
+      # treefmt comes from the project's environment so that its own config
+      # applies. Failures reach Claude as context instead of being swallowed.
+      formatHook = pkgs.writeShellScript "claude-format" ''
+        file=$(${jq} -r '.tool_input.file_path // empty')
+        [ -f "$file" ] || exit 0
+        command -v treefmt >/dev/null 2>&1 || exit 0
+        if ! output=$(treefmt "$file" 2>&1); then
+          case "$output" in
+            *"failed to find treefmt config"*) exit 0 ;;
+          esac
+          ${jq} -n --arg output "''${output: -2000}" '{
+            hookSpecificOutput: {
+              hookEventName: "PostToolUse",
+              additionalContext: ("treefmt failed:\n" + $output)
+            }
+          }'
+        fi
+      '';
+
+      # Exit 2 sends stderr back to Claude; stop_hook_active prevents loops.
+      nixParseHook = pkgs.writeShellScript "claude-nix-parse" ''
+        input=$(cat)
+        [ "$(${jq} -r '.stop_hook_active // false' <<<"$input")" = true ] && exit 0
+        command -v nix-instantiate >/dev/null 2>&1 || exit 0
+        cd "$(${jq} -r '.cwd // "."' <<<"$input")" || exit 0
+        root=$(${git} rev-parse --show-toplevel 2>/dev/null) || exit 0
+        cd "$root" || exit 0
+        failed=0
+        while IFS= read -r -d "" file; do
+          [ -f "$file" ] || continue
+          if ! output=$(nix-instantiate --parse "./$file" 2>&1 >/dev/null); then
+            printf 'Nix parse error in %s:\n%s\n' "$file" "$output" >&2
+            failed=2
+          fi
+        done < <(
+          ${git} diff -z --name-only HEAD -- '*.nix' 2>/dev/null
+          ${git} ls-files -z --others --exclude-standard -- '*.nix'
+        )
+        exit "$failed"
+      '';
     in
     {
       programs.mcp = {
@@ -215,34 +287,10 @@ in
         servers = mcpServers;
       };
 
-      programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
-        lib.mkAfter (
-          aiCli.mkTrustedWrapper {
-            cmd = "claude";
-            trustedFlag = "--dangerously-skip-permissions";
-            inherit trustedDirs;
-          }
-        )
-      );
-
       # Claude Desktop reads claude_desktop_config.json. The app writes its own
       # preferences to the same file, so merge into .mcpServers rather than
       # overwriting the whole document.
       home.activation = {
-        # Home-manager symlinks ~/.claude/settings.json to a read-only /nix/store path.
-        # Claude Code's /effort and /model commands need to write to that file, so we
-        # replace the symlink with a writable copy after activation. Rebuilds reset the
-        # file to the declarative values; runtime /effort changes persist until the next
-        # `nh home switch`.
-        claudeCodeMutableSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          SETTINGS="$HOME/.claude/settings.json"
-          if [ -L "$SETTINGS" ]; then
-            TARGET=$(${pkgs.coreutils}/bin/readlink -f "$SETTINGS")
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm "$SETTINGS"
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 644 "$TARGET" "$SETTINGS"
-          fi
-        '';
-
         claudeDesktopMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           CONFIG_DIR="${claudeDesktopConfigDir}"
           CONFIG_FILE="$CONFIG_DIR/claude_desktop_config.json"
@@ -316,6 +364,9 @@ in
         enable = true;
         package = pkgs.claude-code;
         enableMcpIntegration = true;
+        # Merges into a writable file so runtime changes (/effort, /model)
+        # survive. Keys removed from here linger on disk until deleted by hand.
+        mutableSettings = true;
 
         lspServers = {
           nix = {
@@ -361,9 +412,30 @@ in
 
         settings = {
           effortLevel = "medium";
+          # Opus 5.5 and later ignore the user-level effortLevel above.
+          modelSettings.claude-opus-5-5.effortLevel = "high";
+
+          cleanupPeriodDays = 90;
+
+          statusLine = {
+            type = "command";
+            command = "${statusLineScript}";
+          };
+
+          autoMode = {
+            # Broad allow rules below (git, gh, nix, curl) would otherwise skip
+            # the classifier. They still apply in the other modes.
+            classifyAllShell = true;
+            hard_deny = [
+              "$defaults"
+              "Never activate a NixOS, nix-darwin or Home Manager configuration by any route; building and evaluating is fine."
+            ];
+          };
 
           env = {
             DISABLE_AUTOUPDATER = "1";
+            DISABLE_TELEMETRY = "1";
+            DISABLE_ERROR_REPORTING = "1";
           };
 
           attribution = {
@@ -376,7 +448,7 @@ in
           };
 
           permissions = {
-            defaultMode = "acceptEdits";
+            defaultMode = "auto";
             allow = [
               "Read"
               "Edit"
@@ -412,8 +484,8 @@ in
               # network
               "Bash(curl *)"
               # MCP read-only
-              "mcp__plugin_claude-code-home-manager_figma__get_screenshot"
-              "mcp__plugin_claude-code-home-manager_figma__get_metadata"
+              "mcp__plugin_hm_figma__get_screenshot"
+              "mcp__plugin_hm_figma__get_metadata"
               # containers (read-only)
               "Bash(docker ps *)"
               "Bash(docker logs *)"
@@ -444,6 +516,8 @@ in
             ask = [
               "Bash(git push --force*)"
               "Bash(git push -f *)"
+              "Bash(git push *--force*)"
+              "Bash(git push * -f*)"
             ];
             deny = [
               # Narrow sudo denies instead of a blanket "Bash(sudo *)": the
@@ -490,14 +564,31 @@ in
                 hooks = [
                   {
                     type = "command";
-                    command = ''
-                      INPUT=$(cat)
-                      FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
-                      if [ -n "$FILE_PATH" ] && [ -f "$FILE_PATH" ]; then
-                        treefmt "$FILE_PATH" 2>/dev/null || true
-                      fi
-                    '';
+                    command = "${formatHook}";
                     timeout = 30;
+                  }
+                ];
+              }
+            ];
+            Stop = [
+              {
+                hooks = [
+                  {
+                    type = "command";
+                    command = "${nixParseHook}";
+                    timeout = 60;
+                  }
+                ];
+              }
+            ];
+            Notification = [
+              {
+                matcher = "permission_prompt|idle_prompt|elicitation_dialog|agent_needs_input";
+                hooks = [
+                  {
+                    type = "command";
+                    command = "${notifyHook}";
+                    timeout = 10;
                   }
                 ];
               }
@@ -520,15 +611,6 @@ in
           code-reviewer = builtins.readFile ../pkgs/claude-code/agents/code-reviewer.md;
         };
       };
-
-      # claudeCodeMutableSettings above replaces Home Manager's
-      # ~/.claude/settings.json symlink with a writable file after each
-      # activation. On the next activation, Home Manager must overwrite that
-      # mutable file instead of trying to create a .hm-backup that may already
-      # exist from an earlier switch. The key must match the absolute-path key
-      # used by programs.claude-code (cfg.configDir defaults to
-      # "${homeDirectory}/.claude") to avoid a target-conflict assertion.
-      home.file."${config.home.homeDirectory}/.claude/settings.json".force = true;
 
       home.packages =
         let
