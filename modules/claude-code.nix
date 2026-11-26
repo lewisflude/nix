@@ -60,12 +60,26 @@ in
 
   flake.modules.homeManager.claudeCode =
     {
+      config,
       lib,
       pkgs,
       osConfig ? { },
       ...
     }:
     let
+      # Atuin records Claude's Bash calls in shell history. Declared here
+      # because the settings merge replaces whole hook arrays, so a hook
+      # `atuin` writes into settings.json at runtime would be lost.
+      atuinHooks = lib.optional config.programs.atuin.enable {
+        matcher = "^Bash$";
+        hooks = [
+          {
+            type = "command";
+            command = "${lib.getExe config.programs.atuin.package} hook claude-code";
+          }
+        ];
+      };
+
       secretAvailable = aiCli.secretAvailable osConfig;
       secretPath = aiCli.secretPath osConfig;
 
@@ -558,7 +572,9 @@ in
           };
 
           hooks = {
-            PostToolUse = [
+            PreToolUse = atuinHooks;
+            PostToolUseFailure = atuinHooks;
+            PostToolUse = atuinHooks ++ [
               {
                 matcher = "Edit|Write";
                 hooks = [
