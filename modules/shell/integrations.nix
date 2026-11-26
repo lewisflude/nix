@@ -18,7 +18,13 @@ _: {
         # No flags: ATUIN_NOBIND (zsh.nix localVariables) already suppresses
         # every binding, which made --disable-up-arrow a no-op. ^r is bound
         # explicitly at order 1500.
-        settings.sync_frequency = "5m";
+        settings = {
+          sync_frequency = "5m";
+          # Declared here because the first-run "Enable Atuin AI" prompt tries
+          # to write config.toml, which is a read-only Nix store symlink
+          # (Permission denied, os error 13).
+          ai.enabled = true;
+        };
       };
 
       programs.direnv = {
