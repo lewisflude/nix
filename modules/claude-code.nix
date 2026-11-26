@@ -374,6 +374,12 @@ in
         '';
       };
 
+      # The Nix build is Claude's native binary, so its self-check expects the
+      # native installer's ~/.local/bin (also XDG_BIN_HOME) on PATH and warns
+      # in /status otherwise. sessionPath prepends: keep `claude` out of it
+      # (DISABLE_AUTOUPDATER stops the native installer writing one there).
+      home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
+
       programs.claude-code = {
         enable = true;
         package = pkgs.claude-code;
