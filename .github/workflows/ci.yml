@@ -25,7 +25,7 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v22
 
       - name: Setup Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v13
+        uses: DeterminateSystems/magic-nix-cache-action@v15
 
       - name: Check flake health
         uses: DeterminateSystems/flake-checker-action@main
@@ -54,7 +54,7 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v22
 
       - name: Setup Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v13
+        uses: DeterminateSystems/magic-nix-cache-action@v15
 
       - name: Build flake outputs
         run: |
@@ -79,7 +79,7 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v22
 
       - name: Setup Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v13
+        uses: DeterminateSystems/magic-nix-cache-action@v15
 
       - name: Setup Cachix
         uses: cachix/cachix-action@v17
@@ -118,7 +118,7 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v22
 
       - name: Setup Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v13
+        uses: DeterminateSystems/magic-nix-cache-action@v15
 
       - name: Setup Cachix
         uses: cachix/cachix-action@v17
