@@ -25,6 +25,7 @@ Humans: start with [`README.md`](README.md) instead.
 | `DENDRITIC_PATTERN.md`  | Writing, creating, or refactoring any `.nix` module     |
 | `NIX_PRACTICES.md`      | Nix language, packaging, options, secrets, verification |
 | `README.md`             | Repo layout, hosts, common commands                     |
+| `TODO.md`               | Prioritised maintenance backlog — check before starting |
 | `CLAUDE.md`             | Claude Code pointer to this file                        |
 
 Claude Code users also have a `/dendritic-pattern` skill and a `nix-module`
