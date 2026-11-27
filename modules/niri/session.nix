@@ -30,8 +30,6 @@
         x11.enable = true;
       };
 
-      programs.hyprcursor-phinger.enable = true;
-
       programs.niri = {
         # Use the niri-flake package built against its pinned nixpkgs (see the
         # nixpkgs-niri note in flake.nix) rather than the overlay against the

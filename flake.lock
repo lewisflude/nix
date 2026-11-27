@@ -753,26 +753,6 @@
         "type": "github"
       }
     },
-    "hyprcursor-phinger": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1763845612,
-        "narHash": "sha256-78zH5GrYa35bEkzeVnl8uXFbZ/zsiSHayjxZlNt+Xe8=",
-        "owner": "jappie3",
-        "repo": "hyprcursor-phinger",
-        "rev": "1207a845501a28e0e00d4a8e935ee0c9cab30650",
-        "type": "github"
-      },
-      "original": {
-        "owner": "jappie3",
-        "repo": "hyprcursor-phinger",
-        "type": "github"
-      }
-    },
     "ia-get": {
       "inputs": {
         "nixpkgs": [
@@ -1503,7 +1483,6 @@
         "flake-parts": "flake-parts_4",
         "git-hooks-nix": "git-hooks-nix_2",
         "home-manager": "home-manager",
-        "hyprcursor-phinger": "hyprcursor-phinger",
         "ia-get": "ia-get",
         "import-tree": "import-tree",
         "kicad-mcp-server": "kicad-mcp-server",

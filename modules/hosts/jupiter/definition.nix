@@ -172,7 +172,6 @@ in
         inputs.dms.homeModules.default
         inputs.dms.homeModules.niri
         inputs.dms-plugin-registry.homeModules.default
-        inputs.hyprcursor-phinger.homeManagerModules.hyprcursor-phinger
 
         # Core home-manager modules
         homeManager.shell

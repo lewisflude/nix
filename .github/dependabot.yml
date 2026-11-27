@@ -45,7 +45,6 @@ updates:
           - "musnix"
           - "vpn-confinement"
           - "nix-flatpak"
-          - "hyprcursor-phinger"
           - "ia-get"
           - "pog"
           - "nix-index-database"

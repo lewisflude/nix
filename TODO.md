@@ -105,7 +105,7 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
 - [x] Stray `.alejandra.toml`, `.deadnix.toml` (treefmt is authoritative)
 - [ ] Karabiner config for an uninstalled app — `modules/karabiner.nix` (re-add
       cask or drop module)
-- [ ] `hyprcursor-phinger` input likely unused under niri _(unverified)_ —
+- [x] `hyprcursor-phinger` input likely unused under niri _(unverified)_ —
       `modules/niri/session.nix:33`
 - [x] Garnix `packages.x86_64-linux.*` only matches `dev`; expose real packages
       or drop the line — `garnix.yaml:12`
@@ -132,7 +132,7 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
 - [ ] **Tooling overlap** — pick one of: dependabot nix vs
       `update-flake-lock.yml`; commitizen hook vs cocogitto; `devour-flake` vs
       `nix-fast-build`
-- [ ] **devShell** — use git-hooks `inputsFrom = [ config.pre-commit.devShell ]`
+- [x] **devShell** — use git-hooks `inputsFrom = [ config.pre-commit.devShell ]`
       instead of hand-merging `enabledPackages` _(unverified)_ —
       `modules/per-system/devShells.nix:10`
 - [ ] **flake-parts `partitions`** for dev-only inputs (low value for a

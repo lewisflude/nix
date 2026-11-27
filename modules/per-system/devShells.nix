@@ -6,8 +6,9 @@ _: {
     {
       # Default dev shell with pre-commit hooks and common tools
       devShells.default = pkgs.mkShell {
-        shellHook = config.pre-commit.settings.shellHook or "";
-        buildInputs = (config.pre-commit.settings.enabledPackages or [ ]) ++ [
+        # git-hooks' devShell carries the hook packages and installs the hooks.
+        inputsFrom = [ config.pre-commit.devShell ];
+        packages = [
           pkgs.jq
           pkgs.yq
           pkgs.git

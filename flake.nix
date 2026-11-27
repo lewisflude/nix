@@ -136,10 +136,6 @@
       url = "github:polygon/audio.nix/5f5bf980572d476f5ff6b3ae12c4e4da7e6b3d3e";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hyprcursor-phinger = {
-      url = "github:jappie3/hyprcursor-phinger";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nix-flatpak = {
       url = "github:gmodena/nix-flatpak/?ref=latest";
     };
