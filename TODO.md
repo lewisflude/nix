@@ -67,13 +67,13 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
       remove — `modules/home-assistant.nix:148`
 - [x] **Caddy** — use `services.caddy.openFirewall` (`modules/caddy.nix:117`);
       drop v1-era `header_up X-Forwarded-*` (`modules/caddy.nix:9`)
-- [ ] **Wake-on-LAN** — replace ethtool unit with `systemd.network.links`
+- [x] **Wake-on-LAN** — replace ethtool unit with `systemd.network.links`
       `WakeOnLan = "magic"` (UDP 9 rule already dropped; a custom `.link`
       replaces `99-default.link`, so carry its `NamePolicy` etc.) —
       `modules/wake-on-lan.nix:8`
-- [ ] **Greeter** — launch `niri-uwsm.desktop` instead of wrapping
-      `niri-session` in uwsm; then drop the polkit `mkForce` hack —
-      `modules/greeter.nix:21`
+- [x] **Greeter** — launch `niri-uwsm.desktop` instead of wrapping
+      `niri-session` in uwsm (polkit `mkForce` must stay: `niri.service`
+      never runs under uwsm) — `modules/greeter.nix:21`
 - [ ] **GitHub runner** → nix-darwin `services.github-runners.<name>` —
       `modules/gh.nix:161`
 - [x] **Node tooling** → HM `programs.npm` / `programs.pnpm` (keep the

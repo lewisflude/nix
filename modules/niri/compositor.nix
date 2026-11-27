@@ -23,11 +23,14 @@
           prettyName = "Niri";
           comment = "Niri compositor managed by UWSM";
           binPath = lib.getExe config.programs.niri.package;
+          # Imports the session environment into systemd/dbus.
+          extraArgs = [ "--session" ];
         };
       };
 
-      # niri-flake targets WantedBy=niri.service, but UWSM uses
-      # wayland-wm@niri-session.service — fix to target graphical-session.target
+      # niri-flake targets WantedBy=niri.service, which only exists when
+      # launched via niri-session. UWSM runs niri as wayland-wm@….service
+      # instead, so hang the polkit agent off graphical-session.target.
       systemd.user.services.niri-flake-polkit.wantedBy = lib.mkForce [
         "graphical-session.target"
       ];
