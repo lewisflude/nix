@@ -153,8 +153,6 @@ in
       };
 
       boot.kernelParams = [
-        "nvidia-drm.modeset=1"
-        "nvidia-drm.fbdev=1"
         # nvidia-modeset.conceal_vrr_caps=1 was here. It zeroes the DRM
         # `vrr_capable` connector property on *every* connector, so niri
         # reported the AW3423DWF as "Variable refresh rate: not supported"

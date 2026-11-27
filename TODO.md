@@ -51,7 +51,7 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
 
 ## P1 — Replace hand-rolled config with upstream modules
 
-- [ ] **NVIDIA** — `modules/graphics.nix`,
+- [x] **NVIDIA** — `modules/graphics.nix`,
       `modules/hosts/jupiter/hardware.nix:156`
   - `package = …production` → `hardware.nvidia.branch = "production"`
   - `extraModprobeConfig` NVreg strings → `hardware.nvidia.moduleParams.nvidia`
