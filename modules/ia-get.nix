@@ -5,7 +5,11 @@
     { pkgs, ... }:
     {
       home.packages = [
-        inputs.ia-get.packages.${pkgs.stdenv.hostPlatform.system}.default
+        # Test suite binds localhost mock servers; the Darwin sandbox denies
+        # that unless local networking is explicitly allowed.
+        (inputs.ia-get.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs {
+          __darwinAllowLocalNetworking = true;
+        })
       ];
     };
 }
