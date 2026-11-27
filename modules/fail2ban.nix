@@ -55,10 +55,13 @@ in
             settings = {
               enabled = true;
               port = "http,https";
-              filter = "caddy-auth";
               maxretry = 10;
               findtime = 600; # 10 minutes
               bantime = 3600; # 1 hour
+            };
+            filter.Definition = {
+              failregex = ''^.*"remote_ip":"<HOST>".*"status":(401|403).*$'';
+              ignoreregex = "";
             };
           };
 
@@ -67,10 +70,14 @@ in
             settings = {
               enabled = true;
               port = "http,https";
-              filter = "caddy-exploit";
               maxretry = 2; # Ban after 2 exploit attempts
               findtime = 3600; # 1 hour window
               bantime = 86400; # 24 hour ban
+            };
+            # Ban on exploit patterns: CVE boundaries, malicious headers, path traversal
+            filter.Definition = {
+              failregex = ''^.*"remote_ip":"<HOST>".*("bissa_cve_boundary"|"Next-Action"|"\.\.\/"|"\.env"|"eval\(").*$'';
+              ignoreregex = "";
             };
           };
         };
@@ -78,19 +85,5 @@ in
 
       # Ensure firewall allows fail2ban to work
       networking.firewall.enable = mkDefault true;
-
-      # Fail2ban filters for Caddy
-      environment.etc."fail2ban/filter.d/caddy-auth.conf".text = ''
-        [Definition]
-        failregex = ^.*"remote_ip":"<HOST>".*"status":(401|403).*$
-        ignoreregex =
-      '';
-
-      environment.etc."fail2ban/filter.d/caddy-exploit.conf".text = ''
-        [Definition]
-        # Ban on exploit patterns: CVE boundaries, malicious headers, path traversal
-        failregex = ^.*"remote_ip":"<HOST>".*("bissa_cve_boundary"|"Next-Action"|"\.\.\/"|"\.env"|"eval\(").*$
-        ignoreregex =
-      '';
     };
 }

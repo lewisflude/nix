@@ -11,7 +11,7 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
 
 ## P0 — Broken or wasting builds
 
-- [ ] **Darwin activation scripts never run.** nix-darwin only executes
+- [x] **Darwin activation scripts never run.** nix-darwin only executes
       `preActivation` / `extraActivation` / `postActivation` (plus built-ins);
       custom names are silently dropped. Move each into
       `system.activationScripts.postActivation.text` with `lib.mkAfter`.
@@ -20,26 +20,26 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
   - `modules/disable-background-agents.nix:30`
   - `modules/nix.nix:74` (disableSpotlightNixStore)
   - `modules/jupiter-music.nix:77` (jupiterMusicCleanupAutofs)
-- [ ] **`ntsync` loaded on a kernel without it.** `modules/gaming.nix:56` adds
+- [x] **`ntsync` loaded on a kernel without it.** `modules/gaming.nix:56` adds
       it to `boot.kernelModules`, but `modules/zfs.nix:39` pins 6.12 (ntsync
       needs 6.14+). Gate it on kernel version or drop it while pinned.
-- [ ] **Dead CUDA cache.** Replace `cuda-maintainers.cachix.org` in
+- [x] **Dead CUDA cache.** Replace `cuda-maintainers.cachix.org` in
       `modules/constants.nix:179,197` with `https://cache.nixos-cuda.org` /
       `cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M=`.
-- [ ] **Stale build workarounds (cause cache misses).** Remove:
+- [x] **Stale build workarounds (cause cache misses).** Remove:
   - `doCheck = false` on `cachix` — `modules/cli-apps.nix:10` (also forces
     devenv to rebuild)
   - `doCheck = false` on `pgcli` — `modules/development-tools.nix:38`
   - `boost = pkgs.boost186` on sunshine — `modules/sunshine.nix:62`
   - `cli-helpers-fix` overlay (nixpkgs has 2.15.1) — `modules/overlays.nix:62`
-- [ ] **Fix evaluation warnings (renamed options).**
+- [x] **Fix evaluation warnings (renamed options).**
   - avahi `publish.*` → `services.avahi.settings.publish.*` —
     `modules/samba.nix:86`, `modules/networking.nix:78`
   - `services.bazarr.listenPort` → `settings.general.port` —
     `modules/arr-stack.nix:57`
   - VPN-Confinement `accessibleFrom` → `allowedIngress` —
     `modules/qbittorrent.nix:196`
-- [ ] **lazygit `git.paging` is superseded** by `git.diffRenderers` (store
+- [x] **lazygit `git.paging` is superseded** by `git.diffRenderers` (store
       symlink blocks lazygit's auto-migration) — `modules/cli-apps.nix:63`
 - [ ] **Homarr image is archived.** `ghcr.io/ajnart/homarr:0.15.3` →
       `ghcr.io/homarr-labs/homarr` (v2; major migration) —
@@ -58,7 +58,7 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
   - drop `nvidia-vaapi-driver` (added by `videoAcceleration`),
     `libva-vdpau-driver`, and `nvidia-drm.modeset/fbdev` kernel params
   - drop `WLR_DRM_DEVICES` (wlroots-only; niri uses `debug.render-drm-device`)
-- [ ] **fail2ban** filters via `environment.etc` →
+- [x] **fail2ban** filters via `environment.etc` →
       `services.fail2ban.jails.<name>.filter` — `modules/fail2ban.nix:83`
 - [ ] **Home Assistant secrets** — drop `hass-secrets-link` oneshot; set
       `sops.templates."hass-secrets.yaml".path` directly —
@@ -69,7 +69,8 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
       drop v1-era `header_up X-Forwarded-*` (`modules/caddy.nix:9`)
       _(unverified)_
 - [ ] **Wake-on-LAN** — replace ethtool unit with `systemd.network.links`
-      `WakeOnLan = "magic"`; drop pointless UDP 9 rule —
+      `WakeOnLan = "magic"` (UDP 9 rule already dropped; a custom `.link`
+      replaces `99-default.link`, so carry its `NamePolicy` etc.) —
       `modules/wake-on-lan.nix:8`
 - [ ] **Greeter** — launch `niri-uwsm.desktop` instead of wrapping
       `niri-session` in uwsm; then drop the polkit `mkForce` hack —
@@ -84,7 +85,7 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
   - remove `caskArgs.no_quarantine` (flag gone from brew)
   - consider dropping `gpg-suite` (duplicates HM gpg + `pinentry_mac`)
   - consider `ghostty` cask → `pkgs.ghostty-bin`
-- [ ] **`$DRY_RUN_CMD` → `run`** in HM activation — `modules/nix-user.nix:39`,
+- [x] **`$DRY_RUN_CMD` → `run`** in HM activation — `modules/nix-user.nix:39`,
       `modules/claude-code.nix:311`, `modules/codex.nix:164`,
       `modules/ai-cli-lib.nix:233`
 - [ ] **nix-user token plumbing** — replace activation script rewriting

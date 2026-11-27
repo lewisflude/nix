@@ -74,9 +74,7 @@ in
     {
       # Tear down the old autofs map + any leftover custom launchd agents from
       # previous iterations of this module.
-      system.activationScripts.jupiterMusicCleanupAutofs.text = ''
-        set -euo pipefail
-
+      system.activationScripts.postActivation.text = lib.mkAfter ''
         uid="$(/usr/bin/id -u ${escapeShellArg username})"
         for label in \
           com.lewisflude.mount-jupiter-music \

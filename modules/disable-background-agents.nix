@@ -5,7 +5,7 @@
 { config, ... }:
 {
   flake.modules.darwin.disableBackgroundAgents =
-    _:
+    { lib, ... }:
     let
       labels = [
         # Adobe Creative Cloud background helpers
@@ -27,7 +27,7 @@
       ];
     in
     {
-      system.activationScripts.disableBackgroundAgents.text = ''
+      system.activationScripts.postActivation.text = lib.mkAfter ''
         uid=$(id -u "${config.username}")
         for label in ${builtins.concatStringsSep " " labels}; do
           /bin/launchctl disable "gui/$uid/$label" 2>/dev/null || true

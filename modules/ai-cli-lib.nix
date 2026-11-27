@@ -230,7 +230,7 @@ let
     ''
       CONFIG_FILE=${lib.escapeShellArg path}
       CONFIG_DIR=$(${pkgs.coreutils}/bin/dirname "$CONFIG_FILE")
-      $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$CONFIG_DIR"
+      run ${pkgs.coreutils}/bin/mkdir -p "$CONFIG_DIR"
 
       EXISTING_JSON=$(${pkgs.coreutils}/bin/mktemp)
       DESIRED_JSON=$(${pkgs.coreutils}/bin/mktemp)
@@ -269,14 +269,14 @@ let
         if needsRemarshal then
           ''
             ${pkgs.yj}/bin/yj -jt < "$MERGED_JSON" > "$MERGED_OUT"
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$MERGED_OUT" "$CONFIG_FILE"
+            run ${pkgs.coreutils}/bin/mv "$MERGED_OUT" "$CONFIG_FILE"
           ''
         else
           ''
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$MERGED_JSON" "$CONFIG_FILE"
+            run ${pkgs.coreutils}/bin/mv "$MERGED_JSON" "$CONFIG_FILE"
           ''
       }
-      $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$EXISTING_JSON" "$DESIRED_JSON" ${
+      run ${pkgs.coreutils}/bin/rm -f "$EXISTING_JSON" "$DESIRED_JSON" ${
         lib.optionalString (!needsRemarshal) "\"$MERGED_JSON\""
       }
     '';

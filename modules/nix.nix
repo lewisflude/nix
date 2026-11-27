@@ -54,27 +54,29 @@ in
   };
 
   # Mercury — Darwin laptop
-  flake.modules.darwin.nix = _: {
-    determinateNix = {
-      enable = true;
-      customSettings = commonSettings // {
-        # M4 Pro: 10 performance + 4 efficiency cores. 6/3 lets a single
-        # heavy build (e.g. cachix's GHC compile) use several performance
-        # cores while leaving headroom for interactive use during a rebuild.
-        cores = 6;
-        eval-cores = 4;
-        max-jobs = 3;
-        # github-runner on Darwin ships a sandbox profile, which Nix only
-        # permits when sandboxing is relaxed.
-        sandbox = "relaxed";
+  flake.modules.darwin.nix =
+    { lib, ... }:
+    {
+      determinateNix = {
+        enable = true;
+        customSettings = commonSettings // {
+          # M4 Pro: 10 performance + 4 efficiency cores. 6/3 lets a single
+          # heavy build (e.g. cachix's GHC compile) use several performance
+          # cores while leaving headroom for interactive use during a rebuild.
+          cores = 6;
+          eval-cores = 4;
+          max-jobs = 3;
+          # github-runner on Darwin ships a sandbox profile, which Nix only
+          # permits when sandboxing is relaxed.
+          sandbox = "relaxed";
+        };
       };
-    };
 
-    # Prevent Spotlight from indexing the Nix store.
-    system.activationScripts.disableSpotlightNixStore.text = ''
-      if [ -d "/nix/store" ]; then
-        mdutil -i off /nix/store 2>/dev/null || true
-      fi
-    '';
-  };
+      # Prevent Spotlight from indexing the Nix store.
+      system.activationScripts.postActivation.text = lib.mkAfter ''
+        if [ -d "/nix/store" ]; then
+          /usr/bin/mdutil -i off /nix/store >/dev/null 2>&1 || true
+        fi
+      '';
+    };
 }

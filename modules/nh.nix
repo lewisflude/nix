@@ -25,6 +25,6 @@ in
         darwinFlake = flakePath;
       };
 
-      home.sessionVariables.NH_NOM = "1";
+      home.sessionVariables.NH_ROM = "1";
     };
 }

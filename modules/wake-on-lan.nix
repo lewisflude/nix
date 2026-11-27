@@ -16,6 +16,7 @@ _: {
         wantedBy = [ "default.target" ];
       };
 
-      networking.firewall.allowedUDPPorts = [ 9 ];
+      # No firewall rule needed: magic packets are handled by the NIC while
+      # the host is off, before the kernel firewall exists.
     };
 }

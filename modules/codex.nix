@@ -161,14 +161,14 @@ in
                 --slurpfile existing "$profile_existing" \
                 '(.profiles[$name] // {}) * $existing[0]' "$legacy_json" > "$profile_merged"
               ${pkgs.yj}/bin/yj -jt < "$profile_merged" > "$profile_toml"
-              $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$profile_toml" "$profile_file"
+              run ${pkgs.coreutils}/bin/mv "$profile_toml" "$profile_file"
 
-              $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$profile_existing" "$profile_merged" "$profile_toml"
+              run ${pkgs.coreutils}/bin/rm -f "$profile_existing" "$profile_merged" "$profile_toml"
             done
           else
             echo "warning: failed to parse $legacy_config during Codex profile migration; leaving it unchanged" >&2
           fi
-          $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$legacy_json"
+          run ${pkgs.coreutils}/bin/rm -f "$legacy_json"
         fi
       '';
 
@@ -190,13 +190,13 @@ in
               if ${pkgs.yj}/bin/yj -tj < "$config_file" > "$existing_json"; then
                 ${pkgs.jq}/bin/jq "$jq_filter" "$existing_json" > "$cleaned_json"
                 ${pkgs.yj}/bin/yj -jt < "$cleaned_json" > "$cleaned_toml"
-                $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$cleaned_toml" "$config_file"
+                run ${pkgs.coreutils}/bin/mv "$cleaned_toml" "$config_file"
               else
                 echo "warning: failed to parse $config_file during Codex cleanup; leaving it unchanged" >&2
               fi
             fi
 
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$existing_json" "$cleaned_json" "$cleaned_toml"
+            run ${pkgs.coreutils}/bin/rm -f "$existing_json" "$cleaned_json" "$cleaned_toml"
           }
 
           repair_codex_hooks_json() {
@@ -215,13 +215,13 @@ in
               walk(if type == "object" and has("command") then .command |= replace_stale_hook_path else . end)
             ' "$hooks_file" > "$tmp"; then
               if ! ${pkgs.diffutils}/bin/cmp -s "$hooks_file" "$tmp"; then
-                $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$tmp" "$hooks_file"
+                run ${pkgs.coreutils}/bin/mv "$tmp" "$hooks_file"
               else
-                $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$tmp"
+                run ${pkgs.coreutils}/bin/rm -f "$tmp"
               fi
             else
               echo "warning: failed to parse $hooks_file during Codex hook repair; leaving it unchanged" >&2
-              $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$tmp"
+              run ${pkgs.coreutils}/bin/rm -f "$tmp"
             fi
           }
 

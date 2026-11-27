@@ -36,7 +36,7 @@ _: {
       };
 
       home.activation.updateNixConf = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        $DRY_RUN_CMD ${updateNixConf}
+        run ${updateNixConf}
       '';
     };
 }

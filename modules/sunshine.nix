@@ -57,10 +57,7 @@ _: {
         autoStart = true;
         capSysAdmin = true;
         openFirewall = true;
-        package = pkgs.sunshine.override {
-          cudaSupport = true;
-          boost = pkgs.boost186; # boost 1.87+ breaks sunshine build (nixpkgs#375077)
-        };
+        package = pkgs.sunshine.override { cudaSupport = true; };
 
         settings = {
           capture = "kms";

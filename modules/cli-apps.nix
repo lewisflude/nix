@@ -1,16 +1,6 @@
 # Simple CLI applications - Tools with minimal configuration
 # Complex CLI apps with extensive configuration are in separate modules
 _: {
-  # cachix builds from source on aarch64-darwin when the pinned nixpkgs rev
-  # lacks a cache hit; its Haskell test suite then aborts on the same libffi
-  # trampoline assertion as pgcli (see modules/development-tools.nix). Patch
-  # it as an overlay rather than a local overrideAttrs so every consumer
-  # (including devenv's internal cachix dependency) shares one derivation
-  # instead of each building its own from-source copy.
-  overlays.cachix-fix = _final: prev: {
-    cachix = prev.cachix.overrideAttrs (_: { doCheck = false; });
-  };
-
   flake.modules.homeManager.cliApps =
     { lib, pkgs, ... }:
     {
@@ -60,10 +50,9 @@ _: {
       programs.lazygit = {
         enable = true;
         settings = {
-          git.paging = {
-            colorArg = "always";
-            pager = "delta --dark --paging=never";
-          };
+          git.diffRenderers = [
+            { command = "delta --dark --paging=never"; }
+          ];
         };
       };
 

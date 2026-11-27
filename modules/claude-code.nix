@@ -308,14 +308,14 @@ in
         claudeDesktopMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           CONFIG_DIR="${claudeDesktopConfigDir}"
           CONFIG_FILE="$CONFIG_DIR/claude_desktop_config.json"
-          $DRY_RUN_CMD mkdir -p "$CONFIG_DIR"
+          run mkdir -p "$CONFIG_DIR"
           if [ ! -s "$CONFIG_FILE" ]; then
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/tee "$CONFIG_FILE" <<<'{}' > /dev/null
+            run ${pkgs.coreutils}/bin/tee "$CONFIG_FILE" <<<'{}' > /dev/null
           fi
           TMP=$(${pkgs.coreutils}/bin/mktemp)
           ${pkgs.jq}/bin/jq --argjson servers '${claudeDesktopServersJson}' \
             '.mcpServers = $servers' "$CONFIG_FILE" > "$TMP"
-          $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv "$TMP" "$CONFIG_FILE"
+          run ${pkgs.coreutils}/bin/mv "$TMP" "$CONFIG_FILE"
         '';
 
         blenderMcpAddon = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -329,8 +329,8 @@ in
           for ver in "$BLENDER_BASE"/[0-9]*/; do
             [ -d "$ver" ] || continue
             DEST="$ver/scripts/addons/blender_mcp"
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$DEST"
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 644 \
+            run ${pkgs.coreutils}/bin/mkdir -p "$DEST"
+            run ${pkgs.coreutils}/bin/install -m 644 \
               ${blenderMcpAddon} "$DEST/__init__.py"
           done
         '';
@@ -351,12 +351,12 @@ in
             REQ="${inputs.kicad-mcp-server}/requirements.txt"
             STAMP="$HOME/.local/share/kicad-mcp/.requirements-stamp"
             if [ ! -x "$VENV_DIR/bin/python" ]; then
-              $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$HOME/.local/share/kicad-mcp"
-              $DRY_RUN_CMD "$KICAD_PY" -m venv --system-site-packages "$VENV_DIR"
+              run ${pkgs.coreutils}/bin/mkdir -p "$HOME/.local/share/kicad-mcp"
+              run "$KICAD_PY" -m venv --system-site-packages "$VENV_DIR"
             fi
             if [ "$(${pkgs.coreutils}/bin/cat "$STAMP" 2>/dev/null)" != "$REQ" ]; then
-              $DRY_RUN_CMD "$VENV_DIR/bin/python" -m pip install --disable-pip-version-check -r "$REQ" \
-                && $DRY_RUN_CMD ${pkgs.coreutils}/bin/tee "$STAMP" <<<"$REQ" > /dev/null
+              run "$VENV_DIR/bin/python" -m pip install --disable-pip-version-check -r "$REQ" \
+                && run ${pkgs.coreutils}/bin/tee "$STAMP" <<<"$REQ" > /dev/null
             fi
           fi
         '';
@@ -367,8 +367,8 @@ in
           for ver in "$ABLETON_PREFS"/Live*/; do
             [ -d "$ver" ] || continue
             DEST="$ver/User Remote Scripts/AbletonMCP"
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$DEST"
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 644 \
+            run ${pkgs.coreutils}/bin/mkdir -p "$DEST"
+            run ${pkgs.coreutils}/bin/install -m 644 \
               ${abletonRemoteScript} "$DEST/__init__.py"
           done
         '';

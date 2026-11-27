@@ -9,6 +9,7 @@ in
 {
   flake.modules.nixos.gaming =
     {
+      config,
       pkgs,
       lib,
       ...
@@ -52,8 +53,13 @@ in
       # primitives in-kernel; Wine 11 / Proton 11 use /dev/ntsync instead of
       # esync/fsync when it exists. The module ships no modalias, so nothing
       # autoloads it on demand -- without this line the device node never
-      # appears and Proton silently falls back.
-      boot.kernelModules = [ "ntsync" ];
+      # appears and Proton silently falls back. Gated because zfs.nix pins
+      # 6.12, which lacks it; returns automatically when the pin is lifted.
+      boot.kernelModules =
+        lib.optionals (lib.versionAtLeast config.boot.kernelPackages.kernel.version "6.14")
+          [
+            "ntsync"
+          ];
 
       programs.gamescope = {
         enable = true;

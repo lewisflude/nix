@@ -54,7 +54,7 @@ in
       services.bazarr = {
         enable = true;
         inherit (media) user group;
-        listenPort = constants.ports.services.bazarr;
+        settings.general.port = constants.ports.services.bazarr;
       };
       services.prowlarr.enable = true;
 
