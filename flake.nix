@@ -111,10 +111,6 @@
     # overriding them would forfeit every cache hit and rebuild from source.
     devenv.url = "github:cachix/devenv";
 
-    fenix = {
-      url = "github:nix-community/fenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     pog = {
       url = "github:jpetrucciani/pog";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -146,10 +142,6 @@
     };
     nix-flatpak = {
       url = "github:gmodena/nix-flatpak/?ref=latest";
-    };
-    nur = {
-      url = "github:nix-community/NUR";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     ia-get = {
       url = "github:wimpysworld/ia-get";

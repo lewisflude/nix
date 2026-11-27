@@ -1,6 +1,6 @@
 # Nix daemon configuration — feature module.
 #
-# Both hosts run Determinate Nix (locked at 3.18.1 via the `determinate`
+# Both hosts run Determinate Nix (version locked via the `determinate`
 # flake input) for lazy-trees and the parallel-eval substrate. All
 # Nix-daemon config is co-located here per dendritic Invariant 3
 # (cross-class co-location); shared values flow through `commonSettings`
@@ -38,10 +38,6 @@ let
     eval-cores = 0;
     extra-substituters = constants.binaryCaches.substituters;
     extra-trusted-public-keys = constants.binaryCaches.trustedPublicKeys;
-    experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
   };
 in
 {

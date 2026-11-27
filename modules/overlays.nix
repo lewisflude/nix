@@ -43,9 +43,6 @@
   # Shared / cross-cutting overlays (no single feature owner)
   # ─────────────────────────────────────────────────────────────────────
   config.overlays = {
-    # NUR — community packages, used wherever
-    nur = inputs.nur.overlays.default;
-
     # ComfyUI: upstream exposes either overlays.default or packages.<system>.default
     comfyui =
       final: prev:

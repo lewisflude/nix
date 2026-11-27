@@ -42,15 +42,12 @@ updates:
           - "nixos-hardware"
           - "sops-nix"
           - "nix-homebrew"
-          - "nur"
           - "musnix"
           - "vpn-confinement"
           - "nix-flatpak"
           - "hyprcursor-phinger"
           - "ia-get"
-          - "fenix"
           - "pog"
-          - "solaar"
           - "nix-index-database"
           - "determinate"
           - "niri"
@@ -61,5 +58,5 @@ updates:
           - "devour-flake"
           - "nixpkgs"
     # Expensive inputs (audio-nix, dms, dms-plugin-registry, signal-nix,
-    # claude-desktop-linux, comfyui, nix-openclaw) are NOT in any group, so
+    # claude-desktop-linux, comfyui) are NOT in any group, so
     # Dependabot opens an individual PR for each — defer or merge per input.

@@ -94,19 +94,19 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
 
 ## P2 — Remove dead weight
 
-- [ ] Unused overlays + inputs: `nur` (`modules/overlays.nix:47`), `fenix`
+- [x] Unused overlays + inputs: `nur` (`modules/overlays.nix:47`), `fenix`
       (`modules/development-tools.nix:5`); remove matching dependabot entries
 - [ ] nvfetcher plumbing: `overlays/sources.toml`, `overlays/_sources/`,
       nvfetcher step in `pkgs/pog-scripts/update-all.nix:90`, treefmt exclude in
       `modules/per-system/treefmt.nix:20`
 - [ ] Orphaned `pkgs/home-assistant/custom-components/home-llm.nix`
-- [ ] Unused `chaotic-nyx.cachix.org` substituter —
+- [x] Unused `chaotic-nyx.cachix.org` substituter —
       `modules/constants.nix:177,195`
-- [ ] Redundant `experimental-features` under Determinate; fix stale "3.18.1"
+- [x] Redundant `experimental-features` under Determinate; fix stale "3.18.1"
       comment — `modules/nix.nix:3,41`
 - [ ] CI: drop `platformLib` warning mask (`.github/workflows/ci.yml:36`); stop
       swallowing cachix push failures with `|| true` (`:115`, `:154`)
-- [ ] Stray `.alejandra.toml`, `.deadnix.toml` (treefmt is authoritative)
+- [x] Stray `.alejandra.toml`, `.deadnix.toml` (treefmt is authoritative)
 - [ ] Karabiner config for an uninstalled app — `modules/karabiner.nix` (re-add
       cask or drop module)
 - [ ] `hyprcursor-phinger` input likely unused under niri _(unverified)_ —
@@ -116,7 +116,7 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
 - [ ] `nix-shell -p` hints → `nix run nixpkgs#…` —
       `scripts/validation/scan-vulnerabilities.sh:44`,
       `pkgs/pog-scripts/visualize-modules.nix:155` (dead branch)
-- [ ] Unused dependabot entries `solaar`, `nix-openclaw` —
+- [x] Unused dependabot entries `solaar`, `nix-openclaw` —
       `.github/dependabot.yml:53,64`
 
 ## P3 — Larger decisions
