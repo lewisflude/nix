@@ -60,14 +60,13 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
   - drop `WLR_DRM_DEVICES` (wlroots-only; niri uses `debug.render-drm-device`)
 - [x] **fail2ban** filters via `environment.etc` →
       `services.fail2ban.jails.<name>.filter` — `modules/fail2ban.nix:83`
-- [ ] **Home Assistant secrets** — drop `hass-secrets-link` oneshot; set
+- [x] **Home Assistant secrets** — drop `hass-secrets-link` oneshot; set
       `sops.templates."hass-secrets.yaml".path` directly —
       `modules/home-assistant.nix:344`
 - [ ] **Home Assistant `config.http`** — moved to UI in HA 2026.8; migrate and
       remove — `modules/home-assistant.nix:148`
-- [ ] **Caddy** — use `services.caddy.openFirewall` (`modules/caddy.nix:117`);
+- [x] **Caddy** — use `services.caddy.openFirewall` (`modules/caddy.nix:117`);
       drop v1-era `header_up X-Forwarded-*` (`modules/caddy.nix:9`)
-      _(unverified)_
 - [ ] **Wake-on-LAN** — replace ethtool unit with `systemd.network.links`
       `WakeOnLan = "magic"` (UDP 9 rule already dropped; a custom `.link`
       replaces `99-default.link`, so carry its `NamePolicy` etc.) —

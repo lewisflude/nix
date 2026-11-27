@@ -64,6 +64,7 @@ in
         owner = "hass";
         group = "hass";
         mode = "0400";
+        path = "/var/lib/hass/secrets.yaml";
       };
 
       # `services.home-assistant.openFirewall` was removed upstream: the frontend
@@ -337,22 +338,6 @@ in
               icon = "mdi:home-variant";
             };
           };
-        };
-      };
-
-      # Systemd services for secrets and intent scripts linking
-      systemd.services.hass-secrets-link = {
-        description = "Link Home Assistant secrets file";
-        wantedBy = [ "home-assistant.service" ];
-        before = [ "home-assistant.service" ];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStart = "${pkgs.coreutils}/bin/ln -sf ${
-            nixosConfig.sops.templates."hass-secrets.yaml".path
-          } /var/lib/hass/secrets.yaml";
-          User = "hass";
-          Group = "hass";
         };
       };
 

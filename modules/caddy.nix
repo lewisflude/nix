@@ -6,10 +6,9 @@ let
   inherit (config) constants useremail;
 
   # Helper functions for Caddy configuration
+  # Caddy v2 sets X-Forwarded-For/-Proto/-Host itself; only X-Real-IP is extra.
   standardHeaders = ''
     header_up X-Real-IP {remote_host}
-    header_up X-Forwarded-For {remote_host}
-    header_up X-Forwarded-Proto {scheme}
   '';
 
   mkReverseProxy = target: {
@@ -84,6 +83,7 @@ in
     { lib, ... }:
     {
       services.caddy = {
+        openFirewall = true;
         enable = true;
         email = useremail;
         virtualHosts =
@@ -113,10 +113,5 @@ in
 
           };
       };
-
-      networking.firewall.allowedTCPPorts = [
-        80
-        443
-      ];
     };
 }
