@@ -6,15 +6,14 @@ _: {
   flake.modules.homeManager.javascript =
     { config, pkgs, ... }:
     {
-      home.packages = [
-        pkgs.nodejs_24
-        pkgs.pnpm
-      ];
-
-      # Redirect `npm install -g` away from the read-only Nix store.
-      home.sessionVariables = {
-        NPM_CONFIG_PREFIX = "${config.home.homeDirectory}/.npm-global";
+      programs.npm = {
+        enable = true;
+        package = pkgs.nodejs_24;
+        # Redirect `npm install -g` away from the read-only Nix store.
+        settings.prefix = "${config.home.homeDirectory}/.npm-global";
       };
+
+      programs.pnpm.enable = true;
 
       home.sessionPath = [
         "${config.home.homeDirectory}/.npm-global/bin"

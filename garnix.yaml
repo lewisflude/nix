@@ -4,12 +4,11 @@
 # through the free-tier evaluator's memory cap (~1.3 GB heap fragmentation
 # limit, observed empirically — Garnix issue #128). System closure caching
 # happens via local `cachix push` to lewisflude.cachix.org instead. Garnix
-# still caches devShells, packages, formatter, and individual checks here.
+# still caches devShells, formatter, and individual checks here.
 builds:
   include:
     - "devShells.x86_64-linux.default"
     - "formatter.x86_64-linux"
-    - "packages.x86_64-linux.*"
     - "checks.x86_64-linux.treefmt"
     - "checks.x86_64-linux.pre-commit"
   exclude:

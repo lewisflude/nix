@@ -103,14 +103,6 @@ in
           autoUpdate = false;
           upgrade = true;
         };
-        caskArgs = {
-          no_quarantine = true;
-        };
-        brews = [
-          "circleci"
-          "mas"
-          "switchaudio-osx"
-        ];
         casks = [
           "1password@beta"
           "ableton-live-suite"
@@ -146,8 +138,10 @@ in
     { lib, pkgs, ... }:
     lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
       home.packages = [
+        pkgs.circleci-cli
         pkgs.ninja
         pkgs.portaudio
+        pkgs.switchaudio-osx
         pkgs.xcodebuild
       ];
     };

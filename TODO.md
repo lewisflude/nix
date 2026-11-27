@@ -77,12 +77,9 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
       `modules/greeter.nix:21`
 - [ ] **GitHub runner** → nix-darwin `services.github-runners.<name>` —
       `modules/gh.nix:161`
-- [ ] **Node tooling** → HM `programs.npm` / `programs.pnpm` (keep the
+- [x] **Node tooling** → HM `programs.npm` / `programs.pnpm` (keep the
       `sessionPath` entry) — `modules/javascript.nix:9`
 - [ ] **Homebrew cleanup** — `modules/darwin.nix:139-156`
-  - brews `circleci`, `switchaudio-osx` → nixpkgs `circleci-cli`,
-    `switchaudio-osx`; drop `mas` (nix-darwin provides it)
-  - remove `caskArgs.no_quarantine` (flag gone from brew)
   - consider dropping `gpg-suite` (duplicates HM gpg + `pinentry_mac`)
   - consider `ghostty` cask → `pkgs.ghostty-bin`
 - [x] **`$DRY_RUN_CMD` → `run`** in HM activation — `modules/nix-user.nix:39`,
@@ -104,14 +101,14 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
       `modules/constants.nix:177,195`
 - [x] Redundant `experimental-features` under Determinate; fix stale "3.18.1"
       comment — `modules/nix.nix:3,41`
-- [ ] CI: drop `platformLib` warning mask (`.github/workflows/ci.yml:36`); stop
+- [x] CI: drop `platformLib` warning mask (`.github/workflows/ci.yml:36`); stop
       swallowing cachix push failures with `|| true` (`:115`, `:154`)
 - [x] Stray `.alejandra.toml`, `.deadnix.toml` (treefmt is authoritative)
 - [ ] Karabiner config for an uninstalled app — `modules/karabiner.nix` (re-add
       cask or drop module)
 - [ ] `hyprcursor-phinger` input likely unused under niri _(unverified)_ —
       `modules/niri/session.nix:33`
-- [ ] Garnix `packages.x86_64-linux.*` only matches `dev`; expose real packages
+- [x] Garnix `packages.x86_64-linux.*` only matches `dev`; expose real packages
       or drop the line — `garnix.yaml:12`
 - [x] `nix-shell -p` hints → `nix run nixpkgs#…` —
       `scripts/validation/scan-vulnerabilities.sh:44`,

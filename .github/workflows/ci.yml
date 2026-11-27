@@ -33,27 +33,7 @@ jobs:
           fail-mode: true
 
       - name: Check flake
-        run: |
-          # Run flake check, but allow the harmless platformLib warning
-          # The platformLib warning is a known flake-parts issue that doesn't affect functionality
-          set +e
-          nix flake check --show-trace --print-build-logs 2>&1 | tee /tmp/flake-check.log
-          exit_code=$?
-          set -e
-
-          # Check if the only issue is the platformLib warning
-          if [ $exit_code -ne 0 ]; then
-            # Count non-platformLib errors
-            other_errors=$(grep -i "error" /tmp/flake-check.log | grep -v "platformLib" | grep -v "error (ignored)" | wc -l)
-            if [ "$other_errors" -eq 0 ] && grep -q "platformLib" /tmp/flake-check.log; then
-              echo "⚠️  Only platformLib warning detected (harmless), treating as success"
-              exit 0
-            else
-              echo "❌ Flake check failed with real errors"
-              cat /tmp/flake-check.log
-              exit 1
-            fi
-          fi
+        run: nix flake check --show-trace --print-build-logs
 
   # Build key configurations to ensure they work
   build-configs:
@@ -112,14 +92,14 @@ jobs:
           # Build NixOS system configuration (jupiter - x86_64-linux)
           # This caches the full system build so rebuilds on jupiter are much faster
           echo "Building NixOS configuration (jupiter)..."
-          nix build .#nixosConfigurations.jupiter.config.system.build.toplevel --no-link || true
+          nix build .#nixosConfigurations.jupiter.config.system.build.toplevel --no-link
 
           # Build dev tools (useful for local development)
           echo "Building dev tools..."
-          nix build .#formatter.x86_64-linux --no-link || true
-          nix build .#checks.x86_64-linux.pre-commit --no-link || true
-          nix build .#checks.x86_64-linux.treefmt --no-link || true
-          nix build .#devShells.x86_64-linux.default --no-link || true
+          nix build .#formatter.x86_64-linux --no-link
+          nix build .#checks.x86_64-linux.pre-commit --no-link
+          nix build .#checks.x86_64-linux.treefmt --no-link
+          nix build .#devShells.x86_64-linux.default --no-link
 
           echo "✅ NixOS builds pushed to Cachix cache"
           echo "💡 When you rebuild on jupiter, Nix will pull from this cache!"
@@ -151,14 +131,14 @@ jobs:
           # Build Darwin system configuration (mercury - aarch64-darwin)
           # This caches the full system build so rebuilds on your Mac are much faster
           echo "Building Darwin configuration (mercury)..."
-          nix build .#darwinConfigurations.mercury.system --no-link || true
+          nix build .#darwinConfigurations.mercury.system --no-link
 
           # Build dev tools for Darwin
           echo "Building dev tools..."
-          nix build .#formatter.aarch64-darwin --no-link || true
-          nix build .#checks.aarch64-darwin.pre-commit --no-link || true
-          nix build .#checks.aarch64-darwin.treefmt --no-link || true
-          nix build .#devShells.aarch64-darwin.default --no-link || true
+          nix build .#formatter.aarch64-darwin --no-link
+          nix build .#checks.aarch64-darwin.pre-commit --no-link
+          nix build .#checks.aarch64-darwin.treefmt --no-link
+          nix build .#devShells.aarch64-darwin.default --no-link
 
           echo "✅ Darwin builds pushed to Cachix cache"
           echo "💡 When you rebuild on your Mac, Nix will pull from this cache!"
