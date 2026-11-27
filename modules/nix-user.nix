@@ -1,42 +1,31 @@
 # Nix user configuration
 # Dendritic pattern: Full implementation as flake.modules.homeManager.nixUser
+#
+# The GitHub access token lives in a sops template rendered by the system
+# (see modules/sops.nix); nix.conf only `!include`s it, so no secret is ever
+# written to the store and a missing template is silently skipped.
 _: {
   flake.modules.homeManager.nixUser =
     {
       config,
       lib,
-      pkgs,
       osConfig ? { },
       ...
     }:
     let
-      updateNixConf = pkgs.writeShellScript "update-nix-conf" ''
-        set -euo pipefail
-        NIX_CONF_DIR="${config.xdg.configHome}/nix"
-        NIX_CONF_FILE="$NIX_CONF_DIR/nix.conf"
-
-        mkdir -p "$NIX_CONF_DIR"
-
-        : > "$NIX_CONF_FILE"
-
-        SECRET_PATH="${osConfig.sops.secrets.GITHUB_TOKEN.path or ""}"
-        if [ -n "$SECRET_PATH" ] && [ -r "$SECRET_PATH" ]; then
-          GITHUB_TOKEN="$(${pkgs.coreutils}/bin/cat "$SECRET_PATH")"
-          if [ -n "$GITHUB_TOKEN" ]; then
-            echo "access-tokens = github.com=$GITHUB_TOKEN" >> "$NIX_CONF_FILE"
-          fi
-        fi
-
-        chmod 600 "$NIX_CONF_FILE"
-      '';
+      tokensPath = osConfig.sops.templates."nix-access-tokens.conf".path or null;
     in
     {
       home.sessionVariables = {
         NIX_USER_CONF_FILES = "${config.xdg.configHome}/nix/nix.conf";
       };
 
-      home.activation.updateNixConf = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        run ${updateNixConf}
-      '';
+      xdg.configFile."nix/nix.conf" = lib.mkIf (tokensPath != null) {
+        # Replaces the regular file the old activation script wrote.
+        force = true;
+        text = ''
+          !include ${tokensPath}
+        '';
+      };
     };
 }

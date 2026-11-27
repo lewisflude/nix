@@ -20,7 +20,7 @@ in
   # NixOS: SOPS configuration
   # ===========================================================================
   flake.modules.nixos.sops =
-    { lib, ... }:
+    { lib, ... }@nixosArgs:
     {
       sops = {
         age = {
@@ -66,6 +66,12 @@ in
             restartUnits = [ "samba-smbd.service" ];
           };
         };
+        # Consumed by homeManager.nixUser via `!include` in ~/.config/nix/nix.conf
+        templates."nix-access-tokens.conf" = {
+          owner = username;
+          mode = "0400";
+          content = "access-tokens = github.com=${nixosArgs.config.sops.placeholder.GITHUB_TOKEN}\n";
+        };
       };
 
       # Create sops-secrets group for user-readable secrets
@@ -77,6 +83,7 @@ in
   # Darwin: SOPS configuration
   # ===========================================================================
   flake.modules.darwin.sops =
+    darwinArgs:
     let
       # Owner-only. `owner = username` already grants the access these secrets
       # need; on macOS `group = "admin"` is every administrator account, so the
@@ -108,6 +115,10 @@ in
           HOME_ASSISTANT_TOKEN = mkDarwinSecret;
           OBSIDIAN_API_KEY = mkDarwinSecret;
           "samba/lewisflude-password" = mkDarwinSecret;
+        };
+        # Consumed by homeManager.nixUser via `!include` in ~/.config/nix/nix.conf
+        templates."nix-access-tokens.conf" = mkDarwinSecret // {
+          content = "access-tokens = github.com=${darwinArgs.config.sops.placeholder.GITHUB_TOKEN}\n";
         };
       };
     };

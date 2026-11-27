@@ -84,7 +84,7 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
 - [x] **`$DRY_RUN_CMD` → `run`** in HM activation — `modules/nix-user.nix:39`,
       `modules/claude-code.nix:311`, `modules/codex.nix:164`,
       `modules/ai-cli-lib.nix:233`
-- [ ] **nix-user token plumbing** — replace activation script rewriting
+- [x] **nix-user token plumbing** — replace activation script rewriting
       `nix.conf` with HM `nix.extraOptions` + `!include <sops path>` —
       `modules/nix-user.nix:13`
 
