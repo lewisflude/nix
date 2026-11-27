@@ -134,30 +134,21 @@ pog.pog {
 
 
     render_graph() {
-        if command -v dot &> /dev/null; then
-            case "$FORMAT" in
-                svg|all)
-                    cyan "Rendering graph to SVG..."
-                    dot -Tsvg "$GRAPH_FILE" -o "$SVG_FILE"
-                    green "✓ SVG created: $SVG_FILE"
-                    ;;
-            esac
+        case "$FORMAT" in
+            svg|all)
+                cyan "Rendering graph to SVG..."
+                dot -Tsvg "$GRAPH_FILE" -o "$SVG_FILE"
+                green "✓ SVG created: $SVG_FILE"
+                ;;
+        esac
 
-            case "$FORMAT" in
-                png|all)
-                    cyan "Rendering graph to PNG..."
-                    dot -Tpng "$GRAPH_FILE" -o "$PNG_FILE"
-                    green "✓ PNG created: $PNG_FILE"
-                    ;;
-            esac
-        else
-            yellow "⚠ Graphviz not installed. Install with:"
-            echo "  nix-shell -p graphviz"
-            echo "  Or: brew install graphviz (on macOS)"
-            echo ""
-            echo "DOT file created: $GRAPH_FILE"
-            echo "You can render it online at: https://dreampuf.github.io/GraphvizOnline/"
-        fi
+        case "$FORMAT" in
+            png|all)
+                cyan "Rendering graph to PNG..."
+                dot -Tpng "$GRAPH_FILE" -o "$PNG_FILE"
+                green "✓ PNG created: $PNG_FILE"
+                ;;
+        esac
     }
 
 

@@ -38,10 +38,10 @@ done
 echo -e "${BLUE}=== NixOS Vulnerability Scanner ===${NC}"
 echo -e "${BLUE}Scanning system for known CVE vulnerabilities...${NC}\n"
 
-# Check if vulnix is available, if not use nix-shell
+# Check if vulnix is available, if not use nix run
 if ! command -v vulnix &>/dev/null; then
-  echo -e "${YELLOW}Note: Running vulnix via nix-shell (this may take a moment)...${NC}\n"
-  VULNIX_CMD="nix-shell -p vulnix --run 'vulnix --system 2>&1'"
+  echo -e "${YELLOW}Note: Running vulnix via nix run (this may take a moment)...${NC}\n"
+  VULNIX_CMD="nix run nixpkgs#vulnix -- --system 2>&1"
 else
   VULNIX_CMD="vulnix --system 2>&1"
 fi

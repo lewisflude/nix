@@ -20,19 +20,12 @@ pog.pog {
       bool = true;
       description = "Skip flake.lock update";
     }
-    {
-      name = "skip_plugins";
-      short = "p";
-      bool = true;
-      description = "Skip ZSH plugins update";
-    }
   ];
 
   runtimeInputs = [
     pkgs.coreutils
     pkgs.git
     pkgs.nix
-    pkgs.nvfetcher
     pkgs.gum
     pkgs.jq
   ];
@@ -87,42 +80,9 @@ pog.pog {
         yellow "Skipping flake update"
       fi
 
-      # Update ZSH plugins
-      if ! ${flag "skip_plugins"}; then
-        cyan "2️⃣  Updating ZSH Plugins"
-        if [ -f "$FLAKE_DIR/home/common/zsh-plugins.toml" ]; then
-          if ${flag "dry_run"}; then
-            debug "DRY RUN: Would update ZSH plugins with nvfetcher"
-          else
-            cd "$FLAKE_DIR/home/common" || die "Failed to change to home/common directory"
-            nvfetcher -c zsh-plugins.toml -o _sources || die "Failed to update ZSH plugins"
-            green "✅ ZSH plugins updated"
-          fi
-        else
-          debug "No zsh-plugins.toml found, skipping"
-        fi
-      else
-        yellow "Skipping plugin updates"
-      fi
-
-      # Update overlay sources (optional - using nvfetcher)
-      if [ -f "$FLAKE_DIR/overlays/sources.toml" ]; then
-        cyan "3️⃣  Updating Overlay Sources"
-        if ${flag "dry_run"}; then
-          debug "DRY RUN: Would update overlay sources with nvfetcher"
-        else
-          cd "$FLAKE_DIR/overlays" || die "Failed to change to overlays directory"
-          nvfetcher -c sources.toml -o _sources || die "Failed to update overlay sources"
-          green "✅ Overlay sources updated"
-          cyan "   Note: You may need to update additional hashes (like npmDepsHash) manually"
-        fi
-      else
-        debug "No overlays/sources.toml found, skipping"
-      fi
-
       # Report inputs that `nix flake update` cannot move, so pins that have
       # quietly gone stale are visible instead of silently frozen forever.
-      cyan "4️⃣  Pinned Inputs"
+      cyan "2️⃣  Pinned Inputs"
       cd "$FLAKE_DIR" || die "Failed to change to flake directory"
       PINNED=$(jq -r '
         . as $lock
@@ -166,13 +126,6 @@ pog.pog {
           git diff --quiet flake.lock 2>/dev/null && echo "flake.lock: No changes" || echo "flake.lock: Updated"
         fi
 
-        if ! ${flag "skip_plugins"} && [ -d "$FLAKE_DIR/home/common/_sources" ]; then
-          git diff --quiet home/common/_sources/ 2>/dev/null && echo "_sources/: No changes" || echo "_sources/: Updated"
-        fi
-
-        if [ -d "$FLAKE_DIR/overlays/_sources" ]; then
-          git diff --quiet overlays/_sources/ 2>/dev/null && echo "overlays/_sources/: No changes" || echo "overlays/_sources/: Updated"
-        fi
 
         echo ""
         green "✅ Update completed!"

@@ -96,10 +96,10 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
 
 - [x] Unused overlays + inputs: `nur` (`modules/overlays.nix:47`), `fenix`
       (`modules/development-tools.nix:5`); remove matching dependabot entries
-- [ ] nvfetcher plumbing: `overlays/sources.toml`, `overlays/_sources/`,
+- [x] nvfetcher plumbing: `overlays/sources.toml`, `overlays/_sources/`,
       nvfetcher step in `pkgs/pog-scripts/update-all.nix:90`, treefmt exclude in
       `modules/per-system/treefmt.nix:20`
-- [ ] Orphaned `pkgs/home-assistant/custom-components/home-llm.nix`
+- [x] Orphaned `pkgs/home-assistant/custom-components/home-llm.nix`
 - [x] Unused `chaotic-nyx.cachix.org` substituter —
       `modules/constants.nix:177,195`
 - [x] Redundant `experimental-features` under Determinate; fix stale "3.18.1"
@@ -113,7 +113,7 @@ Source: modernisation audit, 2026-11-27 (nixpkgs `f6840765`, 2026-11-17).
       `modules/niri/session.nix:33`
 - [ ] Garnix `packages.x86_64-linux.*` only matches `dev`; expose real packages
       or drop the line — `garnix.yaml:12`
-- [ ] `nix-shell -p` hints → `nix run nixpkgs#…` —
+- [x] `nix-shell -p` hints → `nix run nixpkgs#…` —
       `scripts/validation/scan-vulnerabilities.sh:44`,
       `pkgs/pog-scripts/visualize-modules.nix:155` (dead branch)
 - [x] Unused dependabot entries `solaar`, `nix-openclaw` —

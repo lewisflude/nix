@@ -30,7 +30,6 @@ file (except `flake.nix`) is a flake-parts module.
 │   ├── constants.nix         # Shared constants (config.constants)
 │   ├── meta.nix              # Shared metadata (config.username, etc.)
 │   └── *.nix                 # Feature modules (one file per feature)
-├── overlays/                 # nixpkgs overlays + nvfetcher sources
 ├── secrets/                  # SOPS-encrypted secrets
 ├── templates/                # Module scaffolding templates
 ├── scripts/                  # Pre-existing one-off diagnostic scripts
